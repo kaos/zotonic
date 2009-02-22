@@ -1,0 +1,33 @@
+
+.growl-wrap {
+	position: fixed;
+	top: 20px;
+	right: 20px;
+}
+
+.growl-item {
+	width: 250px;
+	height: 60px;
+	background: #333;
+	-moz-border-radius: 6px;
+	-webkit-border-radius: 6px;
+	color: #eee;
+	padding: 0 6px;
+	font-family: lucida Grande;
+	font-size: 12px;
+	border: 2px solid #999;
+	margin: 0 0 12px 0;
+	display: block;
+	position: relative;
+}
+
+.grow-item-close {
+	position: absolute;
+	font-family: Arial;
+	font-size: 12px;
+	font-weight: bold;
+	right: 6px;
+	top: 6px;
+	cursor: pointer;
+}
+

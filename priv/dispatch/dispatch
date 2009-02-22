@@ -1,0 +1,5 @@
+[
+% {example,  ["example",id,'*'], resource_example, [ {prop,"some_value"} ]},
+% {category, [cat],         resource_category, []},
+% {category, [cat, subcat], resource_category, []}
+].

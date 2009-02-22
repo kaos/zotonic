@@ -1,0 +1,245 @@
+%% @author Marc Worrell <marc@worrell.nl>
+%% @copyright 2009 Marc Worrell
+
+%% @doc Person manager.  One person can have only one person process, with multiple ua-sessions and page sessions.
+%%      The person process manager spawns the person processes.  A person process stops itself after some time
+%%      of inactivity.  This person process manager finds the correct person process for the person id coupled to
+%%      the user-agent.
+
+% - On first visit:
+% 	1. Create new user, flag as anonymous user
+% 	2. Add cookie to user, set cookie "zpuid" - valid for 10 years or so
+% 	3. Name of user is empty, no details known except for last visit
+% 	4. Set autologon of cookie to false - an anonymous user can't logon
+% - On next visit:
+% 	1. Grab user from db, using zpuid cookie
+% 	2. If no such user -> handle as first visit
+% 	3. Set 'last visit' of user to now()
+% 	4. If autologon status set, mark user session as logged on (protected stuff is visible)
+%
+% - On user creation:
+% 	1. Create new user
+% 	2. Send user an e-mail with account details
+% 	3. Log on as the new user (see below)
+% - On user logon:
+% 	1. Find user record with username/password (or openid)
+% 	2. Set autologon status of zpuid cookie to checkbox value
+% 	3. If current user is anonymous -> Copy/merge public information over to new user
+% 	4. Change zpsid and zpuid (safety measure)
+% - On user logoff:
+% 	1. Set user process state to 'public' (locking protected and private properties)
+
+
+-module(zp_person_manager).
+-author("Marc Worrell <marc@worrell.nl>").
+
+-behaviour(gen_server).
+
+%% gen_server exports
+-export([init/1, handle_call/3, handle_cast/2, handle_info/2, terminate/2, code_change/3]).
+-export([start_link/0, start_link/1]).
+
+%% interface functions
+-export([ensure_person/1]).
+
+-include_lib("webmachine.hrl").
+-include_lib("zophrenic.hrl").
+
+%% The name of the person cookie
+-define(PERSON_COOKIE, "zppid").
+
+%% Max age of the person cookie, 10 years or so.
+-define(PERSON_COOKIE_MAX_AGE, 3600*24*52*10).
+
+%% Internal state
+-record(state, {pid2key, key2pid}).
+
+
+%%====================================================================
+%% API
+%%====================================================================
+
+%% @spec start_link() -> {ok,Pid} | ignore | {error,Error}
+%% @doc Starts the person manager server
+start_link() ->
+    start_link([]).
+start_link(Args) when is_list(Args) ->
+    gen_server:start_link({local, ?MODULE}, ?MODULE, Args, []).
+
+
+
+%% @doc Ensure that the context has a valid person pid. When there is a session pid then the session is
+%%      added to the person process.
+ensure_person(Context) ->
+    gen_server:call(?MODULE, {ensure_person, Context}).
+
+
+
+%%====================================================================
+%% gen_server callbacks
+%%====================================================================
+
+%% @spec init(Args) -> {ok, State} |
+%%                     {ok, State, Timeout} |
+%%                     ignore               |
+%%                     {stop, Reason}
+%% @doc Initiates the server, initialises the pid lookup dicts
+init(_Args) ->
+    State = #state{pid2key=dict:new(), key2pid=dict:new()},
+    {ok, State}.
+
+
+%% @spec handle_call(Request, From, State) -> {reply, Reply, State} |
+%%                                      {reply, Reply, State, Timeout} |
+%%                                      {noreply, State} |
+%%                                      {noreply, State, Timeout} |
+%%                                      {stop, Reason, Reply, State} |
+%%                                      {stop, Reason, State}
+%% Description: Handling call messages
+
+%% @doc Ensure that we have a person associated with the request.
+handle_call({'ensure_person', Context}, _From, State) ->
+    {Context1, State1} = ensure_person_process(Context, State),
+    erlang:monitor(process, Context1#context.person_pid),
+    {reply, Context1, State1};
+
+%% @doc Trap unknown calls
+handle_call(Message, _From, State) ->
+    {stop, {unknown_call, Message}, State}.
+
+
+%% @spec handle_cast(Msg, State) -> {noreply, State} |
+%%                                  {noreply, State, Timeout} |
+%%                                  {stop, Reason, State}
+
+%% @doc Trap unknown casts
+handle_cast(Message, State) ->
+    {stop, {unknown_cast, Message}, State}.
+
+
+%% @spec handle_info(Info, State) -> {noreply, State} |
+%%                                   {noreply, State, Timeout} |
+%%                                   {stop, Reason, State}
+
+%% @doc Handle the disappearance of a person process
+handle_info({'DOWN', _MonitorRef, process, Pid, _Info}, State) ->
+    State1 = erase_pid(Pid, State),
+    {noreply, State1};
+
+%% @doc Handling all non call/cast messages
+handle_info(_Info, State) ->
+    {noreply, State}.
+
+
+%% @spec terminate(Reason, State) -> void()
+%% @doc This function is called by a gen_server when it is about to
+%% terminate. It should be the opposite of Module:init/1 and do any necessary
+%% cleaning up. When it returns, the gen_server terminates with Reason.
+%% The return value is ignored.
+terminate(_Reason, _State) ->
+    ok.
+
+%% @spec code_change(OldVsn, State, Extra) -> {ok, NewState}
+%% @doc Convert process state when code is changed
+code_change(_OldVsn, State, _Extra) ->
+    {ok, State}.
+
+
+%%====================================================================
+%% support functions
+%%====================================================================
+
+
+%% @spec ensure_person_process(Context, State) -> {NewContex, NewState}
+%% @doc Ensure that we have a person process, binding together the sessions of the person accessing the site
+ensure_person_process(Context, State) ->
+    % Check if the ua visited this site before
+    case get_cookie(Context) of
+        undefined -> first_visit(Context, State);
+        PersonCookieId -> returning(PersonCookieId, Context, State)
+    end.
+    
+
+%% @spec first_visit(Context, State) -> {NewContex, NewState}
+%% @doc A new visit, set a new person cookie, start an anonymous user process
+first_visit(Context, State) ->
+    PersonCookieId = zp_ids:id(),
+    {ok, Pid} = zp_person:new_anonymous(Context#context.session_pid),
+    State1    = store_pid(PersonCookieId, Pid, State),
+    set_cookie(PersonCookieId, Context),
+    Context1  = Context#context{person_pid=Pid},
+    {Context1, State1}.
+
+
+%% @spec returning(PersonCookieId, Context, State) -> {NewContex, NewState}
+%% @doc A returning visitor, lookup the person and ensure that the user process is running
+returning(PersonCookieId, Context, State) ->
+    case find_pid(PersonCookieId, State) of
+        {ok, Pid} ->
+            zp_person:associate_session(Pid, Context#context.session_pid),
+            Context1 = Context#context{person_pid=Pid},
+            {Context1, State};
+        error -> 
+            % Not started, check if the cookie is associated with a person
+            case zp_person:new_cookie_person(PersonCookieId, Context#context.session_pid) of
+                {ok, Pid} ->
+                        %% Cookie was associated with a person, person process started
+                        State1   = store_pid(PersonCookieId, Pid, State),
+                        Context1 = Context#context{person_pid=Pid},
+                        {Context1, State1};
+                error ->
+                        %% Unknown cookie, or person was deleted, handle as a first visit
+                        first_visit(Context, State)
+            end
+    end.
+
+
+%% @spec store_pid(pid(), State) -> State
+%% @doc Add the pid to the person state
+store_pid(PersonCookieId, Pid, State) ->
+    State#state{
+            pid2key = dict:store(Pid, PersonCookieId, State#state.pid2key),
+            key2pid = dict:store(PersonCookieId, Pid, State#state.key2pid)
+        }.
+
+%% @spec erase_pid(pid(), State) -> State
+%% @doc Remove the pid from the person manager state
+erase_pid(Pid, State) ->
+    case dict:find(Pid, State#state.pid2key) of
+        {ok, Key} ->
+            State#state{
+                    pid2key = dict:erase(Pid, State#state.pid2key),
+                    key2pid = dict:erase(Key, State#state.key2pid)
+                };
+        error ->
+            State
+    end.
+
+
+%% @spec get_cookie(Context) -> undefined | PersonCookieId
+%% @doc fetch the person cookie id from the request, return error when not found
+get_cookie(Context) ->
+    ReqProps = zp_context:get_reqprops(Context),
+    Req      = ?REQ(ReqProps),
+    Req:get_cookie_value(?PERSON_COOKIE).
+
+
+%% @spec set_cookie(PersonCookieId, Context) -> ok
+%% @doc Save the person id in a cookie on the user agent
+set_cookie(PersonCookieId, Context) ->
+    ReqProps = zp_context:get_reqprops(Context),
+    Req      = ?REQ(ReqProps),
+    %% TODO: set the {domain,"example.com"} of the session cookie
+    Options  = [{max_age, ?PERSON_COOKIE_MAX_AGE}],
+    {K,V}    = mochiweb_cookies:cookie(?PERSON_COOKIE, PersonCookieId, Options),
+    Req:add_response_header(K,V),
+    ok.
+
+
+%% @spec find_pid(PersonCookieId, State) ->  error | {ok, pid()}
+%% @doc find the pid associated with the person id
+find_pid(undefined, _State) ->
+    error;
+find_pid(PersonCookieId, State) ->
+    dict:find(PersonCookieId, State#state.key2pid).
+
