@@ -1,11 +1,13 @@
-%% @author author <author@example.com>
-%% @copyright YYYY author.
+%% @author Marc Worrell <marc@worrell.nl>
+%% @copyright 2009 Marc Worrell
 
 %% @doc TEMPLATE.
 
 -module(zophrenic).
 -author('author <author@example.com>').
 -export([start/0, stop/0]).
+
+-revision("$Id$").
 
 ensure_started(App) ->
     case application:start(App) of
