@@ -155,12 +155,23 @@ get_module_dispatch(Mod) ->
 
 %% @doc Read a dispatch file, the file should contain a valid Erlang dispatch datastructure.
 get_file_dispatch(File) ->
-    {ok,Data}       = file:read_file(File),
-    String          = binary_to_list(Data),
-    {ok, Tokens, _} = erl_scan:string(String),
-    {ok, Expr}      = erl_parse:parse_exprs(Tokens),
-    {value, Disp, _NewBindings} = erl_eval:exprs(Expr, []),
-    Disp.
+    case filelib:is_regular(File) of
+        true ->
+            Basename = filename:basename(File),
+            case Basename of
+                "." ++ _ -> 
+                    [];
+                _Other  ->
+                    {ok,Data}       = file:read_file(File),
+                    String          = binary_to_list(Data),
+                    {ok, Tokens, _} = erl_scan:string(String),
+                    {ok, Expr}      = erl_parse:parse_exprs(Tokens),
+                    {value, Disp, _NewBindings} = erl_eval:exprs(Expr, []),
+                    Disp
+            end;
+        false -> 
+            []
+    end.
 
 
 %% @doc Transform the dispatchlist into a datastructure for building uris from name/vars
