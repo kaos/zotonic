@@ -15,7 +15,7 @@
         <script type='text/javascript' src='/lib/js/apps/jquery-1.3.js'></script>
         <script type='text/javascript' src='/lib/js/apps/jquery-ui-all-1.6rc5.min.js'></script>
         <script type='text/javascript' src='/lib/js/apps/zophrenic-1.0.js'></script>
-        <script type='text/javascript' src='/lib/js/modules/jquery.growl-1.0.js'></script>
+        <script type='text/javascript' src='/lib/js/modules/jquery.notice.js'></script>
         <script type='text/javascript' src='/lib/js/modules/livevalidation-1.3.js'></script>
     </head>
 

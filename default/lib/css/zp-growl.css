@@ -1,27 +1,31 @@
-
-.growl-wrap {
+.notice-wrap {
 	position: fixed;
 	top: 20px;
 	right: 20px;
+	width: 250px;
+	z-index: 9999;
 }
 
-.growl-item {
-	width: 250px;
+* html .notice-wrap {
+	position: absolute;		
+}
+ 
+.notice-item {
 	height: 60px;
 	background: #333;
 	-moz-border-radius: 6px;
 	-webkit-border-radius: 6px;
 	color: #eee;
-	padding: 0 6px;
+	padding: 6px 6px 0 6px;
 	font-family: lucida Grande;
-	font-size: 12px;
+	font-size: 11px;
 	border: 2px solid #999;
-	margin: 0 0 12px 0;
 	display: block;
 	position: relative;
+	margin: 0 0 12px 0;
 }
 
-.grow-item-close {
+.notice-item-close {
 	position: absolute;
 	font-family: Arial;
 	font-size: 12px;
@@ -30,4 +34,3 @@
 	top: 6px;
 	cursor: pointer;
 }
-

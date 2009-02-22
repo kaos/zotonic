@@ -1,5 +1,5 @@
 /**
- * Zophenic javascript library
+ * Zophrenic javascript library
  *
  * (c) copyright 2009 Marc Worrell
  *
@@ -22,25 +22,24 @@ function zp_growl_add( message, stay )
 {
     if (stay)
     {
-        jQuery.growlAdd({
+        jQuery.noticeAdd({
         	text: message,
-        	stay: 'yep'
+        	stay: true
         });
     }
     else
     {
-		jQuery.growlAdd({
+		jQuery.noticeAdd({
 			text: message,
-			stay: 'nope'
+			stay: false
 		});
     }
 }
 
 function zp_growl_close()
 {
-	jQuery.growlRemove($('.growl-item'), {opacity: 'hide'}, 400);
+	jQuery. jQuery.noticeRemove($('.notice-item-wrapper'), 400);
 }
-
 
 /*** Postback loop ***/
 
@@ -363,38 +362,6 @@ function urlencode(s)
     s = s.replace(/@/g, '%40');
     return s;
 }
-
-
-/*** MISC ***/
-
-function wf_return_false(value, args) { 
-	return false; 
-}
-
-function wf_go_next(controlID) {
-	var o = obj(controlID);
-	if (o.focus) o.focus();
-	if (o.select) o.select();
-	if (o.click) o.click();
-}
-
-function wf_disable_selection(element) {
-    element.onselectstart = function() {
-        return false;
-    };
-    element.unselectable = "on";
-    element.style.MozUserSelect = "none";
-    element.style.cursor = "default";
-}
-
-function wf_set_value(element, value) {
-	if (!element.id) element = obj(element);
-	if (element.value != undefined) element.value = value;
-	else if (element.checked != undefined) element.checked = value;
-	else wf_update(element, value);
-}
-
-
 
 // From: http://malsup.com/jquery/form/jquery.form.js
 
