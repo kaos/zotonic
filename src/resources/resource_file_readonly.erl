@@ -23,6 +23,7 @@
 %% These are used for file serving (move to metadata)
 -record(state, {
         root=undefined,
+        use_cache=false,
         fullpath=undefined,
         is_cached=false,
         path=undefined,
@@ -40,8 +41,9 @@
     }).
 
 init(ConfigProps) ->
+    UseCache     = proplists:get_value(use_cache, ConfigProps, false),
     {root, Root} = proplists:lookup(root, ConfigProps),
-    {ok, #state{root=Root}}.
+    {ok, #state{root=Root, use_cache=UseCache}}.
     
 allowed_methods(_ReqProps, State) ->
     {['HEAD', 'GET'], State}.
@@ -57,8 +59,12 @@ content_types_provided(ReqProps, State) ->
     end.
 
 resource_exists(ReqProps, State) ->
-    Path = ?PATH(ReqProps),
-    case zp_depcache:get(cache_key(Path)) of
+    Path   = ?PATH(ReqProps),
+    Cached = case State#state.use_cache of
+                true -> zp_depcache:get(cache_key(Path));
+                _    -> undefined
+            end,
+    case Cached of
         undefined ->
             case file_exists(State, Path) of 
             	{true, FullPath} -> 
@@ -107,7 +113,7 @@ provide_content(_ReqProps, State) ->
     end.
 
 finish_request(_ReqProps, State) ->
-    case State#state.is_cached of
+    case State#state.is_cached and State#state.use_cache of
         false ->
             case State#state.body of
                 undefined -> 

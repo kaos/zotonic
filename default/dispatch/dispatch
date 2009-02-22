@@ -2,5 +2,5 @@
 [
 	{comet,    ["comet"],     resource_comet, []},
 	{postback, ["postback"],  resource_postback, []},
-	{lib,      ["lib",'*'],   resource_file_readonly, [ {root,["priv/lib", "default/lib"]} ]}
+	{lib,      ["lib",'*'],   resource_file_readonly, [ {root,["priv/lib", "default/lib"]} , {use_cache, false}]}
 ].
