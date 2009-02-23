@@ -56,10 +56,10 @@ event(Event, Context) ->
 
 
 periodic(_Args, Context) ->
-        Date = httpd_util:rfc1123_date(),
-        zp_context:add_script_session([<<"zp_growl_add('According to the server, the Universal Sprout Time is now<br/><strong>">>,Date,<<"</strong>', 0);">>], Context),
-        timer:sleep(10000),
-        ?MODULE:periodic([], Context).
+    Date = httpd_util:rfc1123_date(),
+    zp_context:add_script_session([<<"zp_growl_add('According to the server, the Universal Sprout Time is now<br/><strong>">>,Date,<<"</strong>', 0);">>], Context),
+    timer:sleep(10000),
+    ?MODULE:periodic([], Context).
 
 
     

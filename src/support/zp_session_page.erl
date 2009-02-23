@@ -24,6 +24,7 @@
             start_link/0, 
             start_link/1, 
             stop/1, 
+            ping/1,
             
             set/3, 
             get/2, 
@@ -37,17 +38,26 @@
             comet_detach/1,
             get_attach_state/1,
             
+            check_timeout/1,
+            
             spawn_link/4
         ]).
 
 -record(page_state, {
             vars,
             last_detach,
+            session_pid,
+            linked=[],
             comet_pid=undefined,
             comet_queue=[]
         }).
 
+%%====================================================================
+%% API
+%%====================================================================
 
+%% @spec start_link() -> {ok,Pid} | ignore | {error,Error}
+%% @doc Starts the person manager server
 start_link() ->
     start_link([]).
 start_link(Args) ->
@@ -59,6 +69,11 @@ stop(Pid) ->
     catch _Class:_Term -> 
         error 
     end.
+
+%% @doc Receive a ping, makes sure that we stay alive
+ping(Pid) ->
+    gen_server:cast(Pid, ping).
+
 
 get_attach_state(Pid) ->
     try
@@ -103,14 +118,31 @@ spawn_link(Module, Func, Args, Context) ->
     gen_server:call(Context#context.page_pid, {spawn_link, Module, Func, Args, Context}).
 
 
-%% ------------------------------------------------------------------------------------
-%% Server implementation
-%% ------------------------------------------------------------------------------------
+%% @doc Kill this page when timeout has been reached
+check_timeout(Pid) ->
+    gen_server:cast(Pid, check_timeout).
 
 
-init(_Args) ->
-    State = #page_state{vars=dict:new(), last_detach=0},
+%%====================================================================
+%% gen_server callbacks
+%%====================================================================
+
+%% @spec init(Args) -> {ok, State} |
+%%                     {ok, State, Timeout} |
+%%                     ignore               |
+%%                     {stop, Reason}
+%% @doc Initiates the server, initialises the pid lookup dicts
+init(Args) ->
+    SessionPid   = proplists:get_value(session_pid, Args),
+    IntervalMsec = (?SESSION_PAGE_TIMEOUT div 2) * 1000,
+    timer:apply_interval(IntervalMsec, ?MODULE, check_timeout, [self()]),
+    State = #page_state{vars=dict:new(), session_pid=SessionPid, last_detach=zp_utils:now()},
     {ok, State}.
+
+
+%% @spec handle_cast(Msg, State) -> {noreply, State} |
+%%                                  {noreply, State, Timeout} |
+%%                                  {stop, Reason, State}
 
 handle_cast(stop, State) ->
     {stop, normal, State};
@@ -130,6 +162,7 @@ handle_cast({comet_attach, CometPid}, State) ->
             erlang:monitor(process, CometPid),
             StateComet = State#page_state{comet_pid=CometPid},
             StatePing  = ping_comet(StateComet),
+            zp_session:keepalive(State#page_state.session_pid),
             {noreply, StatePing};
         false ->
             {noreply, State}
@@ -141,11 +174,41 @@ handle_cast(comet_detach, State) ->
 handle_cast({add_script, Script}, State) ->
     StateQueued = State#page_state{comet_queue=[Script|State#page_state.comet_queue]},
     StatePing   = ping_comet(StateQueued),
-    {noreply, StatePing}.
+    {noreply, StatePing};
+    
+%% @doc Do not timeout while there is a comet process attached
+handle_cast(check_timeout, State) when is_pid(State#page_state.comet_pid) ->
+    {noreply, State};
+
+%% @doc Give the comet process some time to come back, timeout afterwards
+handle_cast(check_timeout, State) ->
+    Timeout = State#page_state.last_detach + ?SESSION_PAGE_TIMEOUT,
+    case Timeout =< zp_utils:now() of
+        true ->  {stop, normal, State};
+        false -> {noreply, State}
+    end;
+
+handle_cast(ping, State) ->
+    {noreply, State#page_state{last_detach=zp_utils:now()}};
+
+%% @doc Trap unknown casts
+handle_cast(Message, State) ->
+    {stop, {unknown_cast, Message}, State}.
+
+
+%% @spec handle_call(Request, From, State) -> {reply, Reply, State} |
+%%                                      {reply, Reply, State, Timeout} |
+%%                                      {noreply, State} |
+%%                                      {noreply, State, Timeout} |
+%%                                      {stop, Reason, Reply, State} |
+%%                                      {stop, Reason, State}
+%% Description: Handling call messages
 
 handle_call({spawn_link, Module, Func, Args, Context}, _From, State) ->
-    Pid = spawn_link(Module, Func, [Args, Context]),
-    {reply, Pid, State};
+    Pid    = spawn_link(Module, Func, [Args, Context]),
+    Linked = [Pid | State#page_state.linked],
+    erlang:monitor(process, Pid),
+    {reply, Pid, State#page_state{linked=Linked}};
 
 handle_call(get_scripts, _From, State) ->
     Queue   = State#page_state.comet_queue,
@@ -173,23 +236,45 @@ handle_call(get_attach_state, _From, State) ->
             {reply, {detached, State#page_state.last_detach}, State};
         _Pid ->
             {reply, attached, State}
-    end.
+    end;
+
+%% @doc Trap unknown calls
+handle_call(Message, _From, State) ->
+    {stop, {unknown_call, Message}, State}.
+
+
+%% @spec handle_info(Info, State) -> {noreply, State} |
+%%                                   {noreply, State, Timeout} |
+%%                                   {stop, Reason, State}
 
 handle_info({'DOWN', _MonitorRef, process, Pid, _Info}, State) when Pid == State#page_state.comet_pid ->
     {noreply, State#page_state{comet_pid=undefined, last_detach=zp_utils:now()}};
+handle_info({'DOWN', _MonitorRef, process, Pid, _Info}, State) ->
+    Linked = lists:delete(Pid, State#page_state.linked),
+    {noreply, State#page_state{linked=Linked}};
 handle_info(_, State) ->
     {noreply, State}.
 
-terminate(_Reason, _State) ->
+%% @spec terminate(Reason, State) -> void()
+%% @doc This function is called by a gen_server when it is about to
+%% terminate. It should be the opposite of Module:init/1 and do any necessary
+%% cleaning up. When it returns, the gen_server terminates with Reason.
+%% The return value is ignored.
+%% Terminate all processes coupled to the page.
+terminate(_Reason, State) ->
+    lists:foreach(fun(Pid) -> exit(Pid, 'EXIT') end, State#page_state.linked),
     ok.
 
+
+%% @spec code_change(OldVsn, State, Extra) -> {ok, NewState}
+%% @doc Convert process state when code is changed
 code_change(_OldVsn, State, _Extra) ->
     {ok, State}.
 
 
-%% ------------------------------------------------------------------------------------
-%% Local functions
-%% ------------------------------------------------------------------------------------
+%%====================================================================
+%% support functions
+%%====================================================================
 
 %% @doc Ping the comet process that we have a script queued
 ping_comet(#page_state{comet_queue=[]} = State) ->

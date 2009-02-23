@@ -231,8 +231,8 @@ set_cookie(PersonCookieId, Context) ->
     Req      = ?REQ(ReqProps),
     %% TODO: set the {domain,"example.com"} of the session cookie
     Options  = [{max_age, ?PERSON_COOKIE_MAX_AGE}],
-    {K,V}    = mochiweb_cookies:cookie(?PERSON_COOKIE, PersonCookieId, Options),
-    Req:add_response_header(K,V),
+    Hdr      = mochiweb_cookies:cookie(?PERSON_COOKIE, PersonCookieId, Options),
+    Req:merge_response_headers([Hdr]),
     ok.
 
 

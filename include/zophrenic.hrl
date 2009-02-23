@@ -45,12 +45,22 @@
 %% Number of seconds between two comet polls before the page expires
 -define(SESSION_PAGE_TIMEOUT, 20).
 
+%% Default session expiration in seconds.
+%% The first keepalive message must be received before SESSION_EXPIRE_1 seconds
+%% Subsequent messages must be received before SESSION_EXPIRE_N
+-define(SESSION_EXPIRE_1,   40).
+-define(SESSION_EXPIRE_N, 3600).
+
+%% Millisecs of no activity before the person process is stopped (if there are no attached sessions).
+-define(PERSON_TIMEOUT, 60 * 1000).
+
+
 %% Below is copied from Nitrogen, which is copyright 2008-2009 Rusty Klophaus
 
 %%% LOGGING %%%
 -define(PRINT(Var), error_logger:info_msg("DEBUG: ~p:~p - ~p: ~p~n", [?MODULE, ?LINE, ??Var, Var])).
 -define(LOG(Msg, Args), error_logger:info_msg(Msg, Args)).
--define(DEBUG, error_logger:info_msg("DEBUG: ~p:~p~n", [?MODULE, ?LINE])).
+-define(DEBUG(Msg), error_logger:info_msg("DEBUG: ~p:~p  ~p~n", [?MODULE, ?LINE, Msg])).
 
 %%% EMAIL %%%
 -record(email, {from, to, subject, body}).

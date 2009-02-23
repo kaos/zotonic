@@ -105,7 +105,7 @@ handle_call(count, _From, State) ->
     {reply, Count, State}.
 
 
-%% Handle the down message from a killed session, remove it from the session admin
+%% Handle the down message from a stopped session, remove it from the session admin
 handle_info({'DOWN', _MonitorRef, process, Pid, _Info}, State) ->
     State1 = erase_session_pid(Pid, State),
     {noreply, State1};
@@ -218,7 +218,7 @@ clear_session_id(Context) ->
     ReqProps = zp_context:get_reqprops(Context),
     Req      = ?REQ(ReqProps),
     %% TODO: set the {domain,"example.com"} of the session cookie
-    {K,V}    = mochiweb_cookies:cookie(?SESSION_COOKIE, "", [{max_age, 0}]),
-    Req:add_response_header(K,V),
+    Hdr      = mochiweb_cookies:cookie(?SESSION_COOKIE, "", [{max_age, 0}]),
+    Req:merge_response_headers([Hdr]),
     Context#context{session_pid=undefined}.
 

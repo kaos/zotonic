@@ -15,10 +15,9 @@
 %% interface functions
 -export([new_anonymous/1, new_cookie_person/2, associate_session/2]).
 
--record(state, {sessions}).
+-include_lib("zophrenic.hrl").
 
-%% After 1 minute of no activity the person process is stopped
--define(PERSON_TIMEOUT, 6000).
+-record(state, {sessions}).
 
 %%====================================================================
 %% API

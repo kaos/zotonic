@@ -30,6 +30,7 @@
     set/3,
     get/2, 
     incr/3, 
+    keepalive/1, 
     keepalive/3, 
     ensure_page_session/2,
     add_script/2,
@@ -44,24 +45,17 @@
             now,
             expire,
             timer_ref,
-            pages
+            pages,
+            linked
             }).
 
 %% The state per page
 -record(page, {
             page_id,
-            expire,
             page_pid
             }).
 
 -define(PAGEID_OFFSET, 2).
-
-
-%% Default session expiration in seconds.
-%% The first keepalive message must be received before SESSION_EXPIRE_1 seconds
-%% Subsequent messages must be received before SESSION_EXPIRE_N
--define(SESSION_EXPIRE_1,   40).
--define(SESSION_EXPIRE_N, 3600).
 
 
 start_link() ->
@@ -85,6 +79,10 @@ get(Key, Pid) ->
 incr(Key, Value, Pid) ->
     gen_server:call(Pid, {incr, Key, Value}).
 
+
+%% @doc Reset the expire counter of the session, called from the page process when comet attaches
+keepalive(Pid) ->
+    gen_server:cast(Pid, keepalive).
 
 %% @doc Reset the timeout counter of the page and session according to the current tick
 keepalive(Now, PageId, Pid) ->
@@ -125,41 +123,45 @@ handle_cast(stop, Session) ->
     {stop, normal, Session};
 
 %% @doc Reset the timeout counter for the session and, optionally, a specific page
+handle_cast(keepalive, Session) ->
+    Now      = zp_utils:now(),
+    Session1 = Session#session{expire=Now + ?SESSION_EXPIRE_N, now=Now},
+    {noreply, Session1};
+
+%% @doc Reset the timeout counter, propagate to the page process.
 handle_cast({keepalive, PageId, Now}, Session) ->
     Session1 = Session#session{expire=Now + ?SESSION_EXPIRE_N, now=Now},
-    Session2 = case find_page(PageId, Session1) of
-                undefined -> 
-                    Session1;
-                P -> 
-                    % Update the keepalive timestamp on the record
-                    P1 = page_keepalive(P, Now),
-                    store_page(PageId, P1, Session1)
-               end,
-    {noreply, Session2};
+    case find_page(PageId, Session1) of
+        #page{page_pid=Pid} -> 
+            % Keep the page process alive
+            catch zp_session_page:ping(Pid);
+        undefined -> 
+            ok
+    end,
+    {noreply, Session1};
 
-%% @doc Check session expiration, throw away all page administrations that didn't receive a keepalive for some time
+%% @doc Check session expiration, stop when passed expiration.
 handle_cast({check_expire, Now}, Session) ->
-    if 
-        Session#session.expire < Now ->
-            {stop, normal, Session};
-        true ->
-            IsAlive = fun(Page) ->
-                        Page#page.expire >= Now
-                      end,
-            {Alive,Expired} = lists:partition(IsAlive, Session#session.pages),
-            {Alive1, _Now}  = lists:foldl(fun try_stop/2, {Alive,Now}, Expired),
-            {noreply, Session#session{pages=Alive1, now=Now}}
+    case length(Session#session.pages) of
+        0 ->
+            if 
+                Session#session.expire < Now ->  {stop, normal, Session};
+                true ->  {noreply, Session#session{now=Now}}
+            end;
+        _ ->
+            {noreply, Session#session{expire=Now + ?SESSION_EXPIRE_N, now=Now}}
     end;
 
 %% @doc Add a script to a specific page's script queue
 handle_cast({send_script, Script, PageId}, Session) ->
-    Session1 = case find_page(PageId, Session) of
-                undefined -> 
-                    Session;
-                P -> 
-                    store_page(PageId, add_script(Script, P), Session)
-               end,
-    {noreply, Session1};
+    case find_page(PageId, Session) of
+        undefined -> 
+            Session;
+        #page{page_pid=Pid} ->
+            zp_session_page:add_script(Script, Pid)
+    end,
+    {noreply, Session};
+
 
 %% @doc Add a script to all page's script queues
 handle_cast({add_script, Script}, Session) ->
@@ -174,6 +176,14 @@ handle_cast({set, Key, Value}, Session) ->
     Session1 = Session#session{vars = dict:store(Key, Value, Session#session.vars)},
     {noreply, Session1}.
 
+%% @spec handle_call(Request, From, State) -> {reply, Reply, State} |
+%%                                      {reply, Reply, State, Timeout} |
+%%                                      {noreply, State} |
+%%                                      {noreply, State, Timeout} |
+%%                                      {stop, Reason, Reply, State} |
+%%                                      {stop, Reason, State}
+%% Description: Handling call messages
+
 handle_call({get, Key}, _From, Session) ->
     Value = case dict:find(Key, Session#session.vars) of
                 {ok, V} -> V;
@@ -186,9 +196,11 @@ handle_call({incr, Key, Delta}, _From, Session) ->
     {ok, Value}  = dict:find(Key, Session1#session.vars),
     {reply, Value, Session1};
 
-handle_call({spawn_link, Module, Func, Args, Context}, _From, State) ->
-    Pid = spawn_link(Module, Func, [Args, Context]),
-    {reply, Pid, State};
+handle_call({spawn_link, Module, Func, Args, Context}, _From, Session) ->
+    Pid    = spawn_link(Module, Func, [Args, Context]),
+    Linked = [Pid | Session#session.linked],
+    erlang:monitor(process, Pid),
+    {reply, Pid, Session#session{linked=Linked}};
 
 handle_call({ensure_page_session, Context}, _From, Session) ->
     Context1  = zp_context:ensure_qs(Context),
@@ -200,28 +212,49 @@ handle_call({ensure_page_session, Context}, _From, Session) ->
     {NewPage, Session1} = case find_page(NewPageId, Session) of
                             undefined -> 
                                 % Make a new page for this pid
-                                P = page_start(NewPageId, Session#session.now),
-                                {P, store_page(NewPageId, P, Session)};
-                            P -> 
-                                % Update the keepalive timestamp on the record
-                                P1 = page_keepalive(P, Session#session.now),
-                                {P1, store_page(NewPageId, P1, Session)}
+                                P     = page_start(NewPageId),
+                                Pages = [P|Session#session.pages], 
+                                {P, Session#session{pages=Pages}};
+                            #page{page_pid=Pid}=P -> 
+                                % Keep the page alive
+                                catch zp_session_page:ping(Pid),
+                                {P, Session}
                           end,
     Context2 = Context1#context{page_id=NewPageId, page_pid=NewPage#page.page_pid},
     {reply, Context2, Session1}.
 
+
+%% @spec handle_info(Info, State) -> {noreply, State} |
+%%                                   {noreply, State, Timeout} |
+%%                                   {stop, Reason, State}
+
 handle_info({'DOWN', _MonitorRef, process, Pid, _Info}, Session) ->
-    FIsUp = fun(Page) -> Page#page.page_pid /= Pid end,
-    Pages = lists:filter(FIsUp, Session#session.pages),
-    {noreply, Session#session{pages=Pages}};
+    FIsUp  = fun(Page) -> Page#page.page_pid /= Pid end,
+    Pages  = lists:filter(FIsUp, Session#session.pages),
+    Linked = lists:delete(Pid, Session#session.linked),
+    {noreply, Session#session{pages=Pages, linked=Linked}};
 handle_info(_, Session) ->
     {noreply, Session}.
 
-terminate(_Reason, _Session) ->
+%% @spec terminate(Reason, State) -> void()
+%% @doc This function is called by a gen_server when it is about to
+%% terminate. It should be the opposite of Module:init/1 and do any necessary
+%% cleaning up. When it returns, the gen_server terminates with Reason.
+%% The return value is ignored.
+%% Terminate all processes coupled to the session.
+terminate(_Reason, Session) ->
+    lists:foreach(fun(Pid) -> exit(Pid, 'EXIT') end, Session#session.linked),
     ok.
 
+%% @spec code_change(OldVsn, State, Extra) -> {ok, NewState}
+%% @doc Convert process state when code is changed
 code_change(_OldVsn, Session, _Extra) ->
     {ok, Session}.
+
+
+%%====================================================================
+%% support functions
+%%====================================================================
 
 
 %% @doc Initialize a new session record
@@ -232,14 +265,15 @@ new_session(Args) ->
             now=Now,
             expire=Now + ?SESSION_EXPIRE_1,
             timer_ref=undefined,
-            pages=[]
+            pages=[],
+            linked=[]
             }.
 
 %% @doc Return a new page record, monitor the started page process because we want to know about normal exits
-page_start(PageId, Now) ->
-    {ok,PagePid} = zp_session_page:start_link(),
+page_start(PageId) ->
+    {ok,PagePid} = zp_session_page:start_link([{session_pid, self()}]),
     erlang:monitor(process, PagePid),
-    #page{ expire=Now + ?SESSION_PAGE_TIMEOUT, page_pid=PagePid, page_id=PageId }.
+    #page{page_pid=PagePid, page_id=PageId }.
 
 %% @doc Find the page record in the list of known pages
 find_page(undefined, _Session) ->
@@ -249,44 +283,3 @@ find_page(PageId, Session) ->
         {value, Page} -> Page;
         false -> undefined
     end.
-
-%% @doc Store the page in the session, replace an old page
-store_page(PageId, Page, Session) ->
-    Pages = lists:keystore(PageId, ?PAGEID_OFFSET, Session#session.pages, Page),
-    Session#session{pages=Pages}.
-    
-%% @doc Remove the page from the session
-delete_page(PageId, Session) ->
-    Pages = lists:keydelete(PageId, ?PAGEID_OFFSET, Session#session.pages),
-    Session#session{pages=Pages}.
-
-    
-%% @doc Reset the page timeout
-page_keepalive(Page, Now) ->
-    Page#page{expire=Now + ?SESSION_PAGE_TIMEOUT}.
-
-%% @doc Check with the page if it is busy, if so then we shouldn't expire it. Called from lists:foldl/3.
-try_stop(Page, {Acc,Now}) ->
-    case Page#page.page_pid of
-        undefined ->
-            {Acc,Now};
-        Pid ->
-            case zp_session_page:get_attach_state(Pid) of
-                attached ->
-                    Page1  = Page#page{expire=Now + ?SESSION_PAGE_TIMEOUT},
-                    {[Page1|Acc], Now};
-                {detached, LastDetach} ->
-                    Expire = LastDetach + ?SESSION_PAGE_TIMEOUT,
-                    if
-                        Expire >= Now ->
-                            Page1 = Page#page{expire=Expire},
-                            {[Page1|Acc], Now};
-                        true ->
-                            zp_session_page:stop(Pid),
-                            {Acc,Now}
-                    end;
-                error ->
-                    {Acc,Now}
-            end
-    end.
-
