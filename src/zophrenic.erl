@@ -1,12 +1,11 @@
 %% @author Marc Worrell <marc@worrell.nl>
 %% @copyright 2009 Marc Worrell
 
-%% @doc TEMPLATE.
+%% @doc Basic functions for Zophrenic
 
 -module(zophrenic).
--author('author <author@example.com>').
+-author('Marc Worrell <marc@worrell.nl>').
 -export([start/0, stop/0]).
-
 -revision("$Id$").
 
 ensure_started(App) ->
