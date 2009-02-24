@@ -31,10 +31,11 @@
     get/2, 
     incr/3, 
     keepalive/1, 
-    keepalive/3, 
+    keepalive/2, 
     ensure_page_session/2,
     add_script/2,
     check_expire/2,
+    dump/1,
     spawn_link/4
     ]).
 
@@ -42,7 +43,6 @@
 %% The session state
 -record(session, {
             vars,
-            now,
             expire,
             timer_ref,
             pages,
@@ -85,8 +85,8 @@ keepalive(Pid) ->
     gen_server:cast(Pid, keepalive).
 
 %% @doc Reset the timeout counter of the page and session according to the current tick
-keepalive(Now, PageId, Pid) ->
-    gen_server:cast(Pid, {keepalive, PageId, Now}).
+keepalive(PageId, Pid) ->
+    gen_server:cast(Pid, {keepalive, PageId}).
 
 
 %% @spec ensure_page_session(Context::#context, Pid::pid()) -> #context
@@ -108,6 +108,11 @@ check_expire(Now, Pid) ->
     gen_server:cast(Pid, {check_expire, Now}).
 
 
+%% @doc Dump the session details
+dump(Pid) ->
+    gen_server:cast(Pid, dump).
+
+
 %% @doc Spawn a new process, linked to the session pid
 spawn_link(Module, Func, Args, Context) ->
     gen_server:call(Context#context.session_pid, {spawn_link, Module, Func, Args, Context}).
@@ -125,12 +130,13 @@ handle_cast(stop, Session) ->
 %% @doc Reset the timeout counter for the session and, optionally, a specific page
 handle_cast(keepalive, Session) ->
     Now      = zp_utils:now(),
-    Session1 = Session#session{expire=Now + ?SESSION_EXPIRE_N, now=Now},
+    Session1 = Session#session{expire=Now + ?SESSION_EXPIRE_N},
     {noreply, Session1};
 
 %% @doc Reset the timeout counter, propagate to the page process.
-handle_cast({keepalive, PageId, Now}, Session) ->
-    Session1 = Session#session{expire=Now + ?SESSION_EXPIRE_N, now=Now},
+handle_cast({keepalive, PageId}, Session) ->
+    Now      = zp_utils:now(),
+    Session1 = Session#session{expire=Now + ?SESSION_EXPIRE_N},
     case find_page(PageId, Session1) of
         #page{page_pid=Pid} -> 
             % Keep the page process alive
@@ -146,10 +152,15 @@ handle_cast({check_expire, Now}, Session) ->
         0 ->
             if 
                 Session#session.expire < Now ->  {stop, normal, Session};
-                true ->  {noreply, Session#session{now=Now}}
+                true ->  {noreply, Session}
             end;
         _ ->
-            {noreply, Session#session{expire=Now + ?SESSION_EXPIRE_N, now=Now}}
+            Expire   = Now + ?SESSION_PAGE_TIMEOUT,
+            Session1 = if 
+                            Expire > Session#session.expire -> Session#session{expire=Expire};
+                            true -> Session
+                       end,
+            {noreply, Session1}
     end;
 
 %% @doc Add a script to a specific page's script queue
@@ -174,7 +185,15 @@ handle_cast({add_script, Script}, Session) ->
 %% @doc Set the session variable, replaces any old value
 handle_cast({set, Key, Value}, Session) ->
     Session1 = Session#session{vars = dict:store(Key, Value, Session#session.vars)},
-    {noreply, Session1}.
+    {noreply, Session1};
+
+handle_cast(dump, Session) ->
+    io:format("~p~n", [Session]),
+    {noreply, Session};
+
+handle_cast(Msg, Session) ->
+    {stop, {unknown_cast, Msg}, Session}.
+
 
 %% @spec handle_call(Request, From, State) -> {reply, Reply, State} |
 %%                                      {reply, Reply, State, Timeout} |
@@ -221,8 +240,10 @@ handle_call({ensure_page_session, Context}, _From, Session) ->
                                 {P, Session}
                           end,
     Context2 = Context1#context{page_id=NewPageId, page_pid=NewPage#page.page_pid},
-    {reply, Context2, Session1}.
+    {reply, Context2, Session1};
 
+handle_call(Msg, _From, Session) ->
+    {stop, {unknown_cast, Msg}, Session}.
 
 %% @spec handle_info(Info, State) -> {noreply, State} |
 %%                                   {noreply, State, Timeout} |
@@ -258,11 +279,10 @@ code_change(_OldVsn, Session, _Extra) ->
 
 
 %% @doc Initialize a new session record
-new_session(Args) ->
-    Now = proplists:get_value(now, Args),
+new_session(_Args) ->
+    Now = zp_utils:now(),
     #session{
             vars=dict:new(),
-            now=Now,
             expire=Now + ?SESSION_EXPIRE_1,
             timer_ref=undefined,
             pages=[],

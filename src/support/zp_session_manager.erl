@@ -21,13 +21,20 @@
 -export([start_link/0]).
 
 %% External exports
--export([ensure_session/1, stop_session/1, rename_session/1, count/0, tick/0]).
+-export([
+    ensure_session/1, 
+    stop_session/1, 
+    rename_session/1, 
+    count/0, 
+    dump/0, 
+    tick/0
+]).
 
 -include_lib("webmachine.hrl").
 -include_lib("zophrenic.hrl").
 
 %% The session server state
--record(session_srv, {now, key2pid, pid2key}).
+-record(session_srv, {key2pid, pid2key}).
 
 
 start_link() -> gen_server:start_link({local, ?MODULE}, ?MODULE, [], []).
@@ -54,6 +61,12 @@ count() ->
     gen_server:call(?MODULE, count).
 
 
+%% @spec dump() -> void()
+%% @doc Dump all session to stdout
+dump() ->
+    gen_server:call(?MODULE, dump).
+
+
 %% @spec tick() -> none()
 %% @doc Periodic tick used for cleaning up sessions
 tick() ->
@@ -66,8 +79,8 @@ tick() ->
 %% @doc Initialize the session server with an empty session table.  We make the session manager a system process
 %%      so that crashes in sessions are isolated from each other.
 init(_Args) ->
-    State = #session_srv{now=zp_utils:now(), key2pid=dict:new(), pid2key=dict:new()},
-    timer:apply_interval(1000, ?MODULE, tick, []),
+    State = #session_srv{key2pid=dict:new(), pid2key=dict:new()},
+    timer:apply_interval(?SESSION_CHECK_EXPIRE * 1000, ?MODULE, tick, []),
     process_flag(trap_exit, true),
     {ok, State}.
 
@@ -102,7 +115,16 @@ handle_call({rename_session, Context}, _From, State) ->
 %% Return the number of sessions
 handle_call(count, _From, State) ->
     Count = dict:size(State#session_srv.pid2key),
-    {reply, Count, State}.
+    {reply, Count, State};
+
+%% Dump all sessions to stdout
+handle_call(dump, _From, State) ->
+    SesPids = dict:fetch_keys(State#session_srv.pid2key),
+    lists:foreach(fun(Pid) -> zp_session:dump(Pid) end, SesPids),
+    {reply, ok, State};
+    
+handle_call(Msg, _From, State) ->
+    {stop, {unknown_call, Msg}, State}.
 
 
 %% Handle the down message from a stopped session, remove it from the session admin
@@ -117,7 +139,7 @@ handle_cast(tick, State) ->
     Tick    = zp_utils:now(),
     SesPids = dict:fetch_keys(State#session_srv.pid2key),
     lists:foreach(fun(Pid) -> zp_session:check_expire(Tick, Pid) end, SesPids),
-    {noreply, State#session_srv{now=Tick}};
+    {noreply, State};
 
 handle_cast(_Msg, State) -> {noreply, State}.
 
@@ -134,7 +156,7 @@ ensure_session1(S, P, Context, State) when S == undefined orelse P == error ->
     Context2  = Context1#context{session_pid = Pid},
     {Pid, Context2, State1};
 ensure_session1(_SessionId, Pid, Context, State) ->
-    zp_session:keepalive(State#session_srv.now, Context#context.page_pid, Pid),
+    zp_session:keepalive(Context#context.page_pid, Pid),
     Context1  = Context#context{session_pid = Pid},
     {Pid, Context1, State}.
 
@@ -187,8 +209,8 @@ session_find_pid(SessionId, State) ->
 
 %% @spec new_session(State::state()) -> pid()
 %% @doc Spawn a new session, monitor the pid as we want to know about normal exits
-spawn_session(State) ->
-    case zp_session:start_link([{now,State#session_srv.now}]) of
+spawn_session(_State) ->
+    case zp_session:start_link() of
         {ok, Pid} ->
                 erlang:monitor(process, Pid),
                 Pid

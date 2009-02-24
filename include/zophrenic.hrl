@@ -45,6 +45,9 @@
 %% Number of seconds between two comet polls before the page expires
 -define(SESSION_PAGE_TIMEOUT, 20).
 
+%% Number of seconds between session expiration checks
+-define(SESSION_CHECK_EXPIRE, 10).
+
 %% Default session expiration in seconds.
 %% The first keepalive message must be received before SESSION_EXPIRE_1 seconds
 %% Subsequent messages must be received before SESSION_EXPIRE_N
