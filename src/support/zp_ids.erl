@@ -18,7 +18,18 @@
 -export([init/1, handle_call/3, handle_cast/2, handle_info/2, terminate/2, code_change/3]).
 
 %% id server exports
--export([unique/0, id/0, id/1, optid/1, number/0, number/1, start_link/0]).
+-export([
+    unique/0, 
+    id/0,
+    id/1,
+    optid/1,
+    sign_key/0,
+    number/0,
+    number/1,
+    start_link/0
+]).
+
+-record(state, {sign_key}).
 
 start_link() -> gen_server:start_link({local, ?MODULE}, ?MODULE, [], []).
 
@@ -37,6 +48,12 @@ optid(undefined) -> id(?OPTID_LENGTH);
 optid(false) -> id(?OPTID_LENGTH);
 optid(Id) -> Id.
 
+%% @spec sign_key() -> binary()
+%% @doc Get the key for signing requests stored in the user agent.
+sign_key() -> 
+    gen_server:call(?MODULE, sign_key).
+    
+
 %% @doc Return a big random integer, but smaller than maxint32
 number() ->
     gen_server:call(?MODULE, number).
@@ -48,7 +65,7 @@ number(Max) ->
 init([]) ->
     {A1,A2,A3} = erlang:now(),
     random:seed(A1, A2, A3),
-    {ok, true}.
+    {ok, #state{}}.
 
 
 handle_call(unique, _From, State) ->
@@ -65,7 +82,21 @@ handle_call({number, Max}, _From, State) ->
 
 handle_call({id, Len}, _From, State) ->
     Id = generate_id(Len),
-    {reply, Id, State}.
+    {reply, Id, State};
+
+handle_call(sign_key, _From, State) ->
+    case State#state.sign_key of
+        undefined ->
+            SKey = case os:getenv("ZOPHRENIC_SIGN_KEY") of false -> generate_id(100); K -> K end,
+            Key  = list_to_binary(SKey),
+            {reply, Key, State#state{sign_key=Key}};
+        Key -> 
+            {reply, Key, State}
+    end;
+
+handle_call(Msg, _From, State) ->
+    {stop, {unknown_call, Msg}, State}.
+
 
 handle_cast(_Msg, State) -> {noreply, State}.
 handle_info(_Msg, State) -> {noreply, State}.

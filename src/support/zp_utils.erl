@@ -98,12 +98,10 @@ inner_decode(Data, Base) when is_list(Data) ->
 	
 %%% PICKLE / UNPICKLE %%%
 
-get_sign_key() -> <<"helloworld">>.
-
 pickle(Data) ->
     BData = erlang:term_to_binary(Data),
 	Nonce = zp_ids:number(1 bsl 31),
-	Sign  = get_sign_key(),
+	Sign  = zp_ids:sign_key(),
 	SData = <<BData/binary, Nonce:32, Sign/binary>>,
 	<<C1:64,C2:64>> = erlang:md5(SData),
 	base64:encode(<<C1:64, C2:64, Nonce:32, BData/binary>>).
@@ -111,7 +109,7 @@ pickle(Data) ->
 depickle(Data) ->
     try
         <<C1:64, C2:64, Nonce:32, BData/binary>> = base64:decode(Data),
-    	Sign  = get_sign_key(),
+    	Sign  = zp_ids:sign_key(),
     	SData = <<BData/binary, Nonce:32, Sign/binary>>,
     	<<C1:64, C2:64>> = erlang:md5(SData),
     	erlang:binary_to_term(BData)
