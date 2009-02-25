@@ -162,11 +162,7 @@ get_file_dispatch(File) ->
                 "." ++ _ -> 
                     [];
                 _Other  ->
-                    {ok,Data}       = file:read_file(File),
-                    String          = binary_to_list(Data),
-                    {ok, Tokens, _} = erl_scan:string(String),
-                    {ok, Expr}      = erl_parse:parse_exprs(Tokens),
-                    {value, Disp, _NewBindings} = erl_eval:exprs(Expr, []),
+                    {ok, Disp} = file:consult(File),
                     Disp
             end;
         false -> 
