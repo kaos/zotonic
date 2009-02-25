@@ -1,0 +1,382 @@
+/* Project specific styles for Zophrenic websites
+----------------------------------------------------------
+
+@package:	zophrenic 2009
+@Project	Hans Struijk Bikes
+@Author: 	Tim Benniks <tim@timbenniks.com>
+@Created: 	25-02-2009
+
+---------------------------------------------------------- */
+
+body {
+	background: #eaeaea;
+}
+
+.block {
+	background: #fff;
+	padding: 9px;
+	border-bottom: 1px solid #ddd;
+	margin: 0 0 12px 0;
+}
+
+	.block p:last-child {
+		margin: 0;
+	}
+
+/* Header
+---------------------------------------------------------- */
+
+#header { 
+	margin: 0 0 12px 0;
+}
+
+.basket-wrapper {
+	background: #fff;
+	border: solid #d4d4d4;
+	border-width: 0 1px 1px 1px;
+	height: 40px;
+	margin: 0 0 27px;
+	-moz-border-radius-bottomleft: 4px;
+	-webkit-border-bottom-left-radius:4px;
+	-moz-border-radius-bottomright: 4px;
+	-webkit-border-bottom-right-radius: 4px;
+	padding: 1px 5px 0;
+}
+
+	.basket-wrapper p {
+		margin: 0;
+		color: #333;
+		font-size: 11px;
+		line-height: 16px;
+	}
+	
+	.basket-wrapper a,
+	.basket-wrapper a:focus {
+		text-decoration: none;
+		color: #888;
+	}
+	
+	.basket-wrapper a:hover {
+		color: #464646;
+	}
+	
+	p.basket-text {
+		margin: 3px 0 0 24px;
+	}
+		
+		.basket-user,
+		.basket-basket {
+			float: left;
+			width: 190px;
+			position: relative;
+		}
+		
+			.basket-basket {
+				width: 168px;
+			}
+			
+		.basket-user-image,
+		.basket-basket-image {
+			height: 14px;
+			width: 16px;
+			background: url(../images/hs-icons.gif) -17px 0;
+			float: left;
+			position: absolute;
+			top: 12px;
+		}
+
+		.basket-basket-image {
+			background-position: 0 0;
+		}
+		
+		.basket-logos {
+			width: 108px;
+			height: 25px;
+			background: url(../images/hs-ideal.gif) 0 0;
+			float: left;
+			margin: 6px 0 0 6px;
+		}
+		
+			.basket-logos span {
+				display: none;
+			}
+
+
+/* Header navigation
+---------------------------------------------------------- */
+
+.navigation-wrapper { 
+	background: #fff;
+	border: 1px solid #d4d4d4;
+	-moz-border-radius: 4px;
+	-webkit-border-radius: 4px;
+	position: relative;
+	clear: both;
+}
+
+ul#navigation { 
+	padding: 0 0 0 122px;
+}
+
+ul#navigation li { 
+	display: inline;
+	float: left;
+	border-right: 1px solid #e5e5e5;
+	width: auto;
+}
+
+	ul#navigation li.logo {
+		background: transparent url(../images/hans_struijk_logo.png);
+		position: absolute;
+		top: -63px;
+		left: 0;
+		width: 149px;
+		height: 94px;
+		border: none;
+	}
+	
+	ul#navigation li.logo h1 {
+		display: none;
+	}
+
+	ul#navigation li a,
+	ul#navigation li a:focus {
+		line-height: 34px;
+		padding: 0 16px;
+		text-decoration: none;
+		text-transform: uppercase;
+		color: #464646;
+		height: 34px;
+		display: block;
+	}
+	
+	ul#navigation li a:hover { 
+		color: #000;
+		background: #f2f2f2;
+	}
+
+	ul#navigation li a.current {
+		font-weight: bold;
+		color: #000;
+	}
+	
+ul#navigation li.lang {
+	border: none;
+}
+
+ul#navigation li.lang span { 
+	display: none;
+}
+
+ul#navigation li.lang a {
+	padding: 0;
+	margin: 10px 0 0 7px;
+	height: 14px;
+	width: 16px;
+	background: url(../images/hs-icons.gif);
+}
+
+ul#navigation li.lang a.dutch {
+	background-position: -54px 0;
+}
+
+ul#navigation li.lang a.english {
+	background-position: -36px 0;
+}
+
+
+/* Header search
+---------------------------------------------------------- */
+
+#search { 
+	margin: 7px 0 6px 0;
+}
+	
+	#search input {
+		width: 176px;
+		float: left;
+		margin: 0 3px 0 0;
+	}
+	
+	#search button {
+		margin: 0;
+	}
+	
+	#search fieldset {
+		margin: 0;
+		padding: 0;
+		border: none;
+	}
+	
+	
+/* Sidebar
+---------------------------------------------------------- */
+
+#sidebar .padding {
+	padding: 0 12px 0 0;
+}
+
+#sidebar p {
+	font-size: 11px;
+}
+
+
+/* Sub-navigation
+---------------------------------------------------------- */
+
+#sub-navigation { 
+	margin: 0 0 12px 0;
+}
+
+	#sub-navigation li {
+		display: block;
+	}
+	
+		#sub-navigation li a,
+		#sub-navigation li a:focus {
+			height: 27px;
+			line-height: 27px;
+			border-bottom: 1px solid #ddd;
+			display: block;
+			padding: 0 0 0 8px;
+			color: #464646;
+			text-decoration: none;
+			background: #fff;
+		}
+		
+		#sub-navigation li a:hover,
+		#sub-navigation li a.current {
+			color: #000;
+			background: #f2f2f2;
+		}
+
+
+/* Footer
+---------------------------------------------------------- */
+
+#footer {
+	margin: 18px 0 0 0;
+}
+
+.footer-bike-logos {
+	margin: 0 0 45px;
+}
+
+	.footer-bike-logos li {
+		background: #eaeaea url(../images/hs-logos.gif) no-repeat 0 0;
+		height: 30px;
+		display: block;
+		float: left;
+		margin: 0 7px 0 0;
+	}
+
+	.footer-bike-logos li span {
+		display: none;
+	}
+
+		.footer-bike-logos li.footer-logo1 { background-position: 0 0; width: 19px; }
+		.footer-bike-logos li.footer-logo2 { background-position: -26px 0; width: 73px; }
+		.footer-bike-logos li.footer-logo3 { background-position: -103px 0; width: 48px; }
+		.footer-bike-logos li.footer-logo4 { background-position: -162px 0; width: 50px; }
+		.footer-bike-logos li.footer-logo5 { background-position: -227px 0; width: 60px; }
+		.footer-bike-logos li.footer-logo6 { background-position: -299px 0; width: 25px; }
+		.footer-bike-logos li.footer-logo7 { background-position: -335px 0; width: 52px; }
+		.footer-bike-logos li.footer-logo8 { background-position: -405px 0; width: 35px; }
+
+.footer-text p {
+	font-size: 10px;
+	margin: 0;
+	text-align: center;
+	color: #ccc;
+}
+
+/* Pages - Home page
+---------------------------------------------------------- */
+
+	/* Newsletter
+	------------------------------------------------------ */
+
+	.newsletter p {
+		margin: 0;
+	}
+
+	.newsletter input {
+		width: 130px;
+		float: left;
+		margin: 0 3px 0 0;
+	}
+
+	.newsletter button {
+		margin: 0;
+	}
+	
+	
+	.newsletter fieldset {
+		margin: 0;
+		padding: 0;
+		border: none;
+	}
+
+	
+	/* News
+	------------------------------------------------------ */
+
+	.news-list li {
+		font-size: 11px;
+	}
+	
+		.news-list li span { 
+			color: #000;
+			font-weight: bold;
+		}
+		
+		.news-list li a,
+		.news-list li a:focus {
+			color: #666;
+		}
+		
+		.news-list li a:hover {
+			color: #333;
+		}
+
+		
+	/* Misc lists
+	------------------------------------------------------ */
+	
+	.misc-list li {
+		font-size: 11px
+	}
+		
+		.misc-list li a {
+			color: #333;
+		}
+	
+	
+	/* Bargain
+	------------------------------------------------------ */
+
+	.home-bargain {
+		margin: 0 0 12px 0;
+	}
+		
+	.home-bargain img {
+		float: left;
+	}
+	
+	.home-bargain img.bargain-last {
+		margin: 0 0 0 2px;
+	}
+	
+		h2 span a,
+		h2 span a:focus {
+			text-align: right;
+			font-size: 11px;
+			display: block;
+			margin: -27px 9px 0 0;
+			color: #eeb714;
+		}
+		
+		h2 span a:hover {
+			color: #333;
+			text-decoration: none;
+		}
