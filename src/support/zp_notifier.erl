@@ -132,6 +132,15 @@ handle_cast({'detach_all', Event}, State) ->
 
 
 %% @doc Trigger an event, notify all observers asynchronously
+handle_cast({'notify', Msg, Params}, State) when is_tuple(Msg) ->
+    Event = element(1, Msg),
+    case dict:find(Event, State#state.observers) of
+        {ok, Observers} ->
+            spawn(fun() -> notify_observers(Msg, Params, Observers) end);
+        error -> ok
+    end,
+    {noreply, State};
+
 handle_cast({'notify', Event, Params}, State) ->
     case dict:find(Event, State#state.observers) of
         {ok, Observers} ->
