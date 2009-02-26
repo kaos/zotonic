@@ -50,7 +50,7 @@ init([]) ->
          {log_dir, "priv/log"},
 		 {dispatch, []}],
 
-    Web     = {webmachine_mochiweb,
+    MochiWeb = {webmachine_mochiweb,
 	            {webmachine_mochiweb, start, [WebConfig]}, 
 	            permanent, 5000, worker, dynamic},
 
@@ -86,6 +86,10 @@ init([]) ->
 	            {zp_scomp, start_link, []}, 
 	            permanent, 5000, worker, dynamic},
 
-    Processes = [Web, Depcache, Ids, Dispatcher, Notifier, Session, Person, Template, Scomp],
+    DropBox = {zp_dropbox,
+                {zp_dropbox, start_link, []}, 
+                permanent, 5000, worker, dynamic},
+
+    Processes = [MochiWeb, Depcache, Ids, Dispatcher, Notifier, Session, Person, Template, Scomp, DropBox],
     {ok, {{one_for_one, 1000, 10}, Processes}}.
 
