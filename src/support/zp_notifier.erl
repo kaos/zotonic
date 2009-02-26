@@ -14,10 +14,10 @@
 -export([start_link/0, start_link/1]).
 
 %% interface functions
--export([observe/2, detach/2, notify/1, notify/2, notify_sync/1, notify_sync/2]).
+-export([observe/2, detach/2, notify/1, notify_sync/1]).
 
 %% internal
--export([notify_observers/3, test/0, test_observer/2]).
+-export([notify_observers/2, test/0, test_observer/1]).
 
 
 -record(state, {observers}).
@@ -48,21 +48,12 @@ detach(Event, Observer) ->
 
 %% @doc Async notify observers of an event
 notify(Event) ->
-    gen_server:cast(?MODULE, {'notify', Event, undefined}).
-
-
-%% @doc Async notify observers of an event
-notify(Event, Params) ->
-    gen_server:cast(?MODULE, {'notify', Event, Params}).
+    gen_server:cast(?MODULE, {'notify', Event}).
 
 
 %% @doc Synchronously notify observers, wait till all have done their work
 notify_sync(Event) ->
-    gen_server:call(?MODULE, {'notify_sync', Event, undefined}).
-
-%% @doc Synchronously notify observers, wait till all have done their work
-notify_sync(Event, Params) ->
-    gen_server:call(?MODULE, {'notify_sync', Event, Params}).
+    gen_server:call(?MODULE, {'notify_sync', Event}).
 
 
 %%====================================================================
@@ -88,9 +79,9 @@ init(_Args) ->
 %% Description: Handling call messages
 
 %% @doc Trigger an event, notify all observers synchronously
-handle_call({'notify_sync', Event, Params}, _From, State) ->
+handle_call({'notify_sync', Event}, _From, State) ->
     case dict:find(Event, State#state.observers) of
-        {ok, Observers} -> notify_observers(Event, Params, Observers);
+        {ok, Observers} -> notify_observers(Event, Observers);
         error -> ok
     end,
     {reply, ok, State};
@@ -132,19 +123,19 @@ handle_cast({'detach_all', Event}, State) ->
 
 
 %% @doc Trigger an event, notify all observers asynchronously
-handle_cast({'notify', Msg, Params}, State) when is_tuple(Msg) ->
+handle_cast({'notify', Msg}, State) when is_tuple(Msg) ->
     Event = element(1, Msg),
     case dict:find(Event, State#state.observers) of
         {ok, Observers} ->
-            spawn(fun() -> notify_observers(Msg, Params, Observers) end);
+            spawn(fun() -> notify_observers(Msg, Observers) end);
         error -> ok
     end,
     {noreply, State};
 
-handle_cast({'notify', Event, Params}, State) ->
+handle_cast({'notify', Event}, State) ->
     case dict:find(Event, State#state.observers) of
         {ok, Observers} ->
-            spawn(fun() -> notify_observers(Event, Params, Observers) end);
+            spawn(fun() -> notify_observers(Event, Observers) end);
         error -> ok
     end,
     {noreply, State};
@@ -182,15 +173,15 @@ code_change(_OldVsn, State, _Extra) ->
 %%====================================================================
 
 %% @doc Notify all observers of an event
-notify_observers(Event, Params, Observers) ->
+notify_observers(Event, Observers) ->
     lists:foreach(
                 fun
                     (Fun) when is_function(Fun) ->
-                        catch Fun(Event, Params);
+                        catch Fun(Event);
                     (Pid) when is_pid(Pid) ->
-                        catch Pid ! {Event, Params};
+                        catch Pid ! {Event};
                     ({M,F}) ->
-                        catch M:F(Event, Params)
+                        catch M:F(Event)
                 end,
                 Observers).
 
@@ -201,8 +192,9 @@ test() ->
     detach_all(test),
     observe(test, {?MODULE, test_observer}),
     notify(test),
+    notify({test, arg1, arg2}),
     detach(test, {?MODULE, test_observer}).
 
-test_observer(Event, Args) ->
-    io:format("Received Event \"~p\" with args \"~p\"~n", [Event, Args]).
+test_observer(Event) ->
+    io:format("Received Event \"~p\"~n", [Event]).
 
