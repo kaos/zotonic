@@ -107,9 +107,7 @@ handle_cast({'observe', Event, Observer}, State) ->
 handle_cast({'detach', Event, Observer}, State) ->
     Observers1 = case dict:find(Event, State#state.observers) of
                   {ok, Olist} ->
-                      io:format("Before: ~p (delete ~p)~n", [Olist,Observer]),
                       Olist1 = lists:delete(Observer, Olist),
-                      io:format("After: ~p~n", [Olist1]),
                       dict:store(Event, Olist1, State#state.observers);
                   error ->
                       State#state.observers
