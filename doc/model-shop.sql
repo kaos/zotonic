@@ -72,13 +72,13 @@ WITH (OIDS=FALSE);
 CREATE TABLE shop_product
 (
   id serial NOT NULL,
-  title_nl character varying(80),
-  descr_nl character varying(2000),
-  title_en character varying(80),
-  descr_en character varying(2000),
+  title_nl character varying(80) NOT NULL DEFAULT ''::character varying,
+  descr_nl character varying(2000) NOT NULL DEFAULT ''::character varying,
+  title_en character varying(80) NOT NULL DEFAULT ''::character varying,
+  descr_en character varying(2000) NOT NULL DEFAULT ''::character varying,
   tsv tsvector,
   stock integer NOT NULL DEFAULT 0,  -- Sum stock minus sum order lines for the last hour (or so)
-  shop_brand_id int,
+  shop_brand_id integer,
   shop_group_id1 integer,
   shop_group_id2 integer,
   image_file character varying(100) NOT NULL DEFAULT ''::character varying,
@@ -130,10 +130,10 @@ CREATE INDEX shop_product_tsv ON shop_product USING gin(tsv);
 CREATE FUNCTION shop_product_trigger() RETURNS trigger AS $$ 
 begin
   new.tsv := 
-    setweight(to_tsvector(‚Äö√Ñ√∂‚àö√ë‚àö¬•pg_catalog.dutch‚Äö√Ñ√∂‚àö√ë‚àö¬•, coalesce(new.title_nl,‚Äö√Ñ√∂‚àö√ë‚àöœÄ)), ‚Äö√Ñ√∂‚àö√ë‚àö¬•A‚Äö√Ñ√∂‚àö√ë‚àö¬•) || 
-    setweight(to_tsvector(‚Äö√Ñ√∂‚àö√ë‚àö¬•pg_catalog.dutch‚Äö√Ñ√∂‚àö√ë‚àö¬•, coalesce(new.desc_nl,‚Äö√Ñ√∂‚àö√ë‚àöœÄ)),  ‚Äö√Ñ√∂‚àö√ë‚àö¬•D‚Äö√Ñ√∂‚àö√ë‚àö¬•) ||
-    setweight(to_tsvector(‚Äö√Ñ√∂‚àö√ë‚àö¬•pg_catalog.english‚Äö√Ñ√∂‚àö√ë‚àö¬•, coalesce(new.title_en,‚Äö√Ñ√∂‚àö√ë‚àöœÄ)), ‚Äö√Ñ√∂‚àö√ë‚àö¬•A‚Äö√Ñ√∂‚àö√ë‚àö¬•) || 
-    setweight(to_tsvector(‚Äö√Ñ√∂‚àö√ë‚àö¬•pg_catalog.english‚Äö√Ñ√∂‚àö√ë‚àö¬•, coalesce(new.desc_en,‚Äö√Ñ√∂‚àö√ë‚àöœÄ)),  ‚Äö√Ñ√∂‚àö√ë‚àö¬•D‚Äö√Ñ√∂‚àö√ë‚àö¬•); 
+    setweight(to_tsvector('pg_catalog.dutch', coalesce(new.title_nl,'')), 'A') || 
+    setweight(to_tsvector('pg_catalog.dutch', coalesce(new.desc_nl,'')),  'D') ||
+    setweight(to_tsvector('pg_catalog.english', coalesce(new.title_en,'')), 'A') || 
+    setweight(to_tsvector('pg_catalog.english', coalesce(new.desc_en,'')),  'D'); 
   return new; 
 end 
 $$ LANGUAGE plpgsql; 
@@ -168,14 +168,18 @@ CREATE TABLE shop_sku
   id serial NOT NULL,
 
   -- The product and the properties distinguishing this sku within the product
-  shop_product_id int,
-  shop_property_value_id1 int,
-  shop_property_value_id2 int,
+  shop_product_id integer,
+  shop_property_value_id1 integer,
+  shop_property_value_id2 integer,
 
+  available boolean NOT NULL DEFAULT TRUE,
   imported timestamp with time zone NOT NULL DEFAULT now(),
   created timestamp with time zone NOT NULL DEFAULT now(),
   modified timestamp with time zone NOT NULL DEFAULT now(),
 
+  -- With VMSII we have to calculate the VAT percentage from the prices...
+  vat float NOT NULL DEFAULT 19.0,
+  
   -- Imported from VMSII (VendIT)
   article_nr character varying(50) NOT NULL,
   upc character varying(20) NOT NULL DEFAULT ''::character varying,
@@ -267,15 +271,30 @@ CREATE TABLE shop_cart
   id serial NOT NULL,
   person_id bigint NOT NULL,
   quantity integer NOT NULL DEFAULT 1,
+  shop_product_id int NOT NULL,
+  shop_property_id1 integer,
+  shop_property_id2 integer,
   created timestamp with time zone NOT NULL DEFAULT now(),
   CONSTRAINT shop_cart_pkey PRIMARY KEY (id),
   CONSTRAINT fk_shop_cart_person_id FOREIGN KEY (person_id)
     REFERENCES person(id)
     ON UPDATE CASCADE ON DELETE RESTRICT
+  CONSTRAINT fk_shop_cart_shop_product_id FOREIGN KEY (shop_product_id)
+    REFERENCES shop_product(id)
+    ON UPDATE CASCADE ON DELETE RESTRICT
+  CONSTRAINT fk_shop_cart_shop_property_value_id1 FOREIGN KEY (shop_property_value_id1)
+    REFERENCES shop_property_value(id)
+    ON UPDATE CASCADE ON DELETE SET NULL,
+  CONSTRAINT fk_shop_cart_shop_property_value_id2 FOREIGN KEY (shop_property_value_id2)
+    REFERENCES shop_property_value(id)
+    ON UPDATE CASCADE ON DELETE SET NULL
 )
 WITH (OIDS=FALSE);
 
+CREATE INDEX fki_shop_cart_shop_product_id ON shop_cart(shop_product_id);
 CREATE INDEX fki_shop_cart_person_id ON shop_cart(person_id);
+CREATE INDEX fki_shop_cart_shop_property_value_id1 on shop_cart(shop_property_value_id1);
+CREATE INDEX fki_shop_cart_shop_property_value_id2 on shop_cart(shop_property_value_id2);
 CREATE INDEX shop_cart_index ON shop_cart(person_id,created);
 
 
