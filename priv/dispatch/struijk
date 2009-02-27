@@ -1,29 +1,26 @@
+%% Hans Struijk Fietsen desipatch rules
+%%
+%% TODO:
+%% basket
+%% checkout
+%% admin
+%% clothsize-table / fietsroute / klantenkaart / contact-formulier --> fixed html
+%% aanbiedingen
+%% searchresult
+%% vacature pagina == post
+%% faq
+
 [
 	{home,     [],                               resource_home,     []},
-
 	{category, ["overview", cat],                resource_category, []}, 
 	{category, ["overview", cat, subcat],        resource_category, []}, 
 	{category, ["overview", cat, subcat, brand], resource_category, []}, 
-
     {product, ["product", brand, id],            resource_product,  []}, 
-    {product, ["product", cat, brand, id],       resource_product,  Å[]}, 
-    {product, ["product", cat, subcat, brand, id],resource_product, []}, 
-
+    {product, ["product", cat, brand, id],       resource_product,  []}, 
+    {product, ["product", cat, subcat, brand, id], resource_product, []}, 
     {brand,    ["brand", brand],                 resource_brand,    []},
-    
     {page,     ["page", id],                     resource_page,     []},
     {page,     ["page", id, slug],               resource_page,     []},
-  
-    {news,     ["news"],                         resource_news,     []}
+    {news,     ["news"],                         resource_news,     []},
     {agenda,   ["agenda"],                       resource_agenda,   []}
-    
-    %% TODO:
-    %% basket
-    %% checkout
-    %% admin
-    %% clothsize-table / fietsroute / klantenkaart / contact-formulier --> fixed html
-    %% aanbiedingen
-    %% searchresult
-    %% vacature pagina == post
-    %% faq
 ].
