@@ -47,6 +47,7 @@ init([]) ->
     WebConfig = [
 		 {ip, Ip},
 		 {port, Port},
+		 {error_handler, zp_webmachine_error_handler},
          {log_dir, "priv/log"},
 		 {dispatch, []}],
 

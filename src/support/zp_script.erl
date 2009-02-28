@@ -23,9 +23,17 @@ add_script(Script, Context) ->
     Context#context{scripts=[Script, "\n" | Context#context.scripts]}.
 
 get_page_startup_script(Context) ->
-    [   ?SESSION_PAGE_Q, $=, $", Context#context.page_id, $", $;, 
-        <<"\nzp_postback_loop();\nzp_comet_start();\n">>
-    ].
+    case Context#context.page_id of
+        undefined ->
+            [   <<"\n// No page id, so no comet loop started and generated random page id for postback loop\n">>,
+                ?SESSION_PAGE_Q, $=, $", zp_ids:id(), $", $;, 
+                <<"\nzp_postback_loop();\n">>
+            ];
+        PageId ->
+            [   ?SESSION_PAGE_Q, $=, $", PageId, $", $;, 
+                <<"\nzp_postback_loop();\nzp_comet_start();\n">>
+            ]
+    end.
 
 get_script(Context) -> 
     Context1 = Context#context{scripts=[], content_scripts=[]},
