@@ -11,17 +11,17 @@
 %% @todo Translate unique id-names to base names (after validation)   #name -> fghw-name in postback+qs -> name in validated result
 
 %% @spec validate_query_args(Context) -> {ok, NewContext} | {error, NewContext}
-%% @doc Checks for zp_v arguments, performs enclosed checks and adds the validated terms to the qs_validated list.
+%% @doc Checks for zp_v arguments, performs enclosed checks and adds the validated terms to the q_validated list.
 %%      Errors are reported back to the user agent
 validate_query_args(Context) ->
-    case zp_context:get_context(qs_validated, Context) of
+    case zp_context:get_context(q_validated, Context) of
         undefined ->
             Validations = zp_context:get_q_all("zp_v", Context),
             Validated   = lists:map(fun(X) -> validate(X,Context) end, Validations),
 
             % format is like: [{"email",{ok,"me@example.com"}}]
             % Grep all errors, make scripts for the context var
-            % Move all ok values to the qs_validated dict
+            % Move all ok values to the q_validated dict
             IsError  = fun 
                             ({_Id, {error, _, _}}) -> true;
                             (_X) -> false
@@ -33,7 +33,7 @@ validate_query_args(Context) ->
             {Errors,Values} = lists:partition(IsError, Validated),
             QsValidated     = dict:from_list(lists:map(GetValue, Values)),
 
-            Context1 = zp_context:set_context(qs_validated, QsValidated, Context),
+            Context1 = zp_context:set_context(q_validated, QsValidated, Context),
             Context2 = report_errors(Errors, Context1),
             
             case Errors of

@@ -171,7 +171,7 @@ ensure_page_session(Context) ->
     
 %% @doc Ensure that we have parsed the query string, fetch body if necessary
 ensure_qs(Context) ->
-    case dict:find('qs', Context#context.dict) of
+    case dict:find('q', Context#context.dict) of
         {ok, _Qs} ->
             Context;
         error ->
@@ -181,9 +181,8 @@ ensure_qs(Context) ->
             Body     = parse_form_urlencoded(Req),
             Query    = Req:parse_qs(),
             Combined = PathArgs ++ Body ++ Query,
-            Dict2    = dict:store('qs', Combined, Context#context.dict),
-            Context#context{dict=Dict2},
-            
+            Dict2    = dict:store('q', Combined, Context#context.dict),
+            Context#context{dict=Dict2}
     end.
 
 
@@ -208,8 +207,7 @@ set_resource_module(Module, Context) ->
 %%       Key -> string()
 %% @doc Get a request parameter, either from the query string or the post body.  Post body has precedence over the query string.
 get_q(Key, Context) ->
-    {ok, Qs} = dict:find('qs', Context#context.dict),
-    %% io:format("~n~p~n", [Qs]),
+    {ok, Qs} = dict:find('q', Context#context.dict),
     proplists:get_value(Key, Qs).
 
 
@@ -218,7 +216,7 @@ get_q(Key, Context) ->
 %%        Values -> list()
 %% @doc Get the all the parameters with the same name, returns the empty list when non found.
 get_q_all(Key, Context) ->
-    {ok, Qs} = dict:find('qs', Context#context.dict),
+    {ok, Qs} = dict:find('q', Context#context.dict),
     proplists:get_all_values(Key, Qs).
     
 
@@ -226,7 +224,7 @@ get_q_all(Key, Context) ->
 %% @doc Fetch a query parameter and perform the validation connected to the parameter. An exception {not_validated, Key}
 %%      is thrown when there was no validator, when the validator is invalid or when the validation failed.
 get_q_validated(Key, Context) ->
-    case dict:find('qs_validated', Context#context.dict) of
+    case dict:find('q_validated', Context#context.dict) of
         {ok, Qs} ->
             case dict:find(Key, Qs) of
                 {ok, Value} -> Value;
