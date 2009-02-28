@@ -1,7 +1,7 @@
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml" lang="en">
 <head>
-	<title>{% block title %}{% endblock %} &ndash; Hans Struijk Fietsen</title>
+	<title>{{ error_code }} &ndash; Hans Struijk Fietsen</title>
 
 	<link href="/lib/css/zp-base.css" type="text/css" media="screen" rel="stylesheet" /> 
 	<link href="/lib/css/zp-type.css" type="text/css" media="screen" rel="stylesheet" /> 
@@ -17,7 +17,7 @@
 
 	<div class="zp-wrapper">
 		<div id="header" class="zp-100 clearfix">
-			
+
 			{% include "_shopping_card_small.tpl" %}
 			
 			<div class="navigation-wrapper clearfix">
@@ -49,16 +49,27 @@
 			</div>
 		</div>
 		<div id="content" class="zp-100 clearfix">
-			{% block sidebar %}
-				<div id="sidebar" class="zp-25">
-					<div class="padding">
-						{% include "_subnav.tpl" %}
-					</div>
+			<div id="content-area" class="zp-100">
+				<h2>Whoops, {{ error_code }}</h2>
+				<div class="block">
+					<h3>The ambulance now takes you to room 404</h3>
+					<p>
+						Etiam mi orci, ullamcorper in, malesuada nec, tempor in, dui. Class aptent taciti sociosqu ad litora torquent per conubia nostra,
+						per inceptos himenaeos. Ut adipiscing mattis lacus. Nullam tincidunt augue in eros. Donec felis nisi, ultrices vel, mollis in, 
+						scelerisque a, leo. Morbi ut ipsum ut pede dapibus scelerisque. Nullam a ipsum id magna laoreet placerat. Ut a magna. Nulla facilisi. 
+						Cum sociis natoque penatibus et magnis dis parturient montes, nascetur ridiculus mus. Mauris odio ipsum, iaculis ut, vestibulum a, 
+						convallis id, nulla.
+					</p>
 				</div>
-			{% endblock %}
-			{% block content %}
-				<div id="content-area" class="zp-75"></div>
-			{% endblock %}
+				
+				<div class="block">
+					<p>
+						{% @wire id="error-trigger" action={appear target="error-explain"} %}
+						<a href="javascript:void(0);" id="error-trigger">Find out more about the error &raquo;</a>
+					</p>
+					<pre style="display: none;" id="error-explain">lalalalalalalalal</pre>
+				</div>
+			</div>
 		</div>
 		{% include "_footer.tpl" %}
 	</div>

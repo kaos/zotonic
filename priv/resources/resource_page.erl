@@ -7,7 +7,11 @@
 -include_lib("resource_html.hrl").
 
 html(_ReqProps, Context) ->
-    Html = zp_template:render("page.tpl", Context),
-    zp_context:output(Html, Context).
-   
-
+	MenuList = [
+				[{title, "home"}, {uri, "/"}], 
+				[{title, "fietsen"}, {uri, "/page/fietsen"}]
+			],
+	Context1 = zp_context:set_context(menu_list, MenuList, Context),
+    
+    Html = zp_template:render("page.tpl", Context1),
+	zp_context:output(Html, Context1).

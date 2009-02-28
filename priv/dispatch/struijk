@@ -23,5 +23,6 @@
     {page,     ["page", id, slug],               resource_page,     []},
     {news,     ["news"],                         resource_news,     []},
     {agenda,   ["agenda"],                       resource_agenda,   []},
-    {about,    ["about"],                        resource_template, [{template,"page.tpl"}]}
+    {about,    ["about"],                        resource_template, [{template,"page.tpl"}]},
+    {error,    ["error"],                        resource_error,    []}
 ].
