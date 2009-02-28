@@ -98,10 +98,12 @@ last_modified(_ReqProps, State) ->
             {LMod, State}
     end.
 
-expires(_ReqProps, State) ->
-    NowSecs = calendar:datetime_to_gregorian_seconds(calendar:universal_time()),
-    OneWeek = 7*24*60*60,
-    {calendar:gregorian_seconds_to_datetime(NowSecs + OneWeek), State}.
+expires(ReqProps, State) ->
+    TenYears = 315360000,
+    Req      = ?REQ(ReqProps),
+    NowSecs  = calendar:datetime_to_gregorian_seconds(calendar:universal_time()),
+    Req:add_response_header("Cache-Control", "max-age="++integer_to_list(TenYears)),
+    {calendar:gregorian_seconds_to_datetime(NowSecs + TenYears), State}.
 
 provide_content(_ReqProps, State) ->
     case State#state.body of
