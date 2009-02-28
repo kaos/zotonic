@@ -811,7 +811,7 @@ print_ast(Value, Context, TreeWalker) ->
                        {V, _} = resolve_variable_ast(Var, Context),
                        V;
                   ({number_literal, _, Num}) ->
-                       erl_syntax:integer(Num);
+                       erl_syntax:integer(list_to_integer(Num));
                   ({scomp_arg_tuple, {identifier, _, TupleName}, TupleArgs}) ->
                        TupleNameAst = erl_syntax:atom(TupleName),
                        TupleArgsAst = scomp_ast_map_args(TupleArgs, Context),
@@ -891,8 +891,7 @@ scomp_ast_map_args(Args, Context) ->
                                                {V, _} = resolve_variable_ast(Var, Context),
                                                V;
                                           ({number_literal, _, Num}) ->
-                                               {IntValue,[]} = string:to_integer(Num),
-                                               erl_syntax:integer(IntValue);
+                                               erl_syntax:integer(list_to_integer(Num));
                                           ({scomp_arg_tuple, {identifier, _, TupleName}, TupleArgs}) ->
                                                TupleNameAst = erl_syntax:atom(TupleName),
                                                TupleArgsAst = scomp_ast_map_args(TupleArgs, Context),
