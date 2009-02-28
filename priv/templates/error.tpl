@@ -64,7 +64,7 @@
 				
 				<div class="block">
 					<p>
-						{% @wire id="error-trigger" action={appear target="error-explain"} %}
+						{% @wire id="error-trigger" action={slide_toggle speed=200 target="error-explain"} %} 
 						<a href="javascript:void(0);" id="error-trigger">Find out more about the error &raquo;</a>
 					</p>
 					<pre style="display: none;" id="error-explain">lalalalalalalalal</pre>
