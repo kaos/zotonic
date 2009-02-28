@@ -1,6 +1,7 @@
 -module(erlydtl_runtime).
-
 -compile(export_all).
+
+-include_lib("zophrenic.hrl").
 
 find_value(Key, L) when is_list(L) ->
     proplists:get_value(Key, L);
@@ -11,6 +12,17 @@ find_value(Key, {GBSize, GBData}) when is_integer(GBSize) ->
         _ ->
             undefined
     end;
+
+%% q and q_validated are indexed with strings, this because the indices are from
+%% the query string and post. Wrap them in a 'q' tuple to force a subsequent lookup.
+find_value(Key, {q, List}) ->
+    proplists:get_value(atom_to_list(Key), List);
+find_value(q, #context{}=Context) ->
+    {q, zp_context:get_context(q, Context)};
+find_value(q_validated, #context{}=Context) ->
+    {q, zp_context:get_context(q_validated, Context)};
+
+%% Other cases: context, dict or parametrized module lookup.
 find_value(Key, Tuple) when is_tuple(Tuple) ->
     Module = element(1, Tuple),
     case Module of
