@@ -23,9 +23,14 @@
 			<div class="navigation-wrapper clearfix">
 				<!-- Main navigation -->
 				<ul id="navigation" class="zp-60">
-					<li class="logo"><h1>Hans Struijk Fietsen</h1></li>
-					<li><a href="#" title="#" class="current">Home</a></li>
-					<li><a href="#" title="#">Fietsen</a></li>
+					<li class="logo">
+						<h1>
+							<a href="/" title="Hans Struijk Fietsen">
+								<img src="/lib/images/hans_struijk_logo.png" alt="hans Struijk Fietsen" />
+							</a>
+						</h1>
+					</li>
+					<li class="first"><a href="#" title="#">Fietsen</a></li>
 					<li><a href="#" title="#">Accesoires</a></li>
 					<li><a href="#" title="#">Service</a></li>
 					<li class="lang" title="Nederlands"><a href="#" title="Nederlands" class="dutch"><span>Nederlands</span></a></li>
@@ -41,11 +46,13 @@
 						</fieldset>
 					</form>
 				</div>
-			</div>	
+			</div>
 		</div>
 		<div id="content" class="zp-100 clearfix">
 			<div id="sidebar" class="zp-25">
-				{% block sidebar %}{% endblock %}
+				{% block sidebar %}
+					{% include "_subnav.tpl" %}
+				{% endblock %}
 			</div>
 			<div id="content-area" class="zp-75">
 				{% block content %}{% endblock %}

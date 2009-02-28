@@ -48,13 +48,8 @@
 {% block sidebar %}
 <!-- sidebar content for sub- navigation and more -->
 <div class="padding">
-	<ul id="sub-navigation">
-		<li><a href="#">Accessoires</a></li>
-		<li><a href="#">Klanten service</a></li>
-		<li><a href="#">Vergelijk fietsen</a></li>
-		<li><a href="#">Categorien</a></li>
-		<li><a href="#">Over Hans Struijk</a></li>
-	</ul>
+
+	{% include "_subnav.tpl" %}
 
 	<!-- Newsletter -->
 	<h3 class="block">Nieuwsbrief</h3>

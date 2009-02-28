@@ -125,8 +125,11 @@ ul#navigation li {
 	width: auto;
 }
 
-	ul#navigation li.logo {
-		background: transparent url(../images/hans_struijk_logo.png);
+	ul#navigation li.first {
+		margin: 0 0 0 18px;
+	}
+
+	ul#navigation li.logo h1 {
 		position: absolute;
 		top: -63px;
 		left: 0;
@@ -135,9 +138,19 @@ ul#navigation li {
 		border: none;
 	}
 	
-	ul#navigation li.logo h1 {
-		display: none;
-	}
+		ul#navigation li.logo h1 a {
+			height: 94px;
+		}
+	
+		ul#navigation li.logo h1 a,
+		ul#navigation li.logo h1 a img {
+			padding: 0;
+			margin: 0;
+		}
+		
+		ul#navigation li.logo h1 a:hover {
+			background: none;
+		}
 
 	ul#navigation li a,
 	ul#navigation li a:focus {
