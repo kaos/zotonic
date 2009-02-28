@@ -1,13 +1,12 @@
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml" lang="en">
 <head>
-	<title>{% block title %}Hans Struijk Fietsen{% endblock %}</title>
+	<title>{% block title %}Home pagina{% endblock %} &ndash; Hans Struijk Fietsen</title>
 
 	<link href="/lib/css/zp-base.css" type="text/css" media="screen" rel="stylesheet" /> 
 	<link href="/lib/css/zp-type.css" type="text/css" media="screen" rel="stylesheet" /> 
 	<link href="/lib/css/zp-forms.css" type="text/css" media="screen" rel="stylesheet" /> 
 	<link href="/lib/css/zp-project.css" type="text/css" media="screen" rel="stylesheet" /> 
-	<link href="/lib/css/zp-growl.css" type="text/css" media="screen" rel="stylesheet" /> 
 
 	<!--[if IE]><link href="/lib/css/zp-ie.css" type="text/css" media="screen" rel="stylesheet" /><![endif]--> 
 </head>
@@ -18,21 +17,10 @@
 
 	<div class="zp-wrapper">
 		<div id="header" class="zp-100 clearfix">
-
-			<!-- Shopping basket -->
-			<div class="basket-wrapper zp-50 right">
-				<div class="basket-user clearfix">
-					<p class="basket-user-image"></p>
-					<p class="basket-text">Welkom, Bastiaan Hagenouw <a href="#">Uitloggen &raquo;</a></p>
-				</div>
-				<div class="basket-basket">
-					<p class="basket-basket-image"></p>
-					<p class="basket-text">Uw winkelmand is leeg <a href="#">Bekijk uw winkelmand &raquo;</a></p>
-				</div>
-				<div class="basket-logos"><span><!-- Logo"s content -->iDeal, thuiswinkel waarborg</span></div>
-			</div>
+			
+			{% include "_shopping_card_small.tpl" %}
+			
 			<div class="navigation-wrapper clearfix">
-
 				<!-- Main navigation -->
 				<ul id="navigation" class="zp-60">
 					<li class="logo"><h1>Hans Struijk Fietsen</h1></li>
@@ -49,7 +37,7 @@
 					<form id="searchform" method="post" action="postback">
 						<fieldset>
 							<input id="quick-search" type="text" name="search" />
-							{% @button text="Zoek" postback="show_growl_search"  %}
+							<button>Zoek</button>
 						</fieldset>
 					</form>
 				</div>
@@ -57,12 +45,10 @@
 		</div>
 		<div id="content" class="zp-100 clearfix">
 			<div id="sidebar" class="zp-25">
-				{% block sidebar %}
-				{% endblock %}
+				{% block sidebar %}{% endblock %}
 			</div>
 			<div id="content-area" class="zp-75">
-				{% block content %}
-				{% endblock %}
+				{% block content %}{% endblock %}
 			</div>
 		</div>
 		{% include "_footer.tpl" %}

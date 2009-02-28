@@ -45,7 +45,6 @@
 </div>
 {% endblock %}
 
-
 {% block sidebar %}
 <!-- sidebar content for sub- navigation and more -->
 <div class="padding">
@@ -64,7 +63,7 @@
 		<form action="postback">
 			<fieldset>
 				<input type="text" name="newsletter" id="newsletter" class="input-newsletter" />
-				{% @button text="meld aan" postback="show_growl_newsletter"  %}
+				<button>Aanmelden</button>
 			</fieldset>
 		</form>
 	</div>
