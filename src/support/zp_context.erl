@@ -8,6 +8,7 @@
 
 -export([
     new/1,
+    new/0,
 
     cleanup_for_template/1,
     cleanup_for_scomp/1,
@@ -44,6 +45,7 @@
     incr_page/3,
 
     set_context/3,
+    set_context/2,
     get_context/2,
     incr_context/3
     
@@ -58,6 +60,9 @@ new(ReqProps) ->
     Req    = ?REQ(ReqProps),
     Module = Req:get_metadata('resource_module'),
     #context{reqprops=ReqProps, dict=dict:new(), resource_module=Module}.
+
+%% @doc Return a new empty context
+new() -> #context{dict=dict:new()}.
 
 %% @doc Cleanup a context for the output stream
 cleanup_for_template(#context{}=Context) ->
@@ -323,7 +328,15 @@ incr_page(Key, Value, Context) ->
 set_context(Key, Value, Context) ->
     Dict = dict:store(Key, Value, Context#context.dict),
     Context#context{dict = Dict}.
-    
+
+
+%% @spec set(PropList, Context) -> Context
+%% @doc Set the value of the context variables to all {Key, Value} properties.
+set_context(PropList, Context) when is_list(PropList) ->
+    NewDict = lists:foldl(fun ({Key,Value}, Dict) -> dict:store(Key, Value, Dict) end, Context#context.dict, PropList),
+    Context#context{dict = NewDict}.
+
+
 %% @spec get(Key, Context) -> Value
 %% @doc Fetch the value of the context variable Key
 get_context(Key, Context) ->
