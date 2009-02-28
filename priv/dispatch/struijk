@@ -1,4 +1,4 @@
-%% Hans Struijk Fietsen desipatch rules
+%% Hans Struijk Fietsen dispatch rules
 %%
 %% TODO:
 %% basket
@@ -22,5 +22,6 @@
     {page,     ["page", id],                     resource_page,     []},
     {page,     ["page", id, slug],               resource_page,     []},
     {news,     ["news"],                         resource_news,     []},
-    {agenda,   ["agenda"],                       resource_agenda,   []}
+    {agenda,   ["agenda"],                       resource_agenda,   []},
+    {about,    ["about"],                        resource_template, [{template,"page.tpl"}]}
 ].
