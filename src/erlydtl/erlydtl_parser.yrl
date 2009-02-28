@@ -94,7 +94,7 @@ Nonterminals
     CallWithTag
 
 	UrlTag
-	
+	 PrintTag
     ScompTag
 	ArgList
 	ArgValue.
@@ -139,12 +139,13 @@ Terminals
     text
     with_keyword
 	url_keyword
+    print_keyword
 	scompname
 	open_curly
 	close_curly
 %	open_bracket
 %	close_bracket
-	hash.
+ 	hash.
 
 Rootsymbol
     Elements.
@@ -169,6 +170,7 @@ Elements -> Elements CallTag : '$1' ++ ['$2'].
 Elements -> Elements CallWithTag : '$1' ++ ['$2'].
 Elements -> Elements ScompTag : '$1' ++ ['$2'].
 Elements -> Elements UrlTag : '$1' ++ ['$2'].
+Elements -> Elements PrintTag : '$1' ++ ['$2'].
 
 ValueBraced -> open_var Value close_var : '$2'.
 
@@ -257,6 +259,8 @@ CallWithTag -> open_tag call_keyword identifier with_keyword Value close_tag : {
 %%%% implementation of the url tag
 
 UrlTag -> open_tag url_keyword identifier ArgList close_tag : {url, '$3', '$4'}.
+
+PrintTag -> open_tag print_keyword Value close_tag : {print, '$3'}.
 
 %%%% Special construct to call scomps, scomps can have complex arguments
 

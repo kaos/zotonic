@@ -386,7 +386,9 @@ body_ast(DjangoParseTree, Context, TreeWalker) ->
             ({'scomp', {'scompname', _, Name}, Args}, TreeWalkerAcc) ->
                 scomp_ast(Name, Args, Context, TreeWalkerAcc);
             ({'url', {'identifier', _, Name}, Args}, TreeWalkerAcc) ->
-                url_ast(Name, Args, Context, TreeWalkerAcc)
+                url_ast(Name, Args, Context, TreeWalkerAcc);
+            ({'print', Value}, TreeWalkerAcc) ->
+                print_ast(Value, Context, TreeWalkerAcc)
         end, TreeWalker, DjangoParseTree),   
     {AstList, {Info, TreeWalker3}} = lists:mapfoldl(
         fun({Ast, Info}, {InfoAcc, TreeWalkerAcc}) -> 
@@ -798,6 +800,51 @@ url_ast(Name, Args, Context, TreeWalker) ->
             ),
     {{AppAst, #ast_info{}}, TreeWalker}.  
 
+
+
+print_ast(Value, Context, TreeWalker) ->
+    ValueAst = case Value of
+                  ({string_literal, _, Str}) ->
+                      S2 = unescape_string_literal(Str),
+                      erl_syntax:string(S2);
+                  ({variable, _}=Var) ->
+                       {V, _} = resolve_variable_ast(Var, Context),
+                       V;
+                  ({number_literal, _, Num}) ->
+                       erl_syntax:integer(Num);
+                  ({scomp_arg_tuple, {identifier, _, TupleName}, TupleArgs}) ->
+                       TupleNameAst = erl_syntax:atom(TupleName),
+                       TupleArgsAst = scomp_ast_map_args(TupleArgs, Context),
+                       erl_syntax:tuple([TupleNameAst, TupleArgsAst]);
+                  ({auto_id,{identifier,_,Name}}) ->
+                       {V, _} = auto_id_ast(Name),
+                       V;
+                   (_) ->
+                       erl_syntax:list([])
+                end,
+    PrintAst = erl_syntax:application(
+                erl_syntax:atom(io_lib),
+                erl_syntax:atom(format),
+                [   erl_syntax:string("~p"), 
+                    erl_syntax:list([ValueAst])
+                ]
+            ),
+    FlattenAst = erl_syntax:application(
+                erl_syntax:atom(lists),
+                erl_syntax:atom(flatten),
+                [PrintAst]
+            ),
+    EscapeAst = erl_syntax:application(
+                  erl_syntax:atom(mochiweb_html),
+                  erl_syntax:atom(escape),
+                  [FlattenAst]
+            ),
+    PreAst = erl_syntax:list([
+                erl_syntax:string("<pre>"),
+                EscapeAst,
+                erl_syntax:string("</pre>")
+            ]),
+    {{PreAst, #ast_info{}}, TreeWalker}.  
 
 %% Added by Marc Worrell - handle evaluation of scomps by zp_scomp
 scomp_ast(Scomp, Args, Context, TreeWalker) ->
