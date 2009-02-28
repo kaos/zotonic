@@ -49,6 +49,7 @@
 	 set_metadata/2,
 	 get_metadata/1,
 	 set_path_info/2,
+	 get_path_info/0,
 	 get_path_info/1,
 	 load_path_info/1,
 	 load_dispatch_data/3,
@@ -176,6 +177,11 @@ do_redirect() ->
 
 set_metadata(Key, Value) ->
     call({set_metadata, Key, Value}).
+
+%% @spec get_path_info() -> PropList 
+%% @doc Return all pathinfo args as a property list
+get_path_info() ->
+    call(get_path_info).
 
 get_path_info(Key) ->
     call({get_path_info, Key}).

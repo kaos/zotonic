@@ -169,6 +169,9 @@ handle_call({get_metadata, Key}, _From, State) ->
 handle_call({set_metadata, Key, Value}, _From, State) ->
     NewDict = dict:store(Key, Value, State#state.metadata),
     {reply, ok, State#state{metadata=NewDict}};
+handle_call(get_path_info, _From, State) ->
+    PropList = dict:to_list(State#state.path_info),
+    {reply, PropList, State};
 handle_call({get_path_info, Key}, _From, State) ->
     Reply = case dict:find(Key, State#state.path_info) of
 		{ok, Value} -> Value;

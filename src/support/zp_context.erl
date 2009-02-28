@@ -177,9 +177,10 @@ ensure_qs(Context) ->
         error ->
             ReqProps = Context#context.reqprops,
             Req      = ?REQ(ReqProps),
+            PathArgs = lists:map(fun ({T,V}) -> {atom_to_list(T),V} end, Req:get_path_info()),
             Body     = parse_form_urlencoded(Req),
             Query    = Req:parse_qs(),
-            Combined = Body ++ Query,
+            Combined = PathArgs ++ Body ++ Query,
             Dict2    = dict:store('zophrenic_qs', Combined, Context#context.dict),
             Context#context{dict=Dict2}
     end.
