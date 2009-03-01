@@ -40,6 +40,8 @@
     body=undefined
     }).
 
+-define(MAX_AGE, 315360000).
+
 init(ConfigProps) ->
     UseCache     = proplists:get_value(use_cache, ConfigProps, false),
     {root, Root} = proplists:lookup(root, ConfigProps),
@@ -89,7 +91,9 @@ charsets_provided(_ReqProps, State) ->
         _ -> {no_charset, State}
     end.
     
-last_modified(_ReqProps, State) ->
+last_modified(ReqProps, State) ->
+    Req = ?REQ(ReqProps),
+    Req:add_response_header("Cache-Control", "public, max-age="++integer_to_list(?MAX_AGE)),
     case State#state.last_modified of
         undefined -> 
             LMod = filelib:last_modified(State#state.fullpath),
@@ -98,12 +102,9 @@ last_modified(_ReqProps, State) ->
             {LMod, State}
     end.
 
-expires(ReqProps, State) ->
-    TenYears = 315360000,
-    Req      = ?REQ(ReqProps),
-    NowSecs  = calendar:datetime_to_gregorian_seconds(calendar:universal_time()),
-    Req:add_response_header("Cache-Control", "public, max-age="++integer_to_list(TenYears)),
-    {calendar:gregorian_seconds_to_datetime(NowSecs + TenYears), State}.
+expires(_ReqProps, State) ->
+    NowSecs = calendar:datetime_to_gregorian_seconds(calendar:universal_time()),
+    {calendar:gregorian_seconds_to_datetime(NowSecs + ?MAX_AGE), State}.
 
 provide_content(_ReqProps, State) ->
     case State#state.body of
