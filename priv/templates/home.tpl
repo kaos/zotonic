@@ -8,7 +8,6 @@
 {% block content %}
 	<div id="content-area" class="zp-75">
 		<!-- Area for the main content -->
-		{% print menu_list %}
 		<h2>Shimano XTR Aanbieding <span><a href="#">Lees meer &raquo;</a></span></h2>
 		<div class="home-bargain clearfix">
 			<img src="./lib/images/trapper.jpg" alt="Trapper" />

@@ -5,9 +5,6 @@
 {% block title %} Page Template {% endblock %}
 
 {% block content %}
-	
-	{% print menu_list %}
-	
 	<div id="content-area" class="zp-75">
 		<!-- Area for the main content -->
 		<h2>Dit is een pagina dummy {{ q.id }}</h2>
