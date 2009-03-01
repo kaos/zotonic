@@ -62,11 +62,10 @@
 					</p>
 				</div>
 				
-				<div class="block">
-					<p>
-						{% @wire id="error-trigger" action={slide_toggle speed=200 target="error-explain"} %} 
-						<a href="javascript:void(0);" id="error-trigger">Find out more about the error &raquo;</a>
-					</p>
+				<div class="notification error">
+					<h5>Error</h5>
+					{% @wire id="error-trigger" action={slide_toggle speed=200 target="error-explain"} %} 
+					<a href="javascript:void(0);" id="error-trigger">Click for error information.</a>
 					<pre style="display: none;" id="error-explain">{{ error_dump }}</pre>
 				</div>
 			</div>
