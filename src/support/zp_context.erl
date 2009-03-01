@@ -295,6 +295,8 @@ set_session(Key, Value, Context) ->
 
 %% @spec get_session(Key, Context) -> Value
 %% @doc Fetch the value of the session variable Key
+get_session(_Key, #context{session_pid=undefined}) ->
+    undefined;
 get_session(Key, Context) ->
     zp_session:get(Key, Context#context.session_pid).
 
@@ -313,6 +315,8 @@ set_page(Key, Value, Context) ->
 
 %% @spec get_page(Key, Context) -> Value
 %% @doc Fetch the value of the page variable Key
+get_page(_Key, #context{page_pid=undefined}) ->
+    undefined;
 get_page(Key, Context) ->
     zp_session_page:get(Key, Context#context.page_pid).
 
