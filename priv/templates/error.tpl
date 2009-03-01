@@ -52,7 +52,7 @@
 			<div id="content-area" class="zp-100">
 				<h2>Whoops, {{ error_code }}</h2>
 				<div class="block">
-					<h3>The ambulance now takes you to room 404</h3>
+					<h3>The ambulance now takes you to room {{ error_code }}</h3>
 					<p>
 						Etiam mi orci, ullamcorper in, malesuada nec, tempor in, dui. Class aptent taciti sociosqu ad litora torquent per conubia nostra,
 						per inceptos himenaeos. Ut adipiscing mattis lacus. Nullam tincidunt augue in eros. Donec felis nisi, ultrices vel, mollis in, 
