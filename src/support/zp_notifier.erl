@@ -19,6 +19,7 @@
 %% internal
 -export([notify_observers/2, test/0, test_observer/1]).
 
+-include_lib("zophrenic.hrl").
 
 -record(state, {observers}).
 
@@ -175,11 +176,15 @@ notify_observers(Event, Observers) ->
     lists:foreach(
                 fun
                     (Fun) when is_function(Fun) ->
-                        catch Fun(Event);
+                        Fun(Event);
                     (Pid) when is_pid(Pid) ->
-                        catch Pid ! {Event};
+                        try
+                            Pid ! Event
+                        catch _M:_E ->
+                            ?LOG("Error notifying %p with event %p", [Pid, Event])
+                        end;
                     ({M,F}) ->
-                        catch M:F(Event)
+                        M:F(Event)
                 end,
                 Observers).
 
