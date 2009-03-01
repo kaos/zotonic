@@ -14,7 +14,7 @@
 -author("Marc Worrell <marc@worrell.nl>").
 
 %% API
--export([start_link/0, render/3, tick/0, scomp_ready/4]).
+-export([start_link/0, render/3, scomp_ready/4]).
 
 %% gen_server callbacks
 -export([init/1, handle_call/3, handle_cast/2, handle_info/2,
@@ -27,7 +27,7 @@
 %%      of entries being rendered for the cache.  'Now' is the current time in seconds, updated with 
 %%      a timer to prevent too many time lookups.
 %% @todo do performance checks if we want to use ets for this, nice with dicts is that the content is not copied
--record(state, {now, cache, waiting, scomps}).
+-record(state, {waiting, scomps}).
 
 
 %%====================================================================
@@ -52,12 +52,6 @@ render(ScompName, Args, Context) ->
     end.
 
 
-%% @spec tick() -> none()
-%% @doc Called by a time to update the now counter of the scomp cache.
-tick() ->
-    gen_server:cast(?MODULE, tick).
-
-
 %% @spec scomp_ready(Key, Result, MaxAge, Depends) -> none()
 %% @doc Called when a cacheable scomp has been rendered, places the scomp in the cache and
 %%      posts the result to all waiting processes
@@ -78,12 +72,7 @@ scomp_ready(Key, Result, MaxAge, Depends) ->
 %%--------------------------------------------------------------------
 init([]) ->
     timer:start(),
-    timer:apply_interval(1000, ?MODULE, tick, []),
-    {ok, #state{
-                now=zp_utils:now(),
-                cache=dict:new(),
-                waiting=dict:new(),
-                scomps=dict:new()}}.
+    {ok, #state{waiting=dict:new(), scomps=dict:new()}}.
 
 
 %%--------------------------------------------------------------------
@@ -142,10 +131,6 @@ handle_call({render, ScompName, Args, Context}, From, State) ->
 %%                                      {stop, Reason, State}
 %% Description: Handling cast messages
 %%--------------------------------------------------------------------
-
-%% @desc Update the current time, called once in a second to prevent too many time lookups
-handle_cast(tick, State) ->
-    {noreply, State#state{now=zp_utils:now()}};
 
 %% @desc Store the rendered scomp in the cache, send the result to all waiting processes
 handle_cast({scomp_ready, Key, Result, MaxAge, Depends}, State) ->
