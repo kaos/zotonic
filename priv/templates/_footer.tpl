@@ -1,7 +1,6 @@
 <div id="footer" class="zp-100">
-	{% if show_bike_logos %}
-		{% include "_bikelogos.tpl" %}
-	{% endif %}
+	
+	{% block bike_logos %}{% endblock %}
 	
 	<div class="footer-text">
 		<p><strong>Hans Struijk Fietsen &copy; 2009</strong></p>

@@ -4,7 +4,6 @@
 
 {% block title %} Home page {% endblock %}
 
-
 {% block content %}
 	<div id="content-area" class="zp-75">
 		<!-- Area for the main content -->
@@ -80,4 +79,8 @@
 			</div>
 		</div>	
 	</div>
+{% endblock %}
+
+{% block bike_logos %}
+	{% include "_bikelogos.tpl" %}
 {% endblock %}
