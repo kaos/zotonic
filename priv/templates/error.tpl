@@ -67,7 +67,7 @@
 						{% @wire id="error-trigger" action={slide_toggle speed=200 target="error-explain"} %} 
 						<a href="javascript:void(0);" id="error-trigger">Find out more about the error &raquo;</a>
 					</p>
-					<pre style="display: none;" id="error-explain">lalalalalalalalal</pre>
+					<pre style="display: none;" id="error-explain">{{ error_dump }}</pre>
 				</div>
 			</div>
 		</div>
