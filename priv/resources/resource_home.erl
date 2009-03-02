@@ -10,7 +10,8 @@ html(_ReqProps, Context) ->
 	
 	MenuList = [
 				[{title, "home"}, 		{uri, "/"}], 
-				[{title, "fietsen"}, 	{uri, "/page/fietsen"}]
+				[{title, "fietsen"}, 	{uri, "/page/fietsen"}],
+				[{title, "Trek bikes"}, {uri, "/product/trek/1"}]
 			],
 
 	Context1 = zp_context:set_context(menu_list, MenuList, Context),

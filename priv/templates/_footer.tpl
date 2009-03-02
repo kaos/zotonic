@@ -1,6 +1,8 @@
 <div id="footer" class="zp-100">
 	
-	{% block bike_logos %}{% endblock %}
+	{% block bike_logos %}
+		<hr />
+	{% endblock %}
 	
 	<div class="footer-text">
 		<p><strong>Hans Struijk Fietsen &copy; 2009</strong></p>

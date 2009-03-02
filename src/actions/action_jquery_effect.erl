@@ -27,6 +27,8 @@ render_action(_TriggerId, TargetId, Args, Context) ->
 		'remove_class'  -> io_lib:format("removeClass('~s');", [Class]);
 		'fade_in'       -> io_lib:format("fadeIn(~p);", [Speed]);
 		'fade_out'      -> io_lib:format("fadeOut(~p);", [Speed]);
+		'slide_down'    -> io_lib:format("slideDown(~p);", [Speed]);
+		'slide_up'      -> io_lib:format("slideUp(~p);", [Speed]);
 
         %% @todo check these, i think that with jQuery 1.3 they should be 'animate' with a js_object/2 output
 		'effect'        -> io_lib:format("effect('~s', ~s, ~p);", [Effect, Options, Speed]);

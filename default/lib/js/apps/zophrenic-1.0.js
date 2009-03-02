@@ -82,8 +82,6 @@ function zp_do_postback(triggerID, postback, extraParams)
 	zp_ajax(params);
 }
 
-
-
 function zp_ajax(params) 
 {
 	zp_start_spinner();	
@@ -154,10 +152,8 @@ function zp_comet()
 		    {
 			    setTimeout("zp_comet();", 1000);
 		    }
-	});			
+	});
 }
-
-
 
 /*** Utility functions ***/
 
@@ -165,7 +161,6 @@ function zp_is_enter_key(event)
 {
 	return (event && event.keyCode == 13);
 }
-
 
 /*** Spinner, showed when waiting for a postback ***/
 
@@ -230,7 +225,6 @@ function zp_sorter(sortBlock, sortOptions, sortPostbackInfo)
 	};
 	$(sortBlock).sortable(sortOptions);
 }
-
 
 /*** Form element validations ***/
 

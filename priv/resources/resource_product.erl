@@ -5,7 +5,14 @@
 -module(resource_product).
 -author("Tim Benniks <tim@timbenniks.com>").
 -include_lib("resource_html.hrl").
- 
+
 html(_ReqProps, Context) ->
-    Html = zp_template:render("product.tpl", Context),
-    zp_context:output(Html, Context).
+	MenuList = [
+				[{title, "home"}, {uri, "/"}], 
+				[{title, "fietsen"}, {uri, "/page/fietsen"}],
+				[{title, "Trek bikes"}, {uri, "/product/trek/1"}]
+			],
+	Context1 = zp_context:set_context(menu_list, MenuList, Context),
+
+    Html = zp_template:render("product.tpl", Context1),
+	zp_context:output(Html, Context1).

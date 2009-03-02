@@ -8,7 +8,7 @@
 ---------------------------------------------------------- */
 
 body {
-	font: 12px/18px "Lucida Sans", Helvetica, sans-serif;
+	font: 11px/18px "Lucida Grande", "Lucida Sans", Helvetica, sans-serif;
 	background: url(../images/gridbg.gif);
 	color: #666;
 }
@@ -83,7 +83,7 @@ li img.right {
 a,
 a:focus {
 	color: #444;
-	text-decoration: none;
+	text-decoration: underline;
 }
 
 a:hover {
@@ -161,7 +161,7 @@ button:hover {
 
 .notification {
 	margin: 0 0 17px 0; 
-	padding: 0 4px;
+	padding: 9px;
 	font-size: 11px;
 	line-height: 18px;
 }
