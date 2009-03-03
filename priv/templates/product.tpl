@@ -25,13 +25,34 @@
 				</div>
 			</div>
 			
-			<h3 class="block">Omschrijving van de Shimano 105 ST-5600</h3>
+			<h3 class="block">Product omschrijving</h3>
 			<div class="block">
 				<p>Ergonomic innovation is probably more critical to the higher standard of the new 10-speed S.T.I. levers than the added gearing. The narrower cradle-style perch welcomes the high-on-the-hood riding style and accommodates all sizes of hands. The shift internals borrow the robustness from our MTB technology which results in a smooth and effortless shift.</p>
-				
-				<h3>Beoordeling</h3>
-				<p class="clearfix"><img src="/lib/images/rating.jpg" alt="rating" /></p>
+
+				<h3>Extra gegevens</h3>
+				<p>Ergonomic innovation is probably more critical to the higher standard of the new 10-speed S.T.I. levers than the added gearing.</p>
 			</div>
+			
+			<h3 class="block">Reviews</h3>
+			<ul>
+				<li class="block">
+					<div class="clearfix">
+						<h4 class="left">Marc Worrell <span>5 maart 2009</span></h4>
+						<img src="/lib/images/rating.jpg" alt="rating" class="right" />
+					</div>
+					<p>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Etiam nunc. Aliquam erat volutpat. Fusce tortor ligula, dictum sit amet, aliquam non, luctus quis, justo.</p>
+				</li>
+				<li class="block">
+					<div class="clearfix">
+						<h4 class="left">Tim Benniks <span>3 maart 2009</span></h4>
+						<img src="/lib/images/rating.jpg" alt="rating" class="right" />
+					</div>
+					<p>
+						Lorem ipsum dolor sit amet, consectetur adipiscing elit. Etiam nunc. Aliquam erat volutpat. Fusce tortor ligula, dictum sit amet, aliquam non, luctus quis, justo. 
+						Lorem ipsum dolor sit amet, consectetur adipiscing elit. Etiam nunc. Aliquam erat volutpat. Fusce tortor ligula, dictum sit amet, aliquam non, luctus quis, justo.
+					</p>
+				</li>
+			</ul>
 		</div>
 	</div>
 {% endblock %}
