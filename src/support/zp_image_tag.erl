@@ -36,10 +36,9 @@ url(Filename, Options) ->
 %% @doc Creates an url for the given filename and filters.
 %% Typical urls are like: image/2007/03/31/wedding-300x300-crop-north_east-grey-a3ab6605e5c8ce801ac77eb76289ac12.jpg
 url1(Filename, Options) ->
-    {TagOpts, ImageOpts} = lists:partition(fun is_tagopt/1, Options).
+    {TagOpts, ImageOpts} = lists:partition(fun is_tagopt/1, Options),
     case zp_image_convert:size(Filename, ImageOpts) of
-        {size, Width, Height, Mime} ->
-             
+        {size, Width, Height, Mime} -> {error, not_implemented};
         {error, Reason} -> {error, Reason}
     end.
         
