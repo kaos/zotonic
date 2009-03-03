@@ -57,6 +57,13 @@
 %% Millisecs of no activity before the person process is stopped (if there are no attached sessions).
 -define(PERSON_TIMEOUT, 60 * 1000).
 
+%% Some standard periods in seconds
+-define(MINUTE,     60).
+-define(HOUR,     3600).
+-define(DAY,     86400).
+-define(WEEK,   604800).
+-define(YEAR, 31557600).
+
 
 %% Below is copied from Nitrogen, which is copyright 2008-2009 Rusty Klophaus
 
