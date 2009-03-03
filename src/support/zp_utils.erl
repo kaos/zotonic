@@ -20,6 +20,7 @@
 	pickle/1,
 	depickle/1,
 	url_encode/1,
+	os_escape/1,
 	js_escape/1,
 	js_object/1,
 	js_object/2,
@@ -151,6 +152,35 @@ quote_plus([C | Rest], Acc) ->
     <<Hi:4, Lo:4>> = <<C>>,
     quote_plus(Rest, [hexdigit(Lo), hexdigit(Hi), ?PERCENT | Acc]).
 
+%% @spec os_escape(String) -> String
+%% @doc Simple escape function for command line arguments
+os_escape(A) when is_binary(A) ->
+    os_escape(binary_to_list(A));
+os_escape(A) when is_list(A) -> 
+    os_escape(lists:flatten(A), []).
+
+os_escape([], Acc) ->
+    lists:reverse(Acc);
+os_escape([C|Rest], Acc) when 
+                (C >= $A andalso C =< $Z)
+         orelse (C >= $a andalso C =< $z)
+         orelse (C >= $0 andalso C =< $9)
+         orelse C == $_
+         orelse C == $.
+         orelse C == $-
+         orelse C == $+
+         orelse C == $/
+         orelse C == 32
+    -> 
+    os_escape(Rest, [C|Acc]);
+os_escape([C|Rest], Acc) when 
+                C >= 32
+        orelse  C == $\r
+        orelse  C == $\n
+        orelse  C == $\t
+    ->
+    os_escape(Rest, [C,$\\|Acc]).
+
 
 %%% ESCAPE JAVASCRIPT %%%
 
@@ -234,7 +264,6 @@ only_letters([C|T]) when (C >= $a andalso C =< $z) orelse (C >= $A andalso C =< 
     only_letters(T);
 only_letters(_) ->
     false.
-
 
 combine_defined(Sep, List) ->
     List2 = lists:filter(fun(X) -> X /= undefined end, List),
