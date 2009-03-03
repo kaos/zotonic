@@ -32,7 +32,7 @@ identify_cached(ImageFile) ->
 %% @doc Fetch information about an image, returns width, height, type, etc.
 identify(ImageFile) ->
     CleanedImageFile = zp_utils:os_escape(ImageFile),
-    Result    = os:cmd("identify -quiet \"" ++ CleanedImageFile ++ "\""),
+    Result    = os:cmd("identify -quiet \"" ++ CleanedImageFile ++ "[0]\""),
     [Line1|_] = string:tokens(Result, "\r\n"),
     case string:tokens(Line1, " ") of
         % ["test/a.jpg","JPEG","3440x2285","3440x2285+0+0","8-bit","DirectClass","2.899mb"]
