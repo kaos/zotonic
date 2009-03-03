@@ -397,14 +397,6 @@ ul#navigation li.lang a.english {
 
 /* Pages - Product
 ---------------------------------------------------------- */
-
-.product-image li {
-	width: 352px;
-}
-	
-	.product-image li.last {
-		border-bottom: 1px solid #ddd;
-	}
 	
 	.product-image li img { 
 		margin: 0 0 2px 0;
@@ -420,11 +412,11 @@ ul#navigation li.lang a.english {
 	.product-price {
 		background: #f5f5f5;
 		padding: 9px;
-		border-bottom: 1px solid #ddd;
+		border: 1px solid #ddd;
 	}
 	
 	.product-price h3 {
-		font-size: 18px;
+		font-size: 24px;
 		line-height: 18px;
 		float: left;
 	}
@@ -443,4 +435,36 @@ ul#navigation li.lang a.english {
 	
 	#product-notice {
 		display: none;
+		margin: 0;
 	}
+	
+	/* Pages - product - relates articless
+	--------------------------------------------- */
+	
+	.related-articles {
+		margin: 0 0 12px 0;
+	}
+	
+		.related-articles li.block {
+			margin: 0 0 1px 0;
+		}
+		
+			.related-articles li.block p {
+				margin: 0;
+			}
+			
+			.related-articles li.block a,
+			.related-articles li.block a:focus {
+				text-decoration: none;
+				color: #888;
+			}
+			
+			.related-articles li.block a:hover,
+			.related-articles li.block h4 a:hover {
+				color: #000;
+			}
+			
+			.related-articles li.block h4 a,
+			.related-articles li.block h4 a:focus {
+				color: #666;
+			}

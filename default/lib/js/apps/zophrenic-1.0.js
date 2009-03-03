@@ -18,22 +18,17 @@ var zp_default_form_postback = false;
 
 /*** Growl messages ***/
 
-function zp_growl_add( message, stay ) 
+function zp_growl_add(message, stay, type)
 {
-    if (stay)
-    {
-        jQuery.noticeAdd({
-        	text: message,
-        	stay: true
-        });
-    }
-    else
-    {
-		jQuery.noticeAdd({
-			text: message,
-			stay: false
-		});
-    }
+	stay = stay || false;
+	type = type || 'notice';
+	console.log(type);
+	jQuery.noticeAdd(
+	{
+      	text: message,
+      	stay: stay,
+		type: type
+	});
 }
 
 function zp_growl_close()
