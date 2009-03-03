@@ -21,7 +21,10 @@
 				
 					<h3>Extra gegevens</h3>
 					<p>Ergonomic design: Refined lever hood for improved ergonomics.</p>
-				
+					
+					<h3>Beoordeling</h3>
+					<p class="clearfix"><img src="/lib/images/rating.jpg" alt="rating" /></p>
+					
 					<div class="product-price clearfix">
 						<h3>&euro; 49 <span>incl. btw</span></h3>
 						{% @wire id="product-add-basket" action={fade_in speed=300 target="product-notice"} %} 
@@ -33,6 +36,11 @@
 					<h3>Winkelmand informatie</h3>
 					U heeft de Shimano 105 ST-5600 <strong>2 keer</strong> in uw <a href="#">winkelmand.</a>
 				</div>
+				
+				<h3 class="block">Gerelateerde artikelen</h3>
+				<div class="block">
+					<p>dd</p>
+				</div>	
 			</div>
 		</div>
 	</div>
