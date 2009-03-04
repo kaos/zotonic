@@ -29,6 +29,8 @@ render_action(_TriggerId, TargetId, Args, Context) ->
 		'fade_out'      -> io_lib:format("fadeOut(~p);", [Speed]);
 		'slide_down'    -> io_lib:format("slideDown(~p);", [Speed]);
 		'slide_up'      -> io_lib:format("slideUp(~p);", [Speed]);
+		'slide_fade_out'-> io_lib:format("animate({opacity: 'hide', height: 'hide'}, ~p);", [Speed]);
+		'slide_fade_in' -> io_lib:format("animate({opacity: 'show', height: 'show'}, ~p);", [Speed]);
 
         %% @todo check these, i think that with jQuery 1.3 they should be 'animate' with a js_object/2 output
 		'effect'        -> io_lib:format("effect('~s', ~s, ~p);", [Effect, Options, Speed]);

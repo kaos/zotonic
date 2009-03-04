@@ -19,9 +19,7 @@
 				<div class="product-price clearfix">
 					<h3>&euro;49 <span>incl. btw</span></h3>
 					{# An animate would be nice here #}
-					{# @wire id="product-add-basket" action= #}
-					{#<button id="product-add-basket">+ in winkelmand</button>#}
-					{% @button id="product-add-basket" text="+ in winkelmand" postback="show_basket_notice" action={fade_in speed=300 target="product-notice"} %}
+					{% @button id="product-add-basket" text="+ in winkelmand" postback="show_basket_notice" action={slide_fade_in speed=200 target="product-notice"} %}
 				</div>
 			</div>
 			
@@ -33,8 +31,28 @@
 				<p>Ergonomic innovation is probably more critical to the higher standard of the new 10-speed S.T.I. levers than the added gearing.</p>
 			</div>
 			
-			<h3 class="block">Reviews</h3>
-			<ul>
+			<div class="reviews-title block clearfix">
+				<h3 class="in-block">Reviews</h3>
+				{% @button id="product-add-review-trigger" text="+ schrijf review" action={slide_fade_in speed=200 target="product-add-review-form"} %}
+			</div>
+			<div class="notification notice clearfix" id="product-add-review-form">
+				<form action="postbak" type="post">
+					<fieldset>
+						<legend>Schrijf een review</legend>
+						<div class="form-item">
+							<label for="reviewer-name">Naam:</label>
+							<input type="text" name="reviewer-name" id="reviewer-name" />
+						</div>
+						<div class="form-item">
+							<label for="reviewer-review">Review:</label>
+							<textarea id="reviewer-review" cols="20" rows="20" name="reviewer-message" /></textarea>
+						</div>
+						{% @button id="product-review-form-trigger" text="Voeg toe" action={slide_fade_out speed=200 target="product-add-review-form"} %}
+					</fieldset>
+				</form>
+			</div>
+			
+			<ul class="reviews-list">
 				<li class="block">
 					<div class="clearfix">
 						<h4 class="left">Marc Worrell <span>5 maart 2009</span></h4>

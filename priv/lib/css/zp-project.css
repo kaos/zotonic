@@ -443,6 +443,9 @@ ul#navigation li.lang a.english {
 		margin: 0;
 	}
 	
+
+	
+
 	/* Pages - product - relates articless
 	--------------------------------------------- */
 	
@@ -469,3 +472,19 @@ ul#navigation li.lang a.english {
 		.related-articles li.block h4 a:focus {
 			color: #666;
 		}
+
+
+		/* Pages - product - reviews
+		--------------------------------------------- */
+		.reviews-title {
+			margin: 0 0 1px 0;
+		}
+		
+			#product-add-review-form { 
+				display: none;
+			}
+		
+		#product-add-review-trigger {
+			float: right;
+			margin: 0;
+		} 

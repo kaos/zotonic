@@ -35,6 +35,14 @@ h3.block {
 	border: none;
 }
 
+h3.in-block { 
+	font-size: 18px;   	
+	line-height: 18px; 
+	color: #eeb714; 
+	font-weight: normal;
+	float: left;
+}
+
 h3 { 
 	font-size: 12px; 
 	line-height: 18px; 
@@ -161,6 +169,10 @@ button:hover {
 	text-decoration: none;
 }
 
+.notification button,
+.notificatio a.button {
+	margin: 0;
+}
 
 /* notices
 -------------------------------------------------------------- */
