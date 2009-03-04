@@ -2,14 +2,13 @@
 %% @copyright 2009 Marc Worrell
 %% @date 2009-03-02
 %%
-%% @doc Image manipulation functions.  Resize, crop, gray, etc.
+%% @doc Make still previews of media, using image manipulation functions.  Resize, crop, gray, etc.
 %% This uses the command line imagemagick tools for all image manipulation.
 %% This code is adapted from PHP GD2 code, so the resize/crop could've been done more efficiently, but it works :-)
 %%
 %% @todo Select PNG for small resulting images with lossless source image
 
-
--module(zp_image_convert).
+-module(zp_media_preview).
 -author("Marc Worrell <marc@worrell.nl").
 
 %% interface functions
@@ -24,9 +23,9 @@
 
 
 %% @spec convert(InFile, OutFile, Filters) -> ok | {error, Reason}
-%% @doc Render the outfile from the image in infile using the filters.
+%% @doc Convert the Infile to an outfile with a still image using the filters.
 convert(InFile, OutFile, Filters) ->
-    case zp_file_identify:identify_cached(InFile) of
+    case zp_media_identify:identify_cached(InFile) of
         {ok, FileProps} ->
             {_EndWidth, _EndHeight, CmdArgs} = cmd_args(FileProps, Filters),
             Args1   = lists:flatten(zp_utils:combine(32, CmdArgs)),
@@ -40,7 +39,7 @@ convert(InFile, OutFile, Filters) ->
 %% @spec size(InFile, Filters) -> {size, Width, Height, ResizedMime} | {error, Reason}
 %% @doc Calculate the size of the resulting image.
 size(InFile, Filters) ->
-    case zp_file_identify:identify_cached(InFile) of
+    case zp_media_identify:identify_cached(InFile) of
         {ok, FileProps} ->
             {width, ImageWidth}   = proplists:lookup(width, FileProps),
             {height, ImageHeight} = proplists:lookup(height, FileProps),

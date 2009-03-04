@@ -5,7 +5,7 @@
 %% @doc Identify files, fetch metadata about an image
 %% @todo Recognize more files based on magic number, think of office files etc.
 
--module(zp_file_identify).
+-module(zp_media_identify).
 -author("Marc Worrell <marc@worrell.nl").
 
 %% interface functions

@@ -2,12 +2,10 @@
 %% @copyright 2009 Marc Worrell
 %% @date 2009-03-03
 %%
-%% @doc Generate image urls and tags, based on the filename, size and optional filters.
-%% Does not generate the image itself, this is done when fetching the image.
+%% @doc Generate media urls and tags, based on the filename, size and optional filters.
+%% Does not generate media previews itself, this is done when fetching the image.
 
-%% @todo RENAME ALL IMAGE/FILE MODULES TO MEDIA MODULES.  They will also handle audio/video/icons.
-
--module(zp_image_tag).
+-module(zp_media_tag).
 -author("Marc Worrell <marc@worrell.nl").
 
 %% interface functions
@@ -39,7 +37,7 @@ url(Filename, Options) ->
 %% Typical urls are like: media/img/2007/03/31/wedding.jpg.300x300.crop-north_east.grey.a3ab6605e5c8ce801ac77eb76289ac12.jpg
 url1(Filename, Options) ->
     {TagOpts, ImageOpts} = lists:partition(fun is_tagopt/1, Options),
-    case zp_file_identify:identify_cached(Filename) of
+    case zp_media_identify:identify_cached(Filename) of
         {ok, Props} ->
             {mime, Mime} = proplists:lookup(mime, Props),
             case zp_image_convert:is_convertable(Mime) of
