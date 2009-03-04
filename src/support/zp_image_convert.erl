@@ -16,6 +16,7 @@
 -export([
     convert/3,
     size/2,
+    can_generate_preview/1,
     test/0
 ]).
 
@@ -25,7 +26,7 @@
 %% @spec convert(InFile, OutFile, Filters) -> ok | {error, Reason}
 %% @doc Render the outfile from the image in infile using the filters.
 convert(InFile, OutFile, Filters) ->
-    case zp_image_identify:identify_cached(InFile) of
+    case zp_file_identify:identify_cached(InFile) of
         {ok, FileProps} ->
             {_EndWidth, _EndHeight, CmdArgs} = cmd_args(FileProps, Filters),
             Args1   = lists:flatten(zp_utils:combine(32, CmdArgs)),
@@ -39,7 +40,7 @@ convert(InFile, OutFile, Filters) ->
 %% @spec size(InFile, Filters) -> {size, Width, Height, ResizedMime} | {error, Reason}
 %% @doc Calculate the size of the resulting image.
 size(InFile, Filters) ->
-    case zp_image_identify:identify_cached(InFile) of
+    case zp_file_identify:identify_cached(InFile) of
         {ok, FileProps} ->
             {width, ImageWidth}   = proplists:lookup(width, FileProps),
             {height, ImageHeight} = proplists:lookup(height, FileProps),
@@ -57,6 +58,13 @@ size(InFile, Filters) ->
             {error, Reason}
     end.
 
+
+%% @spec can_generate_preview(Mime) -> true | false
+%% @doc Check if we can generate a preview image of the given mime type
+can_generate_preview("image/" ++ _) -> true;
+can_generate_preview("application/pdf") -> true;
+can_generate_preview("application/postscript") -> true;
+can_generate_preview(_Mime) -> false.
 
 
 %% @doc Map filters to commandline options
