@@ -50,23 +50,26 @@
 		</div>
 		<div id="content" class="zp-100 clearfix">
 			<div id="content-area" class="zp-100">
-				<h2>Whoops, {{ error_code }}</h2>
+				<h2>{{ error_code }} error</h2>
 				<div class="block">
-					<h3>The ambulance now takes you to room {{ error_code }}</h3>
+					<h3>Dear website visitor. You stumbled upon one of our error pages</h3>
 					<p>
-						Etiam mi orci, ullamcorper in, malesuada nec, tempor in, dui. Class aptent taciti sociosqu ad litora torquent per conubia nostra,
-						per inceptos himenaeos. Ut adipiscing mattis lacus. Nullam tincidunt augue in eros. Donec felis nisi, ultrices vel, mollis in, 
-						scelerisque a, leo. Morbi ut ipsum ut pede dapibus scelerisque. Nullam a ipsum id magna laoreet placerat. Ut a magna. Nulla facilisi. 
-						Cum sociis natoque penatibus et magnis dis parturient montes, nascetur ridiculus mus. Mauris odio ipsum, iaculis ut, vestibulum a, 
-						convallis id, nulla.
+						At first we would like to apologize
+						for the fact that you got here. If the title of this page is 404 then you where looking for a page that does not exist
+						in this system. It could have been moved or deleted. Please use our search for to search for anything you like or go the the <a href="/" title="home">homepage</a>.
 					</p>
-				</div>
-				
-				<div class="notification error">
-					<h5>Error</h5>
-					{% @wire id="error-trigger" action={slide_toggle speed=200 target="error-explain"} %} 
-					<a href="javascript:void(0);" id="error-trigger">Click for error information.</a>
-					<pre style="display: none;" id="error-explain">{{ error_dump }}</pre>
+					<p>
+						If the title of this page says 500, then the system had to handle 
+						something it couldn't handle. A mail is now send to the system administrator.
+					</p>
+					
+					<div class="notification error">
+						<h5>{{ error_code }} error</h5>
+						{% @wire id="error-trigger" action={slide_toggle speed=350 target="error-explain"} %} 
+						<a href="javascript:void(0);" id="error-trigger">Click for error information.</a>
+						<pre style="display: none;" id="error-explain">{{ error_dump }}</pre>
+					</div>
+					
 				</div>
 			</div>
 		</div>

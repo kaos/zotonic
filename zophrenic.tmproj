@@ -3,7 +3,7 @@
 <plist version="1.0">
 <dict>
 	<key>currentDocument</key>
-	<string>priv/templates/product.tpl</string>
+	<string>priv/resources/resource_product.erl</string>
 	<key>documents</key>
 	<array>
 		<dict>
@@ -330,9 +330,9 @@
 			<key>caret</key>
 			<dict>
 				<key>column</key>
-				<integer>0</integer>
+				<integer>63</integer>
 				<key>line</key>
-				<integer>22</integer>
+				<integer>15</integer>
 			</dict>
 			<key>firstVisibleColumn</key>
 			<integer>0</integer>
@@ -353,19 +353,49 @@
 			<key>firstVisibleLine</key>
 			<integer>0</integer>
 		</dict>
+		<key>priv/templates/base.tpl</key>
+		<dict>
+			<key>caret</key>
+			<dict>
+				<key>column</key>
+				<integer>65</integer>
+				<key>line</key>
+				<integer>3</integer>
+			</dict>
+			<key>firstVisibleColumn</key>
+			<integer>0</integer>
+			<key>firstVisibleLine</key>
+			<integer>0</integer>
+		</dict>
 		<key>priv/templates/product.tpl</key>
 		<dict>
 			<key>caret</key>
 			<dict>
 				<key>column</key>
-				<integer>96</integer>
+				<integer>78</integer>
 				<key>line</key>
-				<integer>49</integer>
+				<integer>21</integer>
 			</dict>
+			<key>columnSelection</key>
+			<false/>
 			<key>firstVisibleColumn</key>
 			<integer>0</integer>
 			<key>firstVisibleLine</key>
-			<integer>18</integer>
+			<integer>8</integer>
+			<key>selectFrom</key>
+			<dict>
+				<key>column</key>
+				<integer>73</integer>
+				<key>line</key>
+				<integer>21</integer>
+			</dict>
+			<key>selectTo</key>
+			<dict>
+				<key>column</key>
+				<integer>91</integer>
+				<key>line</key>
+				<integer>21</integer>
+			</dict>
 		</dict>
 		<key>src/actions/action_fade_in.erl</key>
 		<dict>
@@ -529,6 +559,7 @@
 	<key>openDocuments</key>
 	<array>
 		<string>priv/templates/product.tpl</string>
+		<string>priv/templates/base.tpl</string>
 		<string>src/actions/action_jquery_effect.erl</string>
 		<string>src/actions/action_slide_fade_in.erl</string>
 		<string>src/actions/action_slide_fade_out.erl</string>

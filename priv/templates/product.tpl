@@ -19,7 +19,7 @@
 				<div class="product-price clearfix">
 					<h3>&euro;49 <span>incl. btw</span></h3>
 					{# An animate would be nice here #}
-					{% @button id="product-add-basket" text="+ in winkelmand" postback="show_basket_notice" action={slide_fade_in speed=200 target="product-notice"} %}
+					{% @button id="product-add-basket" text="+ in winkelmand" postback="show_basket_notice" action={fade_in speed=350 target="product-notice"} %}
 				</div>
 			</div>
 			
@@ -33,7 +33,7 @@
 			
 			<div class="reviews-title block clearfix">
 				<h3 class="in-block">Reviews</h3>
-				{% @button id="product-add-review-trigger" text="+ schrijf review" action={slide_fade_in speed=200 target="product-add-review-form"} %}
+				{% @button id="product-add-review-trigger" text="+ schrijf review" action={slide_fade_in speed=350 target="product-add-review-form"} %}
 			</div>
 			<div class="notification notice clearfix" id="product-add-review-form">
 				<form action="postbak" type="post">
@@ -47,7 +47,7 @@
 							<label for="reviewer-review">Review:</label>
 							<textarea id="reviewer-review" cols="20" rows="20" name="reviewer-message" /></textarea>
 						</div>
-						{% @button id="product-review-form-trigger" text="Voeg toe" action={slide_fade_out speed=200 target="product-add-review-form"} %}
+						{% @button id="product-review-form-trigger" text="Voeg toe" action={slide_fade_out speed=350 target="product-add-review-form"} %}
 					</fieldset>
 				</form>
 			</div>
