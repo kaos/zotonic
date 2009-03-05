@@ -2,7 +2,16 @@
 %% @copyright 2009 Marc Worrell
 %%
 %% @doc Serve static files from a configured list of directories.  Caches files in the local depcache.
+%% Is also able to generate previews (if configured to do so).
 %% @todo gzip files before caching them in the depcache, serve gzip'ed file when requested
+%%
+%% Serves files like:
+%% 
+%% /lib/<filepath>
+%% /image/2007/03/31/wedding.jpg(300x300)(crop-center)(709a-a3ab6605e5c8ce801ac77eb76289ac12).jpg
+%% /media/inline/<filepath>
+%% /media/attachment/<filepath>
+
 
 -module(resource_file_readonly).
 -export([init/1]).
@@ -23,6 +32,9 @@
 %% These are used for file serving (move to metadata)
 -record(state, {
         root=undefined,
+        media_path=undefined,
+        is_media_preview=false,
+        content_disposition=undefined,
         use_cache=false,
         fullpath=undefined,
         is_cached=false,
@@ -41,11 +53,16 @@
     }).
 
 -define(MAX_AGE, 315360000).
+-define(MEDIA_PATH,   "priv/files/archive/").
+
 
 init(ConfigProps) ->
-    UseCache     = proplists:get_value(use_cache, ConfigProps, false),
-    {root, Root} = proplists:lookup(root, ConfigProps),
-    {ok, #state{root=Root, use_cache=UseCache}}.
+    UseCache       = proplists:get_value(use_cache, ConfigProps, false),
+    {root, Root}   = proplists:lookup(root, ConfigProps),
+    IsMediaPreview = proplists:get_value(is_media_preview, ConfigProps, false),
+    MediaPath      = proplists:get_value(media_path, ConfigProps, ?MEDIA_PATH),
+    ContentDisposition = proplists:get_value(content_disposition, ConfigProps),
+    {ok, #state{root=Root, use_cache=UseCache, is_media_preview=IsMediaPreview, media_path=MediaPath, content_disposition=ContentDisposition}}.
     
 allowed_methods(_ReqProps, State) ->
     {['HEAD', 'GET'], State}.
@@ -72,7 +89,14 @@ resource_exists(ReqProps, State) ->
             	{true, FullPath} -> 
             	    {true, State#state{path=Path, fullpath=FullPath}};
             	_ -> 
-            	    {false, State}
+            	    %% We might be able to generate a new preview
+            	    case State#state.is_media_preview of
+            	        true ->
+            	            % Generate a preview, recurse on success
+            	            ensure_preview(ReqProps, Path, State);
+            	        false ->
+                    	    {false, State}
+            	    end
             end;
         {ok, Cache} ->
             {true, State#state{
@@ -106,7 +130,13 @@ expires(_ReqProps, State) ->
     NowSecs = calendar:datetime_to_gregorian_seconds(calendar:universal_time()),
     {calendar:gregorian_seconds_to_datetime(NowSecs + ?MAX_AGE), State}.
 
-provide_content(_ReqProps, State) ->
+provide_content(ReqProps, State) ->
+    Req = ?REQ(ReqProps),
+    case State#state.content_disposition of
+        inline ->     Req:add_response_header("Content-Disposition", "inline");
+        attachment -> Req:add_response_header("Content-Disposition", "attachment");
+        undefined ->  ok
+    end,
     case State#state.body of
         undefined ->
             {ok, Body} = file:read_file(State#state.fullpath),
@@ -182,5 +212,33 @@ is_text("application/x-javascript") -> true;
 is_text("application/xhtml+xml") -> true;
 is_text("application/xml") -> true;
 is_text(_Mime) -> false.
+
+
+%% @spec ensure_preview(ReqProps, Path, State) -> {Boolean, State}
+%% @doc Generate the file on the path from an archived media file.
+%% The path is like: 2007/03/31/wedding.jpg(300x300)(crop-center)(709a-a3ab6605e5c8ce801ac77eb76289ac12).jpg
+%% The original media should be in State#media_path
+%% The generated image should be created in State#root
+ensure_preview(ReqProps, Path, State) ->
+    {Filepath, PreviewPropList, _Checksum, _ChecksumBaseString} = zp_media_tag:url2props(Path),
+    case mochiweb_util:safe_relative_path(Filepath) of
+        undefined ->
+            {false, State};
+        Safepath  ->
+            MediaFile = filename:join(State#state.media_path, Safepath),
+            case filelib:is_regular(MediaFile) of
+                true ->
+                    % Media file exists, perform the resize
+                    % @todo make use of a resize server, so that we do not resize too many files at the same time.
+                    [Root|_] = State#state.root,
+                    PreviewFile = filename:join(Root,Path),
+                    case zp_media_preview:convert(MediaFile, PreviewFile, PreviewPropList) of
+                        ok -> resource_exists(ReqProps,State);
+                        {error, Reason} -> throw(Reason)
+                    end;
+                false ->
+                    {false, State}
+            end
+    end.
 
 

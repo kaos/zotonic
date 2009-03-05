@@ -16,6 +16,7 @@
     convert/3,
     size/2,
     can_generate_preview/1,
+    string2filter/2,
     test/0
 ]).
 
@@ -24,13 +25,26 @@
 
 %% @spec convert(InFile, OutFile, Filters) -> ok | {error, Reason}
 %% @doc Convert the Infile to an outfile with a still image using the filters.
+%% @todo Check if the conversion has been done
+%% @todo Check if the target /= source
 convert(InFile, OutFile, Filters) ->
     case zp_media_identify:identify_cached(InFile) of
         {ok, FileProps} ->
-            {_EndWidth, _EndHeight, CmdArgs} = cmd_args(FileProps, Filters),
-            Args1   = lists:flatten(zp_utils:combine(32, CmdArgs)),
-            Cmd     = ["convert \"", zp_utils:os_escape(InFile), "[0]\" ", Args1, " \"", zp_utils:os_escape(OutFile), "\""],
-            os:cmd(lists:flatten(Cmd));
+            {mime, Mime} = proplists:lookup(mime, FileProps),
+            case can_generate_preview(Mime) of
+                true ->
+                    {_EndWidth, _EndHeight, CmdArgs} = cmd_args(FileProps, Filters),
+                    Args1   = lists:flatten(zp_utils:combine(32, CmdArgs)),
+                    Cmd     = ["convert \"", zp_utils:os_escape(InFile), "[0]\" ", Args1, " \"", zp_utils:os_escape(OutFile), "\""],
+                    file:delete(OutFile),
+                    os:cmd(lists:flatten(Cmd)),
+                    case filelib:is_regular(OutFile) of
+                        true -> ok;
+                        false -> {error, "Error during convert."}
+                    end;
+                false ->
+                    {error, "Can not convert "++Mime}
+            end;
         {error, Reason} ->
             {error, Reason}
     end.
@@ -41,17 +55,23 @@ convert(InFile, OutFile, Filters) ->
 size(InFile, Filters) ->
     case zp_media_identify:identify_cached(InFile) of
         {ok, FileProps} ->
-            {width, ImageWidth}   = proplists:lookup(width, FileProps),
-            {height, ImageHeight} = proplists:lookup(height, FileProps),
-            %{mime, Mime}          = proplists:lookup(mime, FileProps),
-            {orientation, Orientation} = proplists:lookup(orientation, FileProps),
-            ReqWidth   = proplists:get_value(width, Filters),
-            ReqHeight  = proplists:get_value(height, Filters),
-            {CropPar,_Filters1} = fetch_crop(Filters),
-            {ResizeWidth,ResizeHeight,CropArgs} = calc_size(ReqWidth, ReqHeight, ImageWidth, ImageHeight, CropPar, Orientation),
-            case CropArgs of
-                none -> {size, ResizeWidth, ResizeHeight, "image/jpeg"};
-                {_CropL, _CropT, CropWidth, CropHeight} -> {size, CropWidth, CropHeight, "image/jpeg"}
+            {mime, Mime} = proplists:lookup(mime, FileProps),
+            case can_generate_preview(Mime) of
+                true ->
+                    {width, ImageWidth}   = proplists:lookup(width, FileProps),
+                    {height, ImageHeight} = proplists:lookup(height, FileProps),
+                    {orientation, Orientation} = proplists:lookup(orientation, FileProps),
+                    
+                    ReqWidth   = proplists:get_value(width, Filters),
+                    ReqHeight  = proplists:get_value(height, Filters),
+                    {CropPar,_Filters1} = fetch_crop(Filters),
+                    {ResizeWidth,ResizeHeight,CropArgs} = calc_size(ReqWidth, ReqHeight, ImageWidth, ImageHeight, CropPar, Orientation),
+                    case CropArgs of
+                        none -> {size, ResizeWidth, ResizeHeight, "image/jpeg"};
+                        {_CropL, _CropT, CropWidth, CropHeight} -> {size, CropWidth, CropHeight, "image/jpeg"}
+                    end;
+                false ->
+                    {error, "Can not convert "++Mime}
             end;
         {error, Reason} ->
             {error, Reason}
@@ -156,9 +176,9 @@ filter2arg({crop, {CropL, CropT, CropWidth, CropHeight}}, _Width, _Height) ->
     RArg = "+repage",
     {CropWidth, CropHeight, [GArg,32,CArg,32,RArg]};
 filter2arg({grey}, Width, Height) ->
-    filter2arg({gray}, Width, Height);
-filter2arg({gray}, Width, Height) ->
-    {Width, Height, "-colorspace grayscale"};
+    {Width, Height, "-colorspace Gray"};
+filter2arg({mono}, Width, Height) ->
+    {Width, Height, "-monochrome"};
 filter2arg({flip}, Width, Height) ->
     {Width, Height, "-flip"};
 filter2arg({flop}, Width, Height) ->
@@ -248,6 +268,42 @@ calc_size(Width, Height, ImageWidth, ImageHeight, CropPar, _Orientation) ->
 	        % The crop is relative to the original image
 	        {ceil(W), ceil(H), {CropL, CropT, Width, Height}}
     end.
+
+
+%% @spec string2filter(Filter, Arg) -> FilterTuple
+%% @doc Map the list of known filters and known args to atoms.  Used when mapping preview urls back to filter args.
+string2filter("crop", []) ->
+    {crop,center};
+string2filter("crop", Where) -> 
+    Dir = case Where of
+            "north"      -> north;
+            "north_east" -> north_east;
+            "east"       -> east;
+            "south_east" -> south_east;
+            "south"      -> south;
+            "south_west" -> south_west;
+            "west"       -> west;
+            "north_west" -> north_west;
+            "center"     -> center
+          end,
+    {crop,Dir};
+string2filter("grey",[]) ->
+    {grey};
+string2filter("mono",[]) ->
+    {monochrome};
+string2filter("flip",[]) ->
+    {flip};
+string2filter("flop",[]) ->
+    {flop};
+string2filter("blur",[]) ->
+    {blur};
+string2filter("blur",Arg) ->
+    {blur,Arg};
+string2filter("quality", Arg) ->
+    {quality,list_to_integer(Arg)};
+string2filter("background", Arg) ->
+    {background,Arg}.
+
 
 
 % simple ceil for positive numbers

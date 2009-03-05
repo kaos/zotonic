@@ -170,6 +170,8 @@ os_escape([C|Rest], Acc) when
          orelse C == $-
          orelse C == $+
          orelse C == $/
+         orelse C == $(
+         orelse C == $)
          orelse C == 32
     -> 
     os_escape(Rest, [C|Acc]);

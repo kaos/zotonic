@@ -1,7 +1,26 @@
 %% Default dispatch rules for zophrenic
 [
+	{home,     [],            resource_home, []},
 	{comet,    ["comet"],     resource_comet, []},
 	{postback, ["postback"],  resource_postback, []},
-	{lib,      ["lib",'*'],   resource_file_readonly, [ {root,["priv/lib", "default/lib"]} , {use_cache, false}]},
-	{home,     [],            resource_home,        []}
+	{lib,      ["lib",'*'],   resource_file_readonly, [ 
+											{root,["priv/lib", "default/lib"]}, 
+											{use_cache, false}
+										]},
+	{image,    ["image",'*'], resource_file_readonly, [ 
+											{root,["priv/files/preview"]}, 
+											{use_cache, false},
+											{is_media_preview, true},
+											{media_path, "priv/files/archive"}
+										]},
+	{media_inline, ["media","inline",'*'], resource_file_readonly, [ 
+											{root,["priv/files/archive"]}, 
+											{use_cache, false},
+											{content_disposition, inline}
+										]},
+	{media_attachment, ["media","attachment",'*'], resource_file_readonly, [ 
+											{root,["priv/files/archive"]}, 
+											{use_cache, false},
+											{content_disposition, attachment}
+										]}
 ].
