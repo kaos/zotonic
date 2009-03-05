@@ -37,10 +37,12 @@ convert(InFile, OutFile, Filters) ->
                     Args1   = lists:flatten(zp_utils:combine(32, CmdArgs)),
                     Cmd     = ["convert \"", zp_utils:os_escape(InFile), "[0]\" ", Args1, " \"", zp_utils:os_escape(OutFile), "\""],
                     file:delete(OutFile),
-                    os:cmd(lists:flatten(Cmd)),
+                    Result  = os:cmd(lists:flatten(Cmd)),
                     case filelib:is_regular(OutFile) of
                         true -> ok;
-                        false -> {error, "Error during convert."}
+                        false -> 
+                            ?LOG("convert cmd ~p failed, result ~p", [Cmd, Result]),
+                            {error, "Error during convert."}
                     end;
                 false ->
                     {error, "Can not convert "++Mime}

@@ -46,6 +46,7 @@ identify(ImageFile) ->
                 {orientation, 1}
             ]};
         _ ->
+            ?LOG("identify of ~p failed - ~p", [CleanedImageFile, Line1]),
             {error, "unknown result from 'identify': '"++Line1++"'"}
     end.
 
