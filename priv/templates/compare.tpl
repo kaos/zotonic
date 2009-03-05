@@ -10,26 +10,54 @@
 		<ul class="compare-list clearfix">
 			<li class="zp-25 first">
 				<div class="block">
-					<h3>lalallalala</h3>
-					<p>lal</p>			
+					<h3>Tren Urban Vallentia</h3>
+					<p>Plaatje</p>
+					<p>mooie fiets, klein verhaal</p>
+
+					<div class="product-price clearfix">
+						<h3>&euro;1950 <span>incl. btw</span></h3>
+						<button>Bekijk fiets</button>
+						<button>Vraag proefrit aan</button>
+					</div>
 				</div>
 			</li>
 			<li class="zp-25">
 				<div class="block">
-					<h3>lalallalala</h3>
-					<p>lal</p>
+					<h3>Gazelle Champion Mondial</h3>
+					<p>plaatje</p>
+					<p>verhaaltje</p>
+					
+					<div class="product-price clearfix">
+						<h3>&euro;899 <span>incl. btw</span></h3>
+						<button>Bekijk fiets</button>
+						<button>Vraag proefrit aan</button>
+					</div>
 				</div>
 			</li>
 			<li class="zp-25">
 				<div class="block">
-					<h3>lalallalala</h3>
-					<p>lal</p>
+					<h3>HEMA tank fiets</h3>
+					<p>plaatje</p>
+					<p>verhaaltje</p>
+					
+					<div class="product-price clearfix">
+						<h3>&euro;350 <span>incl. btw</span></h3>
+						<button>Bekijk fiets</button>
+						<button>Vraag proefrit aan</button>
+					</div>
 				</div>
 			</li>
 			<li class="zp-25">
 				<div class="block">
-					<h3>lalallalala</h3>
-					<p>lal</p>
+					<h3>Bianchi road</h3>
+					<p>plaatje</p>
+					<p>verhaaltje</p>
+					
+					<div class="product-price clearfix">
+						<h3>&euro;2230 <span>incl. btw</span></h3>
+						<button>Bekijk fiets</button>
+						<button>Vraag proefrit aan</button>
+					</div>
 				</div>
 			</li>
 		</ul>	

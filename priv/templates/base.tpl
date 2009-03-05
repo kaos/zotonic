@@ -30,7 +30,7 @@
 							</a>
 						</h1>
 					</li>
-					<li class="first"><a href="/compare-bikes" title="compare-bikes">Vergelijk fietsen</a></li>
+					<li class="first"><a href="/compare" title="compare-bikes">Vergelijk fietsen</a></li>
 					<li><a href="#" title="#">Accessoires</a></li>
 					<li><a href="#" title="#">Service</a></li>
 					<li class="lang" title="Nederlands"><a href="#" title="Nederlands" class="dutch"><span>Nederlands</span></a></li>

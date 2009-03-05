@@ -256,14 +256,14 @@
 			<key>caret</key>
 			<dict>
 				<key>column</key>
-				<integer>17</integer>
+				<integer>19</integer>
 				<key>line</key>
-				<integer>506</integer>
+				<integer>516</integer>
 			</dict>
 			<key>firstVisibleColumn</key>
 			<integer>0</integer>
 			<key>firstVisibleLine</key>
-			<integer>468</integer>
+			<integer>477</integer>
 		</dict>
 		<key>priv/resources/resource_brand.erl</key>
 		<dict>
@@ -298,9 +298,9 @@
 			<key>caret</key>
 			<dict>
 				<key>column</key>
-				<integer>26</integer>
+				<integer>40</integer>
 				<key>line</key>
-				<integer>6</integer>
+				<integer>32</integer>
 			</dict>
 			<key>firstVisibleColumn</key>
 			<integer>0</integer>
@@ -312,29 +312,29 @@
 			<key>caret</key>
 			<dict>
 				<key>column</key>
-				<integer>21</integer>
+				<integer>10</integer>
 				<key>line</key>
-				<integer>33</integer>
+				<integer>26</integer>
 			</dict>
 			<key>columnSelection</key>
 			<false/>
 			<key>firstVisibleColumn</key>
 			<integer>0</integer>
 			<key>firstVisibleLine</key>
-			<integer>13</integer>
+			<integer>17</integer>
 			<key>selectFrom</key>
 			<dict>
 				<key>column</key>
-				<integer>0</integer>
+				<integer>4</integer>
 				<key>line</key>
-				<integer>0</integer>
+				<integer>23</integer>
 			</dict>
 			<key>selectTo</key>
 			<dict>
 				<key>column</key>
-				<integer>14</integer>
+				<integer>10</integer>
 				<key>line</key>
-				<integer>55</integer>
+				<integer>26</integer>
 			</dict>
 		</dict>
 		<key>priv/templates/compare.tpl</key>
@@ -342,14 +342,14 @@
 			<key>caret</key>
 			<dict>
 				<key>column</key>
-				<integer>36</integer>
+				<integer>18</integer>
 				<key>line</key>
-				<integer>9</integer>
+				<integer>53</integer>
 			</dict>
 			<key>firstVisibleColumn</key>
 			<integer>0</integer>
 			<key>firstVisibleLine</key>
-			<integer>0</integer>
+			<integer>22</integer>
 		</dict>
 		<key>src/erlydtl/erlydtl_parser.yrl</key>
 		<dict>

@@ -506,3 +506,13 @@ ul#navigation li.lang a.english {
 	.compare-list li .block {
 		margin: 0 0 0 2px;
 	}
+	
+	.compare-list li .block .product-price h3 {
+		float: none;
+		margin: 0 0 9px 0;
+	}
+	
+	.compare-list li .block .product-price button {
+		float: left;
+		margin: 0 3px 0 0;
+	}
