@@ -292,7 +292,7 @@ string2filter("crop", Where) ->
 string2filter("grey",[]) ->
     {grey};
 string2filter("mono",[]) ->
-    {monochrome};
+    {mono};
 string2filter("flip",[]) ->
     {flip};
 string2filter("flop",[]) ->
