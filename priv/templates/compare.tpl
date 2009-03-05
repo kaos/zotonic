@@ -11,7 +11,7 @@
 			<li class="zp-25 first">
 				<div class="block">
 					<h3>Tren Urban Vallentia</h3>
-					<p>Plaatje</p>
+					<img src="/lib/images/trek_urban_small.jpg" alt="Vallentia" />
 					<p>mooie fiets, klein verhaal</p>
 
 					<div class="product-price clearfix">
@@ -24,7 +24,7 @@
 			<li class="zp-25">
 				<div class="block">
 					<h3>Gazelle Champion Mondial</h3>
-					<p>plaatje</p>
+					<img src="/lib/images/trek_urban_small.jpg" alt="Vallentia" />
 					<p>verhaaltje</p>
 					
 					<div class="product-price clearfix">
@@ -37,7 +37,7 @@
 			<li class="zp-25">
 				<div class="block">
 					<h3>HEMA tank fiets</h3>
-					<p>plaatje</p>
+					<img src="/lib/images/trek_urban_small.jpg" alt="Vallentia" />
 					<p>verhaaltje</p>
 					
 					<div class="product-price clearfix">
@@ -50,7 +50,7 @@
 			<li class="zp-25">
 				<div class="block">
 					<h3>Bianchi road</h3>
-					<p>plaatje</p>
+					<img src="/lib/images/trek_urban_small.jpg" alt="Vallentia" />
 					<p>verhaaltje</p>
 					
 					<div class="product-price clearfix">
