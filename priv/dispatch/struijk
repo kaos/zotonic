@@ -11,18 +11,20 @@
 %% faq
 
 [
-	{home,     [],                               resource_home,     []},
-	{category, ["overview", cat],                resource_category, []}, 
-	{category, ["overview", cat, subcat],        resource_category, []}, 
-	{category, ["overview", cat, subcat, brand], resource_category, []}, 
-    {product,  ["product", brand, id],            resource_product, []}, 
-    {product,  ["product", cat, brand, id],       resource_product, []}, 
-    {product,  ["product", cat, subcat, brand, id], resource_product, []}, 
-    {brand,    ["brand", brand],                 resource_brand,    []},
-    {page,     ["page", id],                     resource_page,     []},
-    {page,     ["page", id, slug],               resource_page,     []},
-    {news,     ["news"],                         resource_news,     []},
-    {agenda,   ["agenda"],                       resource_agenda,   []},
-    {about,    ["about"],                        resource_template, [{template,"page.tpl"}]},
-    {error,    ["error"],                        resource_error,    []}
+	{home,			[],									resource_home,			[]},
+	{category,		["overview", cat],					resource_category,		[]},
+	{category,		["overview", cat, subcat],			resource_category,		[]},
+	{category,		["overview", cat, subcat, brand],	resource_category,		[]},
+	{product,		["product", brand, id],				resource_product,		[]},
+	{product,		["product", cat, brand, id],		resource_product,		[]},
+	{product,		["product", cat, subcat, brand, id],resource_product,		[]},
+	{brand,			["brand", brand],					resource_brand,			[]},
+	{page,			["page", id],						resource_page,			[]},
+	{page,			["page", id, slug],					resource_page,			[]},
+	{news,			["news"],							resource_news,			[]},
+	{agenda,		["agenda"],							resource_agenda,		[]},
+	{about,			["about"],							resource_template,		[{template,"page.tpl"}]},
+	{bike,			["bike", brand],					resource_bike,			[]},
+	{bike,			["bike", brand, model],				resource_bike,			[]},
+	{compare,		["compare"],						resource_compare,		[]}
 ].

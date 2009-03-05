@@ -487,4 +487,22 @@ ul#navigation li.lang a.english {
 		#product-add-review-trigger {
 			float: right;
 			margin: 0;
-		} 
+		}
+		
+
+/* Pages - compare
+---------------------------------------------------------- */
+
+.compare-list li {
+	float: left;
+	display: inline;
+	margin: 0;
+}
+
+	.compare-list li.first .block {
+		margin: 0;
+	}
+
+	.compare-list li .block {
+		margin: 0 0 0 2px;
+	}

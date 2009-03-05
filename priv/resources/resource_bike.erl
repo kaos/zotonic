@@ -2,20 +2,18 @@
 %% @copyright 2009 Tim Benniks.
 %% @doc Home Page webmachine_resource.
 
--module(resource_home).
+-module(resource_bike).
 -author("Tim Benniks <tim@timbenniks.com>").
 -include_lib("resource_html.hrl").
 
 html(_ReqProps, Context) ->
-	
 	MenuList = [
 				[{title, "home"}, {uri, "/"}], 
 				[{title, "fietsen"}, {uri, "/page/fietsen"}],
 				[{title, "Product page"}, {uri, "/product/shimano/105-ST-5600"}],
 				[{title, "Bike page"}, {uri, "/bike/trek/urban"}]
 			],
-
 	Context1 = zp_context:set_context(menu_list, MenuList, Context),
     
-    Html = zp_template:render("home.tpl", Context1),
+    Html = zp_template:render("bike.tpl", Context1),
 	zp_context:output(Html, Context1).
