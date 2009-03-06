@@ -5,26 +5,13 @@
 {% block title %} Compare bikes {% endblock %}
 
 {% block content %}
-	<div id="content-area">
+	<div id="content-area" class="zp-75">
 		<h2>Vergelijk fietsen</h2>
 		<ul class="compare-list clearfix">
-			<li class="zp-25 first">
-				<div class="block">
-					<h3>Tren Urban Vallentia</h3>
-					<img src="/lib/images/trek_urban_small.jpg" alt="Vallentia" />
-					<p>mooie fiets, klein verhaal</p>
-
-					<div class="product-price clearfix">
-						<h3>&euro;1950 <span>incl. btw</span></h3>
-						<button>Bekijk fiets</button>
-						<button>Vraag proefrit aan</button>
-					</div>
-				</div>
-			</li>
-			<li class="zp-25">
+			<li class="zp-33 first">
 				<div class="block">
 					<h3>Gazelle Champion Mondial</h3>
-					<img src="/lib/images/trek_urban_small.jpg" alt="Vallentia" />
+					<img src="/image/trek_urban.jpg(225x230)(crop)(urban).jpg" alt="" />
 					<p>verhaaltje</p>
 					
 					<div class="product-price clearfix">
@@ -34,10 +21,10 @@
 					</div>
 				</div>
 			</li>
-			<li class="zp-25">
+			<li class="zp-33">
 				<div class="block">
 					<h3>HEMA tank fiets</h3>
-					<img src="/lib/images/trek_urban_small.jpg" alt="Vallentia" />
+					<img src="/image/trek_urban.jpg(225x230)(crop)(urban).jpg" alt="Vallentia" />
 					<p>verhaaltje</p>
 					
 					<div class="product-price clearfix">
@@ -47,10 +34,10 @@
 					</div>
 				</div>
 			</li>
-			<li class="zp-25">
+			<li class="zp-33">
 				<div class="block">
 					<h3>Bianchi road</h3>
-					<img src="/lib/images/trek_urban_small.jpg" alt="Vallentia" />
+					<img src="/image/trek_urban.jpg(225x230)(crop)(urban).jpg" alt="Vallentia" />
 					<p>verhaaltje</p>
 					
 					<div class="product-price clearfix">
@@ -64,4 +51,12 @@
 	</div>
 {% endblock %}
 
-{% block sidebar %}{% endblock %}
+{% block sidebar %}
+	<div id="sidebar" class="zp-25">
+		<div class="padding">
+			
+			{% include "_subnav.tpl" %}
+			
+ 		</div>
+	</div>
+{% endblock %}

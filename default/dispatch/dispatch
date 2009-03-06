@@ -3,6 +3,7 @@
 	{home,     [],            resource_home, []},
 	{comet,    ["comet"],     resource_comet, []},
 	{postback, ["postback"],  resource_postback, []},
+
 	{lib,      ["lib",'*'],   resource_file_readonly, [ 
 											{root,["priv/lib", "default/lib"]}, 
 											{use_cache, false}
@@ -22,5 +23,5 @@
 											{root,["priv/files/archive"]}, 
 											{use_cache, false},
 											{content_disposition, attachment}
-										]}
+										]}											
 ].

@@ -2,7 +2,7 @@
 %% @copyright 2009 Tim Benniks.
 %% @doc Home Page webmachine_resource.
 
--module(resource_compare).
+-module(resource_search).
 -author("Tim Benniks <tim@timbenniks.com>").
 -include_lib("resource_html.hrl").
 
@@ -15,5 +15,5 @@ html(_ReqProps, Context) ->
 			],
 	Context1 = zp_context:set_context(menu_list, MenuList, Context),
     
-    Html = zp_template:render("compare.tpl", Context1),
+    Html = zp_template:render("search.tpl", Context1),
 	zp_context:output(Html, Context1).

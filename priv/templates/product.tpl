@@ -12,8 +12,8 @@
 		<div class="product-wrapper clearfix">
 			<div class="block">
 				<ul class="product-image clearfix">
-					<li class="zp-50"><img src="/lib/images/handgrepen.jpg" /></li>
-					<li class="zp-50"><img src="/lib/images/handgrepen2.jpg" /></li>
+					<li class="zp-50"><img src="/image/handgrepen.jpg(300x200)(crop-center)(jaap).jpg" /></li>
+					<li class="zp-50"><img src="/image/handgrepen2.jpg(300x200)(crop-center)(jaap).jpg" /></li>
 				</ul>
 				
 				<div class="product-price clearfix">
@@ -84,19 +84,19 @@
 			<h2>Gerelateerde artikelen</h2>
 			<ul class="related-articles">
 				<li class="block clearfix">
-					<img src="/lib/images/trapper_klein.jpg" />
+					<img src="/image/trapper_klein.jpg(67x50)(crop)(trapper).jpg" />
 					<h4><a href="#">Shimano</a></h4>
 					<p>PD-6620-G Trapper</p> 
 					<p><a href="#">Bestel snel &raquo;</a></p>
 				</li>
 				<li class="block clearfix">
-					<img src="/lib/images/trapper_klein.jpg" />
+					<img src="/image/trapper_klein.jpg(67x50)(crop)(trapper).jpg" />
 					<h4><a href="#">Shimano</a></h4>
 					<p>PD-6620-G Trapper</p> 
 					<p><a href="#">Bestel snel &raquo;</a></p>
 				</li>
 				<li class="block clearfix">
-					<img src="/lib/images/trapper_klein.jpg" />
+					<img src="/image/trapper_klein.jpg(67x50)(crop)(trapper).jpg" />
 					<h4><a href="#">Shimano</a></h4>
 					<p>PD-6620-G Trapper</p> 
 					<p><a href="#">Bestel snel &raquo;</a></p>

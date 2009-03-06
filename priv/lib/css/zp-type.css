@@ -43,6 +43,10 @@ h3.in-block {
 	float: left;
 }
 
+.header-alone {
+	margin: 0 0 12px 0;
+}
+
 h3 { 
 	font-size: 12px; 
 	line-height: 18px; 
