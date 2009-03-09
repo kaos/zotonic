@@ -114,9 +114,8 @@
 		$('.popup-overlay').show();
 				
 		imgObj
-			.css({position: "absolute", zIndex: 9999, width: fullWidth, height: fullHeight, left: leftPos, top: topPos})
-			.hide()
-			.fadeIn(200)
+			.css({position: "absolute", zIndex: 9999, width: (fullWidth - 80), height: (fullHeight - 80), left: (leftPos + 40), top: (topPos + 40)})
+			.animate({width: fullWidth, height: fullHeight, left: leftPos, top: topPos}, 200)
 			.click(function()
 			{
 				destroy()
