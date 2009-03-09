@@ -7,7 +7,8 @@
 			var obj 			= jQuery(this);
 			var imageWrapper 	= jQuery('<div></div>').addClass('image-wrapper').css({width: obj.width(), height: obj.height()});
 			var imageMagnifier 	= jQuery('<div></div>').addClass('image-magnifier').css({top: obj.offset().top, left: obj.offset().left});
-		
+			var bigImg			= jQuery('<img alt="'+obj.attr('alt')+'" />').hide();
+					
 			obj.wrap(imageWrapper).after(imageMagnifier).parent().hover(function()
 			{
 				imageMagnifier.slideDown(150);
@@ -17,20 +18,21 @@
 				imageMagnifier.slideUp(150);
 			});
 			
-			imageMagnifier.click(function()
+			imageMagnifier.after(bigImg).click(function()
 			{
-				jQuery.fn.imageViewer.loadImage(obj);
+				obj.loadImage();
 			});
 		});
 	}
 	
-	jQuery.fn.imageViewer.loadImage = function(obj)
+	jQuery.fn.loadImage = function()
 	{
+		var obj 			= $(this);
 		var imageOrigSrc 	= obj.attr('src').split('.');
 		var imageTempSrc 	= imageOrigSrc[0].split('/');
 		var imageExt		= imageOrigSrc[imageOrigSrc.length - 1];
 		var imageSrc 		= '/media/inline/' + imageTempSrc[imageTempSrc.length - 1] + '.' + imageExt;
-		var bigImg 			= new Image();
+		var bigImg 			= obj.siblings('img');
 		
 		if(!$('.loaded-bigImage', obj.parent()).length)
 		{
@@ -50,14 +52,16 @@
 					obj.after($(this)).parent().removeClass('loading-bigimage');
 				}
 				
-				jQuery.fn.imageViewer.setWidthHeight(obj);
-				jQuery.fn.imageViewer.showBig(obj);
+				obj.setWidthHeight();
+				obj.showBig();
 			})
-			.attr({src: imageSrc, alt: obj.attr('alt')});
+			.attr({src: imageSrc});
 	}
 	
-	jQuery.fn.imageViewer.setWidthHeight = function(obj)
+	jQuery.fn.setWidthHeight = function()
 	{
+		var obj = $(this);
+
 		jQuery('.loaded-bigImage', obj.parent())
 			.attr({
 				width: jQuery('.loaded-bigImage', obj.parent()).width(),
@@ -65,8 +69,9 @@
 			});
 	}
 	
-	jQuery.fn.imageViewer.showBig = function(obj)
+	jQuery.fn.showBig = function()
 	{
+		var obj 			= $(this);
 		var imgObj			= jQuery('.loaded-bigImage', obj.parent());
 		var imgWrapper		= obj.parent();
 		var zoomImgWidth 	= imgObj.attr('width');
@@ -81,62 +86,43 @@
 		}
 
 		leftPos = ($(window).width() / 2) - (fullWidth / 2);
-		topPos 	= $(window).scrollTop() + 10;
+		topPos 	= ($(window).height() / 2) - (fullHeight / 2);
 
 		$(window).resize(function()
 		{
-			if($(window).width() < zoomImgWidth)
+			$('.image-magnifier').each(function()
 			{
-				imgObj.animate({ 
-					width: ($(window).width() - 40),
-					height: zoomImgHeight * (($(window).width() - 40) / zoomImgWidth),
-					left: ($(window).width() / 2) - (($(window).width() - 40) / 2)
-				}, 200)
-			} 
-			else
-			{
-				imgObj.animate({ 
-					width: zoomImgWidth,
-					height: zoomImgHeight,
-					left: ($(window).width() / 2) - (zoomImgWidth / 2)
-				}, 200)
-			}			
+				$(this).css({top: $(this).parent().offset().top, left: $(this).parent().offset().left});
+			});
 		});
 		
-		$('<span</span>')
-			.addClass('popup-overlay')
-			.css({opacity: .8, height: $(document).height(), backgroundColor: '#fff', zIndex: 8000})
-			.click(function()
-			{
-				jQuery.fn.imageViewer.destroy(obj)
-			})
-			.appendTo(document.body);
+		if(!$('.popup-overlay').length)
+		{
+			$('<span</span>')
+				.addClass('popup-overlay')
+				.appendTo(document.body)
+				.css({opacity: .8, height: $(document).height(), zIndex: 8000})
+				.click(function()
+				{
+					destroy()
+				});
+		}
 		
+		$('.popup-overlay').show();
+				
 		imgObj
-			.css({left: imgWrapper.offset().left, top: imgWrapper.offset().top, position: "absolute", zIndex: 9999})
-			.animate({width: fullWidth, height: fullHeight, left: leftPos, top: topPos}, 300)
+			.css({position: "absolute", zIndex: 9999, width: fullWidth, height: fullHeight, left: leftPos, top: topPos})
+			.fadeIn(200)
 			.click(function()
 			{
-				jQuery.fn.imageViewer.destroy(obj)
+				destroy()
 			});
 	}
 	
-	jQuery.fn.imageViewer.destroy = function(obj)
+	function destroy()
 	{
-		$('.popup-overlay').fadeOut(300, function()
-		{ 
-			$(this).remove() 
-		});
-		
-		jQuery('.loaded-bigImage', obj.parent())
-			.animate({
-				width: obj.width(),
-				height: obj.height(), 
-				left: obj.parent().offset().left,
-				top: obj.parent().offset().top}, 200, function()
-				{ 
-					$(this).remove();
-				});
+		jQuery('.popup-overlay').fadeOut(100);
+		jQuery('.loaded-bigImage').fadeOut(300);
 	}
 })(jQuery);
 

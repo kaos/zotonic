@@ -23,6 +23,10 @@ body {
 		margin: 0;
 	}
 	
+	.block img {
+		display: block;
+	}
+	
 	li.block {
 		margin: 0 0 1px 0;
 	}
@@ -535,15 +539,14 @@ ul#navigation li.lang a.english {
 	opacity: .75;
 }
 
-.loaded-bigImage {
-	border: 5px solid #888;
-	-moz-border-radius: 4px;
-	-webkit-border-radius: 4px;
-}
-
 .popup-overlay {
 	position: absolute;
 	right: 0;
 	top: 0;
 	width: 100%;
+	background: #eee;
+}
+
+.loaded-bigImage {
+	border: 3px solid #ccc;
 }
