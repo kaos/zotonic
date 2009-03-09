@@ -34,9 +34,11 @@
 		var imageSrc 		= '/media/inline/' + imageTempSrc[imageTempSrc.length - 1] + '.' + imageExt;
 		var bigImg 			= obj.siblings('img');
 		
+		var loader			= $('<span></span>').css({background: '#fff url(/lib/images/spinner.gif) 50% 50% no-repeat', opacity: .5, width: obj.width(), height: obj.height(), position: "absolute", top: obj.offset().top, left: obj.offset().left})
+		
 		if(!$('.loaded-bigImage', obj.parent()).length)
 		{
-			obj.parent().addClass('loading-bigimage');
+			$(document.body).append(loader);
 		}
 		
 		jQuery(bigImg)
@@ -49,9 +51,10 @@
 
 				if(!$('.loaded-bigImage', obj.parent()).length)
 				{
-					obj.after($(this)).parent().removeClass('loading-bigimage');
+					obj.after($(this));
 				}
 				
+				loader.remove();				
 				obj.setWidthHeight();
 				obj.showBig();
 			})
@@ -112,6 +115,7 @@
 				
 		imgObj
 			.css({position: "absolute", zIndex: 9999, width: fullWidth, height: fullHeight, left: leftPos, top: topPos})
+			.hide()
 			.fadeIn(200)
 			.click(function()
 			{
@@ -122,7 +126,7 @@
 	function destroy()
 	{
 		jQuery('.popup-overlay').fadeOut(100);
-		jQuery('.loaded-bigImage').fadeOut(300);
+		jQuery('.loaded-bigImage').fadeOut(200);
 	}
 })(jQuery);
 
