@@ -21,6 +21,7 @@
 	 expires/2,
 	 content_types_provided/2,
 	 charsets_provided/2,
+	 encodings_provided/2,
 	 provide_content/2,
 	 finish_request/2
 	 ]).
@@ -76,6 +77,22 @@ content_types_provided(ReqProps, State) ->
         Mime -> 
             {[{Mime, provide_content}], State}
     end.
+
+encodings_provided(_ReqProps, State) ->
+    Encodings = case State#state.use_cache of
+                    true ->
+                        case State#state.mime of
+                            "image/jpeg" -> 
+                                    [{"identity", fun(Data) -> Data end}];
+                            _ -> 
+                                    [{"identity", fun(Data) -> Data end},
+                                     {"gzip",     fun(Data) -> Data end}]
+                        end;
+                    false ->
+                        [{"identity", fun(Data) -> Data end}]
+                end,
+    {Encodings,State}.
+
 
 resource_exists(ReqProps, State) ->
     Path   = ?PATH(ReqProps),
@@ -137,31 +154,42 @@ provide_content(ReqProps, State) ->
         attachment -> Req:add_response_header("Content-Disposition", "attachment");
         undefined ->  ok
     end,
-    case State#state.body of
-        undefined ->
-            {ok, Body} = file:read_file(State#state.fullpath),
-            {Body, State#state{body=Body}};
-        Body -> 
-            {Body, State}
-    end.
+    {Choices, State1} = case State#state.body of
+                            undefined ->
+                                {ok, Data} = file:read_file(State#state.fullpath),
+                                Body = case State#state.use_cache of
+                                          true  -> [{"identity",Data}, {"gzip",zlib:gzip(Data)}];
+                                          false -> [{"identity",Data}]
+                                       end,
+                                {Body, State#state{body=Body}};
+                            Body -> 
+                                {Body, State}
+                        end,
+    CE = Req:get_metadata('content-encoding'),
+    {proplists:get_value(CE, Choices), State1}.
 
 finish_request(_ReqProps, State) ->
-    case State#state.is_cached and State#state.use_cache of
+    case State#state.is_cached of
         false ->
             case State#state.body of
-                undefined -> 
+                undefined ->  
                     {ok, State};
                 _ ->
-                    % Cache the served file in the depcache.  Cache it for 3600 secs.
-                    Cache = #cache{
-                                path=State#state.path,
-                                fullpath=State#state.fullpath,
-                                mime=State#state.mime,
-                                last_modified=State#state.last_modified,
-                                body=State#state.body
-                            },
-                    zp_depcache:set(cache_key(State#state.path), Cache),
-                    {ok, State}
+                    case State#state.use_cache of
+                        true ->
+                            % Cache the served file in the depcache.  Cache it for 3600 secs.
+                            Cache = #cache{
+                                        path=State#state.path,
+                                        fullpath=State#state.fullpath,
+                                        mime=State#state.mime,
+                                        last_modified=State#state.last_modified,
+                                        body=State#state.body
+                                    },
+                            zp_depcache:set(cache_key(State#state.path), Cache),
+                            {ok, State};
+                        _ ->
+                            {ok, State}
+                    end
             end;
         true ->
             {ok, State}
