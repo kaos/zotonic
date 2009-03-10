@@ -17,6 +17,8 @@
 	decode/2,
 	hex_encode/1,
 	hex_decode/1,
+	checksum/1,
+	checksum_assert/2,
 	pickle/1,
 	depickle/1,
 	url_encode/1,
@@ -73,30 +75,36 @@ encode(Data, Base) when is_binary(Data) -> encode(binary_to_list(Data), Base);
 encode(Data, Base) when is_list(Data) ->
 	F = fun(C) when is_integer(C) ->
 		case erlang:integer_to_list(C, Base) of
-			[C1, C2] -> <<C1, C2>>;
-			[C1]     -> <<$0, C1>>;
-			_        -> throw("Could not hex_encode the string.")
+			[C1, C2] -> [C1, C2];
+			[C1]     -> [$0, C1]
 		end
 	end,
-	{ok, list_to_binary([F(I) || I <- Data])}.
+	[F(I) || I <- Data].
 	
 decode(Data, Base) when is_binary(Data) -> decode(binary_to_list(Data), Base);
 decode(Data, Base) when is_list(Data) -> 	
-	{ok, list_to_binary(inner_decode(Data, Base))}.
+	inner_decode(Data, Base).
 
 inner_decode(Data, Base) when is_list(Data) ->
 	case Data of
 		[C1, C2|Rest] -> 
 			I = erlang:list_to_integer([C1, C2], Base),
 			[I|inner_decode(Rest, Base)];
-			
 		[] -> 
-			[];
-			
-		_  -> 
-			throw("Could not hex_decode the string.")
+			[]
 	end.
-	
+
+
+%%% CHECKSUM %%%
+
+checksum(Data) ->
+    Sign = zp_ids:sign_key_simple(),
+    zp_utils:hex_encode(erlang:md5([Sign,Data])).
+
+checksum_assert(Data, Checksum) ->
+    Sign = zp_ids:sign_key_simple(),
+    assert(list_to_binary(zp_utils:hex_decode(Checksum)) == erlang:md5([Sign,Data]), checksum_invalid).
+
 %%% PICKLE / UNPICKLE %%%
 
 pickle(Data) ->

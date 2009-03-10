@@ -6,7 +6,7 @@
 %% Does not generate media previews itself, this is done when fetching the image.
 %%
 %% Typical urls are like: 
-%% /image/2007/03/31/wedding.jpg(300x300)(crop-center)(709a-a3ab6605e5c8ce801ac77eb76289ac12).jpg
+%% /image/2007/03/31/wedding.jpg(300x300)(crop-center)(a3ab6605e5c8ce801ac77eb76289ac12).jpg
 %% /media/inline/2007/03/31/wedding.jpg
 %% /media/attachment/2007/03/31/wedding.jpg
 %%
@@ -31,31 +31,56 @@ tag(Filename, Options) when is_binary(Filename) ->
     tag(binary_to_list(Filename), Options);
 tag(Filename, Options) ->
     case url1(Filename, Options) of
-        {url, Url, TagOpts} -> 
-            {tag, zp_tags:render_tag("img", [{src,Url}|TagOpts])};
+        {url, Url, TagOpts, ImageOpts} -> 
+            % Calculate the real size of the image using the options
+            TagOpts1 = case zp_media_preview:size(filename_to_filepath(Filename),ImageOpts) of
+                            {size, Width, Height, _Mime} ->
+                                [{width,Width},{height,Height}|TagOpts];
+                            _ ->
+                                TagOpts
+                        end,
+            % Make sure the required alt tag is present
+            TagOpts2 =  case proplists:get_value(alt, TagOpts1) of
+                            undefined -> [{alt,""}|TagOpts1];
+                            _ -> TagOpts1
+                        end,
+            {tag, zp_tags:render_tag("img", [{src,Url}|TagOpts2])};
         {error, Reason} -> 
             {error, Reason}
     end.
+
+
+%% @doc Give the filepath for the filename being served
+%% @todo Ensure the file is really in the given directory (ie. no ..'s)
+filename_to_filepath(Filename) ->
+    filename:join("priv/files/archive/", Filename).
+
+
+%% @doc Give the base url for the filename being served
+%% @todo Use the dispatch rules to find the correct image path
+filename_to_urlpath(Filename) ->
+    filename:join("image/", Filename).
 
 
 %% @spec url(Filename, Options) -> {url, Url} | {error, Reason}
 %% @doc Generate the url for the image with the filename and options
 url(Filename, Options) ->
     case url1(Filename, Options) of
-        {url, Url, _TagOptions} -> {url, Url};
+        {url, Url, _TagOptions, _ImageOptions} -> {url, Url};
         {error, Error} -> {error, Error}
     end.
 
 
-%% @spec url1(Filename, Options) -> {url, Url, TagOptions} | {error, Reason}
+%% @spec url1(Filename, Options) -> {url, Url, TagOptions, ImageOpts} | {error, Reason}
 %% @doc Creates an url for the given filename and filters.  This does not check the filename or if it is convertible.
 url1(Filename, Options) ->
     {TagOpts, ImageOpts} = lists:partition(fun is_tagopt/1, Options),
     % Map all ImageOpts to an opt string
     UrlProps = props2url(ImageOpts),
-    %% @todo add the checksum
-    %% @todo Support different preview formats besides .jpg, like .png
-    {url, list_to_binary([Filename,UrlProps,".jpg"]), TagOpts}.
+    Checksum = zp_utils:checksum([Filename,UrlProps,".jpg"]),
+    {url, list_to_binary(filename_to_urlpath(lists:flatten([Filename,UrlProps,$(,Checksum,").jpg"]))), 
+          TagOpts,
+          ImageOpts}.
 
 
 is_tagopt({alt,   _}) -> true;
@@ -71,9 +96,9 @@ props2url(Props) ->
 props2url([], Width, Height, Acc) ->
     Size =  case {Width,Height} of
                 {undefined,undefined} -> [];
-                {undefined,_W} -> [integer_to_list(Width)] ++ "x";
-                {_H,undefined} -> [$x|integer_to_list(Height)];
-                {_H,_W} -> integer_to_list(Width) ++ [$x|integer_to_list(Height)]
+                {_W,undefined} -> [integer_to_list(Width)] ++ "x";
+                {undefined,_H} -> [$x|integer_to_list(Height)];
+                {_W,_H} -> integer_to_list(Width) ++ [$x|integer_to_list(Height)]
             end,
     lists:flatten([$(, zp_utils:combine(")(", [Size|lists:reverse(Acc)]), $)]);
 
@@ -83,12 +108,14 @@ props2url([{height,Height}|Rest], Width, _Height, Acc) ->
     props2url(Rest, Width, zp_convert:to_integer(Height), Acc);
 props2url([{Prop}|Rest], Width, Height, Acc) ->
     props2url(Rest, Width, Height, [atom_to_list(Prop)|Acc]);
+props2url([{Prop,true}|Rest], Width, Height, Acc) ->
+    props2url(Rest, Width, Height, [atom_to_list(Prop)|Acc]);
 props2url([{Prop,Value}|Rest], Width, Height, Acc) ->
     props2url(Rest, Width, Height, [[atom_to_list(Prop),$-,zp_convert:to_list(Value)]|Acc]).
 
 
 %% @spec url2props(Url) -> {Filepath,PreviewPropList,Checksum,ChecksumBaseString}
-%% @doc Translate an url of the format "image.jpg(300x300)(crop-center)(nonce-checksum).jpg" to parts
+%% @doc Translate an url of the format "image.jpg(300x300)(crop-center)(checksum).jpg" to parts
 %% @todo Map the extension to the format of the preview (.jpg or .png)
 url2props(Url) ->
     {Filepath,Rest} = lists:splitwith(fun(C) -> C =/= $( end, Url),
@@ -97,15 +124,20 @@ url2props(Url) ->
     LastParen       = string:rchr(PropsRoot, $(),
     {Props,[$(|Check]} = lists:split(LastParen-1, PropsRoot),
     Check1          = string:strip(Check, right, $)),
+    Checksum = zp_utils:checksum([Filepath,Props,".jpg"]),
+    zp_utils:checksum_assert([Filepath,Props,".jpg"], Check1),
     PropList        = string:tokens(Props, ")("),
     PropList1       = case PropList of
                         [] -> [];
                         [Size|RestProps]->
-                            SizeProps = case string:tokens(Size,"x") of
-                                            ["", ""]        -> [];
-                                            [Width, ""]     -> [{width,list_to_integer(Width)}]; 
-                                            ["", Height]    -> [{height,list_to_integer(Height)}]; 
-                                            [Width, Height] -> [{width,list_to_integer(Width)},{height,list_to_integer(Height)}]
+                            {W,XH} = lists:splitwith(fun(C) -> C >= $0 andalso C =< $9 end, Size),
+                            SizeProps = case {W,XH} of
+                                            {"", "x"}            -> [];
+                                            {"", ""}             -> [];
+                                            {Width, ""}          -> [{width,list_to_integer(Width)}]; 
+                                            {Width, "x"}         -> [{width,list_to_integer(Width)}]; 
+                                            {"", [$x|Height]}    -> [{height,list_to_integer(Height)}]; 
+                                            {Width, [$x|Height]} -> [{width,list_to_integer(Width)},{height,list_to_integer(Height)}]
                                         end,
                             SizeProps ++ url2props1(RestProps, [])
                       end,
@@ -124,8 +156,8 @@ url2props1([P|Rest], Acc) ->
 
 
 test() ->
-    {"path/to/image.jpg", [{width,300},{height,300},{crop,center},{grey}], "nonce-checksum","(300x300)(crop-center)(grey)"} 
-    = url2props("path/to/image.jpg(300x300)(crop-center)(grey)(nonce-checksum).jpg"),
+    {"path/to/image.jpg", [{width,300},{height,300},{crop,center},{grey}], "checksum","(300x300)(crop-center)(grey)"} 
+    = url2props("path/to/image.jpg(300x300)(crop-center)(grey)(checksum).jpg"),
     
     "(300x300)(crop-center)" 
     = props2url([{width,300},{height,300},{crop,center}]),

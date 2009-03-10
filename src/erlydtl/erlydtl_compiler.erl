@@ -251,7 +251,7 @@ forms(File, Module, BodyAst, BodyInfo, CheckSum) ->
                             erl_syntax:variable("AutoId"),
                             erl_syntax:application(
                                         erl_syntax:atom(zp_ids),
-                                        erl_syntax:atom(id),
+                                        erl_syntax:atom(identifier),
                                         [erl_syntax:integer(8)]
                             )
                      ),
@@ -333,7 +333,7 @@ body_ast(DjangoParseTree, Context, TreeWalker) ->
             ({'variable', _} = Variable, TreeWalkerAcc) ->
                 {Ast, VarName} = resolve_variable_ast(Variable, Context),
                 {{format(Ast, Context), #ast_info{var_names = [VarName]}}, TreeWalkerAcc};              
-            ({'include', {string_literal, _, File}}, TreeWalkerAcc) ->
+            ({'include', {string_literal, _, File}, []}, TreeWalkerAcc) ->
                 include_ast(unescape_string_literal(File), Context, TreeWalkerAcc);
             ({'if', {'not', Variable}, Contents}, TreeWalkerAcc) ->
                 {IfAstInfo, TreeWalker1} = empty_ast(TreeWalkerAcc),
@@ -383,6 +383,10 @@ body_ast(DjangoParseTree, Context, TreeWalker) ->
                 cycle_ast(Names, Context, TreeWalkerAcc);
             ({'cycle_compat', Names}, TreeWalkerAcc) ->
                 cycle_compat_ast(Names, Context, TreeWalkerAcc);
+            ({'image', Variable, Args}, TreeWalkerAcc) ->
+                image_ast(Variable, Args, Context, TreeWalkerAcc);
+            ({'image_url', Variable, Args}, TreeWalkerAcc) ->
+                image_url_ast(Variable, Args, Context, TreeWalkerAcc);
             ({'scomp', {'scompname', _, Name}, Args}, TreeWalkerAcc) ->
                 scomp_ast(Name, Args, Context, TreeWalkerAcc);
             ({'url', {'identifier', _, Name}, Args}, TreeWalkerAcc) ->
@@ -787,6 +791,63 @@ call_ast(Module, Variable, AstInfo, TreeWalker) ->
     with_dependencies(Module2:dependencies(), {{CallAst, AstInfo}, TreeWalker}).
 
 
+%% @author Marc Worrell
+%% @doc Generate an image tag based on the image name and the arguments
+%% @todo Optimization for the situation where all parameters are constants
+image_ast(FilenameValue, Args, Context, TreeWalker) ->
+    FilenameAst = resolve_value_ast(FilenameValue, Context),
+    AppAst = erl_syntax:application(
+                        erl_syntax:atom(zp_media_tag),
+                        erl_syntax:atom(tag),
+                        [   FilenameAst,
+                            scomp_ast_map_args(Args, Context)]
+                    ),
+    RenderedAst = erl_syntax:variable("Rendered"),
+    OkAst = erl_syntax:clause(
+                      [erl_syntax:tuple([erl_syntax:atom(tag), RenderedAst])], 
+                      none,
+                      [RenderedAst]),
+    ReasonAst = erl_syntax:variable("Reason"),
+    ErrStrAst = erl_syntax:application(
+                	  erl_syntax:atom(io_lib),
+                	  erl_syntax:atom(format),
+                	  [erl_syntax:string("error: ~p"), erl_syntax:list([ReasonAst])]),
+    ErrorAst = erl_syntax:clause(
+                	 [erl_syntax:tuple([erl_syntax:atom(error), ReasonAst])], 
+                	 none,
+                	 [ErrStrAst]),
+    CallAst = erl_syntax:case_expr(AppAst, [OkAst, ErrorAst]),
+    {{CallAst, #ast_info{}}, TreeWalker}.
+
+
+%% @author Marc Worrell
+%% @doc Generate an image url based on the image name and the arguments
+%% @todo Optimization for the situation where all parameters are constants
+image_url_ast(FilenameValue, Args, Context, TreeWalker) ->
+    FilenameAst = resolve_value_ast(FilenameValue, Context),
+    AppAst = erl_syntax:application(
+                        erl_syntax:atom(zp_media_tag),
+                        erl_syntax:atom(url),
+                        [   FilenameAst,
+                            scomp_ast_map_args(Args, Context)]
+                    ),
+    RenderedAst = erl_syntax:variable("Rendered"),
+    OkAst = erl_syntax:clause(
+                      [erl_syntax:tuple([erl_syntax:atom(url), RenderedAst])], 
+                      none,
+                      [RenderedAst]),
+    ReasonAst = erl_syntax:variable("Reason"),
+    ErrStrAst = erl_syntax:application(
+                	  erl_syntax:atom(io_lib),
+                	  erl_syntax:atom(format),
+                	  [erl_syntax:string("error: ~p"), erl_syntax:list([ReasonAst])]),
+    ErrorAst = erl_syntax:clause(
+                	 [erl_syntax:tuple([erl_syntax:atom(error), ReasonAst])], 
+                	 none,
+                	 [ErrStrAst]),
+    CallAst = erl_syntax:case_expr(AppAst, [OkAst, ErrorAst]),
+    {{CallAst, #ast_info{}}, TreeWalker}.
+    
 
 %% Added by Marc Worrell - handle url generation using the url patterns
 url_ast(Name, Args, Context, TreeWalker) ->
@@ -803,25 +864,7 @@ url_ast(Name, Args, Context, TreeWalker) ->
 
 
 print_ast(Value, Context, TreeWalker) ->
-    ValueAst = case Value of
-                  ({string_literal, _, Str}) ->
-                      S2 = unescape_string_literal(Str),
-                      erl_syntax:string(S2);
-                  ({variable, _}=Var) ->
-                       {V, _} = resolve_variable_ast(Var, Context),
-                       V;
-                  ({number_literal, _, Num}) ->
-                       erl_syntax:integer(list_to_integer(Num));
-                  ({scomp_arg_tuple, {identifier, _, TupleName}, TupleArgs}) ->
-                       TupleNameAst = erl_syntax:atom(TupleName),
-                       TupleArgsAst = scomp_ast_map_args(TupleArgs, Context),
-                       erl_syntax:tuple([TupleNameAst, TupleArgsAst]);
-                  ({auto_id,{identifier,_,Name}}) ->
-                       {V, _} = auto_id_ast(Name),
-                       V;
-                   (_) ->
-                       erl_syntax:list([])
-                end,
+    ValueAst = resolve_value_ast(Value, Context),
     PrintAst = erl_syntax:application(
                 erl_syntax:atom(io_lib),
                 erl_syntax:atom(format),
@@ -844,7 +887,30 @@ print_ast(Value, Context, TreeWalker) ->
                 EscapeAst,
                 erl_syntax:string("</pre>")
             ]),
-    {{PreAst, #ast_info{}}, TreeWalker}.  
+    {{PreAst, #ast_info{}}, TreeWalker}. 
+
+
+resolve_value_ast(Value, Context) ->
+    case Value of
+      ({string_literal, _, Str}) ->
+          S2 = unescape_string_literal(Str),
+          erl_syntax:string(S2);
+      ({variable, _}=Var) ->
+           {V, _} = resolve_variable_ast(Var, Context),
+           V;
+      ({number_literal, _, Num}) ->
+           erl_syntax:integer(list_to_integer(Num));
+      ({scomp_arg_tuple, {identifier, _, TupleName}, TupleArgs}) ->
+           TupleNameAst = erl_syntax:atom(TupleName),
+           TupleArgsAst = scomp_ast_map_args(TupleArgs, Context),
+           erl_syntax:tuple([TupleNameAst, TupleArgsAst]);
+      ({auto_id,{identifier,_,Name}}) ->
+           {V, _} = auto_id_ast(Name),
+           V;
+       (_) ->
+           erl_syntax:list([])
+    end.
+
 
 %% Added by Marc Worrell - handle evaluation of scomps by zp_scomp
 scomp_ast(Scomp, Args, Context, TreeWalker) ->
@@ -881,6 +947,8 @@ scomp_ast(Scomp, Args, Context, TreeWalker) ->
 scomp_ast_map_args(Args, Context) ->
     ArgsAst = lists:map(fun({{identifier, _, Name}, Value}) ->
                             ValueAst = case Value of
+                                          true -> 
+                                              erl_syntax:atom(true);
                                           ({string_literal, _, Str}) ->
                                               S2 = unescape_string_literal(Str),
                                               case Name of

@@ -52,27 +52,35 @@
 scan(Template) ->
     scan(Template, [], {1, 1}, in_text).
 
+
+identifier_to_keyword({identifier, Pos, String}, {open_tag, Acc}) ->
+    RevString = lists:reverse(String),
+    Keywords = ["for", "endfor", "in", "include", "block", "endblock",
+        "extends", "autoescape", "endautoescape", "if", "else", "endif",
+        "not", "or", "and", "comment", "endcomment", "cycle", "firstof",
+        "ifchanged", "ifequal", "endifequal", "ifnotequal", "endifnotequal",
+        "now", "regroup", "spaceless", "endspaceless", "ssi", "templatetag",
+        "load", "call", "with", "url", "print", "image", "image_url"], 
+    Type = case lists:member(RevString, Keywords) of
+        true -> list_to_atom(RevString ++ "_keyword");
+        _ ->    identifier
+    end,
+    {Type, [{Type, Pos, RevString}|Acc]};
+identifier_to_keyword({identifier, Pos, String}, {_PrevToken, Acc}) ->
+    RevString = lists:reverse(String),
+    Keywords = ["in", "not", "or", "and", "firstof", "now", "regroup", "templatetag", "with"], 
+    Type = case lists:member(RevString, Keywords) of
+        true -> list_to_atom(RevString ++ "_keyword");
+        _ ->    identifier
+    end,
+    {Type, [{Type, Pos, RevString}|Acc]};
+identifier_to_keyword({Type, Pos, String}, {_PrevToken, Acc}) ->
+    {Type, [{Type, Pos, lists:reverse(String)}|Acc]}.
+    
+
 scan([], Scanned, _, in_text) ->
-    {ok, lists:reverse(lists:map(
-                fun
-                    ({identifier, Pos, String}) ->
-                        RevString = lists:reverse(String),
-                        Keywords = ["for", "endfor", "in", "include", "block", "endblock",
-                            "extends", "autoescape", "endautoescape", "if", "else", "endif",
-                            "not", "or", "and", "comment", "endcomment", "cycle", "firstof",
-                            "ifchanged", "ifequal", "endifequal", "ifnotequal", "endifnotequal",
-                            "now", "regroup", "spaceless", "endspaceless", "ssi", "templatetag",
-                            "load", "call", "with", "url", "print"], 
-                        Type = case lists:member(RevString, Keywords) of
-                            true ->
-                                list_to_atom(RevString ++ "_keyword");
-                            _ ->
-                                identifier
-                        end,
-                        {Type, Pos, RevString};
-                    ({Type, Pos, String}) ->
-                        {Type, Pos, lists:reverse(String)} 
-                end, Scanned))};
+    {_Token, ScannedKeyword} = lists:foldr(fun identifier_to_keyword/2, {'$eof', []}, Scanned),
+    {ok, lists:reverse(ScannedKeyword)};
 
 scan([], _Scanned, _, {in_comment, _}) ->
     {error, "Reached end of file inside a comment."};

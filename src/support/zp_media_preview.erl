@@ -20,6 +20,9 @@
     test/0
 ]).
 
+-define(MAX_WIDTH,  5000).
+-define(MAX_HEIGHT, 5000).
+
 -include_lib("zophrenic.hrl").
 
 
@@ -33,7 +36,9 @@ convert(InFile, OutFile, Filters) ->
             {mime, Mime} = proplists:lookup(mime, FileProps),
             case can_generate_preview(Mime) of
                 true ->
-                    {_EndWidth, _EndHeight, CmdArgs} = cmd_args(FileProps, Filters),
+                    {EndWidth, EndHeight, CmdArgs} = cmd_args(FileProps, Filters),
+                    zp_utils:assert(EndWidth  < ?MAX_WIDTH, image_too_wide),
+                    zp_utils:assert(EndHeight < ?MAX_HEIGHT, image_too_high),
                     Args1   = lists:flatten(zp_utils:combine(32, CmdArgs)),
                     Cmd     = ["convert \"", zp_utils:os_escape(InFile), "[0]\" ", Args1, " \"", zp_utils:os_escape(OutFile), "\""],
                     file:delete(OutFile),
@@ -190,7 +195,7 @@ filter2arg({blur}, Width, Height) ->
 filter2arg({blur, Blur}, Width, Height) when is_integer(Blur) ->
     {Width, Height, ["-blur ", integer_to_list(Blur)]};
 filter2arg({blur, Blur}, Width, Height) when is_list(Blur) ->
-    case string:tokens("x", Blur) of
+    case string:tokens(Blur, "x") of
         [A,B] -> {Width, Height, ["-blur ", ensure_integer(A), $x, ensure_integer(B)]};
         [A] ->   {Width, Height, ["-blur ", ensure_integer(A)]}
     end;
@@ -206,7 +211,6 @@ filter2arg({quality}, Width, Height) ->
             true -> 50 + round((Pix - 10000) * (100-50) / 80000)
           end,
     {Width,Height, ["-quality ",integer_to_list(Q)]}.
-    
 
 %% @spec fetch_crop(Filters) -> {Crop, Filters}
 %% @doc Split the filters into size/crop and image manipulation filters.
