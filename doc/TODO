@@ -112,16 +112,6 @@ Dispatcher:
 	- add {% url %} tag - done.
 	- initialize webmachine_dispatch on boot - done.
 
-
-== Check performance of MySQL / PostgreSQL drivers ==
-
-Benchmark ErlyDB and AMNESIA.
-When too slow, use the erlang mnesia db.
-Depends on prepared queries - needed for performance and security!
-
-Check PostgreSQL abstraction of ErlyDB - can we user prepared queries?
-
-
 == Inline Templates ==
 
 Make it possible to translate inline templates, i.e. not from a file.
@@ -237,7 +227,7 @@ Integrate webmachine and mochiweb in our source tree, check makefiles.
 == Library file serving: speedup with file cache and gzip ==
 
 	- Put a file cache into the depcache - done.
-	- Serve js and css with gzip
+	- Serve js and css with gzip - done.
 
 == Add application generation script ==
 
