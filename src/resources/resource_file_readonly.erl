@@ -3,7 +3,6 @@
 %%
 %% @doc Serve static files from a configured list of directories.  Caches files in the local depcache.
 %% Is also able to generate previews (if configured to do so).
-%% @todo gzip files before caching them in the depcache, serve gzip'ed file when requested
 %%
 %% Serves files like:
 %% 
