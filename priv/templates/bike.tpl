@@ -9,7 +9,7 @@
 		<h2>Trek Urban Valentia</h2>
 		<div class="block clearfix">
 			<div class="zp-50">
-				<img src="/image/koe.jpg(340x290)(crop)(urban).jpg" alt="trek urban" rel="image-viewer" />
+				<img src="/{% image_url "koe.jpg" width=340 height=290 crop %}" alt="koe" rel="image-viewer" />
 			</div>
 		
 			<div class="zp-50">
@@ -29,7 +29,7 @@
 		<h2>Trek Urban Valentia</h2>
 		<div class="block clearfix">
 			<div class="zp-50">
-				<img src="/image/trek_urban.jpg(352x290)(crop)(urban).jpg" alt="trek urban" rel="image-viewer" />
+				<img src="/{% image_url "trek_urban.jpg" width=340 height=290 crop %}" alt="trek urban" rel="image-viewer" />
 			</div>
 		
 			<div class="zp-50">

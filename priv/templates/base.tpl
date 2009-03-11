@@ -7,6 +7,7 @@
 	<link href="/lib/css/zp-type.css" type="text/css" media="screen" rel="stylesheet" /> 
 	<link href="/lib/css/zp-forms.css" type="text/css" media="screen" rel="stylesheet" /> 
 	<link href="/lib/css/zp-project.css" type="text/css" media="screen" rel="stylesheet" /> 
+	<link href="/lib/css/zp-wysiwyg.css" type="text/css" media="screen" rel="stylesheet" /> 
 
 	<!--[if IE]><link href="/lib/css/zp-ie.css" type="text/css" media="screen" rel="stylesheet" /><![endif]--> 
 </head>

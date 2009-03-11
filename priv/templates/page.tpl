@@ -11,14 +11,8 @@
 		<div class="block clearfix">
 			<p>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Fusce ultricies nisi in lectus. Morbi et sem nec eros bibendum vestibulum. Ut vitae erat vitae dui tempor dictum. Nam sem. Sed iaculis lorem non ipsum. Donec aliquet. Fusce vel elit.ccumsan tellus orci id nisi. </p>
 
-			<div class="zp-50">
-				<h3>Een stukkie tekst</h3>
-				<p>Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.</p>
-			</div>
-			<div class="zp-50">
-				<h3>Een stukkie tekst</h3>
-				<p>non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.</p>
-			</div>
+			<textarea id="wysiwyg" rows="11" cols="150"></textarea>
+			
 		</div>
-	</div>
+	</div>	
 {% endblock %}

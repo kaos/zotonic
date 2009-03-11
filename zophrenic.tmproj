@@ -349,7 +349,7 @@
 			<key>firstVisibleColumn</key>
 			<integer>0</integer>
 			<key>firstVisibleLine</key>
-			<integer>22</integer>
+			<integer>0</integer>
 		</dict>
 		<key>src/erlydtl/erlydtl_parser.yrl</key>
 		<dict>
@@ -419,20 +419,8 @@
 		<string>priv/lib/css/zp-project.css</string>
 	</array>
 	<key>showFileHierarchyDrawer</key>
-	<false/>
-	<key>showFileHierarchyPanel</key>
 	<true/>
-	<key>treeState</key>
-	<dict>
-		<key>priv</key>
-		<dict>
-			<key>isExpanded</key>
-			<true/>
-			<key>subItems</key>
-			<dict/>
-		</dict>
-	</dict>
 	<key>windowFrame</key>
-	<string>{{0, 73}, {1280, 705}}</string>
+	<string>{{288, 277}, {1280, 705}}</string>
 </dict>
 </plist>

@@ -87,9 +87,15 @@
 			fullWidth = $(window).width() - 40;
 			fullHeight = zoomImgHeight * (fullWidth / zoomImgWidth);	
 		}
+		
+		if(zoomImgHeight > $(window).height())
+		{
+			fullHeight = $(window).height() - 40;
+			fullWidth = zoomImgWidth * (fullHeight / zoomImgHeight);	
+		}
 
 		leftPos = ($(window).width() / 2) - (fullWidth / 2);
-		topPos 	= ($(window).height() / 2) - (fullHeight / 2);
+		topPos 	= $(window).scrollTop() + ($(window).height() / 2) - (fullHeight / 2);
 
 		$(window).resize(function()
 		{
