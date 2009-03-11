@@ -59,7 +59,7 @@ filename_to_filepath(Filename) ->
 %% @doc Give the base url for the filename being served
 %% @todo Use the dispatch rules to find the correct image path
 filename_to_urlpath(Filename) ->
-    filename:join("image/", Filename).
+    filename:join("/image/", Filename).
 
 
 %% @spec url(Filename, Options) -> {url, Url} | {error, Reason}
@@ -124,7 +124,6 @@ url2props(Url) ->
     LastParen       = string:rchr(PropsRoot, $(),
     {Props,[$(|Check]} = lists:split(LastParen-1, PropsRoot),
     Check1          = string:strip(Check, right, $)),
-    Checksum = zp_utils:checksum([Filepath,Props,".jpg"]),
     zp_utils:checksum_assert([Filepath,Props,".jpg"], Check1),
     PropList        = string:tokens(Props, ")("),
     PropList1       = case PropList of
@@ -156,15 +155,19 @@ url2props1([P|Rest], Acc) ->
 
 
 test() ->
-    {"path/to/image.jpg", [{width,300},{height,300},{crop,center},{grey}], "checksum","(300x300)(crop-center)(grey)"} 
-    = url2props("path/to/image.jpg(300x300)(crop-center)(grey)(checksum).jpg"),
+    {   "koe.jpg", [{width,400},{crop,east},{blur},{grey}], 
+        "61DADDE06035A4CD4862D99688EC0FFF","(400x)(crop-east)(blur)(grey)"} 
+    = url2props("koe.jpg(400x)(crop-east)(blur)(grey)(61DADDE06035A4CD4862D99688EC0FFF).jpg"),
     
     "(300x300)(crop-center)" 
     = props2url([{width,300},{height,300},{crop,center}]),
     
     {tag,[60,"img",
-          [[32,<<"src">>,61,39,
-            <<"image/to/image.jpg(300x300)(crop-center).jpg">>,39],
-           [32,<<"class">>,61,39,"some-class",39]],
+          [ [32,<<"src">>,61,39,
+             <<"/image/koe.jpg(300x300)(crop-center)(0F96A52C1BD7F22E5833316DC9483913).jpg">>,39],
+            [],
+            [32,<<"width">>,61,39,<<"300">>,39],
+            [32,<<"height">>,61,39,<<"300">>,39],
+            [32,<<"class">>,61,39,"some-class",39]],
           47,62]} = 
-    tag(<<"image/to/image.jpg">>, [{width,300},{height,300},{crop,center},{class,"some-class"}]).
+    tag(<<"koe.jpg">>, [{width,300},{height,300},{crop,center},{class,"some-class"}]).
