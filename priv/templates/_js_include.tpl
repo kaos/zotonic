@@ -4,7 +4,7 @@
 <script type="text/javascript" src="/lib/js/apps/widget_manager.js"></script>
 <script type="text/javascript" src="/lib/js/modules/jquery.notice.js"></script>
 <script type="text/javascript" src="/lib/js/modules/livevalidation-1.3.js"></script>
-<script type="text/javascript" src="/lib/js/modules/jquery.image_viewer2.js"></script>
+<script type="text/javascript" src="/lib/js/modules/jquery.image_viewer.js"></script>
 <script type="text/javascript" src="/lib/js/modules/jquery.wysiwyg.js"></script>
 
 <script type="text/javascript">
