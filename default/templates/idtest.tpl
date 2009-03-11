@@ -5,11 +5,11 @@
 
 {{ #id }}
 
-{% @button id=#id %}
+{% button id=#id %}
 
 <hr/>
 
-{% @include file="included.tpl" maxage=10 %}
+{% include "included.tpl" maxage=10 %}
 
 <hr/>
 

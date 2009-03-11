@@ -6,17 +6,9 @@
 		<link href="/lib/css/zp-base.css" type="text/css" media="screen" rel="stylesheet" /> 
 		<link href="/lib/css/zp-type.css" type="text/css" media="screen" rel="stylesheet" /> 
 		<link href="/lib/css/zp-forms.css" type="text/css" media="screen" rel="stylesheet" /> 
-		<link href="/lib/css/zp-growl.css" type="text/css" media="screen" rel="stylesheet" /> 
+		<link href="/lib/css/zp-project.css" type="text/css" media="screen" rel="stylesheet" /> 
 
-		<!--[if IE]>
-		<link href="/lib/css/zp-ie.css" type="text/css" media="screen" rel="stylesheet" />
-		<![endif]--> 
-
-        <script type='text/javascript' src='/lib/js/apps/jquery-1.3.js'></script>
-        <script type='text/javascript' src='/lib/js/apps/jquery-ui-all-1.6rc5.min.js'></script>
-        <script type='text/javascript' src='/lib/js/apps/zophrenic-1.0.js'></script>
-        <script type='text/javascript' src='/lib/js/modules/jquery.notice.js'></script>
-        <script type='text/javascript' src='/lib/js/modules/livevalidation-1.3.js'></script>
+		<!--[if IE]><link href="/lib/css/zp-ie.css" type="text/css" media="screen" rel="stylesheet" /><![endif]--> 
     </head>
 
     <body>
@@ -28,9 +20,9 @@
 
 					<h2>Postbacks which give some content</h2>
 					<p>
-						{% @button text="Fill the content div" postback="fill_content"  %}
-						{% @button text="Insert Top" postback="insert_top"  %}
-						{% @button text="Insert Bottom" postback="insert_bottom" %}
+						{% button text="Fill the content div" postback="fill_content"  %}
+						{% button text="Insert Top" postback="insert_top"  %}
+						{% button text="Insert Bottom" postback="insert_bottom" %}
 					</p>
 	
 					<div class="clear"></div>
@@ -41,7 +33,7 @@
 		
 					<h2>Some drag/drop testing</h2>
 
-					{% @draggable id="drag1" tag="drag1" %}
+					{% draggable id="drag1" tag="drag1" %}
 					<div id="drag1" style="border: 2px solid #c33; background-color: #e99; padding: 10px; width: 100px; height: 50px">
 						<p>
 							Drag Me
@@ -50,7 +42,7 @@
 		
 					<div class="clear">&nbsp;</div>
 
-					{% @droppable id="drop1" tag="drop1" %}
+					{% droppable id="drop1" tag="drop1" %}
 					<div id="drop1" style="border: 2px solid #3c3; background-color: #9e9; padding: 10px; width: 100px; height: 50px">
 						<p>
 							Drop Here
@@ -77,27 +69,27 @@
 						</div>
 					</div>
 
-					{% @sorter id="sort" %}
-					{% @sortable id="s1" %}
-					{% @sortable id="s2" %}
-					{% @sortable id="s3" %}
-					{% @sortable id="s4" %}
-					{% @sortable id="s5" %}
+					{% sorter id="sort" %}
+					{% sortable id="s1" %}
+					{% sortable id="s2" %}
+					{% sortable id="s3" %}
+					{% sortable id="s4" %}
+					{% sortable id="s5" %}
 					
 					<h2>Some effects</h2>
 					
 					<div class="zp-20">
-						{% @button text="Hide" action={hide target="ef"} %}
-						{% @button text="Show" action={show target="ef"} %}<br/><br/>
-						{% @button text="Fade" action={fade target="ef"} %}
-						{% @button text="Appear" action={appear target="ef"} %}<br/><br/>
-						{% @button text="Toggle" action={toggle target="ef"} %}<br/><br/>
+						{% button text="Hide" action={hide target="ef"} %}
+						{% button text="Show" action={show target="ef"} %}<br/><br/>
+						{% button text="Fade" action={fade_out target="ef"} %}
+						{% button text="Appear" action={fade_in target="ef"} %}<br/><br/>
+						{% button text="Toggle" action={toggle target="ef"} %}<br/><br/>
 						
 						<a id="tgl" href="#">wired toggle</a>
-						{% @wire id="tgl" action={toggle target="ef"} %}
+						{% wire id="tgl" action={toggle target="ef"} %}
 					</div>
 
-					<div class="zp-20">
+					<div class="zp-40">
 						<div id="ef" style="border:1px solid black; background-color: #99c; padding: 10px">
 							<p>Use the buttons on the left to test different effects on this div.</p>
 						</div>
@@ -112,13 +104,13 @@
 
 					<h3>Javascript confirm</h3>
 					<p>
-						{% @button text="Show Confirm" postback="show_confirm" %}<br/><br/>
+						{% button text="Show Confirm" postback="show_confirm" %}<br/><br/>
 					</p>
 				
 					<h3>Growl</h3>
 					<p>
-						{% @button text="Show Temporary Growl" postback="show_growl"  %}<br/><br/>
-						{% @button text="Show Permanent Growl" postback="show_growl_stay" %}<br/><br/>
+						{% button text="Show Temporary Growl" postback="show_growl"  %}<br/><br/>
+						{% button text="Show Permanent Growl" postback="show_growl_stay" %}<br/><br/>
 					</p>
 					
 					<hr/>
@@ -126,12 +118,12 @@
 					<h2>Form validation</h2>
 				
 					<form id="myform" method="POST" action="postback">
-					{% @wire id="myform" type="submit" postback="some_tag" action={toggle target="ef"} %}
+					{% wire id="myform" type="submit" postback="some_tag" action={toggle target="ef"} %}
 					{# You could also use: delegate="module_handling_form" #}
 
 						<label for="email">e-mail</label>
 						<input type="text" id="email" name="email" value="" />
-						{% @validate id="email" type={presence} type={email} %}
+						{% validate id="email" type={presence} type={email} %}
 						
 						<div class="clear"></div>
 						<button>Submit</button>
@@ -141,12 +133,58 @@
 
 					<h2>Redirect to somewhere</h2>
 					
-					{% @button text="Redirect to /" action={redirect location="/"} %}
+					{% button text="Redirect to /" action={redirect location="/"} %}
 				</div>
 			</div>
 		</div>
+		
+		<hr/>
+		
+		<div class="zp-wrapper">
+			<div class="padding">
+				<h2>Dynamic id with <tt>#id</tt></h2>
 
-		{% @script %}
+				{{ #id }}
+
+				{% button id=#id %}
+				<div class="clear"></div>
+
+				<h2>Cached include</h2>
+
+				<p>Include below is cached for 10 seconds</p>
+				
+				{% include "included.tpl" maxage=10 %}
+
+				<h2>Some images</h2>
+
+				<p>
+				{% image "koe.jpg" width=200 height=200 crop="east" mono blur style="border: 1px solid black" %}
+				{% image "koe.jpg" width=200 height=200 crop style="border: 1px solid black" %}
+				{% image "koe.jpg" width=200 height=200 crop="west" blur="20x8" style="border: 1px solid black" %}
+				</p>
+
+				<div class="clear"></div>
+
+				<p>
+				{% image "koe.jpg" width=200 height=200 crop="east" grey style="border: 1px solid black" %}
+				{% image "koe.jpg" width=200 height=200 crop style="border: 1px solid black" %}
+				{% image "koe.jpg" width=200 height=200 crop="west" grey blur="20x8" style="border: 1px solid black" %}
+				</p>
+
+				<div class="clear"></div>
+
+				<h3>And the url of an image</h3>
+
+				{% image_url "koe.jpg" width=400 crop="east" blur grey %}
+
+				<h2>Id test (cont)</h2>
+
+				And the id of above again: {{ #id }}
+			</div>
+		</div>
+
+		{% include "_js_include.tpl" %}
+		{% script %}
 
     </body>
 </html>

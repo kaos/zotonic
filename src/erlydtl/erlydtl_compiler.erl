@@ -333,8 +333,8 @@ body_ast(DjangoParseTree, Context, TreeWalker) ->
             ({'variable', _} = Variable, TreeWalkerAcc) ->
                 {Ast, VarName} = resolve_variable_ast(Variable, Context),
                 {{format(Ast, Context), #ast_info{var_names = [VarName]}}, TreeWalkerAcc};              
-            ({'include', {string_literal, _, File}, []}, TreeWalkerAcc) ->
-                include_ast(unescape_string_literal(File), Context, TreeWalkerAcc);
+            ({'include', {string_literal, _, File}, Args}, TreeWalkerAcc) ->
+                include_ast(unescape_string_literal(File), Args, Context, TreeWalkerAcc);
             ({'if', {'not', Variable}, Contents}, TreeWalkerAcc) ->
                 {IfAstInfo, TreeWalker1} = empty_ast(TreeWalkerAcc),
                 {ElseAstInfo, TreeWalker2} = body_ast(Contents, Context, TreeWalker1),
@@ -374,7 +374,7 @@ body_ast(DjangoParseTree, Context, TreeWalker) ->
             ({'load', Names}, TreeWalkerAcc) ->
                 load_ast(Names, Context, TreeWalkerAcc);
             ({'tag', {'identifier', _, Name}, Args}, TreeWalkerAcc) ->
-                tag_ast(Name, Args, Context, TreeWalkerAcc);            
+                tag_ast(Name, Args, Context, TreeWalkerAcc);
             ({'call', {'identifier', _, Name}}, TreeWalkerAcc) ->
             	call_ast(Name, TreeWalkerAcc);
             ({'call', {'identifier', _, Name}, With}, TreeWalkerAcc) ->
@@ -387,8 +387,6 @@ body_ast(DjangoParseTree, Context, TreeWalker) ->
                 image_ast(Variable, Args, Context, TreeWalkerAcc);
             ({'image_url', Variable, Args}, TreeWalkerAcc) ->
                 image_url_ast(Variable, Args, Context, TreeWalkerAcc);
-            ({'scomp', {'scompname', _, Name}, Args}, TreeWalkerAcc) ->
-                scomp_ast(Name, Args, Context, TreeWalkerAcc);
             ({'url', {'identifier', _, Name}, Args}, TreeWalkerAcc) ->
                 url_ast(Name, Args, Context, TreeWalkerAcc);
             ({'print', Value}, TreeWalkerAcc) ->
@@ -456,14 +454,31 @@ string_ast(String, TreeWalker) ->
     {{erl_syntax:binary([erl_syntax:binary_field(erl_syntax:integer(X)) || X <- String]), #ast_info{}}, TreeWalker}.       
 
 
-include_ast(File, Context, TreeWalker) ->
-    FilePath = full_path(File, Context#dtl_context.doc_root),
-    case parse(FilePath, Context) of
-        {ok, InclusionParseTree, CheckSum} ->
-            with_dependency({FilePath, CheckSum}, body_ast(InclusionParseTree, Context#dtl_context{
-                parse_trail = [FilePath | Context#dtl_context.parse_trail]}, TreeWalker));
-        Err ->
-            throw(Err)
+include_ast(File, Args, Context, TreeWalker) ->
+    IsCached = lists:foldl( fun({{identifier, _, Key}, _}, IsC) -> 
+                                case Key of
+                                    "maxage" -> true;
+                                    "depend" -> true;
+                                    _ -> IsC
+                                end
+                            end,
+                            false,
+                            Args),
+    case IsCached of
+        false ->
+            InterpretedArgs = interpreted_args(Args, Context),
+            FilePath = full_path(File, Context#dtl_context.doc_root),
+            case parse(FilePath, Context) of
+                {ok, InclusionParseTree, CheckSum} ->
+                    with_dependency({FilePath, CheckSum}, body_ast(InclusionParseTree, Context#dtl_context{
+                        local_scopes = [ InterpretedArgs | Context#dtl_context.local_scopes ],
+                        parse_trail = [FilePath | Context#dtl_context.parse_trail]}, TreeWalker));
+                Err ->
+                    throw(Err)
+            end;
+        true ->
+            Args1 = [{{identifier, none, "file"},{string_literal, none, File}} | Args],
+            scomp_ast("include", Args1, Context, TreeWalker)
     end.
 
 
@@ -714,15 +729,7 @@ full_path(File, DocRoot) ->
 tag_ast(Name, Args, Context, TreeWalker) ->
     case lists:member(Name, TreeWalker#treewalker.custom_tags) of
         true ->
-            InterpretedArgs = lists:map(fun
-                    ({{identifier, _, Key}, {string_literal, _, Value}}) ->
-                        {list_to_atom(Key), erl_syntax:string(unescape_string_literal(Value))};
-                    ({{identifier, _, Key}, {auto_id,{identifier,_,AutoId}}}) ->
-                        {V, _} = auto_id_ast(AutoId),
-                        {list_to_atom(Key), V};
-                    ({{identifier, _, Key}, Value}) ->
-                        {list_to_atom(Key), format(resolve_variable_ast(Value, Context), Context)}
-                end, Args),
+            InterpretedArgs = interpreted_args(Args, Context),
             DefaultFilePath = filename:join([erlydtl_deps:get_base_dir(), "priv", "custom_tags", Name]),
             case Context#dtl_context.custom_tags_dir of
                 [] ->
@@ -751,7 +758,9 @@ tag_ast(Name, Args, Context, TreeWalker) ->
                     end
             end;
         _ ->
-            throw({error, lists:concat(["Custom tag '", Name, "' not loaded"])})
+            % Dynamic scomp call
+            % throw({error, lists:concat(["Custom tag '", Name, "' not loaded"])})
+            scomp_ast(Name, Args, Context, TreeWalker)
     end.
  
  tag_ast2({Source, _} = Dep, TagParseTree, InterpretedArgs, Context, TreeWalker) ->
@@ -900,7 +909,7 @@ resolve_value_ast(Value, Context) ->
            V;
       ({number_literal, _, Num}) ->
            erl_syntax:integer(list_to_integer(Num));
-      ({scomp_arg_tuple, {identifier, _, TupleName}, TupleArgs}) ->
+      ({tuple_value, {identifier, _, TupleName}, TupleArgs}) ->
            TupleNameAst = erl_syntax:atom(TupleName),
            TupleArgsAst = scomp_ast_map_args(TupleArgs, Context),
            erl_syntax:tuple([TupleNameAst, TupleArgsAst]);
@@ -913,11 +922,11 @@ resolve_value_ast(Value, Context) ->
 
 
 %% Added by Marc Worrell - handle evaluation of scomps by zp_scomp
-scomp_ast(Scomp, Args, Context, TreeWalker) ->
+scomp_ast(ScompName, Args, Context, TreeWalker) ->
     AppAst = erl_syntax:application(
                 erl_syntax:atom(zp_scomp),
                 erl_syntax:atom(render),
-                [   erl_syntax:atom("scomp_" ++ Scomp), 
+                [   erl_syntax:atom("scomp_" ++ ScompName), 
                     scomp_ast_map_args(Args, Context), 
                     erl_syntax:variable("Variables")
                 ]
@@ -948,6 +957,7 @@ scomp_ast_map_args(Args, Context) ->
     ArgsAst = lists:map(fun({{identifier, _, Name}, Value}) ->
                             ValueAst = case Value of
                                           true -> 
+                                              % special construct for argument name w/o value
                                               erl_syntax:atom(true);
                                           ({string_literal, _, Str}) ->
                                               S2 = unescape_string_literal(Str),
@@ -960,7 +970,7 @@ scomp_ast_map_args(Args, Context) ->
                                                V;
                                           ({number_literal, _, Num}) ->
                                                erl_syntax:integer(list_to_integer(Num));
-                                          ({scomp_arg_tuple, {identifier, _, TupleName}, TupleArgs}) ->
+                                          ({tuple_value, {identifier, _, TupleName}, TupleArgs}) ->
                                                TupleNameAst = erl_syntax:atom(TupleName),
                                                TupleArgsAst = scomp_ast_map_args(TupleArgs, Context),
                                                erl_syntax:tuple([TupleNameAst, TupleArgsAst]);
@@ -982,3 +992,19 @@ auto_id_ast(Name) ->
                     [erl_syntax:variable("AutoId"), erl_syntax:string([$-,$a,$u,$t,$o,$-|Name])]),
         #ast_info{}
     }.
+
+
+interpreted_args(Args, Context) ->
+    lists:map(fun
+            ({{identifier, _, Key}, {string_literal, _, Value}}) ->
+                {list_to_atom(Key), erl_syntax:string(unescape_string_literal(Value))};
+            ({{identifier, _, Key}, {auto_id,{identifier,_,AutoId}}}) ->
+                {V, _} = auto_id_ast(AutoId),
+                {list_to_atom(Key), V};
+            ({{identifier, _, Key}, {tuple_value, {identifier, _, TupleName}, TupleArgs}}) ->
+                 {list_to_atom(Key), {list_to_atom(TupleName), interpreted_args(TupleArgs, Context)}};
+             ({{identifier, _, Key}, true}) ->
+                 {list_to_atom(Key), true};
+            ({{identifier, _, Key}, Value}) ->
+                {list_to_atom(Key), format(resolve_variable_ast(Value, Context), Context)}
+        end, Args).

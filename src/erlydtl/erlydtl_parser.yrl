@@ -96,7 +96,6 @@ Nonterminals
 
 	UrlTag
 	PrintTag
-    ScompTag
 	ImageTag
 	ImageUrlTag.
 %	ValueList
@@ -143,7 +142,6 @@ Terminals
     text
 	url_keyword
     with_keyword
-	scompname
 	open_curly
 	close_curly
 %	open_bracket
@@ -171,22 +169,12 @@ Elements -> Elements CommentBlock : '$1' ++ ['$2'].
 Elements -> Elements CustomTag : '$1' ++ ['$2'].
 Elements -> Elements CallTag : '$1' ++ ['$2'].
 Elements -> Elements CallWithTag : '$1' ++ ['$2'].
-Elements -> Elements ScompTag : '$1' ++ ['$2'].
 Elements -> Elements UrlTag : '$1' ++ ['$2'].
 Elements -> Elements PrintTag : '$1' ++ ['$2'].
 Elements -> Elements ImageTag : '$1' ++ ['$2'].
 Elements -> Elements ImageUrlTag : '$1' ++ ['$2'].
 
 ValueBraced -> open_var Value close_var : '$2'.
-
-Value -> Value pipe Filter : {apply_filter, '$1', '$3'}.
-Value -> Variable : '$1'.
-Value -> Literal : '$1'.
-Value -> hash identifier : {auto_id, '$2'}.
-Value -> open_curly identifier Args close_curly : {scomp_arg_tuple, '$2', '$3'}.
-
-Variable -> identifier : {variable, '$1'}.
-Variable -> Value dot identifier : {attribute, {'$3', '$1'}}.
 
 ExtendsTag -> open_tag extends_keyword string_literal close_tag : {extends, '$3'}.
 IncludeTag -> open_tag include_keyword string_literal Args close_tag : {include, '$3', '$4'}.
@@ -260,22 +248,25 @@ CallWithTag -> open_tag call_keyword identifier with_keyword Value close_tag : {
 ImageTag -> open_tag image_keyword Value Args close_tag : {image, '$3', '$4' }.
 ImageUrlTag -> open_tag image_url_keyword Value Args close_tag : {image_url, '$3', '$4' }.
 
+UrlTag -> open_tag url_keyword identifier Args close_tag : {url, '$3', '$4'}.
+
+PrintTag -> open_tag print_keyword Value close_tag : {print, '$3'}.
+
 Args -> '$empty' : [].
 Args -> Args identifier : '$1' ++ [{'$2', true}].
 Args -> Args identifier equal Value : '$1' ++ [{'$2', '$4'}].
 
 
-%%%% Additions by Marc Worrell 
-%%%% implementation of the url tag
+Value -> Value pipe Filter : {apply_filter, '$1', '$3'}.
+Value -> Variable : '$1'.
+Value -> Literal : '$1'.
+Value -> hash identifier : {auto_id, '$2'}.
+Value -> open_curly identifier Args close_curly : {tuple_value, '$2', '$3'}.
 
-UrlTag -> open_tag url_keyword identifier Args close_tag : {url, '$3', '$4'}.
+Variable -> identifier : {variable, '$1'}.
+Variable -> Value dot identifier : {attribute, {'$3', '$1'}}.
 
-PrintTag -> open_tag print_keyword Value close_tag : {print, '$3'}.
-
-%%%% Special construct to call scomps, scomps can have complex arguments
-
-ScompTag -> open_tag scompname Args close_tag : {scomp, '$2', '$3'}.
-
-% ArgValue -> open_bracket ArgValueList close_bracket : {scomp_arg_list, '$2'}.
-% ArgValueList -> ArgValue : ['$1'].
-% ArgValueList -> ArgValueList comma ArgValue : '$1' ++ ['$2'].
+% experimental for adding lists as argument values
+% Value -> open_bracket ValueList close_bracket : {value_list, '$2'}.
+% ValueList -> Value : ['$1'].
+% ValueList -> ValueList comma Value : '$1' ++ ['$2'].

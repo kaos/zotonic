@@ -210,9 +210,6 @@ scan("{" ++ T, Scanned, {Row, Column}, {_, Closer}) ->
 scan("}" ++ T, Scanned, {Row, Column}, {_, Closer}) ->
     scan(T, [{close_curly, {Row, Column}, "}"} | Scanned], {Row, Column + 1}, {in_code, Closer});
 
-scan("@" ++ T, Scanned, {Row, Column}, {in_code, Closer}) ->
-    scan(T, [{scompname, {Row, Column}, ""} | Scanned], {Row, Column + 1}, {in_scompname, Closer});
-
 scan([H | T], Scanned, {Row, Column}, {in_code, Closer}) ->
     case char_type(H) of
         letter_underscore ->
@@ -237,16 +234,6 @@ scan([H | T], Scanned, {Row, Column}, {in_identifier, Closer}) ->
             scan(T, append_char(Scanned, H), {Row, Column + 1}, {in_identifier, Closer});
         digit ->
             scan(T, append_char(Scanned, H), {Row, Column + 1}, {in_identifier, Closer});
-        _ ->
-            {error, io_lib:format("Illegal character line ~p column ~p", [Row, Column])}
-    end;
-
-scan([H | T], Scanned, {Row, Column}, {in_scompname, Closer}) ->
-    case char_type(H) of
-        letter_underscore ->
-            scan(T, append_char(Scanned, H), {Row, Column + 1}, {in_scompname, Closer});
-        digit ->
-            scan(T, append_char(Scanned, H), {Row, Column + 1}, {in_scompname, Closer});
         _ ->
             {error, io_lib:format("Illegal character line ~p column ~p", [Row, Column])}
     end.
