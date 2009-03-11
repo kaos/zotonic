@@ -11,7 +11,7 @@
 		<div class="block clearfix">
 			<p>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Fusce ultricies nisi in lectus. Morbi et sem nec eros bibendum vestibulum. Ut vitae erat vitae dui tempor dictum. Nam sem. Sed iaculis lorem non ipsum. Donec aliquet. Fusce vel elit.ccumsan tellus orci id nisi. </p>
 
-			<textarea id="wysiwyg" rows="11" cols="150"></textarea>
+			<textarea class="do_wysiwyg" rows="11" cols="150"></textarea>
 			
 		</div>
 	</div>	

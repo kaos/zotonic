@@ -66,7 +66,7 @@
 
 	{% include "_js_include.tpl" %}
 
-	{% @script %}
+	{% script %}
 	
 </body>
 </html>

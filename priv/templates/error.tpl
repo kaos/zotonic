@@ -18,7 +18,7 @@
 			</p>
 			<div class="notification error">
 				<h5>{{ error_code }} error</h5>
-				{% @wire id="error-trigger" action={slide_toggle speed=350 target="error-explain"} %} 
+				{% wire id="error-trigger" action={slide_toggle speed=350 target="error-explain"} %} 
 				<a href="javascript:void(0);" id="error-trigger">Click for error information.</a>
 				<pre style="display: none;" id="error-explain">{{ error_dump }}</pre>
 			</div>

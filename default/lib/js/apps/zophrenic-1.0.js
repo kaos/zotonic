@@ -86,27 +86,25 @@ function zp_ajax(params)
 		type: 'post',
 		data: params,
 		dataType: 'text',
-		success: 
-		    function(data, textStatus) 
-		    {
-    			zp_is_in_postback--;
-    			zp_stop_spinner();
-    			try {
-    				//alert("SUCCESS: " + transport.responseText);
-    				eval(data);
-                    zp_init_postback_forms();
-    			} catch (E) {
-    				alert("Error evaluating ajax return value: " + data);
-    				alert(E);
-    			}
-    		},
-		error:
-		    function(xmlHttpRequest, textStatus, errorThrown) 
-		    {
-			    zp_is_in_postback--;
-    			zp_stop_spinner();
-			    alert("FAIL: " + textStatus);
-		    }
+		success: function(data, textStatus) 
+	    {
+			zp_is_in_postback--;
+			zp_stop_spinner();
+			try {
+				//alert("SUCCESS: " + transport.responseText);
+				eval(data);
+                zp_init_postback_forms();
+			} catch (E) {
+				alert("Error evaluating ajax return value: " + data);
+				alert(E);
+			}
+		},
+		error: function(xmlHttpRequest, textStatus, errorThrown) 
+	    {
+		    zp_is_in_postback--;
+			zp_stop_spinner();
+		    alert("FAIL: " + textStatus);
+	    }
 	});			
 }
 
@@ -163,16 +161,14 @@ function zp_start_spinner()
 {
     if (zp_is_in_postback > 0)
     {
-    	var spinner = $('#spinner');
-    	if (spinner) spinner.animate({opacity: 'show'}, 200);
+    	$('#spinner').fadeIn(100);
     }
 }
 
 function zp_stop_spinner() {
     if (zp_is_in_postback == 0)
     {
-    	var spinner = $('#spinner');
-    	if (spinner) spinner.animate({opacity: 'hide'}, 50);
+    	$('#spinner').fadeOut(100);
     }
 }
 
@@ -500,4 +496,3 @@ $.fieldValue = function(el, successful) {
     }
     return el.value;
 };
-
