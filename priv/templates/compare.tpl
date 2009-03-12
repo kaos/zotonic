@@ -11,9 +11,8 @@
 			<li class="zp-33 first">
 				<div class="block">
 					<h3>Gazelle Champion Mondial</h3>
-					<img src="/image/trek_urban.jpg(225x230)(crop)(urban).jpg" alt="" />
+					<img src="{% image_url "trek_urban.jpg" width=225 height=230 crop %}" alt="fiets" class="do_imageviewer" />
 					<p>verhaaltje</p>
-					
 					<div class="product-price clearfix">
 						<h3>&euro;899 <span>incl. btw</span></h3>
 						<button>Bekijk fiets</button>
@@ -24,9 +23,8 @@
 			<li class="zp-33">
 				<div class="block">
 					<h3>HEMA tank fiets</h3>
-					<img src="/image/trek_urban.jpg(225x230)(crop)(urban).jpg" alt="Vallentia" />
-					<p>verhaaltje</p>
-					
+					<img src="{% image_url "trek_urban.jpg" width=225 height=230 crop %}" alt="fiets" class="do_imageviewer" />
+					<p>verhaaltje</p>					
 					<div class="product-price clearfix">
 						<h3>&euro;350 <span>incl. btw</span></h3>
 						<button>Bekijk fiets</button>
@@ -37,9 +35,8 @@
 			<li class="zp-33">
 				<div class="block">
 					<h3>Bianchi road</h3>
-					<img src="/image/trek_urban.jpg(225x230)(crop)(urban).jpg" alt="Vallentia" />
-					<p>verhaaltje</p>
-					
+					<img src="{% image_url "trek_urban.jpg" width=225 height=230 crop %}" alt="fiets" class="do_imageviewer" />
+					<p>verhaaltje</p>					
 					<div class="product-price clearfix">
 						<h3>&euro;2230 <span>incl. btw</span></h3>
 						<button>Bekijk fiets</button>

@@ -420,7 +420,17 @@
 	</array>
 	<key>showFileHierarchyDrawer</key>
 	<true/>
+	<key>treeState</key>
+	<dict>
+		<key>priv</key>
+		<dict>
+			<key>isExpanded</key>
+			<true/>
+			<key>subItems</key>
+			<dict/>
+		</dict>
+	</dict>
 	<key>windowFrame</key>
-	<string>{{288, 277}, {1280, 705}}</string>
+	<string>{{288, 73}, {982, 705}}</string>
 </dict>
 </plist>

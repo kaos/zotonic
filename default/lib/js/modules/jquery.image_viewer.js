@@ -132,7 +132,7 @@ $.widget("zp.imageviewer",
 	kill: function() 
 	{
 		jQuery('.popup-overlay').fadeOut(100);
-		jQuery('.loaded-bigImage').fadeOut(200);
+		jQuery('.loaded-bigImage').fadeOut(100);
 	   	this.destroy();
 	}
 });
