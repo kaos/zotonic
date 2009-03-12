@@ -5,7 +5,7 @@
 
 -module(zophrenic).
 -author('Marc Worrell <marc@worrell.nl>').
--export([start/0, stop/0]).
+-export([start/0, start/1, stop/0, stop/1]).
 -revision("$Id$").
 
 ensure_started(App) ->
