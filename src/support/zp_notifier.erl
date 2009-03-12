@@ -2,6 +2,7 @@
 %% @copyright 2009 Marc Worrell
 %%
 %% @doc Simple implementation of an observer/notifier. Relays events to observers of that event.
+%% Also implements map and fold operations.
 
 -module(zp_notifier).
 
@@ -14,12 +15,27 @@
 -export([start_link/0, start_link/1]).
 
 %% interface functions
--export([observe/2, detach/2, notify/1, notify_sync/1]).
+-export([
+    observe/2,
+    observe/3,
+    detach/2,
+    detach_all/1,
+    get_observers/1,
+    notify/1, 
+    notify1/1, 
+    first/1, 
+    map/1, 
+    foldl/2, 
+    foldr/2
+]).
 
 %% internal
--export([notify_observers/2, test/0, test_observer/1]).
+-export([notify_observer/3, test/0, test_observer/1]).
 
 -include_lib("zophrenic.hrl").
+
+-define(DEFAULT_PRIORITY, 500).
+-define(TIMEOUT, 60000).
 
 -record(state, {observers}).
 
@@ -36,7 +52,11 @@ start_link(Args) when is_list(Args) ->
 
 %% @doc Subscribe to an event. Observer is a {M,F} or pid()
 observe(Event, Observer) ->
-    gen_server:cast(?MODULE, {'observe', Event, Observer}).
+    gen_server:cast(?MODULE, {'observe', Event, Observer, ?DEFAULT_PRIORITY}).
+
+%% @doc Subscribe to an event. Observer is a {M,F} or pid()
+observe(Event, Observer, Priority) ->
+    gen_server:cast(?MODULE, {'observe', Event, Observer, Priority}).
 
 %% @doc Detach all observers and delete the event
 detach_all(Event) ->
@@ -46,15 +66,34 @@ detach_all(Event) ->
 detach(Event, Observer) ->
     gen_server:cast(?MODULE, {'detach', Event, Observer}).
 
+%% @doc Return all observers for a particular event
+get_observers(Event) ->
+    gen_server:call(?MODULE, {'get_observers', Event}).
 
-%% @doc Async notify observers of an event
+%% @doc Cast the event to all observers
 notify(Event) ->
     gen_server:cast(?MODULE, {'notify', Event}).
 
+%% @doc Cast the event to the first observer
+notify1(Event) ->
+    gen_server:cast(?MODULE, {'notify1', Event}).
 
-%% @doc Synchronously notify observers, wait till all have done their work
-notify_sync(Event) ->
-    gen_server:call(?MODULE, {'notify_sync', Event}).
+%% @doc Call all observers till one returns something else than false
+first(Event) ->
+    gen_server:call(?MODULE, {'first', Event}).
+
+%% @doc Call all observers, return the list of answers
+map(Event) ->
+    gen_server:call(?MODULE, {'map', Event}).
+
+%% @doc Do a fold over all observers, prio 1 observers first
+foldl(Event, Acc0) ->
+    gen_server:call(?MODULE, {'foldl', Event, Acc0}).
+
+%% @doc Do a fold over all observers, prio 1 observers last
+foldr(Event, Acc0) ->
+    gen_server:call(?MODULE, {'foldr', Event, Acc0}).
+
 
 
 %%====================================================================
@@ -79,13 +118,89 @@ init(_Args) ->
 %%                                      {stop, Reason, State}
 %% Description: Handling call messages
 
-%% @doc Trigger an event, notify all observers synchronously
-handle_call({'notify_sync', Event}, _From, State) ->
+%% @doc Return the list of observers for an event
+handle_call({'get_observers', Event}, _From, State) ->
     case dict:find(Event, State#state.observers) of
-        {ok, Observers} -> notify_observers(Event, Observers);
-        error -> ok
-    end,
-    {reply, ok, State};
+        {ok, Observers} ->
+            {reply, Observers, State};
+        error ->
+            {reply, [], State}
+    end;
+
+%% @doc Call all observers, return the list of answers
+%% @todo Make the map a pmap operation
+handle_call({'map', Msg}, From, State) ->
+    Event = element(1, Msg),
+    case dict:find(Event, State#state.observers) of
+        {ok, Observers} ->
+            spawn(fun() -> 
+                        Result = lists:map(fun(Obs) -> notify_observer(Msg, Obs, true) end, Observers),
+                        gen_server:reply(From, Result)
+                  end),
+            {noreply, State};
+        error -> 
+            {reply, undefined, State}
+    end;
+
+%% @doc Call the observers, highest prio first, till one return not false
+handle_call({'first', Msg}, From, State) ->
+    Event = element(1, Msg),
+    case dict:find(Event, State#state.observers) of
+        {ok, Observers} ->
+            spawn(fun() -> 
+                        Result = lists:foldl(
+                                    fun
+                                        (Obs, false) -> notify_observer(Msg, Obs, true);
+                                        (_Obs, Acc) -> Acc
+                                    end, 
+                                    false,
+                                    Observers),
+                        gen_server:reply(From, Result)
+                  end),
+            {noreply, State};
+        error -> 
+            {reply, undefined, State}
+    end;
+
+%% @doc Do a fold over all observers, highest prio first. The accumulator is appended to the message.
+handle_call({'foldl', Msg, Acc0}, From, State) ->
+    Event = element(1, Msg),
+    case dict:find(Event, State#state.observers) of
+        {ok, Observers} ->
+            spawn(fun() -> 
+                        Result = lists:foldl(
+                                    fun(Obs, Acc) -> 
+                                        MsgAcc = list_to_tuple(tuple_to_list(Msg) ++ [Acc]),
+                                        notify_observer(MsgAcc, Obs, true) 
+                                    end, 
+                                    Acc0,
+                                    Observers),
+                        gen_server:reply(From, Result)
+                  end),
+            {noreply, State};
+        error -> 
+            {reply, undefined, State}
+    end;
+
+%% @doc Do a fold over all observers, lowest prio first. The accumulator is appended to the message.
+handle_call({'foldr', Msg, Acc0}, From, State) ->
+    Event = element(1, Msg),
+    case dict:find(Event, State#state.observers) of
+        {ok, Observers} ->
+            spawn(fun() -> 
+                        Result = lists:foldr(
+                                    fun(Obs, Acc) -> 
+                                        MsgAcc = list_to_tuple(tuple_to_list(Msg) ++ [Acc]),
+                                        notify_observer(MsgAcc, Obs, true) 
+                                    end, 
+                                    Acc0,
+                                    Observers),
+                        gen_server:reply(From, Result)
+                  end),
+            {noreply, State};
+        error -> 
+            {reply, undefined, State}
+    end;
 
 %% @doc Trap unknown calls
 handle_call(Message, _From, State) ->
@@ -97,10 +212,13 @@ handle_call(Message, _From, State) ->
 %%                                  {stop, Reason, State}
 
 %% @doc Add an observer to an event
-handle_cast({'observe', Event, Observer}, State) ->
+handle_cast({'observe', Event, Observer, Priority}, State) ->
     Observers1 = case dict:find(Event, State#state.observers) of
-                  {ok, _} -> dict:append(Event, Observer, State#state.observers);
-                  error -> dict:store(Event, [Observer], State#state.observers)
+                  {ok, EventObservers} -> 
+                        Os1 = lists:sort([{Priority, Observer}|EventObservers]),
+                        dict:store(Event, Os1, State#state.observers);
+                  error -> 
+                        dict:store(Event, [{Priority, Observer}], State#state.observers)
                   end,
     {noreply, State#state{observers=Observers1}};
 
@@ -108,7 +226,7 @@ handle_cast({'observe', Event, Observer}, State) ->
 handle_cast({'detach', Event, Observer}, State) ->
     Observers1 = case dict:find(Event, State#state.observers) of
                   {ok, Olist} ->
-                      Olist1 = lists:delete(Observer, Olist),
+                      Olist1 = lists:filter(fun({_Prio,Obs}) -> Obs /= Observer end, Olist),
                       dict:store(Event, Olist1, State#state.observers);
                   error ->
                       State#state.observers
@@ -126,18 +244,24 @@ handle_cast({'notify', Msg}, State) when is_tuple(Msg) ->
     Event = element(1, Msg),
     case dict:find(Event, State#state.observers) of
         {ok, Observers} ->
-            spawn(fun() -> notify_observers(Msg, Observers) end);
+            spawn(fun() -> 
+                        lists:foreach(fun(Obs) -> notify_observer(Msg, Obs, false) end, Observers)
+                  end);
         error -> ok
     end,
     {noreply, State};
 
-handle_cast({'notify', Event}, State) ->
+
+%% @doc Trigger an event, notify the first observer asynchronously
+handle_cast({'notify1', Msg}, State) when is_tuple(Msg) ->
+    Event = element(1, Msg),
     case dict:find(Event, State#state.observers) of
-        {ok, Observers} ->
-            spawn(fun() -> notify_observers(Event, Observers) end);
+        {ok, [Observer|_Observers]} ->
+            spawn(fun() -> notify_observer(Msg, Observer, false) end);
         error -> ok
     end,
     {noreply, State};
+
 
 %% @doc Trap unknown casts
 handle_cast(Message, State) ->
@@ -171,32 +295,42 @@ code_change(_OldVsn, State, _Extra) ->
 %% support functions
 %%====================================================================
 
-%% @doc Notify all observers of an event
-notify_observers(Event, Observers) ->
-    lists:foreach(
-                fun
-                    (Fun) when is_function(Fun) ->
-                        Fun(Event);
-                    (Pid) when is_pid(Pid) ->
-                        try
-                            Pid ! Event
-                        catch _M:_E ->
-                            ?LOG("Error notifying %p with event %p", [Pid, Event])
-                        end;
-                    ({M,F}) ->
-                        M:F(Event)
-                end,
-                Observers).
+%% @doc Notify an observer of an event
+notify_observer(Msg, {_Prio, Fun}, _IsCall) when is_function(Fun) ->
+    Fun(Msg);
+notify_observer(Msg, {_Prio, Pid}, IsCall) when is_pid(Pid) ->
+    try
+        Pid ! {'notify', Msg, self()},
+        case IsCall of
+            true ->
+                receive
+                {reply, Pid, Reply} -> 
+                    Reply
+                after ?TIMEOUT ->
+                    false
+                end;
+            false -> 
+                ok
+        end
+    catch _M:_E ->
+        ?LOG("Error notifying %p with event %p. Detaching pid.", [Pid, Msg]),
+        Event = element(1, Msg),
+        detach(Event, Pid)
+    end;
+notify_observer(Msg, {_Prio, {M,F}}, _IsCall) ->
+    M:F(Msg).
 
 
 %% Simple test
 
 test() ->
-    detach_all(test),
-    observe(test, {?MODULE, test_observer}),
-    notify(test),
-    notify({test, arg1, arg2}),
-    detach(test, {?MODULE, test_observer}).
+    detach_all(test_blaat),
+    observe(test_blaat, {?MODULE, test_observer}),
+    notify({test_blaat, arg1, arg2}),
+    [{?DEFAULT_PRIORITY, {?MODULE, test_observer}}] = get_observers(test_blaat),
+    detach(test_blaat, {?MODULE, test_observer}),
+    [] = get_observers(test_blaat).
+    
 
 test_observer(Event) ->
     io:format("Received Event \"~p\"~n", [Event]).
