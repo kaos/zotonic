@@ -3,7 +3,7 @@
 <plist version="1.0">
 <dict>
 	<key>currentDocument</key>
-	<string>default/lib/js/modules/jquery.image_viewer.js</string>
+	<string>priv/templates/bike.tpl</string>
 	<key>documents</key>
 	<array>
 		<dict>
@@ -63,20 +63,6 @@
 	<integer>256</integer>
 	<key>metaData</key>
 	<dict>
-		<key>default/lib/js/modules/jquery.image_viewer.js</key>
-		<dict>
-			<key>caret</key>
-			<dict>
-				<key>column</key>
-				<integer>8</integer>
-				<key>line</key>
-				<integer>122</integer>
-			</dict>
-			<key>firstVisibleColumn</key>
-			<integer>0</integer>
-			<key>firstVisibleLine</key>
-			<integer>99</integer>
-		</dict>
 		<key>deps/mochiweb/src/mochiweb.app</key>
 		<dict>
 			<key>caret</key>
@@ -314,44 +300,14 @@
 			<key>caret</key>
 			<dict>
 				<key>column</key>
-				<integer>132</integer>
+				<integer>0</integer>
 				<key>line</key>
-				<integer>31</integer>
-			</dict>
-			<key>columnSelection</key>
-			<false/>
-			<key>firstVisibleColumn</key>
-			<integer>0</integer>
-			<key>firstVisibleLine</key>
-			<integer>17</integer>
-			<key>selectFrom</key>
-			<dict>
-				<key>column</key>
-				<integer>4</integer>
-				<key>line</key>
-				<integer>31</integer>
-			</dict>
-			<key>selectTo</key>
-			<dict>
-				<key>column</key>
-				<integer>132</integer>
-				<key>line</key>
-				<integer>31</integer>
-			</dict>
-		</dict>
-		<key>priv/templates/compare.tpl</key>
-		<dict>
-			<key>caret</key>
-			<dict>
-				<key>column</key>
-				<integer>109</integer>
-				<key>line</key>
-				<integer>13</integer>
+				<integer>72</integer>
 			</dict>
 			<key>firstVisibleColumn</key>
 			<integer>0</integer>
 			<key>firstVisibleLine</key>
-			<integer>8</integer>
+			<integer>0</integer>
 		</dict>
 		<key>priv/templates/page.tpl</key>
 		<dict>
@@ -372,7 +328,7 @@
 			<key>caret</key>
 			<dict>
 				<key>column</key>
-				<integer>24</integer>
+				<integer>7</integer>
 				<key>line</key>
 				<integer>102</integer>
 			</dict>
@@ -458,8 +414,6 @@
 	<array>
 		<string>priv/templates/page.tpl</string>
 		<string>priv/templates/product.tpl</string>
-		<string>priv/templates/compare.tpl</string>
-		<string>default/lib/js/modules/jquery.image_viewer.js</string>
 		<string>priv/templates/bike.tpl</string>
 	</array>
 	<key>showFileHierarchyDrawer</key>
@@ -523,6 +477,6 @@
 		</dict>
 	</dict>
 	<key>windowFrame</key>
-	<string>{{0, 73}, {1280, 705}}</string>
+	<string>{{0, 75}, {1280, 703}}</string>
 </dict>
 </plist>

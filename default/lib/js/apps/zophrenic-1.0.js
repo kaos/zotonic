@@ -22,7 +22,6 @@ function zp_growl_add(message, stay, type)
 {
 	stay = stay || false;
 	type = type || 'notice';
-	console.log(type);
 	jQuery.noticeAdd(
 	{
       	text: message,
@@ -122,30 +121,31 @@ function zp_comet_start()
 
 function zp_comet() 
 {
-	$.ajax({ 
-		url: '/comet',
-		type:'post',
-		data: "zp_pageid=" + urlencode(zp_pageid),
-		dataType: 'text',
-		success:
-		    function(data, textStatus) 
-		    {
-    			try {
-    				//alert("SUCCESS: " + data);
-    				eval(data);
-                    zp_init_postback_forms();
-    			} catch (E) {
-    				alert("Error evaluating Comet return value: " + data);
-    				alert(E);
-    			}
-    			setTimeout("zp_comet();", 10);
-    		},
-		error: 
-		    function(xmlHttpRequest, textStatus, errorThrown) 
-		    {
-			    setTimeout("zp_comet();", 1000);
-		    }
-	});
+	//$.ajax({ 
+	//	url: '/comet',
+	//	type:'post',
+	//	data: "zp_pageid=" + urlencode(zp_pageid),
+	//	dataType: 'text',
+	//	success:
+	//	    function(data, textStatus) 
+	//	    {
+    //			try {
+    //				//alert("SUCCESS: " + data);
+    //				eval(data);
+    //                zp_init_postback_forms();
+    //			} catch (E) {
+    //				alert("Error evaluating Comet return value: " + data);
+    //				alert(E);
+    //			}
+    //			setTimeout("zp_comet();", 10);
+    //		},
+	//	error: 
+	//	    function(xmlHttpRequest, textStatus, errorThrown) 
+	//	    {
+	//		    setTimeout("zp_comet();", 1000);
+	//	    }
+	//});
+	return;
 }
 
 /*** Utility functions ***/

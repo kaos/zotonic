@@ -91,6 +91,7 @@ body {
 			float: left;
 			position: absolute;
 			top: 12px;
+			display: block;
 		}
 
 		.basket-basket-image {
@@ -385,7 +386,7 @@ ul#navigation li.lang a.english {
 	}
 	
 	.home-bargain img.bargain-last {
-		margin: 0 0 0 2px;
+		margin: 0 0 0 1px;
 	}
 	
 		h2 span a,

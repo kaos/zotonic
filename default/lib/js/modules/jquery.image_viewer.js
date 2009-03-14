@@ -9,7 +9,7 @@ $.widget("zp.imageviewer",
 	init: function()
 	{
 		var zp			= this;
-		imageWrapper 	= jQuery('<div></div>').addClass('image-wrapper').css({width: this.element.width(), height: this.element.height()});
+		imageWrapper 	= jQuery('<div></div>').addClass('image-wrapper clearfix').css({width: this.element.width(), height: this.element.height()});
 		imageMagnifier 	= jQuery('<div></div>').addClass('image-magnifier').css({top: this.element.offset().top, left: this.element.offset().left});
 		bigImg			= jQuery('<img alt="'+zp.element.attr('alt')+'" />').hide();
 		
