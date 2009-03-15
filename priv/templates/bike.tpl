@@ -9,7 +9,7 @@
 		<h2>Trek Urban Valentia</h2>
 		<div class="block clearfix">
 			<div class="zp-50">
-				<img src="{% image_url "koe.jpg" width=340 height=290 crop %}" alt="koe" class="do_imageviewer {test: 'test'}" />
+				{% image "koe.jpg" width=340 height=290 crop class="do_imageviewer" alt="koe" %}
 			</div>
 		
 			<div class="zp-50">
@@ -29,7 +29,7 @@
 		<h2>Trek Urban Valentia</h2>
 		<div class="block clearfix">
 			<div class="zp-50">
-				<img src="{% image_url "trek_urban.jpg" width=340 height=290 crop %}" alt="trek urban" class="do_imageviewer {test: 'test2'}" />
+				{% image "trek_urban.jpg" width=340 height=290 crop class="do_imageviewer" alt="trac_urban" %}
 			</div>
 		
 			<div class="zp-50">
@@ -57,19 +57,19 @@
 			<h2>Gerelateerde producten</h2>
 			<ul class="related-articles">
 				<li class="block clearfix">
-					<img src="{% image_url "trapper_klein.jpg" width=67 height=50 crop %}" alt="trapper" />
+					{% image "trapper_klein.jpg" width=67 height=50 crop alt="trapper" %}
 					<h4><a href="#">Shimano</a></h4>
 					<p>PD-6620-G Trapper</p> 
 					<p><a href="#">Bestel snel &raquo;</a></p>
 				</li>
 				<li class="block clearfix">
-					<img src="{% image_url "trapper_klein.jpg" width=67 height=50 crop %}" alt="trapper" />
+					{% image "trapper_klein.jpg" width=67 height=50 crop alt="trapper" %}
 					<h4><a href="#">Shimano</a></h4>
 					<p>PD-6620-G Trapper</p> 
 					<p><a href="#">Bestel snel &raquo;</a></p>
 				</li>
 				<li class="block clearfix">
-					<img src="{% image_url "trapper_klein.jpg" width=67 height=50 crop %}" alt="trapper" />
+					{% image "trapper_klein.jpg" width=67 height=50 crop alt="trapper" %}
 					<h4><a href="#">Shimano</a></h4>
 					<p>PD-6620-G Trapper</p> 
 					<p><a href="#">Bestel snel &raquo;</a></p>

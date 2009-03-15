@@ -1,85 +1,50 @@
-/*
- * widgetManager 1.0
- *
- * Copyright (c) 2009 Tim Benniks <tim@timbenniks.com>
- * Licensed under the MIT
- *
- * http://www.zophrenic.com
- *
- */
-
-// create a basic namespace for all widgets in Zophrenic
-$.zp = $.zp || {}; 
-
 // widgetManager class.
 ;(function($)
 {
 	$.extend(
 	{
-		widgetManager: 
+		widgetManager: function(context)
 		{
-			init: function(widgets, context)
-			{
-				context = context || document.body;
-				
-				this.widgetNames = widgets;
-				this.startWidgets(context);
-			},
+			context = context || document.body;
 			
-			startWidgets: function(context)
+			var stack 	  = [context];
+			
+			while(stack.length > 0)
 			{
-				var stack 	 = [context];
-				var names	 = this.widgetNames;
-				var names_do = {};
+				var objectClass, objectOptions, functionName, defaults, element = stack.pop();
 				
-				for(var i in names)
-			   	{
-					names_do['do_' + names[i]] = names[i];
-			   	}
-
-				while(stack.length > 0)
+				if(element.className && (objectClass = new RegExp("do_([\\w_]+)", "g").exec(element.className)))
 				{
-					var element = stack.pop();
+					functionName = objectClass[1];
 					
-					if(element.className && element.className.match( /do_[a-z_]+/ ))
+					if(typeof $(element)[functionName] == "function")
 					{
-						// Note: IE6 does not recognize the \b escape char (whitespace in js regexps)
-						var objectClass = element.className.match( /do_[a-z_]+/g );
-					
-						for(var i in objectClass)
+						if($.ui && typeof $.ui[functionName] == "function")
 						{
-							var functionName = names_do[objectClass[i]];
-							
-							if(functionName)
-							{
-								// use the metadata plugin to add options
-								eval('$(element).' + functionName + '()');
-							}
+							defaults = $.ui[functionName].defaults;
 						}
-					}
-					
-					if(element.childNodes) 
-					{
-						for(var i in element.childNodes)
+						else
 						{
-							if(element.childNodes[i].nodeType != 3)
-							{
-								// Only process if not a text node
-								stack.unshift(element.childNodes[i]);
-							}
+							defaults = {}
+						}
+						
+						objectOptions = $.extend({}, defaults, $(element).metadata());							
+						$(element)[functionName](objectOptions);
+					}
+				}
+
+				if(element.childNodes) 
+				{
+					for(var i in element.childNodes)
+					{
+						if(element.childNodes[i].nodeType != 3)
+						{
+							stack.unshift(element.childNodes[i]);
 						}
 					}
 				}
-			}		
-		}
-	});
-})(jQuery);
-
-// metadata plugin
-;(function($) 
-{
-	$.extend(
-	{
+			}
+		},	
 		metadata: 
 		{
 			defaults : {

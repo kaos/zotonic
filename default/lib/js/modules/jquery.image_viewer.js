@@ -1,4 +1,4 @@
-$.widget("zp.imageviewer", 
+$.widget("ui.imageviewer", 
 {
 	_init: function() 
 	{ 
@@ -8,10 +8,10 @@ $.widget("zp.imageviewer",
 	
 	init: function()
 	{
-		var zp			= this;
+		var ui			= this;
 		imageWrapper 	= jQuery('<div></div>').addClass('image-wrapper clearfix').css({width: this.element.width(), height: this.element.height()});
 		imageMagnifier 	= jQuery('<div></div>').addClass('image-magnifier').css({top: this.element.offset().top, left: this.element.offset().left});
-		bigImg			= jQuery('<img alt="'+zp.element.attr('alt')+'" />').hide();
+		bigImg			= jQuery('<img alt="'+ui.element.attr('alt')+'" />').hide();
 		
 		this.element.wrap(imageWrapper).after(imageMagnifier).parent().hover(function()
 		{
@@ -24,22 +24,22 @@ $.widget("zp.imageviewer",
 		
 		imageMagnifier.after(bigImg).click(function()
 		{
-			zp.loadImage()
+			ui.loadImage()
 		});
 	},
 	
 	loadImage: function()
 	{
-		var zp 				= this;
-		var imageOrigSrc 	= zp.element.attr('src').split('.');
+		var ui 				= this;
+		var imageOrigSrc 	= ui.element.attr('src').split('.');
 		var imageTempSrc 	= imageOrigSrc[0].split('/');
 		var imageExt		= imageOrigSrc[imageOrigSrc.length - 1];
 		var imageSrc 		= '/media/inline/' + imageTempSrc[imageTempSrc.length - 1] + '.' + imageExt;
-		var bigImg 			= zp.element.siblings('img');
+		var bigImg 			= ui.element.siblings('img');
 		
-		var loader			= $('<span></span>').css({background: '#fff url(/lib/images/spinner.gif) 50% 50% no-repeat', opacity: .5, width: zp.element.width(), height: zp.element.height(), position: "absolute", top: zp.element.offset().top, left: zp.element.offset().left})
+		var loader			= $('<span></span>').css({background: '#fff url(/lib/images/spinner.gif) 50% 50% no-repeat', opacity: .5, width: ui.element.width(), height: ui.element.height(), position: "absolute", top: ui.element.offset().top, left: ui.element.offset().left})
 		
-		if(!$('.loaded-bigImage', zp.element.parent()).length)
+		if(!$('.loaded-bigImage', ui.element.parent()).length)
 		{
 			$(document.body).append(loader);
 		}
@@ -52,14 +52,14 @@ $.widget("zp.imageviewer",
 					.addClass('loaded-bigImage')
 					.unbind('load');
 
-				if(!$('.loaded-bigImage', zp.element.parent()).length)
+				if(!$('.loaded-bigImage', ui.element.parent()).length)
 				{
-					zp.element.after($(this));
+					ui.element.after($(this));
 				}
 				
 				loader.remove();				
-				zp.setWidthHeight();
-				zp.showBig();
+				ui.setWidthHeight();
+				ui.showBig();
 			})
 			.attr({src: imageSrc});
 	},
@@ -75,9 +75,9 @@ $.widget("zp.imageviewer",
 	
 	showBig: function()
 	{
-		var zp 				= this;
-		var imgObj			= jQuery('.loaded-bigImage', zp.element.parent());
-		var imgWrapper		= zp.element.parent();
+		var ui 				= this;
+		var imgObj			= jQuery('.loaded-bigImage', ui.element.parent());
+		var imgWrapper		= ui.element.parent();
 		var zoomImgWidth 	= imgObj.attr('width');
 		var zoomImgHeight 	= imgObj.attr('height');
 		var fullWidth 		= zoomImgWidth;
@@ -100,7 +100,7 @@ $.widget("zp.imageviewer",
 
 		$(window).resize(function()
 		{
-			$('.image-magnifier', zp.element.parent()).each(function()
+			$('.image-magnifier', ui.element.parent()).each(function()
 			{
 				$(this).css({top: $(this).parent().offset().top, left: $(this).parent().offset().left});
 			});
@@ -114,7 +114,7 @@ $.widget("zp.imageviewer",
 				.css({opacity: .8, height: $(document).height(), zIndex: 8000})
 				.click(function()
 				{
-					zp.kill()
+					ui.kill()
 				});
 		}
 		
@@ -125,7 +125,7 @@ $.widget("zp.imageviewer",
 			.animate({width: fullWidth, height: fullHeight, left: leftPos, top: topPos}, 200)
 			.click(function()
 			{
-				zp.kill()
+				ui.kill()
 			});
 	},
 	

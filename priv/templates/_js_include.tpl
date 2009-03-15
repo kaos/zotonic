@@ -10,7 +10,7 @@
 <script type="text/javascript">
 	$(function()
 	{
-	    $.widgetManager.init(['wysiwyg', 'imageviewer']);
+	    $.widgetManager();
 	    
     	//$('a[href="#insertImage"]').click(function()
 		//{

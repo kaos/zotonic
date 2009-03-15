@@ -59,7 +59,7 @@
 			<h3 class="block">Nieuwsbrief</h3>
 			<div class="block clearfix newsletter">
 				<p>Schrijf je nu in!</p>
-				<form action="postback">
+				<form action="">
 					<fieldset>
 						<input type="text" name="newsletter" id="newsletter" class="input-newsletter" />
 						<button>Aanmelden</button>
