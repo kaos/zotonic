@@ -484,6 +484,7 @@ ul#navigation li.lang a.english {
 		
 			#product-add-review-form { 
 				display: none;
+				margin: 0 0 2px 0;
 			}
 		
 		#product-add-review-trigger {

@@ -10,7 +10,7 @@
 html(_ReqProps, Context) ->
 	MenuList = [
 				[{title, "home"}, {uri, "/"}], 
-				[{title, "fietsen"}, {uri, "/page/fietsen"}],
+				[{title, "Basic page"}, {uri, "/page/basic"}],
 				[{title, "Product page"}, {uri, "/product/shimano/105-ST-5600"}],
 				[{title, "Bike page"}, {uri, "/bike/trek/urban"}]
 			],

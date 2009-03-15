@@ -40,7 +40,7 @@
 
 				<!-- Search bar -->
 				<div id="search" class="zp-25 right">
-					<form id="searchform" method="GET" action="/search">
+					<form id="searchform" method="get" action="/search">
 						<fieldset>
 							<input id="quick-search" type="text" name="search" />
 							<button>Zoek</button>
