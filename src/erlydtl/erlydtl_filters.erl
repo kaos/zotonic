@@ -200,12 +200,6 @@ urlencode(Input) when is_list(Input) ->
     urlencode(Input, []).
 
 
-% Addition by Marc Worrell - index of tuple or list
-index(Expr, IndexExpr) when is_tuple(Expr) ->
-    element(IndexExpr, Expr);
-index(Expr, IndexExpr) when is_list(Expr) ->
-    lists:nth(IndexExpr, Expr).
-
 % internal
 
 escape(Binary, Index) when is_binary(Binary) ->

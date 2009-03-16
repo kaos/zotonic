@@ -451,24 +451,15 @@ value_ast(ValueToken, AsString, Context, TreeWalker) ->
         {'variable', _} = Variable ->
             {Ast, VarName} = resolve_variable_ast(Variable, Context),
             {{Ast, #ast_info{var_names = [VarName]}}, TreeWalker};
+        {'index_value', _, _} = Variable ->
+            {Ast, VarName} = resolve_variable_ast(Variable, Context),
+            {{Ast, #ast_info{var_names = [VarName]}}, TreeWalker};
         {tuple_value, {identifier, _, TupleName}, TupleArgs} ->
             TupleNameAst = erl_syntax:atom(TupleName),
             TupleArgsAst = scomp_ast_map_args(TupleArgs, Context, TreeWalker),
-            {{erl_syntax:tuple([TupleNameAst, TupleArgsAst]), #ast_info{}},TreeWalker};
-        {'index_value', Expr, IndexExpr} ->
-            index_ast(Expr, IndexExpr, Context, TreeWalker)
+            {{erl_syntax:tuple([TupleNameAst, TupleArgsAst]), #ast_info{}},TreeWalker}
     end.
 
-
-index_ast(Expr, IndexExpr, Context, TreeWalker) ->
-    {{ExprAst,Info1},TreeWalker1}      = value_ast(Expr,      false, Context, TreeWalker),
-    {{IndexExprAst,Info2},TreeWalker2} = value_ast(IndexExpr, false, Context, TreeWalker1),
-    {{erl_syntax:application(
-            erl_syntax:atom(erlydtl_filters), 
-            erl_syntax:atom(index),
-            [ExprAst,IndexExprAst]), 
-        merge_info(Info1, Info2)}, TreeWalker2}.
-    
 
 string_ast(String, TreeWalker) ->
     % {{erl_syntax:string(String), #ast_info{}}, TreeWalker}. %% less verbose AST, better for development and debugging
@@ -566,19 +557,23 @@ resolve_variable_ast({index_value, Variable, Index}, Context, FinderFunction) ->
     {{IndexAst,_Context},_TreeWalker} = value_ast(Index, false, Context, #treewalker{}),
     {VarAst, VarName} = resolve_variable_ast(Variable, Context, FinderFunction),
     {erl_syntax:application(
-            erl_syntax:atom(erlydtl_filters), 
-            erl_syntax:atom(index),
-            [VarAst,IndexAst]), VarName};
+            erl_syntax:atom(erlydtl_runtime), 
+            erl_syntax:atom(FinderFunction),
+            [IndexAst, VarAst]), VarName};
            
 resolve_variable_ast({attribute, {{identifier, _, AttrName}, Variable}}, Context, FinderFunction) ->
     {VarAst, VarName} = resolve_variable_ast(Variable, Context, FinderFunction),
-    {erl_syntax:application(erl_syntax:atom(erlydtl_runtime), erl_syntax:atom(FinderFunction),
-                    [erl_syntax:atom(AttrName), VarAst]), VarName};
+    {erl_syntax:application(
+            erl_syntax:atom(erlydtl_runtime),
+            erl_syntax:atom(FinderFunction),
+            [erl_syntax:atom(AttrName), VarAst]), VarName};
 
 resolve_variable_ast({variable, {identifier, _, VarName}}, Context, FinderFunction) ->
     VarValue = case resolve_scoped_variable_ast(VarName, Context) of
         undefined ->
-            erl_syntax:application(erl_syntax:atom(erlydtl_runtime), erl_syntax:atom(FinderFunction),
+            erl_syntax:application(
+                erl_syntax:atom(erlydtl_runtime), 
+                erl_syntax:atom(FinderFunction),
                 [erl_syntax:atom(VarName), erl_syntax:variable("Variables")]);
         Val ->
             Val

@@ -3,6 +3,13 @@
 
 -include_lib("zophrenic.hrl").
 
+% Index of list with an integer like "a[2]"
+find_value(Key, L) when is_integer(Key) andalso is_list(L) ->
+    try
+        lists:nth(Key, L)
+    catch
+        _:_ -> undefined
+    end;
 find_value(Key, L) when is_list(L) ->
     proplists:get_value(Key, L);
 find_value(Key, {GBSize, GBData}) when is_integer(GBSize) ->
@@ -22,6 +29,14 @@ find_value(q, #context{}=Context) ->
 find_value(q_validated, #context{}=Context) ->
     {q, zp_context:get_context(q_validated, Context)};
 
+% Index of tuple with an integer like "a[2]"
+find_value(Key, T) when is_integer(Key) andalso is_tuple(T) ->
+    try
+        element(Key, T)
+    catch 
+        _:_ -> undefined
+    end;
+
 %% Other cases: context, dict or parametrized module lookup.
 find_value(Key, Tuple) when is_tuple(Tuple) ->
     Module = element(1, Tuple),
@@ -36,11 +51,17 @@ find_value(Key, Tuple) when is_tuple(Tuple) ->
                     undefined
             end;
         Module ->
-            case proplists:get_value(Key, Module:module_info(exports)) of
+            Exports = Module:module_info(exports),
+            case proplists:get_value(Key, Exports) of
                 1 ->
                     Tuple:Key();
                 _ ->
-                    undefined
+                    case proplists:get_value(get, Exports) of
+                        1 -> 
+                            Tuple:get(Key);
+                        _ ->
+                            undefined
+                    end
             end
     end.
 
