@@ -965,17 +965,18 @@ scomp_ast(ScompName, Args, Context, TreeWalker) ->
     CallAst = erl_syntax:case_expr(AppAst, [OkAst, ErrorAst]),
     {{CallAst, #ast_info{}}, TreeWalker}.
     
+
 scomp_ast_map_args(Args, Context, TreeWalker) ->
-    ArgsAst = lists:map(fun({{identifier, _, Name}, Value}) ->
-                            ValueAst = case Value of
-                                true -> 
-                                    % special construct for argument name w/o value
-                                    erl_syntax:atom(true);
-                                _ ->
-                                    resolve_value_ast(Value, Context, TreeWalker)
-                            end,
-                            erl_syntax:tuple([erl_syntax:atom(Name), ValueAst])
-                       end, Args),
+    ArgsAst = lists:map(
+                    fun({{identifier, _, "postback"}, {string_literal, _, Value}}) ->
+                           erl_syntax:tuple([erl_syntax:atom("postback"), erl_syntax:atom(unescape_string_literal(Value))]);
+                       ({{identifier, _, Name}, true}) ->
+                           % special construct for argument name w/o value
+                           erl_syntax:tuple([erl_syntax:atom(Name), erl_syntax:atom(true)]);
+                       ({{identifier, _, Name}, Value}) ->
+                            erl_syntax:tuple([erl_syntax:atom(Name), resolve_value_ast(Value, Context, TreeWalker)])
+                    end, 
+                    Args),
     erl_syntax:list(ArgsAst).
 
 
