@@ -11,10 +11,5 @@
 	$(function()
 	{
 	    $.widgetManager();
-	    
-    	//$('a[href="#insertImage"]').click(function()
-		//{
-		//   $('#wysiwyg').wysiwyg('insertImage', '/lib/image/wysiwyg.gif', { 'class' : 'image_inserted', 'width' : '96px', 'height' : '98px' });
-		//});
 	});
 </script>

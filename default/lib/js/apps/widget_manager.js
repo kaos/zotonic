@@ -44,10 +44,82 @@
 					}
 				}
 			}
-		},	
+		},
+		
+		misc: 
+		{
+			log: function(obj)
+			{
+				if(window.console) 
+				{
+					console.log(obj);
+	
+					if($.noticeAdd)
+					{
+						$.noticeAdd({
+							text: 'Logging, check firebug: '+obj, 
+							type: 'notice', 
+							stay: 0
+						});
+					}
+				} 
+				else 
+				{
+					if($.noticeAdd)
+					{
+						$.noticeAdd({
+							text: 'logged: '+obj, 
+							type: 'notice', 
+							stay: 0
+						});
+					}
+					else
+					{
+						alert(obj.toSource());
+					}
+				}
+			},
+			
+			warn: function(obj, text)
+			{
+				if(window.console) 
+				{
+					console.warn(obj, text);
+				}
+				
+				if($.noticeAdd)
+				{
+					$.noticeAdd({
+						text: text, 
+						type: 'notice', 
+						stay: 1
+					});
+				}
+			},
+			
+			error: function(obj, text)
+			{
+				obj = obj || '';
+
+				if(window.console) 
+				{
+					console.error(obj, text);
+				}
+				
+				if($.noticeAdd)
+				{
+					$.noticeAdd({
+						text: text, 
+						type: 'error', 
+						stay: 1
+					});
+				}
+			}
+		},
+		
 		metadata: 
 		{
-			defaults : {
+			defaults: {
 				type: 'class',
 				name: 'metadata',
 				cre: /({.*})/,
@@ -107,16 +179,16 @@
 					var attr = elem.getAttribute(settings.name);
 					if(attr)
 					{
-					data = attr;
+						data = attr;
 					}
 				}
 				
-				if ( data.indexOf( '{' ) < 0 )
+				if(data.indexOf( '{' ) < 0)
 				data = "{" + data + "}";
 				
 				data = eval("(" + data + ")");
 				
-				$.data( elem, settings.single, data );
+				$.data(elem, settings.single, data);
 				return data;
 			}
 		}
