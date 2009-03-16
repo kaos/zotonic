@@ -53,7 +53,7 @@ Nonterminals
 
     CycleTag
     CycleNames
-    CycleNamesCompat
+%    CycleNamesCompat
 
     ForBlock
     ForBraced
@@ -84,7 +84,7 @@ Nonterminals
     Value
     Variable
     Filter
-    
+
     LoadTag
     LoadNames
     
@@ -97,8 +97,8 @@ Nonterminals
 	UrlTag
 	PrintTag
 	ImageTag
-	ImageUrlTag.
-%	ValueList
+	ImageUrlTag
+	ValueList.
 
 Terminals
     autoescape_keyword
@@ -144,12 +144,14 @@ Terminals
     with_keyword
 	open_curly
 	close_curly
-%	open_bracket
-%	close_bracket
+	open_bracket
+	close_bracket
  	hash.
 
 Rootsymbol
     Elements.
+
+Expect 1.
 
 Elements -> '$empty' : [].
 Elements -> Elements text : '$1' ++ ['$2'].
@@ -192,15 +194,15 @@ CommentBlock -> CommentBraced Elements EndCommentBraced : {comment, '$2'}.
 CommentBraced -> open_tag comment_keyword close_tag.
 EndCommentBraced -> open_tag endcomment_keyword close_tag.
 
-CycleTag -> open_tag cycle_keyword CycleNamesCompat close_tag : {cycle_compat, '$3'}.
+%CycleTag -> open_tag cycle_keyword CycleNamesCompat close_tag : {cycle_compat, '$3'}.
 CycleTag -> open_tag cycle_keyword CycleNames close_tag : {cycle, '$3'}.
 
 CycleNames -> Value : ['$1'].
-CycleNames -> CycleNames Value : '$1' ++ ['$2'].
+CycleNames -> CycleNames comma Value : '$1' ++ ['$2'].
 
-CycleNamesCompat -> identifier comma : ['$1'].
-CycleNamesCompat -> CycleNamesCompat identifier comma : '$1' ++ ['$2'].
-CycleNamesCompat -> CycleNamesCompat identifier : '$1' ++ ['$2'].
+%CycleNamesCompat -> identifier comma : ['$1'].
+%CycleNamesCompat -> CycleNamesCompat identifier comma : '$1' ++ ['$2'].
+%CycleNamesCompat -> CycleNamesCompat identifier : '$1' ++ ['$2'].
 
 ForBlock -> ForBraced Elements EndForBraced : {for, '$1', '$2'}.
 ForBraced -> open_tag for_keyword ForExpression close_tag : '$3'.
@@ -256,17 +258,16 @@ Args -> '$empty' : [].
 Args -> Args identifier : '$1' ++ [{'$2', true}].
 Args -> Args identifier equal Value : '$1' ++ [{'$2', '$4'}].
 
-
 Value -> Value pipe Filter : {apply_filter, '$1', '$3'}.
 Value -> Variable : '$1'.
 Value -> Literal : '$1'.
 Value -> hash identifier : {auto_id, '$2'}.
 Value -> open_curly identifier Args close_curly : {tuple_value, '$2', '$3'}.
+Value -> open_bracket ValueList close_bracket : {value_list, '$2'}.
 
 Variable -> identifier : {variable, '$1'}.
-Variable -> Value dot identifier : {attribute, {'$3', '$1'}}.
+Variable -> Variable open_bracket Value close_bracket : {index_value, '$1', '$3'}.
+Variable -> Variable dot identifier : {attribute, {'$3', '$1'}}.
 
-% experimental for adding lists as argument values
-% Value -> open_bracket ValueList close_bracket : {value_list, '$2'}.
-% ValueList -> Value : ['$1'].
-% ValueList -> ValueList comma Value : '$1' ++ ['$2'].
+ValueList -> Value : ['$1'].
+ValueList -> ValueList comma Value : '$1' ++ ['$3'].

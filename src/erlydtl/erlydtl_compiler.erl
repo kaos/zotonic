@@ -241,12 +241,6 @@ forms(File, Module, BodyAst, BodyInfo, CheckSum) ->
                         erl_syntax:tuple([erl_syntax:string(XFile), erl_syntax:string(XCheckSum)])
                 end, BodyInfo#ast_info.dependencies))])]),     
 
-   BodyAstTmp = erl_syntax:application(
-                    erl_syntax:atom(erlydtl_runtime),
-                    erl_syntax:atom(stringify_final),
-                    [BodyAst]
-                ),
-
     BodyAutoIdAst = erl_syntax:match_expr(
                             erl_syntax:variable("AutoId"),
                             erl_syntax:application(
@@ -259,7 +253,7 @@ forms(File, Module, BodyAst, BodyInfo, CheckSum) ->
     RenderInternalFunctionAst = erl_syntax:function(
         erl_syntax:atom(render2), 
             [erl_syntax:clause([erl_syntax:variable("Variables")], none, 
-                [BodyAutoIdAst, BodyAstTmp])]),   
+                [BodyAutoIdAst, BodyAst])]),   
     
     ModuleAst  = erl_syntax:attribute(erl_syntax:atom(module), [erl_syntax:atom(Module)]),
     
@@ -320,19 +314,6 @@ body_ast(DjangoParseTree, Context, TreeWalker) ->
                     TreeWalkerAcc);
             ({'text', _Pos, String}, TreeWalkerAcc) -> 
                 string_ast(String, TreeWalkerAcc);
-            ({'string_literal', _Pos, String}, TreeWalkerAcc) ->
-                {{auto_escape(erl_syntax:string(unescape_string_literal(String)), Context), 
-                        #ast_info{}}, TreeWalkerAcc};
-            ({'number_literal', _Pos, Number}, TreeWalkerAcc) ->
-                string_ast(Number, TreeWalkerAcc);
-            ({'auto_id', {identifier, _, Auto}}, TreeWalkerAcc) ->
-                {auto_id_ast(Auto), TreeWalkerAcc};
-            ({'attribute', _} = Variable, TreeWalkerAcc) ->
-                {Ast, VarName} = resolve_variable_ast(Variable, Context),
-                {{format(Ast, Context), #ast_info{var_names = [VarName]}}, TreeWalkerAcc};
-            ({'variable', _} = Variable, TreeWalkerAcc) ->
-                {Ast, VarName} = resolve_variable_ast(Variable, Context),
-                {{format(Ast, Context), #ast_info{var_names = [VarName]}}, TreeWalkerAcc};              
             ({'include', {string_literal, _, File}, Args}, TreeWalkerAcc) ->
                 include_ast(unescape_string_literal(File), Args, Context, TreeWalkerAcc);
             ({'if', {'not', Variable}, Contents}, TreeWalkerAcc) ->
@@ -367,8 +348,6 @@ body_ast(DjangoParseTree, Context, TreeWalker) ->
                 {IfAstInfo, TreeWalker1} = body_ast(ElseContents, Context, TreeWalkerAcc),
                 {ElseAstInfo, TreeWalker2} = body_ast(IfContents, Context, TreeWalker1),
                 ifequalelse_ast(Args, IfAstInfo, ElseAstInfo, Context, TreeWalker2);                    
-            ({'apply_filter', Variable, Filter}, TreeWalkerAcc) ->
-                filter_ast(Variable, Filter, Context, TreeWalkerAcc);
             ({'for', {'in', IteratorList, Variable}, Contents}, TreeWalkerAcc) ->
                 for_loop_ast(IteratorList, Variable, Contents, Context, TreeWalkerAcc);
             ({'load', Names}, TreeWalkerAcc) ->
@@ -390,7 +369,10 @@ body_ast(DjangoParseTree, Context, TreeWalker) ->
             ({'url', {'identifier', _, Name}, Args}, TreeWalkerAcc) ->
                 url_ast(Name, Args, Context, TreeWalkerAcc);
             ({'print', Value}, TreeWalkerAcc) ->
-                print_ast(Value, Context, TreeWalkerAcc)
+                print_ast(Value, Context, TreeWalkerAcc);
+            (ValueToken, TreeWalkerAcc) -> 
+                {{ValueAst,ValueInfo},ValueTreeWalker} = value_ast(ValueToken, true, Context, TreeWalkerAcc),
+                {{format(ValueAst, Context),ValueInfo},ValueTreeWalker}
         end, TreeWalker, DjangoParseTree),   
     {AstList, {Info, TreeWalker3}} = lists:mapfoldl(
         fun({Ast, Info}, {InfoAcc, TreeWalkerAcc}) -> 
@@ -449,6 +431,45 @@ empty_ast(TreeWalker) ->
     {{erl_syntax:list([]), #ast_info{}}, TreeWalker}.
 
 
+value_ast(ValueToken, AsString, Context, TreeWalker) ->
+    case ValueToken of
+        {'string_literal', _Pos, String} ->
+            {{auto_escape(erl_syntax:string(unescape_string_literal(String)), Context), 
+                    #ast_info{}}, TreeWalker};
+        {'number_literal', _Pos, Number} ->
+            case AsString of
+                true  -> string_ast(Number, TreeWalker);
+                false -> {{erl_syntax:integer(list_to_integer(Number)), #ast_info{}}, TreeWalker}
+            end;
+        {'auto_id', {identifier, _, Auto}} ->
+            {auto_id_ast(Auto), TreeWalker};
+        {'apply_filter', Variable, Filter} ->
+            filter_ast(Variable, Filter, Context, TreeWalker);
+        {'attribute', _} = Variable ->
+            {Ast, VarName} = resolve_variable_ast(Variable, Context),
+            {{Ast, #ast_info{var_names = [VarName]}}, TreeWalker};
+        {'variable', _} = Variable ->
+            {Ast, VarName} = resolve_variable_ast(Variable, Context),
+            {{Ast, #ast_info{var_names = [VarName]}}, TreeWalker};
+        {tuple_value, {identifier, _, TupleName}, TupleArgs} ->
+            TupleNameAst = erl_syntax:atom(TupleName),
+            TupleArgsAst = scomp_ast_map_args(TupleArgs, Context, TreeWalker),
+            {{erl_syntax:tuple([TupleNameAst, TupleArgsAst]), #ast_info{}},TreeWalker};
+        {'index_value', Expr, IndexExpr} ->
+            index_ast(Expr, IndexExpr, Context, TreeWalker)
+    end.
+
+
+index_ast(Expr, IndexExpr, Context, TreeWalker) ->
+    {{ExprAst,Info1},TreeWalker1}      = value_ast(Expr,      false, Context, TreeWalker),
+    {{IndexExprAst,Info2},TreeWalker2} = value_ast(IndexExpr, false, Context, TreeWalker1),
+    {{erl_syntax:application(
+            erl_syntax:atom(erlydtl_filters), 
+            erl_syntax:atom(index),
+            [ExprAst,IndexExprAst]), 
+        merge_info(Info1, Info2)}, TreeWalker2}.
+    
+
 string_ast(String, TreeWalker) ->
     % {{erl_syntax:string(String), #ast_info{}}, TreeWalker}. %% less verbose AST, better for development and debugging
     {{erl_syntax:binary([erl_syntax:binary_field(erl_syntax:integer(X)) || X <- String]), #ast_info{}}, TreeWalker}.       
@@ -459,6 +480,7 @@ include_ast(File, Args, Context, TreeWalker) ->
                                 case Key of
                                     "maxage" -> true;
                                     "depend" -> true;
+                                    "scomp"  -> true;
                                     _ -> IsC
                                 end
                             end,
@@ -538,6 +560,15 @@ resolve_variable_ast(VarTuple, Context) ->
  
 resolve_ifvariable_ast(VarTuple, Context) ->
     resolve_variable_ast(VarTuple, Context, 'find_value').
+
+
+resolve_variable_ast({index_value, Variable, Index}, Context, FinderFunction) ->
+    {{IndexAst,_Context},_TreeWalker} = value_ast(Index, false, Context, #treewalker{}),
+    {VarAst, VarName} = resolve_variable_ast(Variable, Context, FinderFunction),
+    {erl_syntax:application(
+            erl_syntax:atom(erlydtl_filters), 
+            erl_syntax:atom(index),
+            [VarAst,IndexAst]), VarName};
            
 resolve_variable_ast({attribute, {{identifier, _, AttrName}, Variable}}, Context, FinderFunction) ->
     {VarAst, VarName} = resolve_variable_ast(Variable, Context, FinderFunction),
@@ -571,13 +602,11 @@ resolve_scoped_variable_ast(VarName, Context) ->
         end, undefined, Context#dtl_context.local_scopes).
 
 format(Ast, Context) ->
-    auto_escape(format_number_ast(Ast), Context).
+    auto_escape(stringify(Ast), Context).
 
-
-format_number_ast(Ast) ->
-    erl_syntax:application(erl_syntax:atom(erlydtl_filters), erl_syntax:atom(format_number),
+stringify(Ast) ->
+    erl_syntax:application(erl_syntax:atom(erlydtl_filters), erl_syntax:atom(stringify),
         [Ast]).
-
 
 auto_escape(Value, Context) ->
     case Context#dtl_context.auto_escape of
@@ -804,12 +833,12 @@ call_ast(Module, Variable, AstInfo, TreeWalker) ->
 %% @doc Generate an image tag based on the image name and the arguments
 %% @todo Optimization for the situation where all parameters are constants
 image_ast(FilenameValue, Args, Context, TreeWalker) ->
-    FilenameAst = resolve_value_ast(FilenameValue, Context),
+    FilenameAst = resolve_value_ast(FilenameValue, Context, TreeWalker),
     AppAst = erl_syntax:application(
                         erl_syntax:atom(zp_media_tag),
                         erl_syntax:atom(tag),
                         [   FilenameAst,
-                            scomp_ast_map_args(Args, Context)]
+                            scomp_ast_map_args(Args, Context, TreeWalker)]
                     ),
     RenderedAst = erl_syntax:variable("Rendered"),
     OkAst = erl_syntax:clause(
@@ -833,12 +862,12 @@ image_ast(FilenameValue, Args, Context, TreeWalker) ->
 %% @doc Generate an image url based on the image name and the arguments
 %% @todo Optimization for the situation where all parameters are constants
 image_url_ast(FilenameValue, Args, Context, TreeWalker) ->
-    FilenameAst = resolve_value_ast(FilenameValue, Context),
+    FilenameAst = resolve_value_ast(FilenameValue, Context, TreeWalker),
     AppAst = erl_syntax:application(
                         erl_syntax:atom(zp_media_tag),
                         erl_syntax:atom(url),
                         [   FilenameAst,
-                            scomp_ast_map_args(Args, Context)]
+                            scomp_ast_map_args(Args, Context, TreeWalker)]
                     ),
     RenderedAst = erl_syntax:variable("Rendered"),
     OkAst = erl_syntax:clause(
@@ -865,7 +894,7 @@ url_ast(Name, Args, Context, TreeWalker) ->
                 erl_syntax:atom(zp_dispatcher),
                 erl_syntax:atom(url_for),
                 [   erl_syntax:atom(Name), 
-                    scomp_ast_map_args(Args, Context)
+                    scomp_ast_map_args(Args, Context, TreeWalker)
                 ]
             ),
     {{AppAst, #ast_info{}}, TreeWalker}.  
@@ -873,7 +902,7 @@ url_ast(Name, Args, Context, TreeWalker) ->
 
 
 print_ast(Value, Context, TreeWalker) ->
-    ValueAst = resolve_value_ast(Value, Context),
+    ValueAst = resolve_value_ast(Value, Context, TreeWalker),
     PrintAst = erl_syntax:application(
                 erl_syntax:atom(io_lib),
                 erl_syntax:atom(format),
@@ -899,26 +928,9 @@ print_ast(Value, Context, TreeWalker) ->
     {{PreAst, #ast_info{}}, TreeWalker}. 
 
 
-resolve_value_ast(Value, Context) ->
-    case Value of
-      ({string_literal, _, Str}) ->
-          S2 = unescape_string_literal(Str),
-          erl_syntax:string(S2);
-      ({variable, _}=Var) ->
-           {V, _} = resolve_variable_ast(Var, Context),
-           V;
-      ({number_literal, _, Num}) ->
-           erl_syntax:integer(list_to_integer(Num));
-      ({tuple_value, {identifier, _, TupleName}, TupleArgs}) ->
-           TupleNameAst = erl_syntax:atom(TupleName),
-           TupleArgsAst = scomp_ast_map_args(TupleArgs, Context),
-           erl_syntax:tuple([TupleNameAst, TupleArgsAst]);
-      ({auto_id,{identifier,_,Name}}) ->
-           {V, _} = auto_id_ast(Name),
-           V;
-       (_) ->
-           erl_syntax:list([])
-    end.
+resolve_value_ast(Value, Context, TreeWalker) ->
+    {{Ast,_Info},_TreeWalker} = value_ast(Value, false, Context, TreeWalker),
+    Ast.
 
 
 %% Added by Marc Worrell - handle evaluation of scomps by zp_scomp
@@ -927,7 +939,7 @@ scomp_ast(ScompName, Args, Context, TreeWalker) ->
                 erl_syntax:atom(zp_scomp),
                 erl_syntax:atom(render),
                 [   erl_syntax:atom("scomp_" ++ ScompName), 
-                    scomp_ast_map_args(Args, Context), 
+                    scomp_ast_map_args(Args, Context, TreeWalker), 
                     erl_syntax:variable("Variables")
                 ]
             ),
@@ -953,33 +965,15 @@ scomp_ast(ScompName, Args, Context, TreeWalker) ->
     CallAst = erl_syntax:case_expr(AppAst, [OkAst, ErrorAst]),
     {{CallAst, #ast_info{}}, TreeWalker}.
     
-scomp_ast_map_args(Args, Context) ->
+scomp_ast_map_args(Args, Context, TreeWalker) ->
     ArgsAst = lists:map(fun({{identifier, _, Name}, Value}) ->
                             ValueAst = case Value of
-                                          true -> 
-                                              % special construct for argument name w/o value
-                                              erl_syntax:atom(true);
-                                          ({string_literal, _, Str}) ->
-                                              S2 = unescape_string_literal(Str),
-                                              case Name of
-                                                  "postback" -> erl_syntax:atom(S2);
-                                                  _ -> erl_syntax:string(S2)
-                                              end;
-                                          ({variable, _}=Var) ->
-                                               {V, _} = resolve_variable_ast(Var, Context),
-                                               V;
-                                          ({number_literal, _, Num}) ->
-                                               erl_syntax:integer(list_to_integer(Num));
-                                          ({tuple_value, {identifier, _, TupleName}, TupleArgs}) ->
-                                               TupleNameAst = erl_syntax:atom(TupleName),
-                                               TupleArgsAst = scomp_ast_map_args(TupleArgs, Context),
-                                               erl_syntax:tuple([TupleNameAst, TupleArgsAst]);
-                                          ({auto_id,{identifier,_,Name}}) ->
-                                               {V, _} = auto_id_ast(Name),
-                                               V;
-                                           (_) ->
-                                               erl_syntax:list([])
-                                        end,
+                                true -> 
+                                    % special construct for argument name w/o value
+                                    erl_syntax:atom(true);
+                                _ ->
+                                    resolve_value_ast(Value, Context, TreeWalker)
+                            end,
                             erl_syntax:tuple([erl_syntax:atom(Name), ValueAst])
                        end, Args),
     erl_syntax:list(ArgsAst).

@@ -119,6 +119,17 @@ format_number(Input) when is_float(Input) ->
 format_number(Input) ->
     Input.
 
+% Translate atoms and numbers to strings
+% Leave tuples as tuples.
+stringify(In) when is_atom(In) ->
+    atom_to_list(In);
+stringify(In) when is_integer(In) ->
+    integer_to_list(In);
+stringify(In) when is_float(In) ->
+    mochinum:digits(In);
+stringify(In) ->
+    In.
+
 join([Input], Separator) when is_list(Input) ->
     string:join(Input, Separator).
 
@@ -187,6 +198,13 @@ urlencode(Input) when is_binary(Input) ->
     urlencode(Input, 0);
 urlencode(Input) when is_list(Input) ->
     urlencode(Input, []).
+
+
+% Addition by Marc Worrell - index of tuple or list
+index(Expr, IndexExpr) when is_tuple(Expr) ->
+    element(IndexExpr, Expr);
+index(Expr, IndexExpr) when is_list(Expr) ->
+    lists:nth(IndexExpr, Expr).
 
 % internal
 

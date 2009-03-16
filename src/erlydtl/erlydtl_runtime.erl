@@ -85,14 +85,6 @@ is_false(<<>>) ->
 is_false(_) ->
     false.
 
-stringify_final(In) ->
-   stringify_final(In, []).
-stringify_final([], Out) ->
-   lists:reverse(Out);
-stringify_final([El | Rest], Out) when is_atom(El) ->
-   stringify_final(Rest, [atom_to_list(El) | Out]);
-stringify_final([El | Rest], Out) ->
-   stringify_final(Rest, [El | Out]).
 
 init_counter_stats(List) ->
     init_counter_stats(List, undefined).
