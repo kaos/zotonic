@@ -3,10 +3,12 @@
 <plist version="1.0">
 <dict>
 	<key>currentDocument</key>
-	<string>priv/templates/bike.tpl</string>
+	<string>src/zophrenic.erl</string>
 	<key>documents</key>
 	<array>
 		<dict>
+			<key>expanded</key>
+			<true/>
 			<key>name</key>
 			<string>src</string>
 			<key>regexFolderFilter</key>
@@ -253,14 +255,28 @@
 			<key>firstVisibleLine</key>
 			<integer>0</integer>
 		</dict>
+		<key>priv/lib/css/zp-project.css</key>
+		<dict>
+			<key>caret</key>
+			<dict>
+				<key>column</key>
+				<integer>17</integer>
+				<key>line</key>
+				<integer>93</integer>
+			</dict>
+			<key>firstVisibleColumn</key>
+			<integer>0</integer>
+			<key>firstVisibleLine</key>
+			<integer>65</integer>
+		</dict>
 		<key>priv/resources/resource_brand.erl</key>
 		<dict>
 			<key>caret</key>
 			<dict>
 				<key>column</key>
-				<integer>0</integer>
+				<integer>35</integer>
 				<key>line</key>
-				<integer>0</integer>
+				<integer>10</integer>
 			</dict>
 			<key>firstVisibleColumn</key>
 			<integer>0</integer>
@@ -295,19 +311,19 @@
 			<key>firstVisibleLine</key>
 			<integer>6</integer>
 		</dict>
-		<key>priv/templates/bike.tpl</key>
+		<key>priv/templates/compare.tpl</key>
 		<dict>
 			<key>caret</key>
 			<dict>
 				<key>column</key>
-				<integer>0</integer>
+				<integer>109</integer>
 				<key>line</key>
-				<integer>72</integer>
+				<integer>13</integer>
 			</dict>
 			<key>firstVisibleColumn</key>
 			<integer>0</integer>
 			<key>firstVisibleLine</key>
-			<integer>0</integer>
+			<integer>1</integer>
 		</dict>
 		<key>priv/templates/page.tpl</key>
 		<dict>
@@ -395,6 +411,20 @@
 			<key>firstVisibleLine</key>
 			<integer>197</integer>
 		</dict>
+		<key>src/zophrenic.erl</key>
+		<dict>
+			<key>caret</key>
+			<dict>
+				<key>column</key>
+				<integer>0</integer>
+				<key>line</key>
+				<integer>0</integer>
+			</dict>
+			<key>firstVisibleColumn</key>
+			<integer>0</integer>
+			<key>firstVisibleLine</key>
+			<integer>0</integer>
+		</dict>
 		<key>src/zophrenic_sup.erl</key>
 		<dict>
 			<key>caret</key>
@@ -412,9 +442,8 @@
 	</dict>
 	<key>openDocuments</key>
 	<array>
-		<string>priv/templates/page.tpl</string>
-		<string>priv/templates/product.tpl</string>
-		<string>priv/templates/bike.tpl</string>
+		<string>priv/resources/resource_brand.erl</string>
+		<string>src/zophrenic.erl</string>
 	</array>
 	<key>showFileHierarchyDrawer</key>
 	<false/>
@@ -427,38 +456,7 @@
 			<key>isExpanded</key>
 			<true/>
 			<key>subItems</key>
-			<dict>
-				<key>lib</key>
-				<dict>
-					<key>isExpanded</key>
-					<true/>
-					<key>subItems</key>
-					<dict>
-						<key>js</key>
-						<dict>
-							<key>isExpanded</key>
-							<true/>
-							<key>subItems</key>
-							<dict>
-								<key>apps</key>
-								<dict>
-									<key>isExpanded</key>
-									<true/>
-									<key>subItems</key>
-									<dict/>
-								</dict>
-								<key>modules</key>
-								<dict>
-									<key>isExpanded</key>
-									<true/>
-									<key>subItems</key>
-									<dict/>
-								</dict>
-							</dict>
-						</dict>
-					</dict>
-				</dict>
-			</dict>
+			<dict/>
 		</dict>
 		<key>priv</key>
 		<dict>
@@ -466,7 +464,21 @@
 			<true/>
 			<key>subItems</key>
 			<dict>
-				<key>templates</key>
+				<key>log</key>
+				<dict>
+					<key>isExpanded</key>
+					<true/>
+					<key>subItems</key>
+					<dict/>
+				</dict>
+				<key>models</key>
+				<dict>
+					<key>isExpanded</key>
+					<true/>
+					<key>subItems</key>
+					<dict/>
+				</dict>
+				<key>resources</key>
 				<dict>
 					<key>isExpanded</key>
 					<true/>
@@ -474,6 +486,13 @@
 					<dict/>
 				</dict>
 			</dict>
+		</dict>
+		<key>src</key>
+		<dict>
+			<key>isExpanded</key>
+			<true/>
+			<key>subItems</key>
+			<dict/>
 		</dict>
 	</dict>
 	<key>windowFrame</key>
