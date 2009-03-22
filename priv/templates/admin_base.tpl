@@ -20,8 +20,8 @@
 		</div>
 
 		<ul id="navigation" class="zp-100">
-			<li><a href="index.html" class="current">Dashboard</a></li>
-			<li><a href="pages.html">Pages</a></li>
+			<li><a href="#" class="current">Dashboard</a></li>
+			<li><a href="#">Pages</a></li>
 			<li><a href="#">Users</a></li>
 			<li><a href="#">Products</a></li>
 			<li class="right"><a href="#">Options</a></li>
