@@ -12,11 +12,11 @@
 %%      	Params = proplist()
 %%      	Context = context()
 %%      
-%%      depends(Params, Context) -> {EssentialParams, MaxAge, Depends} | undefined
+%%      varies(Params, Context) -> {EssentialParams, MaxAge, Varies} | undefined
 %%      
 %%      	Params = proplist()
 %%      	MaxAge = integer()
-%%          Depends = TermList
+%%          Varies = TermList
 
 
 -module(gen_scomp).
@@ -29,7 +29,7 @@ behaviour_info(callbacks) ->
         {render, 3},
         {code_change, 3},
         {terminate, 1},
-        {depends, 2}
+        {varies, 2}
      ];
 behaviour_info(_Other) ->
     undefined.

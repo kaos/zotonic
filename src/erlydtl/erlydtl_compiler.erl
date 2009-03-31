@@ -250,10 +250,19 @@ forms(File, Module, BodyAst, BodyInfo, CheckSum) ->
                             )
                      ),
 
+	BodyLanguageAst = erl_syntax:match_expr(
+							erl_syntax:variable("Language"),
+							erl_syntax:application(
+						        erl_syntax:atom(erlydtl_runtime), 
+						        erl_syntax:atom(fetch_value),
+						        [erl_syntax:atom(language), erl_syntax:variable("Variables")]
+							)
+					),
+
     RenderInternalFunctionAst = erl_syntax:function(
         erl_syntax:atom(render2), 
             [erl_syntax:clause([erl_syntax:variable("Variables")], none, 
-                [BodyAutoIdAst, BodyAst])]),   
+                [BodyAutoIdAst, BodyLanguageAst, BodyAst])]),   
     
     ModuleAst  = erl_syntax:attribute(erl_syntax:atom(module), [erl_syntax:atom(Module)]),
     
@@ -307,6 +316,10 @@ body_ast(DjangoParseTree, Context, TreeWalker) ->
                 body_ast(Block, Context, TreeWalkerAcc);
             ({'comment', _Contents}, TreeWalkerAcc) ->
                 empty_ast(TreeWalkerAcc);
+			({'trans', {trans_text, _Pos, TransLiteral}}, TreeWalkerAcc) ->
+				trans_ast(TransLiteral, Context, TreeWalkerAcc);
+			({'trans_ext', {string_literal, _Pos, String}, Args}, TreeWalkerAcc) ->
+				trans_ext_ast(String, Args, Context, TreeWalkerAcc);
             ({'date', 'now', {string_literal, _Pos, FormatString}}, TreeWalkerAcc) ->
                 now_ast(FormatString, Context, TreeWalkerAcc);
             ({'autoescape', {identifier, _, OnOrOff}, Contents}, TreeWalkerAcc) ->
@@ -436,6 +449,9 @@ value_ast(ValueToken, AsString, Context, TreeWalker) ->
         {'string_literal', _Pos, String} ->
             {{auto_escape(erl_syntax:string(unescape_string_literal(String)), Context), 
                     #ast_info{}}, TreeWalker};
+		{'trans_literal', _Pos, String} ->
+            {{auto_escape(trans_literal_ast(String), Context), 
+                    #ast_info{}}, TreeWalker};
         {'number_literal', _Pos, Number} ->
             case AsString of
                 true  -> string_ast(Number, TreeWalker);
@@ -445,6 +461,8 @@ value_ast(ValueToken, AsString, Context, TreeWalker) ->
             {auto_id_ast(Auto), TreeWalker};
         {'apply_filter', Variable, Filter} ->
             filter_ast(Variable, Filter, Context, TreeWalker);
+		{'rsc'} ->
+			rsc_ast(Context, TreeWalker);
         {'attribute', _} = Variable ->
             {Ast, VarName} = resolve_variable_ast(Variable, Context),
             {{Ast, #ast_info{var_names = [VarName]}}, TreeWalker};
@@ -460,17 +478,24 @@ value_ast(ValueToken, AsString, Context, TreeWalker) ->
             {{erl_syntax:tuple([TupleNameAst, TupleArgsAst]), #ast_info{}},TreeWalker}
     end.
 
-
 string_ast(String, TreeWalker) ->
     % {{erl_syntax:string(String), #ast_info{}}, TreeWalker}. %% less verbose AST, better for development and debugging
     {{erl_syntax:binary([erl_syntax:binary_field(erl_syntax:integer(X)) || X <- String]), #ast_info{}}, TreeWalker}.       
 
 
+rsc_ast(_Context, TreeWalker) ->
+		RscAst = erl_syntax:application(
+					erl_syntax:atom(zp_rsc),
+					erl_syntax:atom(rsc),
+					[]
+				),
+		{{RscAst, #ast_info{}}, TreeWalker}.
+
 include_ast(File, Args, Context, TreeWalker) ->
     IsCached = lists:foldl( fun({{identifier, _, Key}, _}, IsC) -> 
                                 case Key of
                                     "maxage" -> true;
-                                    "depend" -> true;
+                                    "vary"   -> true;
                                     "scomp"  -> true;
                                     _ -> IsC
                                 end
@@ -525,6 +550,9 @@ filter_ast1([{identifier, _, Name} | Arg], VariableAst) ->
         [VariableAst | case Arg of 
                 [{string_literal, _, ArgName}] ->
                     [erl_syntax:string(unescape_string_literal(ArgName))];
+                [{trans_literal, _, ArgName}] ->
+					%% TODO: delay this translation until/if needed
+                    [trans_literal_ast(ArgName)];
                 [{number_literal, _, ArgName}] ->
                     [erl_syntax:integer(list_to_integer(ArgName))];
                 _ ->
@@ -547,11 +575,19 @@ search_for_escape_filter(_Variable, _Filter) ->
 
 
 resolve_variable_ast(VarTuple, Context) ->
-    resolve_variable_ast(VarTuple, Context, 'fetch_value').
- 
-resolve_ifvariable_ast(VarTuple, Context) ->
-    resolve_variable_ast(VarTuple, Context, 'find_value').
+    opttrans_variable_ast(resolve_variable_ast(VarTuple, Context, 'fetch_value')).
 
+resolve_ifvariable_ast(VarTuple, Context) ->
+    opttrans_variable_ast(resolve_variable_ast(VarTuple, Context, 'find_value')).
+
+opttrans_variable_ast({Ast, VarName}) ->
+    {erl_syntax:application(
+            erl_syntax:atom(erlydtl_filters), 
+            erl_syntax:atom(opttrans),
+			[
+				Ast,
+				erl_syntax:variable("Language")
+			]), VarName}.
 
 resolve_variable_ast({index_value, Variable, Index}, Context, FinderFunction) ->
     {{IndexAst,_Context},_TreeWalker} = value_ast(Index, false, Context, #treewalker{}),
@@ -630,8 +666,10 @@ ifequalelse_ast(Args, {IfContentsAst, IfContentsInfo}, {ElseContentsAst, ElseCon
     {[Arg1Ast, Arg2Ast], VarNames} = lists:foldl(fun
             (X, {Asts, AccVarNames}) ->
                 case X of
-                    {string_literal, _, Literal} ->
-                        {[erl_syntax:string(unescape_string_literal(Literal)) | Asts], AccVarNames};
+					{string_literal, _, Literal} ->
+					    {[erl_syntax:string(unescape_string_literal(Literal)) | Asts], AccVarNames};
+				    {trans_literal, _, Literal} ->
+				        {[trans_literal_ast(Literal) | Asts], AccVarNames};
                     {number_literal, _, Literal} ->
                         {[erl_syntax:integer(list_to_integer(Literal)) | Asts], AccVarNames};
                     Variable ->
@@ -690,14 +728,16 @@ load_ast(Names, _Context, TreeWalker) ->
 cycle_ast(Names, Context, TreeWalker) ->
     NamesTuple = lists:map(fun({string_literal, _, Str}) ->
                                    erl_syntax:string(unescape_string_literal(Str));
+							  ({trans_literal, _, Str}) ->
+							  	   trans_literal_ast(Str);
+                              ({number_literal, _, Num}) ->
+                                   format(erl_syntax:integer(Num), Context);
                               ({variable, _}=Var) ->
                                    {V, _} = resolve_variable_ast(Var, Context),
                                    V;
                               ({auto_id,{identifier,_,Name}}) ->
                                    {V, _} = auto_id_ast(Name),
                                    V;
-                              ({number_literal, _, Num}) ->
-                                   format(erl_syntax:integer(Num), Context);
                               (_) ->
                                    []
                            end, Names),
@@ -711,6 +751,50 @@ cycle_compat_ast(Names, _Context, TreeWalker) ->
     {{erl_syntax:application(
         erl_syntax:atom('erlydtl_runtime'), erl_syntax:atom('cycle'),
         [erl_syntax:tuple(NamesTuple), erl_syntax:variable("Counters")]), #ast_info{}}, TreeWalker}.
+
+
+%% @author Marc Worrell
+%% @doc Output the trans record which will be translated when 
+%% @todo Optimization for the situation where all parameters are constants
+trans_ast(TransLiteral, _Context, TreeWalker) ->
+	% Remove the first and the last character, these were separating the string from the {_ and _} tokens
+	Lit = lists:reverse(tl(lists:reverse(tl(TransLiteral)))),
+	{{erl_syntax:application(
+		erl_syntax:atom(zp_trans),
+		erl_syntax:atom(trans),
+		[
+			erl_syntax:tuple([
+				erl_syntax:atom(trans),
+				erl_syntax:list([
+					erl_syntax:tuple([ erl_syntax:atom('en'), erl_syntax:string(Lit) ])
+				])
+			]),
+			erl_syntax:variable("Language")
+		]
+	), #ast_info{}}, TreeWalker}.
+
+
+trans_ext_ast(String, Args, Context, TreeWalker) ->
+	Lit = unescape_string_literal(string:strip(String, both, 34), [], noslash),
+	ArgsTrans = interpreted_args(Args, Context),
+	ArgsTransAst = [
+		erl_syntax:tuple([erl_syntax:atom(Lang), Ast]) || {Lang,Ast} <- ArgsTrans
+	],
+	{{erl_syntax:application(
+		erl_syntax:atom(zp_trans),
+		erl_syntax:atom(trans),
+		[
+			erl_syntax:tuple([
+				erl_syntax:atom(trans),
+				erl_syntax:list([
+					erl_syntax:tuple([erl_syntax:atom('en'), erl_syntax:string(Lit)]) | ArgsTransAst
+				])
+			]),
+			erl_syntax:variable("Language")
+		]
+	), #ast_info{}}, TreeWalker}.
+	
+
 
 now_ast(FormatString, _Context, TreeWalker) ->
     % Note: we can't use unescape_string_literal here
@@ -963,7 +1047,7 @@ scomp_ast(ScompName, Args, Context, TreeWalker) ->
 
 scomp_ast_map_args(Args, Context, TreeWalker) ->
     ArgsAst = lists:map(
-                    fun({{identifier, _, "postback"}, {string_literal, _, Value}}) ->
+                    fun({{identifier, _, "postback"}, {Literal, _, Value}}) when Literal == string_literal; Literal == trans_literal ->
                            erl_syntax:tuple([erl_syntax:atom("postback"), erl_syntax:atom(unescape_string_literal(Value))]);
                        ({{identifier, _, Name}, true}) ->
                            % special construct for argument name w/o value
@@ -988,13 +1072,35 @@ interpreted_args(Args, Context) ->
     lists:map(fun
             ({{identifier, _, Key}, {string_literal, _, Value}}) ->
                 {list_to_atom(Key), erl_syntax:string(unescape_string_literal(Value))};
+            ({{identifier, _, Key}, {trans_literal, _, Value}}) ->
+                {list_to_atom(Key), trans_literal_ast(Value)};
             ({{identifier, _, Key}, {auto_id,{identifier,_,AutoId}}}) ->
                 {V, _} = auto_id_ast(AutoId),
                 {list_to_atom(Key), V};
             ({{identifier, _, Key}, {tuple_value, {identifier, _, TupleName}, TupleArgs}}) ->
                  {list_to_atom(Key), {list_to_atom(TupleName), interpreted_args(TupleArgs, Context)}};
-             ({{identifier, _, Key}, true}) ->
+            ({{identifier, _, Key}, true}) ->
                  {list_to_atom(Key), true};
             ({{identifier, _, Key}, Value}) ->
                 {list_to_atom(Key), format(resolve_variable_ast(Value, Context), Context)}
         end, Args).
+
+
+trans_literal_ast(String) ->
+	Lit = unescape_string_literal(String),
+	erl_syntax:application(
+		erl_syntax:atom(zp_trans),
+		erl_syntax:atom(trans),
+		[
+			erl_syntax:tuple([
+				erl_syntax:atom(trans),
+				erl_syntax:list([
+					erl_syntax:tuple([
+						erl_syntax:atom('en'),
+						erl_syntax:string(Lit)
+					])
+				])
+			]),
+			erl_syntax:variable("Language")
+		]
+	).

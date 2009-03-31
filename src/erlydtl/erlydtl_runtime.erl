@@ -63,12 +63,16 @@ find_value(Key, Tuple) when is_tuple(Tuple) ->
                             undefined
                     end
             end
-    end.
+    end;
+
+%% When the current value lookup is a function
+find_value(Key, F) when is_function(F) ->
+	F(Key).
+
 
 fetch_value(Key, Data) ->
     case find_value(Key, Data) of
         undefined ->
-            % throw({undefined_variable, Key});
             <<>>;
         Val ->
             Val

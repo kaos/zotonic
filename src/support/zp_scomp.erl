@@ -52,11 +52,11 @@ render(ScompName, Args, Context) ->
     end.
 
 
-%% @spec scomp_ready(Key, Result, MaxAge, Depends) -> none()
+%% @spec scomp_ready(Key, Result, MaxAge, Varies) -> none()
 %% @doc Called when a cacheable scomp has been rendered, places the scomp in the cache and
 %%      posts the result to all waiting processes
-scomp_ready(Key, Result, MaxAge, Depends) ->
-    gen_server:cast(?MODULE, {scomp_ready, Key, Result, MaxAge, Depends}).
+scomp_ready(Key, Result, MaxAge, Varies) ->
+    gen_server:cast(?MODULE, {scomp_ready, Key, Result, MaxAge, Varies}).
 
 
 %%====================================================================
@@ -89,14 +89,14 @@ init([]) ->
 %%      at the moment of the call to the template engine.  The scomp is a module that
 %%      must be present in the ebin directory. 
 handle_call({render, ScompName, Args, Context}, From, State) ->
-    ScompDepends = ScompName:depends(Args, Context),
-    {Cached, State1} =  case ScompDepends of
+    ScompVaries = ScompName:varies(Args, Context),
+    {Cached, State1} =  case ScompVaries of
                             undefined -> 
                                 {undefined, State};
-                            {Essential, Max, Dep} ->
+                            {Essential, Max, Vary} ->
                                 case Max of
                                     0 -> {undefined, State};
-                                    _ -> {cache_lookup(ScompName, Essential, Dep), State}
+                                    _ -> {cache_lookup(ScompName, Essential, Vary), State}
                                 end
                         end,
     case Cached of 
@@ -110,11 +110,11 @@ handle_call({render, ScompName, Args, Context}, From, State) ->
                     %% No cached entry, we need to redo the scomp.
                     %% When the scomp is cacheable we record it to prevent parallel rendering
                     %% When the scomp is not cacheable we just return the renderer to be evaluated in the process of the caller
-                    case ScompDepends of
+                    case ScompVaries of
                         undefined ->
                             {reply, {renderer, ScompName, render, [Args, Context, ScompState]}, State2};
-                        {EssentialParams, MaxAge, Depends} ->
-                            StateSpawned = spawn_cacheable_renderer(ScompName, ScompState, EssentialParams, MaxAge, Depends, Context, From, State2),
+                        {EssentialParams, MaxAge, Varies} ->
+                            StateSpawned = spawn_cacheable_renderer(ScompName, ScompState, EssentialParams, MaxAge, Varies, Context, From, State2),
                             {noreply, StateSpawned}
                     end
             end;
@@ -133,7 +133,7 @@ handle_call({render, ScompName, Args, Context}, From, State) ->
 %%--------------------------------------------------------------------
 
 %% @desc Store the rendered scomp in the cache, send the result to all waiting processes
-handle_cast({scomp_ready, Key, Result, MaxAge, Depends}, State) ->
+handle_cast({scomp_ready, Key, Result, MaxAge, Varies}, State) ->
     case dict:find(Key, State#state.waiting) of
         {ok, List} -> lists:foreach(fun(Pid) -> catch gen_server:reply(Pid, Result) end, List);
         _ -> ok
@@ -147,7 +147,7 @@ handle_cast({scomp_ready, Key, Result, MaxAge, Depends}, State) ->
         0 -> 
             {noreply, State1};
         Max ->
-            zp_depcache:set(Key, Result, Max, Depends),
+            zp_depcache:set(Key, Result, Max, Varies),
             {noreply, State1}
     end;
     
@@ -189,9 +189,9 @@ code_change(_OldVsn, State, _Extra) ->
 %% Internal functions
 %%--------------------------------------------------------------------
 
-cache_lookup(_ScompName, undefined, _Depends) ->
+cache_lookup(_ScompName, undefined, _Varies) ->
     undefined;
-cache_lookup(ScompName, EssentialParams, _Depends) ->
+cache_lookup(ScompName, EssentialParams, _Varies) ->
     case zp_depcache:get({ScompName,EssentialParams}) of
         {ok, Result} -> Result;
         _ -> undefined
@@ -201,7 +201,7 @@ cache_lookup(ScompName, EssentialParams, _Depends) ->
 %% @doc Render a scomp where we can cache the result.  The scomp is rendered and reported
 %%      back to this scomp server, which then replies all callee processes that are waiting and
 %%      caches the result.
-spawn_cacheable_renderer(ScompName, ScompState, EssentialParams, MaxAge, Depends, Context, From, State) ->
+spawn_cacheable_renderer(ScompName, ScompState, EssentialParams, MaxAge, Varies, Context, From, State) ->
     Key = {ScompName, EssentialParams},
     Waiting = try
                 dict:append(Key, From, State#state.waiting)
@@ -210,7 +210,7 @@ spawn_cacheable_renderer(ScompName, ScompState, EssentialParams, MaxAge, Depends
              end,
     Renderer = fun() ->
                      Result = ScompName:render(EssentialParams, Context, ScompState),
-                     zp_scomp:scomp_ready(Key, Result, MaxAge, Depends)
+                     zp_scomp:scomp_ready(Key, Result, MaxAge, Varies)
                 end,
     spawn(Renderer),
     State#state{waiting=Waiting}.

@@ -6,12 +6,12 @@
 -author("Marc Worrell <marc@worrell.nl>").
 
 -behaviour(gen_scomp).
--export([init/1, depends/2, code_change/3, terminate/1, render/3]).
+-export([init/1, varies/2, code_change/3, terminate/1, render/3]).
 
 -include("zophrenic.hrl").
 
 init(_Args) -> {ok, []}.
-depends(_Params, _Context) -> undefined.
+varies(_Params, _Context) -> undefined.
 code_change(_OldVsn, State, _Extra) -> {ok, State}.    
 terminate(_Reason) -> ok.
 

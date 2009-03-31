@@ -343,13 +343,16 @@ set_context(PropList, Context) when is_list(PropList) ->
 
 %% @spec get(Key, Context) -> Value
 %% @doc Fetch the value of the context variable Key
-get_context(Key, Context) ->
+get_context(Key, Context) when Context#context.dict =/= undefined ->
     case dict:find(Key, Context#context.dict) of
         {ok, Value} ->
                 Value;
         error ->
                 undefined
-    end.
+    end;
+get_context(_Key, _Context) ->
+	undefined.
+
 
 %% @spec incr_session(Key, Increment, Context) -> {NewValue,NewContext}
 %% @doc Increment the context variable Key

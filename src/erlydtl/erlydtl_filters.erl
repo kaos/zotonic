@@ -40,8 +40,13 @@
 -define(NO_ENCODE(C), ((C >= $a andalso C =< $z) orelse
                                   (C >= $A andalso C =< $Z) orelse
                                   (C >= $0 andalso C =< $9) orelse
-                                  (C =:= $\. orelse C =:= $- 
+                                  (C =:= $. orelse C =:= $- 
                                   orelse C =:= $~ orelse C =:= $_))).
+
+opttrans({trans, _}=Trans, Language) ->
+	zp_trans:trans(Trans, Language);
+opttrans(V, _Language) ->
+	V.
 
 add([Input], Number) when is_list(Input) or is_binary(Input) ->
     add(Input, Number);

@@ -28,21 +28,21 @@
 -module(scomp_include).
 -behaviour(gen_scomp).
 
--export([init/1, depends/2, code_change/3, terminate/1, render/3]).
+-export([init/1, varies/2, code_change/3, terminate/1, render/3]).
 
 -include("zophrenic.hrl").
 
 init(_Args) -> {ok, []}.
-depends(Params, _Context) -> 
+varies(Params, _Context) -> 
     MaxAge = proplists:get_value(maxage, Params),
     case zp_convert:to_integer(MaxAge) of
         undefined -> 
             undefined; 
         Max ->
-            Depend  = proplists:get_all_values(depend, Params),
+            Vary    = proplists:get_all_values(vary, Params),
             Params1 = proplists:delete(maxage, Params),
-            Params2 = proplists:delete(depend, Params1),
-            {Params2, Max, Depend}
+            Params2 = proplists:delete(vary, Params1),
+            {Params2, Max, Vary}
     end.
 
 code_change(_OldVsn, State, _Extra) -> {ok, State}.    

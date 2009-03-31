@@ -59,8 +59,8 @@ identifier_to_keyword({identifier, Pos, String}, {open_tag, Acc}) ->
         "extends", "autoescape", "endautoescape", "if", "else", "endif",
         "not", "or", "and", "comment", "endcomment", "cycle", "firstof",
         "ifchanged", "ifequal", "endifequal", "ifnotequal", "endifnotequal",
-        "now", "regroup", "spaceless", "endspaceless", "ssi", "templatetag",
-        "load", "call", "with", "url", "print", "image", "image_url"], 
+        "now", "regroup", "rsc", "spaceless", "endspaceless", "ssi", "templatetag",
+        "load", "call", "with", "url", "print", "image", "image_url", "_",], 
     Type = case lists:member(RevString, Keywords) of
         true -> list_to_atom(RevString ++ "_keyword");
         _ ->    identifier
@@ -68,7 +68,7 @@ identifier_to_keyword({identifier, Pos, String}, {open_tag, Acc}) ->
     {Type, [{Type, Pos, RevString}|Acc]};
 identifier_to_keyword({identifier, Pos, String}, {_PrevToken, Acc}) ->
     RevString = lists:reverse(String),
-    Keywords = ["in", "not", "or", "and", "firstof", "now", "regroup", "templatetag", "with"], 
+    Keywords = ["in", "not", "or", "and", "firstof", "now", "regroup", "rsc", "templatetag", "with"], 
     Type = case lists:member(RevString, Keywords) of
         true -> list_to_atom(RevString ++ "_keyword");
         _ ->    identifier
@@ -85,6 +85,9 @@ scan([], Scanned, _, in_text) ->
 scan([], _Scanned, _, {in_comment, _}) ->
     {error, "Reached end of file inside a comment."};
 
+scan([], _Scanned, _, {in_trans, _}) ->
+    {error, "Reached end of file inside a trans block."};
+
 scan([], _Scanned, _, _) ->
     {error, "Reached end of file inside a code block."};
 
@@ -93,6 +96,24 @@ scan("<!--{{" ++ T, Scanned, {Row, Column}, in_text) ->
 
 scan("{{" ++ T, Scanned, {Row, Column}, in_text) ->
     scan(T, [{open_var, {Row, Column}, "{{"} | Scanned], {Row, Column + 2}, {in_code, "}}"});
+
+scan("<!--{_" ++ T, Scanned, {Row, Column}, in_text) ->
+    scan(T, [
+			{trans_text, {Row, Column + length("<!--{_")}, ""},
+			{open_trans, {Row, Column}, "<!--{_"} | Scanned], 
+    {Row, Column + length("<!--{_")}, {in_trans, "_}-->"});
+
+scan("{_" ++ T, Scanned, {Row, Column}, in_text) ->
+    scan(T, [
+			{trans_text, {Row, Column + 2}, ""},
+			{open_trans, {Row, Column}, "{_"} | Scanned], 
+		{Row, Column + 2}, {in_trans, "_}"});
+
+scan("_}-->" ++ T, Scanned, {Row, Column}, {in_trans, "_}-->"}) ->
+    scan(T, [{close_trans, {Row, Column}, "_}-->"} | Scanned], {Row, Column + length("_}-->")}, in_text);
+
+scan("_}" ++ T, Scanned, {Row, Column}, {in_trans, "_}"}) ->
+    scan(T, [{close_trans, {Row, Column}, "_}"} | Scanned], {Row, Column + 2}, in_text);
 
 scan("<!--{#" ++ T, Scanned, {Row, Column}, in_text) ->
     scan(T, Scanned, {Row, Column + length("<!--{#")}, {in_comment, "#}-->"});
@@ -117,6 +138,9 @@ scan("{%" ++ T, Scanned, {Row, Column}, in_text) ->
 scan([_ | T], Scanned, {Row, Column}, {in_comment, Closer}) ->
     scan(T, Scanned, {Row, Column + 1}, {in_comment, Closer});
 
+scan([H | T], Scanned, {Row, Column}, {in_trans, Closer}) ->
+    scan(T, append_char(Scanned, H), {Row, Column + 1}, {in_trans, Closer});
+
 scan("\n" ++ T, Scanned, {Row, Column}, in_text) ->
     scan(T, append_text_char(Scanned, {Row, Column}, $\n), {Row + 1, 1}, in_text);
 
@@ -126,11 +150,17 @@ scan([H | T], Scanned, {Row, Column}, in_text) ->
 scan("\"" ++ T, Scanned, {Row, Column}, {in_code, Closer}) ->
     scan(T, [{string_literal, {Row, Column}, "\""} | Scanned], {Row, Column + 1}, {in_double_quote, Closer});
 
+scan("_\"" ++ T, Scanned, {Row, Column}, {in_code, Closer}) ->
+    scan(T, [{trans_literal, {Row, Column}, "\""} | Scanned], {Row, Column + 1}, {in_double_quote, Closer});
+
 scan("\"" ++ T, Scanned, {Row, Column}, {in_identifier, Closer}) ->
     scan(T, [{string_literal, {Row, Column}, "\""} | Scanned], {Row, Column + 1}, {in_double_quote, Closer});
 
 scan("\'" ++ T, Scanned, {Row, Column}, {in_code, Closer}) ->
     scan(T, [{string_literal, {Row, Column}, "\""} | Scanned], {Row, Column + 1}, {in_single_quote, Closer});
+
+scan("_\'" ++ T, Scanned, {Row, Column}, {in_code, Closer}) ->
+    scan(T, [{trans_literal, {Row, Column}, "\""} | Scanned], {Row, Column + 1}, {in_single_quote, Closer});
 
 scan("\'" ++ T, Scanned, {Row, Column}, {in_identifier, Closer}) ->
     scan(T, [{string_literal, {Row, Column}, "\""} | Scanned], {Row, Column + 1}, {in_single_quote, Closer});

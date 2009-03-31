@@ -98,6 +98,8 @@ Nonterminals
 	PrintTag
 	ImageTag
 	ImageUrlTag
+	TransTag
+	TransExtTag
 	ValueList.
 
 Terminals
@@ -138,6 +140,7 @@ Terminals
     open_var
     pipe
     print_keyword
+	rsc_keyword
     string_literal
     text
 	url_keyword
@@ -146,6 +149,11 @@ Terminals
 	close_curly
 	open_bracket
 	close_bracket
+	open_trans
+	trans_text
+	close_trans
+	trans_literal
+	'__keyword'
  	hash.
 
 Rootsymbol
@@ -156,6 +164,7 @@ Expect 1.
 Elements -> '$empty' : [].
 Elements -> Elements text : '$1' ++ ['$2'].
 Elements -> Elements ValueBraced : '$1' ++ ['$2'].
+Elements -> Elements TransTag : '$1' ++ ['$2'].
 Elements -> Elements ExtendsTag : '$1' ++ ['$2'].
 Elements -> Elements IncludeTag : '$1' ++ ['$2'].
 Elements -> Elements NowTag : '$1' ++ ['$2'].
@@ -175,9 +184,12 @@ Elements -> Elements UrlTag : '$1' ++ ['$2'].
 Elements -> Elements PrintTag : '$1' ++ ['$2'].
 Elements -> Elements ImageTag : '$1' ++ ['$2'].
 Elements -> Elements ImageUrlTag : '$1' ++ ['$2'].
+Elements -> Elements TransExtTag : '$1' ++ ['$2'].
 
 ValueBraced -> open_var Value close_var : '$2'.
 
+TransTag -> open_trans trans_text close_trans : {trans, '$2'}.
+TransExtTag -> open_tag '__keyword' string_literal Args close_tag : {trans_ext, '$3', '$4'}.
 ExtendsTag -> open_tag extends_keyword string_literal close_tag : {extends, '$3'}.
 IncludeTag -> open_tag include_keyword string_literal Args close_tag : {include, '$3', '$4'}.
 NowTag -> open_tag now_keyword string_literal close_tag : {date, now, '$3'}.
@@ -240,6 +252,7 @@ Filter -> identifier : ['$1'].
 Filter -> identifier colon Literal : ['$1', '$3'].
 
 Literal -> string_literal : '$1'.
+Literal -> trans_literal  : '$1'.
 Literal -> number_literal : '$1'.
 
 CustomTag -> open_tag identifier Args close_tag : {tag, '$2', '$3'}.
@@ -261,6 +274,7 @@ Args -> Args identifier equal Value : '$1' ++ [{'$2', '$4'}].
 Value -> Value pipe Filter : {apply_filter, '$1', '$3'}.
 Value -> Variable : '$1'.
 Value -> Literal : '$1'.
+Value -> rsc_keyword : {rsc}.
 Value -> hash identifier : {auto_id, '$2'}.
 Value -> open_curly identifier Args close_curly : {tuple_value, '$2', '$3'}.
 Value -> open_bracket ValueList close_bracket : {value_list, '$2'}.
