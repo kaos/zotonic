@@ -215,17 +215,14 @@ parse(Data) ->
     end.        
   
 forms(File, Module, BodyAst, BodyInfo, CheckSum) ->
-    Render0FunctionAst = erl_syntax:function(erl_syntax:atom(render),
-        [erl_syntax:clause([], none, [erl_syntax:application(none, 
-                        erl_syntax:atom(render), [erl_syntax:list([])])])]),
     Function2 = erl_syntax:application(none, erl_syntax:atom(render2), 
-        [erl_syntax:variable("Variables")]),
+        [erl_syntax:variable("Variables"), erl_syntax:variable("ZpContext")]),
     ClauseOk = erl_syntax:clause([erl_syntax:variable("Val")], none,
         [erl_syntax:tuple([erl_syntax:atom(ok), erl_syntax:variable("Val")])]),     
     ClauseCatch = erl_syntax:clause([erl_syntax:variable("Err")], none,
         [erl_syntax:tuple([erl_syntax:atom(error), erl_syntax:variable("Err")])]),            
-    Render1FunctionAst = erl_syntax:function(erl_syntax:atom(render),
-        [erl_syntax:clause([erl_syntax:variable("Variables")], none, 
+    Render2FunctionAst = erl_syntax:function(erl_syntax:atom(render),
+        [erl_syntax:clause([erl_syntax:variable("Variables"), erl_syntax:variable("ZpContext")], none, 
             [erl_syntax:try_expr([Function2], [ClauseOk], [ClauseCatch])])]),  
      
     SourceFunctionTuple = erl_syntax:tuple(
@@ -255,25 +252,31 @@ forms(File, Module, BodyAst, BodyInfo, CheckSum) ->
 							erl_syntax:application(
 						        erl_syntax:atom(erlydtl_runtime), 
 						        erl_syntax:atom(fetch_value),
-						        [erl_syntax:atom(language), erl_syntax:variable("Variables")]
+						        [	erl_syntax:atom(language), 
+									erl_syntax:variable("Variables"), 
+									erl_syntax:variable("ZpContext")
+								]
 							)
 					),
 
     RenderInternalFunctionAst = erl_syntax:function(
         erl_syntax:atom(render2), 
-            [erl_syntax:clause([erl_syntax:variable("Variables")], none, 
-                [BodyAutoIdAst, BodyLanguageAst, BodyAst])]),   
+            [ erl_syntax:clause(
+					[erl_syntax:variable("Variables"), erl_syntax:variable("ZpContext")], 
+					none, 
+                	[BodyAutoIdAst, BodyLanguageAst, BodyAst])
+			]),   
     
     ModuleAst  = erl_syntax:attribute(erl_syntax:atom(module), [erl_syntax:atom(Module)]),
     
     ExportAst = erl_syntax:attribute(erl_syntax:atom(export),
-        [erl_syntax:list([erl_syntax:arity_qualifier(erl_syntax:atom(render), erl_syntax:integer(0)),
-                    erl_syntax:arity_qualifier(erl_syntax:atom(render), erl_syntax:integer(1)),
+        [erl_syntax:list([
+					erl_syntax:arity_qualifier(erl_syntax:atom(render), erl_syntax:integer(2)),
                     erl_syntax:arity_qualifier(erl_syntax:atom(source), erl_syntax:integer(0)),
                     erl_syntax:arity_qualifier(erl_syntax:atom(dependencies), erl_syntax:integer(0))])]),
     
-    [erl_syntax:revert(X) || X <- [ModuleAst, ExportAst, Render0FunctionAst,
-            Render1FunctionAst, SourceFunctionAst, DependenciesFunctionAst, RenderInternalFunctionAst
+    [erl_syntax:revert(X) || X <- [ModuleAst, ExportAst,
+            Render2FunctionAst, SourceFunctionAst, DependenciesFunctionAst, RenderInternalFunctionAst
             | BodyInfo#ast_info.pre_render_asts]].    
 
         
@@ -485,14 +488,14 @@ string_ast(String, TreeWalker) ->
 
 rsc_ast(_Context, TreeWalker) ->
 		RscAst = erl_syntax:application(
-					erl_syntax:atom(zp_rsc),
+					erl_syntax:atom(m_rsc),
 					erl_syntax:atom(rsc),
 					[]
 				),
 		{{RscAst, #ast_info{}}, TreeWalker}.
 
 include_ast(File, Args, Context, TreeWalker) ->
-    IsCached = lists:foldl( fun({{identifier, _, Key}, _}, IsC) -> 
+    UseScomp = lists:foldl( fun({{identifier, _, Key}, _}, IsC) -> 
                                 case Key of
                                     "maxage" -> true;
                                     "vary"   -> true;
@@ -502,7 +505,7 @@ include_ast(File, Args, Context, TreeWalker) ->
                             end,
                             false,
                             Args),
-    case IsCached of
+    case UseScomp of
         false ->
             InterpretedArgs = interpreted_args(Args, Context),
             FilePath = full_path(File, Context#dtl_context.doc_root),
@@ -589,20 +592,28 @@ opttrans_variable_ast({Ast, VarName}) ->
 				erl_syntax:variable("Language")
 			]), VarName}.
 
+
+resolve_variable_ast({rsc}, _Context, _FinderFunction) ->
+	{erl_syntax:application(
+				erl_syntax:atom(m_rsc),
+				erl_syntax:atom(rsc),
+				[]
+			), "rsc"};
+
 resolve_variable_ast({index_value, Variable, Index}, Context, FinderFunction) ->
     {{IndexAst,_Context},_TreeWalker} = value_ast(Index, false, Context, #treewalker{}),
     {VarAst, VarName} = resolve_variable_ast(Variable, Context, FinderFunction),
     {erl_syntax:application(
             erl_syntax:atom(erlydtl_runtime), 
             erl_syntax:atom(FinderFunction),
-            [IndexAst, VarAst]), VarName};
+            [IndexAst, VarAst, erl_syntax:variable("ZpContext")]), VarName};
            
 resolve_variable_ast({attribute, {{identifier, _, AttrName}, Variable}}, Context, FinderFunction) ->
     {VarAst, VarName} = resolve_variable_ast(Variable, Context, FinderFunction),
     {erl_syntax:application(
             erl_syntax:atom(erlydtl_runtime),
             erl_syntax:atom(FinderFunction),
-            [erl_syntax:atom(AttrName), VarAst]), VarName};
+            [erl_syntax:atom(AttrName), VarAst, erl_syntax:variable("ZpContext")]), VarName};
 
 resolve_variable_ast({variable, {identifier, _, VarName}}, Context, FinderFunction) ->
     VarValue = case resolve_scoped_variable_ast(VarName, Context) of
@@ -610,7 +621,7 @@ resolve_variable_ast({variable, {identifier, _, VarName}}, Context, FinderFuncti
             erl_syntax:application(
                 erl_syntax:atom(erlydtl_runtime), 
                 erl_syntax:atom(FinderFunction),
-                [erl_syntax:atom(VarName), erl_syntax:variable("Variables")]);
+                [erl_syntax:atom(VarName), erl_syntax:variable("Variables"), erl_syntax:variable("ZpContext")]);
         Val ->
             Val
     end,
@@ -743,7 +754,7 @@ cycle_ast(Names, Context, TreeWalker) ->
                            end, Names),
     {{erl_syntax:application(
         erl_syntax:atom('erlydtl_runtime'), erl_syntax:atom('cycle'),
-        [erl_syntax:tuple(NamesTuple), erl_syntax:variable("Counters")]), #ast_info{}}, TreeWalker}.
+        [erl_syntax:tuple(NamesTuple), erl_syntax:variable("Counters"), erl_syntax:variable("ZpContext")]), #ast_info{}}, TreeWalker}.
 
 %% Older Django templates treat cycle with comma-delimited elements as strings
 cycle_compat_ast(Names, _Context, TreeWalker) ->
@@ -754,7 +765,7 @@ cycle_compat_ast(Names, _Context, TreeWalker) ->
 
 
 %% @author Marc Worrell
-%% @doc Output the trans record which will be translated when 
+%% @doc Output the trans record with the translation call to zp_trans 
 %% @todo Optimization for the situation where all parameters are constants
 trans_ast(TransLiteral, _Context, TreeWalker) ->
 	% Remove the first and the last character, these were separating the string from the {_ and _} tokens
@@ -1019,7 +1030,8 @@ scomp_ast(ScompName, Args, Context, TreeWalker) ->
                 erl_syntax:atom(render),
                 [   erl_syntax:atom("scomp_" ++ ScompName), 
                     scomp_ast_map_args(Args, Context, TreeWalker), 
-                    erl_syntax:variable("Variables")
+                    erl_syntax:variable("Variables"),
+                    erl_syntax:variable("ZpContext")
                 ]
             ),
     RenderedAst = erl_syntax:variable("Rendered"),

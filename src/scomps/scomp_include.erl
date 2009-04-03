@@ -28,7 +28,7 @@
 -module(scomp_include).
 -behaviour(gen_scomp).
 
--export([init/1, varies/2, code_change/3, terminate/1, render/3]).
+-export([init/1, varies/2, code_change/3, terminate/1, render/4]).
 
 -include("zophrenic.hrl").
 
@@ -48,15 +48,14 @@ varies(Params, _Context) ->
 code_change(_OldVsn, State, _Extra) -> {ok, State}.    
 terminate(_Reason) -> ok.
 
-render(Params, Context, _State) ->
+render(Params, Vars, Context, _State) ->
     File = proplists:get_value(file, Params),
-    
     AddC =  fun 
-                ({Name,Value}, Ctx) when Name =/= file andalso Name =/= depend andalso Name =/= maxage ->
-                    zp_context:set_context(Name, Value, Ctx);
-                (_, Ctx) -> 
-                    Ctx
+                ({Name,Value}, Vs) when Name =/= file andalso Name =/= vary andalso Name =/= maxage ->
+                    [{Name,Value}|Vs];
+                (_, Vs) -> 
+                    Vs
             end,
-    Context1 = lists:foldl(AddC, Context, Params),
-    {ok, zp_template:render(File, Context1)}.
+    Vars1 = lists:foldl(AddC, Vars, Params),
+    {ok, zp_template:render(File, Vars1, Context)}.
 

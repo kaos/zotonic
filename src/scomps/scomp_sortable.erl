@@ -8,7 +8,7 @@
 -module(scomp_sortable).
 -behaviour(gen_scomp).
 
--export([init/1, varies/2, code_change/3, terminate/1, render/3]).
+-export([init/1, varies/2, code_change/3, terminate/1, render/4]).
 
 -include("zophrenic.hrl").
 
@@ -19,7 +19,7 @@ terminate(_Reason) -> ok.
 
 % -record(sortitem, {?ELEMENT_BASE(element_sortitem), tag, body=[] }).
 
-render(Params, Context, _State) ->
+render(Params, _Vars, Context, _State) ->
     Id       = proplists:get_value(id, Params),
     Tag      = proplists:get_value(tag, Params),
     Delegate = proplists:get_value(delegate, Params),

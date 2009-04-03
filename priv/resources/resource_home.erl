@@ -15,7 +15,5 @@ html(_ReqProps, Context) ->
 				[{title, "Bike page"}, {uri, "/bike/trek/urban"}]
 			],
 
-	Context1 = zp_context:set_context(menu_list, MenuList, Context),
-    
-    Html = zp_template:render("home.tpl", Context1),
-	zp_context:output(Html, Context1).
+    Html = zp_template:render("home.tpl", [{menu_list, MenuList}], Context),
+	zp_context:output(Html, Context).

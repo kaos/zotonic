@@ -60,7 +60,7 @@ identifier_to_keyword({identifier, Pos, String}, {open_tag, Acc}) ->
         "not", "or", "and", "comment", "endcomment", "cycle", "firstof",
         "ifchanged", "ifequal", "endifequal", "ifnotequal", "endifnotequal",
         "now", "regroup", "rsc", "spaceless", "endspaceless", "ssi", "templatetag",
-        "load", "call", "with", "url", "print", "image", "image_url", "_",], 
+        "load", "call", "with", "url", "print", "image", "image_url", "_"], 
     Type = case lists:member(RevString, Keywords) of
         true -> list_to_atom(RevString ++ "_keyword");
         _ ->    identifier

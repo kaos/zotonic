@@ -4,15 +4,13 @@
 -include_lib("zophrenic.hrl").
 
 % Index of list with an integer like "a[2]"
-find_value(Key, L) when is_integer(Key) andalso is_list(L) ->
+find_value(Key, L, _Context) when is_integer(Key) andalso is_list(L) ->
     try
         lists:nth(Key, L)
     catch
         _:_ -> undefined
     end;
-find_value(Key, L) when is_list(L) ->
-    proplists:get_value(Key, L);
-find_value(Key, {GBSize, GBData}) when is_integer(GBSize) ->
+find_value(Key, {GBSize, GBData}, _Context) when is_integer(GBSize) ->
     case gb_trees:lookup(Key, {GBSize, GBData}) of
         {value, Val} ->
             Val;
@@ -22,15 +20,35 @@ find_value(Key, {GBSize, GBData}) when is_integer(GBSize) ->
 
 %% q and q_validated are indexed with strings, this because the indices are from
 %% the query string and post. Wrap them in a 'q' tuple to force a subsequent lookup.
-find_value(Key, {q, List}) ->
+find_value(Key, {q, List}, _Context) ->
     proplists:get_value(atom_to_list(Key), List);
-find_value(q, #context{}=Context) ->
+find_value(q, _Vars, Context) ->
     {q, zp_context:get_context(q, Context)};
-find_value(q_validated, #context{}=Context) ->
+find_value(q_validated, _Vars, Context) ->
     {q, zp_context:get_context(q_validated, Context)};
 
+%% Regular proplist lookup
+find_value(Key, L, _Context) when is_list(L) ->
+    proplists:get_value(Key, L);
+
+%% Resource list handling, special lookups when skipping the index
+find_value(Key, {rsc_list, L}, _Context) when is_integer(Key) ->
+    try
+        lists:nth(Key, L)
+    catch
+        _:_ -> undefined
+    end;
+find_value(Key, {rsc_list, [H|_T]}, Context) ->
+	find_value(Key, H, Context);
+find_value(_Key, {rsc_list, []}, _Context) ->
+	undefined;
+
+%% Property of a resource
+find_value(Key, #rsc{} = Rsc, Context) ->
+	m_rsc:p(Rsc, Key, Context);
+
 % Index of tuple with an integer like "a[2]"
-find_value(Key, T) when is_integer(Key) andalso is_tuple(T) ->
+find_value(Key, T, _Context) when is_integer(Key) andalso is_tuple(T) ->
     try
         element(Key, T)
     catch 
@@ -38,7 +56,7 @@ find_value(Key, T) when is_integer(Key) andalso is_tuple(T) ->
     end;
 
 %% Other cases: context, dict or parametrized module lookup.
-find_value(Key, Tuple) when is_tuple(Tuple) ->
+find_value(Key, Tuple, _Context) when is_tuple(Tuple) ->
     Module = element(1, Tuple),
     case Module of
         context ->
@@ -65,13 +83,19 @@ find_value(Key, Tuple) when is_tuple(Tuple) ->
             end
     end;
 
-%% When the current value lookup is a function
-find_value(Key, F) when is_function(F) ->
-	F(Key).
+%% When the current value lookup is a function, the context is always passed to F
+find_value(Key, F, Context) when is_function(F) ->
+	F(Key, Context);
+
+%% Any subvalue of a non-existant value is empty
+find_value(_Key, undefined, _Context) ->
+	undefined;
+find_value(_Key, <<>>, _Context) ->
+	undefined.
 
 
-fetch_value(Key, Data) ->
-    case find_value(Key, Data) of
+fetch_value(Key, Data, Context) ->
+    case find_value(Key, Data, Context) of
         undefined ->
             <<>>;
         Val ->
@@ -132,5 +156,5 @@ increment_counter_stats([{counter, Counter}, {counter0, Counter0}, {revcounter, 
         {first, false}, {last, RevCounter0 =:= 1},
         {parentloop, Parent}].
 
-cycle(NamesTuple, Counters) when is_tuple(NamesTuple) ->
-    element(fetch_value(counter0, Counters) rem size(NamesTuple) + 1, NamesTuple).
+cycle(NamesTuple, Counters, Context) when is_tuple(NamesTuple) ->
+    element(fetch_value(counter0, Counters, Context) rem size(NamesTuple) + 1, NamesTuple).

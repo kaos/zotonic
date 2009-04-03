@@ -24,5 +24,5 @@ charsets_provided(_ReqProps, Context) ->
 to_html(_ReqProps, Context) ->
     Context1 = zp_context:ensure_all(Context),
     Template = zp_context:get_context(template, Context1),
-    Html     = zp_template:render(Template, Context1),
+    Html     = zp_template:render(Template, [], Context1),
     zp_context:output(Html, Context1).

@@ -9,7 +9,7 @@
 -module(scomp_draggable).
 -behaviour(gen_scomp).
 
--export([init/1, varies/2, code_change/3, terminate/1, render/3]).
+-export([init/1, varies/2, code_change/3, terminate/1, render/4]).
 
 -include("zophrenic.hrl").
 
@@ -20,7 +20,7 @@ terminate(_Reason) -> ok.
 
 %% -record(draggable, {?ELEMENT_BASE(element_draggable), tag, body=[], group, handle, clone=true, revert=true}).
 
-render(Params, Context, _State) ->
+render(Params, _Vars, Context, _State) ->
     Id      = proplists:get_value(id, Params),
     Tag     = proplists:get_value(tag, Params),
     Clone   = proplists:get_value(clone, Params, true),

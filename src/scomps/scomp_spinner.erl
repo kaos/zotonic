@@ -5,7 +5,7 @@
 -module(scomp_spinner).
 -behaviour(gen_scomp).
 
--export([init/1, varies/2, code_change/3, terminate/1, render/3]).
+-export([init/1, varies/2, code_change/3, terminate/1, render/4]).
 
 -include("zophrenic.hrl").
 
@@ -14,6 +14,6 @@ varies(_Params, _Context) -> undefined.
 code_change(_OldVsn, State, _Extra) -> {ok, State}.    
 terminate(_Reason) -> ok.
 
-render(Params, _Context, _State) ->
+render(Params, _Vars, _Context, _State) ->
     Image = proplists:get_value(image, Params, <<"/lib/images/spinner.gif">>),
     {ok, <<"<div id=\"spinner\" class=\"spinner\" style=\"display: none\"><image alt=\"activity indicator\" src=\"">>,Image,<<"\" /></div>">>}.

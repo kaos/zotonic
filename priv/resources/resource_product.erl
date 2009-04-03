@@ -14,10 +14,8 @@ html(_ReqProps, Context) ->
 				[{title, "Product page"}, {uri, "/product/shimano/105-ST-5600"}],
 				[{title, "Bike page"}, {uri, "/bike/trek/urban"}]
 			],
-	Context1 = zp_context:set_context(menu_list, MenuList, Context),
-
-    Html = zp_template:render("product.tpl", Context1),
-	zp_context:output(Html, Context1).
+    Html = zp_template:render("product.tpl", [{menu_list, MenuList}], Context),
+	zp_context:output(Html, Context).
 	
 event({postback, show_basket_notice, _TriggerId, _TargetId}, Context1) ->
     %%zp_render:wire({fade_in, [{speed,300}, {target, "product-notice"}]}, Context1),

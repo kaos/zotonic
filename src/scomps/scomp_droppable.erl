@@ -9,7 +9,7 @@
 -module(scomp_droppable).
 -behaviour(gen_scomp).
 
--export([init/1, varies/2, code_change/3, terminate/1, render/3, event/2]).
+-export([init/1, varies/2, code_change/3, terminate/1, render/4, event/2]).
 
 -include("zophrenic.hrl").
 
@@ -20,7 +20,7 @@ terminate(_Reason) -> ok.
 
 %% -record(droppable, {?ELEMENT_BASE(element_droppable), tag, body=[], accept_groups=all, active_class=active, hover_class=hover}).
 
-render(Params, Context, _State) ->
+render(Params, _Vars, Context, _State) ->
     Id           = proplists:get_value(id, Params),
     Tag          = proplists:get_value(tag, Params),
     ActiveClass  = proplists:get_value(active_class, Params, "active"),

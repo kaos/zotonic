@@ -15,21 +15,21 @@
 -include_lib("zophrenic.hrl").
 
 %% External exports
--export([compile/1, render/2, reader/1]).
+-export([compile/1, render/3, reader/1]).
 
 
 start_link() -> 
     gen_server:start_link({local, ?MODULE}, ?MODULE, [], []).
 
 
-%% @spec render(File, Context) -> iolist()
+%% @spec render(File, Variables, Context) -> iolist()
 %% @doc Render a template.  First requests the template module from the template server, then renders the template.
 %%      We do not let the template server render the template to prevent that the whole context is copied whilst passing
-%%      The message to the template server. The context might contain a lot of variables set by the resource.
-render(File, Context) ->
+%%      the message to the template server.
+render(File, Variables, Context) ->
     case gen_server:call(?MODULE, {compile_if_modified, File}) of
         {ok, Module} ->
-            case Module:render(Context) of
+            case Module:render(Variables, Context) of
                 {ok, Output}   -> Output;
                 {error, Reason} -> "<strong>Error rendering template: "++ File ++ " ("++Reason++")</strong>"
              end;

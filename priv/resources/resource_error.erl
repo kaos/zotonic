@@ -8,7 +8,5 @@
 
 html(_ReqProps, Context) ->
 	ErrorCode = "404 Page not found",
-	Context1 = zp_context:set_context(error_code, ErrorCode, Context),
-    
-    Html = zp_template:render("error.tpl", Context1),
-	zp_context:output(Html, Context1).
+    Html = zp_template:render("error.tpl", [{error_code, ErrorCode}], Context),
+	zp_context:output(Html, Context).

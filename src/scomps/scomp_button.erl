@@ -6,7 +6,7 @@
 -module(scomp_button).
 -behaviour(gen_scomp).
 
--export([init/1, varies/2, code_change/3, terminate/1, render/3]).
+-export([init/1, varies/2, code_change/3, terminate/1, render/4]).
 
 -include("zophrenic.hrl").
 
@@ -31,7 +31,7 @@ varies(_Params, _Context) -> undefined.
 code_change(_OldVsn, State, _Extra) -> {ok, State}.    
 terminate(_Reason) -> ok.
 
-render(Params, Context, _State) ->
+render(Params, _Vars, Context, _State) ->
     Postback  = proplists:get_value(postback, Params),
     Text      = proplists:get_value(text, Params, <<"Submit">>),
     Id        = zp_ids:optid(proplists:get_value(id, Params)),

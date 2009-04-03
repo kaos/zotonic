@@ -9,12 +9,10 @@
 
 html(_ReqProps, Context) ->
     {Incr, Context2} = zp_context:incr_session(helloworld_counter, 1, Context),
-    Context3         = zp_context:set_context(helloworld_counter, Incr, Context2),
-    
-    Html = zp_template:render("helloworld.tpl", Context3),
-    % Html = zp_template:render("idtest.tpl", Context3),
+    Html = zp_template:render("helloworld.tpl", [{helloworld_counter,Incr}], Context2),
+    % Html = zp_template:render("idtest.tpl", Context2),
     % _Pid = zp_context:spawn_link_page(?MODULE, periodic, [], Context3),
-    zp_context:output(Html, Context3).
+    zp_context:output(Html, Context2).
 
 
 event({postback, show_confirm, _TriggerId, _TargetId}, Context) ->

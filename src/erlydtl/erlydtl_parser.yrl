@@ -274,11 +274,11 @@ Args -> Args identifier equal Value : '$1' ++ [{'$2', '$4'}].
 Value -> Value pipe Filter : {apply_filter, '$1', '$3'}.
 Value -> Variable : '$1'.
 Value -> Literal : '$1'.
-Value -> rsc_keyword : {rsc}.
 Value -> hash identifier : {auto_id, '$2'}.
 Value -> open_curly identifier Args close_curly : {tuple_value, '$2', '$3'}.
 Value -> open_bracket ValueList close_bracket : {value_list, '$2'}.
 
+Variable -> rsc_keyword : {rsc}.
 Variable -> identifier : {variable, '$1'}.
 Variable -> Variable open_bracket Value close_bracket : {index_value, '$1', '$3'}.
 Variable -> Variable dot identifier : {attribute, {'$3', '$1'}}.

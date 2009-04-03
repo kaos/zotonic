@@ -34,7 +34,11 @@
             dict
         }).
 
+%% drag and drop event message
 -record(dragdrop, {tag, delegate, id}).
+
+%% Used for specifying resource ids, see src/models/m_rsc.erl
+-record(rsc, {id}).
 
 %% @doc Check if an assumption is true
 -define(ASSERT(A,E), zp_utils:assert(A,E)).

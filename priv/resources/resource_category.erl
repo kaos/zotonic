@@ -7,5 +7,5 @@
 -include_lib("resource_html.hrl").
  
 html(_ReqProps, Context) ->
-    Html = zp_template:render("category.tpl", Context),
+    Html = zp_template:render("category.tpl", [], Context),
     zp_context:output(Html, Context).

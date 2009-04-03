@@ -13,7 +13,9 @@
     cleanup_for_template/1,
     cleanup_for_scomp/1,
     output/2,
-    
+
+    combine_results/2,
+
     ensure_all/1,
     ensure_session/1,
     ensure_person/1,
@@ -79,11 +81,19 @@ cleanup_for_template(#context{}=Context) ->
 cleanup_for_template(Output) -> Output.
 
 
-%% @doc Cleanup a context for scomp handling.  Resets the dict so that we do not get unneccesary copying during message passing.
-%%      The updates/actions etc are not reset as they can accumulate in nested scomp calls.
+%% @doc Cleanup a context for cacheable scomp handling.  Resets most of the accumulators to prevent duplicating
+%% between different (cached) renderings.
 cleanup_for_scomp(Context) ->
     Context#context{
-        dict=undefined
+        dict=undefined,
+		reqprops=undefined,
+		updates=[],
+		actions=[],
+		content_scripts=[],
+		scripts=[],
+		wire=[],
+		validators=[],
+		render=[]
     }.
 
 
@@ -114,9 +124,16 @@ output1([List|Rest], Context, Acc) when is_list(List) ->
 output1([C|Rest], Context, Acc) ->
     output1(Rest, Context, [C|Acc]).
 
+%% @spec combine_results(Context1, Context2) -> Context
+%% @doc Merge the scripts and the rendered content of two contexts into Context1
+combine_results(C1, C2) ->
+	Merged = merge_scripts(C2, C1),
+    Merged#context{
+        render=combine(C1#context.render, C2#context.render)
+    }.
 
 %% @spec merge_scripts(Context, ContextAcc) -> Context
-%% @doc Merge the scripts in contet C into the context accumulator, used when collecting all scripts in an output stream
+%% @doc Merge the scripts in context C into the context accumulator, used when collecting all scripts in an output stream
 merge_scripts(C, Acc) ->
     Acc#context{
         updates=combine(Acc#context.updates, C#context.updates),
@@ -177,7 +194,7 @@ ensure_qs(Context) ->
         error ->
             ReqProps = Context#context.reqprops,
             Req      = ?REQ(ReqProps),
-            PathArgs = lists:map(fun ({T,V}) -> {atom_to_list(T),V} end, Req:get_path_info()),
+            PathArgs = lists:map(fun ({T,V}) -> {atom_to_list(T),mochiweb_util:unquote(V)} end, Req:get_path_info()),
             Body     = parse_form_urlencoded(Req),
             Query    = Req:parse_qs(),
             Combined = PathArgs ++ Body ++ Query,

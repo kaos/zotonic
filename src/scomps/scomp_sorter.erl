@@ -8,7 +8,7 @@
 -module(scomp_sorter).
 -behaviour(gen_scomp).
 
--export([init/1, varies/2, code_change/3, terminate/1, render/3, event/2]).
+-export([init/1, varies/2, code_change/3, terminate/1, render/4, event/2]).
 
 -include("zophrenic.hrl").
 
@@ -19,7 +19,7 @@ terminate(_Reason) -> ok.
 
 % -record(sortblock, {?ELEMENT_BASE(element_sortblock), tag, items=[], group, connect_with_groups=none, handle }).
 
-render(Params, Context, _State) ->
+render(Params, _Vars, Context, _State) ->
     Id           = proplists:get_value(id, Params),
     Tag          = proplists:get_value(tag, Params),
     Class        = proplists:get_value(class, Params, []),

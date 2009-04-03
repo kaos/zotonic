@@ -14,7 +14,7 @@
 -author("Marc Worrell <marc@worrell.nl>").
 
 %% API
--export([start_link/0, render/3, scomp_ready/4]).
+-export([start_link/0, render/4, scomp_ready/4]).
 
 %% gen_server callbacks
 -export([init/1, handle_call/3, handle_cast/2, handle_info/2,
@@ -41,16 +41,22 @@ start_link() ->
   gen_server:start_link({local, ?MODULE}, ?MODULE, [], []).
 
 
-%% @spec render(ScompName, Args, Vars) -> {ok, Context} | {ok, io_list} | {error, Reason}
+%% @spec render(ScompName, Args, Vars, Context) -> {ok, Context} | {ok, io_list} | {error, Reason}
 %% @doc Render the names scomp, Args are the scomp arguments and Vars are the variables given to the template
-render(ScompName, Args, Context) ->
-    CleanedContext = zp_context:cleanup_for_scomp(Context),
-    case gen_server:call(?MODULE, {render, ScompName, Args, CleanedContext}) of
-        {renderer, M, F, RenderArgs} ->
-            erlang:apply(M, F, RenderArgs);
-        Result -> Result
-    end.
-
+render(ScompName, Args, Vars, Context) ->
+	ScompContext = zp_context:cleanup_for_scomp(Context), 
+    case gen_server:call(?MODULE, {render, ScompName, Args, ScompContext}) of
+        {renderer, M, F, ScompState} ->
+            erlang:apply(M, F, [Args, Vars, Context, ScompState]);
+        Result -> 
+			%% Cached result, merge possible context result
+			case Result of
+				{ok, #context{} = ResContext} ->
+					{ok, zp_context:combine_results(Context, ResContext)};
+				_ ->
+					Result
+			end
+	end.
 
 %% @spec scomp_ready(Key, Result, MaxAge, Varies) -> none()
 %% @doc Called when a cacheable scomp has been rendered, places the scomp in the cache and
@@ -112,7 +118,7 @@ handle_call({render, ScompName, Args, Context}, From, State) ->
                     %% When the scomp is not cacheable we just return the renderer to be evaluated in the process of the caller
                     case ScompVaries of
                         undefined ->
-                            {reply, {renderer, ScompName, render, [Args, Context, ScompState]}, State2};
+                            {reply, {renderer, ScompName, render, ScompState}, State2};
                         {EssentialParams, MaxAge, Varies} ->
                             StateSpawned = spawn_cacheable_renderer(ScompName, ScompState, EssentialParams, MaxAge, Varies, Context, From, State2),
                             {noreply, StateSpawned}
@@ -209,7 +215,7 @@ spawn_cacheable_renderer(ScompName, ScompState, EssentialParams, MaxAge, Varies,
                 _M:_E -> dict:store(Key, [From], State#state.waiting)
              end,
     Renderer = fun() ->
-                     Result = ScompName:render(EssentialParams, Context, ScompState),
+                     Result = ScompName:render(EssentialParams, [], Context, ScompState),
                      zp_scomp:scomp_ready(Key, Result, MaxAge, Varies)
                 end,
     spawn(Renderer),
