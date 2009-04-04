@@ -4,7 +4,7 @@
 %% @doc Model for resource data. Interfaces between zophrenic, templates and the database.
 
 -module(m_rsc).
--author("Marc Worrell <marc@worrell.nl>").
+-author("l Worrell <marc@worrell.nl>").
 
 -export([
 	rsc/0,
@@ -31,44 +31,96 @@ is_me(Id, Context) -> true.
 %% Unknown properties will be checked against the predicates, returns o(Predicate).
 p(#rsc{id=Id}, Predicate, Context) -> 
 	proplists:get_value(Predicate, dummy_data:rsc(Id));
-p(Id, Predicate, Context) when is_integer(Id) ->
-	p(#rsc{id=Id}, Predicate, Context);
-p({rsc_list, [R|_]}, Predicate, Context) ->
-	p(R, Predicate, Context);
-p({rsc_list, []}, _Predicate, _Context) ->
-	undefined;
-p(Value, _Predicate, _Context) -> 
-	Value.
+p(undefined, _Predicate, _Context) ->
+    undefined;
+p(Id, Predicate, Context) ->
+    p(rid(Id), Predicate, Context).
 
 %% Return a list of all edge predicates of this resource
-op(Id, Context) -> [].
+op(#rsc{id=Id}, Context) ->
+    [];
+op(undefined, _Context) -> 
+    [];
+op(Id, Context) ->
+    op(rid(Id), Context).
 
 %% Used for dereferencing object edges inside template expressions
 o(Id, _Context) ->
 	fun(P, Context) -> o(Id, P, Context) end.
 
+%% Return the list of objects with a certain predicate
+o(#rsc{id=Id}, Predicate, Context) ->
+	{rsc_list, []};
+o(undefined, _Predicate, _Context) ->
+    {rsc_list, []};
 o(Id, Predicate, Context) ->
-	{rsc_list, []}.
-	
+    o(rid(Id), Predicate, Context).
+
+
+%% Return the nth object in the predicate list
+o(#rsc{id=Id}, Predicate, Index, Context) ->
+	#rsc{id=undefined};
+o(undefined, _Predicate, _Index, _Context) ->
+    undefined;
 o(Id, Predicate, Index, Context) ->
-	#rsc{id=undefined}.
+    o(rid(Id), Predicate, Index, Context).
+
 	
 %% Return a list of all edge predicates to this resource
-sp(Id, Context) -> 
-	[].
+sp(#rsc{id=Id}, Context) ->
+    [];
+sp(undefined, _Context) -> 
+    [];
+sp(Id, Context) ->
+    sp(rid(Id), Context).
 
 %% Used for dereferencing subject edges inside template expressions
 s(Id, _Context) ->
 	fun(P, Context) -> s(Id, P, Context) end.
 
+%% Return the list of subjects with a certain predicate
+s(#rsc{id=Id}, Predicate, Context) ->
+	{rsc_list, []};
+s(undefined, _Predicate, _Context) ->
+    {rsc_list, []};
 s(Id, Predicate, Context) ->
-	{rsc_list, []}.
-	
+    s(rid(Id), Predicate, Context).
+
+%% Return the nth object in the predicate list
+s(#rsc{id=Id}, Predicate, Index, Context) ->
+	#rsc{id=undefined};
+s(undefined, _Predicate, _Index, _Context) ->
+    undefined;
 s(Id, Predicate, Index, Context) ->
-	#rsc{id=undefined}.
+    s(rid(Id), Predicate, Index, Context).
 
+
+%% Return the list of all media attached to the resource
+media(#rsc{id=Id}, Context) -> 
+	dummy_data:media(Id);
+media(undefined, _Context) -> 
+	[];
 media(Id, Context) -> 
-	[].
+	media(rid(Id), Context).
 
+
+media(#rsc{id=Id}, Index, Context) ->
+	undefined; % | MediaPropList.
+media(undefined, _Index, _Context) ->
+	undefined;
 media(Id, Index, Context) ->
-	undefined. % | MediaPropList.
+    media(rid(Id), Index, Context).
+	
+	
+%% @doc Fetch a #rsc{} from any input
+rid(#rsc{id=Id} = Rsc) ->
+    Rsc;
+rid(Id) when is_integer(Id) ->
+	#rsc{id=Id};
+rid({rsc_list, [R|_]}) ->
+	R;
+rid({rsc_list, []}) ->
+	undefined;
+rid(undefined) -> 
+	undefined.
+

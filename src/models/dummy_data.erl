@@ -9,7 +9,8 @@
 
 %% interface functions
 -export([
-    rsc/1
+    rsc/1,
+    media/1
 ]).
 
 
@@ -41,3 +42,16 @@ rsc(2) ->
     ].
 
 
+media(1) ->
+    [];
+    
+media(2) ->
+    [
+        [
+            {filename, "handgrepen1.jpg"}
+        ],
+
+        [
+            {filename, "handgrepen2.jpg"}
+        ]
+    ].
