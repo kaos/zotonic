@@ -4,7 +4,7 @@
 %% @doc Model for resource data. Interfaces between zophrenic, templates and the database.
 
 -module(m_rsc).
--author("l Worrell <marc@worrell.nl>").
+-author("Marc Worrell <marc@worrell.nl>").
 
 -export([
 	rsc/0,
@@ -35,8 +35,16 @@ p(Id, s, Context)  -> s(Id, Context);
 p(Id, op, Context) -> op(Id, Context);
 p(Id, sp, Context) -> sp(Id, Context);
 
-p(#rsc{id=Id}, Predicate, Context) -> 
-	proplists:get_value(Predicate, dummy_data:rsc(Id));
+p(#rsc{id=Id} = Rsc, Predicate, Context) -> 
+    case proplists:get_value(Predicate, dummy_data:rsc(Id)) of
+        undefined ->
+            case is_edge(Predicate) of
+                true -> o(Rsc, Predicate, Context);
+                false -> undefined
+            end;
+        Value ->
+            Value
+    end;
 p(undefined, _Predicate, _Context) ->
     undefined;
 p(Id, Predicate, Context) ->
@@ -131,4 +139,10 @@ rid({rsc_list, []}) ->
 	undefined;
 rid(undefined) -> 
 	undefined.
+	
+	
+%% @doc Check if a property is a predicate name
+is_edge(brand) -> true;
+is_edge(_) -> false.
+
 
