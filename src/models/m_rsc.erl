@@ -30,7 +30,7 @@ is_me(Id, Context) -> true.
 %% Perform access control checks, return 'undefined' on an error or permission denial
 %% Unknown properties will be checked against the predicates, returns o(Predicate).
 p(#rsc{id=Id}, Predicate, Context) -> 
-	"value";
+	proplists:get_value(Predicate, dummy_data:rsc(Id));
 p(Id, Predicate, Context) when is_integer(Id) ->
 	p(#rsc{id=Id}, Predicate, Context);
 p({rsc_list, [R|_]}, Predicate, Context) ->
