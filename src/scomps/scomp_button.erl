@@ -35,8 +35,10 @@ render(Params, _Vars, Context, _State) ->
     Postback  = proplists:get_value(postback, Params),
     Text      = proplists:get_value(text, Params, <<"Submit">>),
     Id        = zp_ids:optid(proplists:get_value(id, Params)),
-    Class     = [button | proplists:get_all_values(class, Params)],
+    %%Class     = [button | proplists:get_all_values(class, Params)],
+    Class     = proplists:get_all_values(class, Params),
     Style     = proplists:get_value(style, Params),
+    Title     = proplists:get_value(title, Params),
     Actions   = proplists:get_all_values(action, Params),
 
     Options   = [{action,X} || X <- Actions],
@@ -56,7 +58,8 @@ render(Params, _Vars, Context, _State) ->
                     		{<<"id">>,    Id},
                     		{<<"name">>,  Id},
                     		{<<"class">>, Class},
-                    		{<<"style">>, Style}
+                    		{<<"style">>, Style},
+                    		{<<"title">>, Title}
                     	],
                     	Text,
                     	Context1),
