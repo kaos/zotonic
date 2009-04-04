@@ -7,10 +7,14 @@
 -module(dummy_data).
 -author("Marc Worrell <marc@worrell.nl").
 
+-include_lib("zophrenic.hrl").
+
 %% interface functions
 -export([
     rsc/1,
-    media/1
+    media/1,
+    o/1,
+    s/1
 ]).
 
 
@@ -40,8 +44,29 @@ rsc(2) ->
         {en, <<"The DURA-ACE 7900 series sets a new benchmark in top-level road racing components. Shimano has combined all its engineering resources with the latest technology to realize an increasing level of perfection that will">>}
         ]}},
     
-    {price, 49}
-    ].
+    {price, 49},
+    {stock, 10}
+    ];
+    
+rsc(3) ->
+    [
+    {id, 3},
+    {title, <<"Shimano">>}
+    ];
+rsc(_) -> [].
+
+
+o(2) ->
+    [
+        {brand, [#rsc{id=3}]}
+    ];
+o(_) -> [].
+
+s(3) ->
+    [
+        {brand, [#rsc{id=2}]}
+    ];
+s(_) -> [].
 
 
 media(1) ->

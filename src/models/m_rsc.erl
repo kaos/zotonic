@@ -56,7 +56,8 @@ o(Id, _Context) ->
 
 %% Return the list of objects with a certain predicate
 o(#rsc{id=Id}, Predicate, Context) ->
-	{rsc_list, []};
+    Edges = dummy_data:o(Id),
+	{rsc_list, proplists:get_value(Predicate, Edges, [])};
 o(undefined, _Predicate, _Context) ->
     {rsc_list, []};
 o(Id, Predicate, Context) ->
@@ -86,7 +87,8 @@ s(Id, _Context) ->
 
 %% Return the list of subjects with a certain predicate
 s(#rsc{id=Id}, Predicate, Context) ->
-	{rsc_list, []};
+    Edges = dummy_data:s(Id),
+	{rsc_list, proplists:get_value(Predicate, Edges, [])};
 s(undefined, _Predicate, _Context) ->
     {rsc_list, []};
 s(Id, Predicate, Context) ->
