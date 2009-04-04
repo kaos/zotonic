@@ -29,6 +29,12 @@ is_me(Id, Context) -> true.
 
 %% Perform access control checks, return 'undefined' on an error or permission denial
 %% Unknown properties will be checked against the predicates, returns o(Predicate).
+p(Id, media, Context) -> media(Id, Context);
+p(Id, o, Context)  -> o(Id, Context);
+p(Id, s, Context)  -> s(Id, Context);
+p(Id, op, Context) -> op(Id, Context);
+p(Id, sp, Context) -> sp(Id, Context);
+
 p(#rsc{id=Id}, Predicate, Context) -> 
 	proplists:get_value(Predicate, dummy_data:rsc(Id));
 p(undefined, _Predicate, _Context) ->
