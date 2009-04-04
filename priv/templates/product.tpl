@@ -8,29 +8,41 @@
 	<div id="content-area" class="zp-75">
 		<!-- Area for the main content -->
 		<h2>{{rsc[2].title}}</h2>
-		
 		<div class="product-wrapper clearfix">
 			<div class="block">
+				{% if rsc[2].media %}
 				<ul class="product-image clearfix">
-					<li class="zp-50">
-						{% image "handgrepen1.jpg" width=300 height=200 crop alt="Handgrepen" class="do_imageviewer" %}
-					</li>
-					<li class="zp-50">
-						{% image "handgrepen2.jpg" width=300 height=200 crop alt="Handgrepen" class="do_imageviewer" %}
-					</li>
+					{% if rsc[2].media[1].filename %}
+						<li class="zp-50">
+							{% image rsc[2].media[1].filename width=300 height=200 crop alt=rsc[2].media[1].filename class="do_imageviewer" %}
+						</li>
+					{% endif %}
+					
+					{% if rsc[2].media[2].filename %}
+						<li class="zp-50">
+							{% image rsc[2].media[2].filename width=300 height=200 crop alt=rsc[2].media[2].filename class="do_imageviewer" %}
+						</li>
+					{% endif %}
 				</ul>
-				
+				{% endif %}
 				<div class="product-price clearfix">
-					<h3>&euro;49 <span>incl. btw</span></h3>
+					<h3>&euro;{{rsc[2].price}} <span>incl. btw</span></h3>
 					{# An animate would be nice here #}
-					{% button id="product-add-basket" text="+ in winkelmand" postback="show_basket_notice" action={fade_in speed=350 target="product-notice"} %}
+					<div class="clearfix button-wrapper right">
+						{% button id="product-add-basket" class="buy-me" text="leg in winkelmand" postback="show_basket_notice" action={fade_in speed=350 target="product-notice"} %}
+						{% button id="product-buy-basket" class="buy-me right-side-button" text="koop direct &raquo;" postback="show_basket_notice" action={fade_in speed=350 target="product-notice"} %}
+					</div>
 				</div>
 			</div>
 			
-			<h3 class="block">Product omschrijving</h3>
-			<div class="block">
-				{{rsc[2].body}}
-			</div>
+			{% if rsc[2].body %}
+				<h3 class="block">{% _ "Product description" nl="Product omschrijving" %}</h3>
+				<div class="block">
+					{{rsc[2].body}}
+				</div>
+			{% endif %}
+			
+			{% print rsc[2].brand.title %}
 			
 			{#
 			<div class="reviews-title block clearfix">

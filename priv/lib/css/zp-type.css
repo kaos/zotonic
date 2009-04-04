@@ -178,6 +178,19 @@ button:hover {
 	margin: 0;
 }
 
+.buy-me {
+	font-weight: bold;
+	color: #000;
+}
+
+.right-side-button {
+	-moz-border-radius-topright: 10px;
+	-moz-border-radius-bottomright: 10px;
+	-webkit-border-top-right-radius: 10px;
+	-webkit-border-bottom-right-radius: 10px;
+}
+
+
 /* notices
 -------------------------------------------------------------- */
 

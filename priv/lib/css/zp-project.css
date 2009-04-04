@@ -9,13 +9,13 @@
 ---------------------------------------------------------- */
 
 body {
-	background: #eaeaea;
+	background: #eaeaea url(../images/site_bg.jpg) repeat-x top;
 }
 
 .block {
 	background: #fff;
 	padding: 9px;
-	border-bottom: 1px solid #ddd;
+	border-bottom: 1px solid #bbb;
 	margin: 0 0 12px 0;
 }
 
@@ -40,7 +40,7 @@ body {
 
 .basket-wrapper {
 	background: #fff;
-	border: solid #d4d4d4;
+	border: solid #bababa;
 	border-width: 0 1px 1px 1px;
 	height: 40px;
 	margin: 0 0 27px;
@@ -116,7 +116,7 @@ body {
 
 .navigation-wrapper { 
 	background: #fff;
-	border: 1px solid #d4d4d4;
+	border: 1px solid #bababa;
 	-moz-border-radius: 4px;
 	-webkit-border-radius: 4px;
 	position: relative;
@@ -216,7 +216,7 @@ ul#navigation li.lang a.english {
 }
 	
 	#search input {
-		width: 176px;
+		width: 130px;
 		float: left;
 		margin: 0 3px 0 0;
 	}
@@ -226,9 +226,10 @@ ul#navigation li.lang a.english {
 	}
 	
 	#search fieldset {
-		margin: 0;
+		margin: 0 9px 0 0;
 		padding: 0;
 		border: none;
+		float: right;
 	}
 	
 	
@@ -259,7 +260,7 @@ ul#navigation li.lang a.english {
 		#sub-navigation li a:focus {
 			height: 27px;
 			line-height: 27px;
-			border-bottom: 1px solid #ddd;
+			border-bottom: 1px solid #bbb;
 			display: block;
 			padding: 0 0 0 8px;
 			color: #464646;
@@ -438,8 +439,7 @@ ul#navigation li.lang a.english {
 		}
 	
 	.product-price button {
-		float: right;
-		margin: 0;
+		margin: 0 0 0 3px;
 	}
 	
 	#product-notice {

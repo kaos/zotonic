@@ -43,7 +43,7 @@
 					<form id="searchform" method="get" action="/search">
 						<fieldset>
 							<input id="quick-search" type="text" name="search" />
-							<button>Zoek</button>
+							<button class="buy-me right-side-button">Zoek &raquo;</button>
 						</fieldset>
 					</form>
 				</div>
