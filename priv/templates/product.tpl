@@ -2,12 +2,12 @@
 
 {# comment #}
 
-{% block title %} Shimano 105 ST-5600 {% endblock %}
+{% block title %} {{rsc[2].title}} {% endblock %}
 
 {% block content %}
 	<div id="content-area" class="zp-75">
 		<!-- Area for the main content -->
-		<h2>Shimano 105 ST-5600</h2>
+		<h2>{{rsc[2].title}}</h2>
 		
 		<div class="product-wrapper clearfix">
 			<div class="block">
@@ -29,12 +29,10 @@
 			
 			<h3 class="block">Product omschrijving</h3>
 			<div class="block">
-				<p>Ergonomic innovation is probably more critical to the higher standard of the new 10-speed S.T.I. levers than the added gearing. The narrower cradle-style perch welcomes the high-on-the-hood riding style and accommodates all sizes of hands. The shift internals borrow the robustness from our MTB technology which results in a smooth and effortless shift.</p>
-
-				<h3>Extra gegevens</h3>
-				<p>Ergonomic innovation is probably more critical to the higher standard of the new 10-speed S.T.I. levers than the added gearing.</p>
+				{{rsc[2].body}}
 			</div>
 			
+			{#
 			<div class="reviews-title block clearfix">
 				<h3 class="in-block">Reviews</h3>
 				{% button id="product-add-review-trigger" text="+ schrijf review" action={slide_fade_in speed=350 target="product-add-review-form"} %}
@@ -75,6 +73,7 @@
 					</p>
 				</li>
 			</ul>
+			#}
 		</div>
 	</div>
 {% endblock %}
