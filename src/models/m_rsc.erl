@@ -141,6 +141,7 @@ rid(undefined) ->
 	undefined.
 	
 	
+%% @spec is_edge(atom()) -> bool()
 %% @doc Check if a property is a predicate name
 is_edge(brand) -> true;
 is_edge(_) -> false.
