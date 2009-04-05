@@ -9,16 +9,18 @@ Bastiaan
 
 Marc
 - database interface
-- properties
-- types voor resources
+- properties voor resources
+- categorieën voor resources
 - shopping cart logic
+- misc core werk
 
 Tim
 - categorie pagina
-- shopping cart
+- shopping cart templates
 - zoekresultaatpagina
 - fietspagina
 - menu's zoals eindproduct
+- misc templates werk
 
 
 == Week 2 (t/m 17 april) ==
@@ -29,6 +31,10 @@ Bastiaan
   2. opgeven voor onderhoudsbeurt
   3. feedback over aankoop
 - teksten voor mail naar klant wanneer deze een bestelling geplaatst heeft
+- in VMSII:
+  1. te exporteren producten markeren 
+  2. bijschriften/product omschrijvingen
+  3. categorieën van producten ingeven
 - zodra e-commerce module is geïnstalleerd een proefexport met alle gegevens
 
 
@@ -40,7 +46,7 @@ Marc
 - access control
 - logon/logoff
 - e-mail versturen aan admin/ user
-- similar artikelen
+- similar producten
 - checkout traject logic
 
 
@@ -49,22 +55,32 @@ Tim
   1. pagina's editen
   2. sku/product koppeling
   3. product properties editen/koppelen
-  4. sku variatie-properties kiezen (max 2)
+  4. product omschrijvingen editen
+  5. sku variatie-properties kiezen (max 2)
 - checkout traject
 - nieuws overzicht
+- fietsvergelijker
 
 
 == Week 3 (t/m 24 april) ==
 
 Bastiaan
 - Teksten voor pagina's (tweetalig!):
-  1. Helpteksten per categorie / sub-categorie
+  1. Uitlegteksten per categorie / sub-categorie
   2. Agenda
   3. Fiets van de zaak
   4. Vraag & antwoord
   5. Vacatures
   6. Service & onderhoud
-  7. Over Struijk
+  7. Over Hans Struijk
+  8. Filialen
+  9. "Welkom bij Hans Struijk fietsen" op homepage
+  10. Betaalmogelijkheden uitleg
+  11. Verzendkosten uitleg
+  12. Retouren uitleg
+  13. Contact
+  14. Privacy policy
+  15. Algemene voorwaarden
 - DNS wijziging (aan het einde van de week)
 - testen (2e helft van de week + weekend)
 
@@ -74,6 +90,7 @@ Marc
 - integratie upload artikelen uit VMSII
 - integratie Adyen (betaling van checkout)
 - tijdelijke oplossing voor backups van VPS regelen
+- bugfixing core
 - testen (2e helft van de week + weekend)
 
 
@@ -86,6 +103,8 @@ Tim
   3. feedback over aankoop
 - admin
   1. overzicht van orders
+  2. algemeen
+- bugfixing templates
 - testen (2e helft van de week + weekend)
 
 
