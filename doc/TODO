@@ -31,8 +31,8 @@ When you don't supply the delegate then either:
 
 You can access:
 
-	zp_context:get_q()
-	zp_context:get_q_validated()
+	zp_context:q()
+	zp_context:q_validated()
 	
 Javascript needed:
 
@@ -201,7 +201,7 @@ A translation is of the form:
 
 or
 
-  {{ _ "english" nl="nederlands" fr="français" }}
+  {% _ "english" nl="nederlands" fr="français" %}
 
 and is translated by the grammar as:
 
@@ -377,3 +377,33 @@ The m_rsc:p() function returns the predicate of the first #rsc{} in a #rsc list.
 	p([], _Predicate) -> undefined;
 	p(undefined, _Predicate) -> undefined;
 
+
+
+== (Product) Properties ==
+
+triplet:
+
+	(property-id, optional-property-value-id, optional-term)
+
+property ->
+
+	(group-id, property-text, [(property-value-id, text)])
+
+group ->
+
+	(text)
+
+
+For template ->
+
+	[
+		{
+			group-text,
+			[
+				{property-text, property-value-text},
+				...
+			]
+		},
+		...
+	]
+	
