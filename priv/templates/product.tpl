@@ -36,13 +36,35 @@
 			</div>
 			
 			{% if rsc[2].body %}
-				<h3 class="block">{% _ "Product description" nl="Product omschrijving" %}</h3>
-				<div class="block">
-					{{rsc[2].body}}
+			<div class="product-description zp-67">
+				<div class="padding">
+				
+					<h3 class="block">{% _ "Description" nl="Omschrijving" %}</h3>
+					<div class="block">
+						{{rsc[2].body}}
+					</div>
 				</div>
+			</div>
 			{% endif %}
 			
-			{% print rsc[2].brand.title %}
+			<div class="product-properties zp-33">
+				<h3 class="block">{% _ "Properties" nl="Eigenschappen" %}</h3>
+							
+				<div class="block">
+					{% for prop_group in rsc[2].prop %}
+						<h4>{{prop_group.group}}</h4>
+							<ul class="props-list">
+							{% for test in prop_group.props %}
+								<li class="clearfix">
+									<span class="prop-title zp-50">{{test.title}}</span>
+									<span class="prop-value zp-50">{{test.value}}</span>
+								</li>
+							{% endfor %}
+							</ul>
+						{% endfor %}
+					</ul>
+				</div>
+			</div>
 			
 			{#
 			<div class="reviews-title block clearfix">

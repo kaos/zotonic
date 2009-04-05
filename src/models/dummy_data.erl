@@ -41,9 +41,25 @@ rsc(2) ->
         ]}},
     {body, {trans, [
         {nl, <<"De nieuwe DURA-ACE. Een geperfectioneerde legende. De ideale balans tussen lichtgewicht, stijfheid en prestatie. Eindelijk verkrijgbaar om het professionele fietsen naar een nóg hoger niveau te tillen.">>},
-        {en, <<"The DURA-ACE 7900 series sets a new benchmark in top-level road racing components. Shimano has combined all its engineering resources with the latest technology to realize an increasing level of perfection that will">>}
+        {en, <<"<p>he DURA-ACE 7900 series sets a new benchmark in top-level road racing components. Shimano has combined all its engineering resources with the latest technology to realize an increasing level of perfection that will</p> <p>The DURA-ACE 7900 series sets a new benchmark in top-level road racing components. Shimano has combined all its engineering resources with the latest technology to realize an increasing level of perfection that will.</p>">>}
         ]}},
-    
+    {prop, 	[[
+				{group, "Bla"},
+				{props, 
+				[
+					[{title, "Kleur"}, {value,"Red"}],
+					[{title, "materiaal"}, {value,"Staal"}]
+				]}
+			],
+			[
+				{group, "Bloe"},
+				{props, 
+				[
+					[{title, "Kleur"}, {value,"Blauw"}],
+					[{title, "materiaal"}, {value,"Iets anders"}]
+				]}
+			]
+		]},
     {price, 49},
     {stock, 10}
     ];
