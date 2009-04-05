@@ -31,9 +31,10 @@
 							</a>
 						</h1>
 					</li>
-					<li class="first"><a href="/compare" title="compare-bikes">Vergelijk fietsen</a></li>
+					<li class="first"><a href="/compare" title="compare-bikes">Fietsen</a></li>
+					<li><a href="#" title="#">Kleding en schoenen</a></li>
 					<li><a href="#" title="#">Accessoires</a></li>
-					<li><a href="#" title="#">Service</a></li>
+					<li><a href="#" title="#">Onderdelen</a></li>
 					<li class="lang" title="Nederlands"><a href="#" title="Nederlands" class="dutch"><span>Nederlands</span></a></li>
 					<li class="lang" title="English"><a href="#" title="English" class="english"><span>English</span></a></li>
 				</ul>

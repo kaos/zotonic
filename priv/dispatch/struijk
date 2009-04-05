@@ -22,6 +22,7 @@
 	{page,			["page", id],						resource_page,			[]},
 	{page,			["page", id, slug],					resource_page,			[]},
 	{news,			["news"],							resource_news,			[]},
+	{news,			["category"],						resource_category,		[]},
 	{agenda,		["agenda"],							resource_agenda,		[]},
 	{about,			["about"],							resource_template,		[{template,"page.tpl"}]},
 	{bike,			["bike", brand],					resource_bike,			[]},

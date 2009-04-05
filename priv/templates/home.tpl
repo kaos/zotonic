@@ -31,8 +31,8 @@
 			<div class="zp-33">
 				<h4>Over Hans Struijk Fietsen</h4>
 				<ul class="misc-list">
-					<li><a href="#">Betaalmogelijkheden</a></li>
-					<li><a href="#">Verzendkosten</a></li>
+					<li><a href="#">Over Hans Struijk</a></li>
+					<li><a href="#">Filialen</a></li>
 					<li><a href="#">Veel gestelde vragen</a></li>
 				</ul>
 			</div>
