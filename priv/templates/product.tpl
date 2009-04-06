@@ -8,23 +8,29 @@
 	<div id="content-area" class="zp-75">
 		<!-- Area for the main content -->
 		<h2>{{rsc[2].title}}</h2>
-		<div class="product-wrapper clearfix">
-			<div class="block">
-				{% if rsc[2].media %}
-				<ul class="product-image clearfix">
+		<div class="product-wrapper clearfix block">
+			{% if rsc[2].media %}
+			
+			<div class="product-images zp-50">
+				<ul class="clearfix">
 					{% if rsc[2].media[1].filename %}
-						<li class="zp-50">
+						<li>
 							{% image rsc[2].media[1].filename width=300 height=200 crop alt=rsc[2].media[1].filename class="do_imageviewer" %}
 						</li>
 					{% endif %}
-					
+				
 					{% if rsc[2].media[2].filename %}
-						<li class="zp-50">
+						<li>
 							{% image rsc[2].media[2].filename width=300 height=200 crop alt=rsc[2].media[2].filename class="do_imageviewer" %}
 						</li>
 					{% endif %}
 				</ul>
-				{% endif %}
+			</div>
+			
+			{% endif %}
+			
+			{% if rsc[2].body %}
+			<div class="product-description zp-50">
 				<div class="product-price clearfix">
 					<h3>&euro;{{rsc[2].price}} <span>incl. btw</span></h3>
 					{# An animate would be nice here #}
@@ -33,82 +39,70 @@
 						{% button id="product-buy-basket" class="buy-me right-side-button" text="koop direct &raquo;" postback="show_basket_notice" action={fade_in speed=350 target="product-notice"} %}
 					</div>
 				</div>
-			</div>
-			
-			{% if rsc[2].body %}
-			<div class="product-description zp-67">
-				<div class="padding">
 				
-					<h3 class="block">{% _ "Description" nl="Omschrijving" %}</h3>
-					<div class="block">
-						{{rsc[2].body}}
-					</div>
+				<h3>{% _ "Description" nl="Omschrijving" %}</h3>
+				
+				{{rsc[2].body}}
+			
+				<div class="pruduct-properties">
+					<h3>{% _ "Properties" nl="Eigenschappen" %}</h3>
+				
+					{% for prop_group in rsc[2].prop %}
+						<h4>{{prop_group.group}}</h4>
+						<ul class="props-list">
+						{% for test in prop_group.props %}
+							<li class="clearfix">
+								<span class="prop-title zp-50">{{test.title}}</span>
+								<span class="prop-value zp-50">{{test.value}}</span>
+							</li>
+						{% endfor %}
+						</ul>
+					{% endfor %}
 				</div>
 			</div>
 			{% endif %}
-			
-			<div class="product-properties zp-33">
-				<h3 class="block">{% _ "Properties" nl="Eigenschappen" %}</h3>
-							
-				<div class="block">
-					{% for prop_group in rsc[2].prop %}
-						<h4>{{prop_group.group}}</h4>
-							<ul class="props-list">
-							{% for test in prop_group.props %}
-								<li class="clearfix">
-									<span class="prop-title zp-50">{{test.title}}</span>
-									<span class="prop-value zp-50">{{test.value}}</span>
-								</li>
-							{% endfor %}
-							</ul>
-						{% endfor %}
-					</ul>
-				</div>
-			</div>
-			
-			{#
-			<div class="reviews-title block clearfix">
-				<h3 class="in-block">Reviews</h3>
-				{% button id="product-add-review-trigger" text="+ schrijf review" action={slide_fade_in speed=350 target="product-add-review-form"} %}
-			</div>
-			<div class="notification notice clearfix" id="product-add-review-form">
-				<form action="postbak" type="post">
-					<fieldset>
-						<legend>Schrijf een review</legend>
-						<div class="form-item">
-							<label for="reviewer-name">Naam:</label>
-							<input type="text" name="reviewer-name" id="reviewer-name" />
-						</div>
-						<div class="form-item">
-							<label for="reviewer-review">Review:</label>
-							<textarea id="reviewer-review" cols="20" rows="20" name="reviewer-message" /></textarea>
-						</div>
-						{% button id="product-review-form-trigger" text="Voeg toe" action={slide_fade_out speed=350 target="product-add-review-form"} %}
-					</fieldset>
-				</form>
-			</div>
-			
-			<ul class="reviews-list">
-				<li class="block">
-					<div class="clearfix">
-						<h4 class="left">Marc Worrell <span>5 maart 2009</span></h4>
-						<img src="/lib/images/rating.jpg" alt="rating" class="right" />
-					</div>
-					<p>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Etiam nunc. Aliquam erat volutpat. Fusce tortor ligula, dictum sit amet, aliquam non, luctus quis, justo.</p>
-				</li>
-				<li class="block">
-					<div class="clearfix">
-						<h4 class="left">Tim Benniks <span>3 maart 2009</span></h4>
-						<img src="/lib/images/rating.jpg" alt="rating" class="right" />
-					</div>
-					<p>
-						Lorem ipsum dolor sit amet, consectetur adipiscing elit. Etiam nunc. Aliquam erat volutpat. Fusce tortor ligula, dictum sit amet, aliquam non, luctus quis, justo. 
-						Lorem ipsum dolor sit amet, consectetur adipiscing elit. Etiam nunc. Aliquam erat volutpat. Fusce tortor ligula, dictum sit amet, aliquam non, luctus quis, justo.
-					</p>
-				</li>
-			</ul>
-			#}
 		</div>
+		
+		<div class="reviews-title block clearfix">
+			<h3 class="in-block">Reviews</h3>
+			{% button id="product-add-review-trigger" text="+ schrijf review" action={slide_fade_in speed=350 target="product-add-review-form"} %}
+		</div>
+		<div class="notification notice clearfix" id="product-add-review-form">
+			<form action="postbak" type="post">
+				<fieldset>
+					<legend>Schrijf een review</legend>
+					<div class="form-item">
+						<label for="reviewer-name">Naam:</label>
+						<input type="text" name="reviewer-name" id="reviewer-name" />
+					</div>
+					<div class="form-item">
+						<label for="reviewer-review">Review:</label>
+						<textarea id="reviewer-review" cols="20" rows="20" name="reviewer-message" /></textarea>
+					</div>
+					{% button id="product-review-form-trigger" text="Voeg toe" action={slide_fade_out speed=350 target="product-add-review-form"} %}
+				</fieldset>
+			</form>
+		</div>
+		
+		<ul class="reviews-list">
+			<li class="block">
+				<div class="clearfix">
+					<h4 class="left">Marc Worrell <span>5 maart 2009</span></h4>
+					<img src="/lib/images/rating.jpg" alt="rating" class="right" />
+				</div>
+				<p>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Etiam nunc. Aliquam erat volutpat. Fusce tortor ligula, dictum sit amet, aliquam non, luctus quis, justo.</p>
+			</li>
+			<li class="block">
+				<div class="clearfix">
+					<h4 class="left">Tim Benniks <span>3 maart 2009</span></h4>
+					<img src="/lib/images/rating.jpg" alt="rating" class="right" />
+				</div>
+				<p>
+					Lorem ipsum dolor sit amet, consectetur adipiscing elit. Etiam nunc. Aliquam erat volutpat. Fusce tortor ligula, dictum sit amet, aliquam non, luctus quis, justo. 
+					Lorem ipsum dolor sit amet, consectetur adipiscing elit. Etiam nunc. Aliquam erat volutpat. Fusce tortor ligula, dictum sit amet, aliquam non, luctus quis, justo.
+				</p>
+			</li>
+		</ul>
 	</div>
 {% endblock %}
 

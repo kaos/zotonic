@@ -408,21 +408,22 @@ ul#navigation li.lang a.english {
 /* Pages - Product
 ---------------------------------------------------------- */
 	
-	.product-image li img { 
+	.product-images li img { 
 		margin: 0 0 2px 0;
 		padding: 0;
 		float: none;
 		display: block;
 	}
 
-		.product-image li.last img {
+		.product-images li.last img {
 			margin: 0;
 		}
 	
 	.product-price {
 		background: #f5f5f5;
-		padding: 9px;
+		padding: 9px 6px;
 		border: 1px solid #ddd;
+		margin: 0 0 18px 0
 	}
 	
 	.product-price h3 {
@@ -445,10 +446,6 @@ ul#navigation li.lang a.english {
 	#product-notice {
 		display: none;
 		margin: 0;
-	}
-
-	.product-description .padding {
-		padding: 0 12px 0 0;
 	}
 
 	.props-list {
