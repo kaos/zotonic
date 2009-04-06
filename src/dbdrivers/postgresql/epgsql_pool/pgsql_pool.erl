@@ -12,14 +12,18 @@
 
 opts(Opts) ->
     Defaults = [{host, "localhost"},
+                {port, 5432},
                 {password, ""},
-                {username, os:getenv("USER")}],
+                {username, "zophrenic"},
+                {database, "zophrenic"}],
     Opts2 = lists:ukeysort(1, proplists:unfold(Opts)),
     proplists:normalize(lists:ukeymerge(1, Opts2, Defaults), []).
 
 start_link(Size, Opts) ->
     gen_server:start_link(?MODULE, {undefined, Size, opts(Opts)}, []).
 
+start_link(undefined, Size, Opts) ->
+    start_link(Size, Opts);
 start_link(Name, Size, Opts) ->
     gen_server:start_link({local, Name}, ?MODULE, {Name, Size, opts(Opts)}, []).
 

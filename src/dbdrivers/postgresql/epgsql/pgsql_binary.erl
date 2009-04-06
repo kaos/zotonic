@@ -10,6 +10,7 @@
 
 
 encode(_Any, null)  -> <<-1:?int32>>;
+encode(_Any, undefined)  -> <<-1:?int32>>;
 encode(bool, true)  -> <<1:?int32, 1:1/big-signed-unit:8>>;
 encode(bool, false) -> <<1:?int32, 0:1/big-signed-unit:8>>;
 encode(bpchar, C)   -> <<1:?int32, C:1/big-unsigned-unit:8>>;
@@ -35,6 +36,8 @@ encode(_Type, _Value)                -> {error, unsupported}.
 
 decode(bool, <<1:1/big-signed-unit:8>>)     -> true;
 decode(bool, <<0:1/big-signed-unit:8>>)     -> false;
+decode(bool, <<"t">>) -> true;
+decode(bool, <<"f">>) -> false;
 decode(bpchar, <<C:1/big-unsigned-unit:8>>) -> C;
 decode(int2, <<N:1/big-signed-unit:16>>)    -> N;
 decode(int4, <<N:1/big-signed-unit:32>>)    -> N;
@@ -51,7 +54,7 @@ decode(_Other, Bin) -> Bin.
 decode_record(<<>>, Acc) ->
     lists:reverse(Acc);
 decode_record(<<_Type:?int32, -1:?int32, Rest/binary>>, Acc) ->
-    decode_record(Rest, [null | Acc]);
+    decode_record(Rest, [undefined | Acc]);
 decode_record(<<Type:?int32, Len:?int32, Value:Len/binary, Rest/binary>>, Acc) ->
     Value2 = decode(pgsql_types:oid2type(Type), Value),
     decode_record(Rest, [Value2 | Acc]).

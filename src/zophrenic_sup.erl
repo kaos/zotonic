@@ -41,20 +41,37 @@ upgrade() ->
 %% @spec init([]) -> SupervisorTree
 %% @doc supervisor callback.
 init([]) ->
-    Ip   = case os:getenv("WEBMACHINE_IP")   of false -> "0.0.0.0"; Anyip -> Anyip end,   
-    Port = case os:getenv("WEBMACHINE_PORT") of false -> 8000; Anyport -> Anyport end,   
+    % Listen to IP address and Port
+    WebIp      = case os:getenv("ZP_IP")   of false -> "0.0.0.0"; Anyip -> Anyip end,   
+    WebPort    = case os:getenv("ZP_PORT") of false -> 8000; Anyport -> Anyport end,   
+
+    % Default connection for database
+    DbHost     = case os:getenv("ZP_DBHOST")     of false -> "localhost"; AnyDbHost -> AnyDbHost end,
+    DbPort     = case os:getenv("ZP_DBPORT")     of false -> 5432; AnyDbPort -> list_to_integer(AnyDbPort) end,
+    DbUser     = case os:getenv("ZP_DBUSER")     of false -> "zophrenic"; AnyDbUser -> AnyDbUser end,
+    DbPassword = case os:getenv("ZP_DBPASSWORD") of false -> ""; AnyDbPassword -> AnyDbPassword end,
+    DbDatabase = case os:getenv("ZP_DB")         of false -> "zophrenic"; AnyDbDatabase -> AnyDbDatabase end,
 
     WebConfig = [
-		 {ip, Ip},
-		 {port, Port},
+		 {ip, WebIp},
+		 {port, WebPort},
 		 {error_handler, zp_webmachine_error_handler},
          {log_dir, "priv/log"},
-		 {dispatch, []}],
+		 {dispatch, []}
+	],
 
     MochiWeb = {webmachine_mochiweb,
 	            {webmachine_mochiweb, start, [WebConfig]}, 
 	            permanent, 5000, worker, dynamic},
 
+    DbPoolConfig = [
+        {dbdefault, 10, [{host, DbHost}, {port, DbPort}, {user, DbUser}, {password, DbPassword}, {database, DbDatabase}]}
+    ],
+    
+    Postgres = {epgsql_pool,
+                {epgsql_pool, start_link, [DbPoolConfig]},
+                permanent, 5000, worker, dynamic},
+                
     Depcache = {zp_depcache,
                 {zp_depcache, start_link, []}, 
                 permanent, 5000, worker, dynamic},
@@ -91,6 +108,6 @@ init([]) ->
                 {zp_dropbox, start_link, []}, 
                 permanent, 5000, worker, dynamic},
 
-    Processes = [MochiWeb, Depcache, Ids, Dispatcher, Notifier, Session, Person, Template, Scomp, DropBox],
+    Processes = [MochiWeb, Postgres, Depcache, Ids, Dispatcher, Notifier, Session, Person, Template, Scomp, DropBox],
     {ok, {{one_for_one, 1000, 10}, Processes}}.
 

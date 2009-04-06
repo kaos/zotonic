@@ -3,6 +3,7 @@
 -module(pgsql).
 
 -export([connect/2, connect/3, connect/4, close/1]).
+-export([last_id/2, squery1/2, equery1/2, equery1/3, assoc/2, assoc/3]).
 -export([get_parameter/2, squery/2, equery/2, equery/3]).
 -export([parse/2, parse/3, parse/4, describe/2, describe/3]).
 -export([bind/3, bind/4, execute/2, execute/3, execute/4]).
@@ -32,6 +33,41 @@ close(C) when is_pid(C) ->
 get_parameter(C, Name) ->
     pgsql_connection:get_parameter(C, Name).
 
+
+last_id(C, Table) when is_atom(Table) ->
+    last_id(C, atom_to_list(Table));
+last_id(C, Table) ->
+    equery1(C, "select currval(pg_get_serial_sequence($1, 'id'))", [Table]).
+
+assoc(C, Sql) ->
+    assoc(C, Sql, []).
+assoc(C, Sql, Parameters) ->
+    case equery(C, Sql, Parameters) of
+        {ok, Columns, Rows} ->
+            Names = [ list_to_atom(binary_to_list(Name)) || #column{name=Name} <- Columns ],
+            Rows1 = [ lists:zip(Names, tuple_to_list(Row)) || Row <- Rows ],
+            {ok, Rows1};
+        Other -> Other
+    end.
+
+squery1(C, Sql) ->
+    case squery(C,Sql) of
+        {ok, _Columns, [Row|_]} -> {ok, element(1, Row)};
+        {ok, _RowCount, _Columns, [Row|_]} -> {ok, element(1, Row)};
+        Other -> Other
+    end.
+
+equery1(C, Sql) ->
+    equery1(C, Sql, []).
+equery1(C, Sql, Parameters) ->
+    case equery(C, Sql, Parameters) of
+        {ok, _Columns, [Row|_]} -> {ok, element(1, Row)};
+        {ok, _RowCount, _Columns, [Row|_]} -> {ok, element(1, Row)};
+        Other -> Other
+    end.
+
+
+    
 squery(C, Sql) ->
     ok = pgsql_connection:squery(C, Sql),
     case receive_results(C, []) of
