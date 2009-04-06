@@ -4,7 +4,7 @@ EBIN_DIRS    := $(wildcard deps/*/ebin)
 APP          := zophrenic
 PARSER        =src/erlydtl/erlydtl_parser
 
-all: epgsql epgsql_pool mochiweb webmachine gen $(PARSER).erl erl ebin/$(APP).app 
+all: mochiweb webmachine gen $(PARSER).erl erl ebin/$(APP).app 
 
 erl:
 	@$(ERL) -pa $(EBIN_DIRS) -noinput +B \
@@ -16,12 +16,6 @@ gen:
 
 $(PARSER).erl: $(PARSER).yrl
 	$(ERLC) -o src/erlydtl src/erlydtl/erlydtl_parser.yrl
-
-epgsql:
-	(cd deps/epgsql; make)
-
-epgsql_pool:
-	(cd deps/epgsql_pool; make)
 
 mochiweb:
 	(cd deps/mochiweb; make)
