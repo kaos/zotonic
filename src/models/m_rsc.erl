@@ -32,6 +32,7 @@ is_me(Id, Context) -> true.
 p(Id, media, Context) -> media(Id, Context);
 p(Id, o, Context)  -> o(Id, Context);
 p(Id, s, Context)  -> s(Id, Context);
+p(Id, m, Context)  -> m(Id, Context);
 p(Id, op, Context) -> op(Id, Context);
 p(Id, sp, Context) -> sp(Id, Context);
 
@@ -49,6 +50,19 @@ p(undefined, _Predicate, _Context) ->
     undefined;
 p(Id, Predicate, Context) ->
     p(rid(Id), Predicate, Context).
+
+
+%% Fetch some predicate from a module.
+m(Id, _Context) ->
+    fun(Predicate, Context) -> m(Id, Predicate, Context) end.
+
+m(#rsc{id=Id}, Predicate, Context) ->
+    undefined;
+m(undefined, _Predicate, _Context) ->
+    undefined;
+m(Id, Predicate, Context) ->
+    m(rid(Id), Predicate, Context).
+
 
 %% Return a list of all edge predicates of this resource
 op(#rsc{id=Id}, Context) ->
