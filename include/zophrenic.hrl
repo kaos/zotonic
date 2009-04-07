@@ -17,6 +17,11 @@
             page_pid=undefined,
             page_id=undefined,
 
+            %% The database to be used (derived from the Host)
+            db=dbdefault,
+            %% The connection for nested transactions
+            dbc=undefined,
+            
             %% The state below is the real render state, able to be cached and merged
             
             %% State of the current rendered template/scomp/page

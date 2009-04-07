@@ -1,7 +1,7 @@
 -module(pgsql_pool).
 
 -export([start_link/2, start_link/3, stop/1]).
--export([get_connection/2, return_connection/2]).
+-export([get_connection/1, get_connection/2, return_connection/2]).
 
 -export([init/1, code_change/3, terminate/2]). 
 -export([handle_call/3, handle_cast/2, handle_info/2]).
@@ -30,6 +30,9 @@ start_link(Name, Size, Opts) ->
 stop(P) ->
     gen_server:cast(P, stop).
 
+get_connection(P) ->
+    get_connection(P, 1000).
+    
 get_connection(P, Timeout) ->
     gen_server:cast(P, {get_connection, self()}),
     receive
