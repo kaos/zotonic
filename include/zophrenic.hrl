@@ -2,42 +2,43 @@
 %% @copyright 2009 Marc Worrell
 %% @doc Main definitions for zophrenic
 
+-define(ZOPHRENIC_VERSION, "0.1.0").
 
 %% @doc The request context, session information and other
 -record(context, {
-            %% Request properties
-            reqprops,
-            
-            %% The resource responsible for handling this request
-            resource_module,
-            
-            %% The page (comet), session- and user processes associated with the current request
-            person_pid=undefined,
-            session_pid=undefined,
-            page_pid=undefined,
-            page_id=undefined,
+        %% Request properties
+        reqprops,
+        
+        %% The resource responsible for handling this request
+        resource_module,
+        
+        %% The page (comet), session- and user processes associated with the current request
+        person_pid=undefined,
+        session_pid=undefined,
+        page_pid=undefined,
+        page_id=undefined,
 
-            %% The database to be used (derived from the Host)
-            db=dbdefault,
-            %% The connection for nested transactions
-            dbc=undefined,
-            
-            %% The state below is the real render state, able to be cached and merged
-            
-            %% State of the current rendered template/scomp/page
-            updates=[],
-            actions=[],
-            content_scripts=[],
-            scripts=[],
-            wire=[],
-            validators=[],
+        %% The database to be used (derived from the Host)
+        db=dbdefault,
+        %% The database connection used for (nested) transactions, see zp_db
+        dbc=undefined,
+        
+        %% The state below is the render state, can be cached and/or merged
+        
+        %% State of the current rendered template/scomp/page
+        updates=[],
+        actions=[],
+        content_scripts=[],
+        scripts=[],
+        wire=[],
+        validators=[],
 
-            %% iolist with the accumulated html, xml or whatever output
-            render=[],
+        %% iolist with the accumulated html, xml or whatever output
+        render=[],
 
-            %% dictionary with metadata, initialised by the controller
-            dict
-        }).
+        %% dictionary with metadata, initialised by the controller
+        dict
+    }).
 
 %% drag and drop event message
 -record(dragdrop, {tag, delegate, id}).

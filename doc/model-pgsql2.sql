@@ -10,10 +10,9 @@ CREATE TABLE rsc
   is_published boolean NOT NULL DEFAULT false,
   publication_start timestamp with time zone NOT NULL DEFAULT now(),
   publication_end timestamp with time zone NOT NULL DEFAULT '9999-01-01 00:00:00+01'::timestamp with time zone,
-  visible_for integer NOT NULL DEFAULT 1, -- 0 = public, 1 = community, 2 = group
+  visible_for integer NOT NULL DEFAULT 1, -- 0 = public, 1 = community, 2 = group, 3 = owner
+  comment_by integer NOT NULL DEFAULT 3, -- 0 = public, 1 = community, 2 = group, 3 = owner
   group_id int NOT NULL,
-  created timestamp with time zone NOT NULL DEFAULT now(),
-  modified timestamp with time zone NOT NULL DEFAULT now(),
   owner_id int,
   creator_id int,
   modifier_id int,
@@ -22,12 +21,15 @@ CREATE TABLE rsc
   slug character varying(80) NOT NULL DEFAULT ''::character varying,
   unique_name character varying(80),
   props bytea,
+  created timestamp with time zone NOT NULL DEFAULT now(),
+  modified timestamp with time zone NOT NULL DEFAULT now(),
+
   CONSTRAINT resource_pkey PRIMARY KEY (id),
   CONSTRAINT rsc_uri_key UNIQUE (uri),
   CONSTRAINT unique_name_key UNIQUE (unique_name)
 );
 
-COMMENT ON COLUMN rsc.visible_for IS '0 = public, 1 = community, 2 = group';
+COMMENT ON COLUMN rsc.visible_for IS '0 = public, 1 = community, 2 = group, 3 = owner';
 
 ALTER TABLE rsc ADD CONSTRAINT fk_rsc_owner_id FOREIGN KEY (owner_id)
   REFERENCES rsc (id)
@@ -53,6 +55,7 @@ CREATE TABLE predicate
   id serial NOT NULL,
   name character varying(20) NOT NULL,
   uri character varying(250) NOT NULL DEFAULT ''::character varying,
+  reversed boolean NOT NULL default false,
   props bytea,
   
   CONSTRAINT predicate_pkey PRIMARY KEY (id),
@@ -94,8 +97,10 @@ CREATE INDEX edge_sp_seq_key ON edge (subject_id, predicate_id, seq);
 CREATE TABLE grouptype
 (
   id serial NOT NULL,
+  name character varying(80) NOT NULL,
   props bytea,
-  CONSTRAINT grouptype_pkey PRIMARY KEY (id)
+  CONSTRAINT grouptype_pkey PRIMARY KEY (id),
+  CONSTRAINT name_key UNIQUE (name)
 );
 
 
@@ -190,13 +195,15 @@ CREATE INDEX fki_media_creator_id ON media (creator_id);
 -- Table rsc_media
 -- All media used by a resource
 
+
 CREATE TABLE rsc_media
 (
+  id serial NOT NULL,
   rsc_id int NOT NULL,
   media_id int NOT NULL,
   seq int NOT NULL DEFAULT 1000000,
-  
-  CONSTRAINT rsc_media_pkey PRIMARY KEY (rsc_id, media_id),
+
+  CONSTRAINT rsc_media_pkey PRIMARY KEY (id),
   CONSTRAINT fk_rsc_media_rsc_id FOREIGN KEY (rsc_id)
     REFERENCES rsc (id)
     ON UPDATE CASCADE ON DELETE CASCADE,
@@ -205,10 +212,10 @@ CREATE TABLE rsc_media
     ON UPDATE CASCADE ON DELETE CASCADE
 );
 
+CREATE INDEX rsc_media_rsc_id_media_id_key ON rsc_media (rsc_id, media_id);
 CREATE INDEX fki_rsc_media_rsc_id ON rsc_media (rsc_id);
 CREATE INDEX fki_rsc_media_media_id ON rsc_media (media_id);
 CREATE INDEX rsc_media_seq_key ON rsc_media(rsc_id, seq);
-
 
 
 -- Table prop_group
