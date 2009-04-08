@@ -119,7 +119,7 @@ install_predicate(C) ->
 %% @type enumerate_categories(Connection) -> ok
 enumerate_categories(C) ->
     {ok, _, CatTuples} = pgsql:equery(C, "select id, parent_id, seq from category"),
-    Enums = m_categories:enumerate(CatTuples),
+    Enums = m_category:enumerate(CatTuples),
     % {CatId, Nr, Level, Left, Right}
     [
         {ok, _} = pgsql:equery(C, "update category set nr = $2, lvl = $3, lft = $4, rght = $5 where id = $1", Enum)
