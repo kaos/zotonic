@@ -49,11 +49,12 @@ install_group(C) ->
             values ($1, $2, $3)", R) || R <- GroupTypes],
 
     Groups = [
-        %tp name                admin  edit   spvsr  cpub   ppub   props
+        %   tp name                admin  edit   spvsr  cpub   ppub   props
         [1, 2, "ADMINS",           true,  true,  true,  true,  true,  [{title, {trans, [{en, "Administrators"},   {nl, "Beheerders"}]}}]],
         [2, 2, "EDITORS",          false, true,  false, true,  true,  [{title, {trans, [{en, "Editors"},          {nl, "Redacteurs"}]}}]],
         [3, 2, "COMMUNITYEDITORS", false, true,  false, true,  false, [{title, {trans, [{en, "Community Editors"},{nl, "Gemeenschap Redacteurs"}]}}]],
-        [4, 2, "SUPERVISORS",      false, false, true,  false, false, [{title, {trans, [{en, "Supervisors"},      {nl, "Toezichthouders"}]}}]]
+        [4, 2, "SUPERVISORS",      false, false, true,  false, false, [{title, {trans, [{en, "Supervisors"},      {nl, "Toezichthouders"}]}}]],
+        [5, 2, "CONTENT",          false, false, false, false, false, [{title, {trans, [{en, "Content"},          {nl, "Inhoud"}]}}]]
     ],
     
     [ {ok,1} = pgsql:equery(C, "
@@ -92,6 +93,17 @@ install_rsc(C) ->
             values ($1, $2, $3, $4, $5, $6, $7)
             ", R) || R <- Rsc ],
     {ok, _} = pgsql:squery(C, "update rsc set owner_id = 1, creator_id = 1, modifier_id = 1, is_published = true"),
+    
+    % Connect person resources to the correct groups
+    RscGroup = [
+        % Id, Rsc  Grp  obsvr   leader
+        [ 1,  1,   1,   false,  true ]
+    ],
+
+    [ {ok,1} = pgsql:equery(C, "
+            insert into rsc_group (id, rsc_id, group_id, is_observer, is_leader)
+            values ($1, $2, $3, $4, $5)
+            ", R) || R <- RscGroup ],
     ok.
 
 
