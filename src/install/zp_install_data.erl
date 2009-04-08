@@ -10,7 +10,6 @@
 %% interface functions
 -export([
     install/1,
-    enumerate_categories/1,
     install_category/1
 ]).
 
@@ -71,7 +70,7 @@ install_category(C) ->
         {4, 3,         1, [{title, {trans, [{en, "Publication"},    {nl, "Publicatie"}]}}] },
         {5, 4,         2, [{title, {trans, [{en, "Review"},         {nl, "Beoordeling"}]}}] },
         {6, 4,         1, [{title, {trans, [{en, "Article"},        {nl, "Artikel"}]}}] },
-        {7, 3,         1, [{title, {trans, [{en, "Product"},        {nl, "Product"}]}}] }
+        {7, 3,         2, [{title, {trans, [{en, "Product"},        {nl, "Product"}]}}] }
     ],
     [ {ok,1} = pgsql:equery(C, "
             insert into category (id, parent_id, seq, props)
@@ -120,35 +119,10 @@ install_predicate(C) ->
 %% @type enumerate_categories(Connection) -> ok
 enumerate_categories(C) ->
     {ok, _, CatTuples} = pgsql:equery(C, "select id, parent_id, seq from category"),
-    Enums = cat_enumerate(CatTuples),
+    Enums = m_categories:enumerate(CatTuples),
     % {CatId, Nr, Level, Left, Right}
     [
         {ok, _} = pgsql:equery(C, "update category set nr = $2, lvl = $3, lft = $4, rght = $5 where id = $1", Enum)
         || Enum <- Enums
     ],
     ok.
-
-%% @doc Take a category list and make it into a tree, calculating the left/right and lvl nrs
-%% @spec cat_enumerate(Cats) -> Sorts
-%%  Cats = [Cat]
-%%  Cat = {CatId, Parent, NodeSeq} 
-%%  Sorts = [Sort]
-%%  Sort = {CatId, Nr, Level, Left, Right}
-cat_enumerate(Cats) ->
-    % Fetch all the roots of our forest
-    {Roots, Rest} = lists:partition(fun({_Id, Parent, _Seq}) -> Parent == undefined end, Cats),
-    % Make the trees from the roots down
-    Trees = [ make_tree(Root, Rest, 1) || Root <- Roots],
-    % Flatten the trees, enumerating all nodes depth-first
-    {Flatten,_Nr} = lists:foldl(fun(Tree, {Acc,Nr}) -> flatten_tree(Tree, Acc, Nr) end, {[],1}, Trees),
-    Flatten.
-
-make_tree({NodeId,_Parent,NodeSeq} = Node, Nodes, Level) ->
-    SubNodes = lists:filter(fun ({_,Parent,_}) -> Parent == NodeId end, Nodes),
-    SubTrees = [ make_tree(SubNode, Nodes, Level+1) || SubNode <- SubNodes ],
-    {Level, NodeSeq, Node, lists:keysort(2, SubTrees)}.
-    
-flatten_tree({Level, _NodeSeq, {NodeId,_Parent,_Seq}, SubTrees}, NodesAcc, NodeNr) ->
-    {NodesAcc1, NodeNr1} = lists:foldl(fun(Tree, {Acc,Nr}) -> flatten_tree(Tree, Acc, Nr) end, {NodesAcc,NodeNr+1}, SubTrees),
-    {[ {NodeId, NodeNr, Level, NodeNr, NodeNr1-1} | NodesAcc1], NodeNr1}.
-
