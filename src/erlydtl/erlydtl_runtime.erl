@@ -139,22 +139,31 @@ init_counter_stats(List) ->
     init_counter_stats(List, undefined).
 
 init_counter_stats(List, Parent) ->
+    N = length(List),
     [{counter, 1}, 
         {counter0, 0}, 
-        {revcounter, length(List)}, 
-        {revcounter0, length(List) - 1}, 
+        {revcounter, N}, 
+        {revcounter0, N - 1}, 
         {first, true}, 
-        {last, length(List) =:= 1},
+        {last, N =:= 1},
         {parentloop, Parent}].
 
+
+to_list(L) when is_list(L) -> L;
+to_list(T) when is_tuple(T) -> tuple_to_list(T);
+to_list({rsc_list, L}) -> L;
+to_list(_) -> [].
+
+    
 increment_counter_stats([{counter, Counter}, {counter0, Counter0}, {revcounter, RevCounter},
-        {revcounter0, RevCounter0}, {first, _}, {last, _}, {parentloop, Parent}]) ->
+         {revcounter0, RevCounter0}, {first, _}, {last, _}, {parentloop, Parent}]) ->
     [{counter, Counter + 1},
         {counter0, Counter0 + 1},
         {revcounter, RevCounter - 1},
         {revcounter0, RevCounter0 - 1},
         {first, false}, {last, RevCounter0 =:= 1},
         {parentloop, Parent}].
+
 
 cycle(NamesTuple, Counters, Context) when is_tuple(NamesTuple) ->
     element(fetch_value(counter0, Counters, Context) rem size(NamesTuple) + 1, NamesTuple).

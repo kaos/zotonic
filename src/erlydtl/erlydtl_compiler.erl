@@ -711,7 +711,8 @@ for_loop_ast(IteratorList, Variable, Contents, Context, TreeWalker) ->
                     end, IteratorList)] | Context#dtl_context.local_scopes]}, TreeWalker),
     CounterAst = erl_syntax:application(erl_syntax:atom(erlydtl_runtime), 
         erl_syntax:atom(increment_counter_stats), [erl_syntax:variable("Counters")]),
-    {ListAst, VarName} = resolve_variable_ast(Variable, Context),
+    {VarAst, VarName} = resolve_variable_ast(Variable, Context),
+    ListAst = erl_syntax:application(erl_syntax:atom(erlydtl_runtime), erl_syntax:atom(to_list), [VarAst]),
     CounterVars0 = case resolve_scoped_variable_ast("forloop", Context) of
         undefined ->
             erl_syntax:application(erl_syntax:atom(erlydtl_runtime), erl_syntax:atom(init_counter_stats), [ListAst]);
