@@ -9,17 +9,17 @@ $.widget("ui.imageviewer",
 	init: function()
 	{
 		var ui			= this;
-		imageWrapper 	= jQuery('<div></div>').addClass('image-wrapper clearfix').css({width: this.element.width(), height: this.element.height()});
+		imageWrapper 	= jQuery('<div></div>').addClass('image-wrapper');
 		imageMagnifier 	= jQuery('<div></div>').addClass('image-magnifier').css({top: this.element.offset().top, left: this.element.offset().left});
 		bigImg			= jQuery('<img alt="'+ui.element.attr('alt')+'" />').hide();
 		
 		this.element.wrap(imageWrapper).after(imageMagnifier).parent().hover(function()
 		{
-			$('.image-magnifier', $(this).parent()).slideDown(150);
+			$('.image-magnifier', $(this).parent()).show(150);
 		},
 		function()
 		{
-			$('.image-magnifier', $(this).parent()).slideUp(150);
+			$('.image-magnifier', $(this).parent()).hide(150);
 		});
 		
 		imageMagnifier.after(bigImg).click(function()
@@ -57,7 +57,7 @@ $.widget("ui.imageviewer",
 					ui.element.after($(this));
 				}
 				
-				loader.remove();				
+				loader.remove();
 				ui.setWidthHeight();
 				ui.showBig();
 			})
@@ -111,7 +111,8 @@ $.widget("ui.imageviewer",
 			$('<span</span>')
 				.addClass('popup-overlay')
 				.appendTo(document.body)
-				.css({opacity: .8, height: $(document).height(), zIndex: 8000})
+				.css({display: 'none', height: $(document).height(), zIndex: 8000})
+				.animate({opacity: .7}, 500)
 				.click(function()
 				{
 					ui.kill()
@@ -121,8 +122,8 @@ $.widget("ui.imageviewer",
 		$('.popup-overlay').show();
 				
 		imgObj
-			.css({position: "absolute", zIndex: 9999, width: (fullWidth - 80), height: (fullHeight - 80), left: (leftPos + 40), top: (topPos + 40)})
-			.animate({width: fullWidth, height: fullHeight, left: leftPos, top: topPos}, 200)
+			.css({display: 'none', position: "absolute", zIndex: 9999, width: fullWidth, height: fullHeight, left: leftPos, top: topPos})
+			.fadeIn(500)
 			.click(function()
 			{
 				ui.kill()
@@ -131,8 +132,8 @@ $.widget("ui.imageviewer",
 	
 	kill: function() 
 	{
-		jQuery('.popup-overlay').fadeOut(100);
-		jQuery('.loaded-bigImage').fadeOut(100);
+		jQuery('.popup-overlay').fadeOut(200);
+		jQuery('.loaded-bigImage').fadeOut(300);
 	   	this.destroy();
 	}
 });

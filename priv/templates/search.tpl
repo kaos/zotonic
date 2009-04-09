@@ -11,26 +11,41 @@
 		
 		<h3 class="block">Trek urban</h3>
 		<div class="block clearfix">
-			<p>
-				{% image "trek_urban.jpg" width=120 height=130 crop alt="Handgrepen" %}
-				Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.
-				Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.
-			</p>
+			{% image "trek_urban.jpg" width=180 height=140 crop alt="Handgrepen" class="left do_imageviewer" %}
+			<div class="zp-70">
+				<h4>Description</h4>
+				<p>
+					Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.
+					Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.
+				</p>
+				<div class="product-price clearfix">
+					<h3>&euro;1950 <span>incl. btw</span></h3>
+			
+					<div class="clearfix button-wrapper right">
+						<button class="buy-me right-side-button">Vraag een proefrit aan &raquo;</button>
+					</div>
+				</div>
+			</div>
 		</div>
 		
-		<h3 class="block">Bike</h3>
+		<h3 class="block">Handgrepen</h3>
 		<div class="block clearfix">
-			<p>
-				{% image "trek_urban.jpg" width=120 height=130 crop alt="Handgrepen" %}
-				Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.
-			</p>
+			{% image "handgrepen.jpg" width=180 height=140 crop alt="Handgrepen" class="left do_imageviewer" %}
+			<div class="zp-70">
+				<h4>Description</h4>
+				<p>
+					Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.
+					Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.
+				</p>
+				<div class="product-price clearfix">
+					<h3>&euro;66 <span>incl. btw</span></h3>
+					<div class="clearfix button-wrapper right">
+						{% button id="product-add-basket" class="buy-me" text="leg in winkelmand" postback="show_basket_notice" action={fade_in speed=350 target="product-notice"} %}
+						{% button id="product-buy-basket" class="buy-me right-side-button" text="koop direct &raquo;" postback="show_basket_notice" action={fade_in speed=350 target="product-notice"} %}
+					</div>
+				</div>
+			</div>
 		</div>
-		
-		<h3 class="block">About Hans Struijk</h3>
-		<div class="block clearfix">
-			<p>Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.</p>
-		</div>
-		
 	</div>
 {% endblock %}
 

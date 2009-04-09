@@ -35,8 +35,8 @@
 					<h3>&euro;{{rsc[2].price}} <span>incl. btw</span></h3>
 					{# An animate would be nice here #}
 					<div class="clearfix button-wrapper right">
-						{% button id="product-add-basket" class="buy-me" text="leg in winkelmand" postback="show_basket_notice" action={fade_in speed=350 target="product-notice"} %}
-						{% button id="product-buy-basket" class="buy-me right-side-button" text="koop direct &raquo;" postback="show_basket_notice" action={fade_in speed=350 target="product-notice"} %}
+						{% button id="product-add-basket" class="buy-me" text="leg in winkelmand" %}
+						{% button id="product-buy-basket" class="buy-me right-side-button" text="koop direct &raquo;" %}
 					</div>
 				</div>
 				

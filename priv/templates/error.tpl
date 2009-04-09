@@ -10,7 +10,7 @@
 			<p>
 				At first we would like to apologize
 				for the fact that you got here. If the title of this page is 404 then you where looking for a page that does not exist
-				in this system. It could have been moved or deleted. Please use our search for to search for anything you like or go the the <a href="/" title="home">homepage</a>.
+				in this system. It could have been moved or deleted. Please use our search to find anything you like. Or go the the <a href="/" title="home">homepage</a>.
 			</p>
 			<p>
 				If the title of this page says 500, then the system had to handle 
