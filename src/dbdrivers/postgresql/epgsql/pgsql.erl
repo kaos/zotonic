@@ -12,6 +12,7 @@
 -export([with_transaction/2]).
 
 -include("pgsql.hrl").
+-include("zophrenic.hrl").
 
 -define(timeout, 5000).
 
@@ -89,6 +90,9 @@ squery(C, Sql) ->
 equery(C, Sql) ->
     equery(C, Sql, []).
 
+
+equery(C, Sql, Parameters) when is_tuple(Parameters) ->
+    equery(C, Sql, tuple_to_list(Parameters));
 equery(C, Sql, Parameters) ->
     case pgsql_connection:parse(C, "", Sql, []) of
         {ok, #statement{types = Types} = S} ->
@@ -96,6 +100,7 @@ equery(C, Sql, Parameters) ->
             ok = pgsql_connection:equery(C, S, Typed_Parameters),
             receive_result(C);
         Error ->
+            ?LOG("SQL error ~p : ~p", [Error, Sql]),
             Error
     end.
 
@@ -149,12 +154,14 @@ sync(C) ->
 
 %% misc helper functions
 with_transaction(C, F) ->
-    try {ok, [], []} = squery(C, "BEGIN"),
+    try
+        {ok, [], []} = squery(C, "BEGIN"),
         R = F(C),
         {ok, [], []} = squery(C, "COMMIT"),
         R
     catch
-        _:Why ->
+        E:Why ->
+            ?LOG("Exception in transaction: \"~p,~p\"", [E,Why]),
             squery(C, "ROLLBACK"),
             {rollback, Why}
     end.
