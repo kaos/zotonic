@@ -27,7 +27,8 @@ is_owner(Id, Context) -> true.
 is_ingroup(Id, Context) -> true.
 is_me(Id, Context) -> true.
 
-%% Perform access control checks, return 'undefined' on an error or permission denial
+%% @todo Perform access control checks, return 'undefined' on an error or permission denial
+
 %% Unknown properties will be checked against the predicates, returns o(Predicate).
 p(Id, media, Context) -> media(Id, Context);
 p(Id, o, Context)  -> o(Id, Context);
@@ -37,19 +38,32 @@ p(Id, op, Context) -> op(Id, Context);
 p(Id, sp, Context) -> sp(Id, Context);
 
 p(#rsc{id=Id} = Rsc, Predicate, Context) -> 
-    case proplists:get_value(Predicate, dummy_data:rsc(Id)) of
+    Value = case zp_depcache:get(Rsc, Predicate) of
+        {ok, V} -> 
+            V;
+        undefined ->
+            case zp_db:select(rsc, Id, Context) of
+                {ok, Record} ->
+                    zp_depcache:set(Rsc, Record, ?WEEK, [Rsc]),
+                    proplists:get_value(Predicate, Record);
+                _ ->
+                    zp_depcache:set(Rsc, undefined, ?WEEK, [Rsc]),
+                    undefined
+            end
+    end,
+    case Value of
         undefined ->
             case is_edge(Predicate) of
                 true -> o(Rsc, Predicate, Context);
                 false -> undefined
             end;
-        Value ->
+        _ ->
             Value
     end;
 p(undefined, _Predicate, _Context) ->
     undefined;
 p(Id, Predicate, Context) ->
-    p(rid(Id), Predicate, Context).
+    p(rid(Id, Context), Predicate, Context).
 
 
 %% Fetch some predicate from a module.
@@ -61,7 +75,7 @@ m(#rsc{id=Id}, Predicate, Context) ->
 m(undefined, _Predicate, _Context) ->
     undefined;
 m(Id, Predicate, Context) ->
-    m(rid(Id), Predicate, Context).
+    m(rid(Id, Context), Predicate, Context).
 
 
 %% Return a list of all edge predicates of this resource
@@ -70,7 +84,7 @@ op(#rsc{id=Id}, Context) ->
 op(undefined, _Context) -> 
     [];
 op(Id, Context) ->
-    op(rid(Id), Context).
+    op(rid(Id, Context), Context).
 
 %% Used for dereferencing object edges inside template expressions
 o(Id, _Context) ->
@@ -83,7 +97,7 @@ o(#rsc{id=Id}, Predicate, Context) ->
 o(undefined, _Predicate, _Context) ->
     {rsc_list, []};
 o(Id, Predicate, Context) ->
-    o(rid(Id), Predicate, Context).
+    o(rid(Id, Context), Predicate, Context).
 
 
 %% Return the nth object in the predicate list
@@ -92,7 +106,7 @@ o(#rsc{id=Id}, Predicate, Index, Context) ->
 o(undefined, _Predicate, _Index, _Context) ->
     undefined;
 o(Id, Predicate, Index, Context) ->
-    o(rid(Id), Predicate, Index, Context).
+    o(rid(Id, Context), Predicate, Index, Context).
 
 	
 %% Return a list of all edge predicates to this resource
@@ -101,7 +115,7 @@ sp(#rsc{id=Id}, Context) ->
 sp(undefined, _Context) -> 
     [];
 sp(Id, Context) ->
-    sp(rid(Id), Context).
+    sp(rid(Id, Context), Context).
 
 %% Used for dereferencing subject edges inside template expressions
 s(Id, _Context) ->
@@ -114,7 +128,7 @@ s(#rsc{id=Id}, Predicate, Context) ->
 s(undefined, _Predicate, _Context) ->
     {rsc_list, []};
 s(Id, Predicate, Context) ->
-    s(rid(Id), Predicate, Context).
+    s(rid(Id, Context), Predicate, Context).
 
 %% Return the nth object in the predicate list
 s(#rsc{id=Id}, Predicate, Index, Context) ->
@@ -122,7 +136,7 @@ s(#rsc{id=Id}, Predicate, Index, Context) ->
 s(undefined, _Predicate, _Index, _Context) ->
     undefined;
 s(Id, Predicate, Index, Context) ->
-    s(rid(Id), Predicate, Index, Context).
+    s(rid(Id, Context), Predicate, Index, Context).
 
 
 %% Return the list of all media attached to the resource
@@ -131,7 +145,7 @@ media(#rsc{id=Id}, Context) ->
 media(undefined, _Context) -> 
 	[];
 media(Id, Context) -> 
-	media(rid(Id), Context).
+	media(rid(Id, Context), Context).
 
 
 media(#rsc{id=Id}, Index, Context) ->
@@ -139,20 +153,43 @@ media(#rsc{id=Id}, Index, Context) ->
 media(undefined, _Index, _Context) ->
 	undefined;
 media(Id, Index, Context) ->
-    media(rid(Id), Index, Context).
+    media(rid(Id, Context), Index, Context).
 	
 	
 %% @doc Fetch a #rsc{} from any input
-rid(#rsc{id=Id} = Rsc) ->
+rid(#rsc{id=Id} = Rsc, _Context) ->
     Rsc;
-rid(Id) when is_integer(Id) ->
+rid(Id, _Context) when is_integer(Id) ->
 	#rsc{id=Id};
-rid({rsc_list, [R|_]}) ->
+rid({rsc_list, [R|_]}, _Context) ->
 	R;
-rid({rsc_list, []}) ->
+rid({rsc_list, []}, _Context) ->
 	undefined;
-rid(undefined) -> 
+rid([C|_] = UniqueName, Context) when is_list(UniqueName) and is_integer(C) ->
+    rid_unique_name(UniqueName, Context);
+rid(UniqueName, Context) when is_binary(UniqueName) ->
+    rid_unique_name(binary_to_list(UniqueName), Context);
+rid(undefined, _Context) -> 
+	undefined;
+rid(<<>>, _Context) -> 
 	undefined.
+
+
+rid_unique_name(UniqueName, Context) ->
+    Name = zp_utils:to_lower(UniqueName),
+    case zp_depcache:get({rsc_unique_name, Name}) of
+        {ok, undefined} ->
+            undefined;
+        {ok, Id} ->
+            Id;
+        undefined ->
+            Id = case zp_db:q1("select id from rsc where unique_name = $1", [Name], Context) of
+                undefined -> undefined;
+                Value -> #rsc{id=Value}
+            end,
+            zp_depcache:set({rsc_unique_name, Name}, Id, ?DAY, [Id,{rsc_unique_name, Name}]),
+            Id
+    end.
 	
 	
 %% @spec is_edge(atom()) -> bool()

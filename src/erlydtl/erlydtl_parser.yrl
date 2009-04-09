@@ -154,12 +154,13 @@ Terminals
 	close_trans
 	trans_literal
 	'__keyword'
+	zp_config_keyword
  	hash.
 
 Rootsymbol
     Elements.
 
-Expect 1.
+Expect 3.
 
 Elements -> '$empty' : [].
 Elements -> Elements text : '$1' ++ ['$2'].
@@ -278,10 +279,14 @@ Value -> hash identifier : {auto_id, '$2'}.
 Value -> open_curly identifier Args close_curly : {tuple_value, '$2', '$3'}.
 Value -> open_bracket ValueList close_bracket : {value_list, '$2'}.
 
+% Configuration access, must be loopable so no intermediate functions
 Variable -> rsc_keyword : {rsc}.
 Variable -> identifier : {variable, '$1'}.
 Variable -> Variable open_bracket Value close_bracket : {index_value, '$1', '$3'}.
 Variable -> Variable dot identifier : {attribute, {'$3', '$1'}}.
+Variable -> zp_config_keyword : {zp_config, undefined, undefined}.
+Variable -> zp_config_keyword dot identifier : {zp_config, '$3', undefined}.
+Variable -> zp_config_keyword dot identifier dot identifier : {zp_config, '$3', '$5'}.
 
 ValueList -> Value : ['$1'].
 ValueList -> ValueList comma Value : '$1' ++ ['$3'].

@@ -39,9 +39,9 @@ install_config(C) ->
 install_group(C) ->
     % Install the group types
     GroupTypes = [
-        [1, "GENERAL",    [{title, {trans, [{en, "Generic"},       {nl, "Generiek"}]}}]],
-        [2, "WORKGROUP",  [{title, {trans, [{en, "Working Group"}, {nl, "Werkgroep"}]}}]],
-        [3, "FAMILY",     [{title, {trans, [{en, "Family"},        {nl, "Familie"}]}}]]
+        [1, "general",    [{title, {trans, [{en, "Generic"},       {nl, "Generiek"}]}}]],
+        [2, "workgroup",  [{title, {trans, [{en, "Working Group"}, {nl, "Werkgroep"}]}}]],
+        [3, "family",     [{title, {trans, [{en, "Family"},        {nl, "Familie"}]}}]]
     ],
 
     [ {ok,1} = pgsql:equery(C, "
@@ -50,11 +50,11 @@ install_group(C) ->
 
     Groups = [
         %   tp name                admin  edit   spvsr  cpub   ppub   props
-        [1, 2, "ADMINS",           true,  true,  true,  true,  true,  [{title, {trans, [{en, "Administrators"},   {nl, "Beheerders"}]}}]],
-        [2, 2, "EDITORS",          false, true,  false, true,  true,  [{title, {trans, [{en, "Editors"},          {nl, "Redacteurs"}]}}]],
-        [3, 2, "COMMUNITYEDITORS", false, true,  false, true,  false, [{title, {trans, [{en, "Community Editors"},{nl, "Gemeenschap Redacteurs"}]}}]],
-        [4, 2, "SUPERVISORS",      false, false, true,  false, false, [{title, {trans, [{en, "Supervisors"},      {nl, "Toezichthouders"}]}}]],
-        [5, 2, "CONTENT",          false, false, false, false, false, [{title, {trans, [{en, "Content"},          {nl, "Inhoud"}]}}]]
+        [1, 2, "admins",           true,  true,  true,  true,  true,  [{title, {trans, [{en, "Administrators"},   {nl, "Beheerders"}]}}]],
+        [2, 2, "editors",          false, true,  false, true,  true,  [{title, {trans, [{en, "Editors"},          {nl, "Redacteurs"}]}}]],
+        [3, 2, "communityeditors", false, true,  false, true,  false, [{title, {trans, [{en, "Community Editors"},{nl, "Gemeenschap Redacteurs"}]}}]],
+        [4, 2, "supervisors",      false, false, true,  false, false, [{title, {trans, [{en, "Supervisors"},      {nl, "Toezichthouders"}]}}]],
+        [5, 2, "content",          false, false, false, false, false, [{title, {trans, [{en, "Content"},          {nl, "Inhoud"}]}}]]
     ],
     
     [ {ok,1} = pgsql:equery(C, "
@@ -84,8 +84,8 @@ install_category(C) ->
 %% @todo Add the hostname to the uri
 install_rsc(C) ->
     Rsc = [
-        % id  uri         vsfr  grp  cat  name,     props
-        [ 1,  "person/1", 0,    1,   2,   "ADMIN",  [{title,"Site Administrator"}] ]
+        % id  uri       vsfr  grp  cat  name,     props
+        [ 1,  "/id/1",  0,    1,   2,   "admin",  [{title,"Site Administrator"}] ]
     ],
     
     [ {ok,1} = pgsql:equery(C, "
@@ -112,9 +112,9 @@ install_rsc(C) ->
 install_predicate(C) ->
     Preds = [
         % id  name      uri                                                  rvrsd  props
-        [ 1, "ABOUT",   "http://www.w3.org/1999/02/22-rdf-syntax-ns#about",  false, [{title, {trans, [{en,"About"},   {nl,"Over"}]}}]],
-        [ 2, "AUTHOR",  "http://purl.org/dc/elements/1.1/creator",           true,  [{title, {trans, [{en,"Author"},  {nl,"Auteur"}]}}]],
-        [ 3, "REVIEW",  "http://purl.org/stuff/rev#Review",                  true,  [{title, {trans, [{en,"Reviews"}, {nl,"Beoordeelt"}]}}]]
+        [ 1, "about",   "http://www.w3.org/1999/02/22-rdf-syntax-ns#about",  false, [{title, {trans, [{en,"About"},   {nl,"Over"}]}}]],
+        [ 2, "author",  "http://purl.org/dc/elements/1.1/creator",           true,  [{title, {trans, [{en,"Author"},  {nl,"Auteur"}]}}]],
+        [ 3, "review",  "http://purl.org/stuff/rev#Review",                  true,  [{title, {trans, [{en,"Reviews"}, {nl,"Beoordeelt"}]}}]]
     ],
 
     [ {ok,1} = pgsql:equery(C, "

@@ -39,6 +39,10 @@
         %% dictionary with metadata, initialised by the controller
         dict
     }).
+    
+
+-define(DB(Context), Context#context.db).
+-define(DBC(Context), Context#context.dbc).
 
 %% drag and drop event message
 -record(dragdrop, {tag, delegate, id}).

@@ -34,7 +34,11 @@
 	is_process_alive/1,
 	trim/1,
 	is_true/1,
-	assert/2
+	to_lower/1,
+	to_upper/1,
+	assert/2,
+	split_proplist/2,
+	index_proplist/2
 ]).
 
 %%% FORMAT %%%
@@ -333,7 +337,67 @@ is_true(N) when is_integer(N) andalso N /= 0 -> true;
 
 is_true(_) -> false.
 
+
+%% @doc Return a lowercase string for the input
+%% @spec to_lower(Value) -> String
+to_lower(B) when is_binary(B) ->
+    string:to_lower(binary_to_list(B));
+to_lower(L) when is_list(L) ->
+    string:to_lower(lists:flatten(L));
+to_lower(A) when is_atom(A) ->
+    string:to_lower(atom_to_list(A)).
+
+
+%% @doc Return a uppercase string for the input
+%% @spec to_upper(Value) -> String
+to_upper(B) when is_binary(B) ->
+    string:to_upper(binary_to_list(B));
+to_upper(L) when is_list(L) ->
+    string:to_upper(lists:flatten(L));
+to_upper(A) when is_atom(A) ->
+    string:to_upper(atom_to_list(A)).
+
+
 %% @spec assert(bool(), error) -> none()
 %% @doc Check if an assertion is ok or failed
 assert(false, Error) -> erlang:error(Error);
 assert(_, _) -> ok.
+
+
+%% @doc Given a list of proplists, make it a nested list with respect to a property, combining elements
+%% with the same property.  Assumes the list is sorted on the property you are splitting on
+%% For example:  [[{a,b}{x}], [{a,b}{z}], [{a,c}{y}]] gives:
+%%   [ {b, [[{a,b}{x}], [{a,b}{z}]]},  {c, [[{a,c}{y}]]} ]
+%% @spec split_on(Property, [PropList]) -> PropList
+split_proplist(_Prop, []) -> 
+    [];
+split_proplist(Prop, [Item|Rest]) ->
+    PropValue = proplists:get_value(Prop, Item),
+    split_proplist(Prop, PropValue, Rest, [Item], []).
+
+split_proplist(_Prop, _PropValue, [], [], Result) ->
+    lists:reverse(Result);
+split_proplist(Prop, PropValue, [], Acc, Result) ->
+    lists:reverse(Acc),
+    split_proplist(Prop, PropValue, [], [], [{zp_convert:to_atom(PropValue),Acc}|Result]);
+split_proplist(Prop, PropValue, [C|Rest], Acc, Result) ->
+    case proplists:get_value(Prop, C) of
+        PropValue -> 
+            split_proplist(Prop, PropValue, Rest, [C|Acc], Result);
+        Other ->
+            split_proplist(Prop, Other, Rest, [], [{zp_convert:to_atom(PropValue),Acc}|Result])
+    end.
+
+
+%% @doc Make a property list based on the value of a property
+%% For example:  [  [{a,b}], [{a,c}] ]  gives  [{a, [{a,b}]}, {c, [[{a,c}]]}]
+%% @spec index_proplist(Property, [PropList]) -> PropList
+index_proplist(_Prop, []) ->
+    [];
+index_proplist(Prop, List) ->
+    index_proplist(Prop, List, []).
+
+index_proplist(_Prop, [], Acc) ->
+    lists:reverse(Acc);
+index_proplist(Prop, [L|Rest], Acc) ->
+    index_proplist(Prop, Rest, [{zp_convert:to_atom(proplists:get_value(Prop,L)),L}|Acc]).

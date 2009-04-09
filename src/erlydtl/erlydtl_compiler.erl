@@ -632,6 +632,9 @@ resolve_variable_ast({apply_filter, Variable, Filter}, Context, FinderFunction) 
     VarValue = filter_ast1(Filter, erl_syntax:list([VarAst])),
     {VarValue, VarName};
 
+resolve_variable_ast({zp_config, Module, Key}, _Context, _FinderFunction) ->
+        {zp_config_ast(Module, Key), "zp_config"};
+
 resolve_variable_ast(What, _Context, _FinderFunction) ->
    error_logger:error_msg("~p:resolve_variable_ast unhandled: ~p~n", [?MODULE, What]).
 
@@ -642,6 +645,26 @@ resolve_scoped_variable_ast(VarName, Context) ->
                     _ -> Value
                 end
         end, undefined, Context#dtl_context.local_scopes).
+
+
+zp_config_ast(undefined, undefined) ->
+    erl_syntax:application(
+            erl_syntax:atom(m_config),
+            erl_syntax:atom(all),
+            [erl_syntax:variable("ZpContext")]
+        );
+zp_config_ast({'identifier', _, Module}, undefined) ->
+    erl_syntax:application(
+            erl_syntax:atom(m_config),
+            erl_syntax:atom(get),
+            [erl_syntax:atom(Module), erl_syntax:variable("ZpContext")]
+        );
+zp_config_ast({'identifier', _, Module}, {'identifier', _, Key}) ->
+    erl_syntax:application(
+            erl_syntax:atom(m_config),
+            erl_syntax:atom(get),
+            [erl_syntax:atom(Module), erl_syntax:atom(Key), erl_syntax:variable("ZpContext")]
+        ).
 
 format(Ast, Context) ->
     auto_escape(stringify(Ast), Context).
@@ -1087,6 +1110,8 @@ interpreted_args(Args, Context) ->
                 {list_to_atom(Key), erl_syntax:string(unescape_string_literal(Value))};
             ({{identifier, _, Key}, {trans_literal, _, Value}}) ->
                 {list_to_atom(Key), trans_literal_ast(Value)};
+            ({{identifier, _, Key}, {zp_config_ast, Module, Key}}) ->
+                {list_to_atom(Key), zp_config_ast(Module, Key)};
             ({{identifier, _, Key}, {auto_id,{identifier,_,AutoId}}}) ->
                 {V, _} = auto_id_ast(AutoId),
                 {list_to_atom(Key), V};

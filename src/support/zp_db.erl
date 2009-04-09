@@ -14,6 +14,8 @@
     get/2,
     assoc/2,
     assoc/3,
+    assoc_props/2,
+    assoc_props/3,
     q/2,
     q/3,
     q1/2,
@@ -86,6 +88,16 @@ assoc(Sql, Parameters, Context) ->
     {ok, Result} = pgsql:assoc(C, Sql, Parameters),
     return_connection(C, Context),
     Result.
+
+
+assoc_props(Sql, Context) ->
+    assoc_props(Sql, [], Context).
+
+assoc_props(Sql, Parameters, Context) ->
+    C = get_connection(Context),
+    {ok, Result} = pgsql:assoc(C, Sql, Parameters),
+    return_connection(C, Context),
+    merge_props(Result).
 
 q(Sql, Context) ->
     q(Sql, [], Context).
@@ -285,3 +297,24 @@ assert_table_name1([]) ->
     true;
 assert_table_name1([H|T]) when (H >= $a andalso H =< $z) orelse (H >= $0 andalso H =< $9) orelse H == $_ ->
     assert_table_name1(T).
+
+
+
+%% @doc Merge the contents of the props column into the result rows
+%% @spec merge_props(list()) -> list()
+merge_props(undefined) ->
+    undefined;
+merge_props(List) ->
+    merge_props(List, []).
+    
+merge_props([], Acc) ->
+    lists:reverse(Acc);
+merge_props([R|Rest], Acc) ->
+    case proplists:get_value(props, R) of
+        undefined ->
+            merge_props(Rest, [R|Acc]);
+        <<>> ->
+            merge_props(Rest, [R|Acc]);
+        List ->
+            merge_props(Rest, [lists:keydelete(props, 1, R)++List|Acc])
+    end.

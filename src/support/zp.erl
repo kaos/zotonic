@@ -10,13 +10,27 @@
 %% interface functions
 -export([
     m/0,
+    flush/0,
+    restart/0,
     install/0,
     install/1
 ]).
 
 
-m() -> make:all([load]).
+m() -> 
+    make:all([load]), 
+    flush().
 
-install() -> zp_install:install(dbdefault).
-install(Db) -> zp_install:install(Db).
+flush() ->
+    zp_depcache:flush(),
+    zp_dispatcher:reload().
+
+restart() ->
+    zophrenic:stop(),
+    zophrenic:start().
+
+install() -> 
+    zp_install:install(dbdefault).
+install(Db) -> 
+    zp_install:install(Db).
 

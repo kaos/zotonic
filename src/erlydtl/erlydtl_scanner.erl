@@ -68,7 +68,9 @@ identifier_to_keyword({identifier, Pos, String}, {open_tag, Acc}) ->
     {Type, [{Type, Pos, RevString}|Acc]};
 identifier_to_keyword({identifier, Pos, String}, {_PrevToken, Acc}) ->
     RevString = lists:reverse(String),
-    Keywords = ["in", "not", "or", "and", "firstof", "now", "regroup", "rsc", "templatetag", "with"], 
+    Keywords = ["in", "not", "or", "and", "firstof", "now", "regroup", "templatetag", "with",
+        "rsc", "zp_config"
+    ], 
     Type = case lists:member(RevString, Keywords) of
         true -> list_to_atom(RevString ++ "_keyword");
         _ ->    identifier
