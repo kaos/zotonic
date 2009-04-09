@@ -23,6 +23,7 @@ install(C) ->
     ok = install_category(C),
     ok = install_rsc(C),
     ok = install_predicate(C),
+    ok = install_edge(C),
     ok.
 
 
@@ -85,7 +86,8 @@ install_category(C) ->
 install_rsc(C) ->
     Rsc = [
         % id  uri       vsfr  grp  cat  name,     props
-        [ 1,  "/id/1",  0,    1,   2,   "admin",  [{title,"Site Administrator"}] ]
+        [ 1,  "/id/1",  0,    1,   2,   "admin",  [{title,"Site Administrator"}] ],
+        [ 2,  "/id/2",  0,    1,   6,   "about",  [{title,"About Zophrenic"}, {body, "<p>Some nice text in the body.</p>"}] ]
     ],
     
     [ {ok,1} = pgsql:equery(C, "
@@ -124,6 +126,19 @@ install_predicate(C) ->
     ok.
 
 
+
+%% @doc Install example edges between the predefined content
+install_edge(C) ->
+    Edges = [
+        %  subj  obj  pred  seq
+        [  2,    1,   2,    1  ]
+    ],
+    
+    [ {ok,1} = pgsql:equery(C, "
+            insert into edge (subject_id, object_id, predicate_id, seq)
+            values ($1, $2, $3, $4)
+            ", R) || R <- Edges],
+    ok.
 
 
 

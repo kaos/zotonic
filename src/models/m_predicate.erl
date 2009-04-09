@@ -28,21 +28,24 @@ is_predicate(Pred, Context) ->
 
 %% @doc Return the id of the predicate
 %% @spec id(Pred, Context) -> int()
-id(Pred, Context) ->
-    Name = zp_utils:to_lower(Pred),
-    case zp_depcache:get({predicate_id, Name}) of
+id(Pred, Context) when is_atom(Pred) ->
+    case zp_depcache:get({predicate_id, Pred}) of
         {ok, PredId} ->
             PredId;
         undefined ->
-            case zp_db:q1("select id from predicate where name = $1", [Name], Context) of
+            case zp_db:q1("select id from predicate where name = $1", [Pred], Context) of
                 undefined ->
-                    zp_depcache:set({predicate_id, Name}, undefined, ?DAY, [predicate]),
+                    zp_depcache:set({predicate_id, Pred}, undefined, ?DAY, [predicate]),
                     undefined;
                 Id ->
-                    zp_depcache:set({predicate_id, Name}, Id, ?DAY, [predicate]),
+                    zp_depcache:set({predicate_id, Pred}, Id, ?DAY, [predicate]),
                     Id
             end
-    end.
+    end;
+id(Pred, _Context) when is_integer(Pred) ->
+    Pred;
+id(Pred, Context) ->
+    id(zp_utils:to_atom(Pred), Context).
 
 
 %% @doc Return the definition of the predicate
@@ -78,3 +81,4 @@ all(Context) ->
             zp_depcache:set(predicate, Preds1, ?DAY, [predicate]),
             Preds1
     end.
+

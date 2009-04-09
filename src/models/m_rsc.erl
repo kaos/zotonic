@@ -8,7 +8,7 @@
 
 -export([
 	rsc/0,
-	exists/1, 
+	exists/2, 
 	is_readable/2, is_writeable/2, is_owner/2, is_ingroup/2, is_me/2,
 	p/3, 
 	op/2, o/2, o/3, o/4,
@@ -20,7 +20,34 @@
 
 rsc() -> fun(Id, _Context) -> #rsc{id=Id} end.
 
-exists(Id) -> true.
+
+exists([C|_] = UniqueName, Context) when is_list(UniqueName) and is_integer(C) ->
+    case rid_unique_name(UniqueName, Context) of
+        undefined -> false;
+        _ -> true
+    end;
+exists(UniqueName, Context) when is_binary(UniqueName) ->
+    case rid_unique_name(UniqueName, Context) of
+        undefined -> false;
+        _ -> true
+    end;
+exists(Id, Context) -> 
+    case rid(Id, Context) of
+        #rsc{id=Rid} = Rsc ->
+            case zp_depcache:get({exists, Rid}) of
+                undefined -> 
+                    Exists = case zp_db:q1("select id from rsc where id = $1", [Rid], Context) of
+                        undefined -> false;
+                        _ -> true
+                    end,
+                    zp_depcache:set({exists, Rid}, Exists, Rsc),
+                    Exists;
+                Exists ->
+                    Exists
+            end;
+        undefined -> false
+    end.
+    
 is_readable(Id, Context) -> true.
 is_writeable(Id, Context) -> true.
 is_owner(Id, Context) -> true.
@@ -53,7 +80,7 @@ p(#rsc{id=Id} = Rsc, Predicate, Context) ->
     end,
     case Value of
         undefined ->
-            case is_edge(Predicate) of
+            case m_predicate:is_predicate(Predicate, Context) of
                 true -> o(Rsc, Predicate, Context);
                 false -> undefined
             end;
@@ -80,7 +107,7 @@ m(Id, Predicate, Context) ->
 
 %% Return a list of all edge predicates of this resource
 op(#rsc{id=Id}, Context) ->
-    [];
+    m_edge:object_predicates(Id, Context);
 op(undefined, _Context) -> 
     [];
 op(Id, Context) ->
@@ -92,8 +119,7 @@ o(Id, _Context) ->
 
 %% Return the list of objects with a certain predicate
 o(#rsc{id=Id}, Predicate, Context) ->
-    Edges = dummy_data:o(Id),
-	{rsc_list, proplists:get_value(Predicate, Edges, [])};
+	{rsc_list, m_edge:objects(Id, Predicate, Context)};
 o(undefined, _Predicate, _Context) ->
     {rsc_list, []};
 o(Id, Predicate, Context) ->
@@ -101,17 +127,20 @@ o(Id, Predicate, Context) ->
 
 
 %% Return the nth object in the predicate list
-o(#rsc{id=Id}, Predicate, Index, Context) ->
-	#rsc{id=undefined};
-o(undefined, _Predicate, _Index, _Context) ->
+o(#rsc{id=Id}, Predicate, N, Context) ->
+    case m_edge:object(Id, Predicate, N, Context) of
+        undefined -> undefined;
+        ObjectId -> #rsc{id=ObjectId}
+    end;
+o(undefined, _Predicate, _N, _Context) ->
     undefined;
-o(Id, Predicate, Index, Context) ->
-    o(rid(Id, Context), Predicate, Index, Context).
+o(Id, Predicate, N, Context) ->
+    o(rid(Id, Context), Predicate, N, Context).
 
 	
 %% Return a list of all edge predicates to this resource
 sp(#rsc{id=Id}, Context) ->
-    [];
+    m_edge:subject_predicates(Id, Context);
 sp(undefined, _Context) -> 
     [];
 sp(Id, Context) ->
@@ -123,20 +152,22 @@ s(Id, _Context) ->
 
 %% Return the list of subjects with a certain predicate
 s(#rsc{id=Id}, Predicate, Context) ->
-    Edges = dummy_data:s(Id),
-	{rsc_list, proplists:get_value(Predicate, Edges, [])};
+	{rsc_list, m_edge:subjects(Id, Predicate, Context)};
 s(undefined, _Predicate, _Context) ->
     {rsc_list, []};
 s(Id, Predicate, Context) ->
     s(rid(Id, Context), Predicate, Context).
 
 %% Return the nth object in the predicate list
-s(#rsc{id=Id}, Predicate, Index, Context) ->
-	#rsc{id=undefined};
-s(undefined, _Predicate, _Index, _Context) ->
+s(#rsc{id=Id}, Predicate, N, Context) ->
+    case m_edge:subject(Id, Predicate, N, Context) of
+        undefined -> undefined;
+        SubjectId -> #rsc{id=SubjectId}
+    end;
+s(undefined, _Predicate, _N, _Context) ->
     undefined;
-s(Id, Predicate, Index, Context) ->
-    s(rid(Id, Context), Predicate, Index, Context).
+s(Id, Predicate, N, Context) ->
+    s(rid(Id, Context), Predicate, N, Context).
 
 
 %% Return the list of all media attached to the resource
@@ -171,10 +202,14 @@ rid(UniqueName, Context) when is_binary(UniqueName) ->
     rid_unique_name(binary_to_list(UniqueName), Context);
 rid(undefined, _Context) -> 
 	undefined;
+rid(UniqueName, Context) when is_atom(UniqueName) -> 
+    rid_unique_name(atom_to_list(UniqueName), Context);
 rid(<<>>, _Context) -> 
 	undefined.
 
 
+%% @doc Return the id of the resource with a certain unique name.
+%% rid_unique_name(UniqueName, Context) -> #rsc{} | undefined
 rid_unique_name(UniqueName, Context) ->
     Name = zp_utils:to_lower(UniqueName),
     case zp_depcache:get({rsc_unique_name, Name}) of
@@ -190,11 +225,4 @@ rid_unique_name(UniqueName, Context) ->
             zp_depcache:set({rsc_unique_name, Name}, Id, ?DAY, [Id,{rsc_unique_name, Name}]),
             Id
     end.
-	
-	
-%% @spec is_edge(atom()) -> bool()
-%% @doc Check if a property is a predicate name
-is_edge(brand) -> true;
-is_edge(_) -> false.
-
 

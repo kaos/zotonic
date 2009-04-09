@@ -26,6 +26,7 @@
     delete/3,
     select/3,
     columns/2,
+    update_sequence/3,
     
     assert_table_name/1,
     prepare_cols/2
@@ -219,6 +220,7 @@ delete(Table, Id, Context) ->
     {ok, RowsDeleted}.
 
 
+
 %% @doc Read a row from a table, the row must have a column with the name 'id'.  
 %% The props column contents is merged with the other properties returned.
 %% @spec select(Table, Id, Context) -> {ok, Row}
@@ -281,13 +283,28 @@ columns(Table, Context) ->
         {ok, Cols} -> 
             Cols;
         _ ->
-            {ok, C} = pgsql_pool:get_connection(Db),
+            C = get_connection(Context),
             Cols = pgsql:columns(C, Table),
-            pgsql_pool:return_connection(Db, C),
+            return_connection(C, Context),
             zp_depcache:set({columns, Db, Table}, Cols, ?YEAR, [{database, Db}]),
             Cols
     end.
-    
+
+
+%% @doc Update the sequence of the ids in the table. They will be renumbered according to their position in the id list.
+%% @spec update_sequence(Table, IdList, Context) -> void()
+update_sequence(Table, Ids, Context) when is_atom(Table) ->
+    update_sequence(atom_to_list(Table), Ids, Context);
+update_sequence(Table, Ids, Context) ->
+    assert_table_name(Table),
+    Args = lists:zip(Ids, lists:seq(1, length(Ids))),
+    Updater = fun(Ctx) -> 
+                C = get_connection(Ctx),
+                [ {ok, _} = pgsql:equery1(C, "update \""++Table++"\" set seq = $2 where id = $1", Arg) || Arg <- Args ],
+                return_connection(C, Ctx)
+            end,
+    ok = transaction(Updater, Context).
+
 
 %% @doc Check if a name is a valid SQL table name. Crashes when invalid
 %% @spec check_table_name(String) -> true

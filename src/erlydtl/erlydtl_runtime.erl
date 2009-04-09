@@ -119,7 +119,7 @@ are_equal(Arg1, [Arg2]) when is_list(Arg1) ->
 are_equal(_, _) ->
     false.
 
-is_false("") ->
+is_false([]) ->
     true;
 is_false(false) ->
     true;
@@ -130,6 +130,8 @@ is_false("0") ->
 is_false(<<"0">>) ->
     true;
 is_false(<<>>) ->
+    true;
+is_false({rsc_list, []}) ->
     true;
 is_false(_) ->
     false.
