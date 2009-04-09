@@ -441,7 +441,15 @@ ul#navigation li.lang a.english {
 	
 	.product-price button {
 		margin: 0 0 0 3px;
+		color: #EEB714;
+		background: #444;
+		padding: 2px 3px;
+		border: 1px solid #000;
 	}
+		
+		.product-price button:hover {
+			background: #000;
+		}
 	
 	#product-notice {
 		display: none;
