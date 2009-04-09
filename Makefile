@@ -28,8 +28,6 @@ docs:
 
 clean: 
 	@echo "removing:"
-	(cd deps/epgsql; make clean)
-	(cd deps/epgsql_pool; make clean)
 	(cd deps/mochiweb; make clean)
 	(cd deps/webmachine; make clean)
 	@rm -fv ebin/*.beam ebin/*.app
