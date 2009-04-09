@@ -5,11 +5,11 @@
 {% block title %} Category Page {% endblock %}
 
 {% block content %}
-	<div id="content-area" class="zp-75">
+	<div id="content-area" class="zp-75 category-overview">
 		<!-- Area for the main content -->
 		<h2>Accessoires category</h2>
 
-		<ul class="zp-67">
+		<ul class="zp-67 subcategory-list">
 			<li class="block clearfix">
 				<a href="/category/bags" title="cateogry bags">
 					{% image "140.jpg" width=230 height=140 crop alt="bags" class="left" %}

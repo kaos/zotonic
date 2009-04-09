@@ -545,6 +545,10 @@ ul#navigation li.lang a.english {
 	margin: 0 0 12px 2px;
 }
 
+.subcategory-list li.block img {
+	border: 1px solid #eee;
+}
+
 /* Modules - image viewer
 ---------------------------------------------------------- */
 
