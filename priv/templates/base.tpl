@@ -12,6 +12,9 @@
 	<!--[if IE]><link href="/lib/css/zp-ie.css" type="text/css" media="screen" rel="stylesheet" /><![endif]--> 
 </head>
 <body>
+	
+	{% print q %}
+	
 	<div class="skip">
 		<a href="#content" title="Go directly to page content">Go to page content</a>
 	</div>
@@ -33,7 +36,7 @@
 					</li>
 					<li class="first"><a href="/compare" title="compare-bikes">Fietsen</a></li>
 					<li><a href="#" title="#">Kleding en schoenen</a></li>
-					<li><a href="#" title="#">Accessoires</a></li>
+					<li><a href="/category" title="#">Accessoires</a></li>
 					<li><a href="#" title="#">Onderdelen</a></li>
 					<li class="lang" title="Nederlands"><a href="#" title="Nederlands" class="dutch"><span>Nederlands</span></a></li>
 					<li class="lang" title="English"><a href="#" title="English" class="english"><span>English</span></a></li>
