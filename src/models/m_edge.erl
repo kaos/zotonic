@@ -9,6 +9,9 @@
 
 %% interface functions
 -export([
+    get/2,
+    get_id/4,
+    get_edges/2,
     insert/4,
     delete/2,
     delete/4,
@@ -21,6 +24,33 @@
 ]).
 
 -include_lib("zophrenic.hrl").
+
+
+
+%% @doc Get the complete edge with the id
+get(Id, Context) ->
+    zp_db:assoc_row("select * from edge where id = $1", [Id], Context).
+
+%% @doc Get the edge id of a subject/pred/object combination
+get_id(SubjectId, Pred, ObjectId, Context) ->
+    PredId = m_predicate:id(Pred, Context),
+    zp_db:q1("select id from edge where subject_id = $1 and object_id = $2 and predicate_id = $3", [SubjectId, PredId, ObjectId], Context).
+
+%% @doc Return the full description of all edges from a subject, grouped by predicate
+get_edges(SubjectId, Context) ->
+    case zp_depcache:get({edges, SubjectId}) of
+        {ok, Edges} -> 
+            Edges;
+        undefined ->
+            Edges = zp_db:assoc("
+                select e.id, e.subject_id, e.predicate_id, p.name, e.object_id, e.seq 
+                from edge e join predicate p on predicate_id = e.predicate_id 
+                where e.subject_id = $1 
+                order by e.predicate_id, e.seq, e.id", [SubjectId], Context),
+            Edges1 = zp_utils:group_proplists(name, Edges),
+            zp_depcache:set({edges, SubjectId}, Edges1, ?DAY, [#rsc{id=SubjectId}]),
+            Edges1
+    end.
 
 %% Insert a new edge
 insert(SubjectId, Pred, ObjectId, Context) ->

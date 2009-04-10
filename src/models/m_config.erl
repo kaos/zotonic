@@ -29,7 +29,7 @@ all(Context) ->
             Cs;
         undefined ->
             Cs = zp_db:assoc_props("select * from config order by module, key", Context),
-            Indexed = [ {M, zp_utils:index_proplist(key, CMs)} || {M,CMs} <- zp_utils:split_proplist(module, Cs) ],
+            Indexed = [ {M, zp_utils:index_proplist(key, CMs)} || {M,CMs} <- zp_utils:group_proplists(module, Cs) ],
             zp_depcache:set(config, Indexed, ?DAY),
             Indexed
     end.
