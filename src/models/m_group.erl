@@ -9,6 +9,11 @@
 
 %% interface functions
 -export([
+    add_member/3,
+    add_observer/3,
+    add_leader/3,
+    delete_member/2,
+    delete_member/3,
     groups_member/1,
     groups_member/2,
     groups_observer/1,
@@ -25,6 +30,55 @@
 
 -include_lib("zophrenic.hrl").
 
+add_member(Id, RscId, Context) ->
+    F = fun(Ctx) ->
+        case zp_db:q1("select id from rsc_group where group_id = $1 and rsc_id = $2", [Id, RscId], Ctx) of
+            undefined ->
+                {ok, Id} = zp_db:insert(rsc_group, [{group_id, Id},{rsc_id, RscId}], Ctx),
+                Id;
+            RscGroupId ->
+                zp_db:q("update rsc_group set is_observer = false, is_leader = false where id = $1", [RscGroupId], Ctx),
+                RscGroupId
+        end
+    end,
+    zp_db:transaction(F, Context).
+
+
+add_observer(Id, RscId, Context) ->
+    F = fun(Ctx) ->
+        case zp_db:q1("select id from rsc_group where group_id = $1 and rsc_id = $2", [Id, RscId], Ctx) of
+            undefined ->
+                {ok, Id} = zp_db:insert(rsc_group, [{group_id, Id},{rsc_id, RscId},{is_observer, true}], Ctx),
+                Id;
+            RscGroupId ->
+                zp_db:q("update rsc_group set is_observer = true, is_leader = false where id = $1", [RscGroupId], Ctx),
+                RscGroupId
+        end
+    end,
+    zp_db:transaction(F, Context).
+
+
+add_leader(Id, RscId, Context) ->
+    F = fun(Ctx) ->
+        case zp_db:q1("select id from rsc_group where group_id = $1 and rsc_id = $2", [Id, RscId], Ctx) of
+            undefined ->
+                {ok, Id} = zp_db:insert(rsc_group, [{group_id, Id},{rsc_id, RscId},{is_leader, true}], Ctx),
+                Id;
+            RscGroupId ->
+                zp_db:q("update rsc_group set is_observer = false, is_leader = true where id = $1", [RscGroupId], Ctx),
+                RscGroupId
+        end
+    end,
+    zp_db:transaction(F, Context).
+
+
+delete_member(RscGroupId, Context) ->
+    zp_db:delete(rsc_group, RscGroupId, Context).
+
+delete_member(Id, RscId, Context) ->
+    zp_db:q("delete from rsc_group where group_id = $1 and rsc_id = $2",[Id, RscId], Context).
+    
+    
 %% @doc Return the group ids the current person is member of
 %% @spec person_groups(Context) -> List
 groups_member(Context) ->
