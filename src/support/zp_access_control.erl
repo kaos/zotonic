@@ -2,7 +2,7 @@
 %% @copyright 2009 Marc Worrell
 %% @date 2009-04-10
 %%
-%% @doc 
+%% @doc Access Control for zophrenic. Defines what a person can do on the site.
 
 -module(zp_access_control).
 -author("Marc Worrell <marc@worrell.nl").
@@ -10,6 +10,9 @@
 %% interface functions
 -export([
     default/2,
+    has_role/2,
+    publish_level/1,
+    publish_level/2,
     person/1,
     add_defaults/2,
     add_person/3
@@ -19,7 +22,35 @@
 default(group, Context) -> 
     1;
 default(visible_for, Context) ->
-    0.
+    publish_level(Context).
+
+
+has_role(admin, Context) ->
+    true;
+has_role(supervisor, Context) ->
+    true;
+has_role(editor, Context) ->
+    true;
+has_role(community_publisher, Context) ->
+    true;
+has_role(public_publisher, Context) ->
+    true.
+    
+publish_level(Context) ->
+    publish_level(0, Context).
+publish_level(Requested, Context) ->
+    Max = case has_role(public_publisher, Context) of
+        true -> 0;
+        false ->
+            case has_role(community_publisher, Context) of
+                true -> 1;
+                false -> 2  % group only
+            end
+    end,
+    if 
+        Max >  Requested -> Max;
+        Max =< Requested -> Requested
+    end.
 
 person(Context) ->
     1.
@@ -30,8 +61,13 @@ add_defaults(PropList, Context) ->
         _ -> PropList
     end,
     PropVis = case proplists:get_value(visible_for, PropGroup) of
-        undefined -> [{visible_for,default(visible_for,Context)}|PropGroup];
-        _ -> PropGroup
+        undefined -> [{visible_for,publish_level(Context)}|PropGroup];
+        Vis -> 
+            Max = publish_level(Context),
+            if 
+                Max > Vis -> zp_utils:prop_replace(visible_for, Max, PropGroup);
+                true -> PropGroup
+            end
     end,
     PropVis.
 

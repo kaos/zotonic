@@ -50,20 +50,46 @@ exists(Id, Context) ->
     
 is_readable(Id, Context) -> true.
 is_writeable(Id, Context) -> true.
-is_owner(Id, Context) -> true.
 is_ingroup(Id, Context) -> true.
-is_me(Id, Context) -> true.
+
+is_owner(Id, Context) ->
+    case rid(Id, Context) of
+        #rsc{id=RscId} = R ->
+            p(R, owner_id, Context) == RscId;
+        _ ->
+            false
+    end.
+
+is_me(Id, Context) -> 
+    case rid(Id, Context) of
+        #rsc{id=RscId} ->
+            zp_access_control:person(Context) == RscId;
+        _ ->
+            false
+    end.
 
 %% @todo Perform access control checks, return 'undefined' on an error or permission denial
 
-%% Unknown properties will be checked against the predicates, returns o(Predicate).
+% List of special properties to be redirected to functions
 p(Id, media, Context) -> media(Id, Context);
 p(Id, o, Context)  -> o(Id, Context);
 p(Id, s, Context)  -> s(Id, Context);
 p(Id, m, Context)  -> m(Id, Context);
 p(Id, op, Context) -> op(Id, Context);
 p(Id, sp, Context) -> sp(Id, Context);
-
+p(Id, is_me, Context) -> is_me(Id, Context);
+p(Id, is_owner, Context) -> is_me(Id, Context);
+p(Id, is_readable, Context) -> is_readable(Id, Context);
+p(Id, is_writeable, Context) -> is_writeable(Id, Context);
+p(Id, is_ingroup, Context) -> is_ingroup(Id, Context);
+p(Id, exists, Context) -> exists(Id, Context);
+p(Id, group, Context) -> 
+    case p(Id, group_id, Context) of
+        undefined -> undefined;
+        GroupId -> m_group:get(GroupId, Context)
+    end;
+    
+% Check if the requested predicate is a readily available property or an edge
 p(#rsc{id=Id} = Rsc, Predicate, Context) -> 
     Value = case zp_depcache:get(Rsc, Predicate) of
         {ok, V} -> 
@@ -80,6 +106,7 @@ p(#rsc{id=Id} = Rsc, Predicate, Context) ->
     end,
     case Value of
         undefined ->
+            % Unknown properties will be checked against the predicates, returns o(Predicate).
             case m_predicate:is_predicate(Predicate, Context) of
                 true -> o(Rsc, Predicate, Context);
                 false -> undefined

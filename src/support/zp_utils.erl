@@ -38,6 +38,7 @@
 	to_upper/1,
 	assert/2,
 	prop_replace/3,
+	prop_delete/2,
 	group_proplists/2,
 	index_proplist/2
 ]).
@@ -368,6 +369,9 @@ assert(_, _) -> ok.
 %% @doc Replace a property in a proplist
 prop_replace(Prop, Value, List) ->
     [{Prop,Value} | lists:keydelete(Prop,1,List)].
+
+prop_delete(Prop, List) ->
+    lists:keydelete(Prop, 1, List).
 
 %% @doc Given a list of proplists, make it a nested list with respect to a property, combining elements
 %% with the same property.  Assumes the list is sorted on the property you are splitting on
