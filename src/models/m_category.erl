@@ -9,12 +9,61 @@
 
 %% interface functions
 -export([
+    get/2,
+    get_by_name/2,
+    get_by_parent/2,
+    get_range/2,
+    get_range_by_name/2,
+    name_to_id/2,
+    update_parent/3,
+    update_sequence/2,
     tree/1,
     tree/2,
     renumber/1,
     enumerate/1
 ]).
 
+
+get(Id, Context) ->
+    zp_db:assoc_props_row("select * from category where id = $1", [Id], Context).
+
+get_by_name(Name, Context) ->
+    zp_db:assoc_props_row("select * from category where name = $1", [Name], Context).
+
+get_by_parent(Id, Context) ->
+    zp_db:assoc_props("select * from category where parent_id = $1 order by seq", [Id], Context).
+
+get_range(Id, Context) ->
+    case zp_db:q("select lft, rght from category where id = $1", [Id], Context) of
+        [Row] -> Row;
+        _ -> {1, 0} % empty range
+    end.
+
+get_range_by_name(Name, Context) ->
+    case zp_db:q("select lft, rght from category where name = $1", [Name], Context) of
+        [Row] -> Row;
+        _ -> {1, 0} % empty range
+    end.
+
+name_to_id(Name, Context) ->
+    zp_db:q1("select id from category where name = $1", [Name], Context).
+
+
+update_parent(Id, ParentId, Context) ->
+    F = fun(Ctx) ->
+        zp_db:q("update category set parent_id = $1 where id = $2", [ParentId, Id], Context),
+        renumber(Ctx)
+    end,
+    zp_db:transaction(F, Context).
+    
+
+update_sequence(Ids, Context) ->
+    F = fun(Ctx) ->
+        zp_db:update_sequence(category, Ids, Ctx),
+        renumber(Ctx)
+    end,
+    zp_db:transaction(F, Context).
+    
 
 %% @doc Return the tree of all categories
 %% @spec tree(Context) -> Tree
