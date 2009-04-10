@@ -12,6 +12,10 @@
     transaction/2,
     set/3,
     get/2,
+    assoc_row/2,
+    assoc_row/3,
+    assoc_props_row/2,
+    assoc_props_row/3,
     assoc/2,
     assoc/3,
     assoc_props/2,
@@ -77,6 +81,25 @@ return_connection(C, #context{dbc=undefined, db=Db}) ->
     pgsql_pool:return_connection(Db, C);
 return_connection(_C, _Context) -> 
     ok.
+
+
+assoc_row(Sql, Context) ->
+    assoc_row(Sql, [], Context).
+
+assoc_row(Sql, Parameters, Context) ->
+    case assoc(Sql, Parameters, Context) of
+        [Row] -> Row;
+        [] -> undefined
+    end.
+
+assoc_props_row(Sql, Context) ->
+    assoc_props_row(Sql, [], Context).
+
+assoc_props_row(Sql, Parameters, Context) ->
+    case assoc_props(Sql, Parameters, Context) of
+        [Row] -> Row;
+        [] -> undefined
+    end.
     
 
 %% @doc Return property lists of the results of a query on the database in the Context
