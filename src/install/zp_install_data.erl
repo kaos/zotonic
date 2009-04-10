@@ -66,17 +66,17 @@ install_group(C) ->
 
 install_category(C) ->
     Cats = [
-        {1, undefined, 1, [{title, {trans, [{en, "Uncategorized"},  {nl, "Geen categorie"}]}}] },
-        {2, undefined, 1, [{title, {trans, [{en, "Person"},         {nl, "Persoon"}]}}] },
-        {3, undefined, 1, [{title, {trans, [{en, "Artifact"},       {nl, "Artefact"}]}}] },
-        {4, 3,         1, [{title, {trans, [{en, "Publication"},    {nl, "Publicatie"}]}}] },
-        {5, 4,         2, [{title, {trans, [{en, "Review"},         {nl, "Beoordeling"}]}}] },
-        {6, 4,         1, [{title, {trans, [{en, "Article"},        {nl, "Artikel"}]}}] },
-        {7, 3,         2, [{title, {trans, [{en, "Product"},        {nl, "Product"}]}}] }
+        {1, undefined, 1, other,       [{title, {trans, [{en, "Uncategorized"},  {nl, "Geen categorie"}]}}] },
+        {2, undefined, 1, person,      [{title, {trans, [{en, "Person"},         {nl, "Persoon"}]}}] },
+        {3, undefined, 1, artifact,    [{title, {trans, [{en, "Artifact"},       {nl, "Artefact"}]}}] },
+        {4, 3,         1, publication, [{title, {trans, [{en, "Publication"},    {nl, "Publicatie"}]}}] },
+        {5, 4,         2, review,      [{title, {trans, [{en, "Review"},         {nl, "Beoordeling"}]}}] },
+        {6, 4,         1, article,     [{title, {trans, [{en, "Article"},        {nl, "Artikel"}]}}] },
+        {7, 3,         2, product,     [{title, {trans, [{en, "Product"},        {nl, "Product"}]}}] }
     ],
     [ {ok,1} = pgsql:equery(C, "
-            insert into category (id, parent_id, seq, props)
-            values ($1, $2, $3, $4)", R) || R <- Cats],
+            insert into category (id, parent_id, name, seq, props)
+            values ($1, $2, $3, $4, $5)", R) || R <- Cats],
     ok = enumerate_categories(C),
     ok.
     

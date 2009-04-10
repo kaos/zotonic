@@ -374,13 +374,15 @@ model_pgsql() ->
     (
       id serial NOT NULL,
       parent_id int,
+      name character varying(80),
       seq int NOT NULL DEFAULT 1000000,
       nr int NOT NULL DEFAULT 0,
       lvl int NOT NULL DEFAULT 0,
       lft int NOT NULL DEFAULT 0,
       rght int NOT NULL DEFAULT 0,
       props bytea,
-      CONSTRAINT category_pkey PRIMARY KEY (id)
+      CONSTRAINT category_pkey PRIMARY KEY (id),
+      CONSTRAINT category_name_key UNIQUE (name)
     )",
 
     "ALTER TABLE category ADD CONSTRAINT fk_category_parent_id FOREIGN KEY (parent_id)
