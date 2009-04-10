@@ -170,4 +170,5 @@ test() ->
             [32,<<"height">>,61,39,<<"300">>,39],
             [32,<<"class">>,61,39,"some-class",39]],
           47,62]} = 
-    tag(<<"koe.jpg">>, [{width,300},{height,300},{crop,center},{class,"some-class"}]).
+    tag(<<"koe.jpg">>, [{width,300},{height,300},{crop,center},{class,"some-class"}]),
+    ok.

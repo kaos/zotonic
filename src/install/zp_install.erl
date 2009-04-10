@@ -226,7 +226,8 @@ model_pgsql() ->
       group_id int NOT NULL,
       created timestamp with time zone NOT NULL DEFAULT now(),
       creator_id int,
-      filename character varying(255) NOT NULL,
+      filename character varying(400) NOT NULL,
+      rootname character varying(100) NOT NULL,
       mime character varying(64) NOT NULL DEFAULT 'application/octet-stream'::character varying,
       size int NOT NULL DEFAULT 0,
       props bytea,
@@ -242,6 +243,7 @@ model_pgsql() ->
 
     "CREATE INDEX fki_media_group_id ON media (group_id)",
     "CREATE INDEX fki_media_creator_id ON media (creator_id)",
+    "CREATE INDEX fki_media_rootname ON media (rootname)",
 
 
     % Table rsc_media

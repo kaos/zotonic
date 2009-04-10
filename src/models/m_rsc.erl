@@ -172,19 +172,19 @@ s(Id, Predicate, N, Context) ->
 
 %% Return the list of all media attached to the resource
 media(#rsc{id=Id}, Context) -> 
-	dummy_data:media(Id);
+    m_media:get_rsc(Id, Context);
 media(undefined, _Context) -> 
 	[];
 media(Id, Context) -> 
 	media(rid(Id, Context), Context).
 
 
-media(#rsc{id=Id}, Index, Context) ->
-	undefined; % | MediaPropList.
-media(undefined, _Index, _Context) ->
+media(#rsc{id=Id}, N, Context) ->
+    m_media:get_rsc(Id, N, Context);
+media(undefined, _N, _Context) ->
 	undefined;
-media(Id, Index, Context) ->
-    media(rid(Id, Context), Index, Context).
+media(Id, N, Context) ->
+    media(rid(Id, Context), N, Context).
 	
 	
 %% @doc Fetch a #rsc{} from any input

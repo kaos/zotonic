@@ -44,7 +44,7 @@ get_edges(SubjectId, Context) ->
         undefined ->
             Edges = zp_db:assoc("
                 select e.id, e.subject_id, e.predicate_id, p.name, e.object_id, e.seq 
-                from edge e join predicate p on predicate_id = e.predicate_id 
+                from edge e join predicate p on p.id = e.predicate_id 
                 where e.subject_id = $1 
                 order by e.predicate_id, e.seq, e.id", [SubjectId], Context),
             Edges1 = zp_utils:group_proplists(name, Edges),
