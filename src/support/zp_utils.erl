@@ -37,7 +37,8 @@
 	to_lower/1,
 	to_upper/1,
 	assert/2,
-	split_proplist/2,
+	prop_replace/3,
+	group_proplists/2,
 	index_proplist/2
 ]).
 
@@ -364,28 +365,32 @@ assert(false, Error) -> erlang:error(Error);
 assert(_, _) -> ok.
 
 
+%% @doc Replace a property in a proplist
+prop_replace(Prop, Value, List) ->
+    [{Prop,Value} | lists:keydelete(Prop,1,List)].
+
 %% @doc Given a list of proplists, make it a nested list with respect to a property, combining elements
 %% with the same property.  Assumes the list is sorted on the property you are splitting on
 %% For example:  [[{a,b}{x}], [{a,b}{z}], [{a,c}{y}]] gives:
 %%   [ {b, [[{a,b}{x}], [{a,b}{z}]]},  {c, [[{a,c}{y}]]} ]
-%% @spec split_on(Property, [PropList]) -> PropList
-split_proplist(_Prop, []) -> 
+%% @spec group_proplists(Property, [PropList]) -> PropList
+group_proplists(_Prop, []) -> 
     [];
-split_proplist(Prop, [Item|Rest]) ->
+group_proplists(Prop, [Item|Rest]) ->
     PropValue = proplists:get_value(Prop, Item),
-    split_proplist(Prop, PropValue, Rest, [Item], []).
+    group_proplists(Prop, PropValue, Rest, [Item], []).
 
-split_proplist(_Prop, _PropValue, [], [], Result) ->
+group_proplists(_Prop, _PropValue, [], [], Result) ->
     lists:reverse(Result);
-split_proplist(Prop, PropValue, [], Acc, Result) ->
+group_proplists(Prop, PropValue, [], Acc, Result) ->
     lists:reverse(Acc),
-    split_proplist(Prop, PropValue, [], [], [{zp_convert:to_atom(PropValue),Acc}|Result]);
-split_proplist(Prop, PropValue, [C|Rest], Acc, Result) ->
+    group_proplists(Prop, PropValue, [], [], [{zp_convert:to_atom(PropValue),Acc}|Result]);
+group_proplists(Prop, PropValue, [C|Rest], Acc, Result) ->
     case proplists:get_value(Prop, C) of
         PropValue -> 
-            split_proplist(Prop, PropValue, Rest, [C|Acc], Result);
+            group_proplists(Prop, PropValue, Rest, [C|Acc], Result);
         Other ->
-            split_proplist(Prop, Other, Rest, [], [{zp_convert:to_atom(PropValue),Acc}|Result])
+            group_proplists(Prop, Other, Rest, [C], [{zp_convert:to_atom(PropValue),Acc}|Result])
     end.
 
 
