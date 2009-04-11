@@ -32,7 +32,7 @@ $.widget("ui.imageviewer",
 	{
 		var ui 				= this;
 		var imageOrigSrc 	= ui.element.attr('src').split('.');
-		var imageTempSrc 	= imageOrigSrc[0].split('/');
+		var imageTempSrc 	= imageOrigSrc[0].split('/image/');
 		var imageExt		= imageOrigSrc[imageOrigSrc.length - 1];
 		var imageSrc 		= '/media/inline/' + imageTempSrc[imageTempSrc.length - 1] + '.' + imageExt;
 		var bigImg 			= ui.element.siblings('img');
