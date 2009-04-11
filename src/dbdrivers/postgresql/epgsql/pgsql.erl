@@ -3,7 +3,7 @@
 -module(pgsql).
 
 -export([connect/2, connect/3, connect/4, close/1]).
--export([last_id/2, squery1/2, equery1/2, equery1/3, assoc/2, assoc/3]).
+-export([last_id/2, reset_id/2, squery1/2, equery1/2, equery1/3, assoc/2, assoc/3]).
 -export([columns/2]).
 -export([get_parameter/2, squery/2, equery/2, equery/3]).
 -export([parse/2, parse/3, parse/4, describe/2, describe/3]).
@@ -46,6 +46,12 @@ last_id(C, Table) when is_atom(Table) ->
     last_id(C, atom_to_list(Table));
 last_id(C, Table) ->
     equery1(C, "select currval(pg_get_serial_sequence($1, 'id'))", [Table]).
+
+reset_id(C, Table) when is_atom(Table) ->
+    reset_id(C, atom_to_list(Table));
+reset_id(C, Table) ->
+    {ok, Max} = equery1(C, "select max(id) from \""++Table++"\""),
+    equery1(C, "select setval(pg_get_serial_sequence($1, 'id'), $2)", [Table, Max+1]).
 
 assoc(C, Sql) ->
     assoc(C, Sql, []).
