@@ -31,6 +31,7 @@ encode(bytea, T) when is_tuple(T)   ->
 encode(bytea, [T|_Rest]=L) when is_tuple(T)   -> 
     B = term_to_binary(L),
     encode(bytea, <<?TERM_MAGIC_NUMBER, B/binary>>);
+encode(Type, A) when is_atom(A)      -> encode(Type, atom_to_list(A));
 encode(Type, L) when is_list(L)      -> encode(Type, iolist_to_binary(L));
 encode(_Type, _Value)                -> {error, unsupported}.
 
