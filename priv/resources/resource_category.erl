@@ -13,5 +13,11 @@ html(_ReqProps, Context) ->
 				[{title, "Product page"}, {uri, "/product/shimano/105-ST-5600"}],
 				[{title, "Bike page"}, {uri, "/bike/trek/urban"}]
 			],
-    Html = zp_template:render("category.tpl", [{menu_list, MenuList}], Context),
+    
+	Html = case zp_context:get_q("subcat", Context) of
+		undefined -> zp_template:render("category.tpl", [{menu_list, MenuList}], Context);
+		_ ->
+			zp_template:render("sub_category.tpl", [{menu_list, MenuList}], Context)
+	end,
+	
 	zp_context:output(Html, Context).
