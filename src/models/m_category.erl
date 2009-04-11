@@ -14,6 +14,7 @@
     get_by_parent/2,
     get_range/2,
     get_range_by_name/2,
+    path/2,
     name_to_id/2,
     update_parent/3,
     update_sequence/2,
@@ -55,7 +56,7 @@ update_parent(Id, ParentId, Context) ->
         renumber(Ctx)
     end,
     zp_db:transaction(F, Context).
-    
+
 
 update_sequence(Ids, Context) ->
     F = fun(Ctx) ->
@@ -63,7 +64,14 @@ update_sequence(Ids, Context) ->
         renumber(Ctx)
     end,
     zp_db:transaction(F, Context).
-    
+
+
+%% @doc Return the path from a root to the category
+%% @spec path(Id, Context) -> [CatId]
+path(Id, Context) ->
+    Cat = get(Id, Context),
+    proplists:get_value(path, Cat).
+        
 
 %% @doc Return the tree of all categories
 %% @spec tree(Context) -> Tree
@@ -111,10 +119,15 @@ renumber(Context) ->
 renumber_transaction(Context) ->
     CatTuples = zp_db:q("select id, parent_id, seq from category", Context),
     Enums = enumerate(CatTuples),
-    % {CatId, Nr, Level, Left, Right}
-    [
-        zp_db:q("update category set nr = $2, lvl = $3, lft = $4, rght = $5 where id = $1", Enum, Context)
-        || Enum <- Enums
+     [
+        zp_db:update(category, CatId, [
+            {nr, Nr},
+            {lvl, Level},
+            {lft, Left},
+            {rght, Right},
+            {path, Path}
+        ], Context)
+        || {CatId, Nr, Level, Left, Right, Path} <- Enums
     ],
     ok.
 
@@ -125,22 +138,22 @@ renumber_transaction(Context) ->
 %%  Cats = [Cat]
 %%  Cat = {CatId, Parent, NodeSeq} 
 %%  Sorts = [Sort]
-%%  Sort = {CatId, Nr, Level, Left, Right}
+%%  Sort = {CatId, Nr, Level, Left, Right, Path}
 enumerate(Cats) ->
     % Fetch all the roots of our forest
     {Roots, Rest} = lists:partition(fun({_Id, Parent, _Seq}) -> Parent == undefined end, Cats),
     % Make the trees from the roots down
-    Trees = [ make_tree(Root, Rest, 1) || Root <- Roots],
+    Trees = [ make_tree(Root, Rest, 1, []) || Root <- Roots],
     % Flatten the trees, enumerating all nodes depth-first
     {Flatten,_Nr} = lists:foldl(fun(Tree, {Acc,Nr}) -> flatten_tree(Tree, Acc, Nr) end, {[],1}, Trees),
     Flatten.
 
-make_tree({NodeId,_Parent,NodeSeq} = Node, Nodes, Level) ->
+make_tree({NodeId,_Parent,NodeSeq} = Node, Nodes, Level, Path) ->
     SubNodes = lists:filter(fun ({_,Parent,_}) -> Parent == NodeId end, Nodes),
-    SubTrees = [ make_tree(SubNode, Nodes, Level+1) || SubNode <- SubNodes ],
-    {Level, NodeSeq, Node, lists:keysort(2, SubTrees)}.
+    SubTrees = [ make_tree(SubNode, Nodes, Level+1, [NodeId|Path]) || SubNode <- SubNodes ],
+    {Level, NodeSeq, Node, lists:keysort(2, SubTrees), Path}.
     
-flatten_tree({Level, _NodeSeq, {NodeId,_Parent,_Seq}, SubTrees}, NodesAcc, NodeNr) ->
+flatten_tree({Level, _NodeSeq, {NodeId,_Parent,_Seq}, SubTrees, Path}, NodesAcc, NodeNr) ->
     {NodesAcc1, NodeNr1} = lists:foldl(fun(Tree, {Acc,Nr}) -> flatten_tree(Tree, Acc, Nr) end, {NodesAcc,NodeNr+1}, SubTrees),
-    {[ {NodeId, NodeNr, Level, NodeNr, NodeNr1-1} | NodesAcc1], NodeNr1}.
+    {[ {NodeId, NodeNr, Level, NodeNr, NodeNr1-1, Path} | NodesAcc1], NodeNr1}.
 
