@@ -108,24 +108,31 @@ insert_file_rsc(File, RscId, Props, Context) ->
         insert_rsc_media(RscId, Id, Ctx),
         {ok, Id}
     end,
-    zp_db:transaction(F, Context).
+    zp_db:transaction(F, Context),
+    zp_depcache:flush({media_rsc, RscId}).
 
 
 %% @doc Couple the media to the resource
 %% @spec insert_rsc_media(RscId, Id, Context) -> {ok, RscMediaId}
 insert_rsc_media(RscId, Id, Context) ->
-    zp_db:insert(rsc_media, [{rsc_id, RscId}, {media_id, Id}], Context).
+    zp_db:insert(rsc_media, [{rsc_id, RscId}, {media_id, Id}], Context),
+    zp_depcache:flush({media_rsc, RscId}).
     
 
 %% @doc Decouple a media from an resource
 delete_rsc_media(RscId, Id, Context) ->
-    zp_db:q("delete from rsc_media where rsc_id = $1 and media_id = $2", [RscId, Id], Context).
+    zp_db:q("delete from rsc_media where rsc_id = $1 and media_id = $2", [RscId, Id], Context),
+    zp_depcache:flush({media_rsc, RscId}).
 
 
-%% @doc Decouple a media from an resource
+%% @doc Delete a media
 delete_rsc_media(RscMediaId, Context) ->
-    zp_db:delete(rsc_media, RscMediaId, Context).
-
+    RscId = zp:q1("select rsc_id from rsc_media where id = $2", [RscMediaId], Context),
+    zp_db:delete(rsc_media, RscMediaId, Context),
+    case RscId of
+        undefined -> ok;
+        _ -> zp_depcache:flush({media_rsc, RscId})
+    end.
 
 %% @doc Fetch the media information of the file, if they are not set in the Props
 add_media_info(File, Props) ->
