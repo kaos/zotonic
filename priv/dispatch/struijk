@@ -19,7 +19,7 @@
 	{overview,		["overview", cat, subcat, brand],				resource_category,		[]},
 	{overview,		["overview", "bybrand", brand],					resource_brand,			[]},
 	{product,		["product", id],								resource_product,		[]},
-	{product,		["product", brand, id],							resource_product,		[]},
+	{product,		["product", id, slug],							resource_product,		[]},
 	{page,			["page", id],									resource_page,			[]},
 	{page,			["page", id, slug],								resource_page,			[]},
 	{news,			["news"],										resource_news,			[]},
