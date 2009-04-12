@@ -9,39 +9,39 @@
 
 		<ul class="zp-67 subcategory-list">
 			<li class="block clearfix">
-				<a href="/category/bags" title="cateogry bags">
+				<a href="/overview/accessoires/bags" title="cateogry bags">
 					{% image "140.jpg" width=200 height=70 crop alt="bags" class="left" %}
 				</a>
 				<h3>Bags</h3>
-				<p>Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod. <a href="#">read&nbsp;more&nbsp;&raquo;</a></p>
+				<p>Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod. <a href="/overview/accessoires/bags" title="cateogry bags">read&nbsp;more&nbsp;&raquo;</a></p>
 			</li>
 			<li class="block clearfix">
-				<a href="/category/bags" title="cateogry bags">
+				<a href="/overview/accessoires/bags" title="cateogry bags">
 					{% image "37.jpg" width=200 height=70 crop alt="Glasses" class="left" %}
 				</a>
 				<h3>Glasses</h3>
-				<p>Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod tempor. <a href="#">read&nbsp;more&nbsp;&raquo;</a></p>
+				<p>Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod tempor. <a href="/overview/accessoires/bags" title="cateogry bags">read&nbsp;more&nbsp;&raquo;</a></p>
 			</li>
 			<li class="block clearfix">
-				<a href="/category/batteries" title="cateogry batteries">
+				<a href="/overview/accessoires/batteries" title="cateogry batteries">
 					{% image "1610.jpg" width=200 height=70 crop alt="bags" class="left" %}
 				</a>
 				<h3>Batteries</h3>
-				<p>Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod. <a href="#">read&nbsp;more&nbsp;&raquo;</a></p>
+				<p>Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod. <a href="/overview/accessoires/batteries" title="cateogry batteries">read&nbsp;more&nbsp;&raquo;</a></p>
 			</li>
 			<li class="block clearfix">
-				<a href="/category/fietscomputers" title="cateogry bags">
+				<a href="/overview/accessoires/fietscomputers" title="cateogry bags">
 					{% image "1586.jpg" width=200 height=70 crop alt="Glasses" class="left" %}
 				</a>
 				<h3>Fietscomputers</h3>
-				<p>Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod tempor. <a href="#">read&nbsp;more&nbsp;&raquo;</a></p>
+				<p>Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod tempor. <a href="/overview/accessoires/fietscomputers" title="cateogry bags">read&nbsp;more&nbsp;&raquo;</a></p>
 			</li>
 			<li class="block clearfix">
-				<a href="/category/montagestandaards" title="cateogry Montagestandaards">
+				<a href="/overview/accessoires/montagestandaards" title="cateogry Montagestandaards">
 					{% image "1636.jpg" width=200 height=70 crop alt="bags" class="left" %}
 				</a>
 				<h3>Montagestandaards</h3>
-				<p>Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod. <a href="#">read&nbsp;more&nbsp;&raquo;</a></p>
+				<p>Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod. <a href="/overview/accessoires/montagestandaards" title="cateogry Montagestandaards">read&nbsp;more&nbsp;&raquo;</a></p>
 			</li>
 		</ul>
 		
