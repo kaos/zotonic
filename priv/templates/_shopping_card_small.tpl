@@ -6,7 +6,7 @@
 	</div>
 	<div class="basket-basket">
 		<p class="basket-basket-image"></p>
-		<p class="basket-text">Uw winkelmand is leeg <a href="#">Bekijk uw winkelmand &raquo;</a></p>
+		<p class="basket-text">Uw winkelmand is leeg <a href="/cart">Bekijk uw winkelmand &raquo;</a></p>
 	</div>
 	<div class="basket-logos"><span><!-- Logo"s content -->iDeal, thuiswinkel waarborg</span></div>
 </div>

@@ -1,7 +1,5 @@
 {% extends "base.tpl" %}
 
-{# comment #}
-
 {% block title %} Home page {% endblock %}
 
 {% block content %}

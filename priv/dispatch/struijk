@@ -29,5 +29,6 @@
 	{bike,			["bike", brand, model],							resource_bike,			[]},
 	{compare,		["compare", cat, id],							resource_compare,		[]},
 	{search,   		["search"],										resource_search,		[]},
-	{admin,   		["admin"],										resource_admin,			[]}	
+	{admin,   		["admin"],										resource_admin,			[]},	
+	{cart,   		["cart"],										resource_cart,			[]}	
 ].

@@ -1,7 +1,5 @@
 {% extends "base.tpl" %}
 
-{# comment #}
-
 {% block title %} {{rsc[2].title}} {% endblock %}
 
 {% block content %}

@@ -1,7 +1,5 @@
 {% extends "base.tpl" %}
 
-{# comment #}
-
 {% block title %} Compare bikes {% endblock %}
 
 {% block content %}

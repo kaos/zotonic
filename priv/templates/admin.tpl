@@ -1,7 +1,5 @@
 {% extends "admin_base.tpl" %}
 
-{# comment #}
-
 {% block title %} admin {% endblock %}
 
 {% block content %}

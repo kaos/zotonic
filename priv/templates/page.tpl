@@ -1,7 +1,5 @@
 {% extends "base.tpl" %}
 
-{# comment #}
-
 {% block title %} Page Template {% endblock %}
 
 {% block content %}
