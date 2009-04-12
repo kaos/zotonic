@@ -1,55 +1,34 @@
 {% extends "base.tpl" %}
 
-{% block title %} Category Page {% endblock %}
+{% block title %}{{cat.title}}{% endblock %}
 
 {% block content %}
 	<div id="content-area" class="zp-75 category-overview">
 		<!-- Area for the main content -->
-		<h2>Accessoires category</h2>
-
+		<h2>{{ cat.title }}</h2>
 		<ul class="zp-67 subcategory-list">
+		{% for sub in m.category[cat_id].tree1 %}
 			<li class="block clearfix">
-				<a href="/overview/accessoires/bags" title="cateogry bags">
-					{% image "140.jpg" width=200 height=70 crop alt="bags" class="left" %}
+				<a href="{% url overview cat=cat.name subcat=sub.name %}">
+					{% image m.category[sub.id].image width=200 height=70 crop alt="bags" class="left" %}
 				</a>
-				<h3>Bags</h3>
-				<p>Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod. <a href="/overview/accessoires/bags" title="cateogry bags">read&nbsp;more&nbsp;&raquo;</a></p>
+				<h3><a href="{% url overview cat=cat.name subcat=sub.name %}">{{ sub.title }}</a></h3>
+				<p>
+					{{ sub.intro }}
+					<a href="{% url overview cat=cat.name subcat=sub.name %}">Lees&nbsp;meer&nbsp;&raquo;</a>
+				</p>
 			</li>
+		{% empty %}
 			<li class="block clearfix">
-				<a href="/overview/accessoires/bags" title="cateogry bags">
-					{% image "37.jpg" width=200 height=70 crop alt="Glasses" class="left" %}
-				</a>
-				<h3>Glasses</h3>
-				<p>Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod tempor. <a href="/overview/accessoires/bags" title="cateogry bags">read&nbsp;more&nbsp;&raquo;</a></p>
+				<p>{{cat.title}} heeft geen subcategorieën.</p>
 			</li>
-			<li class="block clearfix">
-				<a href="/overview/accessoires/batteries" title="cateogry batteries">
-					{% image "1610.jpg" width=200 height=70 crop alt="bags" class="left" %}
-				</a>
-				<h3>Batteries</h3>
-				<p>Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod. <a href="/overview/accessoires/batteries" title="cateogry batteries">read&nbsp;more&nbsp;&raquo;</a></p>
-			</li>
-			<li class="block clearfix">
-				<a href="/overview/accessoires/fietscomputers" title="cateogry bags">
-					{% image "1586.jpg" width=200 height=70 crop alt="Glasses" class="left" %}
-				</a>
-				<h3>Fietscomputers</h3>
-				<p>Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod tempor. <a href="/overview/accessoires/fietscomputers" title="cateogry bags">read&nbsp;more&nbsp;&raquo;</a></p>
-			</li>
-			<li class="block clearfix">
-				<a href="/overview/accessoires/montagestandaards" title="cateogry Montagestandaards">
-					{% image "1636.jpg" width=200 height=70 crop alt="bags" class="left" %}
-				</a>
-				<h3>Montagestandaards</h3>
-				<p>Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod. <a href="/overview/accessoires/montagestandaards" title="cateogry Montagestandaards">read&nbsp;more&nbsp;&raquo;</a></p>
-			</li>
+		{% endfor %}
 		</ul>
-		
+	
 		<div class="category-sidebar zp-33">
 			<div class="block clearfix">
-				<h3>Ldieladie</h3>
-				<p>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Fusce ultricies nisi in lectus. Morbi et sem nec eros bibendum vestibulum. Ut vitae erat vitae dui tempor dictum. Nam sem. Sed iaculis lorem non ipsum. Donec aliquet. Fusce vel elit si.</p>
-				<p>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Fusce ultricies nisi in lectus. Morbi et sem nec eros bibendum vestibulum. Ut vitae erat vitae dui tempor dictum. Nam sem. Sed iaculis lorem non ipsum. Donec aliquet. Fusce vel elit si.</p>
+				<h3>{{ cat.title }}</h3>
+				{{ cat.body }}
 			</div>
 		</div>
 	</div>	
@@ -69,24 +48,18 @@
 			
 			<h3 class="block">Featured products</h3>
 			<ul class="related-articles">
-				<li class="block clearfix">
-					{% image "trapper_klein.jpg" width=67 height=50 crop alt="trapper" %}
-					<h4><a href="#">Shimano</a></h4>
-					<p>PD-6620-G Trapper</p> 
-					<p><a href="#">Bestel snel &raquo;</a></p>
-				</li>
-				<li class="block clearfix">
-					{% image "trapper_klein.jpg" width=67 height=50 crop alt="trapper" %}
-					<h4><a href="#">Shimano</a></h4>
-					<p>PD-6620-G Trapper</p> 
-					<p><a href="#">Bestel snel &raquo;</a></p>
-				</li>
-				<li class="block clearfix">
-					{% image "trapper_klein.jpg" width=67 height=50 crop alt="trapper" %}
-					<h4><a href="#">Shimano</a></h4>
-					<p>PD-6620-G Trapper</p> 
-					<p><a href="#">Bestel snel &raquo;</a></p>
-				</li>
+				{% for id in featured %}
+					<li class="block clearfix">
+						<a href="{% url product id=id slug=m.rsc[id].slug %}">{% image m.rsc[id].media[1].filename width=67 height=50 crop alt="trapper" %}</a>
+						<h4><a href="{% url product id=id %}"></a></h4>
+						<p>{{ m.rsc[id].title }}</p> 
+						<p><a href="#">Bestel snel &raquo;</a></p>
+					</li>
+				{% empty %}
+					<li class="block clearfix">
+						<p>{{cat.title}} heeft geen producten</p>
+					</li>
+				{% endfor %}
 			</ul>
 		</div>
 	</div>

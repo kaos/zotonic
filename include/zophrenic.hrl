@@ -44,11 +44,17 @@
 -define(DB(Context), Context#context.db).
 -define(DBC(Context), Context#context.dbc).
 
-%% drag and drop event message
--record(dragdrop, {tag, delegate, id}).
+%% Model value interface for templates
+-record(m, {model, value}).
 
 %% Used for specifying resource ids, see src/models/m_rsc.erl
 -record(rsc, {id}).
+
+%% Used for specifying resource id lists, as returned by object/subject lookup
+-record(rsc_list, {list}).
+
+%% drag and drop event message
+-record(dragdrop, {tag, delegate, id}).
 
 %% @doc Check if an assumption is true
 -define(ASSERT(A,E), zp_utils:assert(A,E)).

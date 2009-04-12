@@ -40,7 +40,11 @@
 	prop_replace/3,
 	prop_delete/2,
 	group_proplists/2,
-	index_proplist/2
+	index_proplist/2,
+	randomize/1,
+	randomize/2,
+	split/2,
+	replace1/3
 ]).
 
 %%% FORMAT %%%
@@ -410,3 +414,37 @@ index_proplist(_Prop, [], Acc) ->
     lists:reverse(Acc);
 index_proplist(Prop, [L|Rest], Acc) ->
     index_proplist(Prop, Rest, [{zp_convert:to_atom(proplists:get_value(Prop,L)),L}|Acc]).
+
+
+%% @doc Simple randomize of a list. Not good quality, but good enough for us
+randomize(List) ->
+    {A1,A2,A3} = erlang:now(),
+    random:seed(A1, A2, A3),
+    D = lists:map(fun(A) ->
+                    {random:uniform(), A}
+             end, List),
+    {_, D1} = lists:unzip(lists:keysort(1, D)), 
+    D1.
+
+randomize(N, List) ->
+    split(N, randomize(List)).
+
+split(N, L) ->
+    split(N,L,[]).
+
+split(_N, [], Acc) ->
+    {lists:reverse(Acc), []};
+split(0, Rest, Acc) ->
+    {lists:reverse(Acc), Rest};
+split(N, [A|Rest], Acc) ->
+    split(N-1, Rest, [A|Acc]).
+
+
+replace1(F, T, L) ->
+    replace1(F, T, L, []).
+replace1(_F, _T, [], Acc) ->
+    lists:reverse(Acc);
+replace1(F, T, [F|R], Acc) ->
+    replace1(F, T, R, [T|Acc]);
+replace1(F, T, [C|R], Acc) ->
+    replace1(F, T, R, [C|Acc]).

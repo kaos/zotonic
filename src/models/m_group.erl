@@ -9,6 +9,8 @@
 
 %% interface functions
 -export([
+    get/2,
+    insert/2,
     add_member/3,
     add_observer/3,
     add_leader/3,
@@ -23,12 +25,44 @@
     groups_leader/1,
     groups_leader/2,
     roles/1,
-    roles/2,
-    get/2,
-    insert/2
+    roles/2
 ]).
 
 -include_lib("zophrenic.hrl").
+
+
+%% @doc Get the group
+%% @spec get(Id, Context) -> PropList
+get(Id, Context) ->
+    case zp_depcache:get({group, Id}) of
+        {ok, Group} -> Group;
+        undefined ->
+            Group = zp_db:assoc_props_row("select * from \"group\" where id = $1", [Id], Context),
+            zp_depcache:set({group, Id}, Group, ?WEEK),
+            Group
+    end.
+
+
+%% @doc Insert a new group, make sure that the roles are only set by the admin
+%% @spec insert(PropList, Context) -> int()
+insert(Props, Context) ->
+    PropsSafe = case zp_access_control:has_role(admin, Context) of
+        true -> Props;
+        false ->
+            zp_utils:prop_delete(is_admin, 
+                zp_utils:prop_delete(is_editor, 
+                    zp_utils:prop_delete(is_supervisor, 
+                        zp_utils:prop_delete(is_community_publisher, 
+                            zp_utils:prop_delete(is_public_publisher, Props)))))
+    end,
+    PropsType = case proplists:get_value(grouptype_id, PropsSafe) of
+        undefined -> [ {grouptype_id, m_grouptype:default(Context)} | PropsSafe];
+        _ -> PropsSafe
+    end,
+    {ok, Id} = zp_db:insert(group, PropsType, Context),
+    Id.
+
+
 
 add_member(Id, RscId, Context) ->
     F = fun(Ctx) ->
@@ -144,35 +178,3 @@ roles(PersonId, Context) ->
     end,
     P = lists:zip([admin, editor, supervisor, community_publisher, public_publisher], tuple_to_list(Roles)),
     [ R || {R,M} <- P, M =/= 0 ].
-
-%% @doc Get the group
-%% @spec get(Id, Context) -> PropList
-get(Id, Context) ->
-    case zp_depcache:get({group, Id}) of
-        {ok, Group} -> Group;
-        undefined ->
-            Group = zp_db:assoc_props_row("select * from \"group\" where id = $1", [Id], Context),
-            zp_depcache:set({group, Id}, Group, ?WEEK),
-            Group
-    end.
-
-
-%% @doc Insert a new group, make sure that the roles are only set by the admin
-%% @spec insert(PropList, Context) -> int()
-insert(Props, Context) ->
-    PropsSafe = case zp_access_control:has_role(admin, Context) of
-        true -> Props;
-        false ->
-            zp_utils:prop_delete(is_admin, 
-                zp_utils:prop_delete(is_editor, 
-                    zp_utils:prop_delete(is_supervisor, 
-                        zp_utils:prop_delete(is_community_publisher, 
-                            zp_utils:prop_delete(is_public_publisher, Props)))))
-    end,
-    PropsType = case proplists:get_value(grouptype_id, PropsSafe) of
-        undefined -> [ {grouptype_id, m_grouptype:default(Context)} | PropsSafe];
-        _ -> PropsSafe
-    end,
-    {ok, Id} = zp_db:insert(group, PropsType, Context),
-    Id.
-

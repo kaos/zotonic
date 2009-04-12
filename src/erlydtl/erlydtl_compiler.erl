@@ -35,6 +35,8 @@
 -author('rsaccon@gmail.com').
 -author('emmiller@gmail.com').
 
+-include_lib("zophrenic.hrl").
+
 %% --------------------------------------------------------------------
 %% Definitions
 %% --------------------------------------------------------------------
@@ -365,7 +367,9 @@ body_ast(DjangoParseTree, Context, TreeWalker) ->
                 {ElseAstInfo, TreeWalker2} = body_ast(IfContents, Context, TreeWalker1),
                 ifequalelse_ast(Args, IfAstInfo, ElseAstInfo, Context, TreeWalker2);                    
             ({'for', {'in', IteratorList, Variable}, Contents}, TreeWalkerAcc) ->
-                for_loop_ast(IteratorList, Variable, Contents, Context, TreeWalkerAcc);
+                for_loop_ast(IteratorList, Variable, Contents, none, Context, TreeWalkerAcc);
+            ({'for', {'in', IteratorList, Variable}, Contents, EmptyPartContents}, TreeWalkerAcc) ->
+                for_loop_ast(IteratorList, Variable, Contents, EmptyPartContents, Context, TreeWalkerAcc);
             ({'load', Names}, TreeWalkerAcc) ->
                 load_ast(Names, Context, TreeWalkerAcc);
             ({'tag', {'identifier', _, Name}, Args}, TreeWalkerAcc) ->
@@ -463,9 +467,8 @@ value_ast(ValueToken, AsString, Context, TreeWalker) ->
         {'auto_id', {identifier, _, Auto}} ->
             {auto_id_ast(Auto), TreeWalker};
         {'apply_filter', Variable, Filter} ->
+            ?DEBUG({'apply_filter', Variable, Filter}),
             filter_ast(Variable, Filter, Context, TreeWalker);
-		{'rsc'} ->
-			rsc_ast(Context, TreeWalker);
         {'attribute', _} = Variable ->
             {Ast, VarName} = resolve_variable_ast(Variable, Context),
             {{Ast, #ast_info{var_names = [VarName]}}, TreeWalker};
@@ -474,6 +477,9 @@ value_ast(ValueToken, AsString, Context, TreeWalker) ->
             {{Ast, #ast_info{var_names = [VarName]}}, TreeWalker};
         {'index_value', _, _} = Variable ->
             {Ast, VarName} = resolve_variable_ast(Variable, Context),
+            {{Ast, #ast_info{var_names = [VarName]}}, TreeWalker};
+        {model, {identifier, _, VarName}} = Model ->
+            {Ast, VarName} = resolve_variable_ast(Model, Context),
             {{Ast, #ast_info{var_names = [VarName]}}, TreeWalker};
         {tuple_value, {identifier, _, TupleName}, TupleArgs} ->
             TupleNameAst = erl_syntax:atom(TupleName),
@@ -485,14 +491,6 @@ string_ast(String, TreeWalker) ->
     % {{erl_syntax:string(String), #ast_info{}}, TreeWalker}. %% less verbose AST, better for development and debugging
     {{erl_syntax:binary([erl_syntax:binary_field(erl_syntax:integer(X)) || X <- String]), #ast_info{}}, TreeWalker}.       
 
-
-rsc_ast(_Context, TreeWalker) ->
-		RscAst = erl_syntax:application(
-					erl_syntax:atom(m_rsc),
-					erl_syntax:atom(rsc),
-					[]
-				),
-		{{RscAst, #ast_info{}}, TreeWalker}.
 
 include_ast(File, Args, Context, TreeWalker) ->
     UseScomp = lists:foldl( fun({{identifier, _, Key}, _}, IsC) -> 
@@ -544,7 +542,8 @@ filter_ast(Variable, Filter, Context, TreeWalker) ->
 filter_ast_noescape(Variable, [{identifier, _, "escape"}], Context, TreeWalker) ->
     body_ast([Variable], Context, TreeWalker);
 filter_ast_noescape(Variable, Filter, Context, TreeWalker) ->
-    {{VariableAst, Info}, TreeWalker2} = body_ast([Variable], Context, TreeWalker),
+    % {{VariableAst, Info}, TreeWalker2} = body_ast([Variable], Context, TreeWalker),
+    {{VariableAst,Info},TreeWalker2} = value_ast(Variable, true, Context, TreeWalker),
     VarValue = filter_ast1(Filter, VariableAst),
     {{VarValue, Info}, TreeWalker2}.
 
@@ -592,13 +591,12 @@ opttrans_variable_ast({Ast, VarName}) ->
 				erl_syntax:variable("Language")
 			]), VarName}.
 
-
-resolve_variable_ast({rsc}, _Context, _FinderFunction) ->
-	{erl_syntax:application(
-				erl_syntax:atom(m_rsc),
-				erl_syntax:atom(rsc),
-				[]
-			), "rsc"};
+resolve_variable_ast({model, {identifier, _, VarName}}, _Context, _FinderFunction) ->
+    {erl_syntax:tuple([
+            erl_syntax:atom(m),
+            erl_syntax:atom("m_" ++ VarName),
+            erl_syntax:atom(undefined)
+        ]), "m"};
 
 resolve_variable_ast({index_value, Variable, Index}, Context, FinderFunction) ->
     {{IndexAst,_Context},_TreeWalker} = value_ast(Index, false, Context, #treewalker{}),
@@ -629,11 +627,13 @@ resolve_variable_ast({variable, {identifier, _, VarName}}, Context, FinderFuncti
 
 resolve_variable_ast({apply_filter, Variable, Filter}, Context, FinderFunction) ->
     {VarAst, VarName} = resolve_variable_ast(Variable, Context, FinderFunction),
-    VarValue = filter_ast1(Filter, erl_syntax:list([VarAst])),
+    ValueAst = erl_syntax:application(
+            erl_syntax:atom(erlydtl_runtime),
+            erl_syntax:atom(to_value),
+            [VarAst, erl_syntax:variable("ZpContext")]
+        ),
+    VarValue = filter_ast1(Filter, erl_syntax:list([ValueAst])),
     {VarValue, VarName};
-
-resolve_variable_ast({zp_config, Module, Key}, _Context, _FinderFunction) ->
-        {zp_config_ast(Module, Key), "zp_config"};
 
 resolve_variable_ast(What, _Context, _FinderFunction) ->
    error_logger:error_msg("~p:resolve_variable_ast unhandled: ~p~n", [?MODULE, What]).
@@ -647,29 +647,11 @@ resolve_scoped_variable_ast(VarName, Context) ->
         end, undefined, Context#dtl_context.local_scopes).
 
 
-zp_config_ast(undefined, undefined) ->
-    erl_syntax:application(
-            erl_syntax:atom(m_config),
-            erl_syntax:atom(all),
-            [erl_syntax:variable("ZpContext")]
-        );
-zp_config_ast({'identifier', _, Module}, undefined) ->
-    erl_syntax:application(
-            erl_syntax:atom(m_config),
-            erl_syntax:atom(get),
-            [erl_syntax:atom(Module), erl_syntax:variable("ZpContext")]
-        );
-zp_config_ast({'identifier', _, Module}, {'identifier', _, Key}) ->
-    erl_syntax:application(
-            erl_syntax:atom(m_config),
-            erl_syntax:atom(get),
-            [erl_syntax:atom(Module), erl_syntax:atom(Key), erl_syntax:variable("ZpContext")]
-        ).
-
 format(Ast, Context) ->
     auto_escape(stringify(Ast), Context).
 
 stringify(Ast) ->
+    ?DEBUG({stringify, Ast}),
     erl_syntax:application(erl_syntax:atom(erlydtl_filters), erl_syntax:atom(stringify),
         [Ast]).
 
@@ -722,7 +704,7 @@ ifequalelse_ast(Args, {IfContentsAst, IfContentsInfo}, {ElseContentsAst, ElseCon
     {{Ast, Info#ast_info{var_names = VarNames}}, TreeWalker}.         
 
 
-for_loop_ast(IteratorList, Variable, Contents, Context, TreeWalker) ->
+for_loop_ast(IteratorList, Variable, Contents, EmptyPartContents, Context, TreeWalker) ->
     Vars = lists:map(fun({identifier, _, Iterator}) -> 
                     erl_syntax:variable("Var_" ++ Iterator) 
             end, IteratorList),
@@ -735,14 +717,15 @@ for_loop_ast(IteratorList, Variable, Contents, Context, TreeWalker) ->
     CounterAst = erl_syntax:application(erl_syntax:atom(erlydtl_runtime), 
         erl_syntax:atom(increment_counter_stats), [erl_syntax:variable("Counters")]),
     {VarAst, VarName} = resolve_variable_ast(Variable, Context),
-    ListAst = erl_syntax:application(erl_syntax:atom(erlydtl_runtime), erl_syntax:atom(to_list), [VarAst]),
+    ListAst = erl_syntax:application(erl_syntax:atom(erlydtl_runtime), erl_syntax:atom(to_list), [VarAst, erl_syntax:variable("ZpContext")]),
     CounterVars0 = case resolve_scoped_variable_ast("forloop", Context) of
         undefined ->
             erl_syntax:application(erl_syntax:atom(erlydtl_runtime), erl_syntax:atom(init_counter_stats), [ListAst]);
         Value ->
             erl_syntax:application(erl_syntax:atom(erlydtl_runtime), erl_syntax:atom(init_counter_stats), [ListAst, Value])
     end,
-    {{erl_syntax:application(
+
+    ForLoopF = fun(BaseListAst) -> erl_syntax:application(
             erl_syntax:atom('erlang'), erl_syntax:atom('element'),
             [erl_syntax:integer(1), erl_syntax:application(
                     erl_syntax:atom('lists'), erl_syntax:atom('mapfoldl'),
@@ -753,8 +736,26 @@ for_loop_ast(IteratorList, Variable, Contents, Context, TreeWalker) ->
                                         _ -> [erl_syntax:list(Vars), erl_syntax:variable("Counters")] end, none, 
                                     [erl_syntax:tuple([InnerAst, CounterAst])])
                             ]),
-                        CounterVars0, ListAst])]),
-                Info#ast_info{var_names = [VarName]}}, TreeWalker2}.
+                        CounterVars0, BaseListAst])])
+    end,
+
+    {CompleteForLoopAst, Info2, TreeWalker3} = case EmptyPartContents of
+        none ->
+            {ForLoopF(ListAst), Info, TreeWalker2};
+        _ -> 
+            {{EmptyPartAst, EmptyPartInfo}, EmptyWalker} = body_ast(EmptyPartContents, Context, TreeWalker2),
+            LAst = erl_syntax:variable("L"),
+            EmptyClauseAst = erl_syntax:clause(
+        		 [erl_syntax:list([])], 
+        		 none,
+        		 [EmptyPartAst]),
+            LoopClauseAst = erl_syntax:clause(
+                [LAst],
+                none,
+                [ForLoopF(LAst)]),
+            {erl_syntax:case_expr(ListAst, [EmptyClauseAst, LoopClauseAst]), merge_info(Info,EmptyPartInfo), EmptyWalker} 
+    end,
+    {{CompleteForLoopAst, Info2#ast_info{var_names = [VarName]}}, TreeWalker3}.
 
 load_ast(Names, _Context, TreeWalker) ->
     CustomTags = lists:merge([X || {identifier, _ , X} <- Names], TreeWalker#treewalker.custom_tags),
@@ -1110,8 +1111,6 @@ interpreted_args(Args, Context) ->
                 {list_to_atom(Key), erl_syntax:string(unescape_string_literal(Value))};
             ({{identifier, _, Key}, {trans_literal, _, Value}}) ->
                 {list_to_atom(Key), trans_literal_ast(Value)};
-            ({{identifier, _, Key}, {zp_config_ast, Module, Key}}) ->
-                {list_to_atom(Key), zp_config_ast(Module, Key)};
             ({{identifier, _, Key}, {auto_id,{identifier,_,AutoId}}}) ->
                 {V, _} = auto_id_ast(AutoId),
                 {list_to_atom(Key), V};
@@ -1120,7 +1119,7 @@ interpreted_args(Args, Context) ->
             ({{identifier, _, Key}, true}) ->
                  {list_to_atom(Key), true};
             ({{identifier, _, Key}, Value}) ->
-                {list_to_atom(Key), format(resolve_variable_ast(Value, Context), Context)}
+                {list_to_atom(Key), resolve_variable_ast(Value, Context)}
         end, Args).
 
 

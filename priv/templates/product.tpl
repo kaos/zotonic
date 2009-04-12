@@ -1,25 +1,25 @@
 {% extends "base.tpl" %}
 
-{% block title %} {{rsc[2].title}} {% endblock %}
+{% block title %} {{m.rsc[rsc_id].title}} {% endblock %}
 
-{% block content %}
+{% block content %} 	
 	<div id="content-area" class="zp-75">
 		<!-- Area for the main content -->
-		<h2>{{rsc[2].title}}</h2>
+		<h2>{{m.rsc[rsc_id].title}}</h2>
 		<div class="product-wrapper clearfix block">
-			{% if rsc[2].media %}
+			{% if m.rsc[rsc_id].media %}
 			
 			<div class="product-images zp-50">
 				<ul class="clearfix">
-					{% if rsc[2].media[1].filename %}
+					{% if m.rsc[rsc_id].media[1].filename %}
 						<li>
-							{% image rsc[2].media[1].filename width=300 height=200 crop alt=rsc[2].media[1].filename class="do_imageviewer" %}
+							{% image m.rsc[rsc_id].media[1].filename width=300 crop alt=m.rsc[rsc_id].media[1].filename class="do_imageviewer" %}
 						</li>
 					{% endif %}
 				
-					{% if rsc[2].media[2].filename %}
+					{% if m.rsc[rsc_id].media[2].filename %}
 						<li>
-							{% image rsc[2].media[2].filename width=300 height=200 crop alt=rsc[2].media[2].filename class="do_imageviewer" %}
+							{% image m.rsc[rsc_id].media[2].filename width=300 crop alt=m.rsc[rsc_id].media[2].filename class="do_imageviewer" %}
 						</li>
 					{% endif %}
 				</ul>
@@ -27,10 +27,9 @@
 			
 			{% endif %}
 			
-			{% if rsc[2].body %}
 			<div class="product-description zp-50">
 				<div class="product-price clearfix">
-					<h3>&euro;{{rsc[2].price}} <span>incl. btw</span></h3>
+					<h3>&euro;{{m.rsc[rsc_id].price|format_price}} <!--span>incl. btw</span--></h3>
 					{# An animate would be nice here #}
 					<div class="clearfix button-wrapper right">
 						{% button id="product-add-basket" class="buy-me" text="leg in winkelmand" %}
@@ -38,14 +37,15 @@
 					</div>
 				</div>
 				
+				{% if m.rsc[rsc_id].body %}
 				<h3>{% _ "Description" nl="Omschrijving" %}</h3>
 				
-				{{rsc[2].body}}
+				{{m.rsc[rsc_id].body}}
 			
-				<div class="pruduct-properties">
+				<div class="product-properties">
 					<h3>{% _ "Properties" nl="Eigenschappen" %}</h3>
 				
-					{% for prop_group in rsc[2].prop %}
+					{% for prop_group in m.rsc[rsc_id].prop %}
 						<h4>{{prop_group.group}}</h4>
 						<ul class="props-list">
 						{% for test in prop_group.props %}
@@ -57,8 +57,8 @@
 						</ul>
 					{% endfor %}
 				</div>
+				{% endif %}
 			</div>
-			{% endif %}
 		</div>
 		
 		<div class="reviews-title block clearfix">

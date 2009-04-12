@@ -3,6 +3,10 @@
 
 -include_lib("zophrenic.hrl").
 
+% Finde the value of a model value
+find_value(Key, #m{model=Model} = M, Context) ->
+    Model:m_find_value(Key, M, Context);
+    
 % Index of list with an integer like "a[2]"
 find_value(Key, L, _Context) when is_integer(Key) andalso is_list(L) ->
     try
@@ -23,24 +27,24 @@ find_value(Key, {GBSize, GBData}, _Context) when is_integer(GBSize) ->
 find_value(Key, {q, List}, _Context) ->
     proplists:get_value(atom_to_list(Key), List);
 find_value(q, _Vars, Context) ->
-    {q, zp_context:get_context(q, Context)};
+    {q, zp_context:get(q, Context)};
 find_value(q_validated, _Vars, Context) ->
-    {q, zp_context:get_context(q_validated, Context)};
+    {q, zp_context:get(q_validated, Context)};
 
 %% Regular proplist lookup
 find_value(Key, L, _Context) when is_list(L) ->
     proplists:get_value(Key, L);
 
 %% Resource list handling, special lookups when skipping the index
-find_value(Key, {rsc_list, L}, _Context) when is_integer(Key) ->
+find_value(Key, #rsc_list{list=L}, _Context) when is_integer(Key) ->
     try
         lists:nth(Key, L)
     catch
         _:_ -> undefined
     end;
-find_value(Key, {rsc_list, [H|_T]}, Context) ->
+find_value(Key, #rsc_list{list=[H|_T]}, Context) ->
 	find_value(Key, H, Context);
-find_value(_Key, {rsc_list, []}, _Context) ->
+find_value(_Key, #rsc_list{list=[]}, _Context) ->
 	undefined;
 
 %% Property of a resource
@@ -151,11 +155,16 @@ init_counter_stats(List, Parent) ->
         {parentloop, Parent}].
 
 
-to_list(L) when is_list(L) -> L;
-to_list(T) when is_tuple(T) -> tuple_to_list(T);
-to_list({rsc_list, L}) -> L;
-to_list(_) -> [].
+to_list(L, _Context) when is_list(L) -> L;
+to_list(T, _Context) when is_tuple(T) -> tuple_to_list(T);
+to_list(#m{model=Model} = M, Context) -> Model:m_to_list(M, Context);
+to_list(#rsc_list{list=L}, _Context) -> L;
+to_list(_, _Context) -> [].
 
+to_value(#m{model=Model} = M, Context) ->
+    Model:m_value(M, Context);
+to_value(V, _Context) ->
+    V.
     
 increment_counter_stats([{counter, Counter}, {counter0, Counter0}, {revcounter, RevCounter},
          {revcounter0, RevCounter0}, {first, _}, {last, _}, {parentloop, Parent}]) ->

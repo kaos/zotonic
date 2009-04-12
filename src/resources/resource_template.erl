@@ -15,7 +15,7 @@ init(Settings) -> {ok, Settings}.
 service_available(ReqProps, Settings) ->
     {template, Template} = proplists:lookup(template, Settings),
     Context  = zp_context:new(ReqProps),
-    Context1 = zp_context:set_context(template, Template, Context),
+    Context1 = zp_context:set(template, Template, Context),
     {true, Context1}.
 
 charsets_provided(_ReqProps, Context) ->
@@ -23,6 +23,6 @@ charsets_provided(_ReqProps, Context) ->
 
 to_html(_ReqProps, Context) ->
     Context1 = zp_context:ensure_all(Context),
-    Template = zp_context:get_context(template, Context1),
+    Template = zp_context:get(template, Context1),
     Html     = zp_template:render(Template, [], Context1),
     zp_context:output(Html, Context1).

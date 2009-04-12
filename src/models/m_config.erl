@@ -7,8 +7,13 @@
 -module(m_config).
 -author("Marc Worrell <marc@worrell.nl").
 
+-behaviour(gen_model).
+
 %% interface functions
 -export([
+    m_find_value/3,
+    m_to_list/2,
+    m_value/2,
     all/1,
     get/2,
     get/3,
@@ -20,6 +25,28 @@
 ]).
 
 -include_lib("zophrenic.hrl").
+
+%% @doc Fetch the value for the key from a model source
+%% @spec m_find_value(Key, Source, Context) -> term()
+m_find_value(Module, #m{value=undefined} = M, _Context) ->
+    M#m{value=Module};
+m_find_value(Key, #m{value=Module}, Context) ->
+    get(Module, Key, Context).
+
+%% @doc Transform a m_config value to a list, used for template loops
+%% @spec m_to_list(Source, Context)
+m_to_list(#m{value=undefined}, Context) ->
+    all(Context);
+m_to_list(#m{value=Module}, Context) ->
+    get(Module, Context).
+
+%% @doc Transform a model value so that it can be formatted or piped through filters
+%% @spec m_value(Source, Context) -> term()
+m_value(#m{value=undefined}, Context) ->
+    all(Context);
+m_value(#m{value=Module}, Context) ->
+    get(Module, Context).
+    
 
 %% @doc Return all configurations gives a nested proplist (module, key)
 

@@ -57,6 +57,7 @@ Nonterminals
 
     ForBlock
     ForBraced
+	EmptyBraced
     EndForBraced
     ForExpression
     ForGroup
@@ -114,6 +115,7 @@ Terminals
     cycle_keyword
     dot
     else_keyword
+	empty_keyword
     endautoescape_keyword
     endblock_keyword
     endcomment_keyword
@@ -140,7 +142,6 @@ Terminals
     open_var
     pipe
     print_keyword
-	rsc_keyword
     string_literal
     text
 	url_keyword
@@ -154,13 +155,13 @@ Terminals
 	close_trans
 	trans_literal
 	'__keyword'
-	zp_config_keyword
+	model_index
  	hash.
 
 Rootsymbol
     Elements.
 
-Expect 3.
+Expect 1.
 
 Elements -> '$empty' : [].
 Elements -> Elements text : '$1' ++ ['$2'].
@@ -218,6 +219,8 @@ CycleNames -> CycleNames comma Value : '$1' ++ ['$2'].
 %CycleNamesCompat -> CycleNamesCompat identifier : '$1' ++ ['$2'].
 
 ForBlock -> ForBraced Elements EndForBraced : {for, '$1', '$2'}.
+ForBlock -> ForBraced Elements EmptyBraced Elements EndForBraced : {for, '$1', '$2', '$4'}.
+EmptyBraced -> open_tag empty_keyword close_tag.
 ForBraced -> open_tag for_keyword ForExpression close_tag : '$3'.
 EndForBraced -> open_tag endfor_keyword close_tag.
 ForExpression -> ForGroup in_keyword Variable : {'in', '$1', '$3'}.
@@ -279,14 +282,10 @@ Value -> hash identifier : {auto_id, '$2'}.
 Value -> open_curly identifier Args close_curly : {tuple_value, '$2', '$3'}.
 Value -> open_bracket ValueList close_bracket : {value_list, '$2'}.
 
-% Configuration access, must be loopable so no intermediate functions
-Variable -> rsc_keyword : {rsc}.
+Variable -> model_index identifier : {model, '$2'}.
 Variable -> identifier : {variable, '$1'}.
 Variable -> Variable open_bracket Value close_bracket : {index_value, '$1', '$3'}.
 Variable -> Variable dot identifier : {attribute, {'$3', '$1'}}.
-Variable -> zp_config_keyword : {zp_config, undefined, undefined}.
-Variable -> zp_config_keyword dot identifier : {zp_config, '$3', undefined}.
-Variable -> zp_config_keyword dot identifier dot identifier : {zp_config, '$3', '$5'}.
 
 ValueList -> Value : ['$1'].
 ValueList -> ValueList comma Value : '$1' ++ ['$3'].

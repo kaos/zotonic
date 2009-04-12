@@ -31,10 +31,13 @@
 							</a>
 						</h1>
 					</li>
-					<li class="first"><a href="/compare/mtb/1" title="compare-bikes">Fietsen</a></li>
-					<li><a href="/overview/clothing-shoes" title="#">Kleding en schoenen</a></li>
-					<li><a href="/overview/accessoires" title="#">Accessoires</a></li>
-					<li><a href="/overview/parts" title="#">Onderdelen</a></li>
+
+					<!--li class="first"><a href="/compare/mtb/1" title="compare-bikes">Fietsen</a></li!-->
+
+					{% for cat in m.category.product.tree1 %}
+						<li><a href="{% url overview cat=cat.name %}">{{ cat.title }}</a></li>
+					{% endfor %}
+
 					<li class="lang" title="Nederlands"><a href="#" title="Nederlands" class="dutch"><span>Nederlands</span></a></li>
 					<li class="lang" title="English"><a href="#" title="English" class="english"><span>English</span></a></li>
 				</ul>

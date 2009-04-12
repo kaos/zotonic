@@ -60,7 +60,7 @@ model_pgsql() ->
     "CREATE TABLE rsc
     (
         id serial NOT NULL,
-        uri character varying(250) NOT NULL DEFAULT ''::character varying,
+        uri character varying(250),
         is_authoritative boolean NOT NULL DEFAULT true,
         is_published boolean NOT NULL DEFAULT false,
         publication_start timestamp with time zone NOT NULL DEFAULT now(),
@@ -74,14 +74,14 @@ model_pgsql() ->
         category_id int NOT NULL DEFAULT 1,
         is_featured boolean NOT NULL DEFAULT false,
         slug character varying(80) NOT NULL DEFAULT ''::character varying,
-        unique_name character varying(80),
+        name character varying(80),
         props bytea,
         created timestamp with time zone NOT NULL DEFAULT now(),
         modified timestamp with time zone NOT NULL DEFAULT now(),
 
         CONSTRAINT resource_pkey PRIMARY KEY (id),
         CONSTRAINT rsc_uri_key UNIQUE (uri),
-        CONSTRAINT unique_name_key UNIQUE (unique_name)
+        CONSTRAINT name UNIQUE (name)
     )",
     "COMMENT ON COLUMN rsc.visible_for IS '0 = public, 1 = community, 2 = group, 3 = owner'",
 

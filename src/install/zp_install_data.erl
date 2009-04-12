@@ -33,6 +33,7 @@ install_config(C) ->
     {ok, 1} = pgsql:equery(C, 
         "insert into config (module, key, value, props, modified) values ($1, $2, $3, $4, now())", 
         ["zophrenic", "version", ?ZOPHRENIC_VERSION, []]),
+    pgsql:reset_id(C, "config"),
     ok.
     
 
@@ -48,6 +49,7 @@ install_group(C) ->
     [ {ok,1} = pgsql:equery(C, "
             insert into grouptype (id, name, props) 
             values ($1, $2, $3)", R) || R <- GroupTypes],
+    pgsql:reset_id(C, "grouptype"),
 
     Groups = [
         %   tp name                admin  edit   spvsr  cpub   ppub   props
@@ -62,6 +64,7 @@ install_group(C) ->
             insert into \"group\" (id, grouptype_id, name, is_admin, is_editor, is_supervisor, is_community_publisher, is_public_publisher, props) 
             values ($1, $2, $3, $4, $5, $6, $7, $8, $9)", R) || R <- Groups],
     
+    pgsql:reset_id(C, "group"),
     ok.
 
 install_category(C) ->
@@ -75,8 +78,9 @@ install_category(C) ->
         {7, 3,         2, product,     [{title, {trans, [{en, "Product"},        {nl, "Product"}]}}] }
     ],
     [ {ok,1} = pgsql:equery(C, "
-            insert into category (id, parent_id, name, seq, props)
+            insert into category (id, parent_id, seq, name, props)
             values ($1, $2, $3, $4, $5)", R) || R <- Cats],
+    pgsql:reset_id(C, "category"),
     ok = enumerate_categories(C),
     ok.
     
@@ -91,10 +95,11 @@ install_rsc(C) ->
     ],
     
     [ {ok,1} = pgsql:equery(C, "
-            insert into rsc (id, uri, visible_for, group_id, category_id, unique_name, props)
+            insert into rsc (id, uri, visible_for, group_id, category_id, name, props)
             values ($1, $2, $3, $4, $5, $6, $7)
             ", R) || R <- Rsc ],
     {ok, _} = pgsql:squery(C, "update rsc set owner_id = 1, creator_id = 1, modifier_id = 1, is_published = true"),
+    pgsql:reset_id(C, "rsc"),
     
     % Connect person resources to the correct groups
     RscGroup = [
@@ -106,6 +111,7 @@ install_rsc(C) ->
             insert into rsc_group (id, rsc_id, group_id, is_observer, is_leader)
             values ($1, $2, $3, $4, $5)
             ", R) || R <- RscGroup ],
+    pgsql:reset_id(C, "rsc_group"),
     ok.
 
 
@@ -123,6 +129,7 @@ install_predicate(C) ->
             insert into predicate (id, name, uri, reversed, props)
             values ($1, $2, $3, $4, $5)
             ", R) || R <- Preds],
+    pgsql:reset_id(C, "predicate"),
     ok.
 
 
@@ -138,6 +145,7 @@ install_edge(C) ->
             insert into edge (subject_id, object_id, predicate_id, seq)
             values ($1, $2, $3, $4)
             ", R) || R <- Edges],
+    pgsql:reset_id(C, "edge"),
     ok.
 
 
@@ -147,9 +155,8 @@ install_edge(C) ->
 enumerate_categories(C) ->
     {ok, _, CatTuples} = pgsql:equery(C, "select id, parent_id, seq from category"),
     Enums = m_category:enumerate(CatTuples),
-    % {CatId, Nr, Level, Left, Right}
     [
-        {ok, _} = pgsql:equery(C, "update category set nr = $2, lvl = $3, lft = $4, rght = $5 where id = $1", Enum)
-        || Enum <- Enums
+        {ok, _} = pgsql:equery(C, "update category set nr = $2, lvl = $3, lft = $4, rght = $5, props = $6 where id = $1", [CatId, Nr, Level, Left, Right, [{path,Path}]])
+        || {CatId, Nr, Level, Left, Right, Path} <- Enums
     ],
     ok.

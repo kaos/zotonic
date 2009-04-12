@@ -55,7 +55,7 @@ scan(Template) ->
 
 identifier_to_keyword({identifier, Pos, String}, {open_tag, Acc}) ->
     RevString = lists:reverse(String),
-    Keywords = ["for", "endfor", "in", "include", "block", "endblock",
+    Keywords = ["for", "empty", "endfor", "in", "include", "block", "endblock",
         "extends", "autoescape", "endautoescape", "if", "else", "endif",
         "not", "or", "and", "comment", "endcomment", "cycle", "firstof",
         "ifchanged", "ifequal", "endifequal", "ifnotequal", "endifnotequal",
@@ -68,9 +68,7 @@ identifier_to_keyword({identifier, Pos, String}, {open_tag, Acc}) ->
     {Type, [{Type, Pos, RevString}|Acc]};
 identifier_to_keyword({identifier, Pos, String}, {_PrevToken, Acc}) ->
     RevString = lists:reverse(String),
-    Keywords = ["in", "not", "or", "and", "firstof", "now", "regroup", "templatetag", "with",
-        "rsc", "zp_config"
-    ], 
+    Keywords = ["in", "not", "or", "and", "firstof", "now", "regroup", "templatetag", "with" ], 
     Type = case lists:member(RevString, Keywords) of
         true -> list_to_atom(RevString ++ "_keyword");
         _ ->    identifier
@@ -193,6 +191,8 @@ scan([H | T], Scanned, {Row, Column}, {in_double_quote, Closer}) ->
 scan([H | T], Scanned, {Row, Column}, {in_single_quote, Closer}) ->
     scan(T, append_char(Scanned, H), {Row, Column + 1}, {in_single_quote, Closer});
 
+scan("m." ++ T, Scanned, {Row, Column}, {in_code, Closer}) ->
+    scan(T, [{model_index, {Row, Column}, "m:"} | Scanned], {Row, Column + 2}, {in_code, Closer});
 
 scan("," ++ T, Scanned, {Row, Column}, {_, Closer}) ->
     scan(T, [{comma, {Row, Column}, ","} | Scanned], {Row, Column + 1}, {in_code, Closer});

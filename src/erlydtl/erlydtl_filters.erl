@@ -37,6 +37,8 @@
 
 -compile(export_all).
 
+-include_lib("zophrenic.hrl").
+
 -define(NO_ENCODE(C), ((C >= $a andalso C =< $z) orelse
                                   (C >= $A andalso C =< $Z) orelse
                                   (C >= $0 andalso C =< $9) orelse
@@ -126,6 +128,22 @@ format_number(Input) when is_function(Input, 0) ->
 format_number(Input) ->
     Input.
 
+format_price(Input) when is_integer(Input) ->
+    ?DEBUG({format_price, Input}),
+    integer_to_list(Input);
+format_price(Input) when is_float(Input) ->
+    ?DEBUG({format_price, Input}),
+    case round(Input) == Input of
+        true -> integer_to_list(round(Input));
+        false -> io_lib:format("~.2f", [Input])
+    end;
+format_price(Input) when is_function(Input, 0) ->
+    ?DEBUG({format_price, Input}),
+    format_price(Input());
+format_price(Input) ->
+    ?DEBUG({format_price, Input}),
+    Input.
+
 % Translate atoms and numbers to strings
 % Leave tuples as tuples.
 stringify(In) when is_atom(In) ->
@@ -133,6 +151,7 @@ stringify(In) when is_atom(In) ->
 stringify(In) when is_integer(In) ->
     integer_to_list(In);
 stringify(In) when is_float(In) ->
+    ?DEBUG({stringify, In}),
     mochinum:digits(In);
 stringify(In) ->
     In.

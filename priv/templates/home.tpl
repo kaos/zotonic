@@ -7,8 +7,8 @@
 		<!-- Area for the main content -->
 		<h2>Shimano XTR Aanbieding <span><a href="#">Lees meer &raquo;</a></span></h2>
 		<div class="home-bargain clearfix">
-			<img src="./lib/images/trapper.jpg" alt="Trapper" />
-			<img class="bargain-last" src="./lib/images/onderdelen.jpg" alt="Trapper" />
+			<img src="/lib/images/trapper.jpg" alt="Trapper" />
+			<img class="bargain-last" src="/lib/images/onderdelen.jpg" alt="Trapper" />
 		</div>
 
 		<h3 class="block">Welkom bij Hans Struijk Fietsen</h3>

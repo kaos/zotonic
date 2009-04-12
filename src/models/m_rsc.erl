@@ -6,7 +6,13 @@
 -module(m_rsc).
 -author("Marc Worrell <marc@worrell.nl>").
 
+-behaviour(gen_model).
+
 -export([
+    m_find_value/3,
+    m_to_list/2,
+    m_value/2,
+    
 	rsc/0,
 	exists/2, 
 	is_readable/2, is_writeable/2, is_owner/2, is_ingroup/2, is_me/2,
@@ -18,16 +24,40 @@
 
 -include_lib("zophrenic.hrl").
 
+
+%% @doc Fetch the value for the key from a model source
+%% @spec m_find_value(Key, Source, Context) -> term()
+m_find_value(Id, #m{value=undefined}, _Context) ->
+    #rsc{id=Id};
+m_find_value(Key, #m{value=#rsc{}} = M, Context) ->
+    p(M#m.value, Key, Context).
+
+%% @doc Transform a m_config value to a list, used for template loops
+%% @spec m_to_list(Source, Context) -> List
+m_to_list(#m{value=#rsc_list{list=List}}, _Context) ->
+    List;
+m_to_list(#m{}, _Context) ->
+    [].
+
+%% @doc Transform a model value so that it can be formatted or piped through filters
+%% @spec m_value(Source, Context) -> term()
+m_value(#m{value=undefined}, _Context) ->
+    undefined;
+m_value(#m{value=V}, _Context) ->
+    V.
+
+
+
 rsc() -> fun(Id, _Context) -> #rsc{id=Id} end.
 
 
-exists([C|_] = UniqueName, Context) when is_list(UniqueName) and is_integer(C) ->
-    case rid_unique_name(UniqueName, Context) of
+exists([C|_] = Name, Context) when is_list(Name) and is_integer(C) ->
+    case rid_name(Name, Context) of
         undefined -> false;
         _ -> true
     end;
-exists(UniqueName, Context) when is_binary(UniqueName) ->
-    case rid_unique_name(UniqueName, Context) of
+exists(Name, Context) when is_binary(Name) ->
+    case rid_name(Name, Context) of
         undefined -> false;
         _ -> true
     end;
@@ -35,14 +65,14 @@ exists(Id, Context) ->
     case rid(Id, Context) of
         #rsc{id=Rid} = Rsc ->
             case zp_depcache:get({exists, Rid}) of
+                {ok, Exists} ->
+                    Exists;
                 undefined -> 
                     Exists = case zp_db:q1("select id from rsc where id = $1", [Rid], Context) of
                         undefined -> false;
                         _ -> true
                     end,
-                    zp_depcache:set({exists, Rid}, Exists, Rsc),
-                    Exists;
-                Exists ->
+                    zp_depcache:set({exists, Rid}, Exists, ?DAY, [Rsc]),
                     Exists
             end;
         undefined -> false
@@ -146,9 +176,9 @@ o(Id, _Context) ->
 
 %% Return the list of objects with a certain predicate
 o(#rsc{id=Id}, Predicate, Context) ->
-	{rsc_list, m_edge:objects(Id, Predicate, Context)};
+	#rsc_list{list=m_edge:objects(Id, Predicate, Context)};
 o(undefined, _Predicate, _Context) ->
-    {rsc_list, []};
+    #rsc_list{list=[]};
 o(Id, Predicate, Context) ->
     o(rid(Id, Context), Predicate, Context).
 
@@ -179,9 +209,9 @@ s(Id, _Context) ->
 
 %% Return the list of subjects with a certain predicate
 s(#rsc{id=Id}, Predicate, Context) ->
-	{rsc_list, m_edge:subjects(Id, Predicate, Context)};
+	#rsc_list{list=m_edge:subjects(Id, Predicate, Context)};
 s(undefined, _Predicate, _Context) ->
-    {rsc_list, []};
+    #rsc_list{list=[]};
 s(Id, Predicate, Context) ->
     s(rid(Id, Context), Predicate, Context).
 
@@ -215,41 +245,51 @@ media(Id, N, Context) ->
 	
 	
 %% @doc Fetch a #rsc{} from any input
-rid(#rsc{id=Id} = Rsc, _Context) ->
+rid(#rsc{} = Rsc, _Context) ->
     Rsc;
 rid(Id, _Context) when is_integer(Id) ->
 	#rsc{id=Id};
-rid({rsc_list, [R|_]}, _Context) ->
+rid(#rsc_list{list=[R|_]}, _Context) ->
 	R;
-rid({rsc_list, []}, _Context) ->
+rid(#rsc_list{list=[]}, _Context) ->
 	undefined;
 rid([C|_] = UniqueName, Context) when is_list(UniqueName) and is_integer(C) ->
-    rid_unique_name(UniqueName, Context);
+    case only_digits(UniqueName) of
+        true -> #rsc{id=list_to_integer(UniqueName)};
+        false -> rid_name(UniqueName, Context)
+    end;
 rid(UniqueName, Context) when is_binary(UniqueName) ->
-    rid_unique_name(binary_to_list(UniqueName), Context);
+    rid_name(binary_to_list(UniqueName), Context);
 rid(undefined, _Context) -> 
 	undefined;
 rid(UniqueName, Context) when is_atom(UniqueName) -> 
-    rid_unique_name(atom_to_list(UniqueName), Context);
+    rid_name(atom_to_list(UniqueName), Context);
 rid(<<>>, _Context) -> 
 	undefined.
 
 
+only_digits([]) -> 
+    true;
+only_digits([C|R]) when C >= $0 andalso C =< $9 ->
+    only_digits(R);
+only_digits(_) ->
+    false.
+
 %% @doc Return the id of the resource with a certain unique name.
-%% rid_unique_name(UniqueName, Context) -> #rsc{} | undefined
-rid_unique_name(UniqueName, Context) ->
-    Name = zp_utils:to_lower(UniqueName),
-    case zp_depcache:get({rsc_unique_name, Name}) of
+%% rid_name(Name, Context) -> #rsc{} | undefined
+rid_name(Name, Context) ->
+    Lower = zp_utils:to_lower(Name),
+    case zp_depcache:get({rsc_name, Lower}) of
         {ok, undefined} ->
             undefined;
         {ok, Id} ->
             Id;
         undefined ->
-            Id = case zp_db:q1("select id from rsc where unique_name = $1", [Name], Context) of
+            Id = case zp_db:q1("select id from rsc where name = $1", [Lower], Context) of
                 undefined -> undefined;
                 Value -> #rsc{id=Value}
             end,
-            zp_depcache:set({rsc_unique_name, Name}, Id, ?DAY, [Id,{rsc_unique_name, Name}]),
+            zp_depcache:set({rsc_name, Lower}, Id, ?DAY, [Id]),
             Id
     end.
 

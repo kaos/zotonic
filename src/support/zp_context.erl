@@ -46,10 +46,10 @@
     get_page/2,
     incr_page/3,
 
-    set_context/3,
-    set_context/2,
-    get_context/2,
-    incr_context/3
+    set/3,
+    set/2,
+    get/2,
+    incr/3
     
     ]).
 
@@ -293,7 +293,7 @@ spawn_link_page(Module, Func, Args, Context) ->
 %% @spec Find a key in the context, page, session or user state.
 %% @todo Add page and user lookup
 get_value(Key, Context) ->
-    case get_context(Key, Context) of
+    case get(Key, Context) of
         undefined ->
             case get_page(Key, Context) of
                 undefined -> get_session(Key, Context);
@@ -346,37 +346,37 @@ incr_page(Key, Value, Context) ->
 
 %% @spec set(Key, Value, Context) -> Context
 %% @doc Set the value of the context variable Key to Value
-set_context(Key, Value, Context) ->
+set(Key, Value, Context) ->
     Dict = dict:store(Key, Value, Context#context.dict),
     Context#context{dict = Dict}.
 
 
 %% @spec set(PropList, Context) -> Context
 %% @doc Set the value of the context variables to all {Key, Value} properties.
-set_context(PropList, Context) when is_list(PropList) ->
+set(PropList, Context) when is_list(PropList) ->
     NewDict = lists:foldl(fun ({Key,Value}, Dict) -> dict:store(Key, Value, Dict) end, Context#context.dict, PropList),
     Context#context{dict = NewDict}.
 
 
 %% @spec get(Key, Context) -> Value
 %% @doc Fetch the value of the context variable Key
-get_context(Key, Context) when Context#context.dict =/= undefined ->
+get(Key, Context) when Context#context.dict =/= undefined ->
     case dict:find(Key, Context#context.dict) of
         {ok, Value} ->
                 Value;
         error ->
                 undefined
     end;
-get_context(_Key, _Context) ->
+get(_Key, _Context) ->
 	undefined.
 
 
 %% @spec incr_session(Key, Increment, Context) -> {NewValue,NewContext}
 %% @doc Increment the context variable Key
-incr_context(Key, Value, Context) ->
+incr(Key, Value, Context) ->
     Dict = dict:update_counter(Key, Value, Context#context.dict),
     Context1 = Context#context{dict = Dict},
-    get_context(Key, Context1).
+    get(Key, Context1).
 
 
 
