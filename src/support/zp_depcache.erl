@@ -13,6 +13,7 @@
 
 %% depcache exports
 -export([set/2, set/3, set/4, get/1, get/2, flush/1, flush/0, tick/0, size/0]).
+-export([memo/1, memo/2, memo/3, memo/4]).
 
 %% internal export
 -export([cleanup/1, cleanup/5]).
@@ -32,6 +33,43 @@ start_link() -> gen_server:start_link({local, ?MODULE}, ?MODULE, [], []).
 
 % Number of slots visited for each iteration
 -define(CLEANUP_BATCH, 100).
+
+
+memo({M,F,A}) ->
+    memo({M,F,A}, ?HOUR, []).
+
+memo({M,F,A}, MaxAge) ->
+    memo({M,F,A}, MaxAge, []);
+memo(F, Key) ->
+    memo(F, Key, ?HOUR, []).
+
+memo({M,F,A}, MaxAge, Dep) ->
+    Key = memo_key({M,F,A}),
+    case ?MODULE:get(Key) of
+        {ok, Value} ->
+            Value;
+        undefined ->
+            Value = erlang:apply(M, F, A),
+            set(Key, Value, MaxAge, Dep),
+            Value
+    end;
+memo(F, Key, MaxAge) ->
+    memo(F, Key, MaxAge, []).
+
+memo(F, Key, MaxAge, Dep) ->
+    case ?MODULE:get(Key) of
+        {ok, Value} ->
+            Value;
+        undefined ->
+            Value = F(),
+            set(Key, Value, MaxAge, Dep),
+            Value
+    end.
+
+
+memo_key({M,F,A}) -> 
+    WithoutContext = lists:filter(fun(#context{}) -> false; (_) -> true end, A),
+    {M,F,WithoutContext}.
 
 
 %% @spec set(Key, Data, MaxAge) -> void()
@@ -252,15 +290,15 @@ find_value(Key, L) when is_list(L) ->
     proplists:get_value(Key, L);
 
 %% Resource list handling, special lookups when skipping the index
-find_value(Key, {rsc_list, L}) when is_integer(Key) ->
+find_value(Key, #rsc_list{list=L}) when is_integer(Key) ->
     try
         lists:nth(Key, L)
     catch
         _:_ -> undefined
     end;
-find_value(Key, {rsc_list, [H|_T]}) ->
+find_value(Key, #rsc_list{list=[H|_T]}) ->
 	find_value(Key, H);
-find_value(_Key, {rsc_list, []}) ->
+find_value(_Key, #rsc_list{list=[]}) ->
 	undefined;
 
 % Index of tuple with an integer like "a[2]"
