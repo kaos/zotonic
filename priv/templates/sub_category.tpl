@@ -112,7 +112,7 @@
 	<div id="sidebar" class="zp-25">
 		<div class="padding">
 			
-			<h2>Siblings</h3>
+			<h3 class="block">Siblings</h3>
 			<ul id="sub-navigation">
 			    <li><a href="#">Glasses</a></li>
 			    <li><a href="#">Bags</a></li>
@@ -121,7 +121,7 @@
 			    <li><a href="#">Montagestandaards</a></li>
 			</ul>
 			
-			<h2>Brands</h3>
+			<h3 class="block">Brands</h3>
 			<ul id="sub-navigation">
 			    <li><a href="#">Stevens <span class="amount">(3)<span></a></li>
 			    <li><a href="#">Ortliep <span class="amount">(5)<span></a></li>

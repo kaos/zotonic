@@ -266,6 +266,7 @@ ul#navigation li.lang a.english {
 			color: #464646;
 			text-decoration: none;
 			background: #fff;
+			font-size: 11px;
 		}
 		
 		#sub-navigation li a:hover,
