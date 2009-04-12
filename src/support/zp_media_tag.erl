@@ -27,6 +27,10 @@
 
 %% @spec tag(Filename, Options) -> {tag, TagString} | {error, Reason}
 %% @doc Generate a HTML image tag for the image with the filename and options
+tag(undefined, _Options) ->
+    {tag, []};
+tag([], _Options) ->
+    {tag, []};
 tag(Filename, Options) when is_binary(Filename) ->
     tag(binary_to_list(Filename), Options);
 tag(Filename, Options) ->
