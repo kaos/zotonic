@@ -31,7 +31,7 @@
 							</a>
 						</h1>
 					</li>
-					<li class="first"><a href="/compare" title="compare-bikes">Fietsen</a></li>
+					<li class="first"><a href="/compare/mtb/1" title="compare-bikes">Fietsen</a></li>
 					<li><a href="/overview/clothing-shoes" title="#">Kleding en schoenen</a></li>
 					<li><a href="/overview/accessoires" title="#">Accessoires</a></li>
 					<li><a href="/overview/parts" title="#">Onderdelen</a></li>

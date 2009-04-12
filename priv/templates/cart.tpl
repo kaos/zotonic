@@ -39,7 +39,16 @@
 					<div class="zp-20"><input type="text" value="1" class="card-item-amount" /></div>
 					<div class="zp-15">&euro; 33</div>
 				</div>
-			</li>		</dul>
+			</li>
+		</ul>
+		<div class="block cart-product-price clearfix">
+			<h3>&euro;66 <span>incl. btw</span></h3>
+			{# An animate would be nice here #}
+			<div class="clearfix button-wrapper right">
+				{% button id="product-add-basket" class="buy-me left-side-button" text="&laquo; winkel verder" %}
+				{% button id="product-buy-basket" class="buy-me right-side-button" text="reken af &raquo;" %}
+			</div>
+		</div>
 	</div>
 {% endblock %}
 

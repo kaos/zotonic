@@ -317,7 +317,7 @@ ul#navigation li.lang a.english {
 	font-size: 10px;
 	margin: 0;
 	text-align: center;
-	color: #ccc;
+	color: #bbb;
 }
 
 /* Pages - Home page
@@ -431,21 +431,24 @@ ul#navigation li.lang a.english {
 		border: 1px solid #ddd;
 		margin: 0 0 18px 0
 	}
-	
-	.product-price h3 {
+		
+	.product-price h3,
+	.cart-product-price h3 {
 		font-size: 24px;
 		line-height: 18px;
 		float: left;
 	}
 	
-		.product-price h3 span {
+		.product-price h3 span,
+		.cart-product-price h3 span {
 			color: #888;
 			font-size: 11px;
 			font-weight: normal;
 			line-height: 11px;
 		}
 	
-	.product-price button {
+	.product-price button,
+	.cart-product-price button {
 		margin: 0 0 0 3px;
 		color: #EEB714;
 		background: #444;
@@ -453,7 +456,8 @@ ul#navigation li.lang a.english {
 		border: 1px solid #000;
 	}
 		
-		.product-price button:hover {
+		.product-price button:hover,
+		.cart-product-price button:hover {
 			background: #000;
 		}
 	
@@ -568,6 +572,24 @@ ul#navigation li.lang a.english {
 		.product-list-item .product-price {
 			margin: 0;
 		}
+
+
+/* Pages - cart
+---------------------------------------------------------- */
+
+li.cart-titles {
+	font-weight: bold;
+	color: #333;
+}
+
+li.cart-titles .block,
+li.cart-item .block {
+	margin: 0 0 2px 0;
+}
+
+.card-item-amount[type="text"] {
+	width: 30px;
+}
 
 /* Modules - image viewer
 ---------------------------------------------------------- */
