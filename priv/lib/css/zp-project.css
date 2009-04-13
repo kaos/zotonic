@@ -539,7 +539,11 @@ ul#navigation li.lang a.english {
 	
 	.compare-list li .block .product-price h3 {
 		float: left;
-	}	
+	}
+	
+	.compare-list .product-price {
+		margin: 0;
+	}
 
 /* Pages - category
 ---------------------------------------------------------- */
