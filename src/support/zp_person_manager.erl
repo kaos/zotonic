@@ -46,7 +46,7 @@
 -include_lib("zophrenic.hrl").
 
 %% The name of the person cookie
--define(PERSON_COOKIE, "zppid").
+-define(PERSON_COOKIE, "zp_pid").
 
 %% Max age of the person cookie, 10 years or so.
 -define(PERSON_COOKIE_MAX_AGE, 3600*24*52*10).
