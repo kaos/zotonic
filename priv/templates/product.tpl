@@ -32,8 +32,8 @@
 					<h3>&euro;{{m.rsc[rsc_id].price|format_price}} <!--span>incl. btw</span--></h3>
 					{# An animate would be nice here #}
 					<div class="clearfix button-wrapper right">
-						{% button id="product-add-basket" class="buy-me" text="leg in winkelmand" %}
-						{% button id="product-buy-basket" class="buy-me right-side-button" text="koop direct &raquo;" %}
+						{% button id="product-add-basket" class="buy-me" text="leg in winkelmand" action={shop_addcart id=rsc_id} %}
+						{% button id="product-buy-basket" class="buy-me right-side-button" text="koop direct &raquo;" action={shop_buynow id=rsc_id} %}
 					</div>
 				</div>
 				
