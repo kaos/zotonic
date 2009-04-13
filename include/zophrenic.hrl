@@ -59,6 +59,9 @@
 %% @doc Check if an assumption is true
 -define(ASSERT(A,E), zp_utils:assert(A,E)).
 
+%% @doc Call the translate function, 2nd parameter is either language or context
+-define(TR(T,L), zp_trans:trans(T,L)).
+
 %% The name of the session request parameter
 -define(SESSION_PAGE_Q, "zp_pageid").
 
