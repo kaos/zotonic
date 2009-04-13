@@ -1,107 +1,41 @@
 {% extends "base.tpl" %}
 
-{% block title %} Category Page sub{% endblock %}
+{% block title %}{{ m.category[cat_id].title }}{% endblock %}
 
 {% block content %}
 	<div id="content-area" class="zp-75 category-overview">
 		<!-- Area for the main content -->
-		<h2>Bags category</h2>
+		<h2>{{ m.category[cat_id].title }}</h2>
 		<div class="block clearfix">
-			<h3>Ldieladie</h3>
-			<p>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Fusce ultricies nisi in lectus. Morbi et sem nec eros bibendum vestibulum. Ut vitae erat vitae dui tempor dictum. Nam sem. Sed iaculis lorem non ipsum. Donec aliquet. Fusce vel elit si.</p>
+			<h3>{{ m.category[cat_id].intro }}</h3>
+			{{ m.category[cat_id].body }}
 		</div>
 		
 		<ul class="subcategory-product-list clearfix">
+			{% for id in products %}
 			<li class="zp-50 product-list-item">
 				<div class="block clearfix">
-					<a href="/category/bags" title="cateogry bags">
-						{% image "140.jpg" width=60 height=60 crop alt="bags" class="left" %}
+					<a href="{% url product id=id slug=m.rsc[id].slug %}">
+						{% image m.rsc[id].media[1].filename width=60 height=60 crop alt=m.rsc[id].title class="left" %}
 					</a>
-					<a href="/category/bags" title="cateogry bags">
-						<h3>Bags</h3>
+					<a href="{% url product id=id slug=m.rsc[id].slug %}">
+						<h3>{{ m.rsc[id].title }}</h3>
 					</a>
-					<p>Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod.</p>
+					<p>{{ m.rsc[id].intro }}</p>
 					<div class="product-price clearfix clear">
-						<h3>&euro;22 <span>incl. btw</span></h3>
+						<h3>&euro;{{ m.rsc[id].price|format_price }} <!--span>incl. btw</span--></h3>
 						<div class="clearfix button-wrapper right">
-							{% button id="product-view" class="buy-me" text="meer info" %}
-							{% button id="product-buy-basket" class="buy-me right-side-button" text="koop direct &raquo;" %}
+							{% button class="buy-me" text="meer info" action={redirect id=id}%}
+							{% button class="buy-me right-side-button" text="koop direct &raquo;" %}
 						</div>
 					</div>
 				</div>
 			</li>
-			<li class="zp-50 product-list-item">
-				<div class="block clearfix block-last">
-					<a href="/category/bags" title="cateogry bags">
-						{% image "37.jpg" width=60 height=60 crop alt="bags" class="left" %}
-					</a>
-					<a href="/category/bags" title="cateogry bags">
-						<h3>Bags</h3>
-					</a>
-					<p>Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod.</p>
-					<div class="product-price clearfix clear">
-						<h3>&euro;22 <span>incl. btw</span></h3>
-						<div class="clearfix button-wrapper right">
-							{% button id="product-view" class="buy-me" text="meer info" %}
-							{% button id="product-buy-basket" class="buy-me right-side-button" text="koop direct &raquo;" %}
-						</div>
-					</div>
-				</div>
+			{% empty %}
+			<li class="zp-100">
+				<p>Er zijn geen producten in deze categorie.</p>
 			</li>
-			<li class="zp-50 product-list-item">
-				<div class="block clearfix">
-					<a href="/category/bags" title="cateogry bags">
-						{% image "134.jpg" width=60 height=60 crop alt="bags" class="left" %}
-					</a>
-					<a href="/category/bags" title="cateogry bags">
-						<h3>Bags</h3>
-					</a>
-					<p>Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod.</p>
-					<div class="product-price clearfix clear">
-						<h3>&euro;22 <span>incl. btw</span></h3>
-						<div class="clearfix button-wrapper right">
-							{% button id="product-view" class="buy-me" text="meer info" %}
-							{% button id="product-buy-basket" class="buy-me right-side-button" text="koop direct &raquo;" %}
-						</div>
-					</div>
-				</div>
-			</li>
-			<li class="zp-50 product-list-item block-last">
-				<div class="block clearfix">
-					<a href="/category/bags" title="cateogry bags">
-						{% image "1610.jpg" width=60 height=60 crop alt="bags" class="left" %}
-					</a>
-					<a href="/category/bags" title="cateogry bags">
-						<h3>Bags</h3>
-					</a>
-					<p>Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod.</p>
-					<div class="product-price clearfix clear">
-						<h3>&euro;22 <span>incl. btw</span></h3>
-						<div class="clearfix button-wrapper right">
-							{% button id="product-view" class="buy-me" text="meer info" %}
-							{% button id="product-buy-basket" class="buy-me right-side-button" text="koop direct &raquo;" %}
-						</div>
-					</div>
-				</div>
-			</li>
-			<li class="zp-50 product-list-item">
-				<div class="block clearfix">
-					<a href="/category/bags" title="cateogry bags">
-						{% image "1636.jpg" width=60 height=60 crop alt="bags" class="left" %}
-					</a>
-					<a href="/category/bags" title="cateogry bags">
-						<h3>Bags</h3>
-					</a>
-					<p>Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod.</p>
-					<div class="product-price clearfix clear">
-						<h3>&euro;22 <span>incl. btw</span></h3>
-						<div class="clearfix button-wrapper right">
-							{% button id="product-view" class="buy-me" text="meer info" %}
-							{% button id="product-buy-basket" class="buy-me right-side-button" text="koop direct &raquo;" %}
-						</div>
-					</div>
-				</div>
-			</li>
+			{% endfor %}
 		</ul>
 	</div>	
 {% endblock %}
@@ -110,13 +44,11 @@
 	<div id="sidebar" class="zp-25">
 		<div class="padding">
 			
-			<h3 class="block">Siblings</h3>
+			<h3 class="block">{{ m.category[m.category[cat_id].parent_id].title }}</h3>
 			<ul id="sub-navigation">
-			    <li><a href="#">Glasses</a></li>
-			    <li><a href="#">Bags</a></li>
-			    <li><a href="#">Batteries</a></li>
-			    <li><a href="#">Fietscomputers</a></li>
-			    <li><a href="#">Montagestandaards</a></li>
+				{% for cat in m.category[m.category[cat_id].parent_id].tree1 %}
+			    	<li><a {% ifequal cat.id cat_id %}class="current" {% endifequal %} href="{% url overview cat=m.category[cat.parent_id].name subcat=cat.name %}">{{ cat.title }}</a></li>
+				{% endfor %}
 			</ul>
 			
 			<h3 class="block">Brands</h3>

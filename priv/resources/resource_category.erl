@@ -45,17 +45,21 @@ html(_ReqProps, Context) ->
 			],
 	IsSubCat = zp_context:get(is_subcat, Context),
 	CatId = zp_context:get(cat_id, Context),
-    Featured = zp_depcache:memo({search, search, [{category_featured, CatId}, Context]}),
-    {FeatShown,_} = zp_utils:randomize(3, Featured),
 	Vars = [
 	    {menu_list, MenuList},
 	    {cat_id, CatId},
 	    {is_subcat, IsSubCat},
-	    {featured, FeatShown},
 	    {cat, m_category:get(CatId, Context)}
 	],
 	Html = case IsSubCat of
-		false -> zp_template:render("category.tpl", Vars, Context);
-		true ->	zp_template:render("sub_category.tpl", Vars, Context)
+		false ->
+        	Featured = zp_depcache:memo({search, search, [{category_featured, CatId}, Context]}),
+            {FeatShown,_} = zp_utils:randomize(3, Featured),
+            Vars1 = [{featured, FeatShown} | Vars ],
+		    zp_template:render("category.tpl", Vars1, Context);
+		true ->
+        	Products = zp_depcache:memo({search, search, [{category_featured, CatId}, {1,1000}, Context]}),
+            Vars1 = [{products, Products} | Vars ],
+		    zp_template:render("sub_category.tpl", Vars1, Context)
 	end,
 	zp_context:output(Html, Context).
