@@ -6,6 +6,7 @@
 <script type="text/javascript" src="/lib/js/modules/livevalidation-1.3.js"></script>
 <script type="text/javascript" src="/lib/js/modules/jquery.image_viewer.js"></script>
 <script type="text/javascript" src="/lib/js/modules/jquery.wysiwyg.js"></script>
+<script type="text/javascript" src="/lib/js/modules/zp_autocomplete.js"></script>
 
 <script type="text/javascript">
 	$(function()
