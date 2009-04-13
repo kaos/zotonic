@@ -21,6 +21,9 @@
 		{% empty %}
 			<li class="block clearfix">
 				<p>{{cat.title}} heeft geen subcategorieën.</p>
+				{% ifequal cat.name "bikes" %}
+				<p>{% button action={redirect location="/compare/mtb/1"} text="Vergelijk Fietsen" %}</p>
+				{% endifequal %}
 			</li>
 		{% endfor %}
 		</ul>

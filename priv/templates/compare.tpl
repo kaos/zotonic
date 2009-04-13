@@ -13,7 +13,7 @@
 					<p>verhaaltje</p>
 					<div class="product-price clearfix">
 						<h3>&euro;899 <span>incl. btw</span></h3>
-						<button>Bekijk fiets</button>
+						{% button text="Bekijk fiets" action={redirect location="/bike/trek/urban"} %}
 						<button>Vraag proefrit aan</button>
 					</div>
 				</div>
@@ -25,7 +25,7 @@
 					<p>verhaaltje</p>					
 					<div class="product-price clearfix">
 						<h3>&euro;350 <span>incl. btw</span></h3>
-						<button>Bekijk fiets</button>
+						{% button text="Bekijk fiets" action={redirect location="/bike/trek/urban"} %}
 						<button>Vraag proefrit aan</button>
 					</div>
 				</div>
@@ -37,7 +37,7 @@
 					<p>verhaaltje</p>					
 					<div class="product-price clearfix">
 						<h3>&euro;2230 <span>incl. btw</span></h3>
-						<button>Bekijk fiets</button>
+						{% button text="Bekijk fiets" action={redirect location="/bike/trek/urban"} %}
 						<button>Vraag proefrit aan</button>
 					</div>
 				</div>
@@ -50,7 +50,14 @@
 	<div id="sidebar" class="zp-25">
 		<div class="padding">
 			
-			{% include "_subnav.tpl" %}
+			<h2>Fietsen</h2>
+			<ul id="sub-navigation">
+			{% for cat in m.category.bikes.tree1 %}
+		    	<li><a href="{% url overview cat=m.category[cat.parent_id].name subcat=cat.name %}">{{ cat.title }}</a></li>
+			{% empty %}
+				<li>Er zijn geen subcategorieën.</li>
+			{% endfor %}
+			</ul>
 			
  		</div>
 	</div>

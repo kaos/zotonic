@@ -32,8 +32,15 @@
 {% block sidebar %}
 	<div id="sidebar" class="zp-25">
 		<div class="padding">
-			
-			{% include "_subnav.tpl" %}
+
+			<h2>Fietsen</h2>
+			<ul id="sub-navigation">
+			{% for cat in m.category.bikes.tree1 %}
+		    	<li><a href="{% url overview cat=m.category[cat.parent_id].name subcat=cat.name %}">{{ cat.title }}</a></li>
+			{% empty %}
+				<li>Er zijn geen subcategorieën.</li>
+			{% endfor %}
+			</ul>
 			
 			<h2>Gerelateerde producten</h2>
 			<ul class="related-articles">

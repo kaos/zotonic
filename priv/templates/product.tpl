@@ -107,8 +107,13 @@
 {% block sidebar %}
 	<div id="sidebar" class="zp-25">
 		<div class="padding">
-			
-			{% include "_subnav.tpl" %}
+
+			<h3 class="block">{{ m.category[m.category[m.rsc[rsc_id].category_id].parent_id].title }}</h3>
+			<ul id="sub-navigation">
+				{% for cat in m.category[m.category[m.rsc[rsc_id].category_id].parent_id].tree1 %}
+			    	<li><a {% ifequal cat.id m.rsc[rsc_id].category_id %}class="current" {% endifequal %} href="{% url overview cat=m.category[cat.parent_id].name subcat=cat.name %}">{{ cat.title }}</a></li>
+				{% endfor %}
+			</ul>
 			
 			<h2>Gerelateerde artikelen</h2>
 			<ul class="related-articles">
