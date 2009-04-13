@@ -13,7 +13,7 @@
 					<h3 class="alt">Quick navigation</h3>
 
 					<div class="clearfix">
-						<a class="button" href="/pages">manage pages &raquo;</a>
+						<a class="button" href="/admin/overview">manage pages &raquo;</a>
 						<a class="button" href="/pages">manage categories &raquo;</a>
 						<a class="button" href="/pages">manage prodcuts &raquo;</a>
 						<a class="button" href="/pages">manage users &raquo;</a>
