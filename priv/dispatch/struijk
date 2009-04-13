@@ -28,6 +28,10 @@
 	{bikes,			["bike", id, slug],								resource_bike,			[]},
 	{compare,		["compare", cat, id],							resource_compare,		[]},
 	{search,   		["search"],										resource_search,		[]},
-	{admin,   		["admin"],										resource_admin,			[]},	
-	{shop_cart, 	["cart"],										resource_cart,			[]}	
+	{shop_cart, 	["cart"],										resource_cart,			[]},
+
+
+	{admin,   				["admin"],								resource_admin,			[]},
+	{admin_overview_rsc,  	["admin", "overview"],					resource_admin_overview,[]},
+	{admin_edit_rsc, 		["admin", "edit", rsc],					resource_admin_edit,	[]}
 ].
