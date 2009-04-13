@@ -12,7 +12,7 @@
 				<a href="{% url overview cat=cat.name subcat=sub.name %}">
 					{% image m.category[sub.id].image width=200 height=70 crop alt="bags" class="left" %}
 				</a>
-				<h3><a href="{% url overview cat=cat.name subcat=sub.name %}">{{ sub.title }}</a></h3>
+				<h3><a href="{% url overview cat=cat.name subcat=sub.name %}" title="{{ sub.title }}">{{ sub.title }}</a></h3>
 				<p>
 					{{ sub.intro }}
 					<a href="{% url overview cat=cat.name subcat=sub.name %}">Lees&nbsp;meer&nbsp;&raquo;</a>
@@ -45,18 +45,15 @@
 			<ul id="sub-navigation">
 			    <li><a href="#">Stevens <span class="amount">(3)<span></a></li>
 			    <li><a href="#">Ortliep <span class="amount">(5)<span></a></li>
-			    <li><a href="#">Sky is pancaces <span class="amount">(2)<span></a></li>
-			    <li><a href="#">Marc <span class="amount">(13)<span></a></li>
+			    <li><a href="#">Duracell <span class="amount">(2)<span></a></li>
 			</ul>
 			
 			<h3 class="block">Featured products</h3>
 			<ul class="related-articles">
 				{% for id in featured %}
 					<li class="block clearfix">
-						<a href="{% url product id=id slug=m.rsc[id].slug %}">{% image m.rsc[id].media[1].filename width=67 height=50 crop alt="trapper" %}</a>
-						<h4><a href="{% url product id=id %}"></a></h4>
-						<p>{{ m.rsc[id].title }}</p> 
-						<p><a href="#">Bestel snel &raquo;</a></p>
+						<a href="{% url product id=id slug=m.rsc[id].slug %}" title="{{ m.rsc[id].title }}">{% image m.rsc[id].media[1].filename width=60 height=40 crop alt="trapper" %}</a>
+						<h4><a href="{% url product id=id %}">{{ m.rsc[id].title }}</a></h4>
 					</li>
 				{% empty %}
 					<li class="block clearfix">

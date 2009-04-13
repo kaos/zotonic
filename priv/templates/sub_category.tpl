@@ -7,7 +7,7 @@
 		<!-- Area for the main content -->
 		<h2>{{ m.category[cat_id].title }}</h2>
 		<div class="block clearfix">
-			<h3>{{ m.category[cat_id].intro }}</h3>
+			<p class="intro">{{ m.category[cat_id].intro }}</p>
 			{{ m.category[cat_id].body }}
 		</div>
 		
@@ -25,7 +25,7 @@
 					<div class="product-price clearfix clear">
 						<h3>&euro;{{ m.rsc[id].price|format_price }} <!--span>incl. btw</span--></h3>
 						<div class="clearfix button-wrapper right">
-							{% button class="buy-me" text="meer info" action={redirect id=id}%}
+							{% button class="buy-me" text="meer info" action={redirect id=id} %}
 							{% button class="buy-me right-side-button" text="koop direct &raquo;" %}
 						</div>
 					</div>
@@ -55,8 +55,7 @@
 			<ul id="sub-navigation">
 			    <li><a href="#">Stevens <span class="amount">(3)<span></a></li>
 			    <li><a href="#">Ortliep <span class="amount">(5)<span></a></li>
-			    <li><a href="#">Sky is pancaces <span class="amount">(2)<span></a></li>
-			    <li><a href="#">Marc <span class="amount">(13)<span></a></li>
+			    <li><a href="#">Duracell <span class="amount">(2)<span></a></li>
 			</ul>
 		</div>
 	</div>

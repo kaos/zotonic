@@ -41,8 +41,10 @@
 				<h3>{% _ "Description" nl="Omschrijving" %}</h3>
 				
 				{{m.rsc[rsc_id].body}}
+				
+				{% endif %}
 			
-				<div class="product-properties">
+				{#<div class="product-properties">
 					<h3>{% _ "Properties" nl="Eigenschappen" %}</h3>
 				
 					{% for prop_group in m.rsc[rsc_id].prop %}
@@ -56,8 +58,7 @@
 						{% endfor %}
 						</ul>
 					{% endfor %}
-				</div>
-				{% endif %}
+				</div>#}
 			</div>
 		</div>
 		
