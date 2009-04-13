@@ -114,7 +114,7 @@
 						<h3>&euro;{{m.rsc[rsc_id].price|format_price}} <!--span>incl. btw</span--></h3>
 						{# An animate would be nice here #}
 						<div class="clearfix button-wrapper right">
-							{% button id="product-buy-basket" class="buy-me right-side-button" text="koop direct &raquo;" %}
+							{% button class="right right-side-button" text="Meer info &raquo;" action={redirect location="/bike/9999/trek-urban"} %}
 						</div>
 					</div>
 				</div>
@@ -126,7 +126,7 @@
 					<p>verhaaltje</p>
 					<div class="product-price clearfix">
 						<h3>&euro;350</h3>
-						{% button class="right right-side-button" text="Meer info" action={redirect location="/bike/9999/trek-urban"} %}
+						{% button class="right right-side-button" text="Meer info &raquo;" action={redirect location="/bike/9999/trek-urban"} %}
 					</div>
 				</div>
 			</li>
@@ -137,7 +137,7 @@
 					<p>verhaaltje</p>
 					<div class="product-price clearfix">
 						<h3>&euro;2230</h3>
-						{% button class="right right-side-button" text="Meer info" action={redirect location="/bike/9999/trek-urban"} %}
+						{% button class="right right-side-button" text="Meer info &raquo;" action={redirect location="/bike/9999/trek-urban"} %}
 					</div>
 				</div>
 			</li>
