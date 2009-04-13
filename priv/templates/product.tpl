@@ -62,7 +62,7 @@
 			</div>
 		</div>
 		
-		<div class="reviews-title block clearfix">
+		{#<div class="reviews-title block clearfix">
 			<h3 class="in-block">Reviews</h3>
 			{% button id="product-add-review-trigger" text="+ schrijf review" action={slide_fade_in speed=350 target="product-add-review-form"} %}
 		</div>
@@ -101,6 +101,46 @@
 					Lorem ipsum dolor sit amet, consectetur adipiscing elit. Etiam nunc. Aliquam erat volutpat. Fusce tortor ligula, dictum sit amet, aliquam non, luctus quis, justo.
 				</p>
 			</li>
+		</ul>#}
+		
+		<h3 class="block">Related products</h3>
+		<ul class="compare-list clearfix">
+			<li class="zp-33 first">
+				<div class="block">
+					<h3>Gazelle Champion Mondial</h3>
+					<img src="{% image_url "trek_urban.jpg" width=225 height=130 crop %}" alt="fiets" class="do_imageviewer" />
+					<p>verhaaltje</p>
+					<div class="product-price clearfix">
+						<h3>&euro;{{m.rsc[rsc_id].price|format_price}} <!--span>incl. btw</span--></h3>
+						{# An animate would be nice here #}
+						<div class="clearfix button-wrapper right">
+							{% button id="product-buy-basket" class="buy-me right-side-button" text="koop direct &raquo;" %}
+						</div>
+					</div>
+				</div>
+			</li>
+			<li class="zp-33">
+				<div class="block">
+					<h3>HEMA tank fiets</h3>
+					<img src="{% image_url "trek_urban.jpg" width=225 height=130 crop %}" alt="fiets" class="do_imageviewer" />
+					<p>verhaaltje</p>
+					<div class="product-price clearfix">
+						<h3>&euro;350</h3>
+						{% button class="right right-side-button" text="Meer info" action={redirect location="/bike/9999/trek-urban"} %}
+					</div>
+				</div>
+			</li>
+			<li class="zp-33">
+				<div class="block">
+					<h3>Bianchi road</h3>
+					<img src="{% image_url "trek_urban.jpg" width=225 height=130 crop %}" alt="fiets" class="do_imageviewer" />
+					<p>verhaaltje</p>
+					<div class="product-price clearfix">
+						<h3>&euro;2230</h3>
+						{% button class="right right-side-button" text="Meer info" action={redirect location="/bike/9999/trek-urban"} %}
+					</div>
+				</div>
+			</li>
 		</ul>
 	</div>
 {% endblock %}
@@ -116,26 +156,11 @@
 				{% endfor %}
 			</ul>
 			
-			<h2>Gerelateerde artikelen</h2>
-			<ul class="related-articles">
-				<li class="block clearfix">
-					{% image "trapper_klein.jpg" width=67 height=50 crop alt="trapper" %}
-					<h4><a href="#">Shimano</a></h4>
-					<p>PD-6620-G Trapper</p> 
-					<p><a href="#">Bestel snel &raquo;</a></p>
-				</li>
-				<li class="block clearfix">
-					{% image "trapper_klein.jpg" width=67 height=50 crop alt="trapper" %}
-					<h4><a href="#">Shimano</a></h4>
-					<p>PD-6620-G Trapper</p> 
-					<p><a href="#">Bestel snel &raquo;</a></p>
-				</li>
-				<li class="block clearfix">
-					{% image "trapper_klein.jpg" width=67 height=50 crop alt="trapper" %}
-					<h4><a href="#">Shimano</a></h4>
-					<p>PD-6620-G Trapper</p> 
-					<p><a href="#">Bestel snel &raquo;</a></p>
-				</li>
+			<h3 class="block">Brands</h3>
+			<ul id="sub-navigation">
+			    <li><a href="#">Stevens <span class="amount">(3)<span></a></li>
+			    <li><a href="#">Ortliep <span class="amount">(5)<span></a></li>
+			    <li><a href="#">Duracell <span class="amount">(2)<span></a></li>
 			</ul>
 			
 			<div class="notification notice" id="product-notice">

@@ -12,9 +12,8 @@
 					<img src="{% image_url "trek_urban.jpg" width=225 height=230 crop %}" alt="fiets" class="do_imageviewer" />
 					<p>verhaaltje</p>
 					<div class="product-price clearfix">
-						<h3>&euro;899 <span>incl. btw</span></h3>
-						{% button text="Bekijk fiets" action={redirect location="/bike/9999/trek-urban"} %}
-						<button>Vraag proefrit aan</button>
+						<h3>&euro;899</h3>
+						{% button text="Meer info &raquo;" class="right right-side-button" action={redirect location="/bike/9999/trek-urban"} %}
 					</div>
 				</div>
 			</li>
@@ -22,11 +21,10 @@
 				<div class="block">
 					<h3>HEMA tank fiets</h3>
 					<img src="{% image_url "trek_urban.jpg" width=225 height=230 crop %}" alt="fiets" class="do_imageviewer" />
-					<p>verhaaltje</p>					
+					<p>verhaaltje</p>
 					<div class="product-price clearfix">
-						<h3>&euro;350 <span>incl. btw</span></h3>
-						{% button text="Bekijk fiets" action={redirect location="/bike/9999/trek-urban"} %}
-						<button>Vraag proefrit aan</button>
+						<h3>&euro;350</h3>
+						{% button text="Meer info &raquo;" class="right right-side-button" action={redirect location="/bike/9999/trek-urban"} %}
 					</div>
 				</div>
 			</li>
@@ -34,11 +32,10 @@
 				<div class="block">
 					<h3>Bianchi road</h3>
 					<img src="{% image_url "trek_urban.jpg" width=225 height=230 crop %}" alt="fiets" class="do_imageviewer" />
-					<p>verhaaltje</p>					
+					<p>verhaaltje</p>
 					<div class="product-price clearfix">
-						<h3>&euro;2230 <span>incl. btw</span></h3>
-						{% button text="Bekijk fiets" action={redirect location="/bike/9999/trek-urban"} %}
-						<button>Vraag proefrit aan</button>
+						<h3>&euro;2230</h3>
+						{% button text="Meer info &raquo;" class="right right-side-button" action={redirect location="/bike/9999/trek-urban"} %}
 					</div>
 				</div>
 			</li>

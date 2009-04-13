@@ -82,7 +82,12 @@ h5, h6 {
 
 p { 
 	margin: 0 0 18px 0; 
-} 
+}
+	
+	p.intro {
+		color: #333;
+		font-weight: bold;
+	}
 
 p img, 
 li img { 
