@@ -14,6 +14,7 @@
     install_rsc/1
 ]).
 
+-include_lib("zophrenic.hrl").
 
 install(Context) ->
     install_cat(Context),
@@ -48,7 +49,7 @@ install_cat(Context) ->
     ],
     
     F = fun(Ctx) ->
-        [ m_category:insert(Cat, Ctx) || Cat <- Cats ],
+        [ ok = m_category:insert(Cat, Ctx) || Cat <- Cats ],
         [ m_category:update_parent(m_category:name_to_id(B,Ctx), m_category:name_to_id(A,Ctx), Ctx) || {A,B} <- Parents],
         m_category:renumber(Ctx)
     end,
@@ -143,10 +144,11 @@ install_rsc(Context) ->
             File = "priv/files/archive/" ++ integer_to_list(ProdNr) ++ ".jpg",
             m_media:insert_file_rsc(File, Id, [], Ctx)
         end,
-        [ M(IR) || IR <- IdRsc]
+        [ M(IR) || IR <- IdRsc],
+        ok
     end,
     
-    zp_db:transaction(F, Context).
+    ok = zp_db:transaction(F, Context).
     
     
     

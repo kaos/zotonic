@@ -16,6 +16,7 @@
     install/1
 ]).
 
+-include_lib("zophrenic.hrl").
 
 m() -> 
     make:all([load]), 
@@ -30,7 +31,11 @@ restart() ->
     zophrenic:start().
 
 install() -> 
-    zp_install:install(dbdefault).
+    install(dbdefault).
 install(Db) -> 
-    zp_install:install(Db).
+    zp_install:install(Db),
+    flush(),
+    Context   = zp_context:new(),
+    ContextDb = Context#context{db=Db},
+    shop_install_data:install(ContextDb).
 
