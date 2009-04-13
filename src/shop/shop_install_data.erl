@@ -129,7 +129,7 @@ install_rsc(Context) ->
             {title, "Tacx Cycle Motion Stand"},
             {slug, "tacx-cycle-motion-stand"},
             {price, 95.00},
-            {category_id, m_category:name_to_id(bikecomputers, Context)},
+            {category_id, m_category:name_to_id(montagestands, Context)},
             {group_id, 1},
             {product_nr, 1636},
             {body, "<p>Ideale montagestandaard voor de zwaardere werkzaamheden. Uitgevoerd met verplaatsbaar montageblad. De fiets wordt gefixeerd aan de voor- of achtervork en staat stevig op een kunststof bracketsteun. De vorkhouders zijn zowel in hoogte als in lengte verschuifbaar. Geschikt voor racefietsen en mountainbikes met een wieldiameter van 24 t/m 28 inch.</p>"}
