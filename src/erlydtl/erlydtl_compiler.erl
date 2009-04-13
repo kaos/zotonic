@@ -467,7 +467,6 @@ value_ast(ValueToken, AsString, Context, TreeWalker) ->
         {'auto_id', {identifier, _, Auto}} ->
             {auto_id_ast(Auto), TreeWalker};
         {'apply_filter', Variable, Filter} ->
-            ?DEBUG({'apply_filter', Variable, Filter}),
             filter_ast(Variable, Filter, Context, TreeWalker);
         {'attribute', _} = Variable ->
             {Ast, VarName} = resolve_variable_ast(Variable, Context),
@@ -651,7 +650,6 @@ format(Ast, Context) ->
     auto_escape(stringify(Ast), Context).
 
 stringify(Ast) ->
-    ?DEBUG({stringify, Ast}),
     erl_syntax:application(erl_syntax:atom(erlydtl_filters), erl_syntax:atom(stringify),
         [Ast]).
 
