@@ -148,11 +148,13 @@ make_postback_info(Tag, EventType, TriggerId, TargetId, Delegate, Context) ->
 	zp_utils:pickle(PostbackInfo).
 
 
-%% @doc Make a javascript to call the postback, posting an encoded string containing callback information
+%% @doc Make a javascript to call the postback, posting an encoded string containing callback information. 
+%% The PostbackTag is send to the server, EventType is normally the atom 'postback'.
+%% @spec make_postback(PostbackTag, EventType, TriggerId, TargetId, Deletegate, Context) -> {JavascriptString, PickledPostback}
 make_postback(undefined, _EventType, _TriggerId, _TargetId, _Delegate, _Context) ->
     {[],[]};
-make_postback(Postback, EventType, TriggerId, TargetId, Delegate, Context) ->
-	PickledPostbackInfo = make_postback_info(Postback, EventType, TriggerId, TargetId, Delegate, Context),
+make_postback(PostbackTag, EventType, TriggerId, TargetId, Delegate, Context) ->
+	PickledPostbackInfo = make_postback_info(PostbackTag, EventType, TriggerId, TargetId, Delegate, Context),
 	{[<<"zp_queue_postback('">>,TriggerId,<<"', '">>,PickledPostbackInfo,<<"');">>], PickledPostbackInfo}.
 
 
