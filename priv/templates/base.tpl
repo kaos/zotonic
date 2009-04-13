@@ -35,7 +35,7 @@
 					<!--li class="first"><a href="/compare/mtb/1" title="compare-bikes">Fietsen</a></li!-->
 
 					{% for cat in m.category.product.tree1 %}
-						<li><a href="{% url overview cat=cat.name %}">{{ cat.title }}</a></li>
+						<li><a href="{% url overview cat=cat.name %}" title="{{ cat.title }}">{{ cat.title }}</a></li>
 					{% endfor %}
 
 					<li class="lang" title="Nederlands"><a href="#" title="Nederlands" class="dutch"><span>Nederlands</span></a></li>
