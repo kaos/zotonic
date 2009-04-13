@@ -230,7 +230,7 @@ set_cookie(PersonCookieId, Context) ->
     ReqProps = zp_context:get_reqprops(Context),
     Req      = ?REQ(ReqProps),
     %% TODO: set the {domain,"example.com"} of the session cookie
-    Options  = [{max_age, ?PERSON_COOKIE_MAX_AGE}],
+    Options  = [{max_age, ?PERSON_COOKIE_MAX_AGE}, {path, "/"}],
     Hdr      = mochiweb_cookies:cookie(?PERSON_COOKIE, PersonCookieId, Options),
     Req:merge_response_headers([Hdr]),
     ok.

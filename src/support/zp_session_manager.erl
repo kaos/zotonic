@@ -230,7 +230,7 @@ set_session_id(SessionId, Context) ->
     ReqProps = zp_context:get_reqprops(Context),
     Req      = ?REQ(ReqProps),
     %% TODO: set the {domain,"example.com"} of the session cookie
-    {K,V}    = mochiweb_cookies:cookie(?SESSION_COOKIE, SessionId, []),
+    {K,V}    = mochiweb_cookies:cookie(?SESSION_COOKIE, SessionId, [{path, "/"}]),
     Req:add_response_header(K,V),
     Context.
 
@@ -240,7 +240,7 @@ clear_session_id(Context) ->
     ReqProps = zp_context:get_reqprops(Context),
     Req      = ?REQ(ReqProps),
     %% TODO: set the {domain,"example.com"} of the session cookie
-    Hdr      = mochiweb_cookies:cookie(?SESSION_COOKIE, "", [{max_age, 0}]),
+    Hdr      = mochiweb_cookies:cookie(?SESSION_COOKIE, "", [{max_age, 0}, {path, "/"}]),
     Req:merge_response_headers([Hdr]),
     Context#context{session_pid=undefined}.
 
