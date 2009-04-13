@@ -20,9 +20,10 @@
     get_root/1,
     get_range/2,
     get_range_by_name/2,
+    get_path/2,
     insert/2,
-    path/2,
     name_to_id/2,
+    id_to_name/2,
     update_parent/3,
     update_sequence/2,
     tree/1,
@@ -128,6 +129,12 @@ name_to_id(Name, Context) ->
     end,
     zp_depcache:memo(F, {category_name_to_id, Name}, ?WEEK, [category]).
 
+id_to_name(Id, Context) ->
+    F = fun() ->
+        zp_db:q1("select name from category where id = $1", [Id], Context)
+    end,
+    zp_depcache:memo(F, {category_id_to_name, Id}, ?WEEK, [category]).
+
 
 update_parent(Id, ParentId, Context) ->
     F = fun(Ctx) ->
@@ -165,7 +172,7 @@ image(Id, Context) ->
     
 %% @doc Return the path from a root to the category
 %% @spec path(Id, Context) -> [CatId]
-path(Id, Context) ->
+get_path(Id, Context) ->
     Cat = get(Id, Context),
     proplists:get_value(path, Cat).
         

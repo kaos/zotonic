@@ -9,7 +9,10 @@
 -export([render_action/4]).
 
 render_action(_TriggerId, _TargetId, Args, Context) -> 
-    Location = proplists:get_value(location, Args, "/"),
+    Location = case proplists:get_value(id, Args) of
+        undefined -> proplists:get_value(location, Args, "/");
+        Id -> m_rsc:p(Id, page_url, Context)
+    end,
 	Script   = [<<"window.location = \"">>,zp_utils:js_escape(Location),$",$;],
 	{Script, Context}.
     

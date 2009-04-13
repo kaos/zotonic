@@ -19,7 +19,8 @@
 	p/3, 
 	op/2, o/2, o/3, o/4,
 	sp/2, s/2, s/3, s/4,
-	media/2, media/3
+	media/2, media/3,
+	page_url/2
 ]).
 
 -include_lib("zophrenic.hrl").
@@ -49,7 +50,6 @@ m_value(#m{value=V}, _Context) ->
 
 
 rsc() -> fun(Id, _Context) -> #rsc{id=Id} end.
-
 
 exists([C|_] = Name, Context) when is_list(Name) and is_integer(C) ->
     case rid_name(Name, Context) of
@@ -113,6 +113,7 @@ p(Id, is_readable, Context) -> is_readable(Id, Context);
 p(Id, is_writeable, Context) -> is_writeable(Id, Context);
 p(Id, is_ingroup, Context) -> is_ingroup(Id, Context);
 p(Id, exists, Context) -> exists(Id, Context);
+p(Id, page_url, Context) -> page_url(Id, Context);
 p(Id, group, Context) -> 
     case p(Id, group_id, Context) of
         undefined -> undefined;
@@ -293,3 +294,28 @@ rid_name(Name, Context) ->
             Id
     end.
 
+
+page_url(Id, Context) ->
+    case rid(Id, Context) of
+        #rsc{id=RscId} ->
+            CatId = p(Id, category_id, Context),
+            Args = [{id,RscId},{slug, p(Id, slug, Context)}],
+            case CatId of
+                undefined ->
+                    page_url_path([], Args, Context);
+                _ ->
+                    CatPath = lists:reverse(m_category:get_path(CatId, Context) ++ [CatId]),
+                    page_url_path(CatPath, Args, Context)
+            end;
+        _ ->
+            undefined
+    end.
+
+page_url_path([], Args, Context) ->
+    zp_dispatcher:url_for(page, Args);
+page_url_path([CatId|Rest], Args, Context) ->
+    Name = m_category:id_to_name(CatId, Context),
+    case zp_dispatcher:url_for(Name, Args) of
+        undefined -> page_url_path(Rest, Args, Context);
+        Url -> Url
+    end.
