@@ -10,11 +10,14 @@
 
 -export([trans/2, is_language/1, lc2/1, lc2descr/1]).
 
+-include_lib("zophrenic.hrl").
 
 %% @doc translate a string or trans record into another language
 %% @spec trans(From, Language) -> String
 %%   From = #trans{} | String
 %%   Language = atom()
+trans(Text, #context{}) ->
+    trans(Text, en);
 trans({trans, Trans}, Language) ->
 	case proplists:get_value(Language, Trans) of
 		undefined -> 
