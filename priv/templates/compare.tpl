@@ -13,7 +13,7 @@
 					<p>verhaaltje</p>
 					<div class="product-price clearfix">
 						<h3>&euro;899 <span>incl. btw</span></h3>
-						{% button text="Bekijk fiets" action={redirect location="/bike/trek/urban"} %}
+						{% button text="Bekijk fiets" action={redirect location="/bike/9999/trek-urban"} %}
 						<button>Vraag proefrit aan</button>
 					</div>
 				</div>
@@ -25,7 +25,7 @@
 					<p>verhaaltje</p>					
 					<div class="product-price clearfix">
 						<h3>&euro;350 <span>incl. btw</span></h3>
-						{% button text="Bekijk fiets" action={redirect location="/bike/trek/urban"} %}
+						{% button text="Bekijk fiets" action={redirect location="/bike/9999/trek-urban"} %}
 						<button>Vraag proefrit aan</button>
 					</div>
 				</div>
@@ -37,7 +37,7 @@
 					<p>verhaaltje</p>					
 					<div class="product-price clearfix">
 						<h3>&euro;2230 <span>incl. btw</span></h3>
-						{% button text="Bekijk fiets" action={redirect location="/bike/trek/urban"} %}
+						{% button text="Bekijk fiets" action={redirect location="/bike/9999/trek-urban"} %}
 						<button>Vraag proefrit aan</button>
 					</div>
 				</div>
