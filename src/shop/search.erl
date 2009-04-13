@@ -34,7 +34,7 @@ search({category_featured, CatId}, {Offset,Limit}, Context) ->
               and rc.nr >= ic.lft
               and rc.nr <= ic.rght
               and ic.id = $1
-            order by r.is_featured desc
+            order by r.is_featured desc, r.id desc
             limit $3
             offset $2
         ", [CatId, Offset-1, Limit], Context),
