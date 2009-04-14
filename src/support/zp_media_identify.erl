@@ -34,18 +34,30 @@ identify_cached(ImageFile) ->
 identify(ImageFile) ->
     CleanedImageFile = zp_utils:os_escape(ImageFile),
     Result    = os:cmd("identify -quiet \"" ++ CleanedImageFile ++ "[0]\""),
+    % ["test/a.jpg","JPEG","3440x2285","3440x2285+0+0","8-bit","DirectClass","2.899mb"]
+    % sometimes:
+    % test.jpg[0]=>test.jpg JPEG 2126x1484 2126x1484+0+0 DirectClass 8-bit 836.701kb 0.130u 0:02
     [Line1|_] = string:tokens(Result, "\r\n"),
-    case string:tokens(Line1, " ") of
-        % ["test/a.jpg","JPEG","3440x2285","3440x2285+0+0","8-bit","DirectClass","2.899mb"]
-        [_Path, Type, Dim, _Dim2, _Depth, _Class, _Size] ->
-            [Width,Height] = string:tokens(Dim, "x"),
-            {ok, [
-                {width, list_to_integer(Width)},
-                {height, list_to_integer(Height)},
-                {mime, mime(Type)},
-                {orientation, 1}
-            ]};
-        _ ->
+    Words = string:tokens(Line1, " "),
+    WordCount = length(Words),
+    Words1 = if
+        WordCount > 4 -> 
+            {A,_B} = lists:split(4, Words),
+            A;
+        true -> 
+            Words
+    end,
+    try 
+        [_Path, Type, Dim, _Dim2] = Words1,
+        [Width,Height] = string:tokens(Dim, "x"),
+        {ok, [
+            {width, list_to_integer(Width)},
+            {height, list_to_integer(Height)},
+            {mime, mime(Type)},
+            {orientation, 1}
+        ]}
+    catch 
+        _:_ ->
             ?LOG("identify of ~p failed - ~p", [CleanedImageFile, Line1]),
             {error, "unknown result from 'identify': '"++Line1++"'"}
     end.
