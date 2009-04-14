@@ -12,12 +12,12 @@
 
 [
 	{home,			[],												resource_home,			[]},
-	{overview,		["overview", cat],								resource_category,		[]},
+	{overview,		["overview"],   								resource_category,		[]},
+	{overview,		["overview", "bybrand", brand],					resource_category,		[]},
 	{overview,		["overview", cat, "bybrand", brand],			resource_category,		[]},
-	{overview,		["overview", cat, subcat],						resource_category,		[]},
 	{overview,		["overview", cat, subcat, "bybrand", brand], 	resource_category,		[]},
-	{overview,		["overview", cat, subcat, brand],				resource_category,		[]},
-	{overview,		["overview", "bybrand", brand],					resource_brand,			[]},
+	{overview,		["overview", cat],								resource_category,		[]},
+	{overview,		["overview", cat, subcat],						resource_category,		[]},
 	{product,		["product", id],								resource_product,		[]},
 	{product,		["product", id, slug],							resource_product,		[]},
 	{page,			["page", id],									resource_page,			[]},
