@@ -49,7 +49,7 @@
 			<h3>&euro;<strong id="cart-price-total">{{ shop_cart_total|format_price }}</strong> <span>incl. btw</span></h3>
 			{# An animate would be nice here #}
 			<div class="clearfix button-wrapper right">
-				{% button id="product-add-basket" class="buy-me left-side-button" text="&laquo; winkel verder" %}
+				{% button id="product-add-basket" class="buy-me left-side-button" text="&laquo; winkel verder" action={redirect dispatch="overview"} %}
 				{% button id="product-buy-basket" class="buy-me right-side-button" text="reken af &raquo;" %}
 			</div>
 		</div>
