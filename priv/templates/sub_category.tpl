@@ -1,11 +1,11 @@
 {% extends "base.tpl" %}
 
-{% block title %}{{ m.category[cat_id].title }}{% endblock %}
+{% block title %}{{ m.rsc[brand_id].title }} {{ m.category[cat_id].title }}{% endblock %}
 
 {% block content %}
 	<div id="content-area" class="zp-75 category-overview">
 		<!-- Area for the main content -->
-		<h2>{{ m.category[cat_id].title }}</h2>
+		<h2>{{ m.rsc[brand_id].title }} {{ m.category[cat_id].title }}</h2>
 		<div class="block clearfix">
 			<p class="intro">{{ m.category[cat_id].intro }}</p>
 			{{ m.category[cat_id].body }}
@@ -51,11 +51,12 @@
 				{% endfor %}
 			</ul>
 			
-			<h3 class="block">Brands</h3>
+			<h3 class="block">Merken</h3>
 			<ul id="sub-navigation">
-			    <li><a href="#">Stevens <span class="amount">(3)<span></a></li>
-			    <li><a href="#">Ortliep <span class="amount">(5)<span></a></li>
-			    <li><a href="#">Duracell <span class="amount">(2)<span></a></li>
+				<li><a href="{% url overview cat=cat_name subcat=subcat_name %}">Alle merken <span class="amount">({{ prod_count|default:"-" }})<span></a></li>
+				{% for b_id, b_name, b_count in cat_brand %}
+			    <li><a {% ifequal brand_id b_id %}class="current" {% endifequal %} href="{% url overview cat=cat_name subcat=subcat_name brand=b_name %}">{{m.rsc[b_id].title}} <span class="amount">({{ b_count|default:"-" }})<span></a></li>
+				{% endfor %}
 			</ul>
 		</div>
 	</div>

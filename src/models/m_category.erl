@@ -23,6 +23,7 @@
     get_path/2,
     insert/2,
     name_to_id/2,
+    name_to_id_check/2,
     id_to_name/2,
     update_parent/3,
     update_sequence/2,
@@ -48,7 +49,10 @@ m_find_value(tree2, #m{value=undefined}, Context) ->
     tree_depth(Context, 2);
 
 m_find_value(Index, #m{value=undefined} = M, Context) ->
-    M#m{value={cat, name_to_id(Index, Context)}};
+    case name_to_id(Index, Context) of
+        {ok, Id} -> M#m{value={cat, Id}};
+        {error, _} -> undefined
+    end;
 
 m_find_value(tree, #m{value={cat, Id}}, Context) ->
     tree(Id, Context);
@@ -122,12 +126,19 @@ get_range_by_name(Name, Context) ->
     zp_depcache:memo(F, {category_range_name, Name}, ?WEEK, [category]).
 
 name_to_id(Name, _Context) when is_integer(Name) ->
-    Name;
+    {ok, Name};
 name_to_id(Name, Context) ->
     F = fun() ->
-        zp_db:q1("select id from category where name = $1", [Name], Context)
+        case zp_db:q1("select id from category where name = $1", [Name], Context) of
+            undefined -> {error, {enoent, category, Name}};
+            Id -> {ok, Id}
+        end
     end,
     zp_depcache:memo(F, {category_name_to_id, Name}, ?WEEK, [category]).
+
+name_to_id_check(Name, Context) ->
+    {ok, Id} = name_to_id(Name, Context),
+    Id.
 
 id_to_name(Id, Context) ->
     F = fun() ->
@@ -155,8 +166,9 @@ update_sequence(Ids, Context) ->
 
 
 insert(Props, Context) ->
-    zp_db:insert(category, Props, Context),
-    zp_depcache:flush(category).
+    {ok, Id} = zp_db:insert(category, Props, Context),
+    zp_depcache:flush(category),
+    {ok, Id}.
 
 
 image(Id, Context) ->

@@ -10,9 +10,13 @@
 %% interface functions
 -export([
     is_predicate/2,
-    id/2,
+    name_to_id/2,
+    name_to_id_check/2,
     all/1,
-    predicate/2
+    get/2,
+    insert/2,
+    delete/2,
+    update/3
 ]).
 
 -include_lib("zophrenic.hrl").
@@ -21,40 +25,41 @@
 %% @doc Test if the property is the name of a predicate
 %% @spec is_predicate(Pred, Context) -> bool()
 is_predicate(Pred, Context) ->
-    case id(Pred, Context) of
-        undefined -> false;
-        _Id -> true
+    case name_to_id(Pred, Context) of
+        {ok, _Id} -> true;
+        _ -> false
     end.
 
 %% @doc Return the id of the predicate
-%% @spec id(Pred, Context) -> int()
-id(Pred, Context) when is_atom(Pred) ->
-    case zp_depcache:get({predicate_id, Pred}) of
-        {ok, PredId} ->
-            PredId;
-        undefined ->
-            case zp_db:q1("select id from predicate where name = $1", [Pred], Context) of
-                undefined ->
-                    zp_depcache:set({predicate_id, Pred}, undefined, ?DAY, [predicate]),
-                    undefined;
-                Id ->
-                    zp_depcache:set({predicate_id, Pred}, Id, ?DAY, [predicate]),
-                    Id
-            end
-    end;
-id(Pred, _Context) when is_integer(Pred) ->
-    Pred;
-id(Pred, Context) ->
-    id(zp_utils:to_atom(Pred), Context).
+%% @spec name_to_id(Pred, Context) -> {ok, int()} | {error, Reason}
+name_to_id(Pred, Context) when is_atom(Pred) ->
+    F = fun() ->
+        case zp_db:q1("select id from predicate where name = $1", [Pred], Context) of
+            undefined -> {error, {enoent, predicate, Pred}};
+            Id -> {ok, Id}
+        end
+    end,
+    zp_depcache:memo(F, {predicate_id, Pred}, ?DAY, [predicate]);
+name_to_id(Pred, _Context) when is_integer(Pred) ->
+    {ok, Pred};
+name_to_id(Pred, Context) ->
+    name_to_id(zp_convert:to_atom(Pred), Context).
+
+
+%% @doc Return the id of the predicate, crash when it can't be found
+%% @spec name_to_id_check(Pred, Context) -> int()
+name_to_id_check(Name, Context) ->
+    {ok, Id} = name_to_id(Name, Context),
+    Id.
 
 
 %% @doc Return the definition of the predicate
 %% @spec predicate(Pred, Context) -> PredicatePropList | undefined
-predicate(Pred, Context) when is_binary(Pred) ->
-    predicate(list_to_atom(zp_utils:to_lower(Pred)), Context);
-predicate(Pred, Context) when is_list(Pred) ->
-    predicate(list_to_atom(string:to_lower(Pred)), Context);
-predicate(Pred, Context) ->
+get(Pred, Context) when is_binary(Pred) ->
+    get(list_to_atom(zp_utils:to_lower(Pred)), Context);
+get(Pred, Context) when is_list(Pred) ->
+    get(list_to_atom(string:to_lower(Pred)), Context);
+get(Pred, Context) ->
     case zp_depcache:get(predicate, Pred) of
         {ok, undefined} ->
             undefined;
@@ -81,4 +86,24 @@ all(Context) ->
             zp_depcache:set(predicate, Preds1, ?DAY, [predicate]),
             Preds1
     end.
+
+%% @doc Insert a new predicate
+%% @spec insert(Props, Context) -> {ok, Id}
+insert(Props, Context) ->
+    {ok, Id} = zp_db:insert(predicate, Props, Context),
+    zp_depcache:flush(predicate),
+    {ok, Id}.
+
+%% @doc Delete a predicate, crashes when the predicate is in use
+%% @spec delete(Props, Context) -> void()
+delete(Id, Context) ->
+    zp_db:delete(predicate, Id, Context),
+    zp_depcache:flush(predicate).
+
+
+%% @doc Update a predicate
+%% @spec update(Props, Props, Context) -> void()
+update(Id, Props, Context) ->
+    zp_db:update(predicate, Id, Props, Context),
+    zp_depcache:flush(predicate).
 

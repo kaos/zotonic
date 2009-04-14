@@ -44,7 +44,7 @@ get(Id, Context) ->
 
 
 %% @doc Insert a new group, make sure that the roles are only set by the admin
-%% @spec insert(PropList, Context) -> int()
+%% @spec insert(PropList, Context) -> {ok, int()}
 insert(Props, Context) ->
     PropsSafe = case zp_access_control:has_role(admin, Context) of
         true -> Props;
@@ -60,7 +60,8 @@ insert(Props, Context) ->
         _ -> PropsSafe
     end,
     {ok, Id} = zp_db:insert(group, PropsType, Context),
-    Id.
+    zp_depcache:flush(group),
+    {ok, Id}.
 
 
 

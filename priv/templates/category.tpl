@@ -1,21 +1,22 @@
 {% extends "base.tpl" %}
 
-{% block title %}{{cat.title}}{% endblock %}
+{% block title %}{{ m.rsc[brand_id].title }}  {{cat.title}}{% endblock %}
 
 {% block content %}
 	<div id="content-area" class="zp-75 category-overview">
 		<!-- Area for the main content -->
-		<h2>{{ cat.title }}</h2>
+		<h2>{{ m.rsc[brand_id].title }} {{ cat.title }}</h2>
 		<ul class="zp-67 subcategory-list">
-		{% for sub in m.category[cat_id].tree1 %}
+		{% for sub in subcats %}
 			<li class="block clearfix">
-				<a href="{% url overview cat=cat.name subcat=sub.name %}">
+				<a href="{% ifequal cat.name "product" %}{% url overview cat=sub.name brand=brand_name %}{% else %}{% url overview cat=cat.name subcat=sub.name brand=brand_name %}{% endifequal %}">
 					{% image m.category[sub.id].image width=200 height=70 crop alt="bags" class="left" %}
 				</a>
-				<h3><a href="{% url overview cat=cat.name subcat=sub.name %}" title="{{ sub.title }}">{{ sub.title }}</a></h3>
+				<h3><a href="{% ifequal cat.name "product" %}{% url overview cat=sub.name brand=brand_name %}{% else %}{% url overview cat=cat.name subcat=sub.name brand=brand_name %}{% endifequal %}" title="{{ sub.title }}">
+						{{ sub.title }}</a></h3>
 				<p>
 					{{ sub.intro }}
-					<a href="{% url overview cat=cat.name subcat=sub.name %}">Lees&nbsp;meer&nbsp;&raquo;</a>
+					<a href="{% ifequal cat.name "product" %}{% url overview cat=sub.name brand=brand_name %}{% else %}{% url overview cat=cat.name subcat=sub.name brand=brand_name %}{% endifequal %}">Lees&nbsp;meer&nbsp;&raquo;</a>
 				</p>
 			</li>
 		{% empty %}
@@ -30,6 +31,11 @@
 	
 		<div class="category-sidebar zp-33">
 			<div class="block clearfix">
+				{% if brand_id %}
+					<h3>{{ m.rsc[brand_id].title }}</h3>
+					{{ m.rsc[brand_id].body }}
+				{% endif %}
+
 				<h3>{{ cat.title }}</h3>
 				{{ cat.body }}
 			</div>
@@ -41,11 +47,12 @@
 	<div id="sidebar" class="zp-25">
 		<div class="padding">
 			
-			<h3 class="block">Brands</h3>
+			<h3 class="block">Merken</h3>
 			<ul id="sub-navigation">
-			    <li><a href="#">Stevens <span class="amount">(3)<span></a></li>
-			    <li><a href="#">Ortliep <span class="amount">(5)<span></a></li>
-			    <li><a href="#">Duracell <span class="amount">(2)<span></a></li>
+				<li><a href="{% url overview cat=cat_name subcat=subcat_name %}">Alle merken <span class="amount">({{ prod_count|default:"-" }})<span></a></li>
+				{% for b_id, b_name, b_count in cat_brand %}
+			    <li><a {% ifequal brand_id b_id %}class="current" {% endifequal %} href="{% url overview cat=cat_name subcat=subcat_name brand=b_name %}">{{m.rsc[b_id].title}} <span class="amount">({{ b_count|default:"-" }})<span></a></li>
+				{% endfor %}
 			</ul>
 			
 			<h3 class="block">Featured products</h3>

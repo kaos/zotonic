@@ -33,7 +33,7 @@ get(Id, Context) ->
 
 %% @doc Get the edge id of a subject/pred/object combination
 get_id(SubjectId, Pred, ObjectId, Context) ->
-    PredId = m_predicate:id(Pred, Context),
+    PredId = m_predicate:name_to_id_check(Pred, Context),
     zp_db:q1("select id from edge where subject_id = $1 and object_id = $2 and predicate_id = $3", [SubjectId, PredId, ObjectId], Context).
 
 %% @doc Return the full description of all edges from a subject, grouped by predicate
@@ -54,16 +54,16 @@ get_edges(SubjectId, Context) ->
 
 %% Insert a new edge
 insert(SubjectId, Pred, ObjectId, Context) ->
-    PredId = m_predicate:id(Pred, Context),
+    PredId = m_predicate:name_to_id_check(Pred, Context),
     case zp_db:q1("select id from edge where subject_id = $1 and object_id = $2 and predicate_id = $3", [SubjectId, ObjectId, PredId], Context) of
         undefined ->
             {ok, EdgeId} = zp_db:insert(edge, [{subject_id, SubjectId}, {object_id, ObjectId}, {predicate_id, PredId}], Context),
             zp_depcache:flush(#rsc{id=SubjectId}),
             zp_depcache:flush(#rsc{id=ObjectId}),
-            EdgeId;
+            {ok, EdgeId};
         EdgeId ->
             % Edge exists - skip
-            EdgeId
+            {ok, EdgeId}
     end.
 
 
@@ -81,7 +81,7 @@ delete(Id, Context) ->
 
 %% @doc Delete an edge by subject, object and predicate id
 delete(SubjectId, Pred, ObjectId, Context) ->
-    PredId = m_predicate:id(Pred, Context),
+    PredId = m_predicate:name_to_id_check(Pred, Context),
     zp_db:q("delete from edge where subject_id = $1 and object_id = $2 and predicate_id = $3",  [SubjectId, ObjectId, PredId], Context),
     zp_depcache:flush(#rsc{id=SubjectId}),
     zp_depcache:flush(#rsc{id=ObjectId}),
@@ -109,7 +109,7 @@ subject(Id, Pred, N, Context) ->
 %% @doc Return all object ids of an id with a certain predicate.  The order of the ids is deterministic.
 %% @spec objects(Id, Pred, Context) -> List
 objects(Id, Pred, Context) when is_atom(Pred) ->
-    objects(Id, m_predicate:id(Pred,Context), Context);
+    objects(Id, m_predicate:name_to_id_check(Pred,Context), Context);
 objects(Id, Pred, Context) ->
     case zp_depcache:get({objects, Pred, Id}) of
         {ok, Objects} ->
@@ -125,7 +125,7 @@ objects(Id, Pred, Context) ->
 %% @doc Return all subject ids of an object id with a certain predicate.   The order of the ids is deterministic.
 %% @spec subjects(Id, Pred, Context) -> List
 subjects(Id, Pred, Context) when is_atom(Pred) ->
-    subjects(Id, m_predicate:id(Pred,Context), Context);
+    subjects(Id, m_predicate:name_to_id_check(Pred,Context), Context);
 subjects(Id, Pred, Context) ->
     case zp_depcache:get({subjects, Pred, Id}) of
         {ok, Objects} ->

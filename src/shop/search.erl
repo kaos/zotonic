@@ -38,6 +38,29 @@ search({category_featured, CatId}, {Offset,Limit}, Context) ->
             limit $3
             offset $2
         ", [CatId, Offset-1, Limit], Context),
+    [ Col || {Col} <- Rows ];
+
+%% @doc Return a list of featured resource ids inside a category having a object_id as predicate
+%% @spec search(SearchSpec, Range, Context) -> IdList | {error, Reason}
+search({category_featured_with_pred, CatId, Predicate, ObjectId}, {Offset,Limit}, Context) ->
+    PredId = m_predicate:name_to_id_check(Predicate, Context),
+    Rows = zp_db:q("
+            select r.id
+            from rsc r, category rc, category ic, edge e
+            where r.category_id = rc.id
+              and r.is_published
+              and r.publication_start <= now()
+              and r.publication_end >= now()
+              and rc.nr >= ic.lft
+              and rc.nr <= ic.rght
+              and ic.id = $1
+              and r.id = e.subject_id
+              and e.predicate_id = $4
+              and e.object_id = $5
+            order by r.is_featured desc, r.id desc
+            limit $3
+            offset $2
+        ", [CatId, Offset-1, Limit, PredId, ObjectId], Context),
     [ Col || {Col} <- Rows ].
 
 

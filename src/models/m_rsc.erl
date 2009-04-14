@@ -13,6 +13,9 @@
     m_to_list/2,
     m_value/2,
     
+    name_to_id/2,
+    name_to_id_check/2,
+    
 	rsc/0,
 	exists/2, 
 	is_readable/2, is_writeable/2, is_owner/2, is_ingroup/2, is_me/2,
@@ -47,7 +50,17 @@ m_value(#m{value=undefined}, _Context) ->
 m_value(#m{value=V}, _Context) ->
     V.
 
+%% @doc Return the id of the resource with the name
+% @spec name_to_id(NameString, Context) -> int() | undefined
+name_to_id(Name, Context) ->
+    case rid_name(Name, Context) of
+        #rsc{id=Id} -> {ok, Id};
+        _ -> {error, {enoent, rsc, Name}}
+    end.
 
+name_to_id_check(Name, Context) ->
+    {ok, Id} = name_to_id(Name, Context),
+    Id.
 
 rsc() -> fun(Id, _Context) -> #rsc{id=Id} end.
 
