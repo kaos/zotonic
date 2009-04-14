@@ -21,8 +21,8 @@ render_action(_TriggerId, _TargetId, Args, Context) ->
         DispatchString ->
             Dispatch = zp_convert:to_atom(DispatchString),
             Args1 = proplists:delete(dispatch, Args),
-            zp_dispatcher:url_for(Dispatch, Args1, Context)
+            zp_dispatcher:url_for(Dispatch, Args1, none)
     end,
-	Script   = [<<"window.location = \"">>,zp_utils:js_escape(Location),$",$;],
+	Script = [<<"window.location = \"">>,zp_utils:js_escape(Location),$",$;],
 	{Script, Context}.
     
