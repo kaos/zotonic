@@ -3,12 +3,10 @@
 <plist version="1.0">
 <dict>
 	<key>currentDocument</key>
-	<string>src/zophrenic.erl</string>
+	<string>default/lib/js/modules/zp_autocomplete.js</string>
 	<key>documents</key>
 	<array>
 		<dict>
-			<key>expanded</key>
-			<true/>
 			<key>name</key>
 			<string>src</string>
 			<key>regexFolderFilter</key>
@@ -65,6 +63,20 @@
 	<integer>256</integer>
 	<key>metaData</key>
 	<dict>
+		<key>default/lib/js/modules/zp_autocomplete.js</key>
+		<dict>
+			<key>caret</key>
+			<dict>
+				<key>column</key>
+				<integer>67</integer>
+				<key>line</key>
+				<integer>12</integer>
+			</dict>
+			<key>firstVisibleColumn</key>
+			<integer>0</integer>
+			<key>firstVisibleLine</key>
+			<integer>0</integer>
+		</dict>
 		<key>deps/mochiweb/src/mochiweb.app</key>
 		<dict>
 			<key>caret</key>
@@ -246,28 +258,14 @@
 			<key>caret</key>
 			<dict>
 				<key>column</key>
-				<integer>0</integer>
+				<integer>2</integer>
 				<key>line</key>
-				<integer>29</integer>
+				<integer>35</integer>
 			</dict>
 			<key>firstVisibleColumn</key>
 			<integer>0</integer>
 			<key>firstVisibleLine</key>
 			<integer>0</integer>
-		</dict>
-		<key>priv/lib/css/zp-project.css</key>
-		<dict>
-			<key>caret</key>
-			<dict>
-				<key>column</key>
-				<integer>17</integer>
-				<key>line</key>
-				<integer>93</integer>
-			</dict>
-			<key>firstVisibleColumn</key>
-			<integer>0</integer>
-			<key>firstVisibleLine</key>
-			<integer>65</integer>
 		</dict>
 		<key>priv/resources/resource_brand.erl</key>
 		<dict>
@@ -283,90 +281,64 @@
 			<key>firstVisibleLine</key>
 			<integer>0</integer>
 		</dict>
-		<key>priv/resources/resource_compare.erl</key>
+		<key>priv/templates/category.tpl</key>
 		<dict>
 			<key>caret</key>
 			<dict>
 				<key>column</key>
-				<integer>32</integer>
+				<integer>14</integer>
 				<key>line</key>
-				<integer>10</integer>
-			</dict>
-			<key>firstVisibleColumn</key>
-			<integer>0</integer>
-			<key>firstVisibleLine</key>
-			<integer>0</integer>
-		</dict>
-		<key>priv/templates/base.tpl</key>
-		<dict>
-			<key>caret</key>
-			<dict>
-				<key>column</key>
-				<integer>40</integer>
-				<key>line</key>
-				<integer>32</integer>
-			</dict>
-			<key>firstVisibleColumn</key>
-			<integer>0</integer>
-			<key>firstVisibleLine</key>
-			<integer>6</integer>
-		</dict>
-		<key>priv/templates/compare.tpl</key>
-		<dict>
-			<key>caret</key>
-			<dict>
-				<key>column</key>
-				<integer>109</integer>
-				<key>line</key>
-				<integer>13</integer>
-			</dict>
-			<key>firstVisibleColumn</key>
-			<integer>0</integer>
-			<key>firstVisibleLine</key>
-			<integer>1</integer>
-		</dict>
-		<key>priv/templates/page.tpl</key>
-		<dict>
-			<key>caret</key>
-			<dict>
-				<key>column</key>
-				<integer>0</integer>
-				<key>line</key>
-				<integer>0</integer>
-			</dict>
-			<key>firstVisibleColumn</key>
-			<integer>0</integer>
-			<key>firstVisibleLine</key>
-			<integer>0</integer>
-		</dict>
-		<key>priv/templates/product.tpl</key>
-		<dict>
-			<key>caret</key>
-			<dict>
-				<key>column</key>
-				<integer>7</integer>
-				<key>line</key>
-				<integer>102</integer>
+				<integer>16</integer>
 			</dict>
 			<key>columnSelection</key>
 			<false/>
 			<key>firstVisibleColumn</key>
 			<integer>0</integer>
 			<key>firstVisibleLine</key>
-			<integer>77</integer>
+			<integer>0</integer>
 			<key>selectFrom</key>
+			<dict>
+				<key>column</key>
+				<integer>12</integer>
+				<key>line</key>
+				<integer>16</integer>
+			</dict>
+			<key>selectTo</key>
+			<dict>
+				<key>column</key>
+				<integer>17</integer>
+				<key>line</key>
+				<integer>16</integer>
+			</dict>
+		</dict>
+		<key>priv/templates/sub_category.tpl</key>
+		<dict>
+			<key>caret</key>
 			<dict>
 				<key>column</key>
 				<integer>0</integer>
 				<key>line</key>
-				<integer>102</integer>
+				<integer>53</integer>
+			</dict>
+			<key>columnSelection</key>
+			<false/>
+			<key>firstVisibleColumn</key>
+			<integer>0</integer>
+			<key>firstVisibleLine</key>
+			<integer>0</integer>
+			<key>selectFrom</key>
+			<dict>
+				<key>column</key>
+				<integer>8</integer>
+				<key>line</key>
+				<integer>58</integer>
 			</dict>
 			<key>selectTo</key>
 			<dict>
 				<key>column</key>
 				<integer>0</integer>
 				<key>line</key>
-				<integer>103</integer>
+				<integer>53</integer>
 			</dict>
 		</dict>
 		<key>src/erlydtl/erlydtl_parser.yrl</key>
@@ -411,39 +383,11 @@
 			<key>firstVisibleLine</key>
 			<integer>197</integer>
 		</dict>
-		<key>src/zophrenic.erl</key>
-		<dict>
-			<key>caret</key>
-			<dict>
-				<key>column</key>
-				<integer>0</integer>
-				<key>line</key>
-				<integer>0</integer>
-			</dict>
-			<key>firstVisibleColumn</key>
-			<integer>0</integer>
-			<key>firstVisibleLine</key>
-			<integer>0</integer>
-		</dict>
-		<key>src/zophrenic_sup.erl</key>
-		<dict>
-			<key>caret</key>
-			<dict>
-				<key>column</key>
-				<integer>0</integer>
-				<key>line</key>
-				<integer>0</integer>
-			</dict>
-			<key>firstVisibleColumn</key>
-			<integer>0</integer>
-			<key>firstVisibleLine</key>
-			<integer>0</integer>
-		</dict>
 	</dict>
 	<key>openDocuments</key>
 	<array>
-		<string>priv/resources/resource_brand.erl</string>
-		<string>src/zophrenic.erl</string>
+		<string>default/lib/js/modules/zp_autocomplete.js</string>
+		<string>priv/dispatch/struijk</string>
 	</array>
 	<key>showFileHierarchyDrawer</key>
 	<false/>
@@ -456,7 +400,38 @@
 			<key>isExpanded</key>
 			<true/>
 			<key>subItems</key>
-			<dict/>
+			<dict>
+				<key>lib</key>
+				<dict>
+					<key>isExpanded</key>
+					<true/>
+					<key>subItems</key>
+					<dict>
+						<key>js</key>
+						<dict>
+							<key>isExpanded</key>
+							<true/>
+							<key>subItems</key>
+							<dict>
+								<key>apps</key>
+								<dict>
+									<key>isExpanded</key>
+									<true/>
+									<key>subItems</key>
+									<dict/>
+								</dict>
+								<key>modules</key>
+								<dict>
+									<key>isExpanded</key>
+									<true/>
+									<key>subItems</key>
+									<dict/>
+								</dict>
+							</dict>
+						</dict>
+					</dict>
+				</dict>
+			</dict>
 		</dict>
 		<key>priv</key>
 		<dict>
@@ -464,14 +439,7 @@
 			<true/>
 			<key>subItems</key>
 			<dict>
-				<key>log</key>
-				<dict>
-					<key>isExpanded</key>
-					<true/>
-					<key>subItems</key>
-					<dict/>
-				</dict>
-				<key>models</key>
+				<key>dispatch</key>
 				<dict>
 					<key>isExpanded</key>
 					<true/>
@@ -485,17 +453,17 @@
 					<key>subItems</key>
 					<dict/>
 				</dict>
+				<key>templates</key>
+				<dict>
+					<key>isExpanded</key>
+					<true/>
+					<key>subItems</key>
+					<dict/>
+				</dict>
 			</dict>
-		</dict>
-		<key>src</key>
-		<dict>
-			<key>isExpanded</key>
-			<true/>
-			<key>subItems</key>
-			<dict/>
 		</dict>
 	</dict>
 	<key>windowFrame</key>
-	<string>{{0, 75}, {1280, 703}}</string>
+	<string>{{9, 95}, {1818, 1083}}</string>
 </dict>
 </plist>
