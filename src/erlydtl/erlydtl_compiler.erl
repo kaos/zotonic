@@ -475,7 +475,7 @@ value_ast(ValueToken, AsString, Context, TreeWalker) ->
             {Ast, VarName} = resolve_variable_ast(Variable, Context),
             {{Ast, #ast_info{var_names = [VarName]}}, TreeWalker};
         {'index_value', _, _} = Variable ->
-            {Ast, VarName} = resolve_variable_ast(Variable, Context),
+            {Ast, VarName} = resolve_indexvariable_ast(Variable, Context),
             {{Ast, #ast_info{var_names = [VarName]}}, TreeWalker};
         {model, {identifier, _, VarName}} = Model ->
             {Ast, VarName} = resolve_variable_ast(Model, Context),
@@ -580,6 +580,10 @@ resolve_variable_ast(VarTuple, Context) ->
 
 resolve_ifvariable_ast(VarTuple, Context) ->
     opttrans_variable_ast(resolve_variable_ast(VarTuple, Context, 'find_value')).
+
+resolve_indexvariable_ast(VarTuple, Context) ->
+    opttrans_variable_ast(resolve_variable_ast(VarTuple, Context, 'find_value')).
+
 
 opttrans_variable_ast({Ast, VarName}) ->
     {erl_syntax:application(

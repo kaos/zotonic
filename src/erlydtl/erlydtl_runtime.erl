@@ -4,6 +4,10 @@
 -include_lib("zophrenic.hrl").
 
 % Finde the value of a model value
+find_value(<<>>, #m{}, _Context) ->
+    undefined;
+find_value(undefined, #m{}, _Context) ->
+    undefined;
 find_value(Key, #m{model=Model} = M, Context) ->
     Model:m_find_value(Key, M, Context);
     

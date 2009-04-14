@@ -140,6 +140,12 @@ format_price(Input) when is_function(Input, 0) ->
 format_price(Input) ->
     Input.
 
+default(Input, Default) -> 
+    case erlydtl_runtime:is_false(Input) of
+        true -> Default;
+        false -> Input
+    end.
+
 % Translate atoms and numbers to strings
 % Leave tuples as tuples.
 stringify(In) when is_atom(In) ->
