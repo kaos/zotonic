@@ -28,7 +28,7 @@
 							defaults = {}
 						}
 						
-						objectOptions = $.extend({}, defaults, $(element).metadata());							
+						objectOptions = $.extend({}, defaults, $(element).metadata());
 						$(element)[functionName](objectOptions);
 					}
 				}

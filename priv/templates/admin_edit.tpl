@@ -32,10 +32,24 @@
 			</div>
 			<div class="zp-25">
 				<div class="padding">
-					<h3 class="alt">Context</h3>
+					<h3 class="alt">Auto completer</h3>
 					<input type="text" name="test" class="do_autocomplete" title="Try typing a word, I'll finish it." />
 					
-					<p>Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.</p>
+					<p>&nbsp;</p>
+					<h3 class="alt">Unlinker</h3>
+					<div class="rsc-edge">
+						<span class="do_unlink { object_id: 2, edge_id: 33, subject_id: 4 }">
+							About	
+							<img alt="" src="/lib/images/cross.png" />
+						</span>
+					</div>
+
+					<div class="rsc-edge">
+						<span class="do_unlink { object_id: 2, edge_id: 33, subject_id: 4 }">
+							About	
+							<img alt="" src="/lib/images/cross.png" />
+						</span>
+					</div>
 				</div>
 			</div>
 		</div>

@@ -276,3 +276,51 @@ a:focus {
 	border: solid #888;
 	border-width: 1px;
 }
+
+
+/* autocompleter
+---------------------------------------------------------- */
+
+.suggestions-list {
+	background: #f9f9f9;
+	border: solid;
+	border-width: 1px;
+	border-color: #eee #888 #888 #888;
+}
+
+	.suggestions-list li.suggestions-result {
+		padding: 2px 4px;
+		cursor: pointer;
+	}
+	
+		.suggestions-list li.suggestions-result.hovering {
+			background: #eee;
+		}
+
+
+/* unlinker
+---------------------------------------------------------- */
+
+.rsc-edge {
+	line-height: 27px;
+}
+
+.unlink-confirm {
+	background: #fff;
+	border: 1px solid #ccc;
+	-moz-border-radius: 3px;
+	-webkit-border-radius: 3px;
+	padding: 2px 2px 2px 15px;
+	opacity: .90;
+	display: none;
+}
+
+.unlink-confirm button {
+	margin: 0 0 0 3px;
+}
+
+.unlink-confirm span {
+	margin: 0 3px 0 0;
+	float: left;
+	display: block;
+}
