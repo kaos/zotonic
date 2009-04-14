@@ -80,11 +80,13 @@
 				}
 			},
 			
-			warn: function(obj, text)
+			warn: function(text, obj)
 			{
+				obj = obj || '';
+				
 				if(window.console) 
 				{
-					console.warn(obj, text);
+					console.warn(text, obj);
 				}
 				
 				if($.noticeAdd)
@@ -97,13 +99,13 @@
 				}
 			},
 			
-			error: function(obj, text)
+			error: function(text, obj)
 			{
 				obj = obj || '';
 
 				if(window.console) 
 				{
-					console.error(obj, text);
+					console.error(text, obj);
 				}
 				
 				if($.noticeAdd)

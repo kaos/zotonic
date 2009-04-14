@@ -57,10 +57,11 @@ function zp_postback_loop()
 
 function zp_queue_postback(triggerID, postback, extraParams) 
 {
-	var o = new Object();
-	o.triggerID   = triggerID;
-	o.postback    = postback;
-	o.extraParams = extraParams;
+	var o 			= new Object();
+	o.triggerID		= triggerID;
+	o.postback		= postback;
+	o.extraParams	= extraParams;
+	
 	zp_postbacks.push(o);
 }
 
@@ -81,28 +82,33 @@ function zp_ajax(params)
 	zp_start_spinner();	
 
 	$.ajax({ 
-		url: '/postback',
-		type: 'post',
-		data: params,
-		dataType: 'text',
+		url: 		'/postback',
+		type: 		'post',
+		data: 		params,
+		dataType: 	'text',
 		success: function(data, textStatus) 
 	    {
 			zp_is_in_postback--;
 			zp_stop_spinner();
-			try {
-				//alert("SUCCESS: " + transport.responseText);
+			
+			try 
+			{
+				//$.misc.log("SUCCESS: " + transport.responseText);
 				eval(data);
                 zp_init_postback_forms();
-			} catch (E) {
-				alert("Error evaluating ajax return value: " + data);
-				alert(E);
+			} 
+			catch(e)
+			{
+				$.misc.error("Error evaluating ajax return value: " + data);
+				$.misc.warn(e);
 			}
 		},
 		error: function(xmlHttpRequest, textStatus, errorThrown) 
 	    {
 		    zp_is_in_postback--;
 			zp_stop_spinner();
-		    alert("FAIL: " + textStatus);
+		    
+		$.misc.error("FAIL: " + textStatus);
 	    }
 	});			
 }
@@ -155,18 +161,19 @@ function zp_is_enter_key(event)
 	return (event && event.keyCode == 13);
 }
 
-/*** Spinner, showed when waiting for a postback ***/
+/*** Spinner, showen when waiting for a postback ***/
 
 function zp_start_spinner()
 {
-    if (zp_is_in_postback > 0)
+    if(zp_is_in_postback > 0)
     {
     	$('#spinner').fadeIn(100);
     }
 }
 
-function zp_stop_spinner() {
-    if (zp_is_in_postback == 0)
+function zp_stop_spinner() 
+{
+    if(zp_is_in_postback == 0)
     {
     	$('#spinner').fadeOut(100);
     }
@@ -181,10 +188,12 @@ function zp_draggable(dragObj, dragOptions, dragTag)
 
 function zp_droppable(dropObj, dropOptions, dropPostbackInfo) 
 {
-	dropOptions.drop = function(ev, ui) {
+	dropOptions.drop = function(ev, ui) 
+	{
 		var dragTag = $(ui.draggable[0]).data("zp_drag_tag");
 		zp_queue_postback(this.id, dropPostbackInfo, "drag_item=" + urlencode(dragTag));
 	}
+
 	$(dropObj).droppable(dropOptions);
 }
 
@@ -197,7 +206,8 @@ function zp_sortable(sortableItem, sortTag)
 
 function zp_sorter(sortBlock, sortOptions, sortPostbackInfo) 
 {
-	sortOptions.update = function() {
+	sortOptions.update = function() 
+	{
 		var sortItems = "";
 
 		for (var i=0; i<this.childNodes.length; i++) 
@@ -214,6 +224,7 @@ function zp_sorter(sortBlock, sortOptions, sortPostbackInfo)
 		}
 		zp_queue_postback(this.id, sortPostbackInfo, "sort_items=" + urlencode(sortItems));
 	};
+	
 	$(sortBlock).sortable(sortOptions);
 }
 
