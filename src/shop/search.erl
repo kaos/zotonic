@@ -10,20 +10,36 @@
 %% interface functions
 -export([
     search/2,
-    search/3,
-    search_media/2,
-    search_media/3
+    search/3
 ]).
 
 -define(OFFSET_LIMIT, {1,10}).
 
+-include_lib("zophrenic.hrl").
 
 search(S, Context) ->
     search(S, ?OFFSET_LIMIT, Context).
-    
-%% @doc Return a list of featured resource ids inside a category
+
+
+%% @doc Return a list of resource ids, featured ones first
+%% @spec search(SearchSpec, Range, Context) -> {ok, IdList, Total} | {error, Reason}
+search({featured, []}, {Offset,Limit}, Context) ->
+    Rows = zp_db:q("
+            select r.id
+            from rsc r
+            where r.is_published
+              and r.publication_start <= now()
+              and r.publication_end >= now()
+            order by r.is_featured desc, r.id desc
+            limit $2
+            offset $1
+        ", [Offset-1, Limit], Context),
+    #search_result{result=[ Col || {Col} <- Rows ]};
+
+%% @doc Return a list of resource ids inside a category, featured ones first
 %% @spec search(SearchSpec, Range, Context) -> IdList | {error, Reason}
-search({category_featured, CatId}, {Offset,Limit}, Context) ->
+search({featured, [{cat, Cat}]}, {Offset,Limit}, Context) ->
+    CatId = m_category:name_to_id_check(Cat, Context),
     Rows = zp_db:q("
             select r.id
             from rsc r, category rc, category ic
@@ -38,11 +54,12 @@ search({category_featured, CatId}, {Offset,Limit}, Context) ->
             limit $3
             offset $2
         ", [CatId, Offset-1, Limit], Context),
-    [ Col || {Col} <- Rows ];
+    #search_result{result=[ Col || {Col} <- Rows ]};
 
 %% @doc Return a list of featured resource ids inside a category having a object_id as predicate
 %% @spec search(SearchSpec, Range, Context) -> IdList | {error, Reason}
-search({category_featured_with_pred, CatId, Predicate, ObjectId}, {Offset,Limit}, Context) ->
+search({featured, [{cat,Cat},{object,ObjectId},{predicate,Predicate}]}, {Offset,Limit}, Context) ->
+    CatId = m_category:name_to_id_check(Cat, Context),
     PredId = m_predicate:name_to_id_check(Predicate, Context),
     Rows = zp_db:q("
             select r.id
@@ -61,13 +78,9 @@ search({category_featured_with_pred, CatId, Predicate, ObjectId}, {Offset,Limit}
             limit $3
             offset $2
         ", [CatId, Offset-1, Limit, PredId, ObjectId], Context),
-    [ Col || {Col} <- Rows ].
+    #search_result{result=[ Col || {Col} <- Rows ]};
 
-
-search_media(S, Context) ->
-    search_media(S, ?OFFSET_LIMIT, Context).
-    
-search_media({category_image, CatId}, {Offset,Limit}, Context) ->
+search({media_category_image, CatId}, {Offset,Limit}, Context) ->
     Rows = zp_db:q("
             select m.filename 
             from rsc r, category rc, category ic, rsc_media rm, media m
@@ -84,9 +97,5 @@ search_media({category_image, CatId}, {Offset,Limit}, Context) ->
             limit $3
             offset $2
         ", [CatId, Offset-1, Limit], Context),
-    [ Col || {Col} <- Rows ].
+    #search_result{result=[ Col || {Col} <- Rows ]}.
     
-
-    
-
-

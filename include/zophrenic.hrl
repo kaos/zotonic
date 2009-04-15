@@ -53,6 +53,13 @@
 %% Used for specifying resource id lists, as returned by object/subject lookup
 -record(rsc_list, {list}).
 
+%% Used for search results
+-record(search_result, {result, total}).
+-record(m_search_result, {search_name, search_props, result, page, pagelen, total}).
+
+%% Default page length for search
+-define(SEARCH_PAGELEN, 25).
+
 %% drag and drop event message
 -record(dragdrop, {tag, delegate, id}).
 

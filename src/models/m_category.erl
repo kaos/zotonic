@@ -173,7 +173,8 @@ insert(Props, Context) ->
 
 image(Id, Context) ->
     F = fun() ->
-        search:search_media({category_image, Id}, Context)
+        #search_result{result=Result} = search:search({media_category_image, Id}, Context),
+        Result
     end,
     Files = zp_depcache:memo(F, {category_image, Id}, ?DAY, [category]),
     case Files of

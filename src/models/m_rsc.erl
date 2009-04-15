@@ -17,6 +17,7 @@
     name_to_id_check/2,
     
 	rsc/0,
+	rsc/2,
 	exists/2, 
 	is_readable/2, is_writeable/2, is_owner/2, is_ingroup/2, is_me/2,
 	p/3, 
@@ -63,6 +64,7 @@ name_to_id_check(Name, Context) ->
     Id.
 
 rsc() -> fun(Id, _Context) -> #rsc{id=Id} end.
+rsc(Id, _Context) -> #rsc{id=Id}.
 
 exists([C|_] = Name, Context) when is_list(Name) and is_integer(C) ->
     case rid_name(Name, Context) of
