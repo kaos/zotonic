@@ -41,7 +41,6 @@ $.widget("ui.unlink",
 		obj.css({cursor: 'pointer'}).click(function()
 		{
 			var confirm	= $('<div></div>').addClass('unlink-confirm').css({position: 'absolute', top: unlinkTop, left: unlinkLeft}).html('<span>Are you sure?</span>').append('<button class="unlink-yes">yes</button><button class="unlink-no">no</button>').fadeIn(200).appendTo(document.body);
-
 			obj.css({color: '#f00'});
 		
 			$('.unlink-no', confirm).click(function()
