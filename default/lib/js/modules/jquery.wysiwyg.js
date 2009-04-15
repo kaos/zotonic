@@ -328,7 +328,7 @@
 
             $.data(element, 'wysiwyg', this);
 
-            var newX = element.width || element.clientWidth;
+            var newX = '100%';
             var newY = element.height || element.clientHeight;
 
             if ( element.nodeName.toLowerCase() == 'textarea' )
@@ -343,7 +343,7 @@
 
                 var editor = this.editor = $('<iframe></iframe>').css({
                     minHeight : ( newY - 6 ).toString() + 'px',
-                    width     : ( newX - 8 ).toString() + 'px'
+                    width     : '100%'
                 }).attr('id', $(element).attr('id') + 'IFrame');
 
                 if ( $.browser.msie )
@@ -366,7 +366,7 @@
 
             this.appendControls();
             this.element = $('<div></div>').css({
-                width : ( newX > 0 ) ? ( newX ).toString() + 'px' : '100%'
+                width : '100%'
             }).addClass('wysiwyg')
               .append(panel)
               .append( $('<div><!-- --></div>').css({ clear : 'both' }) )

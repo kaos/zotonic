@@ -24,7 +24,7 @@
 *	
 *	@author 	Tim Benniks <tim@timbenniks.com>
 * 	@copyright  2009 timbenniks.com
-*	@version    $Id: zp.unlink.js 12 2009-04-15 12:24:18Z timbenniks $
+*	@version    $Id: zp.tooltip.js 12 2009-04-15 12:24:18Z timbenniks $
 **/
 
 ;(function(jQuery) 
@@ -40,11 +40,11 @@
 			maxwidth: 			'330px',
 		}
   		
-		var options = jQuery.extend(defaults, options);
+		var options = $.extend(defaults, options);
   			
   		return this.each(function() 
 		{
-			obj = jQuery(this);
+			obj = $(this);
 		
 			if(this.title == '')
 			{

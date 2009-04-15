@@ -248,7 +248,7 @@ a:focus {
 	text-align: left;  
 	cursor: pointer;
 	color: #333; 
-	font-weight:bold;
+	font-weight: normal;
 }
 
 .admin-form textarea,
@@ -256,18 +256,23 @@ a:focus {
 	padding: 3px 3px 2px;
 	border: solid #ccc;
 	border-width: 1px;
-	width: 99%;
+	width: 100%;
 	-moz-border-radius: 2px;
 	-webkit-border-radius: 2px;
-	font-size: 16px;
+	font-size: 11px;
 	color: #666;
 }
 
 .admin-form textarea {
-	width: 100%;
-	font-family: "Lucida Sans",Helvetica,sans-serif;
-	font-size: 11px;
-	height: 500px
+	font-family: "Lucida Sans", Helvetica, sans-serif;
+}
+
+.admin-form textarea.intro {
+	height: 150px;
+}
+
+.admin-form textarea.body {
+	height: 300px;
 }
 
 .admin-form textarea:focus,
@@ -323,4 +328,24 @@ a:focus {
 	margin: 0 3px 0 0;
 	float: left;
 	display: block;
+}
+
+
+/* tooltip
+---------------------------------------------------------- */
+
+.tooltip {
+	position: absolute;
+	display: none;
+	background: #fff;
+	border: 1px solid;
+	border-color: #ccc;
+	color: #666;
+	padding: 3px 5px;
+	-moz-border-radius: 3px;
+	-webkit-border-radius: 3px;
+	font-size: .95em;
+	margin: 0;
+	min-height: 14px;
+	text-align: left;
 }
