@@ -165,7 +165,7 @@ ensure_visitor_process(Context, State) ->
 %% @doc A new visit, set a new visitor cookie, start an anonymous visitor process
 first_visit(Context, State) ->
     VisitorCookieId = zp_ids:id(),
-    {ok, Pid} = zp_visitor:new_anonymous(VisitorCookieId, Context#context.session_pid),
+    {ok, Pid} = zp_visitor:new_anonymous(VisitorCookieId, Context),
     State1    = store_pid(VisitorCookieId, Pid, State),
     set_cookie(VisitorCookieId, Context),
     Context1  = Context#context{visitor_pid=Pid},
