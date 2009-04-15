@@ -146,8 +146,19 @@ default(Input, Default) ->
         false -> Input
     end.
 
+default_if_none(Input, Default) -> 
+    default_if_undefined(Input, Default).
+default_if_undefined(Input, Default) -> 
+    case Input of
+        undefined -> Default;
+        _ -> Input
+    end.
+
+
 % Translate atoms and numbers to strings
 % Leave tuples as tuples.
+stringify(undefined) ->
+    <<>>;
 stringify(In) when is_atom(In) ->
     atom_to_list(In);
 stringify(In) when is_integer(In) ->

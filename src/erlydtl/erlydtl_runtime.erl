@@ -95,20 +95,15 @@ find_value(Key, Tuple, _Context) when is_tuple(Tuple) ->
 find_value(Key, F, Context) when is_function(F) ->
 	F(Key, Context);
 
-%% Any subvalue of a non-existant value is empty
+%% Any subvalue of a non-existant value is undefined
 find_value(_Key, undefined, _Context) ->
 	undefined;
 find_value(_Key, <<>>, _Context) ->
 	undefined.
 
-
+%% This used to translate undefined into <<>>, this translation is now done by zp_render:render/2
 fetch_value(Key, Data, Context) ->
-    case find_value(Key, Data, Context) of
-        undefined ->
-            <<>>;
-        Val ->
-            Val
-    end.
+    find_value(Key, Data, Context).
 
 are_equal(Arg1, Arg2) when Arg1 =:= Arg2 ->
     true;
