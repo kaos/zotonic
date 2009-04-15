@@ -193,6 +193,7 @@ make_url_for(Name, Args, Escape, UriLookup) ->
     Args1 = lists:filter(fun
             ({_, <<>>}) -> false;
             ({_, []}) -> false;
+            ({_, undefined}) -> false;
             (_) -> true
         end, Args),
     case dict:find(Name1, UriLookup) of
