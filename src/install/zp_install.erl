@@ -398,9 +398,9 @@ model_pgsql() ->
     (
       id bigserial NOT NULL,
       rsc_id int,
+      props bytea,
       created timestamp with time zone NOT NULL DEFAULT now(),
       modified timestamp with time zone NOT NULL DEFAULT now(),
-      props bytea,
       CONSTRAINT visitor_pkey PRIMARY KEY (id),
       CONSTRAINT fk_visitor_rsc_id FOREIGN KEY (rsc_id)
         REFERENCES rsc (id)
@@ -415,9 +415,9 @@ model_pgsql() ->
     "CREATE TABLE visitor_cookie
     (
       cookie character varying (64) NOT NULL,
-      visitor_id int NOT NULL,
-      created timestamp with time zone NOT NULL DEFAULT now(),
+      visitor_id bigint NOT NULL,
       autologon_expire timestamp with time zone NOT NULL DEFAULT '2000-01-01 00:00:00+01'::timestamp with time zone,
+      created timestamp with time zone NOT NULL DEFAULT now(),
       CONSTRAINT visitor_cookie_pkey PRIMARY KEY (cookie),
       CONSTRAINT fk_visitor_id FOREIGN KEY (visitor_id)
         REFERENCES visitor (id)

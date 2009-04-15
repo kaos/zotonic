@@ -1,9 +1,9 @@
 %% @author Marc Worrell <marc@worrell.nl>
 %% @copyright 2009 Marc Worrell
 
-%% @doc Person manager.  One person can have only one person process, with multiple ua-sessions and page sessions.
-%%      The person process manager spawns the person processes.  A person process stops itself after some time
-%%      of inactivity.  This person process manager finds the correct person process for the person id coupled to
+%% @doc Visitor manager.  One visitor can have only one visitor process, with multiple ua-sessions and page sessions.
+%%      The visitor process manager spawns the visitor processes.  A visitor process stops itself after some time
+%%      of inactivity.  This visitor process manager finds the correct visitor process for the person id coupled to
 %%      the user-agent.
 
 % - On first visit:
@@ -30,7 +30,7 @@
 % 	1. Set user process state to 'public' (locking protected and private properties)
 
 
--module(zp_person_manager).
+-module(zp_visitor_manager).
 -author("Marc Worrell <marc@worrell.nl>").
 
 -behaviour(gen_server).
@@ -40,16 +40,16 @@
 -export([start_link/0, start_link/1]).
 
 %% interface functions
--export([ensure_person/1]).
+-export([ensure_visitor/1]).
 
 -include_lib("webmachine.hrl").
 -include_lib("zophrenic.hrl").
 
 %% The name of the person cookie
--define(PERSON_COOKIE, "zp_pid").
+-define(VISITOR_COOKIE, "zp_pid").
 
 %% Max age of the person cookie, 10 years or so.
--define(PERSON_COOKIE_MAX_AGE, 3600*24*52*10).
+-define(VISITOR_COOKIE_MAX_AGE, 3600*24*52*10).
 
 %% Internal state
 -record(state, {pid2key, key2pid}).
@@ -70,8 +70,9 @@ start_link(Args) when is_list(Args) ->
 
 %% @doc Ensure that the context has a valid person pid. When there is a session pid then the session is
 %%      added to the person process.
-ensure_person(Context) ->
-    gen_server:call(?MODULE, {ensure_person, Context}).
+%% @spec ensure_visitor(Context) -> Context
+ensure_visitor(Context) ->
+    gen_server:call(?MODULE, {ensure_visitor, Context}).
 
 
 
@@ -97,10 +98,10 @@ init(_Args) ->
 %%                                      {stop, Reason, State}
 %% Description: Handling call messages
 
-%% @doc Ensure that we have a person associated with the request.
-handle_call({'ensure_person', Context}, _From, State) ->
-    {Context1, State1} = ensure_person_process(Context, State),
-    erlang:monitor(process, Context1#context.person_pid),
+%% @doc Ensure that we have a visitor associated with the request.
+handle_call({'ensure_visitor', Context}, _From, State) ->
+    {Context1, State1} = ensure_visitor_process(Context, State),
+    erlang:monitor(process, Context1#context.visitor_pid),
     {reply, Context1, State1};
 
 %% @doc Trap unknown calls
@@ -150,42 +151,42 @@ code_change(_OldVsn, State, _Extra) ->
 %%====================================================================
 
 
-%% @spec ensure_person_process(Context, State) -> {NewContex, NewState}
-%% @doc Ensure that we have a person process, binding together the sessions of the person accessing the site
-ensure_person_process(Context, State) ->
+%% @spec ensure_visitor_process(Context, State) -> {NewContex, NewState}
+%% @doc Ensure that we have a person process, binding together the sessions of the visitor accessing the site
+ensure_visitor_process(Context, State) ->
     % Check if the ua visited this site before
     case get_cookie(Context) of
         undefined -> first_visit(Context, State);
-        PersonCookieId -> returning(PersonCookieId, Context, State)
+        VisitorCookieId -> returning(VisitorCookieId, Context, State)
     end.
     
 
 %% @spec first_visit(Context, State) -> {NewContex, NewState}
-%% @doc A new visit, set a new person cookie, start an anonymous user process
+%% @doc A new visit, set a new visitor cookie, start an anonymous visitor process
 first_visit(Context, State) ->
-    PersonCookieId = zp_ids:id(),
-    {ok, Pid} = zp_person:new_anonymous(Context#context.session_pid),
-    State1    = store_pid(PersonCookieId, Pid, State),
-    set_cookie(PersonCookieId, Context),
-    Context1  = Context#context{person_pid=Pid},
+    VisitorCookieId = zp_ids:id(),
+    {ok, Pid} = zp_visitor:new_anonymous(VisitorCookieId, Context#context.session_pid),
+    State1    = store_pid(VisitorCookieId, Pid, State),
+    set_cookie(VisitorCookieId, Context),
+    Context1  = Context#context{visitor_pid=Pid},
     {Context1, State1}.
 
 
-%% @spec returning(PersonCookieId, Context, State) -> {NewContex, NewState}
+%% @spec returning(VisitorCookieId, Context, State) -> {NewContext, NewState}
 %% @doc A returning visitor, lookup the person and ensure that the user process is running
-returning(PersonCookieId, Context, State) ->
-    case find_pid(PersonCookieId, State) of
+returning(VisitorCookieId, Context, State) ->
+    case find_pid(VisitorCookieId, State) of
         {ok, Pid} ->
-            zp_person:associate_session(Pid, Context#context.session_pid),
-            Context1 = Context#context{person_pid=Pid},
+            zp_visitor:associate_session(Pid, Context),
+            Context1 = Context#context{visitor_pid=Pid},
             {Context1, State};
         error -> 
             % Not started, check if the cookie is associated with a person
-            case zp_person:new_cookie_person(PersonCookieId, Context#context.session_pid) of
+            case zp_visitor:new_returning(VisitorCookieId, Context) of
                 {ok, Pid} ->
                         %% Cookie was associated with a person, person process started
-                        State1   = store_pid(PersonCookieId, Pid, State),
-                        Context1 = Context#context{person_pid=Pid},
+                        State1   = store_pid(VisitorCookieId, Pid, State),
+                        Context1 = Context#context{visitor_pid=Pid},
                         {Context1, State1};
                 error ->
                         %% Unknown cookie, or person was deleted, handle as a first visit
@@ -196,10 +197,10 @@ returning(PersonCookieId, Context, State) ->
 
 %% @spec store_pid(pid(), State) -> State
 %% @doc Add the pid to the person state
-store_pid(PersonCookieId, Pid, State) ->
+store_pid(VisitorCookieId, Pid, State) ->
     State#state{
-            pid2key = dict:store(Pid, PersonCookieId, State#state.pid2key),
-            key2pid = dict:store(PersonCookieId, Pid, State#state.key2pid)
+            pid2key = dict:store(Pid, VisitorCookieId, State#state.pid2key),
+            key2pid = dict:store(VisitorCookieId, Pid, State#state.key2pid)
         }.
 
 %% @spec erase_pid(pid(), State) -> State
@@ -216,30 +217,30 @@ erase_pid(Pid, State) ->
     end.
 
 
-%% @spec get_cookie(Context) -> undefined | PersonCookieId
+%% @spec get_cookie(Context) -> undefined | VisitorCookieId
 %% @doc fetch the person cookie id from the request, return error when not found
 get_cookie(Context) ->
     ReqProps = zp_context:get_reqprops(Context),
     Req      = ?REQ(ReqProps),
-    Req:get_cookie_value(?PERSON_COOKIE).
+    Req:get_cookie_value(?VISITOR_COOKIE).
 
 
-%% @spec set_cookie(PersonCookieId, Context) -> ok
+%% @spec set_cookie(VisitorCookieId, Context) -> ok
 %% @doc Save the person id in a cookie on the user agent
-set_cookie(PersonCookieId, Context) ->
+set_cookie(VisitorCookieId, Context) ->
     ReqProps = zp_context:get_reqprops(Context),
     Req      = ?REQ(ReqProps),
     %% TODO: set the {domain,"example.com"} of the session cookie
-    Options  = [{max_age, ?PERSON_COOKIE_MAX_AGE}, {path, "/"}],
-    Hdr      = mochiweb_cookies:cookie(?PERSON_COOKIE, PersonCookieId, Options),
+    Options  = [{max_age, ?VISITOR_COOKIE_MAX_AGE}, {path, "/"}],
+    Hdr      = mochiweb_cookies:cookie(?VISITOR_COOKIE, VisitorCookieId, Options),
     Req:merge_response_headers([Hdr]),
     ok.
 
 
-%% @spec find_pid(PersonCookieId, State) ->  error | {ok, pid()}
-%% @doc find the pid associated with the person id
+%% @spec find_pid(VisitorCookieId, State) ->  error | {ok, pid()}
+%% @doc find the pid associated with the visitor id
 find_pid(undefined, _State) ->
     error;
-find_pid(PersonCookieId, State) ->
-    dict:find(PersonCookieId, State#state.key2pid).
+find_pid(VisitorCookieId, State) ->
+    dict:find(VisitorCookieId, State#state.key2pid).
 

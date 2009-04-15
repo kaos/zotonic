@@ -12,10 +12,10 @@
         %% The resource responsible for handling this request
         resource_module,
         
-        %% The page (comet), session- and user processes associated with the current request
-        person_pid=undefined,
-        session_pid=undefined,
-        page_pid=undefined,
+        %% The page (comet), session- and visitor processes associated with the current request
+        visitor_pid=undefined,  % might be present on multiple browsers & computers
+        session_pid=undefined,  % one session per browser
+        page_pid=undefined,     % multiple pages per session
         page_id=undefined,
 
         %% The database to be used (derived from the Host)
@@ -77,8 +77,8 @@
 -define(SESSION_EXPIRE_1,   40).
 -define(SESSION_EXPIRE_N, 3600).
 
-%% Millisecs of no activity before the person process is stopped (if there are no attached sessions).
--define(PERSON_TIMEOUT, 60 * 1000).
+%% Millisecs of no activity before the visitor process is stopped (if there are no attached sessions).
+-define(VISITOR_TIMEOUT, 60 * 1000).
 
 %% Some standard periods in seconds
 -define(MINUTE,     60).

@@ -11,6 +11,7 @@
     new/0,
 
     cleanup_for_template/1,
+    cleanup_for_database/1,
     cleanup_for_scomp/1,
     output/2,
 
@@ -18,7 +19,7 @@
 
     ensure_all/1,
     ensure_session/1,
-    ensure_person/1,
+    ensure_visitor/1,
     ensure_page_session/1,
     ensure_qs/1,
     
@@ -45,6 +46,9 @@
     set_page/3,
     get_page/2,
     incr_page/3,
+
+    set_visitor/3,
+    get_visitor/2,
 
     set/3,
     set/2,
@@ -79,6 +83,11 @@ cleanup_for_template(#context{}=Context) ->
         render=Context#context.render
     };
 cleanup_for_template(Output) -> Output.
+
+
+%% @doc Cleanup a context so that it can be used exclusively for database connections
+cleanup_for_database(Context) ->
+    #context{db=Context#context.db, dbc=Context#context.dbc}.
 
 
 %% @doc Cleanup a context for cacheable scomp handling.  Resets most of the accumulators to prevent duplicating
@@ -152,7 +161,7 @@ combine(X,Y) -> [X++Y].
 %% @doc Ensure session and page session and fetch&parse the query string
 ensure_all(Context) ->
     Context1 = ensure_session(Context),
-    Context2 = ensure_person(Context1),
+    Context2 = ensure_visitor(Context1),
     Context3 = ensure_page_session(Context2),
     ensure_qs(Context3).
 
@@ -161,17 +170,17 @@ ensure_session(Context) ->
     case Context#context.session_pid of
         undefined ->
             Context1 = zp_session_manager:ensure_session(Context),
-            zp_person:associate_session(Context1#context.person_pid, Context1#context.session_pid),
+            zp_visitor:associate_session(Context1#context.visitor_pid, Context1#context.session_pid),
             Context1;
         _ ->
             Context    
     end.
     
-%% @doc Ensure that we have a person, start a new person process when needed
-ensure_person(Context) ->
-    case Context#context.person_pid of
+%% @doc Ensure that we have a visitor, start a new visitor process when needed
+ensure_visitor(Context) ->
+    case Context#context.visitor_pid of
         undefined ->
-            zp_person_manager:ensure_person(Context);
+            zp_visitor_manager:ensure_visitor(Context);
         _ ->
             Context    
     end.
@@ -267,7 +276,7 @@ add_script_page(Script, Context) ->
 %% @doc Spawn a new process, link it to the session process.
 spawn_link_session(Module, Func, Args, Context) ->
     LinkContext = #context{
-                    person_pid  = Context#context.person_pid,
+                    visitor_pid  = Context#context.visitor_pid,
                     session_pid = Context#context.session_pid,
                     page_pid    = Context#context.page_pid
                 },
@@ -276,7 +285,7 @@ spawn_link_session(Module, Func, Args, Context) ->
 %% @doc Spawn a new process, link it to the page process.  Used for comet feeds.
 spawn_link_page(Module, Func, Args, Context) ->
     LinkContext = #context{
-                    person_pid  = Context#context.person_pid,
+                    visitor_pid  = Context#context.visitor_pid,
                     session_pid = Context#context.session_pid,
                     page_pid    = Context#context.page_pid
                 },
@@ -290,18 +299,37 @@ spawn_link_page(Module, Func, Args, Context) ->
 
 
 %% @spec get_value(Key::string(), Context) -> Value | undefined
-%% @spec Find a key in the context, page, session or user state.
+%% @spec Find a key in the context, page, session or visitor state.
 %% @todo Add page and user lookup
 get_value(Key, Context) ->
     case get(Key, Context) of
         undefined ->
             case get_page(Key, Context) of
-                undefined -> get_session(Key, Context);
-                Value -> Value
+                undefined -> 
+                    case get_session(Key, Context) of
+                        undefined -> get_visitor(Key, Context);
+                        Value -> Value
+                    end;
+                Value ->
+                    Value
             end;
         Value ->
             Value
     end.
+
+
+%% @spec set_visitor(Key, Value, Context) -> Context
+%% @doc Set the value of the visitor variable Key to Value
+set_visitor(Key, Value, Context) ->
+    zp_visitor:set(Key, Value, Context#context.visitor_pid),
+    Context.
+
+%% @spec get_visitor(Key, Context) -> Value
+%% @doc Fetch the value of the visitor variable Key
+get_visitor(_Key, #context{visitor_pid=undefined}) ->
+    undefined;
+get_visitor(Key, Context) ->
+    zp_visitor:get(Key, Context#context.visitor_pid).
 
 
 %% @spec set_session(Key, Value, Context) -> Context
@@ -317,12 +345,10 @@ get_session(_Key, #context{session_pid=undefined}) ->
 get_session(Key, Context) ->
     zp_session:get(Key, Context#context.session_pid).
 
-
 %% @spec incr_session(Key, Increment, Context) -> {NewValue, NewContext}
 %% @doc Increment the session variable Key
 incr_session(Key, Value, Context) ->
     {zp_session:incr(Key, Value, Context#context.session_pid), Context}.
-
 
 %% @spec set_page(Key, Value, Context) -> Context
 %% @doc Set the value of the page variable Key to Value

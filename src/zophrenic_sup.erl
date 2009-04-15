@@ -88,8 +88,8 @@ init([]) ->
 	            {zp_session_manager, start_link, []}, 
 	            permanent, 5000, worker, dynamic},
 
-    Person = {zp_person_manager,
-	            {zp_person_manager, start_link, []}, 
+    Visitor = {zp_visitor_manager,
+	            {zp_visitor_manager, start_link, []}, 
 	            permanent, 5000, worker, dynamic},
 
     Ids     = {zp_ids,
@@ -108,6 +108,6 @@ init([]) ->
                 {zp_dropbox, start_link, []}, 
                 permanent, 5000, worker, dynamic},
 
-    Processes = [MochiWeb, Postgres, Depcache, Ids, Dispatcher, Notifier, Session, Person, Template, Scomp, DropBox],
+    Processes = [MochiWeb, Postgres, Depcache, Ids, Dispatcher, Notifier, Session, Visitor, Template, Scomp, DropBox],
     {ok, {{one_for_one, 1000, 10}, Processes}}.
 
