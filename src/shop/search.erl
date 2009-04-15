@@ -80,6 +80,21 @@ search({featured, [{cat,Cat},{object,ObjectId},{predicate,Predicate}]}, {Offset,
         ", [CatId, Offset-1, Limit, PredId, ObjectId], Context),
     #search_result{result=[ Col || {Col} <- Rows ]};
 
+search({latest, [{cat, Cat}]}, {Offset,Limit}, Context) ->
+    CatId = m_category:name_to_id_check(Cat, Context),
+    Rows = zp_db:q("
+            select r.id
+            from rsc r, category rc, category ic
+            where r.category_id = rc.id
+              and rc.nr >= ic.lft
+              and rc.nr <= ic.rght
+              and ic.id = $1
+            order by r.modified desc, r.id desc
+            limit $3
+            offset $2
+        ", [CatId, Offset-1, Limit], Context),
+    #search_result{result=[ Col || {Col} <- Rows ]};
+
 search({media_category_image, CatId}, {Offset,Limit}, Context) ->
     Rows = zp_db:q("
             select m.filename 

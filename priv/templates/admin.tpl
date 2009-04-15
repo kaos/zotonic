@@ -44,54 +44,31 @@
 				<div class="padding">
 
 					<div id="dashboard-pages">
-						<h3 class="above-list">Last modified pages</h3>
+						<h3 class="above-list">Last modified articles</h3>
 						<ul class="short-list">
 							<li class="headers clearfix">
-								<span class="zp-25">Title</span>
+								<span class="zp-35">Title</span>
 								<span class="zp-25">Category</span>
 								<span class="zp-25">Publish date</span>
-								<span class="zp-25">Options</span>
+								<span class="zp-15">Options</span>
 							</li>
+							{% for id in m.search[{latest cat="article"}] %}
 							<li>
 								<a href="#" class="clearfix">
-									<span class="zp-25">Home</span>
-									<span class="zp-25">Struijk</span>
-									<span class="zp-25">March 10, 19:33</span>
-									<span class="zp-25"><button>edit</button><button>view &raquo;</button></span>
+									<span class="zp-35">{{ m.rsc[id].title }}</span>
+									<span class="zp-25">{{ m.rsc[id].category.name }}</span>
+									<span class="zp-25">{{ m.rsc[id].modified|date:"F d, H:i" }}</span>
+									<span class="zp-15">
+										{% button text="edit" action={redirect dispatch="admin_edit_rsc" rsc=id} %}
+										{% button text="view &raquo;" action={redirect id=id} %}
+									</span>
 								</a>
 							</li>
+							{% empty %}
 							<li>
-								<a href="#" class="clearfix">
-									<span class="zp-25">About</span>
-									<span class="zp-25">About us</span>
-									<span class="zp-25">March 10, 19:38</span>
-									<span class="zp-25"><button>edit</button><button>view &raquo;</button></span>
-								</a>
+								No articles
 							</li>
-							<li>
-								<a href="#" class="clearfix">
-									<span class="zp-25">Contact</span>
-									<span class="zp-25">About us</span>
-									<span class="zp-25">March 10, 20:13</span>
-									<span class="zp-25"><button>edit</button><button>view &raquo;</button></span>
-								</a>
-							</li>
-							<li>
-								<a href="#" class="clearfix">
-									<span class="zp-25">About</span>
-									<span class="zp-25">About us</span>
-									<span class="zp-25">March 10, 19:38</span>
-									<span class="zp-25"><button>edit</button><button>view &raquo;</button></span>
-								</a>
-							</li>
-							<li>
-								<a href="#" class="clearfix">
-									<span class="zp-25">Contact</span>
-									<span class="zp-25">About us</span>
-									<span class="zp-25">March 10, 20:13</span>
-									<span class="zp-25"><button>edit</button><button>view &raquo;</button></span>
-								</a>
-							</li>
+							{% endfor %}
 						</ul>
 					</div>
 					
@@ -99,51 +76,28 @@
 						<h3 class="above-list">Last modified products</h3>
 						<ul class="short-list">
 							<li class="headers clearfix">
-								<span class="zp-25">Title</span>
+								<span class="zp-35">Title</span>
 								<span class="zp-25">Category</span>
 								<span class="zp-25">Publish date</span>
-								<span class="zp-25">Options</span>
+								<span class="zp-15">Options</span>
 							</li>
+							{% for id in m.search[{latest cat="product"}] %}
 							<li>
 								<a href="#" class="clearfix">
-									<span class="zp-25">Home</span>
-									<span class="zp-25">Struijk</span>
-									<span class="zp-25">March 10, 19:33</span>
-									<span class="zp-25"><button>edit</button><button>view &raquo;</button></span>
+									<span class="zp-35">{{ m.rsc[id].title }}</span>
+									<span class="zp-25">{{ m.rsc[id].category.name }}</span>
+									<span class="zp-25">{{ m.rsc[id].modified|date:"F d, H:i" }}</span>
+									<span class="zp-15">
+										{% button text="edit" action={redirect dispatch="admin_edit_rsc" rsc=id} %}
+										{% button text="view &raquo;" action={redirect id=id} %}
+									</span>
 								</a>
 							</li>
+							{% empty %}
 							<li>
-								<a href="#" class="clearfix">
-									<span class="zp-25">About</span>
-									<span class="zp-25">About us</span>
-									<span class="zp-25">March 10, 19:38</span>
-									<span class="zp-25"><button>edit</button><button>view &raquo;</button></span>
-								</a>
+								No products
 							</li>
-							<li>
-								<a href="#" class="clearfix">
-									<span class="zp-25">Contact</span>
-									<span class="zp-25">About us</span>
-									<span class="zp-25">March 10, 20:13</span>
-									<span class="zp-25"><button>edit</button><button>view &raquo;</button></span>
-								</a>
-							</li>
-							<li>
-								<a href="#" class="clearfix">
-									<span class="zp-25">About</span>
-									<span class="zp-25">About us</span>
-									<span class="zp-25">March 10, 19:38</span>
-									<span class="zp-25"><button>edit</button><button>view &raquo;</button></span>
-								</a>
-							</li>
-							<li>
-								<a href="#" class="clearfix">
-									<span class="zp-25">Contact</span>
-									<span class="zp-25">About us</span>
-									<span class="zp-25">March 10, 20:13</span>
-									<span class="zp-25"><button>edit</button><button>view &raquo;</button></span>
-								</a>
-							</li>
+							{% endfor %}
 						</ul>
 					</div>
 				</div>

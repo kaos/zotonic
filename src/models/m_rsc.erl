@@ -134,6 +134,8 @@ p(Id, group, Context) ->
         undefined -> undefined;
         GroupId -> m_group:get(GroupId, Context)
     end;
+p(Id, category, Context) -> 
+    m_category:get(p(Id, category_id, Context), Context);
     
 % Check if the requested predicate is a readily available property or an edge
 p(#rsc{id=Id} = Rsc, Predicate, Context) -> 
