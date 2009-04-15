@@ -50,6 +50,26 @@
 							<img alt="" src="/lib/images/cross.png" />
 						</span>
 					</div>
+					
+					<style type="text/css">
+						.tooltip {
+							position: absolute;
+							display: none;
+							background: #fff;
+							border: 1px solid;
+							border-color: #ccc;
+							color: #666;
+							padding: 3px 5px;
+							-moz-border-radius: 3px;
+							-webkit-border-radius: 3px;
+							font-size: .95em;
+							margin: 0;
+							min-height: 14px;
+							text-align: left;
+						}
+					</style>
+					
+					<button class="do_tooltip" title="I'm am the tooptip popup, I'm am the tooptip popup">Yeah, give me a tooltip</button>
 				</div>
 			</div>
 		</div>
