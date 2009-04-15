@@ -66,7 +66,7 @@ f2time(N) ->
     {R3, Sec}  = tmodulo(R2, 1.0),
     case timeround(R3) of
         US when US >= 1.0 -> f2time(ceiling(N));
-        US                -> {Hour, Min, Sec + US}
+        US                -> {Hour, Min, round(Sec + US)}
     end.
 
 time2f({H, M, S}) ->
