@@ -1,3 +1,31 @@
+/**
+*	zp.imageviewer()
+*	This function is used to view the big version of images in the zophrenic CMS
+*
+*   Copyright (c) 2009 Tim Benniks
+*
+*	Permission is hereby granted, free of charge, to any person obtaining a copy
+*	of this software and associated documentation files (the "Software"), to deal
+*	in the Software without restriction, including without limitation the rights
+*	to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+*	copies of the Software, and to permit persons to whom the Software is
+*	furnished to do so, subject to the following conditions:
+*
+*	The above copyright notice and this permission notice shall be included in
+*	all copies or substantial portions of the Software.
+*
+*	THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+*	IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+*	FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+*	AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+*	LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+*	OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
+*	THE SOFTWARE.
+*	
+*	@author 	Tim Benniks <tim@timbenniks.com>
+* 	@copyright  2009 timbenniks.com
+*	@version    $Id: zp.imageviewer.js 12 2009-04-15 16:14:18Z timbenniks $
+**/
 $.widget("ui.imageviewer", 
 {
 	_init: function() 
@@ -86,13 +114,13 @@ $.widget("ui.imageviewer",
 		if(zoomImgWidth > $(window).width())
 		{
 			fullWidth = $(window).width() - 40;
-			fullHeight = zoomImgHeight * (fullWidth / zoomImgWidth);	
+			fullHeight = zoomImgHeight * (fullWidth / zoomImgWidth);
 		}
 		
 		if(zoomImgHeight > $(window).height())
 		{
 			fullHeight = $(window).height() - 40;
-			fullWidth = zoomImgWidth * (fullHeight / zoomImgHeight);	
+			fullWidth = zoomImgWidth * (fullHeight / zoomImgHeight);åå
 		}
 
 		leftPos = ($(window).width() / 2) - (fullWidth / 2);
@@ -112,7 +140,7 @@ $.widget("ui.imageviewer",
 				.addClass('popup-overlay')
 				.appendTo(document.body)
 				.css({display: 'none', height: $(document).height(), zIndex: 8000})
-				.animate({opacity: .7}, 500)
+				.animate({opacity: .7}, 200)
 				.click(function()
 				{
 					ui.kill()
@@ -123,7 +151,7 @@ $.widget("ui.imageviewer",
 				
 		imgObj
 			.css({display: 'none', position: "absolute", zIndex: 9999, width: fullWidth, height: fullHeight, left: leftPos, top: topPos})
-			.fadeIn(500)
+			.fadeIn(200)
 			.click(function()
 			{
 				ui.kill()
@@ -133,7 +161,7 @@ $.widget("ui.imageviewer",
 	kill: function() 
 	{
 		jQuery('.popup-overlay').fadeOut(200);
-		jQuery('.loaded-bigImage').fadeOut(300);
+		jQuery('.loaded-bigImage').fadeOut(200);
 	   	this.destroy();
 	}
 });
