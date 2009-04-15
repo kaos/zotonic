@@ -66,10 +66,15 @@ identify(ImageFile) ->
 %% @spec mime(String) -> MimeType
 %% @doc Map the type returned by ImageMagick to a mime type
 %% @todo Add more imagemagick types, check the mime types
+mime("JPEG") -> "image/jpeg";
+mime("GIF") -> "image/gif";
+mime("TIFF") -> "image/tiff";
+mime("BMP") -> "image/bmp";
 mime("PDF") -> "application/pdf";
 mime("PS") -> "application/postscript";
 mime("PS2") -> "application/postscript";
 mime("PS3") -> "application/postscript";
+mime("PNG") -> "image/png";
 mime("PNG8") -> "image/png";
 mime("PNG24") -> "image/png";
 mime("PNG32") -> "image/png";
