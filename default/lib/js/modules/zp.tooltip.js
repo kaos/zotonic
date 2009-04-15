@@ -54,7 +54,7 @@
 
 			obj.bind(options.inevent, function(e) 
 			{
-				this.tip 		= this.title;A
+				this.tip 		= this.title;
 				var tip_content = this.title;
 				this.title 		= "";
 				
