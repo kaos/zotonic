@@ -82,6 +82,10 @@ Nonterminals
     AutoEscapeBraced
     EndAutoEscapeBraced
 
+	WithBlock
+	WithBraced
+	EndWithBraced
+	
     Value
     Variable
     Filter
@@ -104,6 +108,7 @@ Nonterminals
 	ValueList.
 
 Terminals
+	as_keyword
     autoescape_keyword
     block_keyword
     call_keyword
@@ -123,6 +128,7 @@ Terminals
     endif_keyword
     endifequal_keyword
     endifnotequal_keyword
+	endwith_keyword
     equal
     extends_keyword
     for_keyword
@@ -187,6 +193,7 @@ Elements -> Elements PrintTag : '$1' ++ ['$2'].
 Elements -> Elements ImageTag : '$1' ++ ['$2'].
 Elements -> Elements ImageUrlTag : '$1' ++ ['$2'].
 Elements -> Elements TransExtTag : '$1' ++ ['$2'].
+Elements -> Elements WithBlock : '$1' ++ ['$2'].
 
 ValueBraced -> open_var Value close_var : '$2'.
 
@@ -251,6 +258,10 @@ EndIfNotEqualBraced -> open_tag endifnotequal_keyword close_tag.
 AutoEscapeBlock -> AutoEscapeBraced Elements EndAutoEscapeBraced : {autoescape, '$1', '$2'}.
 AutoEscapeBraced -> open_tag autoescape_keyword identifier close_tag : '$3'.
 EndAutoEscapeBraced -> open_tag endautoescape_keyword close_tag.
+
+WithBlock -> WithBraced Elements EndWithBraced : {with, '$1', '$2'}.
+WithBraced -> open_tag with_keyword Value as_keyword identifier close_tag : ['$3', '$5'].
+EndWithBraced -> open_tag endwith_keyword close_tag.
 
 Filter -> identifier : ['$1'].
 Filter -> identifier colon Literal : ['$1', '$3'].

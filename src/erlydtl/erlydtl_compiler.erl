@@ -366,6 +366,8 @@ body_ast(DjangoParseTree, Context, TreeWalker) ->
                 {IfAstInfo, TreeWalker1} = body_ast(ElseContents, Context, TreeWalkerAcc),
                 {ElseAstInfo, TreeWalker2} = body_ast(IfContents, Context, TreeWalker1),
                 ifequalelse_ast(Args, IfAstInfo, ElseAstInfo, Context, TreeWalker2);                    
+            ({'with', [Expr, {'identifier', _, Identifier}], WithContents}, TreeWalkerAcc) ->
+                with_ast(Expr, Identifier, WithContents, Context, TreeWalkerAcc);
             ({'for', {'in', IteratorList, Variable}, Contents}, TreeWalkerAcc) ->
                 for_loop_ast(IteratorList, Variable, Contents, none, Context, TreeWalkerAcc);
             ({'for', {'in', IteratorList, Variable}, Contents, EmptyPartContents}, TreeWalkerAcc) ->
@@ -706,6 +708,19 @@ ifequalelse_ast(Args, {IfContentsAst, IfContentsInfo}, {ElseContentsAst, ElseCon
     {{Ast, Info#ast_info{var_names = VarNames}}, TreeWalker}.         
 
 
+with_ast(Value, Variable, Contents, Context, TreeWalker) ->
+    Postfix = zp_ids:identifier(),
+    VarName = "With_" ++ Variable ++ [$_|Postfix],
+    VarAst = erl_syntax:variable(VarName),
+    {{ValueAst, ValueInfo}, TreeWalker1} = value_ast(Value, false, Context, TreeWalker),
+    {{InnerAst, InnerInfo}, TreeWalker2} = body_ast(
+            Contents,
+            Context#dtl_context{local_scopes=[[{list_to_atom(Variable), VarAst}] | Context#dtl_context.local_scopes]}, 
+            TreeWalker1),
+    WithAst = erl_syntax:block_expr([erl_syntax:match_expr(VarAst, ValueAst), InnerAst]),
+    {{WithAst, merge_info(ValueInfo,InnerInfo)}, TreeWalker2}.
+    
+    
 for_loop_ast(IteratorList, Variable, Contents, EmptyPartContents, Context, TreeWalker) ->
     Vars = lists:map(fun({identifier, _, Iterator}) -> 
                     erl_syntax:variable("Var_" ++ Iterator) 
