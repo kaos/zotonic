@@ -18,6 +18,7 @@
     get/2,
     get/3,
     get_value/3,
+    get_value/4,
     set_value/4,
     set_prop/5,
     delete/3,
@@ -92,6 +93,13 @@ get_value(Module, Key, Context) ->
         undefined -> undefined;
         Cfg -> proplists:get_value(value, Cfg)
     end.
+
+get_value(Module, Key, Default, Context) ->
+    case get_value(Module, Key, Context) of
+        undefined -> Default;
+        Value -> Value
+    end.
+
 
 set_value(Module, Key, Value, Context) ->
     case zp_db:q("update config set value = $1 where module = $2 and key = $3", [Value, Module, Key], Context) of
