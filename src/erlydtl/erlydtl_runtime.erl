@@ -154,10 +154,10 @@ init_counter_stats(List, Parent) ->
         {parentloop, Parent}].
 
 
-to_list(L, _Context) when is_list(L) -> L;
-to_list(T, _Context) when is_tuple(T) -> tuple_to_list(T);
 to_list(#m{model=Model} = M, Context) -> Model:m_to_list(M, Context);
 to_list(#rsc_list{list=L}, _Context) -> L;
+to_list(L, _Context) when is_list(L) -> L;
+to_list(T, _Context) when is_tuple(T) -> tuple_to_list(T);
 to_list(_, _Context) -> [].
 
 to_value(#m{model=Model} = M, Context) ->
