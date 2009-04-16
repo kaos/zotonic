@@ -485,7 +485,16 @@ value_ast(ValueToken, AsString, Context, TreeWalker) ->
         {tuple_value, {identifier, _, TupleName}, TupleArgs} ->
             TupleNameAst = erl_syntax:atom(TupleName),
             TupleArgsAst = scomp_ast_map_args(TupleArgs, Context, TreeWalker),
-            {{erl_syntax:tuple([TupleNameAst, TupleArgsAst]), #ast_info{}},TreeWalker}
+            {{erl_syntax:tuple([TupleNameAst, TupleArgsAst]), #ast_info{}},TreeWalker};
+        {value_list, Values} ->
+            {ValueAstList, ValueInfo, TreeWalker1} = lists:foldl(
+                        fun(V, {Acc,Info,TreeW}) ->
+                            {{Ast,InfoV}, TreeW1} = value_ast(V, false, Context, TreeW),
+                            {[Ast|Acc], merge_info(Info,InfoV), TreeW1}
+                        end,
+                        {[], #ast_info{}, TreeWalker}, 
+                        Values),
+            {{erl_syntax:list(lists:reverse(ValueAstList)), ValueInfo},TreeWalker1}
     end.
 
 string_ast(String, TreeWalker) ->
@@ -1123,21 +1132,24 @@ auto_id_ast(Name) ->
 
 
 interpreted_args(Args, Context) ->
-    lists:map(fun
-            ({{identifier, _, Key}, {string_literal, _, Value}}) ->
-                {list_to_atom(Key), erl_syntax:string(unescape_string_literal(Value))};
-            ({{identifier, _, Key}, {trans_literal, _, Value}}) ->
-                {list_to_atom(Key), trans_literal_ast(Value)};
-            ({{identifier, _, Key}, {auto_id,{identifier,_,AutoId}}}) ->
-                {V, _} = auto_id_ast(AutoId),
-                {list_to_atom(Key), V};
-            ({{identifier, _, Key}, {tuple_value, {identifier, _, TupleName}, TupleArgs}}) ->
-                 {list_to_atom(Key), {list_to_atom(TupleName), interpreted_args(TupleArgs, Context)}};
-            ({{identifier, _, Key}, true}) ->
-                 {list_to_atom(Key), true};
-            ({{identifier, _, Key}, Value}) ->
-                {list_to_atom(Key), resolve_variable_ast(Value, Context)}
-        end, Args).
+    lists:map(fun({{identifier, _, Key}, Value}) -> {list_to_atom(Key), interpreted_argval(Value, Context)} end, Args).
+
+interpreted_argval({string_literal, _, Value}, _Context) -> 
+    erl_syntax:string(unescape_string_literal(Value));
+interpreted_argval({trans_literal, _, Value}, _Context) ->
+    trans_literal_ast(Value);
+interpreted_argval({auto_id,{identifier,_,AutoId}}, _Context) ->
+    {V, _} = auto_id_ast(AutoId), 
+    V;
+interpreted_argval({tuple_value, {identifier, _, TupleName}, TupleArgs}, Context) ->
+    erl_syntax:tuple([erl_syntax:atom(TupleName), erl_syntax:list(interpreted_args(TupleArgs, Context))]);
+interpreted_argval({value_list, Values}, Context) ->
+    List = lists:map(fun(V) -> interpreted_argval(V, Context) end, Values),
+    erl_syntax:list(List);
+interpreted_argval(true, _Context) ->
+    erl_syntax:atom(true);
+interpreted_argval(Value, Context) ->
+    resolve_variable_ast(Value, Context).
 
 
 trans_literal_ast(String) ->
