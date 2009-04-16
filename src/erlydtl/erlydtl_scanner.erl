@@ -212,6 +212,18 @@ scan("." ++ T, Scanned, {Row, Column}, {_, Closer}) ->
 scan(" " ++ T, Scanned, {Row, Column}, {_, Closer}) ->
     scan(T, Scanned, {Row, Column + 1}, {in_code, Closer});
 
+scan("\t" ++ T, Scanned, {Row, Column}, {_, Closer}) ->
+    scan(T, Scanned, {Row, Column + 1}, {in_code, Closer});
+
+scan("\r\n" ++ T, Scanned, {Row, _Column}, {_, Closer}) ->
+    scan(T, Scanned, {Row+1, 1}, {in_code, Closer});
+
+scan("\n" ++ T, Scanned, {Row, _Column}, {_, Closer}) ->
+    scan(T, Scanned, {Row+1, 1}, {in_code, Closer});
+
+scan("\r" ++ T, Scanned, {Row, Column}, {_, Closer}) ->
+    scan(T, Scanned, {Row, Column + 1}, {in_code, Closer});
+
 scan("#" ++ T, Scanned, {Row, Column}, {_, Closer}) ->
     scan(T, [{hash, {Row, Column}, "#"} | Scanned], {Row, Column + 1}, {in_code, Closer});
 
