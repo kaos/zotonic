@@ -18,6 +18,7 @@ code_change(_OldVsn, State, _Extra) -> {ok, State}.
 terminate(_Reason) -> ok.
 
 render(Params, _Vars, _Context, _State) ->
+    ?DEBUG(Params),
     Class      = proplists:get_value(class, Params),
     Style      = proplists:get_value(style, Params),
     Id         = proplists:get_value(id, Params),
@@ -44,15 +45,15 @@ render(Params, _Vars, _Context, _State) ->
 	% Chart Type...
 	Type = [
 		"&cht=",
-		case proplists:get_value(type, Params, line) of
-			line -> "lc";
-			sparkline -> "ls";
-			stacked_horizontal_bar -> "bhs";
-			stacked_vertical_bar -> "bvs";
-			grouped_horizontal_bar -> "bhg";
-			grouped_vertical_bar -> "bvg";
-			pie -> "p";
-			pie3d -> "p3";
+		case proplists:get_value(type, Params, "line") of
+			"line" -> "lc";
+			"sparkline" -> "ls";
+			"stacked_horizontal_bar" -> "bhs";
+			"stacked_vertical_bar" -> "bvs";
+			"grouped_horizontal_bar" -> "bhg";
+			"grouped_vertical_bar" -> "bvg";
+			"pie" -> "p";
+			"pie3d" -> "p3";
 			OtherType -> erlang:error({unknown_chart_type, OtherType})
 		end
 	],
@@ -92,9 +93,6 @@ render(Params, _Vars, _Context, _State) ->
                     		"left"   -> "l";
                     		"bottom" -> "b";
                     		"right"  -> "r";
-                	    	top    -> "t";
-                    		left   -> "l";
-                    		bottom -> "b";
                     		_  -> "r"
                     	end,
 	
@@ -164,35 +162,41 @@ render(Params, _Vars, _Context, _State) ->
         	])}.
 
 
-process_axis(N, Axis) ->
+process_axis(N, {axis, Axis}) ->
     FontSize = proplists:get_value(font_size, Axis, 10),
     Color    = proplists:get_value(color, Axis, "909090"),
     
-	Position = case zp_convert:to_atom(proplists:get_value(position, Axis)) of
-            		top    -> "t";
-            		right  -> "r";
-            		bottom -> "x";
-            		left   -> "y";
+	Position = case zp_convert:to_list(proplists:get_value(position, Axis, "top")) of
+            		"top"    -> "t";
+            		"right"  -> "r";
+            		"bottom" -> "x";
+            		"left"   -> "y";
             		OtherPosition -> erlang:error({unknown_axis_position, OtherPosition})
             	end,
 
-	StringLabels = [zp_convert:to_list(X) || X <- proplist:get_value(labels, Axis)],
+	StringLabels = [zp_convert:to_list(X) || X <- proplists:get_value(labels, Axis, [])],
 	Labels       = integer_to_list(N) ++ ":|" ++ string:join(StringLabels, "|"),
 	Style        = io_lib:format("~b,~s,~b", [N, zp_convert:to_list(Color), FontSize]),
 	[Position, Labels, Style].
 	
-process_data(_N, Data) ->
+process_data(_N, {data, Data}) ->
     LineWidth    = proplists:get_value(line_width,  Data, 1),
     LineLength   = proplists:get_value(line_length, Data, 1),
     BlankLength  = proplists:get_value(blank_width, Data, 0),
     MinValue     = proplists:get_value(min_value, Data, 0),
     MaxValue     = proplists:get_value(max_value, Data, 100),
-	Color        = zp_convert:to_list(proplists:get_value(color, Data)),
+	Color        = proplists:get_value(color, Data),
 	Legend       = zp_convert:to_list(proplists:get_value(legend, Data)),
-    Values       = proplists:get_value(values, Data, 100),
+    Values       = proplists:get_value(values, Data, []),
     
 	Scale        = io_lib:format("~b,~b", [MinValue,MaxValue]),
 	StringValues = [zp_convert:to_list(X) || X <- Values],
-	Values       = string:join(StringValues, ","),
+	JoinedValues = string:join(StringValues, ","),
 	Styles       = io_lib:format("~b,~b,~b", [LineWidth, LineLength, BlankLength]),
-	[Color, Legend, Scale, Styles, Values, length(StringValues)].
+	[flatten_color(Color), Legend, Scale, Styles, JoinedValues, length(StringValues)].
+
+flatten_color([A|_] = List) when is_list(A) or is_binary(A) or is_atom(A) ->
+    string:join([ zp_convert:to_list(Color) || Color <- List ], ",");
+flatten_color(A) ->
+    zp_convert:to_list(A).
+    
