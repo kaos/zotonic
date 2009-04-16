@@ -1088,7 +1088,7 @@ scomp_ast(ScompName, Args, Context, TreeWalker) ->
     RenderedAst = erl_syntax:variable("Rendered"),
     CleanedAst = erl_syntax:application(
                 erl_syntax:atom(zp_context),
-                erl_syntax:atom(cleanup_for_template),
+                erl_syntax:atom(prune_for_template),
                 [RenderedAst]
             ),
     OkAst = erl_syntax:clause(

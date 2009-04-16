@@ -84,10 +84,10 @@ html(_ReqProps, Context) ->
 		false ->
         	#search_result{result=Featured} = case BrandId of
         	    undefined -> zp_depcache:memo(
-        	                        {search, search, [{featured, [{cat,CatId}]}, Context]},
+        	                        {zp_search, search, [{featured, [{cat,CatId}]}, Context]},
         	                        ?HOUR, [shop_import]);
         	    _ -> zp_depcache:memo(
-                                    {search, search, [{featured, [{cat,CatId},{object,BrandId},{predicate,brand}]}, Context]}, 
+                                    {zp_search, search, [{featured, [{cat,CatId},{object,BrandId},{predicate,brand}]}, Context]}, 
                                     ?HOUR, [shop_import])
         	end,
             {FeatShown,_} = zp_utils:randomize(3, Featured),
@@ -100,10 +100,10 @@ html(_ReqProps, Context) ->
 		true ->
             #search_result{result=Products} = case BrandId of
                 undefined -> zp_depcache:memo(
-                                    {search, search, [{featured, [{cat,CatId}]}, {1,1000}, Context]}, 
+                                    {zp_search, search, [{featured, [{cat,CatId}]}, {1,1000}, Context]}, 
                                     ?HOUR, [shop_import]);
                 _ -> zp_depcache:memo(
-                                    {search, search, [{featured, [{cat,CatId},{object,BrandId},{predicate,brand}]}, {1,1000}, Context]}, 
+                                    {zp_search, search, [{featured, [{cat,CatId},{object,BrandId},{predicate,brand}]}, {1,1000}, Context]}, 
                                     ?HOUR, [shop_import])
             end,
             Vars1 = [

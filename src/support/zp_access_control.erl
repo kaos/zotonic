@@ -10,6 +10,7 @@
 %% interface functions
 -export([
     default/2,
+    can_see/1,
     has_role/2,
     publish_level/1,
     publish_level/2,
@@ -18,12 +19,16 @@
     add_person/3
 ]).
 
+-include_lib("zophrenic.hrl").
 
 default(group, Context) -> 
     1;
 default(visible_for, Context) ->
     publish_level(Context).
 
+%% @doc Maximum visible_for value for content that is not in the user's groups
+can_see(Context) -> 
+    ?ACL_VIS_GROUP.
 
 has_role(admin, Context) ->
     true;
@@ -40,11 +45,12 @@ publish_level(Context) ->
     publish_level(0, Context).
 publish_level(Requested, Context) ->
     Max = case has_role(public_publisher, Context) of
-        true -> 0;
+        true -> 
+            ?ACL_VIS_PUBLIC;
         false ->
             case has_role(community_publisher, Context) of
-                true -> 1;
-                false -> 2  % group only
+                true -> ?ACL_VIS_COMMUNITY;
+                false -> ?ACL_VIS_GROUP  % group only
             end
     end,
     if 

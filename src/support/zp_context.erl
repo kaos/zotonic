@@ -10,9 +10,9 @@
     new/1,
     new/0,
 
-    cleanup_for_template/1,
-    cleanup_for_database/1,
-    cleanup_for_scomp/1,
+    prune_for_template/1,
+    prune_for_database/1,
+    prune_for_scomp/1,
     output/2,
 
     combine_results/2,
@@ -71,7 +71,7 @@ new(ReqProps) ->
 new() -> #context{dict=dict:new()}.
 
 %% @doc Cleanup a context for the output stream
-cleanup_for_template(#context{}=Context) ->
+prune_for_template(#context{}=Context) ->
     #context{
         dict=undefined, reqprops=undefined,
         updates=Context#context.updates,
@@ -82,17 +82,17 @@ cleanup_for_template(#context{}=Context) ->
         validators=Context#context.validators,
         render=Context#context.render
     };
-cleanup_for_template(Output) -> Output.
+prune_for_template(Output) -> Output.
 
 
 %% @doc Cleanup a context so that it can be used exclusively for database connections
-cleanup_for_database(Context) ->
+prune_for_database(Context) ->
     #context{db=Context#context.db, dbc=Context#context.dbc}.
 
 
 %% @doc Cleanup a context for cacheable scomp handling.  Resets most of the accumulators to prevent duplicating
 %% between different (cached) renderings.
-cleanup_for_scomp(Context) ->
+prune_for_scomp(Context) ->
     Context#context{
         dict=undefined,
 		reqprops=undefined,

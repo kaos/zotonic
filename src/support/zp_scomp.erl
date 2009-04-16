@@ -44,7 +44,7 @@ start_link() ->
 %% @spec render(ScompName, Args, Vars, Context) -> {ok, Context} | {ok, io_list} | {error, Reason}
 %% @doc Render the names scomp, Args are the scomp arguments and Vars are the variables given to the template
 render(ScompName, Args, Vars, Context) ->
-	ScompContext = zp_context:cleanup_for_scomp(Context), 
+	ScompContext = zp_context:prune_for_scomp(Context), 
     case gen_server:call(?MODULE, {render, ScompName, Args, ScompContext}) of
         {renderer, M, F, ScompState} ->
             erlang:apply(M, F, [Args, Vars, Context, ScompState]);

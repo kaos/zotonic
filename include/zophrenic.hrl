@@ -56,9 +56,15 @@
 %% Used for search results
 -record(search_result, {result, total}).
 -record(m_search_result, {search_name, search_props, result, page, pagelen, total}).
+-record(search_sql, {select, from, where="", order="", limit, tables=[], args=[], run_func, extra}).
 
 %% Default page length for search
 -define(SEARCH_PAGELEN, 25).
+
+%% ACL visibility levels
+-define(ACL_VIS_GROUP, 2).
+-define(ACL_VIS_COMMUNITY, 1).
+-define(ACL_VIS_PUBLIC, 0).
 
 %% drag and drop event message
 -record(dragdrop, {tag, delegate, id}).
