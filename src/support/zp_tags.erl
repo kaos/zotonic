@@ -10,8 +10,8 @@
 
 -include("include/zophrenic.hrl").
 
--export ([render_tag/2, render_tag/3, render_tag/4]).
-
+-export([render_tag/2, render_tag/3, render_tag/4]).
+-export([optional_escape/1]).
 
 %% @doc Render a tag with properties, return the tag text. div has special handling as <div/> is not allowed.
 render_tag("div", Props) ->
@@ -46,7 +46,7 @@ render_tag(TagName, Props, Content, Context) ->
 %%% Property display functions %%%
     
 write_props(Props) ->
-    lists:map(fun display_property/1, Props).            
+    [ display_property(optional_escape_property(P)) || P <- Props ].
 
 display_property({_Prop, undefined}) ->
     [];
@@ -69,3 +69,21 @@ display_property({Prop, Value}) when is_atom(Value) ->
 	[32, Prop, $=, $', atom_to_list(Value), $'];
 display_property({Prop, Value}) ->
 	[32, Prop, $=, $', Value, $'].
+
+
+optional_escape_property({href, Uri}) -> {href, optional_escape(Uri)};
+optional_escape_property({src, Uri}) -> {src, optional_escape(Uri)};
+optional_escape_property({<<"src">>, Uri}) -> {<<"src">>, optional_escape(Uri)};
+optional_escape_property({<<"href">>, Uri}) -> {<<"href">>, optional_escape(Uri)};
+optional_escape_property(P) -> P.
+
+optional_escape(S) when is_list(S) ->
+    case string:chr(S, $&) of
+        0 -> S;
+        _ ->
+            case string:str(S, "&amp;") of
+                0 -> mochiweb_html:escape(S);
+                _ -> S
+            end
+    end;
+optional_escape(S) -> S.

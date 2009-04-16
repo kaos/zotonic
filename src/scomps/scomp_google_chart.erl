@@ -18,7 +18,6 @@ code_change(_OldVsn, State, _Extra) -> {ok, State}.
 terminate(_Reason) -> ok.
 
 render(Params, _Vars, _Context, _State) ->
-    ?DEBUG(Params),
     Class      = proplists:get_value(class, Params),
     Style      = proplists:get_value(style, Params),
     Id         = proplists:get_value(id, Params),
