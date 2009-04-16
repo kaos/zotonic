@@ -231,6 +231,10 @@ a:focus {
 		margin: 0;
 	}
 
+fieldset.admin-form:last-child {
+	margin: 0 0 9px 0;
+}
+
 .admin-form legend { 
 	color: #000;
 	font-size: 12px;
@@ -256,14 +260,12 @@ a:focus {
 	padding: 3px 3px 2px;
 	border: solid #ccc;
 	border-width: 1px;
-	width: 100%;
 	-moz-border-radius: 2px;
 	-webkit-border-radius: 2px;
-	font-size: 11px;
+	font-size: 12px;
 	color: #666;
-}
-
-.admin-form textarea {
+	width: 100%;
+	padding: 3px 0;
 	font-family: "Lucida Sans", Helvetica, sans-serif;
 }
 

@@ -108,8 +108,8 @@
 					<div id="dashboard-products">
 						<h3 class="above-list">Best selling products in the last two weeks</h3>
 						{% chart_pie
-								data=[ ['First',10], ['Second',20], ['Third',30], ['Fourth',20] ]
-								colors='0000ff' width=400 height=200 %}
+								data=[ ['Tacx Cycle Motion Stand',10], ['Duracell AA Plus',30], ['Ortlieb Mud Racer XS',15], ['Shimano v-brake',15], [' Rudy Project Jekyll', 30]]
+								colors='0D8BB1' width=581 height=150 %}
 					</div>
 
 					<div id="dashboard-orders">

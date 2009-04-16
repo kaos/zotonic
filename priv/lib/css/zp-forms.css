@@ -45,13 +45,11 @@ input[type="text"] {
 	padding: 3px 3px 2px;
 	border: solid #ccc;
 	border-width: 1px;
-	width: 200px;
 	-moz-border-radius: 2px;
 	-webkit-border-radius: 2px;
 }
 
 textarea {
-	width: 483px;
 	font-family: "Lucida Sans",Helvetica,sans-serif;
 	font-size: 11px;
 	height: 100px
