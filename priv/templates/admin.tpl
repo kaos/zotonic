@@ -107,7 +107,9 @@
 				<div class="padding last">
 					<div id="dashboard-products">
 						<h3 class="above-list">Best selling products in the last two weeks</h3>
-						<img src="http://chart.apis.google.com/chart?cht=p3&amp;chd=t:60,20,20&amp;chs=400x200&amp;chl=Hello|World|Internet" alt="" />
+						{% chart_pie
+								data=[ ['First',10], ['Second',20], ['Third',30], ['Fourth',20] ]
+								colors='0000ff' width=400 height=200 %}
 					</div>
 
 					<div id="dashboard-orders">
