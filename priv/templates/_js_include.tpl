@@ -9,9 +9,10 @@
 <script type="text/javascript" src="/lib/js/modules/zp.autocomplete.js"></script>
 <script type="text/javascript" src="/lib/js/modules/zp.unlink.js"></script>
 <script type="text/javascript" src="/lib/js/modules/zp.tooltip.js"></script>
+<script type="text/javascript" src="/lib/js/modules/zp.blockminifier.js"></script>
 
 <script type="text/javascript" src="/lib/js/modules/jquery.wysiwyg.js"></script>
-<script type="text/javascript" src="/lib/js/modules/livevalidation-1.3.js"></script>
+<script type="text/javascript" src="/lib/js/apps/livevalidation-1.3.js"></script>
 
 <script type="text/javascript">
 	$(function()

@@ -117,8 +117,8 @@
 					
 					<h2>Form validation</h2>
 				
-					<form id="myform" method="POST" action="postback">
 					{% wire id="myform" type="submit" postback="some_tag" action={toggle target="ef"} %}
+					<form id="myform" method="POST" action="postback">
 					{# You could also use: delegate="module_handling_form" #}
 
 						<label for="email">e-mail</label>

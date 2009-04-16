@@ -3,3 +3,9 @@ body {
 	color: #333;
 	margin: 0;
 }
+
+a,
+a:focus {
+	color: #32394b;
+	text-decoration: underline;
+}

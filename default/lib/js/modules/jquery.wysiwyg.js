@@ -39,7 +39,7 @@
 
     $.fn.wysiwyg = function( options )
     {
-        if ( arguments.length > 0 && arguments[0].constructor == String )
+		if ( arguments.length > 0 && arguments[0].constructor == String )
         {
             var action = arguments[0].toString();
             var params = [];
@@ -177,8 +177,8 @@
         },
 
         TOOLBAR : {
-            bold          : { visible : true, tags : ['b', 'strong'], css : { fontWeight : 'bold' } },
-            italic        : { visible : true, tags : ['i', 'em'], css : { fontStyle : 'italic' } },
+            bold          : { visible : false, tags : ['b', 'strong'], css : { fontWeight : 'bold' } },
+            italic        : { visible : false, tags : ['i', 'em'], css : { fontStyle : 'italic' } },
             strikeThrough : { visible : false, tags : ['s', 'strike'], css : { textDecoration : 'line-through' } },
             underline     : { visible : false, tags : ['u'], css : { textDecoration : 'underline' } },
 
@@ -207,13 +207,13 @@
             separator04 : { visible : false, separator : true },
 
             insertOrderedList    : { visible : false, tags : ['ol'] },
-            insertUnorderedList  : { visible : true, tags : ['ul'] },
+            insertUnorderedList  : { visible : false, tags : ['ul'] },
             insertHorizontalRule : { visible : false, tags : ['hr'] },
 
             separator05 : { separator : false },
 
             createLink : {
-                visible : true,
+                visible : false,
                 exec    : function()
                 {
                     var selection = $(this.editor).documentSelection();
@@ -647,6 +647,14 @@
             }
 
             return false;
-        }
+		}
     });
+	
+	$.fn.wysiwyg.defaultset = { 
+		bold: { visible: true }, 
+		italic: { visible: true }, 
+		insertUnorderedList: { visible: true }, 
+		createLink: { visible: true }
+	}
+
 })(jQuery);

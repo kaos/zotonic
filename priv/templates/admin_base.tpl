@@ -49,23 +49,7 @@
 </div>
 
 	{% include "_js_include.tpl" %}
-	
-	<script type="text/javascript">
-		$(function()
-		{
-			$(window).bind('resize load', function()
-			{
-				if($(window).width() < 1200)
-				{
-					$('body').addClass('zp-normal').removeClass('zp-wide');
-				}
-				else
-				{
-					$('body').removeClass('zp-normal').addClass('zp-wide');	
-				}
-			});
-		});
-	</script>
+	<script type="text/javascript" src="/lib/js/modules/admin-common.js"></script>
 	{% script %}
 	
 </body>

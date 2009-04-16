@@ -49,6 +49,10 @@ hr {
 	padding: 0 18px 0 0;
 }
 
+.item-wrapper {
+	margin: 0 0 18px 0;	
+}
+
 .short-list,
 .item  {
 	margin: 0 0 18px 0;
@@ -56,6 +60,14 @@ hr {
 	background: #f1f1f1;
 	border: solid #ddd;
 	border-width: 0 1px 1px 1px;
+	-moz-border-radius-bottomleft: 5px;
+	-moz-border-radius-bottomright: 5px;
+	-webkit-border-bottom-left-radius: 5px;
+	-webkit-border-bottom-right-radius: 5px;
+}
+
+.item {
+	margin: 0;
 }
 
 	.item {
@@ -137,8 +149,31 @@ h3.above-item {
 	border-bottom: 1px solid #bbb;
 	margin: 0;
 	padding: 4px 8px;
+	position: relative;
 }
 
+	h3.above-item span.title {
+		display: block;
+		float: left;
+	}
+
+	h3.above-item span.arrow {
+		background: #ccc url(/lib/images/h3-close.png) no-repeat center top;
+		float: right;
+		height: 27px;
+		position: absolute;
+		right: 0;
+		text-indent: -9999px;
+		top: 0;
+		width: 22px;
+		cursor: pointer;
+		display: none;
+	}
+	
+	h3.above-item:hover span.arrow {
+		display: block;
+	}
+	
 a,
 a:focus {
 	color: #32394b;
@@ -270,7 +305,7 @@ fieldset.admin-form:last-child {
 }
 
 .admin-form textarea.intro {
-	height: 150px;
+	height: 80px;
 }
 
 .admin-form textarea.seo-desc {
