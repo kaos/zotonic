@@ -1,15 +1,31 @@
-div.wysiwyg { border: 1px solid #cccccc; padding: 0; background-color: #ffffff; }
+div.wysiwyg { 
+	border: 1px solid #cccccc; 
+	padding: 0; 
+	background-color: #ffffff; 
+	-moz-border-radius: 4px;
+	-webkit-border-radius: 4px;
+}
 div.wysiwyg * { margin: 0; padding: 0; }
 
-div.wysiwyg ul.panel { border-bottom: 1px solid #cccccc; float: left; width: 100%; padding: 0; }
-div.wysiwyg ul.panel li { list-style-type: none; float: left; margin: 0 2px; padding: 2px; background: #ffffff;}
+div.wysiwyg ul.panel { 
+	border-bottom: 1px solid #cccccc; 
+	float: left; 
+	width: 100%; 
+	padding: 0; 
+	background: #f2f2f2;
+	-webkit-border-top-left-radius: 4px;
+	-webkit-border-top-left-radius: 4px;
+	-moz-border-radius-topleft: 4px;
+	-moz-border-radius-topright: 4px;
+	background:#F7F7F7 none repeat scroll 0 0;
+}
+div.wysiwyg ul.panel li { list-style-type: none; float: left; margin: 3px 0 3px 3px; padding: 0;}
 div.wysiwyg ul.panel li.separator { height: 16px; margin: 0 4px; border-left: 1px solid #cccccc; }
-div.wysiwyg ul.panel li a { display: block; width: 16px; height: 16px; background: url(/lib/images/wysiwyg.gif) no-repeat -64px -80px; border: 0; cursor: pointer; padding: 0; border: 1px solid #fff;}
-div.wysiwyg ul.panel li a:hover, div.wysiwyg ul.panel li a.active { border: 1px solid #cccccc; border-left-color: #aaaaaa; border-top-color: #aaaaaa; padding: 0; background: #f9f9f9 url(/lib/images/wysiwyg.gif) no-repeat; }
-div.wysiwyg ul.panel li a.active { background-color: #f9f9f9; border: 1px solid #cccccc; border-left-color: #aaaaaa; border-top-color: #aaaaaa; padding: 0; }
+div.wysiwyg ul.panel li a { display: block; width: 16px; height: 16px; background: #fff url(/lib/images/wysiwyg.gif) no-repeat -64px -80px; border: 0; cursor: pointer; padding: 2px; border: 1px solid; border-color: #B2B2B2;-moz-border-radius: 4px; -webkit-border-radius: 4px;}
+div.wysiwyg ul.panel li a:hover, div.wysiwyg ul.panel li a.active {  background: #f1f1f1 url(/lib/images/wysiwyg.gif) no-repeat; }
 
-div.wysiwyg ul.panel li a.bold { background-position: 0 -16px; }
-div.wysiwyg ul.panel li a.italic { background-position: -16px -16px; }
+div.wysiwyg ul.panel li a.bold { background-position: 2px -14px; }
+div.wysiwyg ul.panel li a.italic { background-position: -14px -14px; }
 div.wysiwyg ul.panel li a.strikeThrough { background-position: -32px -16px; }
 div.wysiwyg ul.panel li a.underline { background-position: -48px -16px; }
 
@@ -28,7 +44,7 @@ div.wysiwyg ul.panel li a.undo { background-position: 0 -64px; }
 div.wysiwyg ul.panel li a.redo { background-position: -16px -64px; }
 
 div.wysiwyg ul.panel li a.insertOrderedList { background-position: -32px -48px; }
-div.wysiwyg ul.panel li a.insertUnorderedList { background-position: -16px -48px; }
+div.wysiwyg ul.panel li a.insertUnorderedList { background-position: -14px -46px; }
 div.wysiwyg ul.panel li a.insertHorizontalRule { background-position: 0 -48px; }
 
 div.wysiwyg ul.panel li a.h1 { background-position: 0 -32px; }
@@ -45,7 +61,7 @@ div.wysiwyg ul.panel li a.paste { background-position: -64px -64px; }
 div.wysiwyg ul.panel li a.increaseFontSize { background-position: -16px -80px; }
 div.wysiwyg ul.panel li a.decreaseFontSize { background-position: -32px -80px; }
 
-div.wysiwyg ul.panel li a.createLink { background-position: -80px -48px; }
+div.wysiwyg ul.panel li a.createLink { background-position: -78px -45px; }
 div.wysiwyg ul.panel li a.insertImage { background-position: -80px -80px; }
 
 div.wysiwyg ul.panel li a.html { background-position: -48px -48px; }
@@ -53,4 +69,6 @@ div.wysiwyg ul.panel li a.removeFormat { background-position: -80px -64px; }
 
 div.wysiwyg ul.panel li a.empty { background-position: -64px -80px; }
 
-div.wysiwyg iframe { border: 0; margin: 5px 0 0 0; clear: left; }
+div.wysiwyg iframe { border: 0; margin: 5px 0 0 0; clear: left; font: 11px/18px "Lucida Grande", "Lucida Sans", Helvetica, sans-serif;
+color: #666;}
+

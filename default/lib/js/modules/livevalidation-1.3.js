@@ -49,9 +49,12 @@ LiveValidation.FILE = 6;
  *	@var validations {Array} - an array of LiveValidation objects
  *	@return {Bool} - true if all passed validation, false if any fail						
  */
-LiveValidation.massValidate = function(validations){
-  var returnValue = true;
-	for(var i = 0, len = validations.length; i < len; ++i ){
+LiveValidation.massValidate = function(validations)
+{
+ 	var returnValue = true;
+	
+	for(var i = 0, len = validations.length; i < len; ++i )
+	{
 		var valid = validations[i].validate();
 		if(returnValue) returnValue = valid;
 	}
@@ -60,7 +63,8 @@ LiveValidation.massValidate = function(validations){
 
 /****** prototype ******/
 
-LiveValidation.prototype = {
+LiveValidation.prototype = 
+{
 
     validClass: 'LV_valid',
     invalidClass: 'LV_invalid',

@@ -234,54 +234,58 @@ function zp_sorter(sortBlock, sortOptions, sortPostbackInfo)
 // This function can be run multiple times.
 function zp_init_postback_forms()
 {
-	$("form[action='postback']").submit(
-	        function (event)
-	        {
-	            var serialized  = $(this).formSerialize();
-                var postback    = $(this).data("zp_submit_postback");
-                var action      = $(this).data("zp_submit_action");
-                var form_id     = $(this).attr('id');
-                var validations = $(this).formValidationPostback();
-                
-                if (!postback) 
-                {
-                    postback = zp_default_form_postback;
-                }
-                zp_queue_postback(form_id, postback, serialized+'&'+validations); 
-                if (action)
-                {
-                    setTimeout(action, 10);
-                }
-	            event.stopPropagation();
-	            return false;
-	        }
-	    ).attr('action', 'postback:installed');
+	$("form[action*='postback']").submit(function(event)
+	{
+		var serialized	= $(this).formSerialize();
+		var postback	= $(this).data("zp_submit_postback");
+		var action		= $(this).data("zp_submit_action");
+		var form_id		= $(this).attr('id');
+		var validations = $(this).formValidationPostback();
+
+		if(!postback)
+		{
+			postback = zp_default_form_postback;
+		}
+
+		zp_queue_postback(form_id, postback, serialized+'&'+validations); 
+		
+		if(action)
+		{
+			setTimeout(action, 10);
+		}
+		
+		event.stopPropagation();
+		return false;
+	})
+	.attr('action', 'pb:installed');
 }
 
-
 // Collect all postback validations from the form elements
-$.fn.formValidationPostback = function() {
-    var a = [];
-    if (this.length == 0) return a;
+$.fn.formValidationPostback = function() 
+{
+	var a = [];
+	if(this.length == 0) return a;
 
-    var form = this[0];
-    var els  = form.elements;
-    if (!els) return a;
+	var form = this[0];
+	var els	 = form.elements;
 
-    for(var i=0, max=els.length; i < max; i++) 
-    {
-        var el = els[i];
-        var n  = el.name;
-        if (n)
-        {
-            var v = $(el).data("zp_postback_validation");
-            if (v)
-            {
-                a.push({name: "zp_v", value: n+":"+v})
-            }
-        }
-    }
-    return $.param(a);
+	if (!els) return a;
+
+	for(var i=0, max=els.length; i < max; i++) 
+	{
+		var el = els[i];
+		var n  = el.name;
+
+		if (n)
+		{
+			var v = $(el).data("zp_postback_validation");
+			if (v)
+			{
+				a.push({name: "zp_v", value: n+":"+v})
+			}
+		}
+	}
+	return $.param(a);
 }
 
 // Initialize a validator for the element #id

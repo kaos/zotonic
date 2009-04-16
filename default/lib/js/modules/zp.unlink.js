@@ -64,7 +64,7 @@ $.widget("ui.unlink",
 				{
 					$(this).remove();
 				});
-				
+
 				$.post(self.options.controller, 
 				{
 					 object_id: self.options.object_id, 

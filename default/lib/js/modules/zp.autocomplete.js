@@ -52,7 +52,7 @@ $.widget("ui.autocomplete",
 					{
 						obj.removeClass('loading');
 						suggestions.animate({height: 'show', opacity: 'show'}, 200).html(data);
-				
+	
 						$('.suggestions-result').hover(function() 
 						{
 							$(this).addClass('hovering')
