@@ -152,6 +152,11 @@ h3.above-item {
 	position: relative;
 }
 
+	.above-item-all-corners {
+		-moz-border-radius: 5px;
+		-webkit-border-radius: 5px;
+	}
+
 	h3.above-item span.title {
 		display: block;
 		float: left;
@@ -348,7 +353,16 @@ fieldset.admin-form:last-child {
 ---------------------------------------------------------- */
 
 .rsc-edge {
-	line-height: 27px;
+	line-height: 11px;
+	margin: 6px 6px 6px 0;
+	float: left;
+	-moz-border-radius: 8px;
+	-webkit-border-radius: 8px;
+	padding: 4px 6px 4px 4px;
+	background: #ccc;
+	text-transform: lowercase;
+	border: 1px solid #bbb;
+	cursor: pointer;
 }
 
 .unlink-confirm {
@@ -371,6 +385,24 @@ fieldset.admin-form:last-child {
 	display: block;
 }
 
+.unlink-item {
+	float: left;
+	display: block;
+}
+
+.unlink-cross {
+	background: transparent url(/lib/images/crosses.png) no-repeat left bottom;
+	height: 11px;
+	width: 11px;
+	display: block;
+	float: left;
+	margin: 0 3px 0 0;
+}
+
+	.unlink-cross:hover,
+	.rsc-edge:hover .unlink-cross {
+		background: transparent url(/lib/images/crosses.png) no-repeat left top;
+	}
 
 /* tooltip
 ---------------------------------------------------------- */

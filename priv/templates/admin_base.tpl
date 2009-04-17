@@ -24,13 +24,13 @@
 			<h1 class="zophrenic">Zophrenic</h1>
 		</div>
 
-		{#<!--[if lte IE 6]>#}
+		<!--[if lte IE 6]>
 		<div id="ie6-upgrade" class="notification notice">
-		<h4>Warning</h4>
-		Your version of Internet Explorer is extremely <strong>out of date</strong> and has known <strong>security issues!</strong><br />
-		To have the best experience using the Zophrenic admin and to protect your computer correct this by installing <a href="http://www.opera.com">Opera</a>, <a href="http://mozilla.com">FireFox</a>, <a href="http://www.apple.com/safari/download/">Safari</a> or a higher version <a href="http://www.microsoft.com/windows/downloads/ie/getitnow.mspx">Internet Explorer</a>.
+			<h4>Warning</h4>
+			Your version of Internet Explorer is extremely <strong>out of date</strong> and has known <strong>security issues!</strong><br />
+			To have the best experience using the Zophrenic admin and to protect your computer correct this by installing <a href="http://www.opera.com">Opera</a>, <a href="http://mozilla.com">FireFox</a>, <a href="http://www.apple.com/safari/download/">Safari</a> or a higher version <a href="http://www.microsoft.com/windows/downloads/ie/getitnow.mspx">Internet Explorer</a>.
 		</div>
-		{#<![endif]-->#}
+		<![endif]-->
 
 		<ul id="navigation" class="zp-100">
 			<li><a href="/admin/" class="current">Dashboard</a></li>

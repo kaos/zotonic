@@ -34,11 +34,11 @@ $.widget("ui.blockminifier",
 	{
 		$('span.arrow', this.element).toggle(function()
 		{
-			$(this).parent().next('.item').animate({height: 'hide', opacity: 'hide'}, 120);
+			$(this).parent().addClass('above-item-all-corners').next('.item').animate({height: 'hide', opacity: 'hide'}, 120);
 		},
 		function()
 		{
-			$(this).parent().next('.item').animate({height: 'show', opacity: 'show'}, 120);
+			$(this).parent().removeClass('above-item-all-corners').next('.item').animate({height: 'show', opacity: 'show'}, 120);
 		});
 	}
 });
