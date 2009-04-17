@@ -11,9 +11,7 @@
 -export([
     m/0,
     flush/0,
-    restart/0,
-    install/0,
-    install/1
+    restart/0
 ]).
 
 -include_lib("zophrenic.hrl").
