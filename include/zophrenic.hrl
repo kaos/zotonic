@@ -25,6 +25,9 @@
 
         %% The language selected, used by zp_trans and others
         language=en,
+        
+        %% The current logged on user, derived from the session and visitor
+        user_id=undefined,
 
         %% The state below is the render state, can be cached and/or merged
         

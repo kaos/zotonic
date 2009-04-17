@@ -127,8 +127,20 @@ add_acl_check1(Table, Alias, Args, Context) ->
             end,
             {Sql1, Args};
         ?ACL_VIS_COMMUNITY ->
-            % can see published community and public content or any content from one of the user's groups
-            % TODO: Need to check the groups of the user
-            {[], Args}
+            % Can see published community and public content or any content from one of the user's groups
+            Sql = Alias ++ ".visible_for in (0,1) ",
+            Sql1 = case Table of
+                rsc ->
+                    Sql++" and "
+                    ++Alias++".is_published and "
+                    ++Alias++".publication_start <= now() and "
+                    ++Alias++".publication_end >= now()";
+                _ ->
+                    Sql
+            end,
+            N = length(Args),
+            Sql2 = "((" ++ Sql1 ++ ") or rsc_id = $"++integer_to_list(N+1)
+                    ++" or group_id in (select rg.group_id from rsc_group rg where rg.rsc_id = $"++integer_to_list(N+1)++"))",
+            {[], Args ++ [Context#context.user_id]}
     end.
     
