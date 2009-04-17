@@ -63,7 +63,7 @@ all(Context) ->
     end.
 
 
-get(Module, Context) ->
+get(Module, Context) when is_atom(Module) ->
     case zp_depcache:get(config, Module) of
         {ok, undefined} ->
             undefined;
@@ -74,7 +74,7 @@ get(Module, Context) ->
             proplists:get_value(Module, All)
     end.
 
-get(Module, Key, Context) ->
+get(Module, Key, Context) when is_atom(Module) andalso is_atom(Key) ->
     case zp_depcache:get(config, Module) of
         {ok, undefined} ->
             undefined;
@@ -88,13 +88,13 @@ get(Module, Key, Context) ->
             end
     end.
 
-get_value(Module, Key, Context) ->
+get_value(Module, Key, Context) when is_atom(Module) andalso is_atom(Key) ->
     case get(Module, Key, Context) of
         undefined -> undefined;
         Cfg -> proplists:get_value(value, Cfg)
     end.
 
-get_value(Module, Key, Default, Context) ->
+get_value(Module, Key, Default, Context) when is_atom(Module) andalso is_atom(Key) ->
     case get_value(Module, Key, Context) of
         undefined -> Default;
         Value -> Value
