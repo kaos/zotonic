@@ -371,7 +371,7 @@ fieldset.admin-form:last-child {
 	-moz-border-radius: 3px;
 	-webkit-border-radius: 3px;
 	padding: 2px 2px 2px 15px;
-	opacity: .90;
+	opacity: .80;
 	display: none;
 }
 
@@ -410,14 +410,13 @@ fieldset.admin-form:last-child {
 .tooltip {
 	position: absolute;
 	display: none;
-	background: #fff;
-	border: 1px solid;
-	border-color: #ccc;
-	color: #666;
+	background: #333;
+	opacity: .90;
+	color: #f7f7f7;
 	padding: 3px 5px;
 	-moz-border-radius: 3px;
 	-webkit-border-radius: 3px;
-	font-size: .95em;
+	font-size: 11px;
 	margin: 0;
 	min-height: 14px;
 	text-align: left;

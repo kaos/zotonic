@@ -34,19 +34,15 @@ $.widget("ui.unlink",
 	{
 		var self			= this;
 		var obj 			= this.element;
-		var unlinkLeft 		= $('span.unlink-cross', obj).position().left - 2;
+		var unlinkLeft 		= $('span.unlink-cross', obj).position().left - 3;
 		var unlinkTop  		= obj.position().top - 7;
-		var orig_edge_color = obj.css('color');
 		
-		obj.css({cursor: 'pointer'}).click(function()
+		obj.click(function()
 		{
 			var confirm	= $('<div></div>').addClass('unlink-confirm').css({position: 'absolute', top: unlinkTop, left: unlinkLeft}).html('<span>Are you sure?</span>').append('<button class="unlink-yes">yes</button><button class="unlink-no">no</button>').fadeIn(200).appendTo(document.body);
-			obj.css({color: '#f00'});
 			
 			$('.unlink-no', confirm).click(function()
 			{
-				obj.css({color: orig_edge_color});
-				
 				$(this).parent().fadeOut(200, function()
 				{
 					$(this).remove();

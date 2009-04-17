@@ -68,7 +68,7 @@
 				var left = $(this).position().left;
 				var top  = $(this).position().top;
 								
-				tip.css({top: top - 40});
+				tip.css({top: top - 30});
 				
 				if(left + tip.width() > $(window).width())
 				{
