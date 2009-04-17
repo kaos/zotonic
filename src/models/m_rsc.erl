@@ -21,7 +21,7 @@
 	rsc/0,
 	rsc/2,
 	exists/2, 
-	is_readable/2, is_writeable/2, is_ingroup/2, is_me/2,
+	is_readable/2, is_writeable/2, is_ingroup/2, is_me/2, is_a/3, is_a_list/2,
 	p/3, 
 	op/2, o/2, o/3, o/4,
 	sp/2, s/2, s/3, s/4,
@@ -142,6 +142,7 @@ p(Id, is_me, Context) -> is_me(Id, Context);
 p(Id, is_readable, Context) -> is_readable(Id, Context);
 p(Id, is_writeable, Context) -> is_writeable(Id, Context);
 p(Id, is_ingroup, Context) -> is_ingroup(Id, Context);
+p(Id, is_a, Context) -> [ {C,true} || C <- is_a_list(Id, Context) ];
 p(Id, exists, Context) -> exists(Id, Context);
 p(Id, page_url, Context) -> page_url(Id, Context);
 p(Id, group, Context) -> 
@@ -326,6 +327,27 @@ rid_name(Name, Context) ->
             Id
     end.
 
+%% @doc Check if the resource is inside a category
+is_a(Id, Cat, Context) ->
+    case m_category:name_to_id(Cat, Context) of
+        {ok, CatId} ->
+            RscCatId = p(Id, category_id, Context),
+            case RscCatId of
+                CatId ->
+                    true;
+                _ ->
+                    Path = m_category:get_path(RscCatId, Context),
+                    lists:any(fun(X) -> X == CatId end, Path)
+            end;
+        _ ->
+            false
+    end.
+
+is_a_list(Id, Context) ->
+    RscCatId = p(Id, category_id, Context),
+    Path = m_category:get_path(RscCatId, Context),
+    [ zp_convert:to_atom(m_category:id_to_name(C, Context)) || C <- Path ++ [RscCatId]].
+    
 
 page_url(Id, Context) ->
     case rid(Id, Context) of
