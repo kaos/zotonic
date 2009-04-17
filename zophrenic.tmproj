@@ -3,7 +3,7 @@
 <plist version="1.0">
 <dict>
 	<key>currentDocument</key>
-	<string>default/lib/js/modules/zp_autocomplete.js</string>
+	<string>priv/templates/admin.tpl</string>
 	<key>documents</key>
 	<array>
 		<dict>
@@ -63,20 +63,6 @@
 	<integer>256</integer>
 	<key>metaData</key>
 	<dict>
-		<key>default/lib/js/modules/zp_autocomplete.js</key>
-		<dict>
-			<key>caret</key>
-			<dict>
-				<key>column</key>
-				<integer>67</integer>
-				<key>line</key>
-				<integer>12</integer>
-			</dict>
-			<key>firstVisibleColumn</key>
-			<integer>0</integer>
-			<key>firstVisibleLine</key>
-			<integer>0</integer>
-		</dict>
 		<key>deps/mochiweb/src/mochiweb.app</key>
 		<dict>
 			<key>caret</key>
@@ -281,6 +267,64 @@
 			<key>firstVisibleLine</key>
 			<integer>0</integer>
 		</dict>
+		<key>priv/templates/admin.tpl</key>
+		<dict>
+			<key>caret</key>
+			<dict>
+				<key>column</key>
+				<integer>18</integer>
+				<key>line</key>
+				<integer>111</integer>
+			</dict>
+			<key>columnSelection</key>
+			<false/>
+			<key>firstVisibleColumn</key>
+			<integer>0</integer>
+			<key>firstVisibleLine</key>
+			<integer>82</integer>
+			<key>selectFrom</key>
+			<dict>
+				<key>column</key>
+				<integer>16</integer>
+				<key>line</key>
+				<integer>111</integer>
+			</dict>
+			<key>selectTo</key>
+			<dict>
+				<key>column</key>
+				<integer>22</integer>
+				<key>line</key>
+				<integer>111</integer>
+			</dict>
+		</dict>
+		<key>priv/templates/admin_base.tpl</key>
+		<dict>
+			<key>caret</key>
+			<dict>
+				<key>column</key>
+				<integer>19</integer>
+				<key>line</key>
+				<integer>18</integer>
+			</dict>
+			<key>firstVisibleColumn</key>
+			<integer>0</integer>
+			<key>firstVisibleLine</key>
+			<integer>3</integer>
+		</dict>
+		<key>priv/templates/admin_edit.tpl</key>
+		<dict>
+			<key>caret</key>
+			<dict>
+				<key>column</key>
+				<integer>19</integer>
+				<key>line</key>
+				<integer>75</integer>
+			</dict>
+			<key>firstVisibleColumn</key>
+			<integer>0</integer>
+			<key>firstVisibleLine</key>
+			<integer>51</integer>
+		</dict>
 		<key>priv/templates/category.tpl</key>
 		<dict>
 			<key>caret</key>
@@ -310,6 +354,20 @@
 				<key>line</key>
 				<integer>16</integer>
 			</dict>
+		</dict>
+		<key>priv/templates/product.tpl</key>
+		<dict>
+			<key>caret</key>
+			<dict>
+				<key>column</key>
+				<integer>4</integer>
+				<key>line</key>
+				<integer>0</integer>
+			</dict>
+			<key>firstVisibleColumn</key>
+			<integer>0</integer>
+			<key>firstVisibleLine</key>
+			<integer>0</integer>
 		</dict>
 		<key>priv/templates/sub_category.tpl</key>
 		<dict>
@@ -386,8 +444,9 @@
 	</dict>
 	<key>openDocuments</key>
 	<array>
-		<string>default/lib/js/modules/zp_autocomplete.js</string>
-		<string>priv/dispatch/struijk</string>
+		<string>priv/templates/admin_edit.tpl</string>
+		<string>priv/templates/admin.tpl</string>
+		<string>priv/templates/product.tpl</string>
 	</array>
 	<key>showFileHierarchyDrawer</key>
 	<false/>
@@ -412,22 +471,7 @@
 							<key>isExpanded</key>
 							<true/>
 							<key>subItems</key>
-							<dict>
-								<key>apps</key>
-								<dict>
-									<key>isExpanded</key>
-									<true/>
-									<key>subItems</key>
-									<dict/>
-								</dict>
-								<key>modules</key>
-								<dict>
-									<key>isExpanded</key>
-									<true/>
-									<key>subItems</key>
-									<dict/>
-								</dict>
-							</dict>
+							<dict/>
 						</dict>
 					</dict>
 				</dict>
@@ -439,19 +483,20 @@
 			<true/>
 			<key>subItems</key>
 			<dict>
-				<key>dispatch</key>
+				<key>lib</key>
 				<dict>
 					<key>isExpanded</key>
 					<true/>
 					<key>subItems</key>
-					<dict/>
-				</dict>
-				<key>resources</key>
-				<dict>
-					<key>isExpanded</key>
-					<true/>
-					<key>subItems</key>
-					<dict/>
+					<dict>
+						<key>css</key>
+						<dict>
+							<key>isExpanded</key>
+							<true/>
+							<key>subItems</key>
+							<dict/>
+						</dict>
+					</dict>
 				</dict>
 				<key>templates</key>
 				<dict>
@@ -464,6 +509,6 @@
 		</dict>
 	</dict>
 	<key>windowFrame</key>
-	<string>{{9, 95}, {1818, 1083}}</string>
+	<string>{{0, 70}, {1680, 958}}</string>
 </dict>
 </plist>

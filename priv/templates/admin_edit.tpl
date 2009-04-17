@@ -66,18 +66,8 @@
 								<span class="arrow">make smaller</span>
 							</h3>
 							<div class="item clearfix">
-								<input type="text" name="test" class="do_autocomplete" title="Try typing a word, I'll finish it." />
-								<div class="rsc-edge">
-									<span class="do_unlink { object_id: 2, edge_id: 33, subject_id: 4 }">
-										About<img alt="" src="/lib/images/cross.png" />
-									</span>
-								</div>
-								<div class="rsc-edge">
-									<span class="do_unlink { object_id: 2, edge_id: 33, subject_id: 4 }">
-										About<img alt="" src="/lib/images/cross.png" />
-									</span>
-								</div>
-								<button class="do_tooltip" title="I'm am the tooptip popup, I'm am the tooptip popup">Yeah, give me a tooltip</button>
+								{% button class="save-resource" text="save" %}
+								{% button class="discard-resource" text="discard" %}
 							</div>
 						</div>
 					
