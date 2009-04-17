@@ -49,7 +49,7 @@
 </div>
 
 	{% include "_js_include.tpl" %}
-	<script type="text/javascript" src="/lib/js/modules/admin-common.js"></script>
+	<script type="text/javascript" src="/lib/js/apps/admin-common.js"></script>
 	{% script %}
 	
 </body>
