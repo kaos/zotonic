@@ -199,7 +199,7 @@ install_rsc(Context) ->
     ],
     
     F = fun(Ctx) ->
-        Rets = [ zp_db:insert(rsc, [{is_published, true}, {visible_for, 0}, {group_id, 1}, {owner_id, 1}, {modifier_id, 1}, {creator_id, 1} | R], Ctx) || R <- Rsc ],
+        Rets = [ zp_db:insert(rsc, [{is_published, true}, {visible_for, 0}, {group_id, 1}, {modifier_id, 1}, {creator_id, 1} | R], Ctx) || R <- Rsc ],
         IdRsc = lists:zip(Rets, Rsc),
         M = fun({{ok,Id}, R}) ->
             case proplists:get_value(product_nr, R) of

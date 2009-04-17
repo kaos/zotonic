@@ -30,12 +30,3 @@ restart() ->
     zophrenic:stop(),
     zophrenic:start().
 
-install() -> 
-    install(dbdefault).
-install(Db) -> 
-    zp_install:install(Db),
-    flush(),
-    Context   = zp_context:new(),
-    ContextDb = Context#context{db=Db},
-    shop_install_data:install(ContextDb).
-

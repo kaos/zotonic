@@ -28,12 +28,14 @@ find_value(Key, {GBSize, GBData}, _Context) when is_integer(GBSize) ->
 
 %% q and q_validated are indexed with strings, this because the indices are from
 %% the query string and post. Wrap them in a 'q' tuple to force a subsequent lookup.
-find_value(Key, {q, List}, _Context) ->
-    proplists:get_value(atom_to_list(Key), List);
-find_value(q, _Vars, Context) ->
-    {q, zp_context:get(q, Context)};
-find_value(q_validated, _Vars, Context) ->
-    {q, zp_context:get(q_validated, Context)};
+find_value(Key, {q}, Context) ->
+    zp_context:get_q(atom_to_list(Key), Context);
+find_value(Key, {q_validated}, Context) ->
+    zp_context:get_q_validated(atom_to_list(Key), Context);
+find_value(q, _Vars, _Context) ->
+    {q};
+find_value(q_validated, _Vars, _Context) ->
+    {q_validated};
 
 %% Regular proplist lookup
 find_value(Key, L, _Context) when is_list(L) ->
@@ -156,6 +158,9 @@ init_counter_stats(List, Parent) ->
 
 to_list(#m{model=Model} = M, Context) -> Model:m_to_list(M, Context);
 to_list(#rsc_list{list=L}, _Context) -> L;
+to_list(#search_result{result=L}, _Context) -> L;
+to_list({q}, Context) -> zp_context:get_q_all(Context);
+to_list({q_validated}, _Context) -> [];
 to_list(L, _Context) when is_list(L) -> L;
 to_list(T, _Context) when is_tuple(T) -> tuple_to_list(T);
 to_list(_, _Context) -> [].

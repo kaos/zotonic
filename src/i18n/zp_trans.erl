@@ -8,7 +8,7 @@
 -module(zp_trans).
 -author("Marc Worrell <marc@worrell.nl>").
 
--export([trans/2, is_language/1, lc2/1, lc2descr/1]).
+-export([trans/2, default_language/1, is_language/1, lc2/1, lc2descr/1]).
 
 -include_lib("zophrenic.hrl").
 
@@ -16,8 +16,8 @@
 %% @spec trans(From, Language) -> String
 %%   From = #trans{} | String
 %%   Language = atom()
-trans(Text, #context{}) ->
-    trans(Text, en);
+trans(Text, #context{} = Context) ->
+    trans(Text, Context#context.language);
 trans({trans, Trans}, Language) ->
 	case proplists:get_value(Language, Trans) of
 		undefined -> 
@@ -29,6 +29,10 @@ trans({trans, Trans}, Language) ->
 	end;
 trans(String, Language) ->
 	trans({trans, [{en,String}]}, Language).
+
+%% @doc Return the configured default language for this server
+default_language(Context) ->
+    zp_convert:to_atom(m_config:get_value("zophrenic", "language", en, Context)).
 
 
 %% @doc check if the two letter code is a valid language

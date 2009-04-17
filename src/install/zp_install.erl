@@ -15,7 +15,6 @@
     install/1
 ]).
 
-
 %% @doc Install the database on the database connection supplied
 %% @spec install(Database) -> ok
 install(Database) ->
@@ -26,12 +25,12 @@ install(Database) ->
 
 
 install_all(C) ->
-    install_model(C),
+    install_sql_list(C, model_pgsql()),
     zp_install_data:install(C),
     ok.
 
-install_model(C) ->
-    [ {ok, [], []} = pgsql:squery(C, Sql) || Sql <- model_pgsql() ].
+install_sql_list(C, Model) ->
+    [ {ok, [], []} = pgsql:squery(C, Sql) || Sql <- Model ].
     
 
 %% @doc Return a list containing the SQL statements to build the database model
@@ -65,12 +64,13 @@ model_pgsql() ->
         is_published boolean NOT NULL DEFAULT false,
         publication_start timestamp with time zone NOT NULL DEFAULT now(),
         publication_end timestamp with time zone NOT NULL DEFAULT '9999-01-01 00:00:00+01'::timestamp with time zone,
-        visible_for integer NOT NULL DEFAULT 1, -- 0 = public, 1 = community, 2 = group, 3 = owner
-        comment_by integer NOT NULL DEFAULT 3, -- 0 = public, 1 = community, 2 = group, 3 = owner
+        visible_for int NOT NULL DEFAULT 1, -- 0 = public, 1 = community, 2 = group
+        comment_by int NOT NULL DEFAULT 3, -- 0 = public, 1 = community, 2 = group, 3 = nobody
+        comments int NOT NULL default 0,
         group_id int NOT NULL,
-        owner_id int,
         creator_id int,
         modifier_id int,
+        version int NOT NULL DEFAULT 1,
         category_id int NOT NULL DEFAULT 1,
         is_featured boolean NOT NULL DEFAULT false,
         slug character varying(80) NOT NULL DEFAULT ''::character varying,
@@ -79,15 +79,32 @@ model_pgsql() ->
         created timestamp with time zone NOT NULL DEFAULT now(),
         modified timestamp with time zone NOT NULL DEFAULT now(),
 
+        -- pivot fields for searching
+        pivot_tsv tsvector,       -- texts 
+        pivot_rtsv tsvector,      -- related ids (cat, prop, rsc)
+
+    	pivot_first_name character varying(100),
+    	pivot_surname character varying(100),
+        pivot_gender character varying(1),
+        
+        pivot_date_start timestamp with time zone,
+        pivot_date_end timestamp with time zone,
+        pivot_date_start_month_day int,  -- used for birthdays
+        pivot_date_end_month_day int,    -- used for decease dates
+        
+        pivot_street character varying(120),
+        pivot_city character varying(100),
+        pivot_state character varying(50),
+        pivot_postcode character varying(30),
+        pivot_country character varying(80),
+        pivot_geocode character varying(20),
+
         CONSTRAINT resource_pkey PRIMARY KEY (id),
         CONSTRAINT rsc_uri_key UNIQUE (uri),
         CONSTRAINT name UNIQUE (name)
     )",
-    "COMMENT ON COLUMN rsc.visible_for IS '0 = public, 1 = community, 2 = group, 3 = owner'",
+    "COMMENT ON COLUMN rsc.visible_for IS '0 = public, 1 = community, 2 = group'",
 
-    "ALTER TABLE rsc ADD CONSTRAINT fk_rsc_owner_id FOREIGN KEY (owner_id)
-      REFERENCES rsc (id)
-      ON UPDATE CASCADE ON DELETE SET NULL",
     "ALTER TABLE rsc ADD CONSTRAINT fk_rsc_creator_id FOREIGN KEY (creator_id)
       REFERENCES rsc (id)
       ON UPDATE CASCADE ON DELETE SET NULL",
@@ -95,11 +112,25 @@ model_pgsql() ->
       REFERENCES rsc (id)
       ON UPDATE CASCADE ON DELETE SET NULL",
       
-    "CREATE INDEX fki_rsc_owner_id ON rsc (owner_id)",
     "CREATE INDEX fki_rsc_creator_id ON rsc (creator_id)",
     "CREATE INDEX fki_rsc_modifier_id ON rsc (modifier_id)",
     "CREATE INDEX fki_rsc_created ON rsc (created)",
     "CREATE INDEX fki_rsc_modified ON rsc (modified)",
+
+    "CREATE INDEX rsc_pivot_tsv_key ON rsc USING gin(pivot_tsv)",
+    "CREATE INDEX rsc_pivot_rtsv_key ON rsc USING gin(pivot_rtsv)",
+
+    "CREATE INDEX rsc_pivot_surname_key ON rsc (pivot_surname)",
+    "CREATE INDEX rsc_pivot_first_name_key ON rsc (pivot_first_name)",
+    "CREATE INDEX rsc_pivot_gender_key ON rsc (pivot_gender)",
+    "CREATE INDEX rsc_pivot_date_start_key ON rsc (pivot_date_start)",
+    "CREATE INDEX rsc_pivot_date_end_key ON rsc (pivot_date_end)",
+    "CREATE INDEX rsc_pivot_date_start_month_day_key ON rsc (pivot_date_start_month_day)",
+    "CREATE INDEX rsc_pivot_date_end_month_day_key ON rsc (pivot_date_end_month_day)",
+    "CREATE INDEX rsc_pivot_city_street_key ON rsc (pivot_city, pivot_street)",
+    "CREATE INDEX rsc_pivot_country_key ON rsc (pivot_country)",
+    "CREATE INDEX rsc_pivot_postcode_key ON rsc (pivot_postcode)",
+    "CREATE INDEX rsc_pivot_geocode_key ON rsc (pivot_geocode)",
 
     % Table: predicate
     % Holds all predicates used in the edge table
@@ -450,10 +481,92 @@ model_pgsql() ->
       CONSTRAINT identity_prop_key UNIQUE (type, prop1, prop2, prop3, prop4)
     )",
 
-    "CREATE INDEX fki_auth_rsc_id ON identity (rsc_id)",
-    "CREATE INDEX auth_visited_key ON identity (visited)",
-    "CREATE INDEX auth_created_key ON identity (created)"
+    "CREATE INDEX fki_identity_rsc_id ON identity (rsc_id)",
+    "CREATE INDEX identity_visited_key ON identity (visited)",
+    "CREATE INDEX identity_created_key ON identity (created)",
+
+
+    % pivot queue for rsc, all things that are updated are queued here for later full text indexing
+    "CREATE TABLE rsc_pivot_queue
+    (
+        rsc_id int NOT NULL,
+        serial int NOT NULL DEFAULT 1,
+        due timestamp NOT NULL,
+        is_update boolean NOT NULL default true,
+        
+        CONSTRAINT rsc_pivot_queue_pkey PRIMARY KEY (rsc_id),
+        CONSTRAINT fk_rsc_pivot_queue_rsc_id FOREIGN KEY (rsc_id)
+          REFERENCES rsc(id)
+          ON UPDATE CASCADE ON DELETE CASCADE
+    )",
+
+    "CREATE INDEX fki_rsc_pivot_queue_rsc_id ON rsc_pivot_queue (rsc_id)",
+    "CREATE INDEX fki_rsc_pivot_queue_due ON rsc_pivot_queue (is_update, due)",
+
+    % Update/insert trigger on rsc to fill the update queue
+    % The text indexing is deleted until the updates are stable
+    "
+    CREATE FUNCTION rsc_pivot_update() RETURNS trigger AS $$
+    declare 
+        duetime timestamp;
+        do_queue boolean;
+    begin
+        if (tg_op = 'INSERT') then
+            duetime := now() - interval '10 minute';
+            do_queue := true;
+        elseif (new.version <> old.version or new.modified <> old.modified) then
+            duetime := now() + interval '10 minute';
+            do_queue := true;
+        else
+            do_queue := false;
+        end if;
+
+        if (do_queue) then
+            <<insert_update_queue>>
+            loop
+                update rsc_pivot_queue 
+                set due = (case when duetime < due then duetime else due end),
+                    serial = serial + 1
+                where rsc_id = new.id;
+            
+                exit insert_update_queue when found;
+            
+                begin
+                    insert into rsc_pivot_queue (rsc_id, due, is_update) values (new.id, duetime, tg_op = 'UPDATE');
+                    exit insert_update_queue;
+                exception
+                    when unique_violation then
+                        -- do nothing
+                end;
+            end loop insert_update_queue;
+        end if;
+        return null;
+    end;
+    $$ LANGUAGE plpgsql
+    ",
+    "
+    CREATE TRIGGER rsc_update_queue_trigger AFTER INSERT OR UPDATE
+    ON rsc FOR EACH ROW EXECUTE PROCEDURE rsc_pivot_update()
+    "
     ].
+
+
+%    -- Fulltext index of products
+%    -- TODO: Also mix in the shop product id, brand, group and properties
+%    -- TODO: Use ispell for handling typos
+%    CREATE INDEX shop_product_tsv ON shop_product USING gin(tsv);
+%    CREATE FUNCTION shop_product_trigger() RETURNS trigger AS $$ 
+%    begin
+%      new.tsv := 
+%        setweight(to_tsvector('pg_catalog.dutch', coalesce(new.title_nl,'')), 'A') || 
+%        setweight(to_tsvector('pg_catalog.dutch', coalesce(new.desc_nl,'')),  'D') ||
+%        setweight(to_tsvector('pg_catalog.english', coalesce(new.title_en,'')), 'A') || 
+%        setweight(to_tsvector('pg_catalog.english', coalesce(new.desc_en,'')),  'D'); 
+%      return new; 
+%    end 
+%    $$ LANGUAGE plpgsql; 
+%    CREATE TRIGGER tsvectorupdate_shop_product BEFORE INSERT OR UPDATE 
+%    ON shop_product FOR EACH ROW EXECUTE PROCEDURE shop_product_trigger();
 
 
 

@@ -34,6 +34,7 @@
 	is_process_alive/1,
 	trim/1,
 	is_true/1,
+	is_string/1,
 	to_lower/1,
 	to_upper/1,
 	assert/2,
@@ -343,6 +344,14 @@ is_true(N) when is_integer(N) andalso N /= 0 -> true;
 
 is_true(_) -> false.
 
+
+%% @doc Check if the variable is a one dimensional list, probably a string
+is_string([]) -> 
+    true;
+is_string([C|Rest]) when is_integer(C) andalso (C >= 32 orelse C == 9 orelse C == 10 orelse C == 12 orelse C == 13) ->
+    is_string(Rest);
+is_string(_) -> 
+    false.
 
 %% @doc Return a lowercase string for the input
 %% @spec to_lower(Value) -> String

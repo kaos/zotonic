@@ -64,6 +64,17 @@ search({latest, [{cat, Cat}]}, _OffsetLimit, Context) ->
         tables=[{rsc,"r"}]
     };
 
+search({fulltext, [{cat,Cat},{text,QueryText}]}, _OffsetLimit, Context) ->
+    CatId = m_category:name_to_id_check(Cat, Context),
+    #search_sql{
+        select="r.id, ts_rank_cd(pivot_tsv, query, 32) AS rank",
+        from="rsc r, category rc, category ic, to_tsquery($2) query",
+        where=" query @@ pivot_tsv  and r.category_id = rc.id and rc.nr >= ic.lft and rc.nr <= ic.rght and ic.id = $1",
+        order="rank desc",
+        args=[CatId, QueryText],
+        tables=[{rsc,"r"}]
+    };
+
 search({media_category_image, [{cat,Cat}]}, _OffsetLimit, Context) ->
     CatId = m_category:name_to_id_check(Cat, Context),
     #search_sql{

@@ -60,3 +60,4 @@ html_encode([H|T]) ->
 		$\n -> "<br>" ++ html_encode(T);
 		_ -> [H|html_encode(T)]
 	end.
+

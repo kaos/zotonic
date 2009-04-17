@@ -16,10 +16,12 @@
     name_to_id/2,
     name_to_id_check/2,
     
+    get/2,
+    
 	rsc/0,
 	rsc/2,
 	exists/2, 
-	is_readable/2, is_writeable/2, is_owner/2, is_ingroup/2, is_me/2,
+	is_readable/2, is_writeable/2, is_ingroup/2, is_me/2,
 	p/3, 
 	op/2, o/2, o/3, o/4,
 	sp/2, s/2, s/3, s/4,
@@ -63,6 +65,28 @@ name_to_id_check(Name, Context) ->
     {ok, Id} = name_to_id(Name, Context),
     Id.
 
+
+%% @doc Read a whole resource
+%% @spec get(Id, Context) -> 
+get(Id, Context) ->
+    case rid(Id, Context) of
+        #rsc{id=Rid} = Rsc ->
+            case zp_depcache:get(Rsc) of
+                {ok, Resource} -> 
+                    Resource;
+                undefined ->
+                    case zp_db:select(rsc, Id, Context) of
+                        {ok, Record} ->
+                            zp_depcache:set(Rsc, Record, ?WEEK, [Rsc]),
+                            Record;
+                        _ ->
+                            zp_depcache:set(Rsc, undefined, ?WEEK, [Rsc]),
+                            undefined
+                    end
+            end
+    end.
+
+
 rsc() -> fun(Id, _Context) -> #rsc{id=Id} end.
 rsc(Id, _Context) -> #rsc{id=Id}.
 
@@ -97,14 +121,6 @@ is_readable(Id, Context) -> true.
 is_writeable(Id, Context) -> true.
 is_ingroup(Id, Context) -> true.
 
-is_owner(Id, Context) ->
-    case rid(Id, Context) of
-        #rsc{id=RscId} = R ->
-            p(R, owner_id, Context) == RscId;
-        _ ->
-            false
-    end.
-
 is_me(Id, Context) -> 
     case rid(Id, Context) of
         #rsc{id=RscId} ->
@@ -123,7 +139,6 @@ p(Id, m, Context)  -> m(Id, Context);
 p(Id, op, Context) -> op(Id, Context);
 p(Id, sp, Context) -> sp(Id, Context);
 p(Id, is_me, Context) -> is_me(Id, Context);
-p(Id, is_owner, Context) -> is_me(Id, Context);
 p(Id, is_readable, Context) -> is_readable(Id, Context);
 p(Id, is_writeable, Context) -> is_writeable(Id, Context);
 p(Id, is_ingroup, Context) -> is_ingroup(Id, Context);

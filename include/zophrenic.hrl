@@ -22,7 +22,10 @@
         db=dbdefault,
         %% The database connection used for (nested) transactions, see zp_db
         dbc=undefined,
-        
+
+        %% The language selected, used by zp_trans and others
+        language=en,
+
         %% The state below is the render state, can be cached and/or merged
         
         %% State of the current rendered template/scomp/page

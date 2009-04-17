@@ -46,7 +46,7 @@
 				<div id="search" class="zp-25 right">
 					<form id="searchform" method="get" action="/search">
 						<fieldset>
-							<input id="quick-search" type="text" name="search" />
+							<input id="quick-search" type="text" name="qs" value="{{ q.qs|escape }}" />
 							<button class="buy-me right-side-button">Zoek &raquo;</button>
 						</fieldset>
 					</form>

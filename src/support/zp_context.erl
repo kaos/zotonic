@@ -9,6 +9,7 @@
 -export([
     new/1,
     new/0,
+    new_for_db/1,
 
     prune_for_template/1,
     prune_for_database/1,
@@ -28,6 +29,7 @@
     set_resource_module/2,
 
     get_q/2,
+    get_q/3,
     get_q_all/2,
     get_q_validated/2,
 
@@ -53,8 +55,10 @@
     set/3,
     set/2,
     get/2,
-    incr/3
+    incr/3,
     
+    language/1
+
     ]).
 
 -include_lib("webmachine.hrl").
@@ -65,10 +69,18 @@
 new(ReqProps) ->
     Req    = ?REQ(ReqProps),
     Module = Req:get_metadata('resource_module'),
-    #context{reqprops=ReqProps, dict=dict:new(), resource_module=Module}.
+    Context = #context{reqprops=ReqProps, dict=dict:new(), resource_module=Module},
+    Context#context{language=zp_trans:default_language(Context)}.
 
 %% @doc Return a new empty context
-new() -> #context{dict=dict:new()}.
+new() -> 
+    Context = #context{dict=dict:new()},
+    Context#context{language=zp_trans:default_language(Context)}.
+
+%% @doc Return an almost empty context for the database connection only, nothing else is initialised
+new_for_db(Database) ->
+    Context = new(),
+    Context#context{db=Database}.
 
 %% @doc Cleanup a context for the output stream
 prune_for_template(#context{}=Context) ->
@@ -233,8 +245,21 @@ set_resource_module(Module, Context) ->
 %%       Key -> string()
 %% @doc Get a request parameter, either from the query string or the post body.  Post body has precedence over the query string.
 get_q(Key, Context) ->
-    {ok, Qs} = dict:find('q', Context#context.dict),
-    proplists:get_value(Key, Qs).
+    case dict:find('q', Context#context.dict) of
+        {ok, Qs} -> proplists:get_value(Key, Qs);
+        error -> undefined
+    end.
+
+
+%% @spec get_q(Key, Context, Default) -> Value
+%%       Value -> string()
+%%       Key -> string()
+%% @doc Get a request parameter, either from the query string or the post body.  Post body has precedence over the query string.
+get_q(Key, Context, Default) ->
+    case dict:find('q', Context#context.dict) of
+        {ok, Qs} -> proplists:get_value(Key, Qs, Default);
+        error -> undefined
+    end.
 
 
 %% @spec get_q_all(Key, Context) -> Values
@@ -405,6 +430,9 @@ incr(Key, Value, Context) ->
     get(Key, Context1).
 
 
+%% @doc Return the selected language of the Context
+language(Context) ->
+    Context#context.language.
 
 %% ------------------------------------------------------------------------------------
 %% Local helper functions

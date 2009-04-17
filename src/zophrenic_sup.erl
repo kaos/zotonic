@@ -76,6 +76,10 @@ init([]) ->
                 {zp_depcache, start_link, []}, 
                 permanent, 5000, worker, dynamic},
 
+    Installer = {zp_installer,
+                {zp_installer, start_link, [DbPoolConfig]},
+                permanent, 1, worker, dynamic},
+
     Dispatcher = {zp_dispatcher,
 	            {zp_dispatcher, start_link, []}, 
 	            permanent, 5000, worker, dynamic},
@@ -108,6 +112,10 @@ init([]) ->
                 {zp_dropbox, start_link, []}, 
                 permanent, 5000, worker, dynamic},
 
-    Processes = [MochiWeb, Postgres, Depcache, Ids, Dispatcher, Notifier, Session, Visitor, Template, Scomp, DropBox],
+    Pivot = {zp_pivot_rsc,
+                {zp_pivot_rsc, start_link, []}, 
+                permanent, 5000, worker, dynamic},
+
+    Processes = [MochiWeb, Postgres, Depcache, Installer, Ids, Dispatcher, Notifier, Session, Visitor, Template, Scomp, DropBox, Pivot],
     {ok, {{one_for_one, 1000, 10}, Processes}}.
 

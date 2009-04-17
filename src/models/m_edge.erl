@@ -19,6 +19,8 @@
     subject/4,
     objects/3,
     subjects/3,
+    objects/2,
+    subjects/2,
     object_predicates/2,
     subject_predicates/2
 ]).
@@ -133,9 +135,28 @@ subjects(Id, Pred, Context) ->
         undefined ->
             Ids = zp_db:q("select subject_id from edge where object_id = $1 and predicate_id = $2 order by id", [Id, Pred], Context),
             Subjects = [ SubjId || {SubjId} <- Ids ],
-            zp_depcache:set({subjects, Pred, Id}, Subjects, ?DAY, [#rsc{id=Id}]),
+            zp_depcache:set({subjects, Pred, Id}, Subjects, ?HOUR, [#rsc{id=Id}]),
             Subjects
     end.
+
+
+%% @doc Return all object ids of the resource
+%% @spec objects(Id, Context) -> list()
+objects(Id, Context) ->
+    F = fun() ->
+        Ids = zp_db:q("select object_id from edge where subject_id = $1 order by predicate_id, seq, id", [Id], Context),
+        [ ObjId || {ObjId} <- Ids]
+    end,
+    zp_depcache:memo(F, {objects, Id}, ?DAY, [#rsc{id=Id}]).
+
+%% @doc Return all subject ids of the resource
+%% @spec subjects(Id, Context) -> list()
+subjects(Id, Context) ->
+    F = fun() ->
+        Ids = zp_db:q("select subject_id from edge where object_id = $1 order by predicate_id, id", [Id], Context),
+        [ SubjId || {SubjId} <- Ids]
+    end,
+    zp_depcache:memo(F, {subjects, Id}, ?HOUR, [#rsc{id=Id}]).
 
 
 %% @doc Return the list of predicates in use by edges to objects from the id

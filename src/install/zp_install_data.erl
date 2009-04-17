@@ -98,7 +98,7 @@ install_rsc(C) ->
             insert into rsc (id, uri, visible_for, group_id, category_id, name, props)
             values ($1, $2, $3, $4, $5, $6, $7)
             ", R) || R <- Rsc ],
-    {ok, _} = pgsql:squery(C, "update rsc set owner_id = 1, creator_id = 1, modifier_id = 1, is_published = true"),
+    {ok, _} = pgsql:squery(C, "update rsc set creator_id = 1, modifier_id = 1, is_published = true"),
     pgsql:reset_id(C, "rsc"),
     
     % Connect person resources to the correct groups
