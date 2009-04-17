@@ -19,7 +19,8 @@
     poll/1,
     pivot/2,
     
-    pivot_resource/2
+    pivot_resource/2,
+    pg_lang/1
 ]).
 
 -include("zophrenic.hrl").

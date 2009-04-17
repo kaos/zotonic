@@ -68,10 +68,10 @@ search({fulltext, [{cat,Cat},{text,QueryText}]}, _OffsetLimit, Context) ->
     CatId = m_category:name_to_id_check(Cat, Context),
     #search_sql{
         select="r.id, ts_rank_cd(pivot_tsv, query, 32) AS rank",
-        from="rsc r, category rc, category ic, to_tsquery($2) query",
+        from="rsc r, category rc, category ic, to_tsquery($3, $2) query",
         where=" query @@ pivot_tsv  and r.category_id = rc.id and rc.nr >= ic.lft and rc.nr <= ic.rght and ic.id = $1",
         order="rank desc",
-        args=[CatId, QueryText],
+        args=[CatId, QueryText, zp_pivot_rsc:pg_lang(Context#context.language)],
         tables=[{rsc,"r"}]
     };
 
