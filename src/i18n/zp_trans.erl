@@ -32,7 +32,7 @@ trans(String, Language) ->
 
 %% @doc Return the configured default language for this server
 default_language(Context) ->
-    zp_convert:to_atom(m_config:get_value("zophrenic", "language", en, Context)).
+    zp_convert:to_atom(m_config:get_value(zophrenic, language, en, Context)).
 
 
 %% @doc check if the two letter code is a valid language
