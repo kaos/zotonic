@@ -5,11 +5,11 @@
 {% block content %}
 	<div id="content-area" class="zp-75">
 		<!-- Area for the main content -->
-		<h2 class="header-alone">Zoek resultaat</h2>
+		<h2 class="header-alone">{% if q.qs %}U heeft gezocht op <em>{{ q.qs|escape }}</em>{% else %}Zoek resultaat{% endif %}</h2>
 		
 		{% pager result=result %}
 		
-		{% for rsc_id, rank in result %}
+		{% for rsc_id, cid, bid, rank in result %}
 		<h3 class="block">{{ m.rsc[rsc_id].title }}</h3>
 		<div class="block clearfix">
 			<a href="{{ m.rsc[rsc_id].page_url }}">{% image m.rsc[rsc_id].media[1].filename width=180 height=140 crop alt="Handgrepen" class="left" %}</a>
@@ -67,6 +67,36 @@
 	<div id="sidebar" class="zp-25">
 		<div class="padding">
 			{% include "_subnav.tpl" %}
+
+			<h3 class="block">Categorieën</h3>
+			<ul class="sub-navigation">
+				<li><a href="{% url search qs=q.qs qbrand=q.qbrand %}">Alle categorieën <span class="amount">({{ result.total|default:"-" }})</span></a></li>
+				{% for c in m.category.product.tree2.children %}
+					{% if cat_count[c.id] %}
+						<li>
+							<a href="{% url search qs=q.qs qcat=c.name qbrand=q.qbrand %}">{{ c.title }} <span class="amount">({{ cat_count[c.id] }})</span></a>
+							{% if c.children %}
+								<ul class="sub-navigation">
+								{% for cc in c.children %}
+									{% if cat_count[cc.id] %}
+									<li><a href="{% url search qs=q.qs qcat=cc.name qbrand=q.qbrand %}">&nbsp;&nbsp;&nbsp;&nbsp;{{ cc.title }} <span class="amount">({{ cat_count[cc.id] }})</span></a></li>
+									{% endif %}
+								{% endfor %}
+								</ul>
+							{% endif %}
+						</li>
+					{% endif %}
+				{% endfor %}
+			</ul>
+
+			<h3 class="block">Merken</h3>
+			<ul class="sub-navigation">
+				<li><a href="{% url search qs=q.qs qcat=q.qcat %}">Alle merken <span class="amount">({{ result.total|default:"-" }})</span></a></li>
+				{% for b_id, b_name, b_count in brand_count %}
+			    <li><a {% ifequal brand_id b_id %}class="current" {% endifequal %} href="{% url search qs=q.qs qcat=cat_name qbrand=b_name %}">{{m.rsc[b_id].title}} <span class="amount">({{ b_count|default:"-" }})</span></a></li>
+				{% endfor %}
+			</ul>
+
 		</div>
 	</div>
 {% endblock %}
