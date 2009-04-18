@@ -1,8 +1,14 @@
-% Nitrogen Web Framework for Erlang
-% Copyright (c) 2008-2009 Rusty Klophaus
-% See MIT-LICENSE for licensing information.
+%% @author Marc Worrell <marc@worrell.nl>
+%% @author Rusty Klophaus
+%% @copyright 2009 Marc Worrell
+%%
+%% Based on Nitrogen, which is copyright (c) 2008-2009 Rusty Klophaus
+%% See MIT-LICENSE for licensing information.
 
 -module(zp_render).
+-author("Marc Worrell <marc@worrell.nl>").
+-author("Rusty Klophaus").
+
 -include("zophrenic.hrl").
 
 -export ([
