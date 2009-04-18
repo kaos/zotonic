@@ -80,7 +80,7 @@
 
 			<h3 class="block">Categorieën</h3>
 			<ul class="sub-navigation">
-				<li><a href="{% url search qs=q.qs qbrand=q.qbrand %}">Alle categorieën <span class="amount">({{ result.total|default:"-" }})</span></a></li>
+				<li><a href="{% url search qs=q.qs qbrand=q.qbrand %}">Alle categorieën <span class="amount">({{ total|default:"-" }})</span></a></li>
 				{% for c in m.category.product.tree2.children %}
 					{% if cat_count[c.id] %}
 						<li>
@@ -101,7 +101,7 @@
 
 			<h3 class="block">Merken</h3>
 			<ul class="sub-navigation">
-				<li><a href="{% url search qs=q.qs qcat=q.qcat %}">Alle merken <span class="amount">({{ result.total|default:"-" }})</span></a></li>
+				<li><a href="{% url search qs=q.qs qcat=q.qcat %}">Alle merken <span class="amount">({{ total|default:"-" }})</span></a></li>
 				{% for b_id, b_name, b_count in brand_count %}
 			    <li><a {% ifequal brand_id b_id %}class="current" {% endifequal %} href="{% url search qs=q.qs qcat=cat_name qbrand=b_name %}">{{m.rsc[b_id].title}} <span class="amount">({{ b_count|default:"-" }})</span></a></li>
 				{% endfor %}

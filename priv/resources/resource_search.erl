@@ -29,6 +29,7 @@ html(_ReqProps, Context) ->
 	Qs       = zp_context:get_q("qs", Context),
 	Page     = try list_to_integer(zp_context:get_q("page", Context, "1")) catch _:_ -> 1 end,
     AllProds = zp_search:search({fulltext_catbrand, [{cat,product},{text,Qs}]}, {1,1000}, Context),
+    Total    = length(AllProds#search_result.result),
     
     {Cats, Brands} = count_all(AllProds#search_result.result),
     BrandList = sort_brands(Brands, Context),
@@ -47,6 +48,7 @@ html(_ReqProps, Context) ->
         {page, Page},
         {text, Qs},
         {result, Result},
+        {total, Total},
         {brand_count, BrandList},
         {cat_count, CatCounts}
     ],
