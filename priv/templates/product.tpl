@@ -152,7 +152,7 @@
 			{% with m.category[cat.parent_id] as parent_cat %}
 
 				<h3 class="block">{{ parent_cat.title }}</h3>
-				<ul id="sub-navigation">
+				<ul class="sub-navigation">
 					{% for sibling_cat in parent_cat.tree1 %}
 				    	<li><a {% ifequal sibling_cat.id cat.id %}class="current" {% endifequal %} href="{% url overview cat=parent_cat.name subcat=sibling_cat.name %}">{{ sibling_cat.title }}</a></li>
 					{% endfor %}
@@ -161,10 +161,10 @@
 				{% with m.rsc[rsc_id].brand[1] as brand_id %}
 				
 				<h3 class="block">Merken</h3>
-				<ul id="sub-navigation">
-					<li><a href="{% url overview cat=parent_cat.name subcat=cat.name %}">Alle merken <span class="amount">({{ prod_count|default:"-" }})<span></a></li>
+				<ul class="sub-navigation">
+					<li><a href="{% url overview cat=parent_cat.name subcat=cat.name %}">Alle merken <span class="amount">({{ prod_count|default:"-" }})</span></a></li>
 					{% for b_id, b_name, b_count in cat_brand %}
-					    <li><a {% ifequal brand_id b_id %}class="current" {% endifequal %} href="{% url overview cat=parent_cat.name subcat=cat.name brand=b_name %}">{{m.rsc[b_id].title}} <span class="amount">({{ b_count|default:"-" }})<span></a></li>
+					    <li><a {% ifequal brand_id b_id %}class="current" {% endifequal %} href="{% url overview cat=parent_cat.name subcat=cat.name brand=b_name %}">{{m.rsc[b_id].title}} <span class="amount">({{ b_count|default:"-" }})</span></a></li>
 					{% endfor %}
 				</ul>
 				

@@ -34,7 +34,7 @@
 		<div class="padding">
 
 			<h2>Fietsen</h2>
-			<ul id="sub-navigation">
+			<ul class="sub-navigation">
 			{% for cat in m.category.bikes.tree1 %}
 		    	<li><a href="{% url overview cat=m.category[cat.parent_id].name subcat=cat.name %}">{{ cat.title }}</a></li>
 			{% empty %}

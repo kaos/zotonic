@@ -157,13 +157,10 @@ h3.above-item {
 		-webkit-border-radius: 5px;
 	}
 
-	#sidebar h3.above-item {
-		cursor: move;
-	}
-
 	h3.above-item span.title {
 		display: block;
 		float: left;
+		cursor: move;
 	}
 
 	h3.above-item span.arrow {

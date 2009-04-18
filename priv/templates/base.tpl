@@ -2,12 +2,12 @@
 <html xmlns="http://www.w3.org/1999/xhtml" lang="en">
 <head>
 	<title>{% block title %}{% endblock %} &ndash; Hans Struijk Fietsen</title>
-
+	<meta http-equiv="Content-type" content="text/html; charset=utf-8" />
+	
 	<link href="/lib/css/zp-base.css" type="text/css" media="screen" rel="stylesheet" /> 
 	<link href="/lib/css/zp-type.css" type="text/css" media="screen" rel="stylesheet" /> 
 	<link href="/lib/css/zp-forms.css" type="text/css" media="screen" rel="stylesheet" /> 
 	<link href="/lib/css/zp-project.css" type="text/css" media="screen" rel="stylesheet" /> 
-	<link href="/lib/css/zp-wysiwyg.css" type="text/css" media="screen" rel="stylesheet" /> 
 
 	<!--[if IE]><link href="/lib/css/zp-ie.css" type="text/css" media="screen" rel="stylesheet" /><![endif]--> 
 </head>
@@ -32,7 +32,7 @@
 						</h1>
 					</li>
 
-					<!--li class="first"><a href="/compare/mtb/1" title="compare-bikes">Fietsen</a></li!-->
+					{# <li class="first"><a href="/compare/mtb/1" title="compare-bikes">Fietsen</a></li> #}
 
 					{% for cat in m.category.product.tree1 %}
 						<li><a href="{% url overview cat=cat.name %}" title="{{ cat.title }}">{{ cat.title }}</a></li>

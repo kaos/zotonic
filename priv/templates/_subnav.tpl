@@ -1,4 +1,4 @@
-<ul id="sub-navigation">
+<ul class="sub-navigation">
     <li><a href="/" title="Home">Home</a></li>
     <li><a href="/page/##/filialen" title="Filialen">Filialen</a></li>
     <li><a href="/page/##/klantenkaart" title="Klantenkaart">Klantenkaart</a></li>

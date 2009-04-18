@@ -32,7 +32,7 @@
 						{% button text="-" action={shop_cart_decr id=id} %}
 					</div>
 					<div class="zp-15">
-						<h3>&euro; <span id="cart-price-{{id}}">{{ count_price|format_price }}</h3>
+						<h3>&euro; <span id="cart-price-{{id}}">{{ count_price|format_price }}</span></h3>
 						{% button text="verwijder" action={shop_cart_delete id=id} %}
 					</div>
 				</div>

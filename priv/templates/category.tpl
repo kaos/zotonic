@@ -48,10 +48,10 @@
 		<div class="padding">
 			
 			<h3 class="block">Merken</h3>
-			<ul id="sub-navigation">
-				<li><a href="{% url overview cat=cat_name subcat=subcat_name %}">Alle merken <span class="amount">({{ prod_count|default:"-" }})<span></a></li>
+			<ul class="sub-navigation">
+				<li><a href="{% url overview cat=cat_name subcat=subcat_name %}">Alle merken <span class="amount">({{ prod_count|default:"-" }})</span></a></li>
 				{% for b_id, b_name, b_count in cat_brand %}
-			    <li><a {% ifequal brand_id b_id %}class="current" {% endifequal %} href="{% url overview cat=cat_name subcat=subcat_name brand=b_name %}">{{m.rsc[b_id].title}} <span class="amount">({{ b_count|default:"-" }})<span></a></li>
+			    <li><a {% ifequal brand_id b_id %}class="current" {% endifequal %} href="{% url overview cat=cat_name subcat=subcat_name brand=b_name %}">{{m.rsc[b_id].title}} <span class="amount">({{ b_count|default:"-" }})</span></a></li>
 				{% endfor %}
 			</ul>
 			
@@ -60,7 +60,7 @@
 				{% for id in featured %}
 					<li class="block clearfix">
 						<a href="{% url product id=id slug=m.rsc[id].slug %}" title="{{ m.rsc[id].title }}">{% image m.rsc[id].media[1].filename width=60 height=40 crop alt="trapper" %}</a>
-						<h4><a href="{% url product id=id %}">{{ m.rsc[id].title }}</a></h4>
+						<h3><a href="{% url product id=id %}">{{ m.rsc[id].title }}</a></h3>
 					</li>
 				{% empty %}
 					<li class="block clearfix">

@@ -38,6 +38,11 @@
 							<div class="item clearfix">
 								<fieldset class="admin-form">
 									<div class="form-item clearfix">
+										<label for="no-google">
+											<input id="no-google" type="checkbox" />Ask google not to index this page
+										</label>
+									</div>
+									<div class="form-item clearfix">
 										<label for="title">Page title</label>
 										<input type="text" id="title" name="title" class="zp-100" />
 									</div>
@@ -60,7 +65,7 @@
 				<div class="zp-33" id="sidebar">
 					<div class="padding" id="sort">
 					
-						{% sorter id="sort" handle="h3" axis="y" containment="parent" opacity="0.7" placeholder="sortable-placeholder" %}
+						{% sorter id="sort" handle="h3 .title" axis="y" containment="parent" opacity="0.7" placeholder="sortable-placeholder" %}
 						{% sortable id="sort-publish" %}
 						{% sortable id="sort-connections" %}
 						{% sortable id="sort-date" %}

@@ -26,6 +26,7 @@
  *              onlyOnSubmit {Boolean} - whether should be validated only when the form it belongs to is submitted
  *                            (DEFAULT: false)						
  */
+
 var LiveValidation = function(element, optionsObj){
   	this.initialize(element, optionsObj);
 }
@@ -66,10 +67,10 @@ LiveValidation.massValidate = function(validations)
 LiveValidation.prototype = 
 {
 
-    validClass: 'LV_valid',
-    invalidClass: 'LV_invalid',
-    messageClass: 'LV_validation_message',
-    validFieldClass: 'LV_valid_field',
+    validClass: 'zp_valid',
+    invalidClass: 'zp_invalid',
+    messageClass: 'zp_validation_message',
+    validFieldClass: 'zp_valid_field',
     invalidFieldClass: 'form-field-error',
 
     /**
@@ -88,7 +89,7 @@ LiveValidation.prototype =
       this.form = this.element.form;
       // options
     	var options = optionsObj || {};
-    	this.validMessage = options.validMessage || 'Thankyou!';
+    	this.validMessage = options.validMessage || '';
     	var node = options.insertAfterWhatNode || this.element;
 		this.insertAfterWhatNode = node.nodeType ? node : document.getElementById(node);
       this.onValid = options.onValid || function(){ this.insertMessage(this.createMessageSpan()); this.addFieldClass(); };
@@ -564,7 +565,7 @@ var Validate = {
      */
     Presence: function(value, paramsObj){
       	var paramsObj = paramsObj || {};
-    	var message = paramsObj.failureMessage || "Can't be empty!";
+    	var message = paramsObj.failureMessage || "This field cannot be empty";
     	if(value === '' || value === null || value === undefined){ 
     	  	Validate.fail(message);
     	}
@@ -670,7 +671,7 @@ var Validate = {
      */
     Email: function(value, paramsObj){
     	var paramsObj = paramsObj || {};
-    	var message = paramsObj.failureMessage || "Must be a valid email address!";
+    	var message = paramsObj.failureMessage || "This is not a valid E-mail address";
     	Validate.Format(value, { failureMessage: message, pattern: /^([^@\s]+)@((?:[-a-z0-9]+\.)+[a-z]{2,})$/i } );
     	return true;
     },
@@ -700,9 +701,9 @@ var Validate = {
         var minimum = ((paramsObj.minimum) || (paramsObj.minimum == 0)) ? paramsObj.minimum : null;
     	var maximum = ((paramsObj.maximum) || (paramsObj.maximum == 0)) ? paramsObj.maximum : null;
     	var is = ((paramsObj.is) || (paramsObj.is == 0)) ? paramsObj.is : null;
-        var wrongLengthMessage = paramsObj.wrongLengthMessage || "Must be " + is + " characters long!";
-    	var tooShortMessage = paramsObj.tooShortMessage || "Must not be less than " + minimum + " characters long!";
-    	var tooLongMessage = paramsObj.tooLongMessage || "Must not be more than " + maximum + " characters long!";
+        var wrongLengthMessage = paramsObj.wrongLengthMessage || "Must be " + is + " characters long";
+    	var tooShortMessage = paramsObj.tooShortMessage || "Must not be less than " + minimum + " characters long";
+    	var tooLongMessage = paramsObj.tooLongMessage || "Must not be more than " + maximum + " characters long";
     	switch(true){
     	  	case (is !== null):
     	  		if( value.length != Number(is) ) Validate.fail(wrongLengthMessage);
@@ -718,7 +719,7 @@ var Validate = {
     	  		if( value.length > Number(maximum) ) Validate.fail(tooLongMessage);
     			break;
     		default:
-    			throw new Error("Validate::Length - Length(s) to validate against must be provided!");
+    			throw new Error("Validate::Length - Length(s) to validate against must be provided");
     	}
     	return true;
     },
@@ -792,7 +793,7 @@ var Validate = {
      */
     Exclusion: function(value, paramsObj){
       var paramsObj = paramsObj || {};
-    	paramsObj.failureMessage = paramsObj.failureMessage || "Must not be included in the list!";
+    	paramsObj.failureMessage = paramsObj.failureMessage || "Must not be included in the list";
       paramsObj.negate = true;
     	Validate.Inclusion(value, paramsObj);
       return true;
@@ -810,11 +811,11 @@ var Validate = {
      *							match {String} 			- id of the field that this one should match						
      */
     Confirmation: function(value, paramsObj){
-      	if(!paramsObj.match) throw new Error("Validate::Confirmation - Error validating confirmation: Id of element to match must be provided!");
+      	if(!paramsObj.match) throw new Error("Validate::Confirmation - Error validating confirmation: Id of element to match must be provided");
     	var paramsObj = paramsObj || {};
     	var message = paramsObj.failureMessage || "Does not match!";
     	var match = paramsObj.match.nodeName ? paramsObj.match : document.getElementById(paramsObj.match);
-    	if(!match) throw new Error("Validate::Confirmation - There is no reference with name of, or element with id of '" + paramsObj.match + "'!");
+    	if(!match) throw new Error("Validate::Confirmation - There is no reference with name of, or element with id of '" + paramsObj.match + "'");
     	if(value != match.value){ 
     	  	Validate.fail(message);
     	}

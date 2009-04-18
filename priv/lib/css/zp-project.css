@@ -249,16 +249,16 @@ ul#navigation li.lang a.english {
 /* Sub-navigation
 ---------------------------------------------------------- */
 
-#sub-navigation { 
+.sub-navigation { 
 	margin: 0 0 12px 0;
 }
 
-	#sub-navigation li {
+	.sub-navigation li {
 		display: block;
 	}
 	
-		#sub-navigation li a,
-		#sub-navigation li a:focus {
+		.sub-navigation li a,
+		.sub-navigation li a:focus {
 			height: 27px;
 			line-height: 27px;
 			border-bottom: 1px solid #bbb;
@@ -270,14 +270,14 @@ ul#navigation li.lang a.english {
 			font-size: 11px;
 		}
 		
-		#sub-navigation li a:hover,
-		#sub-navigation li a.current {
+		.sub-navigation li a:hover,
+		.sub-navigation li a.current {
 			color: #000;
 			background: #f2f2f2;
 			font-weight: normal;
 		}
 			
-			#sub-navigation li a span.amount {
+			.sub-navigation li a span.amount {
 				color: #999;
 			}
 
@@ -487,22 +487,6 @@ ul#navigation li.lang a.english {
 			margin: 0;
 		}
 		
-		.related-articles li.block a,
-		.related-articles li.block a:focus {
-			text-decoration: none;
-			color: #888;
-		}
-		
-		.related-articles li.block a:hover,
-		.related-articles li.block h4 a:hover {
-			color: #000;
-		}
-		
-		.related-articles li.block h4 a,
-		.related-articles li.block h4 a:focus {
-			color: #666;
-		}
-
 
 		/* Pages - product - reviews
 		--------------------------------------------- */
@@ -587,6 +571,18 @@ li.cart-item .block {
 
 .card-item-amount[type="text"] {
 	width: 30px;
+}
+
+
+/* Pages - checkout
+---------------------------------------------------------- */
+
+#register-forms .padding {
+	margin: 0 2px 0 0;
+}
+
+label.billing-address-label {
+	width: auto;
 }
 
 /* Modules - image viewer

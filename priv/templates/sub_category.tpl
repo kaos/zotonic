@@ -18,9 +18,11 @@
 					<a href="{% url product id=id slug=m.rsc[id].slug %}">
 						{% image m.rsc[id].media[1].filename width=60 height=60 crop alt=m.rsc[id].title class="left" %}
 					</a>
-					<a href="{% url product id=id slug=m.rsc[id].slug %}">
-						<h3>{{ m.rsc[id].title }}</h3>
-					</a>
+					<h3>
+						<a href="{% url product id=id slug=m.rsc[id].slug %}">
+							{{ m.rsc[id].title }}
+						</a>
+					</h3>
 					<p>{{ m.rsc[id].intro }}</p>
 					<div class="product-price clearfix clear">
 						<h3>&euro;{{ m.rsc[id].price|format_price }} <!--span>incl. btw</span--></h3>
@@ -45,17 +47,17 @@
 		<div class="padding">
 			
 			<h3 class="block">{{ m.category[m.category[cat_id].parent_id].title }}</h3>
-			<ul id="sub-navigation">
+			<ul class="sub-navigation">
 				{% for cat in m.category[m.category[cat_id].parent_id].tree1 %}
 			    	<li><a {% ifequal cat.id cat_id %}class="current" {% endifequal %} href="{% url overview cat=m.category[cat.parent_id].name subcat=cat.name %}">{{ cat.title }}</a></li>
 				{% endfor %}
 			</ul>
 			
 			<h3 class="block">Merken</h3>
-			<ul id="sub-navigation">
-				<li><a href="{% url overview cat=cat_name subcat=subcat_name %}">Alle merken <span class="amount">({{ prod_count|default:"-" }})<span></a></li>
+			<ul class="sub-navigation">
+				<li><a href="{% url overview cat=cat_name subcat=subcat_name %}">Alle merken <span class="amount">({{ prod_count|default:"-" }})</span></a></li>
 				{% for b_id, b_name, b_count in cat_brand %}
-			    <li><a {% ifequal brand_id b_id %}class="current" {% endifequal %} href="{% url overview cat=cat_name subcat=subcat_name brand=b_name %}">{{m.rsc[b_id].title}} <span class="amount">({{ b_count|default:"-" }})<span></a></li>
+			    <li><a {% ifequal brand_id b_id %}class="current" {% endifequal %} href="{% url overview cat=cat_name subcat=subcat_name brand=b_name %}">{{m.rsc[b_id].title}} <span class="amount">({{ b_count|default:"-" }})</span></a></li>
 				{% endfor %}
 			</ul>
 		</div>

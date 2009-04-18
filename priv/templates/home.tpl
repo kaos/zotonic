@@ -16,11 +16,10 @@
 			<li class="zp-50 product-list-item">
 				<div class="block clearfix">
 					<a href="#">
-						{% image "134.jpg" width=120 height=120 crop alt=m.rsc[id].title class="left" %}
+						{% image "134.jpg" width=120 height=120 crop alt=m.rsc[id].title class="left" alt="134" %}
 					</a>
-					<a href="#">
-						<h3>A nice Bag</h3>
-					</a>
+					<h3><a href="#">A nice Bag</a></h3>
+					
 					<p>Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.</p>
 					<div class="product-price clearfix clear">
 						<h3>&euro;33</h3>
@@ -34,11 +33,10 @@
 			<li class="zp-50 product-list-item">
 				<div class="block clearfix">
 					<a href="#">
-						{% image "134.jpg" width=120 height=120 crop alt=m.rsc[id].title class="left" %}
+						{% image "134.jpg" width=120 height=120 crop alt=m.rsc[id].title class="left" alt="134" %}
 					</a>
-					<a href="#">
-						<h3>A nice Bag</h3>
-					</a>
+					<h3><a href="#">A nice Bag</a></h3>
+					
 					<p>Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.</p>
 					<div class="product-price clearfix clear">
 						<h3>&euro;33</h3>
@@ -52,11 +50,10 @@
 			<li class="zp-50 product-list-item">
 				<div class="block clearfix">
 					<a href="#">
-						{% image "134.jpg" width=120 height=120 crop alt=m.rsc[id].title class="left" %}
+						{% image "134.jpg" width=120 height=120 crop alt=m.rsc[id].title class="left" alt="134" %}
 					</a>
-					<a href="#">
-						<h3>A nice Bag</h3>
-					</a>
+					<h3><a href="#">A nice Bag</a></h3>
+					
 					<p>Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.</p>
 					<div class="product-price clearfix clear">
 						<h3>&euro;33</h3>
@@ -70,11 +67,10 @@
 			<li class="zp-50 product-list-item">
 				<div class="block clearfix">
 					<a href="#">
-						{% image "134.jpg" width=120 height=120 crop alt=m.rsc[id].title class="left" %}
+						{% image "134.jpg" width=120 height=120 crop alt=m.rsc[id].title class="left" alt="134" %}
 					</a>
-					<a href="#">
-						<h3>A nice Bag</h3>
-					</a>
+					
+					<h3><a href="#">A nice Bag</a></h3>
 					<p>Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.</p>
 					<div class="product-price clearfix clear">
 						<h3>&euro;33</h3>
