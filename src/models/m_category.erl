@@ -46,7 +46,7 @@ m_find_value(tree, #m{value=undefined}, Context) ->
 m_find_value(tree1, #m{value=undefined}, Context) ->
     get_root(Context);
 m_find_value(tree2, #m{value=undefined}, Context) ->
-    tree_depth(Context, 2);
+    tree_depth(2, Context);
 
 m_find_value(Index, #m{value=undefined} = M, Context) ->
     case name_to_id(Index, Context) of
