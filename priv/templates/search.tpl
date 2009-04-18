@@ -42,7 +42,7 @@
 		<h3 class="block">Kijk ook eens naar</h3>
 		<ul class="compare-list clearfix">
 			{% for id in m.search[{featured cat="product"}] %}
-				<li class="zp-33">
+				<li class="zp-33 {% if forloop.first %}first{% endif %}">
 					<div class="block">
 						<h3><a href="{{ m.rsc[id].page_url }}">{{ m.rsc[id].title }}</a></h3>
 						<a href="{{ m.rsc[id].page_url }}">{% image m.rsc[id].media[1].filename width=225 height=130 crop %}</a>
