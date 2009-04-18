@@ -25,7 +25,7 @@
 %% @doc Search items and handle the paging.  Uses the default page length.
 %% @spec search({Name, SearchPropList}, Page, #context) -> #search_result
 search_pager(Search, Page, Context) ->
-    search_pager(Search, Page, 1, Context).
+    search_pager(Search, Page, ?SEARCH_PAGELEN, Context).
 
 %% @doc Search items and handle the paging
 %% @spec search_pager({Name, SearchPropList}, Page, PageLen, #context) -> #search_result
