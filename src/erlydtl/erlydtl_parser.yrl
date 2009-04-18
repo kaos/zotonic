@@ -53,7 +53,7 @@ Nonterminals
 
     CycleTag
     CycleNames
-%    CycleNamesCompat
+    CycleNamesCompat
 
     ForBlock
     ForBraced
@@ -215,15 +215,15 @@ CommentBlock -> CommentBraced Elements EndCommentBraced : {comment, '$2'}.
 CommentBraced -> open_tag comment_keyword close_tag.
 EndCommentBraced -> open_tag endcomment_keyword close_tag.
 
-%CycleTag -> open_tag cycle_keyword CycleNamesCompat close_tag : {cycle_compat, '$3'}.
+CycleTag -> open_tag cycle_keyword CycleNamesCompat close_tag : {cycle_compat, '$3'}.
 CycleTag -> open_tag cycle_keyword CycleNames close_tag : {cycle, '$3'}.
 
 CycleNames -> Value : ['$1'].
-CycleNames -> CycleNames comma Value : '$1' ++ ['$2'].
+CycleNames -> CycleNames Value : '$1' ++ ['$2'].
 
-%CycleNamesCompat -> identifier comma : ['$1'].
-%CycleNamesCompat -> CycleNamesCompat identifier comma : '$1' ++ ['$2'].
-%CycleNamesCompat -> CycleNamesCompat identifier : '$1' ++ ['$2'].
+CycleNamesCompat -> identifier comma : ['$1'].
+CycleNamesCompat -> CycleNamesCompat identifier comma : '$1' ++ ['$2'].
+CycleNamesCompat -> CycleNamesCompat identifier : '$1' ++ ['$2'].
 
 ForBlock -> ForBraced Elements EndForBraced : {for, '$1', '$2'}.
 ForBlock -> ForBraced Elements EmptyBraced Elements EndForBraced : {for, '$1', '$2', '$4'}.
