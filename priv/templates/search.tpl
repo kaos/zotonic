@@ -103,7 +103,7 @@
 			<ul class="sub-navigation">
 				<li><a href="{% url search qs=q.qs qcat=q.qcat %}">Alle merken <span class="amount">({{ total|default:"-" }})</span></a></li>
 				{% for b_id, b_name, b_count in brand_count %}
-			    <li><a {% ifequal brand_id b_id %}class="current" {% endifequal %} href="{% url search qs=q.qs qcat=cat_name qbrand=b_name %}">{{m.rsc[b_id].title}} <span class="amount">({{ b_count|default:"-" }})</span></a></li>
+			    <li><a {% ifequal brand_id b_id %}class="current" {% endifequal %} href="{% url search qs=q.qs qcat=q.qcat qbrand=b_name %}">{{m.rsc[b_id].title}} <span class="amount">({{ b_count|default:"-" }})</span></a></li>
 				{% endfor %}
 			</ul>
 
