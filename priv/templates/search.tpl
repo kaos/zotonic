@@ -39,8 +39,8 @@
 			{% endif %}
 		</div>
 
-		<h3 class="block">Aanbiedingen</h3>
-		<p>Hier aanbiedingen laten zien wanneer er niets gevonden is?</p>
+		<h3 class="block">Enkele andere producten</h3>
+		<p>Laat lijstje met aanbiedingen en featured artikelen zien</p>
 		{% endfor %}
 
 		{% pager result=result %}
