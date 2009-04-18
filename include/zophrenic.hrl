@@ -59,13 +59,13 @@
 %% Used for specifying resource id lists, as returned by object/subject lookup
 -record(rsc_list, {list}).
 
-%% Used for search results
--record(search_result, {result, total}).
--record(m_search_result, {search_name, search_props, result, page, pagelen, total}).
--record(search_sql, {select, from, where="", order="", limit, tables=[], args=[], run_func, extra}).
-
 %% Default page length for search
--define(SEARCH_PAGELEN, 25).
+-define(SEARCH_PAGELEN, 10).
+
+%% Used for search results
+-record(search_result, {result=[], page=1, pagelen, total, all, pages, next, prev}).
+-record(m_search_result, {search_name, search_props, result, page, pagelen, total, pages, next, prev}).
+-record(search_sql, {select, from, where="", order="", limit, tables=[], args=[], run_func, extra}).
 
 %% ACL visibility levels
 -define(ACL_VIS_GROUP, 2).
