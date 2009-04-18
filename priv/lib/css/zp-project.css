@@ -32,6 +32,19 @@ body {
 		margin: 0 0 1px 0;
 	}
 
+
+/* Pager
+---------------------------------------------------------- */
+
+.pager li {
+	display: inline;
+}
+
+	.pager li.current {
+		font-weight: bold;
+	}
+
+
 /* Header
 ---------------------------------------------------------- */
 
@@ -584,6 +597,7 @@ li.cart-item .block {
 label.billing-address-label {
 	width: auto;
 }
+
 
 /* Modules - image viewer
 ---------------------------------------------------------- */
