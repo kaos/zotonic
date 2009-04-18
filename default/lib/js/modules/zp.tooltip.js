@@ -27,77 +27,73 @@
 *	@version    $Id: zp.tooltip.js 12 2009-04-15 12:24:18Z timbenniks $
 **/
 
-;(function(jQuery) 
+$.widget("ui.tooltip", 
 {
-	$.fn.tooltip = function(options)
+	_init: function() 
 	{
-		var defaults = {
-			offsetY: 			0,
-			offsetX: 			0,
-			inevent: 			'mouseover',
-			outevent: 			'mouseout',
-			width: 				'auto',
-			maxwidth: 			'330px',
-		}
-  		
-		var options = $.extend(defaults, options);
-  			
-  		return this.each(function() 
-		{
-			obj = $(this);
+		self = this;
+		obj  = this.element;
 		
-			if(this.title == '')
-			{
-				obj.unbind(options.inevent, options.outevent);
-				return false;
-			}
+		if(this.title == '')
+		{
+			obj.unbind(self.options.inevent, self.options.outevent);
+			return false;
+		}
 
-			obj.bind(options.inevent, function(e) 
-			{
-				this.tip 		= this.title;
-				var tip_content = this.title;
-				this.title 		= "";
-				
-				tip = $('<div></div>')
-						.addClass('tooltip')
-						.html(tip_content)
-						.css({top: e.pageY + options.offsetY, left: e.pageX + options.offsetX, width: options.width, maxWidth: options.maxwidth });
-				
-				$(document.body).append(tip);
+		obj.bind(self.options.inevent, function(e) 
+		{
+			this.tip 		= this.title;
+			var tip_content = this.title;
+			this.title 		= "";
+			
+			tip = $('<div></div>')
+					.addClass('tooltip')
+					.html(tip_content)
+					.css({top: e.pageY + self.options.offsetY, left: e.pageX + self.options.offsetX, width: self.options.width, maxWidth: self.options.maxwidth });
+			
+			$(document.body).append(tip);
 
-				var left = $(this).position().left;
-				var top  = $(this).position().top;
-								
-				tip.css({top: top - 30});
-				
-				if(left + tip.width() > $(window).width())
-				{
-					tip.css({left: Math.ceil(left) - Math.ceil((obj.width() / 2)) - Math.ceil((tip.width() / 2 ))});
-				}
-				else
-				{
-					tip.css({left: Math.ceil(left) + Math.ceil((obj.width() / 2)) - Math.ceil((tip.width() / 2 ))});
-				}
-				
-				tip.stop().animate({opacity: 'show'}, 200);
-			});
+			var left = $(this).position().left;
+			var top  = $(this).position().top;
+							
+			tip.css({top: top - 30});
 			
-			obj.bind(options.outevent, function(e) 
+			if(left + tip.width() > $(window).width())
 			{
-				tip.stop().animate({opacity: 'show'}, 200, function()
-				{
-					$(this).remove();
-				});
-				
-				$.fn.tooltip.destroy();
-				this.title = this.tip;
-			});
-			
-			$.fn.tooltip.destroy = function()
-			{
-				obj.unbind(options.inevent, options.outevent);
-				$(document).unbind('mousemove');
+				tip.css({left: Math.ceil(left) - Math.ceil((obj.width() / 2)) - Math.ceil((tip.width() / 2 ))});
 			}
+			else
+			{
+				tip.css({left: Math.ceil(left) + Math.ceil((obj.width() / 2)) - Math.ceil((tip.width() / 2 ))});
+			}
+			
+			tip.stop().animate({opacity: 'show'}, 200);
 		});
+		
+		obj.bind(self.options.outevent, function(e) 
+		{
+			tip.stop().animate({opacity: 'show'}, 200, function()
+			{
+				$(this).remove();
+			});
+			
+			$.fn.tooltip.destroy();
+			this.title = this.tip;
+		});
+		
+		$.fn.tooltip.destroy = function()
+		{
+			obj.unbind(self.options.inevent, self.options.outevent);
+			$(document).unbind('mousemove');
+		}
 	}
-})(jQuery);
+});
+
+$.ui.tooltip.defaults = {
+	offsetY: 	0,
+	offsetX: 	0,
+	inevent: 	'mouseover',
+	outevent: 	'mouseout',
+	width: 		'auto',
+	maxwidth: 	'330px',
+}
