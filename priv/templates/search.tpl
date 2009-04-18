@@ -39,8 +39,26 @@
 			{% endif %}
 		</div>
 
-		<h3 class="block">Enkele andere producten</h3>
-		<p>Laat lijstje met aanbiedingen en featured artikelen zien</p>
+		<h3 class="block">Kijk ook eens naar</h3>
+		<ul class="compare-list clearfix">
+			{% for id in m.search[{featured cat="product"}] %}
+				<li class="zp-33">
+					<div class="block">
+						<h3><a href="{{ m.rsc[id].page_url }}">{{ m.rsc[id].title }}</a></h3>
+						<a href="{{ m.rsc[id].page_url }}">{% image m.rsc[id].media[1].filename width=225 height=130 crop %}</a>
+						<p>{{ m.rsc[id].intro }}</p>
+						<div class="product-price clearfix">
+							<h3>&euro;{{m.rsc[id].price|format_price}} <!--span>incl. btw</span--></h3>
+							{# An animate would be nice here #}
+							<div class="clearfix button-wrapper right">
+								{% button class="right right-side-button" text="Meer info &raquo;" action={redirect id=id} %}
+							</div>
+						</div>
+					</div>
+				</li>
+			{% endfor %}
+		</ul>
+			
 		{% endfor %}
 
 		{% pager result=result %}
