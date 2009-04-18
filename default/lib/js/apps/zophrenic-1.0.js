@@ -60,6 +60,11 @@ function zp_postback_loop()
 	}
 }
 
+function zp_opt_cancel(Obj)
+{
+    return ($(obj+':radio').length || $(obj+':checkbox').length)
+}
+
 function zp_queue_postback(triggerID, postback, extraParams) 
 {
 	var o 			= new Object();

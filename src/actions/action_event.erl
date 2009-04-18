@@ -50,7 +50,7 @@ render_action(TriggerId, TargetId, Args, Context) ->
         		true ->
         		    [
     	                <<"$('#">>, TriggerId, <<"').bind('">>, zp_convert:to_list(EventType), <<"', ">>,
-        	            <<"function(event) { ">>, PostbackMsgJS, ActionsJS, <<"; return false; } );\n">>
+        	            <<"function(event) { ">>, PostbackMsgJS, ActionsJS, <<" zp_opt_cancel(this); } );\n">>
         	        ]
         	end,
 
