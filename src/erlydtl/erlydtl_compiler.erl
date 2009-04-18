@@ -801,7 +801,7 @@ cycle_ast(Names, Context, TreeWalker) ->
                                    {V, _} = auto_id_ast(Name),
                                    V;
                               (_) ->
-                                   []
+                                   erl_syntax:string("undefined")
                            end, Names),
     {{erl_syntax:application(
         erl_syntax:atom('erlydtl_runtime'), erl_syntax:atom('cycle'),
