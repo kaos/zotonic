@@ -59,10 +59,36 @@ find_value(Key, #rsc{} = Rsc, Context) ->
 
 % Index of tuple with an integer like "a[2]"
 find_value(Key, T, _Context) when is_integer(Key) andalso is_tuple(T) ->
+    case element(1,T) of
+        dict ->
+            case dict:find(Key, T) of
+                {ok, Val} ->
+                    Val;
+                _ ->
+                    undefined
+            end;
+        _ ->
+            try
+                element(Key, T)
+            catch 
+                _:_ -> undefined
+            end
+    end;
+
+% Search results
+find_value(Key, #search_result{} = S, _Context) when is_integer(Key) ->
     try
-        element(Key, T)
-    catch 
+        lists:nth(Key, S#search_result.result)
+    catch
         _:_ -> undefined
+    end;
+find_value(Key, #search_result{} = S, _Context) ->
+    case Key of
+        result -> S#search_result.result;
+        all -> S#search_result.all;
+        total -> S#search_result.total;
+        page -> S#search_result.page;
+        pages -> S#search_result.pages
     end;
 
 %% Other cases: context, dict or parametrized module lookup.
