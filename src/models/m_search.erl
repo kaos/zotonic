@@ -52,8 +52,10 @@ m_find_value(Key, #m{value=#m_search_result{}} = M, Context) ->
 
 %% @doc Transform a model value to a list, used for template loops
 %% @spec m_to_list(Source, Context) -> List
+m_to_list(#m{value=#m_search_result{result=undefined}}, _Context) ->
+    [];
 m_to_list(#m{value=#m_search_result{result=Result}}, _Context) ->
-    Result;
+    Result#search_result.result;
 m_to_list(#m{}, _Context) ->
     [].
 
@@ -62,17 +64,17 @@ m_to_list(#m{}, _Context) ->
 m_value(#m{value=undefined}, _Context) ->
     undefined;
 m_value(#m{value=#m_search_result{result=Result}}, _Context) ->
-    Result.
+    Result#search_result.result.
 
 
 %% @doc Perform a search, wrap the result in a m_search_result record
 %% @spec search(Search, Context) -> #m_search_result{}
 search({SearchName, Props}=Search, Context) ->
     {Page, PageLen, Props1} = get_paging_props(Props),
-    #search_result{result=Result, total=Total} = zp_search:search(Search, Context),
-    Total1 = case Total of
+    Result = zp_search:search(Search, Context),
+    Total1 = case Result#search_result.total of
         undefined -> length(Result);
-        _ -> Total
+        Total -> Total
     end,
     #m_search_result{result=Result, total=Total1, search_name=SearchName, search_props=Props1};
 search(SearchName, Context) ->

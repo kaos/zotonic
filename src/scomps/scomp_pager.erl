@@ -33,6 +33,13 @@ render(Params, _Vars, Context, _State) ->
     end,
      
     case Result of
+        #m_search_result{result=[]} ->
+            {ok, ""};
+        #m_search_result{result=undefined} ->
+            {ok, ""};
+        #m_search_result{result=#search_result{page=Page, pages=Pages}} ->
+            Html = build_html(Page, Pages, Dispatch, DispatchArgs, Context),
+            {ok, Html};
         #search_result{result=[]} ->
             {ok, ""};
         #search_result{pages=undefined} ->
