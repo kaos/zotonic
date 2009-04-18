@@ -12,75 +12,31 @@
 		</div>
 		
 		<h3 class="block">Featured products</h3>
-		<ul class="subcategory-product-list clearfix">
-			<li class="zp-50 product-list-item">
-				<div class="block clearfix">
-					<a href="#">
-						{% image "134.jpg" width=120 height=120 crop alt=m.rsc[id].title class="left" alt="134" %}
-					</a>
-					<h3><a href="#">A nice Bag</a></h3>
-					
-					<p>Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.</p>
-					<div class="product-price clearfix clear">
-						<h3>&euro;33</h3>
-						<div class="clearfix button-wrapper right">
-							{% button class="buy-me" text="meer info" %}
-							{% button class="buy-me right-side-button" text="koop direct &raquo;" %}
+		<ul class="subcategory-list clearfix">
+			{% for id in m.search[{featured cat="product"}] %}
+				<li class="zp-50 {% ifequal forloop.counter "1" %}first{% endifequal %} {% ifequal forloop.counter "3" %}first{% endifequal %} {% ifequal forloop.counter "5" %}first{% endifequal %}">
+					<div class="block clearfix">
+						<a href="{% url product id=id slug=m.rsc[id].slug %}">
+							{% image m.rsc[id].media[1].filename width=120 height=120 crop alt=m.rsc[id].title class="left" %}
+						</a>
+						<h3>
+							<a href="{% url product id=id slug=m.rsc[id].slug %}">{{ m.rsc[id].title }}</a>
+						</h3>
+						<p>{{ m.rsc[id].intro }}</p>
+						<div class="product-price clearfix clear">
+							<h3>&euro;{{ m.rsc[id].price|format_price }} <!--span>incl. btw</span--></h3>
+							<div class="clearfix button-wrapper right">
+								{% button class="buy-me" text="meer info" action={redirect id=id} %}
+								{% button class="buy-me right-side-button" text="koop direct &raquo;" action={shop_buynow id=id} %}
+							</div>
 						</div>
 					</div>
-				</div>
-			</li>
-			<li class="zp-50 product-list-item">
-				<div class="block clearfix">
-					<a href="#">
-						{% image "134.jpg" width=120 height=120 crop alt=m.rsc[id].title class="left" alt="134" %}
-					</a>
-					<h3><a href="#">A nice Bag</a></h3>
-					
-					<p>Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.</p>
-					<div class="product-price clearfix clear">
-						<h3>&euro;33</h3>
-						<div class="clearfix button-wrapper right">
-							{% button class="buy-me" text="meer info" %}
-							{% button class="buy-me right-side-button" text="koop direct &raquo;" %}
-						</div>
-					</div>
-				</div>
-			</li>
-			<li class="zp-50 product-list-item">
-				<div class="block clearfix">
-					<a href="#">
-						{% image "134.jpg" width=120 height=120 crop alt=m.rsc[id].title class="left" alt="134" %}
-					</a>
-					<h3><a href="#">A nice Bag</a></h3>
-					
-					<p>Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.</p>
-					<div class="product-price clearfix clear">
-						<h3>&euro;33</h3>
-						<div class="clearfix button-wrapper right">
-							{% button class="buy-me" text="meer info" %}
-							{% button class="buy-me right-side-button" text="koop direct &raquo;" %}
-						</div>
-					</div>
-				</div>
-			</li>
-			<li class="zp-50 product-list-item">
-				<div class="block clearfix">
-					<a href="#">
-						{% image "134.jpg" width=120 height=120 crop alt=m.rsc[id].title class="left" alt="134" %}
-					</a>
-					
-					<h3><a href="#">A nice Bag</a></h3>
-					<p>Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.</p>
-					<div class="product-price clearfix clear">
-						<h3>&euro;33</h3>
-						<div class="clearfix button-wrapper right">
-							{% button class="buy-me" text="meer info" %}
-							{% button class="buy-me right-side-button" text="koop direct &raquo;" %}
-						</div>
-					</div>
-				</div>
-			</li>
+				</li>
+				{% empty %}
+					<li class="zp-100">
+						<p>Er zijn geen producten in deze categorie.</p>
+					</li>
+			{% endfor %}
 		</ul>
 		
 		<div class="block clearfix">

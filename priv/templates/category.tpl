@@ -6,7 +6,7 @@
 	<div id="content-area" class="zp-75 category-overview">
 		<!-- Area for the main content -->
 		<h2>{{ m.rsc[brand_id].title }} {{ cat.title }}</h2>
-		<ul class="zp-67 subcategory-list">
+		<ul class="zp-67">
 		{% for sub in subcats %}
 			<li class="block clearfix">
 				<a href="{% ifequal cat.name "product" %}{% url overview cat=sub.name brand=brand_name %}{% else %}{% url overview cat=cat.name subcat=sub.name brand=brand_name %}{% endifequal %}">

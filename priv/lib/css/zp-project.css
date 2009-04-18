@@ -15,7 +15,7 @@ body {
 .block {
 	background: #fff;
 	padding: 9px;
-	border-bottom: 1px solid #bbb;
+	border-bottom: 1px solid #ccc;
 	margin: 0 0 12px 0;
 }
 
@@ -29,9 +29,13 @@ body {
 	}
 	
 	li.block {
-		margin: 0 0 1px 0;
+		margin: 0 0 2px 0;
+		border: none;
 	}
 
+		li.block img {
+			border: 1px solid #ccc;
+		}
 
 /* Pager
 ---------------------------------------------------------- */
@@ -450,7 +454,7 @@ ul#navigation li.lang a.english {
 	.product-price h3,
 	.cart-product-price h3 {
 		font-size: 24px;
-		line-height: 18px;
+		line-height: 24px;
 		float: left;
 	}
 	
@@ -519,37 +523,45 @@ ul#navigation li.lang a.english {
 		}
 		
 
-/* Pages - compare
+/* Pages - compare / sub-category
 ---------------------------------------------------------- */
 
-.compare-list li {
+.compare-list li,
+.subcategory-list li {
 	float: left;
 	display: inline;
 	margin: 0;
 }
 
-	.compare-list li .block {
+	.compare-list li .block,
+	.subcategory-list li .block {
 		margin: 0 0 2px 2px;
 		border: none;
 	}
 	
-	.compare-list li.first .block {
+	.compare-list li.first .block,
+	.subcategory-list li.first .block {
 		margin: 0;
 	}
 	
-	.compare-list li .block .product-price h3 {
+	.compare-list li .block .product-price h3,
+	.subcategory-list li .block .product-price h3 {
 		float: left;
-	}
-	
-	.compare-list .product-price {
 		margin: 0;
 	}
 	
-	.compare-list li img {
+	.compare-list .product-price,
+	.subcategory-list .product-price {
+		margin: 0;
+	}
+	
+	.compare-list li img,
+	.subcategory-list li img {
 		border: 1px solid #ccc;
 	}
 	
-	.compare-list li h3 {
+	.compare-list li h3,
+	.subcategory-list li h3 {
 		margin: 0 0 9px 0;
 	}
 
@@ -560,25 +572,6 @@ ul#navigation li.lang a.english {
 	margin: 0 0 12px 2px;
 }
 
-.subcategory-list li.block img,
-.subcategory-product-list .block img {
-	border: 1px solid #ccc;
-}
-
-	.subcategory-product-list .block {
-		margin: 0 2px 2px 0;
-	}
-	
-		.subcategory-product-list .block-last
-		{
-			margin: 0 0 2px 0;
-		}
-		
-		.product-list-item .product-price {
-			margin: 0;
-		}
-
-
 /* Pages - cart
 ---------------------------------------------------------- */
 
@@ -587,15 +580,9 @@ li.cart-titles {
 	color: #333;
 }
 
-li.cart-titles .block,
-li.cart-item .block {
+li.cart-titles .block {
 	margin: 0 0 2px 0;
 }
-
-.card-item-amount[type="text"] {
-	width: 30px;
-}
-
 
 /* Pages - checkout
 ---------------------------------------------------------- */

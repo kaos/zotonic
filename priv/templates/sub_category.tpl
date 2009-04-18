@@ -11,32 +11,30 @@
 			{{ m.category[cat_id].body }}
 		</div>
 		
-		<ul class="subcategory-product-list clearfix">
+		<ul class="subcategory-list clearfix">
 			{% for id in products %}
-			<li class="zp-50 product-list-item">
-				<div class="block clearfix">
-					<a href="{% url product id=id slug=m.rsc[id].slug %}">
-						{% image m.rsc[id].media[1].filename width=60 height=60 crop alt=m.rsc[id].title class="left" %}
-					</a>
-					<h3>
+				<li class="zp-50 {% ifequal forloop.counter "1" %}first{% endifequal %} {% ifequal forloop.counter "3" %}first{% endifequal %}">
+					<div class="block clearfix">
 						<a href="{% url product id=id slug=m.rsc[id].slug %}">
-							{{ m.rsc[id].title }}
+							{% image m.rsc[id].media[1].filename width=60 height=60 crop alt=m.rsc[id].title class="left" %}
 						</a>
-					</h3>
-					<p>{{ m.rsc[id].intro }}</p>
-					<div class="product-price clearfix clear">
-						<h3>&euro;{{ m.rsc[id].price|format_price }} <!--span>incl. btw</span--></h3>
-						<div class="clearfix button-wrapper right">
-							{% button class="buy-me" text="meer info" action={redirect id=id} %}
-							{% button class="buy-me right-side-button" text="koop direct &raquo;" action={shop_buynow id=id} %}
+						<h3>
+							<a href="{% url product id=id slug=m.rsc[id].slug %}">{{ m.rsc[id].title }}</a>
+						</h3>
+						<p>{{ m.rsc[id].intro }}</p>
+						<div class="product-price clearfix clear">
+							<h3>&euro;{{ m.rsc[id].price|format_price }} <!--span>incl. btw</span--></h3>
+							<div class="clearfix button-wrapper right">
+								{% button class="buy-me" text="meer info" action={redirect id=id} %}
+								{% button class="buy-me right-side-button" text="koop direct &raquo;" action={shop_buynow id=id} %}
+							</div>
 						</div>
 					</div>
-				</div>
-			</li>
-			{% empty %}
-			<li class="zp-100">
-				<p>Er zijn geen producten in deze categorie.</p>
-			</li>
+				</li>
+				{% empty %}
+					<li class="zp-100">
+						<p>Er zijn geen producten in deze categorie.</p>
+					</li>
 			{% endfor %}
 		</ul>
 	</div>	

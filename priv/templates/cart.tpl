@@ -15,8 +15,8 @@
 				</div>
 			</li>
 			{% for id, count, price, count_price in shop_cart %}
-			<li class="cart-item" id="cart-product-{{id}}">
-				<div class="block clearfix">
+			<li class="block" id="cart-product-{{id}}">
+				<div class=" clearfix">
 					<div class="zp-10">
 						<a href="{{ m.rsc[id].page_url }}">{% image m.rsc[id].media[1].filename width=60 height=60 crop alt="bags" class="left" %}</a>
 					</div>
