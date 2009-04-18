@@ -37,7 +37,8 @@ html(_ReqProps, Context) ->
         {menu_list, MenuList},
         {rsc_id, Id},
 	    {cat_brand, CatBrand},
-	    {prod_count, RscCount}
+	    {prod_count, RscCount},
+	    {cart_count, shop_cart:in_cart(Id, Context)}
 	],
     Html = zp_template:render("product.tpl", Vars, Context),
 	zp_context:output(Html, Context).

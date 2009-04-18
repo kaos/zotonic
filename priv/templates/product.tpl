@@ -173,12 +173,10 @@
 			{% endwith %}
 		{% endwith %}
 			
-		{#
-			<div class="notification notice" id="product-notice">
+			<div class="notification notice" {% if cart_count %}style="display: block"{% endif %} id="product-notice">
 				<h3>Winkelmand informatie</h3>
-				U heeft de Shimano 105 ST-5600 <strong>2 keer</strong> in uw <a href="#">winkelmand.</a>
+				<a title="Bekijk uw winkelmand" href="{% url shop_cart %}">U heeft de {{ m.rsc[rsc_id].title }} in uw winkelmand &raquo;</a>
 			</div>
-		#}
 		</div>
 	</div>
 {% endblock %}
