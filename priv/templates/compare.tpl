@@ -9,7 +9,7 @@
 			<li class="zp-33 first">
 				<div class="block">
 					<h3>Gazelle Champion Mondial</h3>
-					<img src="{% image_url "trek_urban.jpg" width=225 height=230 crop %}" alt="fiets" class="do_imageviewer" />
+					<img src="{% image_url "trek_urban.jpg" width=216 height=230 crop %}" alt="fiets" class="do_imageviewer" />
 					<p>verhaaltje</p>
 					<div class="product-price clearfix">
 						<h3>&euro;899</h3>
@@ -20,7 +20,7 @@
 			<li class="zp-33">
 				<div class="block">
 					<h3>HEMA tank fiets</h3>
-					<img src="{% image_url "trek_urban.jpg" width=225 height=230 crop %}" alt="fiets" class="do_imageviewer" />
+					<img src="{% image_url "trek_urban.jpg" width=216 height=230 crop %}" alt="fiets" class="do_imageviewer" />
 					<p>verhaaltje</p>
 					<div class="product-price clearfix">
 						<h3>&euro;350</h3>
@@ -31,7 +31,7 @@
 			<li class="zp-33">
 				<div class="block">
 					<h3>Bianchi road</h3>
-					<img src="{% image_url "trek_urban.jpg" width=225 height=230 crop %}" alt="fiets" class="do_imageviewer" />
+					<img src="{% image_url "trek_urban.jpg" width=216 height=230 crop %}" alt="fiets" class="do_imageviewer" />
 					<p>verhaaltje</p>
 					<div class="product-price clearfix">
 						<h3>&euro;2230</h3>
