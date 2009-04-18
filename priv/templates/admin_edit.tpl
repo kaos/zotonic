@@ -57,10 +57,16 @@
 					</div>
 				</div>
 			
-				<div class="zp-33">
-					<div class="padding">
+				<div class="zp-33" id="sidebar">
+					<div class="padding" id="sort">
 					
-						<div class="item-wrapper">
+						{% sorter id="sort" handle="h3" axis="y" containment="parent" opacity="0.7" placeholder="sortable-placeholder" %}
+						{% sortable id="sort-publish" %}
+						{% sortable id="sort-connections" %}
+						{% sortable id="sort-date" %}
+						{% sortable id="sort-access" %}
+					
+						<div class="item-wrapper" id="sort-publish">
 							<h3 class="above-item clearfix do_blockminifier">
 								<span class="title">Publish</span>
 								<span class="arrow">make smaller</span>
@@ -71,7 +77,7 @@
 							</div>
 						</div>
 					
-						<div class="item-wrapper">
+						<div class="item-wrapper" id="sort-connections">
 							<h3 class="above-item clearfix do_blockminifier">
 								<span class="title">Page connections</span>
 								<span class="arrow">make smaller</span>
@@ -96,7 +102,7 @@
 							</div>
 						</div>
 					
-						<div class="item-wrapper">
+						<div class="item-wrapper" id="sort-date">
 							<h3 class="above-item clearfix do_blockminifier">
 								<span class="title">Date management</span>
 								<span class="arrow">make smaller</span>
@@ -106,7 +112,7 @@
 							</div>
 						</div>
 					
-						<div class="item-wrapper">
+						<div class="item-wrapper" id="sort-access">
 							<h3 class="above-item clearfix do_blockminifier">
 								<span class="title">Access management</span>
 								<span class="arrow">make smaller</span>

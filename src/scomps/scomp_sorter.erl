@@ -27,28 +27,54 @@ render(Params, _Vars, Context, _State) ->
     ConnectGroups= proplists:get_all_values(connect_group, Params),
     Groups       = proplists:get_all_values(group, Params),
     Delegate     = proplists:get_value(delegate, Params),
+    Axis     	 = proplists:get_value(axis, Params),
+	Containment	 = proplists:get_value(containment, Params),
+	Opacity	 	 = proplists:get_value(opacity, Params),
+	Placeholder	 = proplists:get_value(placeholder, Params),
+	
     
     case Id of
         undefined ->
             {error, "sorter scomp, please give the id of the sorter container"};
         _ ->
 
-        	Delegate1    = case Delegate of
-        	                undefined -> zp_context:get_resource_module(Context);
-        	                _ -> Delegate
-        	               end,
+			Delegate1	 = case Delegate of
+							undefined -> zp_context:get_resource_module(Context);
+							_ -> Delegate
+						   end,
 
-        	PickledPostbackInfo = zp_render:make_postback_info({Tag,Delegate1}, sort, Id, Id, ?MODULE, Context),
-        	Handle1           = case Handle of
-                            		undefined -> "null";
-                            		_         -> [$', Handle, $']
-                            	end,
-        	ConnectWithGroups = groups_to_connect_with(ConnectGroups),
-        	GroupClasses      = groups_to_classes(Groups),
+			PickledPostbackInfo = zp_render:make_postback_info({Tag,Delegate1}, sort, Id, Id, ?MODULE, Context),
+			Handle1			  = case Handle of
+									undefined -> "null";
+									_		  -> [$', Handle, $']
+								end,
+			ConnectWithGroups = groups_to_connect_with(ConnectGroups),
+			GroupClasses	  = groups_to_classes(Groups),
+		
+			Axis1				= case Axis of
+									undefined -> "null";
+									_		  -> [$', Axis, $']
+								end,
+		
+			Containment1	   = case Containment of
+									undefined -> "null";
+									_		  -> [$', Containment, $']
+								end,
+
+			Opacity1	   = case Opacity of
+									undefined -> "null";
+									_		  -> [$', Opacity, $']
+								end,
+
+			Placeholder1   = case Placeholder of
+									undefined -> "null";
+									_		  -> [$', Placeholder, $']
+								end,
+
 		
         	% Emit the javascript...
-        	Script = io_lib:format( "zp_sorter($('#~s'), { handle: ~s, connectWith: [~s] }, '~s');", 
-        	                        [Id, Handle1, ConnectWithGroups, PickledPostbackInfo]),
+        	Script = io_lib:format( "zp_sorter($('#~s'), { handle: ~s, connectWith: [~s], axis: ~s, containment: ~s, opacity: ~s, placeholder: ~s }, '~s');", 
+        	                        [Id, Handle1, ConnectWithGroups, Axis1, Containment1, Opacity1, Placeholder1, PickledPostbackInfo]),
 
             Actions = [
                         {script,    [{script, Script}]},
@@ -76,7 +102,7 @@ event({postback, {SortTag,SortDelegate}, TriggerId, _TargetId}, Context) ->
     catch
         _M:E ->
             Error = io_lib:format("Error in routing sort to \"~s:sort_event/3\"; error: \"~p\"", [SortDelegate,E]),
-            zp_render:wire({growl, [{text,Error}, {stay,1}]}, Context)
+            zp_render:wire({growl, [{text,Error}, {stay,1}, {type, error}]}, Context)
     end.
 
 

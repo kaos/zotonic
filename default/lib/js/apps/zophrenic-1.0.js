@@ -1,7 +1,7 @@
 /**
  * Zophrenic javascript library
  *
- * (c) copyright 2009 Marc Worrell
+ * (c) copyright 2009 Marc Worrell / Tim Benniks
  *
  * Based on nitrogen.js which is copyright 2008-2009 Rusty Klophaus
  */
@@ -28,6 +28,11 @@ function zp_growl_add(message, stay, type)
       	stay: stay,
 		type: type
 	});
+	
+	if(type == 'error' && window.console)
+	{
+		console.error(message);
+	}
 }
 
 function zp_growl_close()
@@ -210,7 +215,7 @@ function zp_sorter(sortBlock, sortOptions, sortPostbackInfo)
 	{
 		var sortItems = "";
 
-		for (var i=0; i<this.childNodes.length; i++) 
+		for (var i = 0; i < this.childNodes.length; i++) 
 		{
 			var sortTag = $(this.childNodes[i]).data("zp_sort_tag");
 			if (sortTag)
