@@ -62,6 +62,46 @@
 			</div>
 		</div>
 		
+		<h3 class="block">Related products</h3>
+		<ul class="compare-list clearfix">
+			<li class="zp-33 first">
+				<div class="block">
+					<h3>Gazelle Champion Mondial</h3>
+					<img src="{% image_url "trek_urban.jpg" width=225 height=130 crop %}" alt="fiets" class="do_imageviewer" />
+					<p>verhaaltje</p>
+					<div class="product-price clearfix">
+						<h3>&euro;{{m.rsc[rsc_id].price|format_price}} <!--span>incl. btw</span--></h3>
+						{# An animate would be nice here #}
+						<div class="clearfix button-wrapper right">
+							{% button class="right right-side-button" text="Meer info &raquo;" action={redirect location="/bike/9999/trek-urban"} %}
+						</div>
+					</div>
+				</div>
+			</li>
+			<li class="zp-33">
+				<div class="block">
+					<h3>HEMA tank fiets</h3>
+					<img src="{% image_url "trek_urban.jpg" width=225 height=130 crop %}" alt="fiets" class="do_imageviewer" />
+					<p>verhaaltje</p>
+					<div class="product-price clearfix">
+						<h3>&euro;350</h3>
+						{% button class="right right-side-button" text="Meer info &raquo;" action={redirect location="/bike/9999/trek-urban"} %}
+					</div>
+				</div>
+			</li>
+			<li class="zp-33">
+				<div class="block">
+					<h3>Bianchi road</h3>
+					<img src="{% image_url "trek_urban.jpg" width=225 height=130 crop %}" alt="fiets" class="do_imageviewer" />
+					<p>verhaaltje</p>
+					<div class="product-price clearfix">
+						<h3>&euro;2230</h3>
+						{% button class="right right-side-button" text="Meer info &raquo;" action={redirect location="/bike/9999/trek-urban"} %}
+					</div>
+				</div>
+			</li>
+		</ul>
+		
 		{#<div class="reviews-title block clearfix">
 			<h3 class="in-block">Reviews</h3>
 			{% button id="product-add-review-trigger" text="+ schrijf review" action={slide_fade_in speed=350 target="product-add-review-form"} %}
@@ -102,46 +142,6 @@
 				</p>
 			</li>
 		</ul>#}
-		
-		<h3 class="block">Related products</h3>
-		<ul class="compare-list clearfix">
-			<li class="zp-33 first">
-				<div class="block">
-					<h3>Gazelle Champion Mondial</h3>
-					<img src="{% image_url "trek_urban.jpg" width=225 height=130 crop %}" alt="fiets" class="do_imageviewer" />
-					<p>verhaaltje</p>
-					<div class="product-price clearfix">
-						<h3>&euro;{{m.rsc[rsc_id].price|format_price}} <!--span>incl. btw</span--></h3>
-						{# An animate would be nice here #}
-						<div class="clearfix button-wrapper right">
-							{% button class="right right-side-button" text="Meer info &raquo;" action={redirect location="/bike/9999/trek-urban"} %}
-						</div>
-					</div>
-				</div>
-			</li>
-			<li class="zp-33">
-				<div class="block">
-					<h3>HEMA tank fiets</h3>
-					<img src="{% image_url "trek_urban.jpg" width=225 height=130 crop %}" alt="fiets" class="do_imageviewer" />
-					<p>verhaaltje</p>
-					<div class="product-price clearfix">
-						<h3>&euro;350</h3>
-						{% button class="right right-side-button" text="Meer info &raquo;" action={redirect location="/bike/9999/trek-urban"} %}
-					</div>
-				</div>
-			</li>
-			<li class="zp-33">
-				<div class="block">
-					<h3>Bianchi road</h3>
-					<img src="{% image_url "trek_urban.jpg" width=225 height=130 crop %}" alt="fiets" class="do_imageviewer" />
-					<p>verhaaltje</p>
-					<div class="product-price clearfix">
-						<h3>&euro;2230</h3>
-						{% button class="right right-side-button" text="Meer info &raquo;" action={redirect location="/bike/9999/trek-urban"} %}
-					</div>
-				</div>
-			</li>
-		</ul>
 	</div>
 {% endblock %}
 

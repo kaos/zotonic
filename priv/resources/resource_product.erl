@@ -23,18 +23,11 @@ resource_exists(_ReqProps, Context) ->
     end.
 
 html(_ReqProps, Context) ->
-	MenuList = [
-				[{title, "home"}, {uri, "/"}], 
-				[{title, "Basic page"}, {uri, "/page/basic"}],
-				[{title, "Product page"}, {uri, "/product/shimano/105-ST-5600"}],
-				[{title, "Bike page"}, {uri, "/bike/trek/urban"}]
-			],
 	Id = zp_context:get(id, Context),
 	CatId = m_rsc:p(Id, category_id, Context),
 	CatBrand = shop:category_brands(CatId, Context),
     RscCount = shop:category_rsc_count(CatId, Context),
 	Vars = [
-        {menu_list, MenuList},
         {rsc_id, Id},
 	    {cat_brand, CatBrand},
 	    {prod_count, RscCount},

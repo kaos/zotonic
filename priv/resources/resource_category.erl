@@ -57,13 +57,6 @@ resource_exists(_ReqProps, Context) ->
 
 
 html(_ReqProps, Context) ->
-	MenuList = [
-				[{title, "home"}, {uri, "/"}], 
-				[{title, "Basic page"}, {uri, "/page/basic"}],
-				[{title, "Product page"}, {uri, "/product/shimano/105-ST-5600"}],
-				[{title, "Bike page"}, {uri, "/bike/trek/urban"}]
-			],
-
 	IsSubCat = zp_context:get(is_subcat, Context),
 	CatId    = zp_context:get(cat_id, Context),
 	BrandId  = zp_context:get(brand_id, Context),
@@ -71,7 +64,6 @@ html(_ReqProps, Context) ->
     RscCount = shop:category_rsc_count(CatId, Context),
 
 	Vars = [
-	    {menu_list, MenuList},
 	    {cat_id, CatId},
 	    {brand_id, BrandId},
 	    {brand_name, m_rsc:p(BrandId, name, Context)},

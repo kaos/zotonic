@@ -25,6 +25,7 @@ body {
 	
 	.block img {
 		display: block;
+		margin: 0 6px 9px 0;
 	}
 	
 	li.block {

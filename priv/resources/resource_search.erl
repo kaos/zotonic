@@ -20,17 +20,10 @@ resource_exists(_ReqProps, Context) ->
     
 html(_ReqProps, Context) ->
     Context1 = zp_context:ensure_all(Context),
-	MenuList = [
-				[{title, "home"}, {uri, "/"}], 
-				[{title, "Basic page"}, {uri, "/page/basic"}],
-				[{title, "Product page"}, {uri, "/product/shimano/105-ST-5600"}],
-				[{title, "Bike page"}, {uri, "/bike/trek/urban"}]
-			],
 	CatId  = zp_context:get(cat_id, Context1),
 	Qs     = zp_context:get_q("qs", Context1),
     Result = zp_search:search({fulltext, [{cat,CatId},{text,Qs}]}, {1,100}, Context1),
     Vars   = [
-        {menu_list, MenuList},
         {cat_id, CatId},
         {text, Qs},
         {result, Result}
