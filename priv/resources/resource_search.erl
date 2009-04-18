@@ -5,41 +5,53 @@
 -module(resource_search).
 -author("Tim Benniks <tim@timbenniks.com>").
 
--export([resource_exists/2]).
+-export([]).
 
 -include_lib("resource_html.hrl").
 
-resource_exists(_ReqProps, Context) ->
-    ContextQs = zp_context:ensure_qs(Context),
-    Cat = zp_context:get_q("cat", ContextQs, product),
-    case m_category:name_to_id(Cat, ContextQs) of
-         {ok, CatId} ->
-             {true, zp_context:set([{cat_id, CatId}], ContextQs)};
-         {error, _} -> 
-             {false, ContextQs}
-     end.
-    
 html(_ReqProps, Context) ->
-    Context1 = zp_context:ensure_all(Context),
-	CatId  = zp_context:get(cat_id, Context1),
-	Qs     = zp_context:get_q("qs", Context1),
-	Page   = try list_to_integer(zp_context:get_q("page", Context1, "1")) catch _:_ -> 1 end,
-    Result = zp_search:search_pager({fulltext_catbrand, [{cat,CatId},{text,Qs}]}, Page, Context1),
+    CatId = case zp_context:get_q("qcat", Context) of
+        undefined -> undefined;
+        Cat ->
+            case m_category:name_to_id(Cat, Context) of
+                {ok, CId} -> CId;
+                _ -> undefined
+            end
+    end,
+    BrandId = case zp_context:get_q("qbrand", Context) of
+        undefined -> undefined;
+        Brand ->
+            case m_rsc:name_to_id(Brand, Context) of
+                {ok, BId} -> BId;
+                _ -> undefined
+            end
+    end,
+	Qs       = zp_context:get_q("qs", Context),
+	Page     = try list_to_integer(zp_context:get_q("page", Context, "1")) catch _:_ -> 1 end,
+    AllProds = zp_search:search({fulltext_catbrand, [{cat,product},{text,Qs}]}, {1,1000}, Context),
     
-    {Cats, Brands} = count_all(Result#search_result.all),
+    {Cats, Brands} = count_all(AllProds#search_result.result),
     BrandList = sort_brands(Brands, Context),
     CatCounts = count_categories(Cats, Context),
+
+    Result = case {CatId, BrandId} of
+        {undefined, undefined} ->
+            zp_search:pager(AllProds, Page, Context);
+        _ ->
+            zp_search:search_pager({fulltext_catbrand_filter, [{brand,BrandId},{cat,CatId},{text,Qs}]}, Page, Context)
+    end,
     
     Vars   = [
         {cat_id, CatId},
+        {brand_id, BrandId},
         {page, Page},
         {text, Qs},
         {result, Result},
         {brand_count, BrandList},
         {cat_count, CatCounts}
     ],
-    Html = zp_template:render("search.tpl", Vars, Context1),
-	zp_context:output(Html, Context1).
+    Html = zp_template:render("search.tpl", Vars, Context),
+	zp_context:output(Html, Context).
 	
 
 count_all(List) ->

@@ -5,7 +5,13 @@
 {% block content %}
 	<div id="content-area" class="zp-75">
 		<!-- Area for the main content -->
-		<h2 class="header-alone">{% if q.qs %}U heeft gezocht op <em>{{ q.qs|escape }}</em>{% else %}Zoek resultaat{% endif %}</h2>
+		<h2 class="header-alone">
+			{% if q.qs %}
+				U heeft gezocht op <em>{{ q.qs|escape }}</em>{% if cat_id %}, categorie <em>{{ m.category[cat_id].title }}</em>{% endif %}{% if brand_id %}, merk <em>{{ m.rsc[brand_id].title }}</em>{% endif %}
+			{% else %}
+				Zoek resultaat
+			{% endif %}
+		</h2>
 		
 		{% pager result=result %}
 		
@@ -33,7 +39,11 @@
 		{% empty %}
 		<div class="block clearfix">
 			{% if q.qs %}
-				<h4>Helaas niets gevonden bij uw zoekvraag voor <em>{{ q.qs|default:"niets"|escape }}</em>.</h4>
+				<h4>
+					Helaas niets gevonden bij uw zoekvraag voor <em>{{ q.qs|default:"niets"|escape }}</em>
+					{% if cat_id %}in de categorie <em>{{ m.category[cat_id].title }}</em>{% endif %}
+					{% if brand_id %} en het merk <em>{{ m.rsc[brand_id].title }}</em>{% endif %}
+					</h4>
 			{% else %}
 				<h4>Vul uw zoekvraag in en probeer opnieuw.</em></h4>
 			{% endif %}
@@ -74,12 +84,12 @@
 				{% for c in m.category.product.tree2.children %}
 					{% if cat_count[c.id] %}
 						<li>
-							<a href="{% url search qs=q.qs qcat=c.name qbrand=q.qbrand %}">{{ c.title }} <span class="amount">({{ cat_count[c.id] }})</span></a>
+							<a {% ifequal cat_id c.id %}class="current" {% endifequal %} href="{% url search qs=q.qs qcat=c.name qbrand=q.qbrand %}">{{ c.title }} <span class="amount">({{ cat_count[c.id] }})</span></a>
 							{% if c.children %}
 								<ul class="sub-navigation">
 								{% for cc in c.children %}
 									{% if cat_count[cc.id] %}
-									<li><a href="{% url search qs=q.qs qcat=cc.name qbrand=q.qbrand %}">&nbsp;&nbsp;&nbsp;&nbsp;{{ cc.title }} <span class="amount">({{ cat_count[cc.id] }})</span></a></li>
+									<li><a {% ifequal cat_id cc.id %}class="current" {% endifequal %} href="{% url search qs=q.qs qcat=cc.name qbrand=q.qbrand %}">&nbsp;&nbsp;&nbsp;&nbsp;{{ cc.title }} <span class="amount">({{ cat_count[cc.id] }})</span></a></li>
 									{% endif %}
 								{% endfor %}
 								</ul>

@@ -97,6 +97,32 @@ search({fulltext_catbrand, [{cat,Cat},{text,QueryText}]}, _OffsetLimit, Context)
             }
     end;
 
+search({fulltext_catbrand_filter, [{brand,undefined},{cat,undefined},{text,QueryText}]}, _OffsetLimit, Context) ->
+    search({fulltext_catbrand, [{cat,product},{text,QueryText}]}, _OffsetLimit, Context);
+
+search({fulltext_catbrand_filter, [{brand,undefined},{cat,Cat},{text,QueryText}]}, _OffsetLimit, Context) ->
+    search({fulltext_catbrand, [{cat,Cat},{text,QueryText}]}, _OffsetLimit, Context);
+
+search({fulltext_catbrand_filter, [{brand,BrandId},{cat,undefined},{text,QueryText}]}, _OffsetLimit, Context) ->
+    search({fulltext_catbrand_filter, [{brand,BrandId},{cat,product},{text,QueryText}]}, _OffsetLimit, Context);
+
+search({fulltext_catbrand_filter, [{brand,BrandId},{cat,Cat},{text,QueryText}]}, _OffsetLimit, Context) ->
+    CatId = m_category:name_to_id_check(Cat, Context),
+    PredId = m_predicate:name_to_id_check(brand, Context),
+    case QueryText of
+        A when A == undefined orelse A == "" ->
+            #search_result{result=[]};
+        _ ->
+            #search_sql{
+                select="r.id, r.category_id, e.object_id, ts_rank_cd(pivot_tsv, query, 32) AS rank",
+                from="rsc r left join edge e on r.id = e.subject_id and e.predicate_id = $4, category rc, category ic, to_tsquery($3, $2) query",
+                where=" query @@ pivot_tsv and e.object_id = $5 and r.category_id = rc.id and rc.nr >= ic.lft and rc.nr <= ic.rght and ic.id = $1",
+                order="rank desc",
+                args=[CatId, QueryText, zp_pivot_rsc:pg_lang(Context#context.language), PredId, BrandId],
+                tables=[{rsc,"r"}]
+            }
+    end;
+
 search({media_category_image, [{cat,Cat}]}, _OffsetLimit, Context) ->
     CatId = m_category:name_to_id_check(Cat, Context),
     #search_sql{
