@@ -15,6 +15,7 @@
     tpl_sync_cart_info/1,
     tpl_sync_cart_info/3,
     get_cart/1,
+    in_cart/2,
     get_cart_prices/1,
     add_product/2,
     decr_product/2,
@@ -85,6 +86,14 @@ format_price(Price) ->
 get_cart(Context) ->
     zp_context:get_visitor(shop_cart, Context).
 
+%% @doc Get the count of the product in the cart
+%% @spec in_cart(Id, #context) -> int()
+in_cart(Id, Context) ->
+    Cart = get_cart(Context),
+    case lists:filter(fun({CartId,_N}) -> CartId == Id end, Cart) of
+        [{Id,N}] -> N;
+        [] -> 0
+    end.
 
 %% @doc Add the Id to the cart, increment when the id is already in the cart
 %% @spec add_product(Id, Context) -> NewCount
