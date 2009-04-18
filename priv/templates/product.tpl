@@ -148,25 +148,37 @@
 {% block sidebar %}
 	<div id="sidebar" class="zp-25">
 		<div class="padding">
+		{% with m.category[m.rsc[rsc_id].category_id] as cat %}
+			{% with m.category[cat.parent_id] as parent_cat %}
 
-			<h3 class="block">{{ m.category[m.category[m.rsc[rsc_id].category_id].parent_id].title }}</h3>
-			<ul id="sub-navigation">
-				{% for cat in m.category[m.category[m.rsc[rsc_id].category_id].parent_id].tree1 %}
-			    	<li><a {% ifequal cat.id m.rsc[rsc_id].category_id %}class="current" {% endifequal %} href="{% url overview cat=m.category[cat.parent_id].name subcat=cat.name %}">{{ cat.title }}</a></li>
-				{% endfor %}
-			</ul>
+				<h3 class="block">{{ parent_cat.title }}</h3>
+				<ul id="sub-navigation">
+					{% for sibling_cat in parent_cat.tree1 %}
+				    	<li><a {% ifequal sibling_cat.id cat.id %}class="current" {% endifequal %} href="{% url overview cat=parent_cat.name subcat=sibling_cat.name %}">{{ sibling_cat.title }}</a></li>
+					{% endfor %}
+				</ul>
 			
-			<h3 class="block">Brands</h3>
-			<ul id="sub-navigation">
-			    <li><a href="#">Stevens <span class="amount">(3)<span></a></li>
-			    <li><a href="#">Ortliep <span class="amount">(5)<span></a></li>
-			    <li><a href="#">Duracell <span class="amount">(2)<span></a></li>
-			</ul>
+				{% with m.rsc[rsc_id].brand[1] as brand_id %}
+				
+				<h3 class="block">Merken</h3>
+				<ul id="sub-navigation">
+					<li><a href="{% url overview cat=parent_cat.name subcat=cat.name %}">Alle merken <span class="amount">({{ prod_count|default:"-" }})<span></a></li>
+					{% for b_id, b_name, b_count in cat_brand %}
+					    <li><a {% ifequal brand_id b_id %}class="current" {% endifequal %} href="{% url overview cat=parent_cat.name subcat=cat.name brand=b_name %}">{{m.rsc[b_id].title}} <span class="amount">({{ b_count|default:"-" }})<span></a></li>
+					{% endfor %}
+				</ul>
+				
+				{% endwith %}
+
+			{% endwith %}
+		{% endwith %}
 			
+		{#
 			<div class="notification notice" id="product-notice">
 				<h3>Winkelmand informatie</h3>
 				U heeft de Shimano 105 ST-5600 <strong>2 keer</strong> in uw <a href="#">winkelmand.</a>
 			</div>
+		#}
 		</div>
 	</div>
 {% endblock %}
