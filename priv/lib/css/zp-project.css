@@ -38,6 +38,7 @@ body {
 
 .pager li {
 	display: inline;
+	margin: 0 6px 0 0;
 }
 
 	.pager li.current {
@@ -527,12 +528,13 @@ ul#navigation li.lang a.english {
 	margin: 0;
 }
 
+	.compare-list li .block {
+		margin: 0 0 2px 2px;
+		border: none;
+	}
+	
 	.compare-list li.first .block {
 		margin: 0;
-	}
-
-	.compare-list li .block {
-		margin: 0 0 0 2px;
 	}
 	
 	.compare-list li .block .product-price h3 {
@@ -541,6 +543,14 @@ ul#navigation li.lang a.english {
 	
 	.compare-list .product-price {
 		margin: 0;
+	}
+	
+	.compare-list li img {
+		border: 1px solid #ccc;
+	}
+	
+	.compare-list li h3 {
+		margin: 0 0 9px 0;
 	}
 
 /* Pages - category

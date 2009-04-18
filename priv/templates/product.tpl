@@ -64,42 +64,20 @@
 		
 		<h3 class="block">Related products</h3>
 		<ul class="compare-list clearfix">
-			<li class="zp-33 first">
-				<div class="block">
-					<h3>Gazelle Champion Mondial</h3>
-					<img src="{% image_url "trek_urban.jpg" width=225 height=130 crop %}" alt="fiets" class="do_imageviewer" />
-					<p>verhaaltje</p>
-					<div class="product-price clearfix">
-						<h3>&euro;{{m.rsc[rsc_id].price|format_price}} <!--span>incl. btw</span--></h3>
-						{# An animate would be nice here #}
-						<div class="clearfix button-wrapper right">
-							{% button class="right right-side-button" text="Meer info &raquo;" action={redirect location="/bike/9999/trek-urban"} %}
+			{% for id in m.search[{featured cat="product"}] %}
+				<li class="zp-33 {% ifequal forloop.counter "1" %}first{% endifequal %} {% ifequal forloop.counter "4" %}first{% endifequal %}">
+					<div class="block">
+						<a href="{{ m.rsc[id].page_url }}">{% image m.rsc[id].media[1].filename width=216 height=130 crop %}</a>
+						<h3><a href="{{ m.rsc[id].page_url }}">{{ m.rsc[id].title }}</a></h3>
+						<div class="product-price clearfix">
+							<h3>&euro;{{m.rsc[id].price|format_price}}</h3>
+							<div class="clearfix button-wrapper right">
+								{% button class="right right-side-button" text="Meer info &raquo;" action={redirect id=id} %}
+							</div>
 						</div>
 					</div>
-				</div>
-			</li>
-			<li class="zp-33">
-				<div class="block">
-					<h3>HEMA tank fiets</h3>
-					<img src="{% image_url "trek_urban.jpg" width=225 height=130 crop %}" alt="fiets" class="do_imageviewer" />
-					<p>verhaaltje</p>
-					<div class="product-price clearfix">
-						<h3>&euro;350</h3>
-						{% button class="right right-side-button" text="Meer info &raquo;" action={redirect location="/bike/9999/trek-urban"} %}
-					</div>
-				</div>
-			</li>
-			<li class="zp-33">
-				<div class="block">
-					<h3>Bianchi road</h3>
-					<img src="{% image_url "trek_urban.jpg" width=225 height=130 crop %}" alt="fiets" class="do_imageviewer" />
-					<p>verhaaltje</p>
-					<div class="product-price clearfix">
-						<h3>&euro;2230</h3>
-						{% button class="right right-side-button" text="Meer info &raquo;" action={redirect location="/bike/9999/trek-urban"} %}
-					</div>
-				</div>
-			</li>
+				</li>
+			{% endfor %}
 		</ul>
 		
 		{#<div class="reviews-title block clearfix">
