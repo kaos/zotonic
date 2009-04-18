@@ -10,14 +10,15 @@
 		{% for rsc_id, rank in result %}
 		<h3 class="block">{{ m.rsc[rsc_id].title }}</h3>
 		<div class="block clearfix">
-			{% image m.rsc[rsc_id].media[1].filename width=180 height=140 crop alt="Handgrepen" class="left do_imageviewer" %}
+			<a href="{{ m.rsc[rsc_id].page_url }}">{% image m.rsc[rsc_id].media[1].filename width=180 height=140 crop alt="Handgrepen" class="left" %}</a>
 			<div class="zp-70">
 				<h4>Beschrijving</h4>
 				<p>{{ m.rsc[rsc_id].intro }}</p>
 				<div class="product-price clearfix">
-					<h3>&euro;{{ m.rsc[rsc_id].price }} <span>incl. btw</span></h3>
+					<h3>&euro;{{ m.rsc[rsc_id].price|format_price }} <!--span>incl. btw</span--></h3>
 
 					<div class="clearfix button-wrapper right">
+						{% button class="buy-me" text="meer info" action={redirect id=rsc_id} %}
 						{% button class="buy-me" text="leg in winkelmand" action={shop_addcart id=rsc_id} %}
 						{% button class="buy-me right-side-button" text="koop direct &raquo;" action={shop_buynow id=rsc_id} %}
 					<!--
