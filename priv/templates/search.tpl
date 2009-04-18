@@ -7,6 +7,8 @@
 		<!-- Area for the main content -->
 		<h2 class="header-alone">Zoek resultaat</h2>
 		
+		{% pager result=result %}
+		
 		{% for rsc_id, rank in result %}
 		<h3 class="block">{{ m.rsc[rsc_id].title }}</h3>
 		<div class="block clearfix">
@@ -40,6 +42,8 @@
 		<h3 class="block">Aanbiedingen</h3>
 		<p>Hier aanbiedingen laten zien wanneer er niets gevonden is?</p>
 		{% endfor %}
+
+		{% pager result=result %}
 	</div>
 {% endblock %}
 

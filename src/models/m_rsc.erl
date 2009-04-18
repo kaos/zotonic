@@ -366,10 +366,10 @@ page_url(Id, Context) ->
     end.
 
 page_url_path([], Args, Context) ->
-    zp_dispatcher:url_for(page, Args);
+    zp_dispatcher:url_for(page, Args, Context);
 page_url_path([CatId|Rest], Args, Context) ->
     Name = m_category:id_to_name(CatId, Context),
-    case zp_dispatcher:url_for(Name, Args) of
+    case zp_dispatcher:url_for(Name, Args, Context) of
         undefined -> page_url_path(Rest, Args, Context);
         Url -> Url
     end.

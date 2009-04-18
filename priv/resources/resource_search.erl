@@ -22,9 +22,11 @@ html(_ReqProps, Context) ->
     Context1 = zp_context:ensure_all(Context),
 	CatId  = zp_context:get(cat_id, Context1),
 	Qs     = zp_context:get_q("qs", Context1),
-    Result = zp_search:search({fulltext, [{cat,CatId},{text,Qs}]}, {1,100}, Context1),
+	Page   = try list_to_integer(zp_context:get_q("page", Context1, "1")) catch _:_ -> 1 end,
+    Result = zp_search:search_pager({fulltext, [{cat,CatId},{text,Qs}]}, Page, Context1),
     Vars   = [
         {cat_id, CatId},
+        {page, Page},
         {text, Qs},
         {result, Result}
     ],

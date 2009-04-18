@@ -13,7 +13,9 @@
 -export([start_link/0, start_link/1]).
 
 %% zp_dispatch exports
--export([url_for/1, url_for/2, url_for/3, reload/0, test/0]).
+-export([url_for/2, url_for/3, url_for/4, reload/0, test/0]).
+
+-include_lib("zophrenic.hrl").
 
 -record(state, {dispatchlist=undefined, lookup=undefined}).
 
@@ -28,24 +30,26 @@ start_link(Args) when is_list(Args) ->
     gen_server:start_link({local, ?MODULE}, ?MODULE, Args, []).
 
 
-%% @spec uri_for(atom()) -> iolist()
+%% @spec url_for(atom()) -> iolist()
 %% @doc Construct an uri from a named dispatch, assuming no parameters
-url_for(Name) ->
+url_for(Name, #context{} = _Context) ->
     gen_server:call(?MODULE, {'url_for', Name, [], html}).
 
 
-%% @spec uri_for(atom(), Args) -> iolist()
+%% @spec url_for(atom(), Args) -> iolist()
 %%        type Args = PropList
 %% @doc Construct an uri from a named dispatch and the parameters
-url_for(Name, Args) ->
-    gen_server:call(?MODULE, {'url_for', Name, Args, html}).
+url_for(Name, Args, #context{} = Context) ->
+    Args1 = append_qargs(Args, Context),
+    gen_server:call(?MODULE, {'url_for', Name, Args1, html}).
 
 
-%% @spec uri_for(atom(), Args) -> iolist()
+%% @spec url_for(atom(), Args) -> iolist()
 %%        type Args = PropList
 %% @doc Construct an uri from a named dispatch and the parameters
-url_for(Name, Args, Escape) ->
-    gen_server:call(?MODULE, {'url_for', Name, Args, Escape}).
+url_for(Name, Args, Escape, #context{} = Context) ->
+    Args1 = append_qargs(Args, Context),
+    gen_server:call(?MODULE, {'url_for', Name, Args1, Escape}).
 
 
 %% @doc Reload all dispatch lists.  Finds new dispatch lists and adds them to the dispatcher
@@ -268,6 +272,29 @@ revjoin([S | Rest], Separator, []) ->
 revjoin([S | Rest], Separator, Acc) ->
     revjoin(Rest, Separator, [S, Separator | Acc]).
 
+
+%% @spec Append all query arguments iff they are not mentioned in the arglist and if qargs parameter is set
+append_qargs(Args, Context) ->
+    case proplists:get_value(qargs, Args) of
+        undefined ->
+            Args;
+        false -> 
+            proplists:delete(qargs, Args);
+        true ->
+            Args1 = proplists:delete(qargs, Args),
+            Qs = zp_context:get_q_all(Context),
+            lists:foldr(fun 
+                            ({[$q|_]=Key,_Value}=A, Acc) ->
+                                case proplists:is_defined(Key, Args) of
+                                    true -> Acc;
+                                    false -> [A|Acc]
+                                end;
+                            (_, Acc) -> 
+                                Acc
+                        end,
+                        Args1,
+                        Qs)
+    end.
 
 
 % {ok, X, _}  = erl_scan:string("[{hello, blaat}].").

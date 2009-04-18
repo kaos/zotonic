@@ -30,6 +30,7 @@
 
     get_q/2,
     get_q/3,
+    get_q_all/1,
     get_q_all/2,
     get_q_validated/2,
 
@@ -260,6 +261,15 @@ get_q(Key, Context, Default) ->
         {ok, Qs} -> proplists:get_value(Key, Qs, Default);
         error -> undefined
     end.
+
+
+%% @spec get_q_all(Context) -> Values
+%%        Key -> string()
+%%        Values -> list()
+%% @doc Get all parameters.
+get_q_all(Context) ->
+    {ok, Qs} = dict:find('q', Context#context.dict),
+    Qs.
 
 
 %% @spec get_q_all(Key, Context) -> Values

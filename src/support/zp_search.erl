@@ -10,18 +10,66 @@
 %% interface functions
 -export([
     search/2,
-    search/3
+    search/3,
+    search_pager/3,
+    search_pager/4,
+    pager/3,
+    pager/4
 ]).
 
 -include_lib("zophrenic.hrl").
 
 -define(OFFSET_LIMIT, {1,10}).
+-define(OFFSET_PAGING, {1,1000}).
 
+%% @doc Search items and handle the paging.  Uses the default page length.
+%% @spec search({Name, SearchPropList}, Page, #context) -> #search_result
+search_pager(Search, Page, Context) ->
+    search_pager(Search, Page, 1, Context).
+
+%% @doc Search items and handle the paging
+%% @spec search_pager({Name, SearchPropList}, Page, PageLen, #context) -> #search_result
+search_pager(Search, Page, PageLen, Context) ->
+    SearchResult = search(Search, {1,1000}, Context),
+    pager(SearchResult, Page, PageLen, Context).
+
+
+pager(#search_result{pagelen=undefined} = SearchResult, Page, Context) ->
+    pager(SearchResult, Page, ?SEARCH_PAGELEN, Context);
+pager(SearchResult, Page, Context) ->
+    pager(SearchResult, Page, SearchResult#search_result.pagelen, Context).
+
+pager(#search_result{result=Result} = SearchResult, Page, PageLen, _Context) ->
+    Total = length(Result),
+    Pages = mochinum:int_ceil(Total / PageLen), 
+    Offset = (Page-1) * PageLen + 1,
+    OnPage = case Offset =< Total of
+        true ->
+            {P,_} = zp_utils:split(PageLen, lists:nthtail(Offset-1, Result)),
+            P;
+        false ->
+            []
+    end,
+    Next = if Offset + PageLen < Total -> false; true -> Page+1 end,
+    Prev = if Page > 1 -> Page-1; true -> 1 end,
+    SearchResult#search_result{
+        result=OnPage,
+        all=Result,
+        total=Total,
+        page=Page,
+        pagelen=PageLen,
+        pages=Pages,
+        next=Next,
+        prev=Prev
+    }.
+
+%% @doc Search with the question and return the results
+%% @spec search({Name, SearchPropList}, #context) -> #search_result
 search(Search, Context) ->
     search(Search, ?OFFSET_LIMIT, Context).
 
 %% @doc Perform the named search and its arguments
-%% @spec search({Name, SearchPropList}, Context) -> #search_result
+%% @spec search({Name, SearchPropList}, {Offset, Limit}, Context) -> #search_result
 search({SearchName, Props}, Limit, Context) ->
     % todo: fetch paging information from props
     PropsSorted = lists:keysort(1, Props),

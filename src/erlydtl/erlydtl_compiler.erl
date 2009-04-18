@@ -1035,7 +1035,8 @@ url_ast(Name, Args, Context, TreeWalker) ->
                 erl_syntax:atom(zp_dispatcher),
                 erl_syntax:atom(url_for),
                 [   erl_syntax:atom(Name), 
-                    scomp_ast_map_args(Args, Context, TreeWalker)
+                    scomp_ast_map_args(Args, Context, TreeWalker),
+                    erl_syntax:variable("ZpContext")
                 ]
             ),
     {{AppAst, #ast_info{}}, TreeWalker}.  

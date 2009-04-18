@@ -23,5 +23,5 @@ render_action(TriggerId, TargetId, Args, Context) ->
 
 event({postback, {shop_buynow, Id}, _TriggerId, _TargetId}, Context) ->
     shop_cart:add_product(Id, Context),
-    Url = zp_dispatcher:url_for(shop_cart),
+    Url = zp_dispatcher:url_for(shop_cart, Context),
     zp_render:wire({redirect, [{location,Url}]}, Context).

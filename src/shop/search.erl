@@ -75,6 +75,18 @@ search({fulltext, [{cat,Cat},{text,QueryText}]}, _OffsetLimit, Context) ->
         tables=[{rsc,"r"}]
     };
 
+search({fulltext_catbrand, [{cat,Cat},{text,QueryText}]}, _OffsetLimit, Context) ->
+    CatId = m_category:name_to_id_check(Cat, Context),
+    PredId = m_predicate:name_to_id_check(brand, Context),
+    #search_sql{
+        select="r.id, r.category_id, e.object_id, ts_rank_cd(pivot_tsv, query, 32) AS rank",
+        from="rsc r left join edge e on r.id = e.subject_id and e.predicate_id = $4, category rc, category ic, to_tsquery($3, $2) query",
+        where=" query @@ pivot_tsv  and r.category_id = rc.id and rc.nr >= ic.lft and rc.nr <= ic.rght and ic.id = $1",
+        order="rank desc",
+        args=[CatId, QueryText, zp_pivot_rsc:pg_lang(Context#context.language), PredId],
+        tables=[{rsc,"r"}]
+    };
+
 search({media_category_image, [{cat,Cat}]}, _OffsetLimit, Context) ->
     CatId = m_category:name_to_id_check(Cat, Context),
     #search_sql{
