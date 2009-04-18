@@ -55,7 +55,7 @@ build_html(Page, Pages, Dispatch, DispatchArgs, Context) ->
     {S,M,E} = pages(Page, Pages),
     Urls = urls(S, M, E, Dispatch, DispatchArgs, Context),
     [
-        "\n<ul class=\"pager\">",
+        "\n<ul class=\"pager block\">",
             [ url_to_li(Url, N, N == Page) || {N, Url} <- Urls ],
         "\n</ul"
     ].

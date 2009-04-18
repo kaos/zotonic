@@ -60,9 +60,16 @@ function zp_postback_loop()
 	}
 }
 
-function zp_opt_cancel(Obj)
+function zp_opt_cancel(obj)
 {
-    return ($(obj+':radio').length || $(obj+':checkbox').length)
+	if($(obj+':radio').length || $(obj+':checkbox').length)
+	{
+		return true;
+	}
+	else
+	{
+		return false;
+	}
 }
 
 function zp_queue_postback(triggerID, postback, extraParams) 
