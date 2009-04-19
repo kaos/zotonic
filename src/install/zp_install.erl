@@ -4,8 +4,9 @@
 %%
 %% @doc Install Zophrenic, loads the datamodel into the database
 %% Assumes the database has already been created (which normally needs superuser permissions anyway)
-%% CREATE DATABASE zophrenic WITH OWNER = zophrenic ENCODING = 'UTF8';
 %%
+%% CREATE DATABASE zophrenic WITH OWNER = zophrenic ENCODING = 'UTF8';
+%% CREATE LANGUAGE "plpgsql";
 
 -module(zp_install).
 -author("Marc Worrell <marc@worrell.nl").
