@@ -21,7 +21,8 @@ install(Context) ->
         ok = install_order_status(Ctx),
         ok = install_cat(Ctx),
         ok = install_pred(Ctx),
-        ok = install_rsc(Ctx)
+        ok = install_rsc(Ctx),
+        ok = install_sku(Ctx)
     end,
     ok = zp_db:transaction(F, Context),
     zp_depcache:flush(),
@@ -59,7 +60,6 @@ tables_sql() ->
       
       -- Field for full text search
       tsv tsvector,
-      
       
       -- Imported from VMSII (VendIT)
       article_nr character varying(50) NOT NULL,
@@ -250,7 +250,8 @@ tables_sql() ->
     ",
     
     "CREATE INDEX fki_shop_combo_a_shop_sku_id ON shop_combo(a_shop_sku_id)",
-    "CREATE INDEX fki_shop_combo_b_shop_sku_id ON shop_combo(b_shop_sku_id)"
+    "CREATE INDEX fki_shop_combo_b_shop_sku_id ON shop_combo(b_shop_sku_id)",
+    "CREATE INDEX shop_combo_a_count_key ON shop_combo(a_shop_sku_id, count)"
 
     ].
 
@@ -299,7 +300,8 @@ install_cat(Context) ->
     
     [ {ok, _} = m_category:insert(Cat, Context) || Cat <- Cats ],
     [ m_category:update_parent(m_category:name_to_id_check(B,Context), m_category:name_to_id_check(A,Context), Context) || {A,B} <- Parents],
-    m_category:renumber(Context).
+    m_category:renumber(Context),
+    ok.
 
 
 install_pred(Context) ->
@@ -316,7 +318,7 @@ install_rsc(Context) ->
         [
             {title, "Ortlieb Ultimate 5 Classic"},
             {slug, "ortlieb-ultimate-5-classic"},
-            {price, 74.95},
+            {price, 7495},
             {category_id, m_category:name_to_id_check(bags, Context)},
             {product_nr, 735},
             {name, "product-735"},
@@ -335,7 +337,7 @@ install_rsc(Context) ->
         [
             {title, "Ortlieb Mud Racer XS"},
             {slug, "ortlieb-mud-racer-xs"},
-            {price, 22.95},
+            {price, 2295},
             {category_id, m_category:name_to_id_check(bags, Context)},
             {product_nr, 1271},
             {name, "product-1271"},
@@ -345,7 +347,7 @@ install_rsc(Context) ->
         [
             {title, "Rudy Project Jekyll"},
             {slug, "rudy-project-jekyll"},
-            {price, 99.90},
+            {price, 9990},
             {category_id, m_category:name_to_id_check(glasses, Context)},
             {intro, "Lorem ipsum dolor sit amet, consectetur adipisicing elit"},
             {product_nr, 712},
@@ -354,7 +356,7 @@ install_rsc(Context) ->
         [
             {title, "Duracell AA Plus"},
             {slug, "duracell-aa-plus"},
-            {price, 6.95},
+            {price, 695},
             {category_id, m_category:name_to_id_check(batteries, Context)},
 			{intro, "Lorem ipsum dolor sit amet, consectetur adipisicing elit"},
             {product_nr, 1610},
@@ -363,7 +365,10 @@ install_rsc(Context) ->
         [
             {title, "Cateye Strada (Draadloos)"},
             {slug, "cateye-strada-draadloos"},
-            {price, 89.95},
+            {price, 8995},
+            {special_price, 6995},
+            {special_start, {2009,4,1}},
+            {special_end, {2009,6,1}},
             {category_id, m_category:name_to_id_check(bikecomputers, Context)},
             {product_nr, 1591},
             {name, "product-1591"},
@@ -387,7 +392,7 @@ install_rsc(Context) ->
         [
             {title, "Tacx Cycle Motion Stand"},
             {slug, "tacx-cycle-motion-stand"},
-            {price, 95.00},
+            {price, 9500},
             {category_id, m_category:name_to_id_check(montagestands, Context)},
             {product_nr, 1636},
             {name, "product-1636"},
@@ -454,5 +459,73 @@ install_rsc(Context) ->
                     BrandPred, 
                     m_rsc:name_to_id_check(O, Context), 
                     Context) || {S,O} <- BrandEdges ],
+    ok.
+
+
+
+
+install_sku(Context) ->
+    Skus = [
+        [
+            {rsc_id, m_rsc:name_to_id_check("product-735", Context)},
+            {stock_avail, 5},
+            {article_nr, "prod0735"},
+            {description1, "ULTIMATE5 CLASSIC"},
+            {stock, 5},
+            {price_incl, 7495},
+            {price_excl, 6298}
+        ],
+        [
+            {rsc_id, m_rsc:name_to_id_check("product-1271", Context)},
+            {stock_avail, 4},
+            {article_nr, "prod1271"},
+            {description1, "Ortlieb Mud Racer XS"},
+            {stock, 4},
+            {price_incl, 2295},
+            {price_excl, 1929}
+        ],
+        [
+            {rsc_id, m_rsc:name_to_id_check("product-712", Context)},
+            {stock_avail, 4},
+            {article_nr, "prod0712"},
+            {description1, "Rudy Project Jekyll"},
+            {stock, 4},
+            {price_incl, 9990},
+            {price_excl, 8395}
+        ],
+        [
+            {rsc_id, m_rsc:name_to_id_check("product-1610", Context)},
+            {stock_avail, 100},
+            {article_nr, "prod1610"},
+            {description1, "Duracell AA Plus"},
+            {stock, 100},
+            {price_incl, 695},
+            {price_excl, 584}
+        ],
+        [
+            {rsc_id, m_rsc:name_to_id_check("product-1591", Context)},
+            {stock_avail, 100},
+            {article_nr, "prod1591"},
+            {description1, "Cateye Strada (Draadloos)"},
+            {stock, 100},
+            {price_incl, 8995},
+            {price_excl, 7559},
+            {special_price_incl, 6995},
+            {special_price_excl, 5878},
+            {special_start, {2009,4,1}},
+            {special_end, {2009,6,1}}
+        ],
+        [
+            {rsc_id, m_rsc:name_to_id_check("product-1636", Context)},
+            {stock_avail, 100},
+            {article_nr, "prod1636"},
+            {description1, "Tacx Cycle Motion Stand"},
+            {stock, 100},
+            {price_incl, 8995},
+            {price_excl, 7559}
+        ]
+    ],
+    
+    [ {ok, _} = zp_db:insert(shop_sku, Sku, Context) || Sku <- Skus ],
     ok.
 

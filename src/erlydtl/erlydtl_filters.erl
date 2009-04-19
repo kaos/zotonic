@@ -131,16 +131,24 @@ format_number(Input) ->
     Input.
 
 format_price(Input) when is_integer(Input) ->
-    integer_to_list(Input);
-format_price(Input) when is_float(Input) ->
-    case round(Input) == Input of
-        true -> integer_to_list(round(Input));
-        false -> io_lib:format("~.2f", [Input])
+    case Input rem 100 of
+        0 -> 
+            integer_to_list(Input div 100);
+        Cents when Cents < 10 -> 
+            [integer_to_list(Input div 100), $,, $0, Cents + $0 ];
+        Cents -> 
+            [integer_to_list(Input div 100), $,, integer_to_list(Cents) ]
     end;
+format_price(Input) when is_float(Input) ->
+    format_price(round(Input * 100));
 format_price(Input) when is_function(Input, 0) ->
     format_price(Input());
-format_price(Input) ->
-    Input.
+format_price(Input) when is_list(Input) ->
+    case string:to_integer(Input) of
+        {error, _} -> Input;
+        {N, _Rest} -> format_price(N)
+    end.
+
 
 default(Input, Default) -> 
     case erlydtl_runtime:is_false(Input) of
