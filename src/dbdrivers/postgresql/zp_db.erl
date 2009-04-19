@@ -172,9 +172,16 @@ insert(Table, Props, Context) ->
     Cols = columns(Table, Context),
     InsertProps = prepare_cols(Cols, Props),
     C = get_connection(Context),
+
+    InsertProps1 = case proplists:get_value(props, InsertProps) of
+        undefined ->
+            InsertProps;
+        PropsCol -> 
+            lists:keystore(props, 1, InsertProps, {props, cleanup_props(PropsCol)})
+    end,
     
     %% Build the SQL insert statement
-    {ColNames,Parameters} = lists:unzip(InsertProps),
+    {ColNames,Parameters} = lists:unzip(InsertProps1),
     Sql = "insert into \""++Table++"\" (\"" 
              ++ string:join([ atom_to_list(ColName) || ColName <- ColNames ], "\", \"")
              ++ "\") values ("
@@ -211,7 +218,7 @@ update(Table, Id, Parameters, Context) ->
                 true ->
                     FReplace = fun ({P,_} = T, L) -> lists:keystore(P, 1, L, T) end,
                     NewProps = lists:foldl(FReplace, OldProps, proplists:get_value(props, UpdateProps)),
-                    lists:keystore(props, 1, UpdateProps, {props, NewProps});
+                    lists:keystore(props, 1, UpdateProps, {props, cleanup_props(NewProps)});
                 false ->
                     UpdateProps
             end;
@@ -268,7 +275,27 @@ select(Table, Id, Context) ->
             []
     end,
     {ok, Props}.
-    
+
+
+%% @doc Remove all undefined props, translate texts to binaries.
+cleanup_props(Ps) when is_list(Ps) ->
+    [ {K,to_binary_string(V)} || {K,V} <- Ps, V /= undefined ];
+cleanup_props(P) -> 
+    P.
+
+    to_binary_string(L) when is_list(L) ->
+        case zp_utils:is_string(L) of
+            true -> list_to_binary(L);
+            false -> L
+        end;
+    to_binary_string({trans, Tr}) ->
+        {trans, [ {Lang,to_binary(V)} || {Lang,V} <- Tr ]};
+    to_binary_string(V) -> 
+        V.
+
+    to_binary(L) when is_list(L) -> list_to_binary(L);
+    to_binary(V) -> V.
+
 
 %% @doc Check if all cols are valid columns in the target table, move unknown properties to the props column (if exists)
 prepare_cols(Cols, Props) ->
