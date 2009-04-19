@@ -65,22 +65,20 @@
 							<div class="form-item">
 								<label for="client-billing-address">Adres</label>
 								<input type="text" name="client-billing-address" id="client-billing-address" value="" />
-								{% validate id="client-billing-address" type={presence} %}
 							</div>
 							<div class="form-item">
 								<label for="client-billing-city">Plaats</label>
 								<input type="text" name="client-billing-city" id="client-billing-city" value="" />
-								{% validate id="client-billing-city" type={presence} %}
 							</div>
 							<div class="form-item">
 								<label for="client-billing-postal-code">Postcode</label>
 								<input type="text" name="client-billing-postal-code" id="client-billing-postal-code" value="" />
-								{% validate id="client-billing-postal-code" type={presence} %}
 							</div>
 						</fieldset>
 					</div>
-					<div class="button-wrapper clear">
-						<button>Ga naar betalen &raquo;</button>
+					<div class="button-wrapper clear right">
+						{% button id="edit_cart" class="buy-me left-side-button" text="&laquo; Bewerk winkelmand" %}
+						{% button id="do_payment" class="buy-me right-side-button" text="Naar betalen &raquo;" %}
 					</div>
 				</form>
 			</div>

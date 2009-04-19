@@ -239,6 +239,7 @@ ul#navigation li.lang a.english {
 		width: 130px;
 		float: left;
 		margin: 0 3px 0 0;
+		padding: 3px 0;
 	}
 	
 	#search button {
@@ -468,7 +469,8 @@ ul#navigation li.lang a.english {
 		}
 	
 	.product-price button,
-	.cart-product-price button {
+	.cart-product-price button,
+	button.buy-me {
 		margin: 0 0 0 3px;
 		color: #EEB714;
 		background: #444;

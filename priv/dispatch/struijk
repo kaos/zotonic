@@ -30,6 +30,7 @@
 	{search,   		["search"],										resource_search,		[]},
 	{shop_cart, 	["cart"],										resource_cart,			[]},
 	{shop_checkout, ["checkout"],									resource_checkout,		[]},
+	{shop_checkout_confirm, ["confirm"],							resource_confirm,		[]},
 
 	{admin,   				["admin"],								resource_admin,			[]},
 	{admin_overview_rsc,  	["admin", "overview"],					resource_admin_overview,[]},
