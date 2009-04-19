@@ -2,26 +2,271 @@
 %% @copyright 2009 Marc Worrell
 %% @date 2009-04-11
 %%
-%% @doc 
+%% @doc Install data and tables for the shop functionality.
+%% @todo  order_log, order_status, order_line_status
 
 -module(shop_install_data).
 -author("Marc Worrell <marc@worrell.nl").
 
 %% interface functions
 -export([
-    install/1,
-    install_cat/1,
-    install_rsc/1
+    install/1
 ]).
 
 -include_lib("zophrenic.hrl").
 
 install(Context) ->
-    install_cat(Context),
-    install_pred(Context),
-    install_rsc(Context),
+    F = fun(Ctx) ->
+        ok = install_tables(Ctx),
+        ok = install_order_status(Ctx),
+        ok = install_cat(Ctx),
+        ok = install_pred(Ctx),
+        ok = install_rsc(Ctx)
+    end,
+    ok = zp_db:transaction(F, Context),
     zp_depcache:flush(),
     ok.
+
+
+
+install_tables(Context) ->
+    [ [] = zp_db:q(Sql, Context) || Sql <- tables_sql() ],
+    ok.
+
+
+tables_sql() ->
+    [
+    % All Stock Keeping Units, one product can have one or more skus.  
+    % Skus are attached to a product and have optional varieties
+    "
+    CREATE TABLE shop_sku
+    (
+      id serial NOT NULL,
+
+      -- The product and the properties distinguishing this sku within the product
+      rsc_id integer,
+
+      variety_nl character varying(80) not null default '',
+      variety_en character varying(80) not null default '',
+
+      stock_avail int not null default 0,
+      is_special boolean not null default false,
+      
+      available boolean NOT NULL DEFAULT TRUE,
+      imported timestamp with time zone NOT NULL DEFAULT now(),
+      created timestamp with time zone NOT NULL DEFAULT now(),
+      modified timestamp with time zone NOT NULL DEFAULT now(),
+      
+      -- Field for full text search
+      tsv tsvector,
+      
+      
+      -- Imported from VMSII (VendIT)
+      article_nr character varying(50) NOT NULL,
+      upc character varying(20) NOT NULL DEFAULT ''::character varying,
+      description1 character varying(200) NOT NULL DEFAULT ''::character varying,
+      description2 character varying(200) NOT NULL DEFAULT ''::character varying,
+      stock int not null default 0,
+      price_incl integer NOT NULL DEFAULT 0,
+      price_excl integer NOT NULL DEFAULT 0,
+      special_price_incl integer NOT NULL DEFAULT 0,
+      special_price_excl integer NOT NULL DEFAULT 0,
+      special_start date NOT NULL DEFAULT '2000-01-01'::date,
+      special_end date NOT NULL DEFAULT '2000-01-01'::date,
+      removal_tax integer NOT NULL DEFAULT 0,
+      brand character varying(50) NOT NULL DEFAULT ''::character varying,
+      image_file character varying(100) NOT NULL DEFAULT ''::character varying,
+      product_group character varying(200) NOT NULL DEFAULT ''::character varying,
+      extra1 character varying(200) NOT NULL DEFAULT ''::character varying,
+      extra2 character varying(200) NOT NULL DEFAULT ''::character varying,
+      extra3 character varying(200) NOT NULL DEFAULT ''::character varying,
+      extra4 character varying(200) NOT NULL DEFAULT ''::character varying,
+      extra5 character varying(200) NOT NULL DEFAULT ''::character varying,
+      extra6 character varying(200) NOT NULL DEFAULT ''::character varying,
+
+      -- 0 = 0%, 1 = 6%, 2 = 19%
+      vat_code character(1) default '2'::character,
+
+      CONSTRAINT shop_sku_pkey PRIMARY KEY (id),
+      CONSTRAINT shop_sku_article_nr_key UNIQUE (article_nr),
+      CONSTRAINT fk_shop_sku_rsc_id FOREIGN KEY (rsc_id)
+        REFERENCES rsc(id)
+        ON UPDATE CASCADE ON DELETE SET NULL
+    )",
+
+    "CREATE INDEX fki_shop_sku_rsc_id on shop_sku (rsc_id)",
+    "CREATE INDEX shop_sku_rsc_id_variety on shop_sku (rsc_id, variety_nl)",
+    "CREATE INDEX shop_sku_article_nr ON shop_sku (article_nr)",
+    "CREATE INDEX shop_sku_imported ON shop_sku (imported)",
+
+    "CREATE INDEX shop_sku_tsv_tsv ON shop_sku USING gin(tsv)",
+    "CREATE FUNCTION shop_sku_trigger() RETURNS trigger AS $$ 
+    begin
+      new.tsv := to_tsvector(new.article_nr) ||
+                 to_tsvector(new.upc) ||
+                 to_tsvector(new.description1) ||
+                 to_tsvector(new.description2) ||
+                 to_tsvector(new.brand) ||
+                 to_tsvector(new.product_group) ||
+                 to_tsvector(new.extra1) ||
+                 to_tsvector(new.extra2) ||
+                 to_tsvector(new.extra3) ||
+                 to_tsvector(new.extra4) ||
+                 to_tsvector(new.extra5) ||
+                 to_tsvector(new.extra6) ||
+                 to_tsvector(new.variety_nl) ||
+                 to_tsvector(new.variety_en);
+      return new; 
+    end 
+    $$ LANGUAGE plpgsql",
+    
+    "CREATE TRIGGER tsvectorupdate_shop_sku BEFORE INSERT OR UPDATE 
+    ON shop_sku FOR EACH ROW EXECUTE PROCEDURE shop_sku_trigger()",
+
+    % Valid status for the shop_order
+    % checkout, canceled, timeout, mailed, delivered
+    "
+    CREATE TABLE shop_order_status
+    (
+        status character varying(20) not null,
+        CONSTRAINT shop_order_status_pkey PRIMARY KEY(status)
+    )
+    ",
+    
+    % An order by a person, an order has multiple order lines
+    "
+    CREATE TABLE shop_order
+    (
+      id serial NOT NULL,
+      name character varying(32),
+      visitor_id bigint,
+
+      status character varying(20) NOT NULL DEFAULT '',
+      status_modified timestamp with time zone NOT NULL DEFAULT now(),
+      
+      delivery_costs integer NOT NULL DEFAULT 0,
+      total_price integer NOT NULL DEFAULT 0,
+      payment_method character varying(20),
+
+      first_name character varying(50) not null default '',
+      lastname_prefix character varying(20) not null default '',
+      lastname character varying(100) not null default '',
+      email character varying(100) not null default '',
+      phone character varying(40) not null default '',
+      
+      street character varying(100) not null default '',
+      postcode character varying(20) not null default '',
+      city character varying(100) not null default '',
+      state character varying(100) not null default '',
+      country character varying(50) not null default '',
+
+      has_delivery_address boolean not null default false,
+      delivery_attn character varying(100) not null default'',
+      delivery_street character varying(100) not null default '',
+      delivery_postcode character varying(20) not null default '',
+      delivery_city character varying(100) not null default '',
+      delivery_state character varying(100) not null default '',
+      delivery_country character varying(50) not null default '',
+      
+      created timestamp with time zone NOT NULL DEFAULT now(),
+      modified timestamp with time zone NOT NULL DEFAULT now(),
+      CONSTRAINT shop_order_pkey PRIMARY KEY (id),
+      CONSTRAINT shop_order_name_key UNIQUE(name),
+      CONSTRAINT fk_shop_order_person_id FOREIGN KEY (visitor_id)
+        REFERENCES visitor(id)
+        ON UPDATE CASCADE ON DELETE RESTRICT        
+    )
+    ",
+
+    "CREATE INDEX shop_order_visitor_id ON shop_order (visitor_id)",
+    "CREATE INDEX shop_order_created_key ON shop_order (created)",
+    "CREATE INDEX shop_order_status_key ON shop_order (status, status_modified)",
+
+
+    % Order lines, also used to calculate the amount of reserved skus
+    "
+    CREATE TABLE shop_order_line
+    (
+      id serial NOT NULL,
+      shop_order_id integer NOT NULL,
+      shop_sku_id integer NOT NULL,
+      quantity integer NOT NULL,
+      allocated integer NOT NULL,
+      backorder integer NOT NULL,
+      price_incl integer NOT NULL DEFAULT 0,
+      price_excl integer NOT NULL DEFAULT 0,
+      created timestamp with time zone NOT NULL DEFAULT now(),
+      modified timestamp with time zone NOT NULL DEFAULT now(),
+      CONSTRAINT shop_order_line_pkey PRIMARY KEY (id),
+      CONSTRAINT fk_shop_order_line_shop_sku_id FOREIGN KEY (shop_sku_id)
+        REFERENCES shop_sku (id)
+        ON UPDATE CASCADE ON DELETE RESTRICT,
+      CONSTRAINT fk_shop_order_line_shop_order_id FOREIGN KEY (shop_order_id)
+        REFERENCES shop_order (id)
+        ON UPDATE CASCADE ON DELETE RESTRICT
+    )
+    ",
+
+    "CREATE INDEX fki_shop_order_line_shop_sku_id ON shop_order_line(shop_sku_id)",
+    "CREATE INDEX fki_shop_order_line_shop_order_id ON shop_order_line(shop_order_id)",
+    
+    % Logging table for orders
+    "
+    CREATE TABLE shop_log
+    (
+      id serial NOT NULL,
+      shop_order_id integer,
+      visitor_id bigint,
+      user_id int,
+      action character varying(20) not null default ''::character varying,
+      message character varying(500) not null default ''::character varying,
+      ip_address character varying(40),
+      user_agent character varying(128),
+      created timestamp with time zone NOT NULL DEFAULT now(),
+      CONSTRAINT shop_log_pkey PRIMARY KEY (id)
+    )
+    ",
+
+    "CREATE INDEX shop_log_created_key ON shop_log(created)",
+    "CREATE INDEX shop_log_order_id_key ON shop_log(shop_order_id, created)",
+    "CREATE INDEX shop_log_visitor_id_key ON shop_log(visitor_id, created)",
+
+    % Statistics about which products are sold together
+    % Every row is twice present, to facilitate easy querying
+    "
+    CREATE TABLE shop_combo
+    (
+        a_shop_sku_id int not null,
+        b_shop_sku_id int not null,
+        count int not null default 1,
+        CONSTRAINT shop_combo_pkey PRIMARY KEY (a_shop_sku_id, b_shop_sku_id),
+        CONSTRAINT fk_shop_combo_a_shop_sku_id FOREIGN KEY (a_shop_sku_id)
+            REFERENCES shop_sku(id)
+            ON UPDATE CASCADE ON DELETE CASCADE,
+        CONSTRAINT fk_shop_combo_b_shop_sku_id FOREIGN KEY (b_shop_sku_id)
+            REFERENCES shop_sku(id)
+            ON UPDATE CASCADE ON DELETE CASCADE
+    )
+    ",
+    
+    "CREATE INDEX fki_shop_combo_a_shop_sku_id ON shop_combo(a_shop_sku_id)",
+    "CREATE INDEX fki_shop_combo_b_shop_sku_id ON shop_combo(b_shop_sku_id)"
+
+    ].
+
+
+install_order_status(Context) ->
+    % checkout, canceled, timeout, mailed, delivered
+    Status = [
+        [{status, "checkout"}],
+        [{status, "canceled"}],
+        [{status, "timeout"}],
+        [{status, "mailed"}],
+        [{status, "delivered"}]
+    ],
+    [ {ok, _} = zp_db:insert(shop_order_status, S, Context) || S <- Status ],
+    ok.
+
 
 install_cat(Context) ->
     Cats = [
@@ -52,12 +297,9 @@ install_cat(Context) ->
         {accessories, montagestands}
     ],
     
-    F = fun(Ctx) ->
-        [ {ok, _} = m_category:insert(Cat, Ctx) || Cat <- Cats ],
-        [ m_category:update_parent(m_category:name_to_id_check(B,Ctx), m_category:name_to_id_check(A,Ctx), Ctx) || {A,B} <- Parents],
-        m_category:renumber(Ctx)
-    end,
-    ok = zp_db:transaction(F, Context).
+    [ {ok, _} = m_category:insert(Cat, Context) || Cat <- Cats ],
+    [ m_category:update_parent(m_category:name_to_id_check(B,Context), m_category:name_to_id_check(A,Context), Context) || {A,B} <- Parents],
+    m_category:renumber(Context).
 
 
 install_pred(Context) ->
@@ -65,11 +307,8 @@ install_pred(Context) ->
         [ {name, brand}, {title, "Brand"}, {uri, "http://zophrenic.com/predicate/brand"} ]
     ],
     
-    F = fun(Ctx) ->
-        [ {ok, _} = m_predicate:insert(P, Ctx) || P <- Preds ],
-        ok
-    end,
-    ok = zp_db:transaction(F, Context).
+    [ {ok, _} = m_predicate:insert(P, Context) || P <- Preds ],
+    ok.
 
 
 install_rsc(Context) ->
@@ -198,25 +437,22 @@ install_rsc(Context) ->
         {"product-1636", "tacx"}
     ],
     
-    F = fun(Ctx) ->
-        Rets = [ zp_db:insert(rsc, [{is_published, true}, {visible_for, 0}, {group_id, 1}, {modifier_id, 1}, {creator_id, 1} | R], Ctx) || R <- Rsc ],
-        IdRsc = lists:zip(Rets, Rsc),
-        M = fun({{ok,Id}, R}) ->
-            case proplists:get_value(product_nr, R) of
-                undefined -> ok;
-                ProdNr ->
-                    File = "priv/files/archive/" ++ integer_to_list(ProdNr) ++ ".jpg",
-                    m_media:insert_file_rsc(File, Id, [], Ctx)
-            end
-        end,
-        [ M(IR) || IR <- IdRsc],
-
-        BrandPred = m_predicate:name_to_id_check("brand", Ctx),
-        [ m_edge:insert(m_rsc:name_to_id_check(S, Ctx), 
-                        BrandPred, 
-                        m_rsc:name_to_id_check(O, Ctx), 
-                        Ctx) || {S,O} <- BrandEdges ],
-        ok
+    Rets = [ zp_db:insert(rsc, [{is_published, true}, {visible_for, 0}, {group_id, 1}, {modifier_id, 1}, {creator_id, 1} | R], Context) || R <- Rsc ],
+    IdRsc = lists:zip(Rets, Rsc),
+    M = fun({{ok,Id}, R}) ->
+        case proplists:get_value(product_nr, R) of
+            undefined -> ok;
+            ProdNr ->
+                File = "priv/files/archive/" ++ integer_to_list(ProdNr) ++ ".jpg",
+                m_media:insert_file_rsc(File, Id, [], Context)
+        end
     end,
-    
-    ok = zp_db:transaction(F, Context).
+    [ M(IR) || IR <- IdRsc],
+
+    BrandPred = m_predicate:name_to_id_check("brand", Context),
+    [ m_edge:insert(m_rsc:name_to_id_check(S, Context), 
+                    BrandPred, 
+                    m_rsc:name_to_id_check(O, Context), 
+                    Context) || {S,O} <- BrandEdges ],
+    ok.
+
