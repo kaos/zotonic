@@ -87,3 +87,34 @@
 		</div>
 	</div>
 {% endblock %}
+
+{% block sidebar %}
+	<div id="sidebar" class="zp-25">
+		<div class="padding">
+			
+			{% include "_subnav.tpl" %}
+			
+			<h3 class="block">Winkelwagen</h3>
+			<ul class="mini-cart cart-list">
+				{% for id, count, price, count_price in shop_cart %}
+				<li class="block" id="cart-product-{{id}}">
+					<div class=" clearfix">
+						<a href="{{ m.rsc[id].page_url }}">{% image m.rsc[id].media[1].filename width=35 height=35 crop alt="m.rsc[id].title" class="left" %}</a>
+						<h3><a href="{{ m.rsc[id].page_url }}">{{ m.rsc[id].title }}</a></h3>
+						<span id="count-{{id}}">{{ count }}</span> stuks voor &euro; {{ price|format_price }}
+					</div>
+				</li>
+				{% empty %}
+				<li class="clearfix cart-item">
+					<div class="block clearfix">
+						<p>Uw winkelmand is leeg</p>
+					</div>
+				</li>
+				{% endfor %}
+			</ul>
+			<div class="block cart-product-price clearfix">
+				<h3>&euro;<strong id="cart-price-total">{{ shop_cart_total|format_price }}</strong> <span><a href="{% url shop_cart %}" title="Shopping cart">Pas aan</a></span></h3>
+			</div>
+		</div>	
+	</div>
+{% endblock %}

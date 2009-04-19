@@ -18,7 +18,7 @@
 			<li class="block" id="cart-product-{{id}}">
 				<div class=" clearfix">
 					<div class="zp-10">
-						<a href="{{ m.rsc[id].page_url }}">{% image m.rsc[id].media[1].filename width=60 height=60 crop alt="bags" class="left" %}</a>
+						<a href="{{ m.rsc[id].page_url }}">{% image m.rsc[id].media[1].filename width=60 height=60 crop alt="{{ m.rsc[id].title }}" class="left" %}</a>
 					</div>
 					<div class="zp-20">
 						<h3><a href="{{ m.rsc[id].page_url }}">{{ m.rsc[id].title }}</a></h3>
@@ -47,7 +47,6 @@
 		</ul>
 		<div class="block cart-product-price clearfix">
 			<h3>&euro;<strong id="cart-price-total">{{ shop_cart_total|format_price }}</strong> <span>incl. btw</span></h3>
-			{# An animate would be nice here #}
 			<div class="clearfix button-wrapper right">
 				{% button id="product-add-basket" class="buy-me left-side-button" text="&laquo; winkel verder" action={redirect dispatch="overview"} %}
 				{% button id="product-buy-basket" class="buy-me right-side-button" text="reken af &raquo;" action={redirect dispatch="shop_checkout"} %}

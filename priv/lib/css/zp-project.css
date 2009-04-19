@@ -596,6 +596,9 @@ label.billing-address-label {
 	width: auto;
 }
 
+.mini-cart img {
+	margin: 0 6px 0 0;
+}
 
 /* Modules - image viewer
 ---------------------------------------------------------- */

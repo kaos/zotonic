@@ -29,9 +29,7 @@
 	{compare,		["compare", cat, id],							resource_compare,		[]},
 	{search,   		["search"],										resource_search,		[]},
 	{shop_cart, 	["cart"],										resource_cart,			[]},
-
 	{shop_checkout, ["checkout"],									resource_checkout,		[]},
-
 
 	{admin,   				["admin"],								resource_admin,			[]},
 	{admin_overview_rsc,  	["admin", "overview"],					resource_admin_overview,[]},
