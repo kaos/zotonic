@@ -60,21 +60,23 @@ model_pgsql() ->
     (
         id serial NOT NULL,
         uri character varying(250),
+        name character varying(80),
         is_authoritative boolean NOT NULL DEFAULT true,
         is_published boolean NOT NULL DEFAULT false,
+        is_featured boolean NOT NULL DEFAULT false,
         publication_start timestamp with time zone NOT NULL DEFAULT now(),
         publication_end timestamp with time zone NOT NULL DEFAULT '9999-01-01 00:00:00+01'::timestamp with time zone,
-        visible_for int NOT NULL DEFAULT 1, -- 0 = public, 1 = community, 2 = group
-        comment_by int NOT NULL DEFAULT 3, -- 0 = public, 1 = community, 2 = group, 3 = nobody
-        comments int NOT NULL default 0,
         group_id int NOT NULL,
         creator_id int,
         modifier_id int,
         version int NOT NULL DEFAULT 1,
         category_id int NOT NULL DEFAULT 1,
-        is_featured boolean NOT NULL DEFAULT false,
+        visible_for int NOT NULL DEFAULT 1, -- 0 = public, 1 = community, 2 = group
+        comment_by int NOT NULL DEFAULT 3, -- 0 = public, 1 = community, 2 = group, 3 = nobody
+        comments int NOT NULL default 0,
+        rating int,
+        rating_count int,
         slug character varying(80) NOT NULL DEFAULT ''::character varying,
-        name character varying(80),
         props bytea,
         created timestamp with time zone NOT NULL DEFAULT now(),
         modified timestamp with time zone NOT NULL DEFAULT now(),
@@ -378,10 +380,13 @@ model_pgsql() ->
     (
       id serial NOT NULL,
       rsc_id int NOT NULL,
-      created timestamp with time zone NOT NULL DEFAULT now(),
       creator_id int,
       notify_id int,
       props bytea,
+      ip_address character varying(40),
+      rating int,
+      created timestamp with time zone NOT NULL DEFAULT now(),
+      
       CONSTRAINT comment_pkey PRIMARY KEY (id),
       CONSTRAINT fk_comment_rsc_id FOREIGN KEY (rsc_id)
         REFERENCES rsc(id)
@@ -456,6 +461,35 @@ model_pgsql() ->
     )",
 
     "CREATE INDEX fki_visitor_id ON visitor_cookie (visitor_id)",
+
+    % Table rating
+    % rating can be coupled with a comment, remove the comment and the rating gets adapted
+    
+    "
+    CREATE TABLE rating
+    (
+        id serial NOT NULL,
+        rsc_id int not null,
+        visitor_id int not null,
+        comment_id int,
+        created timestamp with time zone NOT NULL DEFAULT now(),
+        ip_address character varying(40),
+        CONSTRAINT rating_pkey PRIMARY KEY (id),
+        CONSTRAINT fk_rating_rsc_id FOREIGN KEY (rsc_id)
+          REFERENCES rsc(id)
+          ON UPDATE CASCADE ON DELETE CASCADE,
+        CONSTRAINT fk_rating_comment_id FOREIGN KEY (comment_id)
+          REFERENCES comment(id)
+          ON UPDATE CASCADE ON DELETE CASCADE,
+        CONSTRAINT fk_rating_visitor_id FOREIGN KEY (visitor_id)
+          REFERENCES visitor(id)
+          ON UPDATE CASCADE ON DELETE CASCADE
+    )
+    ",
+
+    "CREATE INDEX fki_rating_rsc_id ON rating (rsc_id)",
+    "CREATE INDEX fki_rating_comment_id ON rating (comment_id)",
+    "CREATE INDEX fki_rating_visitor_id ON rating (visitor_id)",
 
     % Table identity
     % Identities of an user, used for authentication.  Examples are password, openid, msn, xmpp etc.
