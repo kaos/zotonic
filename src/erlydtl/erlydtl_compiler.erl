@@ -395,7 +395,8 @@ body_ast(DjangoParseTree, Context, TreeWalker) ->
             (ValueToken, TreeWalkerAcc) -> 
                 {{ValueAst,ValueInfo},ValueTreeWalker} = value_ast(ValueToken, true, Context, TreeWalkerAcc),
                 {{format(ValueAst, Context),ValueInfo},ValueTreeWalker}
-        end, TreeWalker, DjangoParseTree),   
+        end, TreeWalker, DjangoParseTree),
+    
     {AstList, {Info, TreeWalker3}} = lists:mapfoldl(
         fun({Ast, Info}, {InfoAcc, TreeWalkerAcc}) -> 
                 PresetVars = lists:foldl(fun
@@ -1135,6 +1136,8 @@ auto_id_ast(Name) ->
 interpreted_args(Args, Context) ->
     lists:map(fun({{identifier, _, Key}, Value}) -> {list_to_atom(Key), interpreted_argval(Value, Context)} end, Args).
 
+interpreted_argval({number_literal, _, Value}, _Context) -> 
+    erl_syntax:integer(unescape_string_literal(Value));
 interpreted_argval({string_literal, _, Value}, _Context) -> 
     erl_syntax:string(unescape_string_literal(Value));
 interpreted_argval({trans_literal, _, Value}, _Context) ->
@@ -1150,8 +1153,8 @@ interpreted_argval({value_list, Values}, Context) ->
 interpreted_argval(true, _Context) ->
     erl_syntax:atom(true);
 interpreted_argval(Value, Context) ->
-    resolve_variable_ast(Value, Context).
-
+    {Ast, _VarName} = resolve_variable_ast(Value, Context),
+    Ast.
 
 trans_literal_ast(String) ->
 	Lit = unescape_string_literal(String),
