@@ -470,7 +470,7 @@ model_pgsql() ->
     (
         id serial NOT NULL,
         rsc_id int not null,
-        visitor_id int not null,
+        visitor_id bigint not null,
         comment_id int,
         created timestamp with time zone NOT NULL DEFAULT now(),
         ip_address character varying(40),
