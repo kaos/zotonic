@@ -56,7 +56,7 @@ tpl_sync_cart_info(Total, Count, Context) ->
 %% @doc Return a list of all unit prices, order line prices and cumulative price
 %% @spec prices(Context) -> {TotalPrice, NumberOfProducts, [{id, N, price1, priceN}]}
 get_cart_prices(Context) ->
-    Cart = zp_context:get_visitor(shop_cart, Context),
+    Cart = get_cart(Context),
     Prices = prices(Cart, Context, []),
     {Count,Total} = lists:foldl(fun({_Id, N, _Price, NPrice}, {C,T}) -> {C+N,T+NPrice} end, {0, 0.0}, Prices),
     {Total, Count, Prices}.
@@ -84,7 +84,10 @@ format_price(Price) ->
 %% @doc Get the shopping cart of the current user
 %% @spec get_cart(Context) -> [{Id,N},..]
 get_cart(Context) ->
-    zp_context:get_visitor(shop_cart, Context).
+    case zp_context:get_visitor(shop_cart, Context) of
+        undefined -> [];
+        Cart -> Cart
+    end.
 
 %% @doc Get the count of the product in the cart
 %% @spec in_cart(Id, #context) -> int()
@@ -98,13 +101,13 @@ in_cart(Id, Context) ->
 %% @doc Add the Id to the cart, increment when the id is already in the cart
 %% @spec add_product(Id, Context) -> NewCount
 add_product(Id, Context) ->
-    Cart  = zp_context:get_visitor(shop_cart, Context),
+    Cart = get_cart(Context),
     {N, Cart1} = add_cart(Cart, Id),
     zp_context:set_visitor(shop_cart, Cart1, Context), 
     N.
 
 decr_product(Id, Context) ->
-    Cart = zp_context:get_visitor(shop_cart, Context),
+    Cart = get_cart(Context),
     {N1, Cart1} = case proplists:get_value(Id, Cart) of
         N when N > 1 -> {N-1, set_cart(Cart, Id, N-1)};
         1 -> {1, Cart};
@@ -114,7 +117,7 @@ decr_product(Id, Context) ->
     N1.
 
 del_product(Id, Context) ->
-    Cart = zp_context:get_visitor(shop_cart, Context),
+    Cart = get_cart(Context),
     Cart1 = proplists:delete(Id, Cart),
     zp_context:set_visitor(shop_cart, Cart1, Context).
 
