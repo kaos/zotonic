@@ -272,3 +272,8 @@ button:hover {
 .zp_validation_message {
 	margin: 0 0 0 6px;
 }
+
+	.zp_invalid {
+		font-weight: bold;
+		color: red;
+	}

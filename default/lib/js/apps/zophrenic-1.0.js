@@ -318,29 +318,29 @@ function zp_init_validator(id, args)
     }
     else
     {
-        alert('Validator error: no element with id #'+id);
+        $.misc.error('Validator error: no element with id #'+id, $(id));
     }
 }
 
 // Add a validator to the input field
 function zp_add_validator(id, type, args)
 {
-    var v = $('#'+id).data("zp_live_validation");
-    if (v)
-    {
-        switch (type)
-        {
-        case 'email':       v.add(Validate.Email, args); break;
-        case 'presence':    v.add(Validate.Presence, args); break;
-        case 'confirmation':v.add(Validate.Confirmation, args); break;
-        case 'acceptance':  v.add(Validate.Acceptance, args); break;
-        case 'length':      v.add(Validate.Length, args); break;
-        case 'format':      v.add(Validate.Format, args); break;
-        case 'numericality':v.add(Validate.Numericality, args); break;
-        default:
-            alert("unknown validation: "+type);
-        }
-    }
+	var v = $('#'+id).data("zp_live_validation");
+
+	if(v)
+	{
+		switch (type)
+		{
+		  	case 'email':			v.add(Validate.Email, args);		break;
+			case 'presence':		v.add(Validate.Presence, args); 	break;
+			case 'confirmation':	v.add(Validate.Confirmation, args); break;
+			case 'acceptance':		v.add(Validate.Acceptance, args); 	break;
+			case 'length':			v.add(Validate.Length, args); 		break;
+			case 'format':			v.add(Validate.Format, args); 		break;
+			case 'numericality':	v.add(Validate.Numericality, args); break;
+			default:				$.misc.error("unknown validation: "+type);
+		}
+	}
 }
 
 function zp_set_validator_postback(id, postback)
@@ -351,8 +351,9 @@ function zp_set_validator_postback(id, postback)
         
         if (pb)
         {
-            alert("Element #"+id+" had already a validation postback, add all validations as one batch.");
+            $.misc.error("Element #"+id+" had already a validation postback, add all validations as one batch.", $('#' +id));
         }
+
         $('#'+id).data("zp_postback_validation", postback);
     }
 }

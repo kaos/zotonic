@@ -565,7 +565,7 @@ var Validate = {
      */
     Presence: function(value, paramsObj){
       	var paramsObj = paramsObj || {};
-    	var message = paramsObj.failureMessage || "This field cannot be empty";
+    	var message = paramsObj.failureMessage || "*";
     	if(value === '' || value === null || value === undefined){ 
     	  	Validate.fail(message);
     	}
@@ -671,7 +671,7 @@ var Validate = {
      */
     Email: function(value, paramsObj){
     	var paramsObj = paramsObj || {};
-    	var message = paramsObj.failureMessage || "This is not a valid E-mail address";
+    	var message = paramsObj.failureMessage || "Incorrect E-mail";
     	Validate.Format(value, { failureMessage: message, pattern: /^([^@\s]+)@((?:[-a-z0-9]+\.)+[a-z]{2,})$/i } );
     	return true;
     },

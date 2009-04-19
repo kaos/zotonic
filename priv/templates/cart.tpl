@@ -50,7 +50,7 @@
 			{# An animate would be nice here #}
 			<div class="clearfix button-wrapper right">
 				{% button id="product-add-basket" class="buy-me left-side-button" text="&laquo; winkel verder" action={redirect dispatch="overview"} %}
-				{% button id="product-buy-basket" class="buy-me right-side-button" text="reken af &raquo;" %}
+				{% button id="product-buy-basket" class="buy-me right-side-button" text="reken af &raquo;" action={redirect dispatch="shop_checkout"} %}
 			</div>
 		</div>
 	</div>

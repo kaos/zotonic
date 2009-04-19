@@ -166,6 +166,10 @@ html[xmlns] .zp-wrapper {
 	visibility: hidden;
 }
 
+.hide {
+	display: none;
+}
+
 .left {
 	float: left;
 }
