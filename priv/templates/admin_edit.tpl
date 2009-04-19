@@ -88,21 +88,32 @@
 								<span class="arrow">make smaller</span>
 							</h3>
 							<div class="item clearfix">
-								<input type="text" name="test" class="do_autocomplete" title="Try typing a word, I'll finish it." />
-							
 								<div class="unlink-wrapper clearfix">
+									<h4>Brand</h4>
 									<div class="rsc-edge">
 										<span class="do_unlink { object_id: 2, edge_id: 33, subject_id: 4 } clearfix">
 											<span class="unlink-cross"></span>
-											<span class="unlink-item">About</span>
+											<span class="unlink-item">Ortlieb</span>
 										</span>
 									</div>
 									<div class="rsc-edge">
 										<span class="do_unlink { object_id: 2, edge_id: 33, subject_id: 4 } clearfix">
 											<span class="unlink-cross"></span>
-											<span class="unlink-item">About</span>
+											<span class="unlink-item">Ortlieb</span>
 										</span>
 									</div>
+									<span class="link-add"><a href="javascript:void(0);">Add another link</a></span>
+								</div>
+								
+								<div class="unlink-wrapper clearfix">
+									<h4>Tweede link</h4>
+									<div class="rsc-edge">
+										<span class="do_unlink { object_id: 2, edge_id: 33, subject_id: 4 } clearfix">
+											<span class="unlink-cross"></span>
+											<span class="unlink-item">Ortlieb</span>
+										</span>
+									</div>
+									<span class="link-add"><a href="javascript:void(0);">Add another link</a></span>
 								</div>
 							</div>
 						</div>

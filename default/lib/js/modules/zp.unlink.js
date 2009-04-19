@@ -34,45 +34,26 @@ $.widget("ui.unlink",
 	{
 		var self			= this;
 		var obj 			= this.element;
-		var unlinkLeft 		= $('span.unlink-cross', obj).position().left - 3;
-		var unlinkTop  		= obj.position().top - 7;
 		
 		obj.click(function()
 		{
-			var confirm	= $('<div></div>').addClass('unlink-confirm').css({position: 'absolute', top: unlinkTop, left: unlinkLeft}).html('<span>Are you sure?</span>').append('<button class="unlink-yes">yes</button><button class="unlink-no">no</button>').fadeIn(200).appendTo(document.body);
-			
-			$('.unlink-no', confirm).click(function()
+			$.misc.log('edge removed');
+			obj.parent().fadeOut(200, function()
 			{
-				$(this).parent().fadeOut(200, function()
-				{
-					$(this).remove();
-				});
+				$(this).remove();
 			});
-			
-			$('.unlink-yes', confirm).click(function()
-			{
-				confirm.animate({opacity: 'hide', height: 0}, 200, function()
-				{
-					$(this).remove();
-				})
-				
-				obj.parent().animate({opacity: 'hide'}, 200, function()
-				{
-					$(this).remove();
-				});
 
-				$.post(self.options.controller, 
-				{
-					 object_id: self.options.object_id, 
-					 edge_id: self.options.edge_id, 
-					 subject_id: self.options.subject_id
-				}, 
-				function(data)
-				{
-					$.misc.log('edge removed');
-					self.kill();
-				});
-			});
+			//$.post(self.options.controller, 
+			//{
+			//	 object_id: self.options.object_id, 
+			//	 edge_id: self.options.edge_id, 
+			//	 subject_id: self.options.subject_id
+			//}, 
+			//function(data)
+			//{
+			//	$.misc.log('edge removed');
+			//	self.kill();
+			//});
 		});
 	},
 	

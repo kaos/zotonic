@@ -353,6 +353,10 @@ fieldset.admin-form:last-child {
 /* unlinker
 ---------------------------------------------------------- */
 
+.unlink-wrapper {
+	margin: 0 0 9px 0;
+}
+
 .rsc-edge {
 	line-height: 11px;
 	margin: 6px 6px 6px 0;
@@ -364,26 +368,6 @@ fieldset.admin-form:last-child {
 	text-transform: lowercase;
 	border: 1px solid #bbb;
 	cursor: pointer;
-}
-
-.unlink-confirm {
-	background: #fff;
-	border: 1px solid #ccc;
-	-moz-border-radius: 3px;
-	-webkit-border-radius: 3px;
-	padding: 2px 2px 2px 15px;
-	opacity: .80;
-	display: none;
-}
-
-.unlink-confirm button {
-	margin: 0 0 0 3px;
-}
-
-.unlink-confirm span {
-	margin: 0 3px 0 0;
-	float: left;
-	display: block;
 }
 
 .unlink-item {
@@ -404,6 +388,11 @@ fieldset.admin-form:last-child {
 	.rsc-edge:hover .unlink-cross {
 		background: transparent url(/lib/images/crosses.png) no-repeat left top;
 	}
+
+.link-add {
+	float: left;
+	margin: 6px 0 0 4px;
+}
 
 
 /* tooltip
