@@ -316,7 +316,6 @@ install_rsc(Context) ->
         [
             {title, "Ortlieb Ultimate 5 Classic"},
             {slug, "ortlieb-ultimate-5-classic"},
-            {price, 7495},
             {category_id, m_category:name_to_id_check(bags, Context)},
             {product_nr, 735},
             {name, "product-735"},
@@ -335,7 +334,6 @@ install_rsc(Context) ->
         [
             {title, "Ortlieb Mud Racer XS"},
             {slug, "ortlieb-mud-racer-xs"},
-            {price, 2295},
             {category_id, m_category:name_to_id_check(bags, Context)},
             {product_nr, 1271},
             {name, "product-1271"},
@@ -345,7 +343,6 @@ install_rsc(Context) ->
         [
             {title, "Rudy Project Jekyll"},
             {slug, "rudy-project-jekyll"},
-            {price, 9990},
             {category_id, m_category:name_to_id_check(glasses, Context)},
             {intro, "Lorem ipsum dolor sit amet, consectetur adipisicing elit"},
             {product_nr, 712},
@@ -354,7 +351,6 @@ install_rsc(Context) ->
         [
             {title, "Duracell AA Plus"},
             {slug, "duracell-aa-plus"},
-            {price, 695},
             {category_id, m_category:name_to_id_check(batteries, Context)},
 			{intro, "Lorem ipsum dolor sit amet, consectetur adipisicing elit"},
             {product_nr, 1610},
@@ -363,10 +359,6 @@ install_rsc(Context) ->
         [
             {title, "Cateye Strada (Draadloos)"},
             {slug, "cateye-strada-draadloos"},
-            {price, 8995},
-            {special_price, 6995},
-            {special_start, {2009,4,1}},
-            {special_end, {2009,6,1}},
             {category_id, m_category:name_to_id_check(bikecomputers, Context)},
             {product_nr, 1591},
             {name, "product-1591"},
@@ -390,7 +382,6 @@ install_rsc(Context) ->
         [
             {title, "Tacx Cycle Motion Stand"},
             {slug, "tacx-cycle-motion-stand"},
-            {price, 9500},
             {category_id, m_category:name_to_id_check(montagestands, Context)},
             {product_nr, 1636},
             {name, "product-1636"},
