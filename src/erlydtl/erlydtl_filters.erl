@@ -147,7 +147,9 @@ format_price(Input) when is_list(Input) ->
     case string:to_integer(Input) of
         {error, _} -> Input;
         {N, _Rest} -> format_price(N)
-    end.
+    end;
+format_price(undefined) ->
+    [].
 
 
 default(Input, Default) -> 
