@@ -7,12 +7,12 @@
 		<div class="padding">
 			<h2>Persoonlijke gegevens</h2>
 			<div class="block clearfix">
-				<p>Vul dan uw gegevens in om de bestelling te kunnen afronden. Heeft u al eens besteld, klik dan <a href="#">hier</a> om in te loggen.</p>
+				<p>Vul uw naam en adres in om de bestelling af te ronden. Heeft u al eens eerder besteld, klik dan <a href="#">hier om in te loggen</a>.</p>
 			
 				{# {% wire id="checkout-form" type="submit" postback="doe_iets"} %} #}
 				<form method="post" action="postback" id="checkout-form">
 					<fieldset>
-						<legend>Persoonlijk gegevens</legend>
+						<legend>Persoonlijke gegevens</legend>
 						<div class="form-item">
 							<label for="client-name">Naam</label>
 							<input type="text" id="client-name" name="client-name" value="" />
@@ -34,7 +34,11 @@
 				
 					<div class="zp-50">
 						<fieldset>
-							<legend>Aflever adres</legend>
+							<legend>Afleveradres</legend>
+							<div class="form-item">
+								<label for="client-delivery-attn">T.a.v.</label>
+								<input type="text" name="client-delivery-attn" id="client-delivery-attn" value="" />
+							</div>
 							<div class="form-item">
 								<label for="client-delivery-address">Adres</label>
 								<input type="text" name="client-delivery-address" id="client-delivery-address" value="" />
@@ -50,6 +54,11 @@
 								<input type="text" name="client-delivery-postal-code" id="client-delivery-postal-code" value="" />
 								{% validate id="client-delivery-postal-code" type={presence} %}
 							</div>
+							<div class="form-item">
+								<label for="client-delivery-postal-code">Land</label>
+								<input type="text" name="client-delivery-country" id="client-delivery-country" value="" />
+								{% validate id="client-delivery-country" type={presence} %}
+							</div>
 							<div class="form-item clearfix">
 								<label class="billing-address-label" for="billing-address">
 									<input id="billing-address" type="checkbox" />Mijn factuuradres is anders dan mijn afleveradres.
@@ -61,7 +70,11 @@
 					
 					<div class="zp-50 hide" id="billing-address-form">
 						<fieldset>
-							<legend>Factuur adres</legend>
+							<legend>Factuuradres</legend>
+							<div class="form-item">
+								<label for="client-billing-attn">T.a.v.</label>
+								<input type="text" name="client-billing-attn" id="client-billing-attn" value="" />
+							</div>
 							<div class="form-item">
 								<label for="client-billing-address">Adres</label>
 								<input type="text" name="client-billing-address" id="client-billing-address" value="" />
@@ -74,10 +87,14 @@
 								<label for="client-billing-postal-code">Postcode</label>
 								<input type="text" name="client-billing-postal-code" id="client-billing-postal-code" value="" />
 							</div>
+							<div class="form-item">
+								<label for="client-billing-postal-code">Land</label>
+								<input type="text" name="client-billing-country" id="client-billing-country" value="" />
+							</div>
 						</fieldset>
 					</div>
 					<div class="button-wrapper clear right">
-						{% button id="edit_cart" class="buy-me left-side-button" text="&laquo; Bewerk winkelmand" %}
+						{% button id="edit_cart" class="buy-me left-side-button" text="&laquo; Bewerk winkelmand" action={redirect dispatch="shop_cart"} %}
 						{% button id="do_payment" class="buy-me right-side-button" text="Naar betalen &raquo;" %}
 					</div>
 				</form>
@@ -94,12 +111,12 @@
 			
 			<h3 class="block">Winkelwagen</h3>
 			<ul class="mini-cart cart-list">
-				{% for id, count, price, count_price in shop_cart %}
-				<li class="block" id="cart-product-{{id}}">
+				{% for c in shop_cart %}
+				<li class="block" id="cart-product-{{c.id}}">
 					<div class=" clearfix">
-						<a href="{{ m.rsc[id].page_url }}">{% image m.rsc[id].media[1].filename width=35 height=35 crop alt="m.rsc[id].title" class="left" %}</a>
-						<h3><a href="{{ m.rsc[id].page_url }}">{{ m.rsc[id].title }}</a></h3>
-						<span id="count-{{id}}">{{ count }}</span> stuks voor &euro; {{ price|format_price }}
+						<a href="{{ m.rsc[c.id].page_url }}">{% image m.rsc[c.id].media[1].filename width=35 height=35 crop alt="m.rsc[id].title" class="left" %}</a>
+						<h3><a href="{{ m.rsc[c.id].page_url }}">{{ m.rsc[c.id].title }}</a></h3>
+						<span id="count-{{c.id}}">{{ c.n }}</span> stuks à &euro; {{ c.price|format_price }}
 					</div>
 				</li>
 				{% empty %}

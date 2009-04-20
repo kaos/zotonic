@@ -47,8 +47,7 @@ tables_sql() ->
       -- The product and the properties distinguishing this sku within the product
       rsc_id integer,
 
-      variety_nl character varying(80) not null default '',
-      variety_en character varying(80) not null default '',
+      variant character varying(80) not null default '',
 
       stock_avail int not null default 0,
       is_special boolean not null default false,
@@ -94,8 +93,8 @@ tables_sql() ->
         ON UPDATE CASCADE ON DELETE SET NULL
     )",
 
-    "CREATE INDEX fki_shop_sku_rsc_id on shop_sku (rsc_id)",
-    "CREATE INDEX shop_sku_rsc_id_variety on shop_sku (rsc_id, variety_nl)",
+    "CREATE INDEX fki_shop_sku_rsc_id ON shop_sku (rsc_id)",
+    "CREATE INDEX shop_sku_rsc_id_variant ON shop_sku (rsc_id, variant)",
     "CREATE INDEX shop_sku_article_nr ON shop_sku (article_nr)",
     "CREATE INDEX shop_sku_imported ON shop_sku (imported)",
 
@@ -114,8 +113,7 @@ tables_sql() ->
                  to_tsvector(new.extra4) ||
                  to_tsvector(new.extra5) ||
                  to_tsvector(new.extra6) ||
-                 to_tsvector(new.variety_nl) ||
-                 to_tsvector(new.variety_en);
+                 to_tsvector(new.variant);
       return new; 
     end 
     $$ LANGUAGE plpgsql",

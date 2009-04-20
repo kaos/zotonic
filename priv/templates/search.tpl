@@ -23,7 +23,7 @@
 				<h4>Beschrijving</h4>
 				<p>{{ m.rsc[rsc_id].intro }}</p>
 				<div class="product-price clearfix">
-					<h3>&euro;{{ m.rsc[rsc_id].price|format_price }} <!--span>incl. btw</span--></h3>
+					<h3>&euro;{% include "_price.tpl" id=rsc_id %} <!--span>incl. btw</span--></h3>
 
 					<div class="clearfix button-wrapper right">
 						{% button class="buy-me" text="meer info" action={redirect id=rsc_id} %}
@@ -57,7 +57,7 @@
 						<a href="{{ m.rsc[id].page_url }}">{% image m.rsc[id].media[1].filename width=216 height=130 crop %}</a>
 						<h3><a href="{{ m.rsc[id].page_url }}">{{ m.rsc[id].title }}</a></h3>
 						<div class="product-price clearfix">
-							<h3>&euro;{{m.rsc[id].price|format_price}}</h3>
+							<h3>&euro;{% include "_price.tpl" %}</h3>
 							<div class="clearfix button-wrapper right">
 								{% button class="right right-side-button" text="Meer info &raquo;" action={redirect id=id} %}
 							</div>

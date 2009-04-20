@@ -8,7 +8,7 @@
 
 html(_ReqProps, Context) ->
 
-    {TotalPrice, Count, Cart} = shop_cart:get_cart_prices(Context),
+    {TotalPrice, Count, Cart} = shop_cart:get_cart_prices_tpl(Context),
     Vars = [
         {shop_cart, Cart},
         {shop_cart_total, TotalPrice},

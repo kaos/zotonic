@@ -28,21 +28,26 @@
 			{% endif %}
 			
 			<div class="product-description zp-50">
-				<div class="product-price clearfix">
-					<h3>&euro;{{m.rsc[rsc_id].price|format_price}} <!--span>incl. btw</span--></h3>
-					{# An animate would be nice here #}
-					<div class="clearfix button-wrapper right">
-						{% button id="product-add-basket" class="buy-me" text="leg in winkelmand" action={shop_addcart id=rsc_id} %}
-						{% button id="product-buy-basket" class="buy-me right-side-button" text="koop direct &raquo;" action={shop_buynow id=rsc_id} %}
-					</div>
-				</div>
-				
-				{% if m.rsc[rsc_id].body %}
-				<h3>{% _ "Description" nl="Omschrijving" %}</h3>
-				
-				{{m.rsc[rsc_id].body}}
-				
+				{% with m.shop_product[rsc_id].price as p %}
+				{% if p.old_price %}
+					<h3>Oude prijs &euro;{{ p.old_price|format_price }} nu voor:</h3>
 				{% endif %}
+					<div class="product-price clearfix">
+						<h3>&euro;{{p.price|format_price}}<!--span>incl. btw</span--></h3>
+						{# An animate would be nice here #}
+						<div class="clearfix button-wrapper right">
+							{% button id="product-add-basket" class="buy-me" text="leg in winkelmand" action={shop_addcart id=rsc_id} %}
+							{% button id="product-buy-basket" class="buy-me right-side-button" text="koop direct &raquo;" action={shop_buynow id=rsc_id} %}
+						</div>
+					</div>
+					
+					{% if m.rsc[rsc_id].body %}
+					<h3>{% _ "Description" nl="Omschrijving" %}</h3>
+				
+					{{m.rsc[rsc_id].body}}
+				
+					{% endif %}
+				{% endwith %}
 			
 				{#<div class="product-properties">
 					<h3>{% _ "Properties" nl="Eigenschappen" %}</h3>
@@ -70,7 +75,7 @@
 						<a href="{{ m.rsc[id].page_url }}">{% image m.rsc[id].media[1].filename width=216 height=130 crop %}</a>
 						<h3><a href="{{ m.rsc[id].page_url }}">{{ m.rsc[id].title }}</a></h3>
 						<div class="product-price clearfix">
-							<h3>&euro;{{m.rsc[id].price|format_price}}</h3>
+							<h3>&euro;{{ m.shop_product[id].price.price|format_price }}</h3>
 							<div class="clearfix button-wrapper right">
 								{% button class="right right-side-button" text="Meer info &raquo;" action={redirect id=id} %}
 							</div>

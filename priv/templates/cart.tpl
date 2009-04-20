@@ -14,26 +14,26 @@
 					<div class="zp-15">Totaal prijs</div>
 				</div>
 			</li>
-			{% for id, count, price, count_price in shop_cart %}
-			<li class="block" id="cart-product-{{id}}">
+			{% for c in shop_cart %}
+			<li class="block" id="cart-product-{{c.id}}">
 				<div class=" clearfix">
 					<div class="zp-10">
-						<a href="{{ m.rsc[id].page_url }}">{% image m.rsc[id].media[1].filename width=60 height=60 crop alt="{{ m.rsc[id].title }}" class="left" %}</a>
+						<a href="{{ m.rsc[c.id].page_url }}">{% image m.rsc[c.id].media[1].filename width=60 height=60 crop alt="{{ m.rsc[c.id].title }}" class="left" %}</a>
 					</div>
 					<div class="zp-20">
-						<h3><a href="{{ m.rsc[id].page_url }}">{{ m.rsc[id].title }}</a></h3>
-						<p>Rood XX</p>
+						<h3><a href="{{ m.rsc[c.id].page_url }}">{{ m.rsc[c.id].title }}</a></h3>
+						<!--p>Rood XX</p-->
 					</div>
-					<div class="zp-20">Rood XX</div>
-					<div class="zp-15">&euro; {{ price|format_price }}</div>
+					<div class="zp-20">{{ c.variant|default:"-" }}</div>
+					<div class="zp-15">&euro; {{ c.price|format_price }}</div>
 					<div class="zp-20">
-						<h3><span id="count-{{id}}">{{ count }}</span> stuks</h3>
-						{% button text="+" action={shop_cart_incr id=id} %}
-						{% button text="-" action={shop_cart_decr id=id} %}
+						<h3><span id="count-{{c.id}}">{{ c.n }}</span> stuks</h3>
+						{% button text="+" action={shop_cart_incr id=c.id} %}
+						{% button text="-" action={shop_cart_decr id=c.id} %}
 					</div>
 					<div class="zp-15">
-						<h3>&euro; <span id="cart-price-{{id}}">{{ count_price|format_price }}</span></h3>
-						{% button text="verwijder" action={shop_cart_delete id=id} %}
+						<h3>&euro; <span id="cart-price-{{c.id}}">{{ c.nprice|format_price }}</span></h3>
+						{% button text="verwijder" action={shop_cart_delete id=c.id} %}
 					</div>
 				</div>
 			</li>

@@ -24,7 +24,7 @@
 						</h3>
 						<p>{{ m.rsc[id].intro }}</p>
 						<div class="product-price clearfix clear">
-							<h3>&euro;{% include "_price.tpl" price=m.rsc[id].price special_price=m.rsc[id].special_price %} <!--span>incl. btw</span--></h3>
+							<h3>&euro;{% include "_price.tpl" id=id %} <!--span>incl. btw</span--></h3>
 							<div class="clearfix button-wrapper right">
 								{% button class="buy-me" text="meer info" action={redirect id=id} %}
 								{% button class="buy-me right-side-button" text="koop direct &raquo;" action={shop_buynow id=id} %}
