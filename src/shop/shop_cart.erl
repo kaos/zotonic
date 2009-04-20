@@ -58,7 +58,7 @@ tpl_sync_cart_info(Total, Count, Context) ->
 get_cart_prices(Context) ->
     Cart = get_cart(Context),
     Prices = prices(Cart, Context, []),
-    {Count,Total} = lists:foldl(fun({_Id, N, _Price, NPrice}, {C,T}) -> {C+N,T+NPrice} end, {0, 0.0}, Prices),
+    {Count,Total} = lists:foldl(fun({_Id, N, _Price, NPrice}, {C,T}) -> {C+N,T+NPrice} end, {0, 0}, Prices),
     {Total, Count, Prices}.
 
 prices(undefined, _Context, Acc) ->

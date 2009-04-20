@@ -25,7 +25,7 @@ event({postback, {shop_addcart, Id}, _TriggerId, _TargetId}, Context) ->
     shop_cart:add_product(Id, Context),
     Title = ?TR(m_rsc:p(Id, title, Context), Context),
     Text  = ?TR("is toegevoegd aan de winkelmand.", Context),
-    C1 = zp_render:wire({growl, [{text,Title++" "++Text},{stay,0},{type, "notice"}]}, Context),
+    C1 = zp_render:wire({growl, [{text,[Title, 32, Text]},{stay,0},{type, "notice"}]}, Context),
     C2 = zp_render:wire("product-notice", {fade_in, []}, C1),
     shop_cart:tpl_sync_cart_info(C2).
 
