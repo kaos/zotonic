@@ -11,13 +11,12 @@
 
 %% interface functions
 -export([
+    tpl_cart_allocated/1,
     tpl_sync_cart_prices/1,
     tpl_sync_cart_info/1,
     tpl_sync_cart_info/3,
     get_cart/1,
     in_cart/2,
-    get_cart_prices_tpl/1,
-    get_cart_prices/1,
     add_product/2,
     decr_product/2,
     del_product/2,
@@ -26,62 +25,103 @@
 
 -include_lib("zophrenic.hrl").
 
--record(cart, {id, n, sku, variant, price, nprice}).
+-record(cart, {id, n, sku, variant}).
+
+
+%% @doc Return the expected allocation, backorders and price for the cart. This is done
+%% by checking all skus in the database and running an allocation for the product ids.
+%% @spec tpl_cart_allocated(Context) -> {Count, TotalPrice, Backorders, [ {id, n, backorder, price_avg, price_old total} ]}
+tpl_cart_allocated(Context) ->
+    Allocated = [ m_shop_product:allocate_sku_price(Id, N, Context) || #cart{id=Id, n=N} <- get_cart(Context) ],
+    Cart = [
+        [
+            {id, Id},
+            {n, N},
+            {backorder, BackorderN},
+            {price_avg, AvgPrice},
+            {price_old, AvgOldPrice},
+            {total, SumPrice}
+        ] 
+        || {Id, N, BackorderN, AvgPrice, AvgOldPrice, SumPrice} <- Allocated 
+    ],
+    {Count, Total, Backorders} = lists:foldl(
+            fun({_Id, N, BackorderN, _AvgPrice, _AvgOldPrice, SumPrice}, {C,T,B}) ->
+                {C + N, T + SumPrice, B + BackorderN}
+            end,
+            {0, 0, 0},
+            Allocated),
+    {Count, Total, Backorders, Cart}.
+
+
+%% @doc Update the small cart information on the page with a new product count and total price
+tpl_sync_cart_info(Context) ->
+    {Total, Count} = get_cart_prices(Context),
+    tpl_sync_cart_info(Total, Count, Context).
+
+    %% Update the small cart info on the page
+    tpl_sync_cart_info(_Total, 0, Context) ->
+        zp_render:update("cart-info", "Uw winkelmand is leeg", Context);
+    tpl_sync_cart_info(Total, 1, Context) ->
+        zp_render:update("cart-info", "Eén product van &euro;"++format_price(Total), Context);
+    tpl_sync_cart_info(Total, Count, Context) ->
+        zp_render:update("cart-info", integer_to_list(Count)++" producten, &euro;"++format_price(Total), Context).
+    
 
 
 %% @doc Synchronize all prices shown on the cart page with the current cart, used inside event handlers
 %% @spec tpl_sync_cart_prices(Context) -> Context
 tpl_sync_cart_prices(Context) ->
-    {Total, Count, Prices} = get_cart_prices(Context),
+    {Count, Total, Backorders, Cart} = tpl_cart_allocated(Context),
     C1 = zp_render:update("cart-price-total", format_price(Total), Context),
     C2 = tpl_sync_cart_info(Total, Count, C1),
+    C3 = case Backorders of
+        0 -> zp_render:wire("backorder-info", {slide_fade_out, []}, C2);
+        _ -> zp_render:wire("backorder-info", {slide_fade_in, []}, C2)
+    end,
     lists:foldl(
-        fun(#cart{id=Id, nprice=NPrice}, C) ->
-            zp_render:update("cart-price-"++integer_to_list(Id), format_price(NPrice), C)
+        fun(CartProd, C) ->
+            Id = proplists:get_value(id, CartProd),
+            TotalPrice = proplists:get_value(total, CartProd),
+            AvgPrice = proplists:get_value(price_avg, CartProd),
+            OldPrice = proplists:get_value(price_old, CartProd),
+            Backorder = proplists:get_value(backorder, CartProd),
+            
+            ID = integer_to_list(Id),
+            Cback = case Backorder of
+                0 ->
+                    zp_render:wire("cart-backorder-p-"++ID, {fade_out, []}, C);
+                _ ->
+                    Cbo = zp_render:update("cart-backorder-"++ID, integer_to_list(Backorder), C),
+                    zp_render:wire("cart-backorder-p-"++ID, {fade_in, []}, Cbo)
+            end,
+            Cold = case AvgPrice == OldPrice of
+                true ->
+                    zp_render:update("cart-price-old-"++ID, "", Cback);
+                false ->
+                    zp_render:update("cart-price-old-"++ID, ["&euro;",format_price(OldPrice)], Cback)
+            end,
+            Ctotal = zp_render:update("cart-price-"++ID, format_price(TotalPrice), Cold),
+            zp_render:update("cart-price-avg-"++ID, format_price(AvgPrice), Ctotal)
         end,
-        C2,
-        Prices).
+        C3,
+        Cart).
 
-tpl_sync_cart_info(Context) ->
-    {Total, Count, _Prices} = get_cart_prices(Context),
-    tpl_sync_cart_info(Total, Count, Context).
 
-tpl_sync_cart_info(_Total, 0, Context) ->
-    zp_render:update("cart-info", "Uw winkelmand is leeg", Context);
-tpl_sync_cart_info(Total, 1, Context) ->
-    zp_render:update("cart-info", "Eén product van &euro;"++format_price(Total), Context);
-tpl_sync_cart_info(Total, Count, Context) ->
-    zp_render:update("cart-info", integer_to_list(Count)++" producten, &euro;"++format_price(Total), Context).
-    
-
-get_cart_prices_tpl(Context) ->
-    {Total, Count, CartPrices} = get_cart_prices(Context),
-    {Total, Count, [ cart_to_proplist(C) || C <- CartPrices ]}.
-
-    cart_to_proplist(#cart{id=Id,n=N,variant=Variant,price=Price,nprice=NPrice}) ->
-        [
-            {id, Id}, {variant, Variant}, {n, N}, {price, Price}, {nprice, NPrice}
-        ].
-
-%% @doc Return a list of all unit prices, order line prices and cumulative price
-%% @spec prices(Context) -> {TotalPrice, NumberOfProducts, [{id, N, price1, priceN}]}
+%% @doc A simple calculation of the prices for the cart, using the best price for every product involved
+%% @spec get_cart_prices(Context) -> {TotalPrice, NumberOfProducts}
 get_cart_prices(Context) ->
     Cart = get_cart(Context),
-    CartPrices = prices(Cart, Context, []),
-    {Count,Total} = lists:foldl(fun(#cart{n=N, nprice=NPrice}, {C,T}) -> {C+N,T+NPrice} end, {0, 0}, CartPrices),
-    {Total, Count, CartPrices}.
+    lists:foldl(
+            fun(#cart{id=Id, n=N}, {T,C}) -> 
+                Price = best_price(Id, Context),
+                {T+(N * Price), C+N}
+            end, 
+            {0, 0},
+            Cart).
 
-prices(undefined, _Context, Acc) ->
-    Acc;
-prices([], _Context, Acc) ->
-    Acc;
-prices([#cart{id=Id,n=N}|Rest], Context, Acc) ->
-    P = case m_rsc:p(Id, price, Context) of
-        undefined -> #cart{id=Id, n=N, price=0, nprice=0};
-        Price -> #cart{id=Id, n=N, price=Price, nprice=N*Price}
-    end,
-    prices(Rest, Context, [P|Acc]).
-
+    best_price(Id, Context) ->
+        {Price, _OldPrice, _IsVariant} = m_shop_product:get_best_price(Id, Context),
+        Price.
 
 
 %% @doc Format a price for displaying purposes, surpresses the ",00"

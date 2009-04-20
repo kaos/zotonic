@@ -7,11 +7,12 @@
 -include_lib("resource_html.hrl").
  
 html(_ReqProps, Context) ->
-    {TotalPrice, Count, Cart} = shop_cart:get_cart_prices_tpl(Context),
+    {Count, Total, Backorder, Cart} = shop_cart:tpl_cart_allocated(Context),
     Vars = [
         {shop_cart, Cart},
-        {shop_cart_total, TotalPrice},
-        {shop_cart_count, Count}
+        {shop_cart_total, Total},
+        {shop_cart_count, Count},
+        {shop_cart_backorder, Backorder}
     ],
     Html = zp_template:render("checkout.tpl", Vars, Context),
     zp_context:output(Html, Context).

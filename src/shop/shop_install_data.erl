@@ -95,7 +95,6 @@ tables_sql() ->
 
     "CREATE INDEX fki_shop_sku_rsc_id ON shop_sku (rsc_id)",
     "CREATE INDEX shop_sku_rsc_id_variant ON shop_sku (rsc_id, variant)",
-    "CREATE INDEX shop_sku_article_nr ON shop_sku (article_nr)",
     "CREATE INDEX shop_sku_imported ON shop_sku (imported)",
 
     "CREATE INDEX shop_sku_tsv_tsv ON shop_sku USING gin(tsv)",

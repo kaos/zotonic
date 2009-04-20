@@ -25,14 +25,22 @@
 						<!--p>Rood XX</p-->
 					</div>
 					<div class="zp-20">{{ c.variant|default:"-" }}</div>
-					<div class="zp-15">&euro; {{ c.price|format_price }}</div>
+					<div class="zp-15">
+						&euro;<span id="cart-price-avg-{{c.id}}">{{ c.price_avg|format_price }}</span>
+						<br/>
+						<br/>
+						<span id="cart-price-old-{{c.id}}" style="text-decoration: line-through">{% ifnotequal c.price_avg c.price_old %}&euro;{{c.price_old|format_price}}{% endifnotequal %}</span>
+					</div>
 					<div class="zp-20">
 						<h3><span id="count-{{c.id}}">{{ c.n }}</span> stuks</h3>
 						{% button text="+" action={shop_cart_incr id=c.id} %}
 						{% button text="-" action={shop_cart_decr id=c.id} %}
+						<p id="cart-backorder-p-{{c.id}}" class="clear" style="color:red; font-weight: bold; {% if not c.backorder %}display:none{% endif %}">
+							Nabestelling: <span id="cart-backorder-{{c.id}}">{{ c.backorder }}</span> stuks
+						</p>
 					</div>
 					<div class="zp-15">
-						<h3>&euro; <span id="cart-price-{{c.id}}">{{ c.nprice|format_price }}</span></h3>
+						<h3>&euro; <span id="cart-price-{{c.id}}">{{ c.total|format_price }}</span></h3>
 						{% button text="verwijder" action={shop_cart_delete id=c.id} %}
 					</div>
 				</div>
@@ -52,6 +60,10 @@
 				{% button id="product-buy-basket" class="buy-me right-side-button" text="reken af &raquo;" action={redirect dispatch="shop_checkout"} %}
 			</div>
 		</div>
+		
+		{% include "_cart_backorder.tpl" %}
+		{% include "_cart_ordercosts.tpl" %}
+
 	</div>
 {% endblock %}
 

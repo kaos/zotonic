@@ -99,6 +99,9 @@
 					</div>
 				</form>
 			</div>
+
+			{% include "_cart_backorder.tpl" %}
+
 		</div>
 	</div>
 {% endblock %}
@@ -116,7 +119,7 @@
 					<div class=" clearfix">
 						<a href="{{ m.rsc[c.id].page_url }}">{% image m.rsc[c.id].media[1].filename width=35 height=35 crop alt="m.rsc[id].title" class="left" %}</a>
 						<h3><a href="{{ m.rsc[c.id].page_url }}">{{ m.rsc[c.id].title }}</a></h3>
-						<span id="count-{{c.id}}">{{ c.n }}</span> stuks à &euro; {{ c.price|format_price }}
+						<span id="count-{{c.id}}">{{ c.n }}</span> stuks à &euro; {{ c.price_avg|format_price }}
 					</div>
 				</li>
 				{% empty %}
@@ -130,6 +133,9 @@
 			<div class="block cart-product-price clearfix">
 				<h3>&euro;<strong id="cart-price-total">{{ shop_cart_total|format_price }}</strong> <span><a href="{% url shop_cart %}" title="Shopping cart">Pas aan</a></span></h3>
 			</div>
+
+			{% include "_cart_ordercosts.tpl" %}
+		
 		</div>	
 	</div>
 {% endblock %}
