@@ -24,6 +24,8 @@
     q/3,
     q1/2,
     q1/3,
+    q_row/2,
+    q_row/3,
     insert/2,
     insert/3,
     update/4,
@@ -146,6 +148,15 @@ q1(Sql, Parameters, Context) ->
         end,
     return_connection(C, Context),
     V.
+
+q_row(Sql, Context) ->
+    q_row(Sql, [], Context).
+
+q_row(Sql, Args, Context) ->
+    case q(Sql, Args, Context) of
+        [Row|_] -> Row;
+        [] -> undefined
+    end.
 
 
 %% @doc Insert a new row in a table, use only default values.
