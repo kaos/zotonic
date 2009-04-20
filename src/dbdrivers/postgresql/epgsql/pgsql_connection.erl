@@ -114,7 +114,7 @@ code_change(_Old_Vsn, State_Name, State, _Extra) ->
 
 startup({connect, Host, Username, Password, Opts}, From, State) ->
     Port      = proplists:get_value(port, Opts, 5432),
-    Sock_Opts = [{active, false}, {packet, raw}, binary],
+    Sock_Opts = [{nodelay, true}, {active, false}, {packet, raw}, binary],
     case gen_tcp:connect(Host, Port, Sock_Opts) of
         {ok, Sock} ->
             Reader = spawn_link(?MODULE, read, [self(), Sock, <<>>]),
