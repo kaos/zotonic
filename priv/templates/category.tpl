@@ -6,30 +6,31 @@
 	<div id="content-area" class="zp-75 category-overview">
 		<!-- Area for the main content -->
 		<h2>{{ m.rsc[brand_id].title }} {{ cat.title }}</h2>
-		<ul class="zp-67">
-		{% for sub in subcats %}
-			<li class="block clearfix">
-				<a href="{% ifequal cat.name "product" %}{% url overview cat=sub.name brand=brand_name %}{% else %}{% url overview cat=cat.name subcat=sub.name brand=brand_name %}{% endifequal %}">
-					{% image m.category[sub.id].image width=200 height=70 crop alt="bags" class="left" %}
-				</a>
-				<h3><a href="{% ifequal cat.name "product" %}{% url overview cat=sub.name brand=brand_name %}{% else %}{% url overview cat=cat.name subcat=sub.name brand=brand_name %}{% endifequal %}" title="{{ sub.title }}">
-						{{ sub.title }}</a></h3>
-				<p>
-					{{ sub.intro }}
-					<a href="{% ifequal cat.name "product" %}{% url overview cat=sub.name brand=brand_name %}{% else %}{% url overview cat=cat.name subcat=sub.name brand=brand_name %}{% endifequal %}">Lees&nbsp;meer&nbsp;&raquo;</a>
-				</p>
-			</li>
-		{% empty %}
-			<li class="block clearfix">
-				<p>{{cat.title}} heeft geen subcategorieën.</p>
-				{% ifequal cat.name "bikes" %}
-				<p>{% button action={redirect location="/compare/mtb/1"} text="Vergelijk Fietsen" %}</p>
-				{% endifequal %}
-			</li>
-		{% endfor %}
-		</ul>
-	
-		<div class="category-sidebar zp-33">
+		<div class="zp-70">
+			<ul class="list-cats">
+			{% for sub in subcats %}
+				<li class="block clearfix">
+					<a href="{% ifequal cat.name "product" %}{% url overview cat=sub.name brand=brand_name %}{% else %}{% url overview cat=cat.name subcat=sub.name brand=brand_name %}{% endifequal %}">
+						{% image m.category[sub.id].image width=200 height=70 crop alt="bags" class="left" %}
+					</a>
+					<h3><a href="{% ifequal cat.name "product" %}{% url overview cat=sub.name brand=brand_name %}{% else %}{% url overview cat=cat.name subcat=sub.name brand=brand_name %}{% endifequal %}" title="{{ sub.title }}">
+							{{ sub.title }}</a></h3>
+					<p>
+						{{ sub.intro }}
+						<a href="{% ifequal cat.name "product" %}{% url overview cat=sub.name brand=brand_name %}{% else %}{% url overview cat=cat.name subcat=sub.name brand=brand_name %}{% endifequal %}">Lees&nbsp;meer&nbsp;&raquo;</a>
+					</p>
+				</li>
+			{% empty %}
+				<li class="block clearfix">
+					<p>{{cat.title}} heeft geen subcategorieën.</p>
+					{% ifequal cat.name "bikes" %}
+					<p>{% button action={redirect location="/compare/mtb/1"} text="Vergelijk Fietsen" %}</p>
+					{% endifequal %}
+				</li>
+			{% endfor %}
+			</ul>
+		</div>
+		<div class="category-sidebar zp-30">
 			<div class="block clearfix">
 				{% if brand_id %}
 					<h3>{{ m.rsc[brand_id].title }}</h3>

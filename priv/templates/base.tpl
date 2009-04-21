@@ -27,7 +27,10 @@
 					<li class="logo">
 						<h1>
 							<a href="/" title="Hans Struijk Fietsen">
-								<img src="/lib/images/hans_struijk_logo.png" alt="hans Struijk Fietsen" />
+								<img class="hide_id6" src="/lib/images/hans_struijk_logo.png" alt="hans Struijk Fietsen" />
+								<!--[if lte IE 6]>
+									<img src="/lib/images/hans_struijk_logo.gif" alt="hans Struijk Fietsen" />
+								<![endif]-->
 							</a>
 						</h1>
 					</li>
@@ -35,7 +38,7 @@
 					{# <li class="first"><a href="/compare/mtb/1" title="compare-bikes">Fietsen</a></li> #}
 
 					{% for cat in m.category.product.tree1 %}
-						<li><a href="{% url overview cat=cat.name %}" title="{{ cat.title }}">{{ cat.title }}</a></li>
+						<li class="{% if forloop.first %} first {% endif %} "><a href="{% url overview cat=cat.name %}" title="{{ cat.title }}">{{ cat.title }}</a></li>
 					{% endfor %}
 
 					<li class="lang" title="Nederlands"><a href="#" title="Nederlands" class="dutch"><span>Nederlands</span></a></li>
@@ -47,7 +50,7 @@
 					<form id="searchform" method="get" action="/search">
 						<fieldset>
 							<input id="quick-search" type="text" name="qs" value="{{ q.qs|escape }}" />
-							<button class="buy-me right-side-button">Zoek &raquo;</button>
+							<button class="right-side-button">Zoek &raquo;</button>
 						</fieldset>
 					</form>
 				</div>

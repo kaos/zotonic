@@ -43,7 +43,7 @@ $.widget("ui.tooltip",
 		obj.bind(self.options.inevent, function(e) 
 		{
 			this.tip 		= this.title;
-			var tip_content = this.title;
+			var tip_content = this.tip;
 			this.title 		= "";
 			
 			tip = $('<div></div>')
@@ -95,5 +95,5 @@ $.ui.tooltip.defaults = {
 	inevent: 	'mouseover',
 	outevent: 	'mouseout',
 	width: 		'auto',
-	maxwidth: 	'330px',
+	maxwidth: 	'330px'
 }

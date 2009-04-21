@@ -12,7 +12,7 @@
 				{# {% wire id="checkout-form" type="submit" postback="doe_iets"} %} #}
 				<form method="post" action="postback" id="checkout-form">
 					<fieldset>
-						<legend>Persoonlijke gegevens</legend>
+						<h3>Persoonlijke gegevens</h3>
 						<div class="form-item">
 							<label for="client-name">Naam</label>
 							<input type="text" id="client-name" name="client-name" value="" />
@@ -32,9 +32,9 @@
 				
 					<hr />
 				
-					<div class="zp-50">
+					<div class="zp-50 clearfix">
 						<fieldset>
-							<legend>Afleveradres</legend>
+							<h3>Afleveradres</h3>
 							<div class="form-item">
 								<label for="client-delivery-attn">T.a.v.</label>
 								<input type="text" name="client-delivery-attn" id="client-delivery-attn" value="" />
@@ -68,9 +68,9 @@
 						</fieldset>
 					</div>
 					
-					<div class="zp-50 hide" id="billing-address-form">
+					<div class="zp-50 clearfix" id="billing-address-form">
 						<fieldset>
-							<legend>Factuuradres</legend>
+							<h3>Factuuradres</h3>
 							<div class="form-item">
 								<label for="client-billing-attn">T.a.v.</label>
 								<input type="text" name="client-billing-attn" id="client-billing-attn" value="" />
@@ -93,7 +93,7 @@
 							</div>
 						</fieldset>
 					</div>
-					<div class="button-wrapper clear right">
+					<div class="button-wrapper clear">
 						{% button id="edit_cart" class="buy-me left-side-button" text="&laquo; Bewerk winkelmand" action={redirect dispatch="shop_cart"} %}
 						{% button id="do_payment" class="buy-me right-side-button" text="Naar betalen &raquo;" %}
 					</div>
