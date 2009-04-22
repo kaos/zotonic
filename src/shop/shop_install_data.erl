@@ -46,12 +46,12 @@ tables_sql() ->
 
       -- The product and the properties distinguishing this sku within the product
       rsc_id integer,
-
-      variant character varying(80) not null default '',
-
-      stock_avail int not null default 0,
+      variant character varying(100) not null default '',
+      props bytea,
+      stock_avail int not null default 0,           -- Imported stock, minus sold and reserved items
       is_special boolean not null default false,
-      
+      price_actual integer not null default 0,      -- For later use, when sorting on price
+
       available boolean NOT NULL DEFAULT TRUE,
       imported timestamp with time zone NOT NULL DEFAULT now(),
       created timestamp with time zone NOT NULL DEFAULT now(),
@@ -466,8 +466,21 @@ install_sku(Context) ->
         [
             {rsc_id, m_rsc:name_to_id_check("product-1271", Context)},
             {stock_avail, 4},
-            {article_nr, "prod1271"},
+            {article_nr, "prod1271p"},
             {description1, "Ortlieb Mud Racer XS"},
+            {variant, "xspink"},
+            {title, "Pink Flower Edition"},
+            {stock, 4},
+            {price_incl, 2495},
+            {price_excl, 2097}
+        ],
+        [
+            {rsc_id, m_rsc:name_to_id_check("product-1271", Context)},
+            {stock_avail, 4},
+            {article_nr, "prod1271b"},
+            {description1, "Ortlieb Mud Racer XS"},
+            {title, "Deep Night Black"},
+            {variant, "xsblack"},
             {stock, 4},
             {price_incl, 2295},
             {price_excl, 1929}
@@ -492,10 +505,10 @@ install_sku(Context) ->
         ],
         [
             {rsc_id, m_rsc:name_to_id_check("product-1591", Context)},
-            {stock_avail, 100},
+            {stock_avail, 10},
             {article_nr, "prod1591"},
             {description1, "Cateye Strada (Draadloos)"},
-            {stock, 100},
+            {stock, 10},
             {price_incl, 8995},
             {price_excl, 7559},
             {special_price_incl, 6995},

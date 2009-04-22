@@ -15,38 +15,44 @@
     tpl_sync_cart_prices/1,
     tpl_sync_cart_info/1,
     tpl_sync_cart_info/3,
-    get_cart/1,
     in_cart/2,
-    add_product/2,
-    decr_product/2,
-    del_product/2,
+    in_cart/3,
+    add_product/3,
+    decr_product/3,
+    del_product/3,
     format_price/1
 ]).
 
 -include_lib("zophrenic.hrl").
 
--record(cart, {id, n, sku, variant}).
+-record(cart, {idv, n, sku}).
 
 
 %% @doc Return the expected allocation, backorders and price for the cart. This is done
 %% by checking all skus in the database and running an allocation for the product ids.
-%% @spec tpl_cart_allocated(Context) -> {Count, TotalPrice, Backorders, [ {id, n, backorder, price_avg, price_old total} ]}
+%% @spec tpl_cart_allocated(Context) -> {Count, TotalPrice, Backorders, [ {id, n, backorder, price_avg, price_old, total} ]}
 tpl_cart_allocated(Context) ->
-    Allocated = [ m_shop_product:allocate_sku_price(Id, N, Context) || #cart{id=Id, n=N} <- get_cart(Context) ],
+    Allocated = [ 
+        m_shop_product:allocate_sku_price(Id, Variant, N, Context) || #cart{idv={Id,Variant}, n=N} <- get_cart(Context)
+    ],
     Cart = [
         [
             {id, Id},
+            {variant, Variant},
             {n, N},
             {backorder, BackorderN},
             {price_avg, AvgPrice},
             {price_old, AvgOldPrice},
             {total, SumPrice}
         ] 
-        || {Id, N, BackorderN, AvgPrice, AvgOldPrice, SumPrice} <- Allocated 
+        || {Id, Variant, N, BackorderN, AvgPrice, AvgOldPrice, SumPrice} <- Allocated 
     ],
     {Count, Total, Backorders} = lists:foldl(
-            fun({_Id, N, BackorderN, _AvgPrice, _AvgOldPrice, SumPrice}, {C,T,B}) ->
-                {C + N, T + SumPrice, B + BackorderN}
+            fun({_Id, _Variant, N, BackorderN, _AvgPrice, _AvgOldPrice, SumPrice}, {C,T,B}) ->
+                case SumPrice of
+                    undefined -> {C,T,B};
+                    _ -> {C + N, T + SumPrice, B + BackorderN}
+                end
             end,
             {0, 0, 0},
             Allocated),
@@ -80,13 +86,14 @@ tpl_sync_cart_prices(Context) ->
     end,
     lists:foldl(
         fun(CartProd, C) ->
-            Id = proplists:get_value(id, CartProd),
+            Id         = proplists:get_value(id, CartProd),
+            Variant    = proplists:get_value(variant, CartProd),
             TotalPrice = proplists:get_value(total, CartProd),
-            AvgPrice = proplists:get_value(price_avg, CartProd),
-            OldPrice = proplists:get_value(price_old, CartProd),
-            Backorder = proplists:get_value(backorder, CartProd),
+            AvgPrice   = proplists:get_value(price_avg, CartProd),
+            OldPrice   = proplists:get_value(price_old, CartProd),
+            Backorder  = proplists:get_value(backorder, CartProd),
             
-            ID = integer_to_list(Id),
+            ID = integer_to_list(Id) ++ [$- | zp_convert:to_list(Variant)],
             Cback = case Backorder of
                 0 ->
                     zp_render:wire("cart-backorder-p-"++ID, {fade_out, []}, C);
@@ -112,20 +119,24 @@ tpl_sync_cart_prices(Context) ->
 get_cart_prices(Context) ->
     Cart = get_cart(Context),
     lists:foldl(
-            fun(#cart{id=Id, n=N}, {T,C}) -> 
-                Price = best_price(Id, Context),
-                {T+(N * Price), C+N}
+            fun(#cart{idv={Id,Variant}, n=N}, {T,C}) -> 
+                case best_price(Id, Variant, Context) of
+                    undefined -> {T,C};
+                    Price -> {T+(N * Price), C+N}
+                end
             end, 
             {0, 0},
             Cart).
 
-    best_price(Id, Context) ->
-        {Price, _OldPrice, _IsVariant} = m_shop_product:get_best_price(Id, Context),
+    best_price(Id, Variant, Context) ->
+        {Price, _OldPrice, _IsVariant} = m_shop_product:get_best_price(Id, Variant, Context),
         Price.
 
 
 %% @doc Format a price for displaying purposes, surpresses the ",00"
 %% @spec format_price(float) -> String
+format_price(undefined) -> 
+    "-";
 format_price(Price) ->
     erlydtl_filters:format_price(Price).
 
@@ -138,56 +149,70 @@ get_cart(Context) ->
         Cart -> Cart
     end.
 
-%% @doc Get the count of the product in the cart
+
+%% @doc Get the count of the product in the cart, regardless of the variant
 %% @spec in_cart(Id, #context) -> int()
 in_cart(Id, Context) ->
     Cart = get_cart(Context),
-    case lists:filter(fun(#cart{id=CartId}) -> CartId == Id end, Cart) of
-        [#cart{id=Id,n=N}] -> N;
+    case lists:map(fun(#cart{idv={RscId, _V}, n=N}) when RscId == Id -> N; (_) -> 0 end, Cart) of
+        [_N|_] = List -> lists:sum(List);
         [] -> 0
     end.
 
-%% @doc Add the Id to the cart, increment when the id is already in the cart
-%% @spec add_product(Id, Context) -> NewCount
-add_product(Id, Context) ->
+%% @doc Get the count of the product/variant in the cart
+%% @spec in_cart(Id, Variant, #context) -> int()
+in_cart(Id, Variant, Context) ->
     Cart = get_cart(Context),
-    {N, Cart1} = add_cart(Cart, Id),
+    case lists:filter(fun(#cart{idv={CartId, V}}) -> CartId == Id andalso Variant == V end, Cart) of
+        [#cart{n=N}] -> N;
+        [] -> 0
+    end.
+    
+%% @doc Add the Id to the cart, increment when the id is already in the cart
+%% @spec add_product(Id, Variant, Context) -> NewCount
+add_product(Id, Variant, Context) ->
+    ?DEBUG({Id, Variant}),
+    Cart = get_cart(Context),
+    {N, Cart1} = add_cart(Cart, Id, Variant),
     zp_context:set_visitor(shop_cart, Cart1, Context), 
     N.
 
-decr_product(Id, Context) ->
+    add_cart(Cart, Id, Variant) ->
+        add_cart(Cart, Id, Variant, []).
+
+    add_cart([], Id, Variant, Acc) ->
+        {1, lists:reverse([ #cart{idv={Id, Variant},n=1} | Acc])};
+    add_cart([#cart{idv={Id,Variant},n=N} = Cart |Rest], Id, Variant, Acc) ->
+        {N+1, lists:reverse([ Cart#cart{n=N+1} | Acc]) ++ Rest};
+    add_cart([C|Rest], Id, Variant, Acc) ->
+        add_cart(Rest, Id, Variant, [C|Acc]).
+
+
+decr_product(Id, Variant, Context) ->
     Cart = get_cart(Context),
-    {N1, Cart1} = case lists:keysearch(Id, #cart.id, Cart) of
-        {value, #cart{n=N}} when N > 1 -> {N-1, set_cart(Cart, Id, N-1)};
+    {N1, Cart1} = case lists:keysearch({Id, Variant}, #cart.idv, Cart) of
+        {value, #cart{n=N}} when N > 1 -> {N-1, set_cart(Cart, Id, Variant, N-1)};
         {value, #cart{n=1}} -> {1, Cart};
         _ -> {0, Cart}
     end,
     zp_context:set_visitor(shop_cart, Cart1, Context), 
     N1.
 
-del_product(Id, Context) ->
+
+    set_cart(Cart, Id, Variant, N) ->
+        set_cart(Cart, Id, Variant, N, []).
+
+    set_cart([], Id, N, Variant, Acc) ->
+        lists:reverse([ #cart{idv={Id,Variant},n=N} | Acc]);
+    set_cart([#cart{idv={Id,Variant}} = Cart |Rest], Id, Variant, N, Acc) ->
+        lists:reverse([ Cart#cart{n=N} | Acc]) ++ Rest;
+    set_cart([C|Rest], Id, Variant, N, Acc) ->
+        set_cart(Rest, Id, Variant, N, [C|Acc]).
+
+del_product(Id, Variant, Context) ->
     Cart = get_cart(Context),
-    Cart1 = lists:keydelete(Id, #cart.id, Cart),
+    Cart1 = lists:keydelete({Id, Variant}, #cart.idv, Cart),
     zp_context:set_visitor(shop_cart, Cart1, Context).
 
 
-add_cart(undefined, Id) ->
-    {1, [{Id,1}]};
-add_cart(Cart, Id) ->
-    add_cart(Cart, Id, []).
 
-add_cart([], Id, Acc) ->
-    {1, lists:reverse([ #cart{id=Id,n=1} | Acc])};
-add_cart([#cart{id=Id,n=N} = Cart |Rest], Id, Acc) ->
-    {N+1, lists:reverse([ Cart#cart{n=N+1} | Acc]) ++ Rest};
-add_cart([C|Rest], Id, Acc) ->
-    add_cart(Rest, Id, [C|Acc]).
-
-set_cart(Cart, Id, N) ->
-    set_cart(Cart, Id, N, []).
-set_cart([], Id, N, Acc) ->
-    lists:reverse([ #cart{id=Id,n=N} | Acc]);
-set_cart([#cart{id=Id} = Cart |Rest], Id, N, Acc) ->
-    lists:reverse([ Cart#cart{n=N} | Acc]) ++ Rest;
-set_cart([C|Rest], Id, N, Acc) ->
-    set_cart(Rest, Id, N, [C|Acc]).

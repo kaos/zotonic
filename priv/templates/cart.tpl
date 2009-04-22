@@ -15,33 +15,41 @@
 				</div>
 			</li>
 			{% for c in shop_cart %}
-			<li class="block" id="cart-product-{{c.id}}">
+			<li class="block" id="cart-product-{{c.id}}-{{c.variant}}">
 				<div class=" clearfix">
 					<div class="zp-10">
 						<a href="{{ m.rsc[c.id].page_url }}">{% image m.rsc[c.id].media[1].filename width=60 height=60 crop alt="{{ m.rsc[c.id].title }}" class="left" %}</a>
 					</div>
 					<div class="zp-20">
 						<h3><a href="{{ m.rsc[c.id].page_url }}">{{ m.rsc[c.id].title }}</a></h3>
-						<!--p>Rood XX</p-->
-					</div>
-					<div class="zp-20">{{ c.variant|default:"-" }}</div>
-					<div class="zp-15">
-						&euro;<span id="cart-price-avg-{{c.id}}">{{ c.price_avg|format_price }}</span>
-						<br/>
-						<br/>
-						<span id="cart-price-old-{{c.id}}" style="text-decoration: line-through">{% ifnotequal c.price_avg c.price_old %}&euro;{{c.price_old|format_price}}{% endifnotequal %}</span>
+						{% if not c.price_avg|is_defined %}
+							<p class="error" style="padding: 4px">Sorry, momenteel niet leverbaar.</p>
+						{% endif %}
 					</div>
 					<div class="zp-20">
-						<h3><span id="count-{{c.id}}">{{ c.n }}</span> stuks</h3>
-						{% button text="+" action={shop_cart_incr id=c.id} %}
-						{% button text="-" action={shop_cart_decr id=c.id} %}
-						<p id="cart-backorder-p-{{c.id}}" class="clear" style="color:red; font-weight: bold; {% if not c.backorder %}display:none{% endif %}">
-							Nabestelling: <span id="cart-backorder-{{c.id}}">{{ c.backorder }}</span> stuks
+						{% with m.shop_product[c.id].sku[c.variant] as sku %}
+							{% if sku %}{{ sku.title|default:"-" }}
+							{% else %}{{ c.variant|default:"&nbsp;" }}
+							{% endif %}
+						{% endwith %}
+					</div>
+					<div class="zp-15">
+						&euro;<span id="cart-price-avg-{{c.id}}-{{c.variant}}">{{ c.price_avg|format_price }}</span>
+						<br/>
+						<br/>
+						<span id="cart-price-old-{{c.id}}-{{c.variant}}" style="text-decoration: line-through">{% ifnotequal c.price_avg c.price_old %}&euro;{{ c.price_old|format_price }}{% endifnotequal %}</span>
+					</div>
+					<div class="zp-20">
+						<h3><span id="count-{{c.id}}-{{c.variant}}">{{ c.n }}</span> stuks</h3>
+						{% button text="+" action={shop_cart_incr id=c.id variant=c.variant} %}
+						{% button text="-" action={shop_cart_decr id=c.id variant=c.variant} %}
+						<p id="cart-backorder-p-{{c.id}}-{{c.variant}}" class="clear" style="color:red; font-weight: bold; {% if not c.backorder %}display:none{% endif %}">
+							Nabestelling: <span id="cart-backorder-{{c.id}}-{{c.variant}}">{{ c.backorder }}</span> stuks
 						</p>
 					</div>
 					<div class="zp-15">
-						<h3>&euro; <span id="cart-price-{{c.id}}">{{ c.total|format_price }}</span></h3>
-						{% button text="verwijder" action={shop_cart_delete id=c.id} %}
+						<h3>&euro; <span id="cart-price-{{c.id}}-{{c.variant}}">{{ c.total|format_price }}</span></h3>
+						{% button text="verwijder" action={shop_cart_delete id=c.id variant=c.variant} %}
 					</div>
 				</div>
 			</li>

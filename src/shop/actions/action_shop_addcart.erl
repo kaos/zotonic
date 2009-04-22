@@ -16,13 +16,14 @@
 -include_lib("zophrenic.hrl").
 
 render_action(TriggerId, TargetId, Args, Context) -> 
-    Id = proplists:get_value(id, Args),
+    Id      = proplists:get_value(id, Args),
+    Variant = proplists:get_value(variant, Args, <<>>),
     ?ASSERT(is_integer(Id), {id_must_be_integer, Id}),
-	{PostbackMsgJS, _PickledPostback} = zp_render:make_postback({shop_addcart, Id}, postback, TriggerId, TargetId, ?MODULE, Context),
+	{PostbackMsgJS, _PickledPostback} = zp_render:make_postback({shop_addcart, Id, Variant}, postback, TriggerId, TargetId, ?MODULE, Context),
 	{PostbackMsgJS, Context}.
 
-event({postback, {shop_addcart, Id}, _TriggerId, _TargetId}, Context) ->
-    shop_cart:add_product(Id, Context),
+event({postback, {shop_addcart, Id, Variant}, _TriggerId, _TargetId}, Context) ->
+    shop_cart:add_product(Id, Variant, Context),
     Title = ?TR(m_rsc:p(Id, title, Context), Context),
     Text  = ?TR("is toegevoegd aan de winkelmand.", Context),
     C1 = zp_render:wire({growl, [{text,[Title, 32, Text]},{stay,0},{type, "notice"}]}, Context),

@@ -2,7 +2,7 @@
 %% @copyright 2009 Marc Worrell
 %% @date 2009-04-20
 %%
-%% @doc 
+%% @doc Model for product skus and stock of them.
 
 -module(m_shop_product).
 -author("Marc Worrell <marc@worrell.nl").
@@ -15,19 +15,26 @@
     m_value/2,
     
     get_best_price/2,
-    get_best_price_as_proplist/2,
-    allocate_sku_price/3,
-    allocate_sku/3
+    get_best_price/3,
+    allocate_sku_price/4,
+    allocate_sku/4
 ]).
 
 -include_lib("zophrenic.hrl").
 
 %% @doc Fetch the value for the key from a model source
 %% @spec m_find_value(Key, Source, Context) -> term()
+m_find_value(sku, #m{value=Id} = M, _Context) ->
+    M#m{value={sku, Id}};
+m_find_value(Variant, #m{value={sku, Id}}, Context) ->
+    get_sku_as_proplist(Id, Variant, Context);
 m_find_value(Id, #m{value=undefined} = M, _Context) ->
     M#m{value=Id};
 m_find_value(price, #m{value=Id}, Context) ->
-    get_best_price_as_proplist(Id, Context).
+    get_best_price_as_proplist(Id, Context);
+m_find_value(variants, #m{value=Id}, Context) ->
+    get_variants_as_proplist(Id, Context).
+
 
 %% @doc Transform a m_config value to a list, used for template loops
 %% @spec m_to_list(Source, Context) -> List
@@ -48,16 +55,25 @@ get_best_price_as_proplist(Id, Context) ->
             [{price, Price}, {old_price, OldPrice}, {is_variant, IsVariant}]
     end.
 
-%% @doc Get the special price and the price. Special price is not defined if the product is not on sale.
+%% @doc Get the special price and the price, regardless of the stock and variants.
+%% Special price is not defined if the product is not on sale.
 %% @spec get_best_price(Id, Context) -> {SellingPrice, NormalPriceIfOnSale, IsVariant}
 get_best_price(Id, Context) ->
      Skus = get_skus(Id, Context),
      skus_to_best_price(Skus).
 
+%% @doc Get the best price for the variant of the product, regardless of the stock.
+%% @spec get_best_price(Id, Variant, Context) -> {SellingPrice, NormalPriceIfOnSale, IsVariant}
+get_best_price(Id, Variant, Context) ->
+     Skus = get_skus(Id, Context),
+     SkusVariant = lists:filter(fun(Sku) -> proplists:get_value(variant, Sku) == Variant end, Skus),
+     skus_to_best_price(SkusVariant).
 
+%% @doc Get all skus of a product
+%% @todo Add the dependency of this list.  Should bepend on all changes of the skus
 get_skus(Id, Context) ->
     F = fun() ->
-        zp_db:assoc("select * from shop_sku where rsc_id = $1 and available order by variant asc", [Id], Context)
+        zp_db:assoc_props("select * from shop_sku where rsc_id = $1 and available order by variant asc", [Id], Context)
     end,
     zp_depcache:memo(F, {skus, Id}, ?HOUR).
  
@@ -111,13 +127,75 @@ is_filled(_) -> true.
 
 
 
+
+get_sku_as_proplist(Id, Variant, Context) ->
+    Skus = get_skus(Id, Context),
+    V    = zp_convert:to_binary(Variant),
+    case lists:filter(fun(Sku) -> proplists:get_value(variant, Sku) == V end, Skus) of
+        [S|_] -> S;
+        [] -> undefined
+    end.
+
+
+%% @doc Get the list of all variants.  Combine on the same price when there is stock available.
+%% @spec get_variants_as_proplist(Id, Context) -> [ PropList ]
+get_variants_as_proplist(Id, Context) ->
+    Skus = get_skus(Id, Context),
+    {Date, _Time} = calendar:local_time(),
+    PricedSkus = [ set_actual_price(S, Date) || S <- Skus ],
+    case PricedSkus of
+        [] ->
+            [];
+        [Sku|Rest] -> 
+            combine_variants(Rest, Sku, [])
+    end.
+    
+    combine_variants([], S, Acc) ->
+        lists:reverse([S|Acc]);
+    combine_variants([A|Skus], B, Acc) ->
+        VariantA = proplists:get_value(variant, A),
+        VariantB = proplists:get_value(variant, B),
+        if
+            VariantA == VariantB ->
+                PriceA = proplists:get_value(price_actual, A),
+                PriceB = proplists:get_value(price_actual, B),
+                if
+                    PriceA == PriceB ->
+                        AB = combine_variant(A, B),
+                        combine_variants(Skus, AB, [Acc]);
+                    true ->
+                        combine_variants(Skus, A, [B|Acc])
+                end;
+            
+            true ->
+                combine_variants(Skus, A, [B|Acc])
+        end.
+
+    combine_variant(A, B) ->
+        StockA = proplists:get_value(stock_avail, A),
+        StockB = proplists:get_value(stock_avail, B),
+        zp_utils:prop_replace(stock_avail, StockA + StockB, A).
+    
+    set_actual_price(Sku, Date) ->
+        {Price, OldPrice, _IsVariant} = sku_to_price(Sku, Date),
+        zp_utils:prop_replace(price_actual, Price, [{price_old, OldPrice} | Sku]).
+
+    
 %% @doc Allocate all skus.  Calculate the average allocated price and average old price.
-%% @spec allocate_sku_price(Id, N, Context) -> {Id, N, BackorderN, AvgPrice, AvgOldPrice, SumPrice}
-allocate_sku_price(Id, N, Context) ->
-    {Skus, BoSku} = allocate_sku(Id, N, Context),
+%% @spec allocate_sku_price(Id, Variant, N, Context) -> {Id, Variant, N, BackorderN, AvgPrice, AvgOldPrice, SumPrice}
+allocate_sku_price(Id, Variant, N, Context) ->
+    {Skus, BoSku} = allocate_sku(Id, Variant, N, Context),
     case BoSku of
         {undefined, N, undefined, undefined} ->
-            {error, no_sku_avail};
+            {
+                Id,
+                Variant,
+                N,
+                0,
+                undefined,
+                undefined,
+                undefined
+            };
         {_, BoN, _, _} ->
             {SumPrice, SumOldPrice} = lists:foldl(
                     fun({_SNr, SN, SP, SOP}, {Tot, OldTot}) ->
@@ -129,6 +207,7 @@ allocate_sku_price(Id, N, Context) ->
             AvgOldPrice = round(SumOldPrice / N),
             {
                 Id,
+                Variant,
                 N,
                 BoN,
                 AvgPrice,
@@ -140,14 +219,15 @@ allocate_sku_price(Id, N, Context) ->
 
 %% @doc Try to allocate some skus for an order of a product. Returns the list of allocated skus and the to be 
 %% back ordered sku. The skus are allocated starting with the cheapest.
-%% @spec allocate_sku(Id, N, Context) -> {Allocated, {BoNr, BoN, BoPrice, BoOldPrice}}
-allocate_sku(Id, N, Context) ->
+%% @spec allocate_sku(Id, Variant, N, Context) -> {Allocated, {BoNr, BoN, BoPrice, BoOldPrice}}
+allocate_sku(Id, Variant, N, Context) ->
     Skus = zp_db:q("
             select article_nr, stock_avail, price_incl, special_price_incl, special_start, special_end
             from shop_sku
             where stock > 0
               and rsc_id = $1
-              and available", [Id], Context),
+              and variant = $2
+              and available", [Id, Variant], Context),
     {Date,_} = calendar:local_time(),
     PricedSkus = [ select_price(S, Date) || S <- Skus ],
     Sorted = lists:keysort(3, PricedSkus),

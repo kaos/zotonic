@@ -115,11 +115,20 @@
 			<h3 class="block">Winkelwagen</h3>
 			<ul class="mini-cart cart-list">
 				{% for c in shop_cart %}
-				<li class="block" id="cart-product-{{c.id}}">
+				<li class="block">
 					<div class=" clearfix">
 						<a href="{{ m.rsc[c.id].page_url }}">{% image m.rsc[c.id].media[1].filename width=35 height=35 crop alt="m.rsc[id].title" class="left" %}</a>
 						<h3><a href="{{ m.rsc[c.id].page_url }}">{{ m.rsc[c.id].title }}</a></h3>
-						<span id="count-{{c.id}}">{{ c.n }}</span> stuks à &euro; {{ c.price_avg|format_price }}
+						{% if c.variant %}
+							<span>{{ m.shop_product[c.id].sku[c.variant].title }}</span>
+						{% endif %}
+						<p style="clear: left">
+							{% if c.price_avg|is_defined %}
+								{{ c.n }} stuks à &euro; {{ c.price_avg|format_price }}
+							{% else %}
+								Niet leverbaar.
+							{% endif %}
+						</p>
 					</div>
 				</li>
 				{% empty %}
