@@ -16,11 +16,11 @@
 			</li>
 			
 			{% for c in shop_cart %}
-				<li class="block" id="cart-product-{{c.id}}-{{c.variant}}">
-					<div class=" clearfix">
+				<li id="cart-product-{{c.id}}-{{c.variant}}">
+					<div class="block clearfix">
 					
 						<div class="zp-10">
-							<a href="{{ m.rsc[c.id].page_url }}">{% image m.rsc[c.id].media[1].filename width=60 height=60 crop alt="{{ m.rsc[c.id].title }}" class="left" %}</a>
+							<a href="{{ m.rsc[c.id].page_url }}">{% image m.rsc[c.id].media[1].filename width=75 height=60 crop alt="{{ m.rsc[c.id].title }}" class="left" %}</a>
 						</div>
 					
 						<div class="zp-20">

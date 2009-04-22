@@ -26,12 +26,7 @@
 					<h3>&euro;{% include "_price.tpl" id=rsc_id %} <!--span>incl. btw</span--></h3>
 
 					<div class="clearfix button-wrapper right">
-						{% button class="buy-me" text="meer info" action={redirect id=rsc_id} %}
-						{% button class="buy-me" text="leg in winkelmand" action={shop_addcart id=rsc_id} %}
-						{% button class="buy-me right-side-button" text="koop direct &raquo;" action={shop_buynow id=rsc_id} %}
-					<!--
-						<button class="buy-me right-side-button">Vraag een proefrit aan &raquo;</button>
-					-->
+						{% button class="buy-me right-side-button" text="Bekijk product &raquo;" action={redirect id=rsc_id} %}
 					</div>
 				</div>
 			</div>

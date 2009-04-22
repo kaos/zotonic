@@ -57,8 +57,8 @@
 								<a href="#" class="clearfix">
 									<span class="zp-35">{{ m.rsc[id].title }}</span>
 									<span class="zp-25">{{ m.rsc[id].category.name }}</span>
-									<span class="zp-25">{{ m.rsc[id].modified|date:"F d, H:i" }}</span>
-									<span class="zp-15">
+									<span class="zp-20">{{ m.rsc[id].modified|date:"F d, H:i" }}</span>
+									<span class="zp-20">
 										{% button text="view" action={redirect id=id} %}
 										{% button text="edit" action={redirect dispatch="admin_edit_rsc" rsc=id} %}
 									</span>
@@ -78,16 +78,16 @@
 							<li class="headers clearfix">
 								<span class="zp-35">Title</span>
 								<span class="zp-25">Category</span>
-								<span class="zp-25">Publish date</span>
-								<span class="zp-15">Options</span>
+								<span class="zp-20">Publish date</span>
+								<span class="zp-20">Options</span>
 							</li>
 							{% for id in m.search[{latest cat="product"}] %}
 							<li>
 								<a href="#" class="clearfix">
 									<span class="zp-35">{{ m.rsc[id].title }}</span>
 									<span class="zp-25">{{ m.rsc[id].category.name }}</span>
-									<span class="zp-25">{{ m.rsc[id].modified|date:"F d, H:i" }}</span>
-									<span class="zp-15">
+									<span class="zp-20">{{ m.rsc[id].modified|date:"F d, H:i" }}</span>
+									<span class="zp-20">
 										{% button text="view" action={redirect id=id} %}
 										{% button text="edit" action={redirect dispatch="admin_edit_rsc" rsc=id} %}
 									</span>
@@ -109,7 +109,7 @@
 						<h3 class="above-list">Best selling products in the last two weeks</h3>
 						{% chart_pie
 								data=[ ['Tacx Cycle Motion Stand',10], ['Duracell AA Plus',30], ['Ortlieb Mud Racer XS',15], ['Shimano v-brake',15], [' Rudy Project Jekyll', 30]]
-								colors='0D8BB1' width=581 height=150 %}
+								colors='0D8BB1' width=465 height=150 %}
 					</div>
 
 					<div id="dashboard-orders">

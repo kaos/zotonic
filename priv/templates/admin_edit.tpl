@@ -65,7 +65,7 @@
 				<div class="zp-33" id="sidebar">
 					<div class="padding" id="sort">
 					
-						{% sorter id="sort" handle="h3 .title" axis="y" containment="parent" opacity="0.7" placeholder="sortable-placeholder" %}
+						{% sorter id="sort" handle="h3 .title" axis="y" containment="" opacity="0.9" placeholder="sortable-placeholder" %}
 						{% sortable id="sort-publish" %}
 						{% sortable id="sort-connections" %}
 						{% sortable id="sort-date" %}
