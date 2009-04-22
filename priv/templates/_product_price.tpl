@@ -6,6 +6,7 @@
 	{% if p.is_variant %}
 		<div class="notification notice">Dit product heeft meerdere varianten.</div>
 	{% endif %}
+	
 	<div class="product-price clearfix">
 		{% if p.is_variant %}
 			<div class="product-choose-variant">

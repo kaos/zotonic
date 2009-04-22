@@ -24,7 +24,7 @@
 			
 			<div class="product-description zp-50">
 				{% include "_product_price.tpl" %}
-				
+
 				{% if m.rsc[rsc_id].body %}
 					<h3>{% _ "Description" nl="Omschrijving" %}</h3>
 					{{m.rsc[rsc_id].body}}
@@ -116,12 +116,12 @@
 							{% for b_id, b_name, b_count in cat_brand %}
 							    <li><a {% ifequal brand_id b_id %}class="current" {% endifequal %} href="{% url overview cat=parent_cat.name subcat=cat.name brand=b_name %}">{{m.rsc[b_id].title}} <span class="amount">({{ b_count|default:"-" }})</span></a></li>
 							{% endfor %}
-							</ul>
+						</ul>
 					{% endwith %}
 				{% endwith %}
 			{% endwith %}
 			
-			<div class="notification notice" {% if cart_count %}style="display: block"{% endif %} id="product-notice">
+			<div class="notification notice {% if cart_count %}viewable{% endif %} " id="product-notice">
 				<h3>Winkelmand informatie</h3>
 				<a title="Bekijk uw winkelmand" href="{% url shop_cart %}">U heeft de {{ m.rsc[rsc_id].title }} in uw winkelmand &raquo;</a>
 			</div>

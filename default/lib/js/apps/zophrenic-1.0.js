@@ -74,6 +74,11 @@ function zp_opt_cancel(obj)
 
 function zp_queue_postback(triggerID, postback, extraParams) 
 {
+	extraParams = extraParams || new Array(); 
+	var triggerValue = $('#'+triggerID).val() || '';
+	
+	extraParams.push({name: 'triggervalue', value: triggerValue})
+	
 	var o 			= new Object();
 	o.triggerID		= triggerID;
 	o.postback		= postback;
@@ -89,7 +94,7 @@ function zp_do_postback(triggerID, postback, extraParams)
 		"postback=" + urlencode(postback) + 
 		"&zp_trigger_id=" + urlencode(triggerID) +
 		"&zp_pageid=" + urlencode(zp_pageid) + 
-		"&" + extraParams;
+		"&" + $.param(extraParams);
 	
 	zp_ajax(params);
 }
@@ -208,7 +213,8 @@ function zp_droppable(dropObj, dropOptions, dropPostbackInfo)
 	dropOptions.drop = function(ev, ui) 
 	{
 		var dragTag = $(ui.draggable[0]).data("zp_drag_tag");
-		zp_queue_postback(this.id, dropPostbackInfo, "drag_item=" + urlencode(dragTag));
+		var dragItem = new Array({name: 'drag_item', value: dragTag});
+		zp_queue_postback(this.id, dropPostbackInfo, dragItem);
 	}
 
 	$(dropObj).droppable(dropOptions);
@@ -239,7 +245,10 @@ function zp_sorter(sortBlock, sortOptions, sortPostbackInfo)
 			    sortItems += sortTag
 			}
 		}
-		zp_queue_postback(this.id, sortPostbackInfo, "sort_items=" + urlencode(sortItems));
+		
+		var sortItem = new Array({name: 'sort_items', value: sortItems});
+		
+		zp_queue_postback(this.id, sortPostbackInfo, sortItem);
 	};
 	
 	$(sortBlock).sortable(sortOptions);

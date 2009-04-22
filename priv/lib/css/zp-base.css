@@ -170,6 +170,11 @@ html[xmlns] .zp-wrapper {
 	display: none;
 }
 
+
+.viewable {
+	display: block !important;
+}
+
 .left {
 	float: left;
 }
