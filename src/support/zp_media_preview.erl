@@ -24,7 +24,7 @@
 -define(MAX_HEIGHT, 5000).
 
 -define(PIX100, 1000).
--define(PIX50,  160000).
+-define(PIX50,  250000).
 
 -include_lib("zophrenic.hrl").
 
