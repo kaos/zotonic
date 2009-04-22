@@ -37,6 +37,10 @@ render(undefined, Context) ->
     Context;
 render([], Context) -> 
     Context;
+render(#context{} = C, Context) ->
+    C1 = render(C#context.render, Context),
+    C2 = zp_context:merge_scripts(C, C1),
+    C2;
 render(B, Context) when is_integer(B) orelse is_binary(B) -> 
     Context#context{render=[Context#context.render, B]};
 render(A, Context) when is_atom(A) -> 

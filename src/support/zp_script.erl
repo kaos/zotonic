@@ -70,3 +70,4 @@ get_script(Context) ->
         lists:reverse(Context4#context.content_scripts),
         lists:reverse(Context4#context.scripts)
     ].
+

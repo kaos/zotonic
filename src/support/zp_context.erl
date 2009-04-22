@@ -58,8 +58,9 @@
     get/2,
     incr/3,
     
-    language/1
-
+    language/1,
+    
+    merge_scripts/2
     ]).
 
 -include_lib("webmachine.hrl").
