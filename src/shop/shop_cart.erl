@@ -180,9 +180,9 @@ add_product(Id, Variant, Context) ->
         add_cart(Cart, Id, Variant, []).
 
     add_cart([], Id, Variant, Acc) ->
-        {1, lists:reverse([ #cart{idv={Id, Variant},n=1} | Acc])};
+        {1, [ #cart{idv={Id, Variant},n=1} | lists:reverse(Acc)]};
     add_cart([#cart{idv={Id,Variant},n=N} = Cart |Rest], Id, Variant, Acc) ->
-        {N+1, lists:reverse([ Cart#cart{n=N+1} | Acc]) ++ Rest};
+        {N+1, lists:reverse([ Cart#cart{n=N+1} | Acc], Rest)};
     add_cart([C|Rest], Id, Variant, Acc) ->
         add_cart(Rest, Id, Variant, [C|Acc]).
 
