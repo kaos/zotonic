@@ -594,7 +594,7 @@ resolve_ifvariable_ast(VarTuple, Context) ->
     opttrans_variable_ast(resolve_variable_ast(VarTuple, Context, 'find_value')).
 
 resolve_indexvariable_ast(VarTuple, Context) ->
-    opttrans_variable_ast(resolve_variable_ast(VarTuple, Context, 'find_value')).
+    opttrans_variable_ast(resolve_variable_ast(VarTuple, Context, 'fetch_value')).
 
 
 opttrans_variable_ast({Ast, VarName}) ->
@@ -647,7 +647,7 @@ resolve_variable_ast({apply_filter, Variable, Filter}, Context, FinderFunction) 
             erl_syntax:atom(to_value),
             [VarAst, erl_syntax:variable("ZpContext")]
         ),
-    VarValue = filter_ast1(Filter, erl_syntax:list([ValueAst])),
+    VarValue = filter_ast1(Filter, ValueAst),
     {VarValue, VarName};
 
 resolve_variable_ast(What, _Context, _FinderFunction) ->

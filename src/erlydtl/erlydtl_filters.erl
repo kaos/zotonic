@@ -149,7 +149,7 @@ format_price(Input) when is_list(Input) ->
         {N, _Rest} -> format_price(N)
     end;
 format_price(undefined) ->
-    [].
+    "-".
 
 
 default(Input, Default) -> 
@@ -158,6 +158,7 @@ default(Input, Default) ->
         false -> Input
     end.
 
+
 default_if_none(Input, Default) -> 
     default_if_undefined(Input, Default).
 default_if_undefined(Input, Default) -> 
@@ -165,6 +166,15 @@ default_if_undefined(Input, Default) ->
         undefined -> Default;
         _ -> Input
     end.
+
+
+is_defined(undefined) ->
+    false;
+is_defined(V) ->
+    true.
+
+is_undefined(V) ->
+    not(is_defined(V)).
 
 
 % Translate atoms and numbers to strings
