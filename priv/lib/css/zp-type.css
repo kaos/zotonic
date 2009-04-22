@@ -216,6 +216,11 @@ button:hover {
 	line-height: 18px;
 }
 
+	.cart-list .notification {
+		width: auto;
+		float: left;
+	}
+
 .notice {
 	background: #FFF6BF; 
 	color: #514721; 
