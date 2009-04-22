@@ -23,6 +23,9 @@
 -define(MAX_WIDTH,  5000).
 -define(MAX_HEIGHT, 5000).
 
+-define(PIX100, 1000).
+-define(PIX50,  160000).
+
 -include_lib("zophrenic.hrl").
 
 
@@ -202,15 +205,15 @@ filter2arg({blur, Blur}, Width, Height) when is_list(Blur) ->
         [A] ->   {Width, Height, ["-blur ", ensure_integer(A)]}
     end;
 filter2arg({sharpen_small}, Width, Height) when Width < 400 andalso Height < 400 ->
-    {Width, Height, "-unsharp 0.3x0.7 "};
+    {Width, Height, "-unsharp 0.3x0.7 "}; % 6x3+1+0
 filter2arg({sharpen_small}, Width, Height) ->
     {Width, Height, []};
 filter2arg({quality}, Width, Height) ->
     Pix = Width * Height,
     Q   = if 
-            Pix < 10000 -> 100;
-            Pix > 90000 -> 50;
-            true -> 50 + round((Pix - 10000) * (100-50) / 80000)
+            Pix < ?PIX100 -> 100;
+            Pix > ?PIX50 -> 50;
+            true -> 100 - round(50 * (Pix - ?PIX100) / (?PIX50 - ?PIX100))
           end,
     {Width,Height, ["-quality ",integer_to_list(Q)]}.
 
