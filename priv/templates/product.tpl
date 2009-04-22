@@ -37,7 +37,7 @@
 			{% for id in m.search[{featured cat="product"}] %}
 				<li class="zp-33 {% ifequal forloop.counter "1" %}first{% endifequal %} {% ifequal forloop.counter "4" %}first{% endifequal %}">
 					<div class="block">
-						<a href="{{ m.rsc[id].page_url }}">{% image m.rsc[id].media[1].filename width=216 height=130 crop %}</a>
+						<a href="{{ m.rsc[id].page_url }}">{% image m.rsc[id].media[1].filename width=216 height=70 crop %}</a>
 						<h3><a href="{{ m.rsc[id].page_url }}">{{ m.rsc[id].title }}</a></h3>
 						<div class="product-price clearfix">
 							<h3>&euro;{{ m.shop_product[id].price.price|format_price }}</h3>
