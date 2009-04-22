@@ -23,7 +23,9 @@
 			{% endif %}
 			
 			<div class="product-description zp-50">
-				{% include "_product_price.tpl" %}
+				<div id="product-price">
+					{% include "_product_price.tpl" %}
+				</div>
 
 				{% if m.rsc[rsc_id].body %}
 					<h3>{% _ "Description" nl="Omschrijving" %}</h3>
