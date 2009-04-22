@@ -184,7 +184,7 @@ ensure_session(Context) ->
         undefined ->
             Context1 = zp_session_manager:ensure_session(Context),
             zp_visitor:associate_session(Context1#context.visitor_pid, Context1#context.session_pid),
-            Context1;
+            add_nocache_headers(Context1);
         _ ->
             Context    
     end.
@@ -463,3 +463,15 @@ parse_form_urlencoded(Req) ->
             []
     end.
 
+
+%% @doc Some user agents have too aggressive client side caching.  These headers prevent
+%% the caching of content on the user agent iff the content generated has a session. You can prevent
+%% addition of these headers by not calling zp_context:ensure_session/1, or zp_context:ensure_all/1.
+%% @spec add_nocache_headers(#context) -> #context
+add_nocache_headers(Context) ->
+    Req = ?REQ(get_reqprops(Context)),
+    Req:add_response_header("Cache-Control", "private, must-revalidate, no-cache"),
+    Req:add_response_header("Expires", httpd_util:rfc1123_date(calendar:local_time())),
+    % This let IE6 accept our cookies, basically we tell IE6 that our cookies do not contain any private data.
+    Req:add_response_header("P3P", "CP=\"NOI ADM DEV PSAi COM NAV OUR OTRo STP IND DEM\""),
+    Context.
