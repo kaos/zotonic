@@ -120,7 +120,7 @@ $.widget("ui.imageviewer",
 		if(zoomImgHeight > $(window).height())
 		{
 			fullHeight = $(window).height() - 40;
-			fullWidth = zoomImgWidth * (fullHeight / zoomImgHeight);åå
+			fullWidth = zoomImgWidth * (fullHeight / zoomImgHeight);
 		}
 
 		leftPos = ($(window).width() / 2) - (fullWidth / 2);
