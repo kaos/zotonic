@@ -541,6 +541,15 @@ ul#navigation li.lang a.english {
 /* Pages - compare / sub-category
 ---------------------------------------------------------- */
 
+.price {
+	color: #000;
+}
+
+.old-price {
+	text-decoration: line-through;
+	color: #999;
+}
+
 .compare-list li,
 .subcategory-list li {
 	float: left;

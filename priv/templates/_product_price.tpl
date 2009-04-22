@@ -7,8 +7,8 @@
 		<div class="notification notice">Dit product heeft meerdere varianten.</div>
 	{% endif %}
 	<div class="product-price clearfix">
-		<div class="product-choose-variant">
-			{% if p.is_variant %}
+		{% if p.is_variant %}
+			<div class="product-choose-variant">
 				{% wire id="choose-variant" type="change" action={shop_addcart id=rsc_id} %}
 				<select id="choose-variant">
 					<option value="">Maak uw keuze</option>
@@ -19,8 +19,8 @@
 						</option>
 					{% endfor %}
 				</select>
-			{% endif %}
-		</div>
+			</div>
+		{% endif %}
 		
 		<h3>{% if p.is_variant %}<span>vanaf</span> {% endif %} &euro;{{p.price|format_price}}</h3>
 		
