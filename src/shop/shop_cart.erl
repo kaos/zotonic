@@ -171,7 +171,6 @@ in_cart(Id, Variant, Context) ->
 %% @doc Add the Id to the cart, increment when the id is already in the cart
 %% @spec add_product(Id, Variant, Context) -> NewCount
 add_product(Id, Variant, Context) ->
-    ?DEBUG({Id, Variant}),
     Cart = get_cart(Context),
     {N, Cart1} = add_cart(Cart, Id, Variant),
     zp_context:set_visitor(shop_cart, Cart1, Context), 
