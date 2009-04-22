@@ -8,7 +8,7 @@
 ---------------------------------------------------------- */
 
 body {
-	font: 11px/18px "Lucida Grande", "Lucida Sans", Helvetica, sans-serif;
+	font: 11px/18px "Lucida Grande", Arial, sans-serif;
 	background: url(../images/gridbg.gif);
 	color: #666;
 }
@@ -211,7 +211,7 @@ button:hover {
 
 .notification {
 	margin: 0 0 12px 0; 
-	padding: 9px;
+	padding: 2px 6px;
 	font-size: 11px;
 	line-height: 18px;
 }
