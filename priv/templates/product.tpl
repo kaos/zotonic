@@ -23,49 +23,12 @@
 			{% endif %}
 			
 			<div class="product-description zp-50">
-				{% with m.shop_product[rsc_id].price as p %}
-					{% if p.old_price %}
-						<div class="notification notice">Oude prijs &euro;{{ p.old_price|format_price }} nu voor:</div>
-					{% endif %}
-
-					<div class="product-price clearfix">
-						<h3>{% if p.is_variant %}vanaf {% endif %} &euro;{{p.price|format_price}}</h3>
-						
-						<div class="clearfix button-wrapper right">
-							{% if p.is_variant %}
-								{% button class="buy-me right-side-button" text="Meer keuzes &raquo;" action={redirect location="#variants"} %}
-							{% else %}
-								{% button id="product-add-basket" class="buy-me" text="leg in winkelmand" action={shop_addcart id=rsc_id} %}
-								{% button id="product-buy-basket" class="buy-me right-side-button" text="koop direct &raquo;" action={shop_buynow id=rsc_id} %}
-							{% endif %}
-						</div>
-					</div>
-					
-					{% if m.rsc[rsc_id].body %}
-						<h3>{% _ "Description" nl="Omschrijving" %}</h3>
-						{{m.rsc[rsc_id].body}}
-					{% endif %}
-					
-					{% if p.is_variant %}
-						<h3>Maak uw keuze</h3>
-						
-						<ul class="list-rsc-variants">
-						{% for v in m.shop_product[rsc_id].variants %}
-							<li class="clearfix product-price">
-								<h4>{{ v.title }}</h4>
-								<p>
-									&euro;{{ v.price_actual|format_price }} {% if v.price_old %}(was {{v.price_old|format_price}}){% endif %}
-
-									<span class="right">
-										{% button class="buy-me" text="leg in winkelmand" action={shop_addcart id=rsc_id variant=v.variant} %}
-										{% button class="buy-me" text="koop direct &raquo;" action={shop_buynow id=rsc_id variant=v.variant} %}
-									</span>
-								</p>
-							</li>
-						{% endfor %}
-						</ul>
-					{% endif %}
-				{% endwith %}
+				{% include "_product_price.tpl" %}
+				
+				{% if m.rsc[rsc_id].body %}
+					<h3>{% _ "Description" nl="Omschrijving" %}</h3>
+					{{m.rsc[rsc_id].body}}
+				{% endif %}
 			</div>
 		</div>
 		
