@@ -22,10 +22,10 @@ render_action(TriggerId, TargetId, Args, Context) ->
 	{PostbackMsgJS, Context}.
 
 event({postback, {shop_select_variant, Id}, _TriggerId, _TargetId}, Context) ->
-    Variant = zp_context:get_q("triggervalue", Context, <<>>),
+    Variant = zp_convert:to_binary(zp_context:get_q("triggervalue", Context)),
     Vars = [
         {rsc_id, Id},
-        {variant, zp_convert:to_binary(Variant)}
+        {variant, Variant}
     ],
     Html = zp_template:render("_product_price.tpl", Vars, Context),
     zp_render:update("product-price", Html, Context).

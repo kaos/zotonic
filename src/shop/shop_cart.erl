@@ -161,7 +161,7 @@ in_cart(Id, Context) ->
 
 %% @doc Get the count of the product/variant in the cart
 %% @spec in_cart(Id, Variant, #context) -> int()
-in_cart(Id, Variant, Context) ->
+in_cart(Id, Variant, Context) when is_binary(Variant) andalso is_integer(Id) ->
     Cart = get_cart(Context),
     case lists:filter(fun(#cart{idv={CartId, V}}) -> CartId == Id andalso Variant == V end, Cart) of
         [#cart{n=N}] -> N;
@@ -170,7 +170,7 @@ in_cart(Id, Variant, Context) ->
     
 %% @doc Add the Id to the cart, increment when the id is already in the cart
 %% @spec add_product(Id, Variant, Context) -> NewCount
-add_product(Id, Variant, Context) ->
+add_product(Id, Variant, Context) when is_binary(Variant) andalso is_integer(Id) ->
     Cart = get_cart(Context),
     {N, Cart1} = add_cart(Cart, Id, Variant),
     zp_context:set_visitor(shop_cart, Cart1, Context), 
@@ -187,7 +187,7 @@ add_product(Id, Variant, Context) ->
         add_cart(Rest, Id, Variant, [C|Acc]).
 
 
-decr_product(Id, Variant, Context) ->
+decr_product(Id, Variant, Context) when is_binary(Variant) andalso is_integer(Id) ->
     Cart = get_cart(Context),
     {N1, Cart1} = case lists:keysearch({Id, Variant}, #cart.idv, Cart) of
         {value, #cart{n=N}} when N > 1 -> {N-1, set_cart(Cart, Id, Variant, N-1)};
@@ -208,7 +208,7 @@ decr_product(Id, Variant, Context) ->
     set_cart([C|Rest], Id, Variant, N, Acc) ->
         set_cart(Rest, Id, Variant, N, [C|Acc]).
 
-del_product(Id, Variant, Context) ->
+del_product(Id, Variant, Context) when is_binary(Variant) andalso is_integer(Id) ->
     Cart = get_cart(Context),
     Cart1 = lists:keydelete({Id, Variant}, #cart.idv, Cart),
     zp_context:set_visitor(shop_cart, Cart1, Context).
