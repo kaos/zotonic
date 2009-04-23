@@ -42,7 +42,7 @@ event({submit, rscform, _FormId, _TargetId}, Context) ->
     Title = proplists:get_value(title, Props),
     Id = proplists:get_value(id, Props),
     Props1 = proplists:delete(id, Props),
-    m_rsc:update(Id, Props1, Context),
+    m_rsc:update(zp_convert:to_integer(Id), Props1, Context),
     zp_render:wire({growl, [{text,[["Saved ",zp_html:strip(Title)]]}]}, Context).
 
 

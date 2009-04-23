@@ -37,7 +37,7 @@
 
 									<div class="form-item clearfix">
 										<label for="field-content">Body</label>
-										<textarea rows="10" cols="10" id="field-content" name="content" class="do_wysiwyg {css: '/lib/css/zp-wysiwyg-iframe.css',  controls: $.fn.wysiwyg.defaultset} body">{{ r.body|escape }}</textarea>
+										<textarea rows="10" cols="10" id="field-content" name="body" class="do_wysiwyg {css: '/lib/css/zp-wysiwyg-iframe.css',  controls: $.fn.wysiwyg.defaultset} body">{{ r.body|escape }}</textarea>
 									</div>
 								</fieldset>
 							</div>
