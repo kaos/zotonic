@@ -18,6 +18,9 @@
     
     get/2,
     get_acl_props/2,
+    insert/2,
+    delete/2,
+    update/3,
         
 	rsc/0,
 	rsc/2,
@@ -107,8 +110,28 @@ get_acl_props(Id, Context) when is_integer(Id) ->
         end
     end,
     zp_depcache:memo(F, {rsc_acl_fields, Id}, ?DAY, [#rsc{id=Id}]).
-    
 
+
+%% @doc Insert a new resource
+%% @spec insert(Props, Context) -> {ok, Id}
+insert(Props, Context) ->
+    zp_db:insert(rsc, Props, Context).
+
+%% @doc Delete a resource
+%% @spec delete(Props, Context) -> void()
+delete(Id, Context) ->
+    zp_db:delete(rsc, Id, Context),
+    zp_depcache:flush(#rsc{id=Id}).
+
+
+%% @doc Update a predicate
+%% @spec update(Props, Props, Context) -> void()
+update(Id, Props, Context) ->
+    zp_db:update(rsc, Id, Props, Context),
+    zp_depcache:flush(#rsc{id=Id}).
+
+
+%% Function used in template contexts to return a #rsc{id=Id} --> not used anymore???
 rsc() -> fun(Id, _Context) -> #rsc{id=Id} end.
 rsc(Id, _Context) -> #rsc{id=Id}.
 

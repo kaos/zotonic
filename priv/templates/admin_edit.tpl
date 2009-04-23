@@ -14,7 +14,11 @@
 			<h2>{{ r.title|striptags }}</h2>
 		{% endif %}	
 			
-			<form method="post" action="/postback">
+			{% wire id="rscform" type="submit" postback="rscform" %}
+			<form id="rscform" method="post" action="postback">
+				
+				<input type="hidden" name="id" value="{{ id }}" />
+				
 				<div class="zp-67">
 					<div class="padding">
 						<div class="item-wrapper">
@@ -23,7 +27,7 @@
 								<fieldset class="admin-form">
 									<div class="form-item clearfix">
 										<label for="field-title">Title</label>
-										<input type="text" id="field-title" name="title" value="{{ r.title|escape }}" />
+										<input type="text" id="title" name="title" value="{{ r.title|escape }}" />
 									</div>
 
 									<div class="form-item clearfix">
@@ -50,17 +54,17 @@
 									</div>
 									<div class="form-item clearfix">
 										<label for="title">Page title</label>
-										<input type="text" id="title" name="title" class="zp-100" value="{{ r.seo_title|escape }}"/>
+										<input type="text" id="title" name="seo_title" class="zp-100" value="{{ r.seo_title|escape }}"/>
 									</div>
 
 									<div class="form-item clearfix">
 										<label for="keywords">Page keywords</label>
-										<input type="text" id="keywords" name="keywords" class="zp-100" value="{{ r.seo_keywords|escape }}"/>
+										<input type="text" id="keywords" name="seo_keywords" class="zp-100" value="{{ r.seo_keywords|escape }}"/>
 									</div>
 
 									<div class="form-item clearfix">
 										<label for="desc">Page description</label>
-										<textarea rows="10" cols="10" id="desc" name="desc" class="seo-desc zp-100">{{ r.seo_description|escape }}</textarea>
+										<textarea rows="10" cols="10" id="desc" name="seo_desc" class="seo-desc zp-100">{{ r.seo_desc|escape }}</textarea>
 									</div>
 								</fieldset>
 							</div>
