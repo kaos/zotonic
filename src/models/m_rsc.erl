@@ -119,14 +119,14 @@ insert(Props, Context) ->
 
 %% @doc Delete a resource
 %% @spec delete(Props, Context) -> void()
-delete(Id, Context) ->
+delete(Id, Context) when is_integer(Id) ->
     zp_db:delete(rsc, Id, Context),
     zp_depcache:flush(#rsc{id=Id}).
 
 
 %% @doc Update a predicate
 %% @spec update(Props, Props, Context) -> void()
-update(Id, Props, Context) ->
+update(Id, Props, Context) when is_integer(Id) ->
     zp_db:update(rsc, Id, Props, Context),
     zp_depcache:flush(#rsc{id=Id}).
 
