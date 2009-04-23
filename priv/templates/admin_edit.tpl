@@ -10,7 +10,8 @@
 		{% if not r.is_editable %}
 			<h2>You are not allowed to edit <span>{{ r.title|striptags }}</span></h2>
 		{% else %}
-			<h2>Zophrenic Edit <span>{{ r.title|striptags }}</span></h2>
+			<p class="admin-chapeau">editing:</p>
+			<h2>{{ r.title|striptags }}</h2>
 		{% endif %}	
 			
 			<form method="post" action="/postback">
@@ -77,13 +78,13 @@
 						{% sortable id="sort-access" %}
 					
 						<div class="item-wrapper" id="sort-publish">
-							<h3 class="above-item clearfix do_blockminifier">
-								<span class="title">Publish</span>
+							<h3 class="above-item clearfix">
+								<span class="title">Publish this page</span>
 								<span class="arrow">make smaller</span>
 							</h3>
 							<div class="item clearfix">
-								{% button class="save-resource" text="save" %}
-								{% button class="discard-resource" text="discard" action={redirect dispatch="admin"} %}
+								{% button class="save-resource save" text="save" %}
+								{% button class="discard-resource" text="cancel" action={redirect dispatch="admin"} %}
 							</div>
 						</div>
 					

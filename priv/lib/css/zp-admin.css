@@ -125,6 +125,10 @@ h2 {
 	border-bottom: 1px dotted #ddd;
 }
 
+	h2 span {
+		font-size: 11px;
+	}
+
 h3 {
 	color: #32394b;
 	font-size: 12px;
@@ -176,7 +180,7 @@ h3.above-item {
 		display: none;
 	}
 	
-	h3.above-item:hover span.arrow {
+	h3.do_blockminifier:hover span.arrow {
 		display: block;
 	}
 	
@@ -186,6 +190,12 @@ a:focus {
 	text-decoration: underline;
 }
 
+.admin-chapeau {
+	margin: 0;
+	font-family: Georgia;
+	font-style: italic;
+	color: #999;
+}
 
 /* Header
 ---------------------------------------------------------- */
@@ -260,6 +270,24 @@ a:focus {
 /* forms
 ---------------------------------------------------------- */
 
+button, 
+a.button {
+	-moz-border-radius: 5px;
+	-webkit-border-radius: 5px;
+}
+
+button.save {
+	background: #0C8DB2;
+	color: #fff;
+	border-color: #0C8DB2;
+}
+
+	button.save:hover {
+		background: #fff;
+		color: #0C8DB2;
+		border-color: #999;
+	}
+
 .form-item button {
 	margin: 0 3px 0 0;
 }
@@ -314,10 +342,6 @@ fieldset.admin-form:last-child {
 	font-family: "Lucida Sans", Helvetica, sans-serif;
 }
 
-.admin-form textarea.intro {
-	height: 80px;
-}
-
 .admin-form textarea.seo-desc {
 	height: 40px;
 }
@@ -333,6 +357,9 @@ fieldset.admin-form:last-child {
 	border-width: 1px;
 }
 
+#sort-publish button {
+	margin: 0 6px 9px 0;
+}
 
 /* autocompleter
 ---------------------------------------------------------- */
@@ -365,14 +392,20 @@ fieldset.admin-form:last-child {
 	line-height: 11px;
 	margin: 6px 6px 6px 0;
 	float: left;
-	-moz-border-radius: 8px;
-	-webkit-border-radius: 8px;
+	-moz-border-radius: 5px;
+	-webkit-border-radius: 5px;
 	padding: 4px 6px 4px 4px;
-	background: #ccc;
 	text-transform: lowercase;
-	border: 1px solid #bbb;
-	cursor: pointer;
+	border: 1px solid;
+	border-color: #999999 #858585 #666666;
+	background: transparent url(/lib/images/button.png) repeat-x left bottom;
+	
 }
+
+	.rsc-edge-hover {
+		border-color: #db474c;
+	}
+	
 
 .unlink-item {
 	float: left;
@@ -386,13 +419,13 @@ fieldset.admin-form:last-child {
 	display: block;
 	float: left;
 	margin: 0 3px 0 0;
+	cursor: pointer;
 }
 
-	.unlink-cross:hover,
-	.rsc-edge:hover .unlink-cross {
+	.unlink-cross:hover {
 		background: transparent url(/lib/images/crosses.png) no-repeat left top;
 	}
-
+	
 .link-add {
 	float: left;
 	margin: 6px 0 0 4px;

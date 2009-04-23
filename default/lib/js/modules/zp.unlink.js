@@ -35,7 +35,16 @@ $.widget("ui.unlink",
 		var self			= this;
 		var obj 			= this.element;
 		
-		obj.click(function()
+		$('.unlink-cross', obj).hover(function()
+		{
+			$(this).closest('.rsc-edge').addClass('rsc-edge-hover');
+		},
+		function()
+		{
+			$(this).closest('.rsc-edge').removeClass('rsc-edge-hover');
+		});
+		
+		$('.unlink-cross', obj).click(function()
 		{
 			$.misc.log('edge removed');
 			obj.parent().fadeOut(200, function()
