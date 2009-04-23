@@ -59,7 +59,7 @@
 									<span class="zp-20">{{ m.rsc[id].modified|date:"F d, H:i" }}</span>
 									<span class="zp-20">
 										{% button text="view" action={redirect id=id} %}
-										{% button text="edit" action={redirect dispatch="admin_edit_rsc" rsc=id} %}
+										{% button text="edit" action={redirect dispatch="admin_edit_rsc" id=id} %}
 									</span>
 								</a>
 							</li>
@@ -88,7 +88,7 @@
 									<span class="zp-20">{{ m.rsc[id].modified|date:"F d, H:i" }}</span>
 									<span class="zp-20">
 										{% button text="view" action={redirect id=id} %}
-										{% button text="edit" action={redirect dispatch="admin_edit_rsc" rsc=id} %}
+										{% button text="edit" action={redirect dispatch="admin_edit_rsc" id=id} %}
 									</span>
 								</a>
 							</li>
