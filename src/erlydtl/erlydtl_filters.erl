@@ -177,6 +177,16 @@ is_undefined(V) ->
     not(is_defined(V)).
 
 
+striptags(undefined) ->
+    undefined;
+striptags(In) when is_integer(In) ->
+    In;
+striptags(In) when is_float(In) ->
+    In;
+striptags(In) ->
+    zp_html:strip(In).
+    
+
 % Translate atoms and numbers to strings
 % Leave tuples as tuples.
 stringify(undefined) ->
