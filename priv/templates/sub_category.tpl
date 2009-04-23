@@ -22,13 +22,23 @@
 							<a href="{% url product id=id slug=m.rsc[id].slug %}">{{ m.rsc[id].title }}</a>
 						</h3>
 						<p>{{ m.rsc[id].intro }}</p>
+						{% with m.shop_product[id].price as p %}
 						<div class="product-price clearfix clear">
-							<h3>&euro;{% include "_price.tpl" %}</h3>
+							<h3>
+								{% if p.is_variant %}<span>vanaf</span> {% endif %}
+								&euro;{{ p.price|format_price }}
+								{% if p.old_price %}<span class="old-price">{{ p.old_price|format_price }}</span>{% endif %}
+							</h3>
 							<div class="clearfix button-wrapper right">
+							{% if p.is_variant %}
+								{% button class="buy-me right-side-button" text="meer info &raquo;" action={redirect id=id} %}
+							{% else %}
 								{% button class="buy-me" text="meer info" action={redirect id=id} %}
 								{% button class="buy-me right-side-button" text="koop direct &raquo;" action={shop_buynow id=id} %}
+							{% endif %}
 							</div>
 						</div>
+						{% endwith %}
 					</div>
 				</li>
 				{% empty %}

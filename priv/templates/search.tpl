@@ -22,6 +22,26 @@
 			<div class="zp-70">
 				<h4>Beschrijving</h4>
 				<p>{{ m.rsc[rsc_id].intro }}</p>
+
+				{% with m.shop_product[rsc_id].price as p %}
+				<div class="product-price clearfix clear">
+					<h3>
+						{% if p.is_variant %}<span>vanaf</span> {% endif %}
+						&euro;{{ p.price|format_price }}
+						{% if p.old_price %}<span class="old-price">{{ p.old_price|format_price }}</span>{% endif %}
+					</h3>
+					<div class="clearfix button-wrapper right">
+					{% if p.is_variant %}
+						{% button class="buy-me right-side-button" text="bekijk product &raquo;" action={redirect id=rsc_id} %}
+					{% else %}
+						{% button class="buy-me" text="bekijk product" action={redirect id=rsc_id} %}
+						{% button class="buy-me right-side-button" text="koop direct &raquo;" action={shop_buynow id=rsc_id} %}
+					{% endif %}
+					</div>
+				</div>
+				{% endwith %}
+
+{#
 				<div class="product-price clearfix">
 					<h3>&euro;{% include "_price.tpl" id=rsc_id %} <!--span>incl. btw</span--></h3>
 
@@ -29,6 +49,7 @@
 						{% button class="buy-me right-side-button" text="Bekijk product &raquo;" action={redirect id=rsc_id} %}
 					</div>
 				</div>
+#}
 			</div>
 		</div>
 		{% empty %}
