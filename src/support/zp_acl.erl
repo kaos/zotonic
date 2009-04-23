@@ -90,10 +90,13 @@ media_editable(Id, Context) ->
 sudo({M,F}, Context) ->
     erlang:apply(M, F, [set_admin(Context)]);
 sudo({M,F,A}, Context) ->
-    erlang:apply(M, F, A ++ [set_admin(Context)]);
+    ContextSu = set_admin(Context),
+    erlang:apply(M, F, A ++ [ContextSu]);
 sudo(F, Context) when is_function(F, 1) ->
     F(set_admin(Context)).
 
+    set_admin(#context{acl=undefined} = Context) ->
+        Context#context{acl=#acl{is_admin=true}, user_id=1};
     set_admin(Context) ->
         Acl  = Context#context.acl,
         Acl1 = Acl#acl{is_admin=true},
