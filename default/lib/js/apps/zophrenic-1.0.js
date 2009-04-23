@@ -263,7 +263,7 @@ function zp_init_postback_forms()
 {
 	$("form[action*='postback']").submit(function(event)
 	{
-		var serialized	= $(this).formSerialize();
+		var arguments	= $(this).formToArray();
 		var postback	= $(this).data("zp_submit_postback");
 		var action		= $(this).data("zp_submit_action");
 		var form_id		= $(this).attr('id');
@@ -273,14 +273,11 @@ function zp_init_postback_forms()
 		{
 			postback = zp_default_form_postback;
 		}
-
-		zp_queue_postback(form_id, postback, serialized+'&'+validations); 
-		
+		zp_queue_postback(form_id, postback, arguments.concat(validations)); 
 		if(action)
 		{
 			setTimeout(action, 10);
 		}
-		
 		event.stopPropagation();
 		return false;
 	})
@@ -312,7 +309,7 @@ $.fn.formValidationPostback = function()
 			}
 		}
 	}
-	return $.param(a);
+	return a;
 }
 
 // Initialize a validator for the element #id
@@ -514,10 +511,14 @@ $.fieldValue = function(el, successful) {
     if (typeof successful == 'undefined') successful = true;
 
     if (successful && (!n || el.disabled || t == 'reset' || t == 'button' ||
-        (t == 'checkbox' || t == 'radio') && !el.checked ||
+        t == 'radio' && !el.checked ||
         (t == 'submit' || t == 'image') && el.form && el.form.clk != el ||
         tag == 'select' && el.selectedIndex == -1))
             return null;
+    
+    // Return empty value for non-checked checkboxes
+    if (successful && t == 'checkbox' && !el.checked)
+        return '';
 
     if (tag == 'select') {
         var index = el.selectedIndex;
