@@ -33,10 +33,6 @@ body {
 		border: none;
 	}
 
-		li.block img {
-			border: 1px solid #ccc;
-		}
-		
 
 /* Pager
 ---------------------------------------------------------- */
@@ -577,11 +573,6 @@ ul#navigation li.lang a.english {
 	.compare-list .product-price,
 	.subcategory-list .product-price {
 		margin: 0;
-	}
-	
-	.compare-list li img,
-	.subcategory-list li img {
-		border: 1px solid #ccc;
 	}
 	
 	.compare-list li h3,

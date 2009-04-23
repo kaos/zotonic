@@ -21,7 +21,7 @@
 	</div>
 	<div class="zp-wrapper">
 		<div id="header">
-			<h1 class="zophrenic">Zophrenic</h1>
+			<h1 class="zophrenic"><a href="/admin/">Zophrenic</a></h1>
 		</div>
 
 		<!--[if lte IE 6]>
@@ -32,6 +32,7 @@
 		</div>
 		<![endif]-->
 
+		{% block navigation %}
 		<ul id="navigation" class="zp-100">
 			<li><a href="/admin/" class="current">Dashboard</a></li>
 			<li><a href="/admin/overview/">Pages</a></li>
@@ -39,6 +40,7 @@
 			<li><a href="#">Products</a></li>
 			<li class="right"><a href="#">Options</a></li>
 		</ul>
+		{% endblock %}
 
 		{% block content %}{% endblock %}
 	</div>

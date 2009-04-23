@@ -197,6 +197,10 @@ a:focus {
 	margin: 0 0 18px 0;
 }
 
+	#header h1 a {
+		display: block;
+	}
+
 
 /* navigation
 ---------------------------------------------------------- */
