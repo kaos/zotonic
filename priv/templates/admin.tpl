@@ -39,10 +39,9 @@
 			</div>
 
 			<hr class="clear" />
-
+			
 			<div class="zp-50">
 				<div class="padding">
-
 					<div id="dashboard-pages">
 						<h3 class="above-list">Last modified articles</h3>
 						<ul class="short-list">
@@ -71,8 +70,8 @@
 							{% endfor %}
 						</ul>
 					</div>
-					
-					<div id="dashboard-pages">
+				
+					<div id="dashboard-products">
 						<h3 class="above-list">Last modified products</h3>
 						<ul class="short-list">
 							<li class="headers clearfix">
@@ -105,7 +104,7 @@
 
 			<div class="zp-50">
 				<div class="padding last">
-					<div id="dashboard-products">
+					<div id="dashboard-selling-products">
 						<h3 class="above-list">Best selling products in the last two weeks</h3>
 						{% chart_pie
 								data=[ ['Tacx Cycle Motion Stand',10], ['Duracell AA Plus',30], ['Ortlieb Mud Racer XS',15], ['Shimano v-brake',15], [' Rudy Project Jekyll', 30]]
@@ -154,5 +153,4 @@
 			</div>
 		</div>
 		<div class="push"></div>
-	</div>
 {% endblock %}
