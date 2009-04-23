@@ -62,7 +62,8 @@ function zp_postback_loop()
 
 function zp_opt_cancel(obj)
 {
-	if($(obj+':radio').length || $(obj+':checkbox').length)
+    var nodeName = obj.nodeName.toLowerCase();
+    if(nodeName == 'radio' || nodeName == 'checkbox')
 	{
 		return true;
 	}
