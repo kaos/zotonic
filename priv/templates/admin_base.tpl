@@ -50,8 +50,7 @@
 	<div class="footer-content"></div>
 </div>
 
-	{% include "_js_include.tpl" %}
-	<script type="text/javascript" src="/lib/js/apps/admin-common.js"></script>
+	{% include "_admin_js_include.tpl" %}
 	{% script %}
 	
 </body>
