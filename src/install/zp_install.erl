@@ -204,7 +204,6 @@ model_pgsql() ->
       name character varying(80) NOT NULL default ''::character varying,
       description character varying(2000) NOT NULL default ''::character varying,
       is_admin boolean NOT NULL DEFAULT false,
-      is_editor boolean NOT NULL DEFAULT false,
       is_supervisor boolean NOT NULL DEFAULT false,
       is_community_publisher boolean NOT NULL DEFAULT false,
       is_public_publisher boolean NOT NULL DEFAULT false,

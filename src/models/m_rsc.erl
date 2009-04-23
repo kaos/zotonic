@@ -17,11 +17,15 @@
     name_to_id_check/2,
     
     get/2,
-    
+    get_acl_props/2,
+        
 	rsc/0,
 	rsc/2,
 	exists/2, 
-	is_readable/2, is_writeable/2, is_ingroup/2, is_me/2, is_a/3, is_a_list/2,
+	
+	is_visible/2, is_editable/2, is_ingroup/2, is_me/2, 
+	is_a/3, is_a_list/2,
+	
 	p/3, 
 	op/2, o/2, o/3, o/4,
 	sp/2, s/2, s/3, s/4,
@@ -75,7 +79,7 @@ get(Id, Context) ->
                 {ok, Resource} -> 
                     Resource;
                 undefined ->
-                    case zp_db:select(rsc, Id, Context) of
+                    case zp_db:select(rsc, Rid, Context) of
                         {ok, Record} ->
                             zp_depcache:set(Rsc, Record, ?WEEK, [Rsc]),
                             Record;
@@ -86,6 +90,24 @@ get(Id, Context) ->
             end
     end.
 
+
+%% @doc Get the ACL fields for the resource with the id. The id must be an integer
+%% @spec get_acl_fields(Id, #context) -> #acl_props
+get_acl_props(Id, Context) when is_integer(Id) ->
+    F = fun() ->
+        case zp_db:q_row("
+            select is_published, visible_for, group_id, publication_start, publication_end 
+            from rsc 
+            where id = $1", [Id], Context) of
+    
+            {IsPub, Vis, Group, PubS, PubE} ->
+                #acl_props{is_published=IsPub, visible_for=Vis, group_id=Group, publication_start=PubS, publication_end=PubE};
+            false ->
+                #acl_props{is_published=false, visible_for=3, group_id=0}
+        end
+    end,
+    zp_depcache:memo(F, {rsc_acl_fields, Id}, ?DAY, [#rsc{id=Id}]).
+    
 
 rsc() -> fun(Id, _Context) -> #rsc{id=Id} end.
 rsc(Id, _Context) -> #rsc{id=Id}.
@@ -117,14 +139,34 @@ exists(Id, Context) ->
         undefined -> false
     end.
     
-is_readable(Id, Context) -> true.
-is_writeable(Id, Context) -> true.
-is_ingroup(Id, Context) -> true.
+is_visible(Id, Context) ->
+    case rid(Id, Context) of
+        #rsc{id=RscId} ->
+            zp_acl:rsc_visible(RscId, Context);
+        _ ->
+            false
+    end.
+
+is_editable(Id, Context) -> 
+    case rid(Id, Context) of
+        #rsc{id=RscId} ->
+            zp_acl:rsc_editable(RscId, Context);
+        _ ->
+            false
+    end.
+    
+is_ingroup(Id, Context) -> 
+    case rid(Id, Context) of
+        #rsc{id=RscId} ->
+            zp_acl:rsc_ingroup(RscId, Context);
+        _ ->
+            false
+    end.
 
 is_me(Id, Context) -> 
     case rid(Id, Context) of
         #rsc{id=RscId} ->
-            zp_access_control:person(Context) == RscId;
+            zp_acl:person(Context) == RscId;
         _ ->
             false
     end.
@@ -139,8 +181,8 @@ p(Id, m, Context)  -> m(Id, Context);
 p(Id, op, Context) -> op(Id, Context);
 p(Id, sp, Context) -> sp(Id, Context);
 p(Id, is_me, Context) -> is_me(Id, Context);
-p(Id, is_readable, Context) -> is_readable(Id, Context);
-p(Id, is_writeable, Context) -> is_writeable(Id, Context);
+p(Id, is_visible, Context) -> is_visible(Id, Context);
+p(Id, is_editable, Context) -> is_editable(Id, Context);
 p(Id, is_ingroup, Context) -> is_ingroup(Id, Context);
 p(Id, is_a, Context) -> [ {C,true} || C <- is_a_list(Id, Context) ];
 p(Id, exists, Context) -> exists(Id, Context);

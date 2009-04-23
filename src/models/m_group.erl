@@ -46,7 +46,7 @@ get(Id, Context) ->
 %% @doc Insert a new group, make sure that the roles are only set by the admin
 %% @spec insert(PropList, Context) -> {ok, int()}
 insert(Props, Context) ->
-    PropsSafe = case zp_access_control:has_role(admin, Context) of
+    PropsSafe = case zp_acl:has_role(admin, Context) of
         true -> Props;
         false ->
             zp_utils:prop_delete(is_admin, 
@@ -117,7 +117,7 @@ delete_member(Id, RscId, Context) ->
 %% @doc Return the group ids the current person is member of
 %% @spec person_groups(Context) -> List
 groups_member(Context) ->
-    groups_member(zp_access_control:person(Context), Context).
+    groups_member(zp_acl:person(Context), Context).
 
 %% @doc Return the group ids the person is member of
 %% @spec person_groups(PersonId, Context) -> List
@@ -128,7 +128,7 @@ groups_member(PersonId, Context) ->
 %% @doc Return the group ids the current person can only view
 %% @spec person_groups(Context) -> List
 groups_observer(Context) ->
-    groups_observer(zp_access_control:person(Context), Context).
+    groups_observer(zp_acl:person(Context), Context).
 
 %% @doc Return the group ids the person can only view
 %% @spec person_groups(PersonId, Context) -> List
@@ -140,7 +140,7 @@ groups_observer(PersonId, Context) ->
 %% @doc Return the group ids the current person can view
 %% @spec person_groups(Context) -> List
 groups_visible(Context) ->
-    groups_visible(zp_access_control:person(Context), Context).
+    groups_visible(zp_acl:person(Context), Context).
 
 %% @doc Return the group ids the person can view
 %% @spec person_groups(PersonId, Context) -> List
@@ -151,7 +151,7 @@ groups_visible(PersonId, Context) ->
 %% @doc Return the group ids the current person is leader of
 %% @spec person_groups(Context) -> List
 groups_leader(Context) ->
-    groups_leader(zp_access_control:person(Context), Context).
+    groups_leader(zp_acl:person(Context), Context).
 
 %% @doc Return the group ids the person leads
 %% @spec person_groups(PersonId, Context) -> List
@@ -163,13 +163,13 @@ groups_leader(PersonId, Context) ->
 %% @doc Return the roles the current person has
 %% @spec roles(Context) -> [atom(), ..]
 roles(Context) ->
-    roles(zp_access_control:person(Context), Context).
+    roles(zp_acl:person(Context), Context).
 
 %% @doc Return the roles the person has
 %% @spec roles(Context) -> [atom(), ..]
 roles(PersonId, Context) ->
     Roles = case zp_db:q("
-        select  max(g.is_admin::int), max(g.is_editor::int), max(g.is_supervisor::int), 
+        select  max(g.is_admin::int), max(g.is_supervisor::int), 
                 max(g.is_community_publisher::int), max(g.is_public_publisher::int)
         from \"group\" g join rsc_group rg on rg.group_id = g.id
         where rg.rsc_id = $1
@@ -177,5 +177,5 @@ roles(PersonId, Context) ->
           [Row] -> Row;
           [] -> {0, 0, 0, 0, 0}
     end,
-    P = lists:zip([admin, editor, supervisor, community_publisher, public_publisher], tuple_to_list(Roles)),
+    P = lists:zip([admin, supervisor, community_publisher, public_publisher], tuple_to_list(Roles)),
     [ R || {R,M} <- P, M =/= 0 ].

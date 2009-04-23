@@ -10,6 +10,7 @@
 %% interface functions
 -export([
     get/2,
+    get_acl_props/2,
     get_rsc/2,
     get_rsc/3,
     delete/2,
@@ -27,7 +28,27 @@
 %% @doc Get the media record with the id
 %% @spec get(MediaId, Context) -> PropList
 get(Id, Context) ->
-    zp_db:assoc_props_row("select * from media where id = $1", [Id], Context).
+    F = fun() -> zp_db:assoc_props_row("select * from media where id = $1", [Id], Context) end,
+    zp_depcache:memo(F, {media, Id}, ?WEEK).
+
+
+%% @doc Get the ACL fields for the resource with the id. The id must be an integer
+%% @spec get_acl_fields(Id, #context) -> #acl_props
+get_acl_props(Id, Context) when is_integer(Id) ->
+    F = fun() ->
+        case zp_db:q_row("
+            select visible_for, group_id 
+            from media 
+            where id = $1", [Id], Context) of
+
+            {Vis, Group} ->
+                #acl_props{visible_for=Vis, group_id=Group};
+            false ->
+                #acl_props{is_published=false, visible_for=3, group_id=0}
+        end
+    end,
+    zp_depcache:memo(F, {media_acl_props, Id}, ?WEEK, [{media, Id}]).
+
 
 %% @doc Get all media for a certain resource
 %% @spec get_rsc(RscId, Context) -> [PropList]
@@ -89,8 +110,8 @@ insert_file(File, Context) ->
 
 insert_file(File, Props, Context) ->
     PropsMedia = add_media_info(File, Props),
-    PropsAccess = zp_access_control:add_defaults(PropsMedia, Context),
-    PropsCreator = zp_access_control:add_person(creator_id, PropsAccess, Context),
+    PropsAccess = zp_acl:add_defaults(PropsMedia, Context),
+    PropsCreator = zp_acl:add_person(creator_id, PropsAccess, Context),
     ArchiveFile = zp_media_archive:archive_copy_opt(File, Context),
     RootName = filename:rootname(filename:basename(ArchiveFile)),
     zp_db:insert(media, [{filename, ArchiveFile},{rootname, RootName}|PropsCreator], Context).

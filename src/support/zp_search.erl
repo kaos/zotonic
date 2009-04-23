@@ -157,7 +157,7 @@ add_acl_check(_, Args, _Context) ->
 %% @spec add_acl_check1(Table, Alias, Args, Context) -> {Where, NewArgs}
 add_acl_check1(Table, Alias, Args, Context) ->
     % N = length(Args),
-    case zp_access_control:can_see(Context) of
+    case zp_acl:can_see(Context) of
         ?ACL_VIS_GROUP ->
             % Admin or supervisor, can see everything
             {[], Args};

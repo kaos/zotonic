@@ -27,6 +27,7 @@
         language=en,
         
         %% The current logged on user, derived from the session and visitor
+        acl=undefined,      %% opaque placeholder managed by the zp_acl module
         user_id=undefined,
 
         %% The state below is the render state, can be cached and/or merged
@@ -49,6 +50,17 @@
 
 -define(DB(Context), Context#context.db).
 -define(DBC(Context), Context#context.dbc).
+
+%% ACL fields for an acl check. Fields are initialized for the visible resource.
+%% This is used for fetching the acl fields from a resource or media record.
+-record(acl_props, {
+    is_published=true,
+    group_id=1,
+    visible_for=0,
+    publication_start={{1900,1,1},{0,0,0}},
+    publication_end={{9999,1,1}, {0,0,0}}
+}).
+
 
 %% Model value interface for templates
 -record(m, {model, value}).
