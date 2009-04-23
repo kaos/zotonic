@@ -471,8 +471,8 @@ parse_form_urlencoded(Req) ->
 %% @spec add_nocache_headers(#context) -> #context
 add_nocache_headers(Context) ->
     Req = ?REQ(get_reqprops(Context)),
-    Req:add_response_header("Cache-Control", "private, must-revalidate, no-cache"),
-    Req:add_response_header("Expires", httpd_util:rfc1123_date(calendar:local_time())),
+    Req:add_response_header("Cache-Control", "no-store, no-cache, must-revalidate, post-check=0, pre-check=0"),
+    Req:add_response_header("Expires", httpd_util:rfc1123_date({{2008,12,10}, {15,30,0}})),
     % This let IE6 accept our cookies, basically we tell IE6 that our cookies do not contain any private data.
     Req:add_response_header("P3P", "CP=\"NOI ADM DEV PSAi COM NAV OUR OTRo STP IND DEM\""),
     Context.
