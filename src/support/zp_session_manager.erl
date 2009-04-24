@@ -237,6 +237,6 @@ clear_session_id(Context) ->
     RD = zp_context:get_reqdata(Context),
     %% TODO: set the {domain,"example.com"} of the session cookie
     Hdr = mochiweb_cookies:cookie(?SESSION_COOKIE, "", [{max_age, 0}, {path, "/"}]),
-    RD1 = wrq:merge_response_headers([Hdr], RD),
+    RD1 = wrq:merge_resp_headers([Hdr], RD),
     zp_context:set_reqdata(RD1, Context#context{session_pid=undefined}).
 

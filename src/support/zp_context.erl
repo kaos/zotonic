@@ -185,7 +185,8 @@ ensure_session(Context) ->
         undefined ->
             Context1 = zp_session_manager:ensure_session(Context),
             zp_visitor:associate_session(Context1#context.visitor_pid, Context1#context.session_pid),
-            add_nocache_headers(Context1);
+            Context2 = zp_auth:logon_from_session(Context1),
+            add_nocache_headers(Context2);
         _ ->
             Context    
     end.

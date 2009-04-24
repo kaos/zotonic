@@ -88,7 +88,7 @@
 							</h3>
 							<div class="item clearfix">
 								{% button class="save-resource save" text="save" %}
-								{% button class="discard-resource" text="cancel" action={redirect dispatch="admin"} %}
+								{% button class="discard-resource" text="cancel" action={redirect back} %}
 							</div>
 						</div>
 					

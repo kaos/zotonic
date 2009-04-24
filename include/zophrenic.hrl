@@ -122,6 +122,8 @@
 -define(WEEK,   604800).
 -define(YEAR, 31557600).
 
+%% Our default WWW-Authenticate header
+-define(WWW_AUTHENTICATE, "OAuth-rsn").
 
 %% Below is copied from Nitrogen, which is copyright 2008-2009 Rusty Klophaus
 

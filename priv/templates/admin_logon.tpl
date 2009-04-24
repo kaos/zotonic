@@ -10,24 +10,9 @@
 				<h2>Logon to Zophrenic</h2>
 
 				<p>To administer your system you need to logon.</p>
-				<form method="post">
-					<fieldset>
-						<div class="form-item">
-							<label for="zp-username">Name</label>
-							<input type="text" name="zp-username" id="zp-username" />
-						</div>
-						<div class="form-item">
 
-							<label for="zp-password">Password</label>
-							<input type="text" name="zp-password" id="zp-password" />
-						</div>
-						<div class="form-item clearfix">
-							<button type="submit">Logon</button>
-							<button>Cancel</button>
-						</div>
+				{% include "_logon.tpl" %}
 
-					</fieldset>
-				</form>
 			</div>
 			<div class="zp-33">&nbsp;</div>
 		</div>

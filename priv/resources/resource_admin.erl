@@ -4,7 +4,16 @@
 
 -module(resource_admin).
 -author("Tim Benniks <tim@timbenniks.com>").
+
+-export([
+    is_authorized/2
+]).
+
 -include_lib("resource_html.hrl").
+
+is_authorized(ReqData, Context) ->
+    zp_auth:wm_is_authorized(ReqData, Context).
+
 
 html(Context) ->
     Html = zp_template:render("admin.tpl", [], Context),

@@ -13,8 +13,9 @@
 
 -include_lib("resource_html.hrl").
 
+%% @todo Change this into "visible" and add a view instead of edit template.
 is_authorized(ReqData, Context) ->
-    {true, ReqData, Context}.
+    zp_auth:wm_is_authorized(true, visible, "id", ReqData, Context).
 
 
 resource_exists(ReqData, Context) ->
@@ -26,8 +27,7 @@ resource_exists(ReqData, Context) ->
         Context3 = zp_context:set(id, IdN, Context2),
         ?WM_REPLY(m_rsc:exists(IdN, Context3), Context3)
     catch
-        _:_ ->
-            ?WM_REPLY(false, Context2)
+        _:_ -> ?WM_REPLY(false, Context2)
     end.
 
 
@@ -35,10 +35,7 @@ html(Context) ->
     Vars = [
         {id, zp_context:get(id, Context)}
     ],
-    F = fun(Ctx) ->
-        zp_template:render("admin_edit.tpl", Vars, Ctx)
-    end,
-    Html = zp_acl:sudo(F, Context),
+    Html = zp_template:render("admin_edit.tpl", Vars, Context),
 	zp_context:output(Html, Context).
 
 
