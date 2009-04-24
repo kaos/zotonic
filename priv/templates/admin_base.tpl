@@ -33,11 +33,13 @@
 		<![endif]-->
 
 		{% block navigation %}
+		{% wire id="zp-logoff" action={logoff} %}
 		<ul id="navigation" class="zp-100">
 			<li><a href="/admin/" class="current">Dashboard</a></li>
 			<li><a href="/admin/overview/">Pages</a></li>
 			<li><a href="#">Users</a></li>
 			<li><a href="#">Products</a></li>
+			<li class="right"><a id="zp-logoff" href="#">Logoff</a></li>
 			<li class="right"><a href="#">Options</a></li>
 		</ul>
 		{% endblock %}

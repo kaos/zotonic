@@ -12,6 +12,8 @@
     is_auth/1,
     is_auth_recent/1,
     output_logon/1,
+    
+    logoff/1,
     logon_from_session/1,
     
     wm_is_authorized/2,
@@ -36,6 +38,11 @@ is_auth_recent(_) ->
     true.
 
 
+logoff(Context) ->
+    zp_context:set_session(auth_user_id, undefined, Context),
+    zp_acl:logoff(Context).
+    
+    
 %% @doc Check if the session contains an authenticated user id. Called after zp_context:ensure_session. When found
 %% then the user_id of the context is set.
 %% @spec logon_from_session(#context) -> #context
