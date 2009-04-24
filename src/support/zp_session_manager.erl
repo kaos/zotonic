@@ -50,7 +50,7 @@ stop_session(Context) ->
     gen_server:call(?MODULE, {stop_session, Context}).
 
 %% @spec rename_session(Context) -> Context
-%% @doc Ensure a session and rename the cookie
+%% @doc Rename the session id, only call this after ensure_session
 rename_session(Context) ->
     gen_server:call(?MODULE, {rename_session, Context}).
 
@@ -108,7 +108,19 @@ handle_call({stop_session, Context}, _From, State) ->
 
 %% Rename the current session, retain the same session pid, only call this after ensure_session
 handle_call({rename_session, Context}, _From, State) ->
-    {reply, Context, State};
+    case Context#context.session_pid of
+        undefined -> 
+            {reply, Context, State};
+        Pid -> 
+            % Remove old session-id from the lookup tables
+            State1 = erase_session_pid(Pid, State),
+            
+            % Generate a new session id and set cookie
+            SessionId = zp_ids:id(),
+            Context1  = set_session_id(SessionId, Context),
+            State2    = store_session_pid(SessionId, Pid, State1),
+            {reply, Context1, State2}
+    end;
 
 %% Return the number of sessions
 handle_call(count, _From, State) ->
@@ -159,7 +171,7 @@ ensure_session1(_SessionId, Pid, Context, State) ->
     {Pid, Context1, State}.
 
 
-%% @spec forget_session_pid(pid(), State) -> State
+%% @spec erase_session_pid(pid(), State) -> State
 %% @doc Remove the pid from the session state
 erase_session_pid(Pid, State) ->
     case dict:find(Pid, State#session_srv.pid2key) of

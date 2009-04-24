@@ -111,6 +111,7 @@ output_logon(Context) ->
 
 %% @doc Handle logon events. When successful then reload the current page
 event({submit, logon, _TriggerId, _TargetId}, Context) ->
-    zp_context:set_session(auth_user_id, 1, Context),
-    zp_context:set_session(auth_timestamp, erlang:universaltime(), Context),
-    zp_render:wire({reload, []}, Context).
+    Context1 = zp_session_manager:rename_session(Context),
+    zp_context:set_session(auth_user_id, 1, Context1),
+    zp_context:set_session(auth_timestamp, erlang:universaltime(), Context1),
+    zp_render:wire({reload, []}, Context1).
