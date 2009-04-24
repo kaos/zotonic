@@ -10,19 +10,24 @@
 -export([render_action/4]).
 
 render_action(_TriggerId, _TargetId, Args, Context) ->
-    Location = case proplists:get_value(dispatch, Args) of
-        undefined ->
-            case proplists:get_value(id, Args) of
-                undefined -> 
-                    proplists:get_value(location, Args, "/");
-                Id ->
-                    m_rsc:p(Id, page_url, Context)
-            end;
-        DispatchString ->
-            Dispatch = zp_convert:to_atom(DispatchString),
-            Args1 = proplists:delete(dispatch, Args),
-            zp_dispatcher:url_for(Dispatch, Args1, none, Context)
+    Script = case proplists:get_value(back, Args) of
+        true ->
+            "history.go(-1);";
+        _ ->
+            Location = case proplists:get_value(dispatch, Args) of
+                undefined ->
+                    case proplists:get_value(id, Args) of
+                        undefined -> 
+                            proplists:get_value(location, Args, "/");
+                        Id ->
+                            m_rsc:p(Id, page_url, Context)
+                    end;
+                DispatchString ->
+                    Dispatch = zp_convert:to_atom(DispatchString),
+                    Args1 = proplists:delete(dispatch, Args),
+                    zp_dispatcher:url_for(Dispatch, Args1, none, Context)
+            end,
+        	[<<"window.location = \"">>,zp_utils:js_escape(Location),$",$;]
     end,
-	Script = [<<"window.location = \"">>,zp_utils:js_escape(Location),$",$;],
 	{Script, Context}.
     
