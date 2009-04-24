@@ -50,10 +50,9 @@ insert(Props, Context) ->
         true -> Props;
         false ->
             zp_utils:prop_delete(is_admin, 
-                zp_utils:prop_delete(is_editor, 
-                    zp_utils:prop_delete(is_supervisor, 
-                        zp_utils:prop_delete(is_community_publisher, 
-                            zp_utils:prop_delete(is_public_publisher, Props)))))
+                zp_utils:prop_delete(is_supervisor, 
+                    zp_utils:prop_delete(is_community_publisher, 
+                        zp_utils:prop_delete(is_public_publisher, Props))))
     end,
     PropsType = case proplists:get_value(grouptype_id, PropsSafe) of
         undefined -> [ {grouptype_id, m_grouptype:default(Context)} | PropsSafe];

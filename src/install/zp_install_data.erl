@@ -55,16 +55,16 @@ install_group(C) ->
     pgsql:reset_id(C, "grouptype"),
 
     Groups = [
-        %   tp name                admin  edit   spvsr  cpub   ppub   props
-        [1, 2, "admins",           true,  true,  true,  true,  true,  [{title, {trans, [{en, "Administrators"},   {nl, "Beheerders"}]}}]],
-        [2, 2, "editors",          false, true,  false, true,  true,  [{title, {trans, [{en, "Editors"},          {nl, "Redacteurs"}]}}]],
-        [3, 2, "communityeditors", false, true,  false, true,  false, [{title, {trans, [{en, "Community Editors"},{nl, "Gemeenschap Redacteurs"}]}}]],
-        [4, 2, "supervisors",      false, false, true,  false, false, [{title, {trans, [{en, "Supervisors"},      {nl, "Toezichthouders"}]}}]],
-        [5, 2, "content",          false, false, false, false, false, [{title, {trans, [{en, "Content"},          {nl, "Inhoud"}]}}]]
+        %   tp name                admin  spvsr  cpub   ppub   props
+        [1, 2, "admins",           true,  true,  true,  true,  [{title, {trans, [{en, "Administrators"},   {nl, "Beheerders"}]}}]],
+        [2, 2, "editors",          false, false, true,  true,  [{title, {trans, [{en, "Editors"},          {nl, "Redacteurs"}]}}]],
+        [3, 2, "communityeditors", false, false, true,  false, [{title, {trans, [{en, "Community Editors"},{nl, "Gemeenschap Redacteurs"}]}}]],
+        [4, 2, "supervisors",      false, true,  false, false, [{title, {trans, [{en, "Supervisors"},      {nl, "Toezichthouders"}]}}]],
+        [5, 2, "content",          false, false, false, false, [{title, {trans, [{en, "Content"},          {nl, "Inhoud"}]}}]]
     ],
     
     [ {ok,1} = pgsql:equery(C, "
-            insert into \"group\" (id, grouptype_id, name, is_admin, is_editor, is_supervisor, is_community_publisher, is_public_publisher, props) 
+            insert into \"group\" (id, grouptype_id, name, is_admin, is_supervisor, is_community_publisher, is_public_publisher, props) 
             values ($1, $2, $3, $4, $5, $6, $7, $8, $9)", R) || R <- Groups],
     
     pgsql:reset_id(C, "group"),
