@@ -28,7 +28,12 @@ render(Params, _Vars, Context, _State) ->
                 	Postback  -> [{postback,Postback} | Options]
                 end,
 
+    Delegate1 = case Delegate of
+        undefined -> undefined;
+        _ -> zp_convert:to_atom(Delegate)
+    end,
+
     case Options1 of
         [] -> {error, "scomp wire: please give either an <em>action</em> or a <em>postback</em> parameter."};
-        _  -> {ok, zp_render:wire(Id, TargetId, {event,[{type,Type},{delegate,Delegate}|Options1]}, Context)}
+        _  -> {ok, zp_render:wire(Id, TargetId, {event,[{type,Type},{delegate,Delegate1}|Options1]}, Context)}
     end.
