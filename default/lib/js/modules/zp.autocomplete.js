@@ -47,13 +47,13 @@ $.widget("ui.autocomplete",
 			
 			input_updater = setTimeout(function()
 			{
-				if(this.value.length >= self.options.afterChars)
+				if(obj.val().length >= self.options.afterChars)
 				{
 					obj.addClass('loading');
 				
 					$.post(self.options.controller, 
 					{
-						input: 			this.value,
+						input: 			obj.val(),
 						obj:   			obj,
 						suggestions: 	suggestions
 					});

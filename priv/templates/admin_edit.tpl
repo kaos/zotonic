@@ -123,7 +123,7 @@
 											<span class="unlink-item">Ortlieb</span>
 										</span>
 									</div>
-									<span class="link-add"><a href="javascript:void(0);">Add another link</a></span>
+									<span class="link-add"><input type="text" class="do_autocomplete" /></span>
 								</div>
 							</div>
 						</div>
