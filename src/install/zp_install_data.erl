@@ -65,7 +65,7 @@ install_group(C) ->
     
     [ {ok,1} = pgsql:equery(C, "
             insert into \"group\" (id, grouptype_id, name, is_admin, is_supervisor, is_community_publisher, is_public_publisher, props) 
-            values ($1, $2, $3, $4, $5, $6, $7, $8, $9)", R) || R <- Groups],
+            values ($1, $2, $3, $4, $5, $6, $7, $8)", R) || R <- Groups],
     
     pgsql:reset_id(C, "group"),
     ok.
