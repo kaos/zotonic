@@ -24,52 +24,41 @@
 *	
 *	@author 	Tim Benniks <tim@timbenniks.com>
 * 	@copyright  2009 timbenniks.com
-*	@version    $Id: zp.unlink.js 12 2009-04-15 12:24:18Z timbenniks $
+*	@version    $Id: zp.autocomplete.js 12 2009-04-15 12:24:18Z timbenniks $
 **/
 $.widget("ui.autocomplete", 
 {
 	_init: function() 
 	{
-		var self		= this;
-		var obj 		= this.element;	
-		var inputWidth 	= obj.width() + parseInt(obj.css('padding-left')) + parseInt(obj.css('padding-right'));
-		var ulTop 		= obj.position().top + obj.height() + parseInt(obj.css('padding-top')) + parseInt(obj.css('padding-bottom'));
-		var suggestions = $('<ul></ul>').addClass('suggestions-list').css({width: inputWidth, position: 'absolute', top: ulTop, left: obj.position().left}).hide().appendTo(document.body);
-
+		var self			= this;
+		var obj 			= this.element;	
+		var inputWidth 		= obj.width() + parseInt(obj.css('padding-left')) + parseInt(obj.css('padding-right'));
+		var ulTop 			= obj.position().top + obj.height() + parseInt(obj.css('padding-top')) + parseInt(obj.css('padding-bottom'));
+		var suggestions 	= $('<ul></ul>').addClass('suggestions-list').css({width: inputWidth, position: 'absolute', top: ulTop, left: obj.position().left}).hide().appendTo(document.body);
+		var input_updater 	= false;
+	
 		obj.bind('keyup', function()
 		{
-			if(this.value.length >= self.options.afterChars)
+			if(input_updater)
 			{
-				obj.addClass('loading');
-				
-				$.get(self.options.controller, 
-				{
-					input: this.value
-				}, 
-				function(data)
-				{
-					if(data)
-					{
-						obj.removeClass('loading');
-						suggestions.animate({height: 'show', opacity: 'show'}, 200).html(data);
-	
-						$('.suggestions-result').hover(function() 
-						{
-							$(this).addClass('hovering')
-						},
-						function()
-						{
-							$(this).removeClass('hovering')
-						})
-						.click(function()
-						{
-							obj.val($(this).html());
-							suggestions.animate({height: 'hide', opacity: 'hide'}, 200);
-							self.kill();
-						});
-					}
-				});
+				clearTimeout(input_updater);
+				input_updater = false;
 			}
+			
+			input_updater = setTimeout(function()
+			{
+				if(this.value.length >= self.options.afterChars)
+				{
+					obj.addClass('loading');
+				
+					$.post(self.options.controller, 
+					{
+						input: 			this.value,
+						obj:   			obj,
+						suggestions: 	suggestions
+					});
+				}
+			}, 400);
 		});
 	},
 	
@@ -80,6 +69,30 @@ $.widget("ui.autocomplete",
 });
 
 $.ui.autocomplete.defaults = {
-	controller: 'test.php',
+	controller: '/postback',
 	afterChars: 3
+}
+
+var zp_autoCompleteAfterPostback = function(obj, suggestions, data)
+{
+	if(data)
+	{
+		obj.removeClass('loading');
+		suggestions.animate({height: 'show', opacity: 'show'}, 200).html(data);
+
+		$('.suggestions-result').hover(function() 
+		{
+			$(this).addClass('hovering')
+		},
+		function()
+		{
+			$(this).removeClass('hovering')
+		})
+		.click(function()
+		{
+			obj.val($(this).html());
+			suggestions.animate({height: 'hide', opacity: 'hide'}, 200);
+			$.ui.autocomplete.kill();
+		});
+	}
 }
