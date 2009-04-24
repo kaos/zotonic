@@ -1,6 +1,7 @@
 %% @author Justin Sheehy <justin@basho.com>
 %% @author Andy Gross <andy@basho.com>
-%% @copyright 2007-2008 Basho Technologies
+%% @author Bryan Fink <bryan@basho.com>
+%% @copyright 2007-2009 Basho Technologies
 %%
 %%    Licensed under the Apache License, Version 2.0 (the "License");
 %%    you may not use this file except in compliance with the License.
@@ -19,16 +20,16 @@
 -module(webmachine_decision_core).
 -author('Justin Sheehy <justin@basho.com>').
 -author('Andy Gross <andy@basho.com>').
--export([handle_request/3]).
+-author('Bryan Fink <bryan@basho.com>').
+-export([handle_request/2]).
 -export([do_log/1]).
 -include("webmachine_logger.hrl").
 
-handle_request(Req, Pid, Path) ->
+handle_request(Req, Pid) ->
     put(req, Req),
     put(pid, Pid),
-    put(path, Path),
     try
-        decision(v3b13)
+        d(v3b13)
     catch
         error:_ ->            
             error_response(erlang:get_stacktrace())
@@ -36,12 +37,16 @@ handle_request(Req, Pid, Path) ->
 
 wrcall(X) ->
     Req = get(req),
-    %%io:format(" ~p:~p~n", [Req,X]),
     Req:call(X).
 
-get_header_val(H) -> wrcall({get_header_value, H}).
+get_header_val(H) -> wrcall({get_req_header, H}).
 
 method() -> wrcall(method).
+
+d(DecisionID) ->
+    put(decision, DecisionID),
+    log_decision(DecisionID),
+    decision(DecisionID).
     
 respond(Code) ->
     EndTime = now(),
@@ -50,9 +55,24 @@ respond(Code) ->
 	    ErrorHandler = webmachine_dispatcher:get_error_handler(),
 	    Reason = {none, none, []},
 	    ErrorHTML = ErrorHandler:render_error(Code, get(req), Reason),
-            wrcall({append_to_response_body, ErrorHTML});
+            wrcall({set_resp_body, ErrorHTML});
+        304 ->
+            wrcall({remove_resp_header, "Content-Type"}),
+            case resource_call(generate_etag) of
+                undefined -> nop;
+                ETag -> wrcall({set_resp_header, "ETag", ETag})
+            end,
+            case resource_call(expires) of
+                undefined -> nop;
+                Exp ->
+                    wrcall({set_resp_header, "Expires",
+                           httpd_util:rfc1123_date(
+                              calendar:universal_time_to_local_time(Exp))})
+            end;
 	_ -> ignore
     end,
+    put(code, Code),
+    wrcall({set_response_code, Code}),
     resource_call(finish_request),
     wrcall({send_response, Code}),
     RMod = wrcall({get_metadata, 'resource_module'}),
@@ -65,13 +85,13 @@ respond(Code) ->
     Req:stop().
 
 respond(Code, Headers) ->
-    wrcall({add_response_headers, Headers}),
+    wrcall({set_resp_headers, Headers}),
     respond(Code).
 
 error_response(Code, Reason) ->
     ErrorHandler = webmachine_dispatcher:get_error_handler(),
     ErrorHTML = ErrorHandler:render_error(Code, get(req), Reason),
-    wrcall({append_to_response_body, ErrorHTML}),
+    wrcall({set_resp_body, ErrorHTML}),
     respond(Code).
 error_response(Reason) ->
     error_response(500, Reason).
@@ -89,7 +109,7 @@ decision_flow(X, TestResult) when is_integer(X) ->
     if X >= 500 -> error_response(X, TestResult);
        true -> respond(X)
     end;
-decision_flow(X, _TestResult) when is_atom(X) -> decision(X);
+decision_flow(X, _TestResult) when is_atom(X) -> d(X);
 decision_flow({ErrCode, Reason}, _TestResult) when is_integer(ErrCode) ->
     error_response(ErrCode, Reason).
 
@@ -107,8 +127,9 @@ do_log(LogData) ->
 	    ignore
     end.
 
-resource_call(Fun) ->
-    webmachine_resource:do(Fun, get()).
+resource_call(Fun) -> webmachine_resource:do(Fun, get()).
+
+log_decision(DecisionID) -> webmachine_resource:log_d(DecisionID,get()).
 
 %% "Service Available"
 decision(v3b13) ->	
@@ -127,9 +148,9 @@ decision(v3b10) ->
     Methods = resource_call(allowed_methods),
     case lists:member(method(), Methods) of
 	true ->
-	    decision(v3b9);
+	    d(v3b9);
 	false ->
-	    wrcall({add_response_headers, [{"Allow",
+	    wrcall({set_resp_headers, [{"Allow",
 		     string:join([atom_to_list(M) || M <- Methods], ", ")}]}),
 	    respond(405)
     end;
@@ -139,13 +160,13 @@ decision(v3b9) ->
 %% "Authorized?"
 decision(v3b8) ->
     case resource_call(is_authorized) of
-	true -> decision(v3b7);
+	true -> d(v3b7);
 	{error, Reason} ->
 	    error_response(Reason);
 	{halt, Code}  ->
 	    respond(Code);
         AuthHead ->
-            wrcall({add_response_header, "WWW-Authenticate", AuthHead}),
+            wrcall({set_resp_header, "WWW-Authenticate", AuthHead}),
             respond(401)
     end;
 %% "Forbidden?"
@@ -167,7 +188,7 @@ decision(v3b3) ->
 	    Hdrs = resource_call(options),
 	    respond(200, Hdrs);
 	_ ->
-	    decision(v3c3)
+	    d(v3c3)
     end;
 %% Accept exists?
 decision(v3c3) ->
@@ -175,9 +196,9 @@ decision(v3c3) ->
     case get_header_val("accept") of
 	undefined ->
 	    wrcall({set_metadata, 'content-type', hd(PTypes)}),
-	    decision(v3d4);
+	    d(v3d4);
 	_ ->
-	    decision(v3c4)
+	    d(v3c4)
     end;
 %% Acceptable media type available?
 decision(v3c4) ->
@@ -188,7 +209,7 @@ decision(v3c4) ->
 	    respond(406);
 	MType ->
 	    wrcall({set_metadata, 'content-type', MType}),
-	    decision(v3d4)
+	    d(v3d4)
     end;
 %% Accept-Language exists?
 decision(v3d4) ->
@@ -202,7 +223,7 @@ decision(v3e5) ->
     case get_header_val("accept-charset") of
         undefined -> decision_test(choose_charset("*"),
                                    none, 406, v3f6);
-        _ -> decision(v3e6)
+        _ -> d(v3e6)
     end;
 %% Acceptable Charset available?
 decision(v3e6) ->
@@ -216,12 +237,12 @@ decision(v3f6) ->
                undefined -> "";
                CS -> "; charset=" ++ CS
            end,
-    wrcall({add_response_header, "Content-Type", CType ++ CSet}),
+    wrcall({set_resp_header, "Content-Type", CType ++ CSet}),
     case get_header_val("accept-encoding") of
         undefined ->
             decision_test(choose_encoding("identity;q=1.0,*;q=0.5"),
                           none, 406, v3g7);
-        _ -> decision(v3f7)
+        _ -> d(v3f7)
     end;
 %% Acceptable encoding available?
 decision(v3f7) ->
@@ -233,7 +254,7 @@ decision(v3g7) ->
     case variances() of
         [] -> nop;
         Variances ->
-            wrcall({add_response_header, "Vary", string:join(Variances, ", ")})
+            wrcall({set_resp_header, "Vary", string:join(Variances, ", ")})
     end,
     decision_test(resource_call(resource_exists), true, v3g8, v3h7);
 %% "If-Match exists?"
@@ -244,7 +265,7 @@ decision(v3g9) ->
     decision_test(get_header_val("if-match"), "*", v3h10, v3g11);
 %% "ETag in If-Match"
 decision(v3g11) ->
-    ReqETag = mochiweb_util:unquote_header(get_header_val("if-match")),
+    ReqETag = webmachine_util:unquote_header(get_header_val("if-match")),
     decision_test(resource_call(generate_etag), ReqETag, v3h10, 412);
 %% "If-Match: * exists"
 decision(v3h7) ->
@@ -268,10 +289,10 @@ decision(v3h12) ->
 decision(v3i4) ->
     case resource_call(moved_permanently) of
 	{true, MovedURI} ->
-	    wrcall({add_response_header, "Location", MovedURI}),
+	    wrcall({set_resp_header, "Location", MovedURI}),
 	    respond(301);
 	false ->
-	    decision(v3p3);
+	    d(v3p3);
 	{error, Reason} ->
 	    error_response(Reason);
 	{halt, Code} ->
@@ -294,10 +315,10 @@ decision(v3j18) ->
 decision(v3k5) ->
     case resource_call(moved_permanently) of
 	{true, MovedURI} ->
-	    wrcall({add_response_header, "Location", MovedURI}),
+	    wrcall({set_resp_header, "Location", MovedURI}),
 	    respond(301);
 	false ->
-	    decision(v3l5);
+	    d(v3l5);
 	{error, Reason} ->
 	    error_response(Reason);
 	{halt, Code} ->
@@ -308,16 +329,16 @@ decision(v3k7) ->
     decision_test(resource_call(previously_existed), true, v3k5, v3l7);
 %% "Etag in if-none-match?"
 decision(v3k13) ->
-    ReqETag = mochiweb_util:unquote_header(get_header_val("if-none-match")),
+    ReqETag = webmachine_util:unquote_header(get_header_val("if-none-match")),
     decision_test(resource_call(generate_etag), ReqETag, v3j18, v3l13);
 %% "Moved temporarily?"
 decision(v3l5) ->
     case resource_call(moved_temporarily) of
 	{true, MovedURI} ->
-	    wrcall({add_response_header, "Location", MovedURI}),
+	    wrcall({set_resp_header, "Location", MovedURI}),
 	    respond(307);
 	false ->
-	    decision(v3m5);
+	    d(v3m5);
 	{error, Reason} ->
 	    error_response(Reason);
 	{halt, Code} ->
@@ -371,16 +392,20 @@ decision(v3n11) ->
     Stage1 = case resource_call(post_is_create) of
         true ->
             case resource_call(create_path) of
-                undefined -> respond(500);
+                undefined -> error_response("post_is_create w/o create_path");
                 NewPath ->
-                    put(path, NewPath),
-                    Res = accept_helper(),
-                    case Res of
-                        {respond, Code} -> respond(Code);
-                        {halt, Code} -> respond(Code);
-                        {error, _,_} ->
-                            error_response(Res);
-                        _ -> stage1_ok
+                    case is_list(NewPath) of
+                        false -> error_response("create_path not a string");
+                        true ->
+                            wrcall({set_disp_path, NewPath}),
+                            Res = accept_helper(),
+                            case Res of
+                                {respond, Code} -> respond(Code);
+                                {halt, Code} -> respond(Code);
+                                {error, _,_} -> error_response(Res);
+                                {error, _} -> error_response(Res);
+                                _ -> stage1_ok
+                            end
                     end
             end;
         _ ->
@@ -392,9 +417,9 @@ decision(v3n11) ->
     end,
     case Stage1 of
         stage1_ok ->
-            case wrcall({get_metadata, 'do_redirect'}) of
+            case wrcall(resp_redirect) of
                 true ->
-                    case wrcall({get_out_header, "Location"}) of
+                    case wrcall({get_resp_header, "Location"}) of
                         undefined ->
                             respond(500,
                                     "Response had do_redirect but no Location");
@@ -402,7 +427,7 @@ decision(v3n11) ->
                             respond(303)
                     end;
                 _ ->
-                    decision(v3p11)
+                    d(v3p11)
             end;
         _ -> nop
     end;
@@ -417,9 +442,9 @@ decision(v3o14) ->
              case Res of
                  {respond, Code} -> respond(Code);
                  {halt, Code} -> respond(Code);
-                 {error, _,_} ->
-                     error_response(Res);
-                 _ -> decision(v3p11)
+                 {error, _,_} -> error_response(Res);
+                 {error, _} -> error_response(Res);
+                 _ -> d(v3p11)
              end
     end;
 %% "PUT?"
@@ -437,39 +462,43 @@ decision(v3o18) ->
         true ->
             case resource_call(generate_etag) of
                 undefined -> nop;
-                ETag -> wrcall({add_response_header, "ETag", ETag})
+                ETag -> wrcall({set_resp_header, "ETag", ETag})
             end,
             CT = wrcall({get_metadata, 'content-type'}),
             case resource_call(last_modified) of
                 undefined -> nop;
                 LM ->
-                    wrcall({add_response_header, "Last-Modified",
-                           httpd_util:rfc1123_date(calendar:universal_time_to_local_time(LM))})
+                    wrcall({set_resp_header, "Last-Modified",
+                           httpd_util:rfc1123_date(
+                             calendar:universal_time_to_local_time(LM))})
             end,
             case resource_call(expires) of
                 undefined -> nop;
                 Exp ->
-                    wrcall({add_response_header, "Expires",
-                           httpd_util:rfc1123_date(calendar:universal_time_to_local_time(Exp))})
+                    wrcall({set_resp_header, "Expires",
+                           httpd_util:rfc1123_date(
+                              calendar:universal_time_to_local_time(Exp))})
             end,
             F = hd([Fun || {Type,Fun} <- resource_call(content_types_provided),
                            CT =:= Type]),
-            webmachine_resource:do(F, get());
+            resource_call(F);
         false -> nop
     end,
     case FinalBody of
+        {error, _} -> error_response(FinalBody);
         {error, _,_} -> error_response(FinalBody);
-        nop -> decision(v3o18b);
-        _ -> wrcall({append_to_response_body,
+        {halt, Code} -> respond(Code);
+        nop -> d(v3o18b);
+        _ -> wrcall({set_resp_body,
                      encode_body(iolist_to_binary(FinalBody))}),
-             decision(v3o18b)
+             d(v3o18b)
     end;
 
 decision(v3o18b) ->
     decision_test(resource_call(multiple_choices), true, 300, 200);
 %% Response includes an entity?
 decision(v3o20) ->
-    decision_test(wrcall(has_response_body), true, v3o18, 204);
+    decision_test(wrcall(has_resp_body), true, v3o18, 204);
 %% Conflict?
 decision(v3p3) ->
     case resource_call(is_conflict) of
@@ -478,16 +507,16 @@ decision(v3p3) ->
              case Res of
                  {respond, Code} -> respond(Code);
                  {halt, Code} -> respond(Code);
-                 {error, _,_} ->
-                     error_response(Res);
-                 _ -> decision(v3p11)
+                 {error, _,_} -> error_response(Res);
+                 {error, _} -> error_response(Res);
+                 _ -> d(v3p11)
              end
     end;
 
 %% New resource?  (at this point boils down to "has location header")
 decision(v3p11) ->
-    case wrcall({get_out_header, "Location"}) of
-        undefined -> decision(v3o20);
+    case wrcall({get_resp_header, "Location"}) of
+        undefined -> d(v3o20);
         _ -> respond(201)
     end.
 
@@ -503,7 +532,7 @@ accept_helper() ->
         [] -> {respond,415};
         AcceptedContentList ->
             F = hd(AcceptedContentList),
-            webmachine_resource:do(F, get())
+            resource_call(F)
     end.
 
 encode_body(Body) ->
@@ -527,7 +556,7 @@ choose_encoding(AccEncHdr) ->
                 "identity" ->
                     nop;
                 _ ->
-                    wrcall({add_response_header, "Content-Encoding",ChosenEnc})
+                    wrcall({set_resp_header, "Content-Encoding",ChosenEnc})
             end,
             wrcall({set_metadata, 'content-encoding',ChosenEnc}),
 	    ChosenEnc

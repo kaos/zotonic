@@ -24,7 +24,8 @@
 -define(MATCH_ALL, '*').
 
 %% API
--export([start_link/0, start_link/1, stop/0, dispatch/1, set_dispatch_list/1]).
+-export([start_link/0, start_link/1, stop/0, dispatch/1,
+         set_dispatch_list/1, get_dispatch_list/0]).
 -export([set_error_handler/1, get_error_handler/0]).
 
 %% gen_server callbacks
@@ -52,6 +53,9 @@ dispatch(Req) ->
 set_dispatch_list(List) when is_list(List) ->
     gen_server:cast(?MODULE, {set_dispatch_list, List}).
 
+get_dispatch_list() ->
+    gen_server:call(?MODULE, get_dispatch_list).
+
 set_error_handler(ErrorHandlerMod) when is_atom(ErrorHandlerMod) ->
     gen_server:cast(?MODULE, {set_error_handler, ErrorHandlerMod}).
 
@@ -78,11 +82,13 @@ init([DispatchList]) ->
 %%                                      {stop, Reason, Reply, State} |
 %%                                      {stop, Reason, State}
 %% Description: Handling call messages
-handle_call({dispatch, Req}, _From, State) ->
-    DispatchData = binding_dispatch(State#state.dispatchlist, Req),
-    {reply, DispatchData, State};
+handle_call({dispatch, Req}, From, State) ->
+    spawn(fun() -> binding_dispatch(State#state.dispatchlist, Req, From) end),
+    {noreply, State};
 handle_call(get_error_handler, _From, State) ->
-    {reply, State#state.error_handler, State}.
+    {reply, State#state.error_handler, State};
+handle_call(get_dispatch_list, _From, State) ->
+    {reply, State#state.dispatchlist, State}.
 
 %% @spec handle_cast(Msg, State) -> {noreply, State} |
 %%                                  {noreply, State, Timeout} |
@@ -148,7 +154,7 @@ reconstitute([]) ->
 reconstitute(UnmatchedTokens) ->
     string:join(UnmatchedTokens, [?SEPARATOR]).
 
-binding_dispatch(DispatchList, Req) ->
+binding_dispatch(DispatchList, Req, Client) ->
     PathAsString = Req:path(),
     Path = string:tokens(PathAsString, [?SEPARATOR]),
     % URIs that end with a trailing slash are implicitly one token
@@ -158,7 +164,7 @@ binding_dispatch(DispatchList, Req) ->
 		     true -> 1;
 		     _ -> 0
 		 end,
-    try_binding(DispatchList, Path, ExtraDepth).
+    gen_server:reply(Client, try_binding(DispatchList, Path, ExtraDepth)).
 
 calculate_app_root(1) ->
     ".";

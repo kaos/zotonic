@@ -4,15 +4,11 @@ EBIN_DIRS    := $(wildcard deps/*/ebin)
 APP          := zophrenic
 PARSER        =src/erlydtl/erlydtl_parser
 
-all: mochiweb webmachine gen $(PARSER).erl erl ebin/$(APP).app 
+all: mochiweb webmachine $(PARSER).erl erl ebin/$(APP).app 
 
 erl:
-	@$(ERL) -pa $(EBIN_DIRS) -noinput +B \
-	  -eval 'code:load_file(gen_scomp), case make:all() of up_to_date -> halt(0); error -> halt(1) end.'
-
-gen:
-	@$(ERL) -pa $(EBIN_DIRS) -noinput +B \
-	  -eval 'case make:files(["src/behaviours/gen_scomp"]) of up_to_date -> halt(0); error -> halt(1) end.'
+	@$(ERL) -pa $(EBIN_DIRS) -pa ebin -noinput +B \
+	  -eval 'case make:all() of up_to_date -> halt(0); error -> halt(1) end.'
 
 $(PARSER).erl: $(PARSER).yrl
 	$(ERLC) -o src/erlydtl src/erlydtl/erlydtl_parser.yrl

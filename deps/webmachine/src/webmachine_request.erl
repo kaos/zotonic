@@ -1,6 +1,6 @@
 %% @author Justin Sheehy <justin@basho.com>
 %% @author Andy Gross <andy@basho.com>
-%% @copyright 2007-2008 Basho Technologies
+%% @copyright 2007-2009 Basho Technologies
 %% Based on mochiweb_request.erl, which is Copyright 2007 Mochi Media, Inc.
 %%
 %%    Licensed under the Apache License, Version 2.0 (the "License");
@@ -22,12 +22,17 @@
 -author('Andy Gross <andy@basho.com>').
 
 -export([
+         get_reqdata/0,
+         set_reqdata/1,
+	 socket/0,
 	 method/0,
 	 version/0,
+         disp_path/0,
 	 path/0,
-	 socket/0,
 	 raw_path/0,
+	 req_headers/0,
 	 headers/0,
+	 resp_headers/0,
 	 out_headers/0,
 	 get_out_header/1,
 	 has_out_header/1,
@@ -35,28 +40,25 @@
 	 get_header_value/1,
 	 add_response_header/2,
 	 add_response_headers/1,
+	 remove_response_header/1,
 	 merge_response_headers/1,
 	 append_to_response_body/1,
 	 send_response/1,
 	 response_code/0,
-	 recv_body/0,
-	 recv/1,
-	 serve_file/2,
+	 set_response_code/1,
+         set_resp_body/1,
 	 response_body/0,
 	 has_response_body/0,
 	 stop/0,
          do_redirect/0,
+         resp_redirect/0,
 	 set_metadata/2,
 	 get_metadata/1,
-	 set_path_info/2,
 	 get_path_info/0,
 	 get_path_info/1,
-	 load_path_info/1,
-	 load_dispatch_data/3,
+	 load_dispatch_data/4,
 	 get_path_tokens/0,
-	 set_path_tokens/1,
 	 get_app_root/0,
-	 set_app_root/1,
 	 parse_cookie/0,
 	 get_cookie_value/1,
 	 parse_qs/0,
@@ -67,151 +69,105 @@
          call/1
 	 ]).
 
--define(TIMEOUT, 60000).
+-define(TIMEOUT, 150000).
 
-call(Message) ->
-    gen_server:call(Pid, Message, ?TIMEOUT).
+call(Message) -> gen_server:call(Pid, Message, ?TIMEOUT).
 
-method() ->
-    call(method).
+get_reqdata() -> call(get_reqdata).
 
-version() ->
-    call(version).
+set_reqdata(RD) -> call({set_reqdata, RD}).
 
-path() ->
-    call(path).
+socket() -> call(socket).
 
-socket() ->
-    call(socket).
+method() -> call(method).
 
-raw_path() ->
-    call(raw_path).
+version() -> call(version).
 
-headers() ->
-    call(headers).
+disp_path() -> call(disp_path).
 
-out_headers() ->
-    call(out_headers).
+path() -> call(path).
 
-get_out_header(HeaderName) when is_list(HeaderName) ->
-    call({get_out_header, HeaderName}).
+raw_path() -> call(raw_path).
 
-has_out_header(HeaderName) when is_list(HeaderName) ->
-    case THIS:get_out_header(HeaderName) of
+req_headers() -> call(req_headers).
+headers() -> req_headers().
+
+resp_headers() -> call(resp_headers).
+out_headers() -> resp_headers().
+
+get_resp_header(HeaderName) -> call({get_resp_header, HeaderName}).
+get_out_header(HeaderName) -> get_resp_header(HeaderName).
+
+has_resp_header(HeaderName) ->
+    case get_out_header(HeaderName) of
         undefined -> false;
         _ -> true
     end.
+has_out_header(HeaderName) -> has_resp_header(HeaderName).
 
-has_response_body() ->
-   call(has_response_body). 
+has_resp_body() -> call(has_resp_body).
+has_response_body() -> has_resp_body().
 
-peer() ->
-    call(peer).
+response_code() -> call(response_code).
+set_response_code(Code) -> call({set_response_code, Code}).
 
-range() ->
-    call(range).
+peer() -> call(peer).
 
-response_code() ->
-    call(response_code).
+range() -> call(range).
 
-%% @spec parse_cookie() -> [{Key::string(), Value::string()}]
-%% @doc Parse the cookie header.
-parse_cookie() ->
-    call(parse_cookie).
+req_cookie() -> call(req_cookie).
+parse_cookie() -> req_cookie().
+get_cookie_value(Key) -> proplists:get_value(Key, req_cookie()).
 
-%% @spec get_cookie_value(Key::string) -> string() | undefined
-%% @doc Get the value of the given cookie.
-get_cookie_value(Key) ->
-    proplists:get_value(Key, parse_cookie()).
+req_qs() -> call(req_qs).
+parse_qs() -> req_qs().
+get_qs_value(Key) -> proplists:get_value(Key, req_qs()).
+get_qs_value(Key, Default) -> proplists:get_value(Key, req_qs(), Default).
 
-%% @spec parse_qs() -> [{Key::string(), Value::string()}]
-%% @doc Parse the query string of the URL.
-parse_qs() ->
-    call(parse_qs).
+stop() -> gen_server:cast(Pid, stop).
 
-%% @spec get_qs_value(Key::string) -> string() | undefined
-%% @doc Get the value of the given cookie.
-get_qs_value(Key) ->
-    proplists:get_value(Key, parse_qs()).
+set_resp_body(Body) -> call({set_resp_body, Body}).
+resp_body() -> call(resp_body).
+response_body() -> resp_body().
 
-%% @spec get_qs_value(Key::string, Default::term()) -> string() | Default
-%% @doc As get_qs_value/1, but supplies a default too.
-get_qs_value(Key, Default) ->
-    proplists:get_value(Key, parse_qs(), Default).
+get_req_header(K) -> call({get_req_header, K}).
+get_header_value(K) -> get_req_header(K).
 
-stop() ->
-    gen_server:cast(Pid, stop).
+set_resp_header(K, V) -> call({set_resp_header, K, V}).
+add_response_header(K, V) -> set_resp_header(K, V).
 
-recv_body() ->
-    call(recv_body).
+set_resp_headers(Hdrs) -> call({set_resp_headers, Hdrs}).
+add_response_headers(Hdrs) -> set_resp_headers(Hdrs).
 
-response_body() ->
-    call(response_body).
+remove_resp_header(K) -> call({remove_resp_header, K}).
+remove_response_header(K) -> remove_resp_header(K).
 
-get_header_value(K) ->
-    call({get_header_value, K}).
+merge_resp_headers(Hdrs) -> call({merge_resp_headers, Hdrs}).
+merge_response_headers(Hdrs) -> merge_resp_headers(Hdrs).
 
-add_response_header(K, V) ->
-    call({add_response_header, K, V}).
+append_to_response_body(Data) -> call({append_to_response_body, Data}).
 
-add_response_headers(Hdrs) ->
-    call({add_response_headers, Hdrs}).
+do_redirect() -> call({do_redirect}).
 
-merge_response_headers(Hdrs) ->
-    call({merge_response_headers, Hdrs}).
+resp_redirect() -> call({resp_redirect}).
 
-append_to_response_body(Data) ->
-    call({append_to_response_body, Data}).
+send_response(Code) -> call({send_response, Code}).
 
-send_response(Code) ->
-    call({send_response, Code}).
+get_metadata(Key) -> call({get_metadata, Key}).
 
-serve_file(Path, DocRoot) ->
-    call({serve_file, Path, DocRoot}).
+set_metadata(Key, Value) -> call({set_metadata, Key, Value}).
 
-get_metadata(Key) ->
-    call({get_metadata, Key}).
+get_path_info() -> call(get_path_info).
 
-do_redirect() ->
-    set_metadata('do_redirect', true).
+get_path_info(Key) -> call({get_path_info, Key}).
 
-set_metadata(Key, Value) ->
-    call({set_metadata, Key, Value}).
+path_tokens() -> call(path_tokens).
+get_path_tokens() -> path_tokens().
 
-%% @spec get_path_info() -> PropList 
-%% @doc Return all pathinfo args as a property list
-get_path_info() ->
-    call(get_path_info).
+app_root() -> call(app_root).
+get_app_root() -> app_root().
 
-get_path_info(Key) ->
-    call({get_path_info, Key}).
+load_dispatch_data(Bindings, PathTokens, AppRoot, DispPath) ->
+    call({load_dispatch_data, Bindings, PathTokens, AppRoot, DispPath}).
 
-set_path_info(Key, Value) ->
-    call({set_path_info, Key, Value}).
-
-%% @spec load_path_info(PropList) -> ok
-%% @doc Set the path-info dict to contain the props in PropList.
-%% The old path-info dict is discarded.
-load_path_info(PropList) when is_list(PropList) ->
-    call({load_path_info, PropList}).
-
-get_path_tokens() ->
-    call(get_path_tokens).
-
-set_path_tokens(TokenList) when is_list(TokenList) ->
-    call({set_path_tokens, TokenList}).
-
-get_app_root() ->
-    call(get_app_root).
-
-set_app_root(AppRoot) ->
-    call({set_app_root, AppRoot}).
-
-load_dispatch_data(Bindings, Path, AppRoot) ->
-    call({load_dispatch_data, Bindings, Path, AppRoot}).
-
-recv(Length) ->
-    call({recv, Length}).
-
-log_data() ->
-    call(log_data).
+log_data() -> call(log_data).

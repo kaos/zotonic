@@ -15,8 +15,9 @@
 
 -include_lib("resource_html.hrl").
 
-resource_exists(_ReqProps, Context) ->
-    ContextQs = zp_context:ensure_qs(Context),
+resource_exists(ReqData, Context) ->
+    Context1 = ?WM_REQ(ReqData, Context),
+    ContextQs = zp_context:ensure_qs(Context1),
     Cat    = zp_context:get_q("cat", ContextQs),
     Subcat = zp_context:get_q("subcat", ContextQs),
     Brand  = zp_context:get_q("brand",  ContextQs),
@@ -31,7 +32,7 @@ resource_exists(_ReqProps, Context) ->
         _ ->
             case m_rsc:name_to_id(Brand, C1) of
                 {ok, BrandId} ->
-                     {true, zp_context:set(brand_id, BrandId, C1)};
+                    {true, zp_context:set(brand_id, BrandId, C1)};
                 {error, _} -> 
                     {false, C1}
             end
@@ -53,10 +54,10 @@ resource_exists(_ReqProps, Context) ->
         {error, _} ->
             {false, C2}
     end,
-    {OkCat andalso OkBrand, C3}.
+    ?WM_REPLY(OkCat andalso OkBrand, C3).
 
 
-html(_ReqProps, Context) ->
+html(Context) ->
 	IsSubCat = zp_context:get(is_subcat, Context),
 	CatId    = zp_context:get(cat_id, Context),
 	BrandId  = zp_context:get(brand_id, Context),

@@ -56,19 +56,17 @@ loop(MochiReq) ->
 	    Req:send_response(404),
 	    LogData = Req:log_data(),
 	    LogModule = 
-		case application:get_env(webmachine, webmachine_logger_module) of
+                case application:get_env(webmachine,webmachine_logger_module) of
 		    {ok, Val} -> Val;
 		    _ -> webmachine_logger
 		end,
 	    spawn(LogModule, log_access, [LogData]),
 	    Req:stop();
-        {Mod, ModOpts, Path, Bindings, AppRoot, StringPath} ->
-	    %%NOTE: StringPath is only necessary for backwards
-	    %% compatibility and will one day go away.
-	    Req:load_dispatch_data(Bindings, Path, AppRoot),
+        {Mod, ModOpts, PathTokens, Bindings, AppRoot, StringPath} ->
+	    Req:load_dispatch_data(Bindings, PathTokens, AppRoot, StringPath),
 	    Req:set_metadata('resource_module', Mod),
             {ok, Pid} = webmachine_resource:start_link(Mod, ModOpts),
-            webmachine_decision_core:handle_request(Req, Pid, StringPath)
+            webmachine_decision_core:handle_request(Req, Pid)
     end.
 
 get_option(Option, Options) ->

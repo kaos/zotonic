@@ -9,7 +9,7 @@
 
 -include_lib("resource_html.hrl").
 
-html(_ReqProps, Context) ->
+html(Context) ->
     CatId = case zp_context:get_q("qcat", Context) of
         undefined -> undefined;
         Cat ->

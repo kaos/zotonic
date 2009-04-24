@@ -6,7 +6,6 @@
 -author("Tim Benniks <tim@timbenniks.com>").
 -include_lib("resource_html.hrl").
 
-html(_ReqProps, Context) ->
-	
-    Html = zp_template:render("admin_overview.tpl", [], Context),
+html(Context) ->
+	Html = zp_template:render("admin_overview.tpl", [], Context),
 	zp_context:output(Html, Context).

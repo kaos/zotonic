@@ -115,20 +115,18 @@ get_acl_props(Id, Context) when is_integer(Id) ->
 %% @doc Insert a new resource
 %% @spec insert(Props, Context) -> {ok, Id}
 insert(Props, Context) ->
-    zp_db:insert(rsc, Props, Context).
+    m_rsc_update:insert(rsc, Props, Context).
 
 %% @doc Delete a resource
 %% @spec delete(Props, Context) -> void()
 delete(Id, Context) when is_integer(Id) ->
-    zp_db:delete(rsc, Id, Context),
-    zp_depcache:flush(#rsc{id=Id}).
+    m_rsc_update:delete(Id, Context).
 
 
 %% @doc Update a predicate
 %% @spec update(Props, Props, Context) -> void()
 update(Id, Props, Context) when is_integer(Id) ->
-    zp_db:update(rsc, Id, Props, Context),
-    zp_depcache:flush(#rsc{id=Id}).
+    m_rsc_update:update(Id, Props, Context).
 
 
 %% Function used in template contexts to return a #rsc{id=Id} --> not used anymore???

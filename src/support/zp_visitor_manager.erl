@@ -42,7 +42,6 @@
 %% interface functions
 -export([ensure_visitor/1]).
 
--include_lib("webmachine.hrl").
 -include_lib("zophrenic.hrl").
 
 %% The name of the person cookie
@@ -167,9 +166,9 @@ first_visit(Context, State) ->
     VisitorCookieId = zp_ids:id(),
     {ok, Pid} = zp_visitor:new_anonymous(VisitorCookieId, Context),
     State1    = store_pid(VisitorCookieId, Pid, State),
-    set_cookie(VisitorCookieId, Context),
-    Context1  = Context#context{visitor_pid=Pid},
-    {Context1, State1}.
+    Context1  = set_cookie(VisitorCookieId, Context),
+    Context2  = Context1#context{visitor_pid=Pid},
+    {Context2, State1}.
 
 
 %% @spec returning(VisitorCookieId, Context, State) -> {NewContext, NewState}
@@ -220,21 +219,19 @@ erase_pid(Pid, State) ->
 %% @spec get_cookie(Context) -> undefined | VisitorCookieId
 %% @doc fetch the person cookie id from the request, return error when not found
 get_cookie(Context) ->
-    ReqProps = zp_context:get_reqprops(Context),
-    Req      = ?REQ(ReqProps),
-    Req:get_cookie_value(?VISITOR_COOKIE).
+    RD = zp_context:get_reqdata(Context),
+    wrq:get_cookie_value(?VISITOR_COOKIE, RD).
 
 
-%% @spec set_cookie(VisitorCookieId, Context) -> ok
+%% @spec set_cookie(VisitorCookieId, Context) -> Context
 %% @doc Save the person id in a cookie on the user agent
 set_cookie(VisitorCookieId, Context) ->
-    ReqProps = zp_context:get_reqprops(Context),
-    Req      = ?REQ(ReqProps),
+    RD = zp_context:get_reqdata(Context),
     %% TODO: set the {domain,"example.com"} of the session cookie
-    Options  = [{max_age, ?VISITOR_COOKIE_MAX_AGE}, {path, "/"}],
-    Hdr      = mochiweb_cookies:cookie(?VISITOR_COOKIE, VisitorCookieId, Options),
-    Req:merge_response_headers([Hdr]),
-    ok.
+    Options = [{max_age, ?VISITOR_COOKIE_MAX_AGE}, {path, "/"}],
+    Hdr = mochiweb_cookies:cookie(?VISITOR_COOKIE, VisitorCookieId, Options),
+    RD1 = wrq:merge_response_headers([Hdr], RD),
+    zp_context:set_reqdata(RD1, Context).
 
 
 %% @spec find_pid(VisitorCookieId, State) ->  error | {ok, pid()}

@@ -9,5 +9,5 @@
 
 init([]) -> {ok, undefined}.
 
-to_html(_ReqProps, State) ->
-    {"<html><body>Hello, new world</body></html>", State}.
+to_html(ReqData, State) ->
+    {"<html><body>Hello, new world</body></html>", ReqData, State}.

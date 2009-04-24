@@ -4,10 +4,12 @@
 
 -define(ZOPHRENIC_VERSION, "0.1.0").
 
+-include_lib("deps/webmachine/include/wm_reqdata.hrl").
+
 %% @doc The request context, session information and other
 -record(context, {
-        %% Request properties
-        reqprops,
+        %% Webmachine request data
+        wm_reqdata,
         
         %% The resource responsible for handling this request
         resource_module,
@@ -47,6 +49,8 @@
         dict
     }).
     
+-define(WM_REQ(ReqData, Context), zp_context:set_reqdata(ReqData, Context)).
+-define(WM_REPLY(Reply, Context), {Reply, Context#context.wm_reqdata, Context#context{wm_reqdata=undefined}}).
 
 -define(DB(Context), Context#context.db).
 -define(DBC(Context), Context#context.dbc).

@@ -5,7 +5,8 @@
 	     webmachine_demo,
 	     webmachine_demo_app,
 	     webmachine_demo_sup,
-	     webmachine_demo_resource
+	     webmachine_demo_resource,
+	     demo_fs_resource
 	    ]},
   {registered, []},
   {mod, {webmachine_demo_app, []}},

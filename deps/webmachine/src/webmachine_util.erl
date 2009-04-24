@@ -20,10 +20,10 @@
 -module(webmachine_util).
 -export([guess_mime/1]).
 -export([convert_request_date/1, compare_ims_dates/2]).
--export([if_match_etag/1]).
 -export([choose_media_type/2]).
 -export([choose_charset/2]).
 -export([choose_encoding/2]).
+-export([unquote_header/1]).
 -export([now_diff_milliseconds/2]).
 -export([media_type_to_detail/1]).
 
@@ -41,9 +41,6 @@ compare_ims_dates(D1, D2) ->
     GD1 = calendar:datetime_to_gregorian_seconds(D1),
     GD2 = calendar:datetime_to_gregorian_seconds(D2),
     GD1 > GD2.
-
-if_match_etag(_ETagHdr) ->
-    false.
 
 %% @spec guess_mime(string()) -> string()
 %% @doc  Guess the mime type of a file by the extension of its filename.
@@ -258,6 +255,20 @@ build_conneg_list([Acc|AccRest], Result) ->
             {1.0, Choice}
     end,
     build_conneg_list(AccRest,[Pair|Result]).
+
+% (unquote_header copied from mochiweb_util since they don't export it)
+unquote_header("\"" ++ Rest) ->
+    unquote_header(Rest, []);
+unquote_header(S) ->
+    S.
+unquote_header("", Acc) ->
+    lists:reverse(Acc);
+unquote_header("\"", Acc) ->
+    lists:reverse(Acc);
+unquote_header([$\\, C | Rest], Acc) ->
+    unquote_header(Rest, [C | Acc]);
+unquote_header([C | Rest], Acc) ->
+    unquote_header(Rest, [C | Acc]).
 
 %% @type now() = {MegaSecs, Secs, MicroSecs}
 

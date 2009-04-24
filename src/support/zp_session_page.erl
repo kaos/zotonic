@@ -21,36 +21,36 @@
 
 %% session exports
 -export([
-            start_link/0, 
-            start_link/1, 
-            stop/1, 
-            ping/1,
-            
-            set/3, 
-            get/2, 
-            incr/3, 
-            append/3, 
-            append_list/3, 
-            
-            add_script/2,
-            get_scripts/1,
-            comet_attach/2,
-            comet_detach/1,
-            get_attach_state/1,
-            
-            check_timeout/1,
-            
-            spawn_link/4
-        ]).
+    start_link/0, 
+    start_link/1, 
+    stop/1, 
+    ping/1,
+    
+    set/3, 
+    get/2, 
+    incr/3, 
+    append/3, 
+    append_list/3, 
+    
+    add_script/2,
+    get_scripts/1,
+    comet_attach/2,
+    comet_detach/1,
+    get_attach_state/1,
+    
+    check_timeout/1,
+    
+    spawn_link/4
+]).
 
 -record(page_state, {
-            vars,
-            last_detach,
-            session_pid,
-            linked=[],
-            comet_pid=undefined,
-            comet_queue=[]
-        }).
+    vars,
+    last_detach,
+    session_pid,
+    linked=[],
+    comet_pid=undefined,
+    comet_queue=[]
+}).
 
 %%====================================================================
 %% API

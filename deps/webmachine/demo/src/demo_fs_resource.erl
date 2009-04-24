@@ -1,7 +1,7 @@
 %% @author Bryan Fink <bryan@basho.com>
 %% @author Andy Gross <andy@basho.com>
 %% @author Justin Sheehy <justin@basho.com>
-%% @copyright 2008 Basho Technologies, Inc.
+%% @copyright 2008-2009 Basho Technologies, Inc.
 
 -module(demo_fs_resource).
 -export([init/1]).
@@ -26,8 +26,8 @@ init(ConfigProps) ->
     {root, Root} = proplists:lookup(root, ConfigProps),
     {ok, #context{root=Root}}.
     
-allowed_methods(_ReqProps, Context) ->
-    {['HEAD', 'GET', 'PUT', 'DELETE', 'POST'], Context}.
+allowed_methods(ReqData, Context) ->
+    {['HEAD', 'GET', 'PUT', 'DELETE', 'POST'], ReqData, Context}.
 
 file_path(Context, Name) ->
     RelName = case hd(Name) of
@@ -45,15 +45,15 @@ file_exists(Context, Name) ->
 	    false
     end.
 
-resource_exists(ReqProps, Context) ->
-    Path = ?PATH(ReqProps),
+resource_exists(ReqData, Context) ->
+    Path = wrq:disp_path(ReqData),
     case file_exists(Context, Path) of 
 	{true, _} ->
-	    {true, Context};
+	    {true, ReqData, Context};
 	_ ->
             case Path of
-                "p" -> {true, Context};
-                _ -> {false, Context}
+                "p" -> {true, ReqData, Context};
+                _ -> {false, ReqData, Context}
             end
     end.
 
@@ -72,86 +72,86 @@ maybe_fetch_object(Context, Path) ->
 	    {true, Context}
     end.
 
-content_types_provided(ReqProps, Context) ->
-    CT = webmachine_util:guess_mime(?PATH(ReqProps)),
-    {[{CT, provide_content}],
+content_types_provided(ReqData, Context) ->
+    CT = webmachine_util:guess_mime(wrq:disp_path(ReqData)),
+    {[{CT, provide_content}], ReqData,
      Context#context{metadata=[{'content-type', CT}|Context#context.metadata]}}.
 
-content_types_accepted(ReqProps, Context) ->
-    Req = ?REQ(ReqProps),
-    CT = Req:get_header_value("content-type"),
-    {[{CT, accept_content}],
-     Context#context{metadata=[{'content-type', CT}|Context#context.metadata]}}.
+content_types_accepted(ReqData, Context) ->
+    CT = case wrq:get_req_header("content-type", ReqData) of
+             undefined -> "application/octet-stream";
+             X -> X
+         end,
+    {MT, _Params} = webmachine_util:media_type_to_detail(CT),
+    {[{MT, accept_content}], ReqData,
+     Context#context{metadata=[{'content-type', MT}|Context#context.metadata]}}.
 
-accept_content(ReqProps, Context) ->
-    Req = ?REQ(ReqProps),
-    Path = ?PATH(ReqProps),
+accept_content(ReqData, Context) ->
+    Path = wrq:disp_path(ReqData),
     FP = file_path(Context, Path),
     ok = filelib:ensure_dir(filename:dirname(FP)),
-    case file_exists(Context, Path) of 
+    ReqData1 = case file_exists(Context, Path) of 
 	{true, _} ->
-            nop;
+            ReqData;
 	_ ->
-            LOC = "http://" ++ Req:get_header_value("host") ++ "/fs/" ++ Path,
-            Req:add_response_header("Location", LOC)
+            LOC = "http://" ++
+                   wrq:get_req_header("host", ReqData) ++
+                   "/fs/" ++ Path,
+            wrq:set_resp_header("Location", LOC, ReqData)
     end,
-    Value = Req:recv_body(),
+    Value = wrq:req_body(ReqData1),
     case file:write_file(FP, Value) of
         ok ->
-            Req:append_to_response_body(Value),
-            {true, Context};
-        _ ->
-            false
+            {true, wrq:set_resp_body(Value, ReqData1), Context};
+        Err ->
+            {{error, Err}, ReqData1, Context}
     end.    
 
-post_is_create(_ReqProps, Context) ->
-    {true, Context}.
+post_is_create(ReqData, Context) ->
+    {true, ReqData, Context}.
 
-create_path(ReqProps, Context) ->
-    Req = ?REQ(ReqProps),
-    case Req:get_header_value("slug") of
-        undefined -> {undefined, Context};
+create_path(ReqData, Context) ->
+    case wrq:get_req_header("slug", ReqData) of
+        undefined -> {undefined, ReqData, Context};
         Slug ->
             case file_exists(Context, Slug) of
-                {true, _} -> {undefined, Context};
-                _ -> {Slug, Context}
+                {true, _} -> {undefined, ReqData, Context};
+                _ -> {Slug, ReqData, Context}
             end
     end.
 
-delete_resource(ReqProps, Context) ->
-    Path = ?PATH(ReqProps),
-    case file:delete(file_path(Context, Path)) of
-        ok -> {true, Context};
-        _ -> {false, Context}
+delete_resource(ReqData, Context) ->
+    case file:delete(file_path(
+                       Context, wrq:disp_path(ReqData))) of
+        ok -> {true, ReqData, Context};
+        _ -> {false, ReqData, Context}
     end.
 
-provide_content(ReqProps, Context) ->
-    Path = ?PATH(ReqProps),
-    case maybe_fetch_object(Context, Path) of 
+provide_content(ReqData, Context) ->
+    case maybe_fetch_object(Context, wrq:disp_path(ReqData)) of 
 	{true, NewContext} ->
 	    Body = NewContext#context.response_body,
-	    {Body, Context};
+	    {Body, ReqData, Context};
 	{false, NewContext} ->
-	    {error, NewContext}
+	    {error, ReqData, NewContext}
     end.
 
-last_modified(ReqProps, Context) ->
+last_modified(ReqData, Context) ->
     {true, FullPath} = file_exists(Context,
-                                   proplists:get_value(path, ReqProps)),
+                                   wrq:disp_path(ReqData)),
     LMod = filelib:last_modified(FullPath),
-    {LMod, Context#context{metadata=[{'last-modified',
+    {LMod, ReqData, Context#context{metadata=[{'last-modified',
                     httpd_util:rfc1123_date(LMod)}|Context#context.metadata]}}.
 
-hash_body(Body) ->
-    mochihex:to_hex(binary_to_list(crypto:sha(Body))).
+hash_body(Body) -> mochihex:to_hex(binary_to_list(crypto:sha(Body))).
 
-generate_etag(ReqProps, Context) ->
-    case maybe_fetch_object(Context, proplists:get_value(path, ReqProps)) of
+generate_etag(ReqData, Context) ->
+    case maybe_fetch_object(Context, wrq:disp_path(ReqData)) of
         {true, BodyContext} ->
             ETag = hash_body(BodyContext#context.response_body),
-            {ETag,
+            {ETag, ReqData,
              BodyContext#context{metadata=[{etag,ETag}|
                                            BodyContext#context.metadata]}};
         _ ->
-            {undefined, Context}
+            {undefined, ReqData, Context}
     end.

@@ -1,5 +1,6 @@
 % -*- mode: erlang -*-
-{[	"src/*",
+{[	"*",
+	"src/*",
 	"src/*/*",
 	"src/*/*/*",
 	"src/*/*/*/*",
@@ -9,7 +10,6 @@
  ], 
  [	{i, "include"},
 	{i, "src/dbdrivers/postgresql/include"},
-	{i, "ebin"},
   	{outdir, "ebin"},
   	debug_info
  ]

@@ -7,7 +7,7 @@
 %% -author("Your Name <me@example.com>").
 %% -include_lib("resource_html.hrl").
 %% 
-%% html(_ReqProps, Context) ->
+%% html(Context) ->
 %%    Html = zp_template:render("plop.tpl", Context),
 %%    zp_context:output(Html, Context).
 
@@ -18,13 +18,15 @@
 
 init([]) -> {ok, []}.
 
-service_available(ReqProps, _Context) ->
-    {true, zp_context:new(ReqProps)}.
+service_available(ReqData, _Context) ->
+    Context = zp_context:new(ReqData, ?MODULE),
+    ?WM_REPLY(true, Context).
 
-charsets_provided(_ReqProps, Context) ->
-    {[{"utf-8", fun(X) -> X end}], Context}.
+charsets_provided(ReqData, Context) ->
+    {[{"utf-8", fun(X) -> X end}], ReqData, Context}.
 
-to_html(ReqProps, Context) ->
-    Context1 = zp_context:ensure_all(Context),
-    html(ReqProps, Context1).
-
+to_html(ReqData, Context) ->
+    Context1 = ?WM_REQ(ReqData, Context),
+    Context2 = zp_context:ensure_all(Context1),
+    {Html, HtmlContext} = html(Context2),
+    ?WM_REPLY(Html, HtmlContext).

@@ -18,7 +18,7 @@
 -include_lib("include/zophrenic.hrl").
 
 
-%% Timeout for comet flush when there is no data, webmachine has a timeout of 60 seconds, so leave after 55
+%% Timeout for comet flush when there is no data, webmachine 0.x had a timeout of 60 seconds, so leave after 55
 -define(COMET_FLUSH_EMPTY, 55000).
 
 %% Timeout for comet flush when there is data, allow for 50 msec more to gather extra data before flushing
@@ -27,50 +27,55 @@
 
 init([]) -> {ok, []}.
 
-malformed_request(ReqProps, _Context) ->
-    Context = zp_context:new(ReqProps),
-    {false, Context}.
+malformed_request(ReqData, _Context) ->
+    Context = zp_context:new(ReqData),
+    ?WM_REPLY(false, Context).
 
-forbidden(_ReqProps, Context) ->
+forbidden(ReqData, Context) ->
     %% TODO: prevent that we make a new ua session or a new page session, fail when a new session is needed
-    Context1 = zp_context:ensure_all(Context),
-    {false, Context1}.
+    Context1 = ?WM_REQ(ReqData, Context),
+    Context2 = zp_context:ensure_all(Context1),
+    ?WM_REPLY(false, Context2).
 
-allowed_methods(_ReqProps, Context) ->
-    {['POST'], Context}.
+allowed_methods(ReqData, Context) ->
+    {['POST'], ReqData, Context}.
 
-content_types_provided(_ReqProps, Context) -> 
+content_types_provided(ReqData, Context) -> 
     %% When handling a POST the content type function is not used, so supply false for the function.
-    { [{"application/x-javascript", false}], Context }.
+    { [{"application/x-javascript", false}], ReqData, Context }.
 
 
 %% @doc Collect all scripts to be pushed back to the user agent
-process_post(ReqProps, Context) ->
-    erlang:monitor(process, Context#context.page_pid),
-    zp_session_page:comet_attach(self(), Context#context.page_pid),
+process_post(ReqData, Context) ->
+    Context1 = ?WM_REQ(ReqData, Context),
+    erlang:monitor(process, Context1#context.page_pid),
+    zp_session_page:comet_attach(self(), Context1#context.page_pid),
     TRef = start_timer(?COMET_FLUSH_EMPTY),
-    process_post_loop(ReqProps, {Context, TRef, false}).
+    process_post_loop(Context1, TRef, false).
 
 
 %% @doc Wait for all scripts to be pushed to the user agent.
-process_post_loop(ReqProps, {Context, TRef, HasData}) ->
+process_post_loop(Context, TRef, HasData) ->
     receive
         flush ->
             timer:cancel(TRef),
             zp_session_page:comet_detach(Context#context.page_pid),
-            {true, Context};
+            ?WM_REPLY(true, Context);
+
         script_queued ->
             Scripts = zp_session_page:get_scripts(Context#context.page_pid),
-            Req = ?REQ(ReqProps),
-            Req:append_to_response_body(Scripts),
+            RD  = zp_context:get_reqdata(Context),
+            RD1 = wrq:append_to_response_body(Scripts, RD),
+            Context1 = zp_context:set_reqdata(RD1, Context),
             TRef1 = case HasData of
                         true  -> TRef;
                         false -> reset_timer(?COMET_FLUSH_DATA, TRef)
                     end,
-            process_post_loop(ReqProps, {Context,TRef1,true});
+            process_post_loop(Context1, TRef1, true);
+
         {'DOWN', _MonitorRef, process, Pid, _Info} when Pid == Context#context.page_pid ->
             self() ! flush,
-            process_post_loop(ReqProps, {Context,TRef,HasData})
+            process_post_loop(Context, TRef, HasData)
     end.
 
 

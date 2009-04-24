@@ -7,7 +7,7 @@
 -author("Marc Worrell <marc@worrell.nl>").
 
 -export([
-    new/1,
+    new/2,
     new/0,
     new_for_db/1,
 
@@ -24,7 +24,8 @@
     ensure_page_session/1,
     ensure_qs/1,
     
-    get_reqprops/1,
+    get_reqdata/1,
+    set_reqdata/2,
     get_resource_module/1,
     set_resource_module/2,
 
@@ -63,15 +64,12 @@
     merge_scripts/2
     ]).
 
--include_lib("webmachine.hrl").
 -include_lib("zophrenic.hrl").
 
 
 %% @doc Create a new context record for the current request.
-new(ReqProps) ->
-    Req    = ?REQ(ReqProps),
-    Module = Req:get_metadata('resource_module'),
-    Context = #context{reqprops=ReqProps, dict=dict:new(), resource_module=Module},
+new(ReqData, Module) ->
+    Context = #context{wm_reqdata=ReqData, dict=dict:new(), resource_module=Module},
     Context#context{language=zp_trans:default_language(Context)}.
 
 %% @doc Return a new empty context
@@ -84,10 +82,12 @@ new_for_db(Database) ->
     Context = new(),
     Context#context{db=Database}.
 
+
 %% @doc Cleanup a context for the output stream
 prune_for_template(#context{}=Context) ->
     #context{
-        dict=undefined, reqprops=undefined,
+        wm_reqdata=undefined,
+        dict=undefined,
         updates=Context#context.updates,
         actions=Context#context.actions,
         content_scripts=Context#context.content_scripts,
@@ -108,8 +108,8 @@ prune_for_database(Context) ->
 %% between different (cached) renderings.
 prune_for_scomp(Context) ->
     Context#context{
+	    wm_reqdata=undefined,
         dict=undefined,
-		reqprops=undefined,
 		updates=[],
 		actions=[],
 		content_scripts=[],
@@ -215,21 +215,28 @@ ensure_qs(Context) ->
         {ok, _Qs} ->
             Context;
         error ->
-            ReqProps = Context#context.reqprops,
-            Req      = ?REQ(ReqProps),
-            PathArgs = lists:map(fun ({T,V}) -> {atom_to_list(T),mochiweb_util:unquote(V)} end, Req:get_path_info()),
-            Body     = parse_form_urlencoded(Req),
-            Query    = Req:parse_qs(),
+            ReqData  = Context#context.wm_reqdata,
+            PathDict = wrq:path_info(ReqData),
+            PathArgs = lists:map(
+                            fun ({T,V}) -> {atom_to_list(T),mochiweb_util:unquote(V)} end, 
+                            dict:to_list(PathDict)),
+            Body     = parse_form_urlencoded(ReqData),
+            Query    = wrq:req_qs(ReqData),
             Combined = PathArgs ++ Body ++ Query,
             Dict2    = dict:store('q', Combined, Context#context.dict),
             Context#context{dict=Dict2}
     end.
 
 
-%% @spec get_reqprops(Context) -> ReqProps
-%% @doc Return the request properties of the current context
-get_reqprops(Context) ->
-    Context#context.reqprops.
+%% @spec get_reqdata(Context) -> #wm_reqdata
+%% @doc Return the webmachine request data of the context
+get_reqdata(Context) ->
+    Context#context.wm_reqdata.
+
+%% @spec set_reqdata(ReqData, Context) -> #wm_reqdata
+%% @doc Set the webmachine request data of the context
+set_reqdata(ReqData = #wm_reqdata{}, Context) ->
+    Context#context{wm_reqdata=ReqData}.
 
 
 %% @spec get_resource_module(Context) -> term()
@@ -449,12 +456,12 @@ language(Context) ->
 %% Local helper functions
 %% ------------------------------------------------------------------------------------
 
-%% @spec parse_form_urlencoded(Req) -> list()
+%% @spec parse_form_urlencoded(#wm_reqdata) -> list()
 %% @doc Return the keys in the body of the request, only if the request is application/x-www-form-urlencoded
-parse_form_urlencoded(Req) ->
-    case Req:get_header_value("content-type") of
+parse_form_urlencoded(ReqData) ->
+    case wrq:get_req_header("content-type", ReqData) of
         "application/x-www-form-urlencoded" ++ _ ->
-            case Req:recv_body() of
+            case wrq:req_body(ReqData) of
                 undefined ->
                      [];
                 Binary ->
@@ -469,10 +476,9 @@ parse_form_urlencoded(Req) ->
 %% the caching of content on the user agent iff the content generated has a session. You can prevent
 %% addition of these headers by not calling zp_context:ensure_session/1, or zp_context:ensure_all/1.
 %% @spec add_nocache_headers(#context) -> #context
-add_nocache_headers(Context) ->
-    Req = ?REQ(get_reqprops(Context)),
-    Req:add_response_header("Cache-Control", "no-store, no-cache, must-revalidate, post-check=0, pre-check=0"),
-    Req:add_response_header("Expires", httpd_util:rfc1123_date({{2008,12,10}, {15,30,0}})),
+add_nocache_headers(Context = #context{wm_reqdata=ReqData}) ->
+    RD1 = wrq:set_resp_header("Cache-Control", "no-store, no-cache, must-revalidate, post-check=0, pre-check=0", ReqData),
+    RD2 = wrq:set_resp_header("Expires", httpd_util:rfc1123_date({{2008,12,10}, {15,30,0}}), RD1),
     % This let IE6 accept our cookies, basically we tell IE6 that our cookies do not contain any private data.
-    Req:add_response_header("P3P", "CP=\"NOI ADM DEV PSAi COM NAV OUR OTRo STP IND DEM\""),
-    Context.
+    RD3 = wrq:set_resp_header("P3P", "CP=\"NOI ADM DEV PSAi COM NAV OUR OTRo STP IND DEM\"", RD2),
+    Context#context{wm_reqdata=RD3}.

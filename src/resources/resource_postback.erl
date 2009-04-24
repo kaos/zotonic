@@ -19,53 +19,58 @@
 
 init([]) -> {ok, []}.
 
-malformed_request(ReqProps, _Context) ->
-    Context  = zp_context:new(ReqProps),
-    Context1 = zp_context:ensure_qs(Context),
-    case zp_context:get_q("postback", Context1) of
+malformed_request(ReqData, _Context) ->
+    Context1 = zp_context:new(ReqData, ?MODULE),
+    Context2 = zp_context:ensure_qs(Context1),
+    case zp_context:get_q("postback", Context2) of
         undefined ->
-            {true, Context1};
+            ?WM_REPLY(true, Context2);
         _ ->
-            {false, Context1}
+            ?WM_REPLY(false, Context2)
     end.
 
-forbidden(_ReqProps, Context) ->
+forbidden(ReqData, Context) ->
+    Context1 = ?WM_REQ(ReqData, Context),
     %% TODO: prevent that we make a new ua session or a new page session, fail when a new session is needed
-    Context1 = zp_context:ensure_all(Context),
-    {false, Context1}.
+    Context2 = zp_context:ensure_all(Context1),
+    ?WM_REPLY(false, Context2).
 
-allowed_methods(_ReqProps, Context) ->
-    {['POST'], Context}.
+allowed_methods(ReqData, Context) ->
+    {['POST'], ReqData, Context}.
 
-content_types_provided(_ReqProps, Context) -> 
+content_types_provided(ReqData, Context) -> 
     %% When handling a POST the content type function is not used, so supply false for the function.
-    { [{"application/x-javascript", false}], Context }.
+    { [{"application/x-javascript", false}], ReqData, Context }.
 
-process_post(ReqProps, Context) ->
-    Postback = zp_context:get_q("postback", Context),
+process_post(ReqData, Context) ->
+    Context1 = ?WM_REQ(ReqData, Context),
+    Postback = zp_context:get_q("postback", Context1),
     {EventType, TriggerId, TargetId, Tag, Module} = zp_utils:depickle(Postback),
 
     TriggerId1 = case TriggerId of
-                    undefined -> zp_context:get_q("zp_trigger_id", Context);
-                    _         -> TriggerId
-                 end,
+        undefined -> zp_context:get_q("zp_trigger_id", Context1);
+        _         -> TriggerId
+    end,
 
-    ContextRsc   = zp_context:set_resource_module(Module, Context),
+    ContextRsc   = zp_context:set_resource_module(Module, Context1),
     EventContext = case EventType of
-                    "submit" -> 
-                        case zp_validation:validate_query_args(ContextRsc) of
-                            {ok, ContextEval} ->    Module:event({submit, Tag, TriggerId1, TargetId}, ContextEval);
-                            {error, ContextEval} -> ContextEval
-                        end;
-                    _ -> 
-                        Module:event({postback, Tag, TriggerId1, TargetId}, ContextRsc)
-                   end,
+        "submit" -> 
+            case zp_validation:validate_query_args(ContextRsc) of
+                {ok, ContextEval} ->   
+                    Module:event({submit, Tag, TriggerId1, TargetId}, ContextEval);
+                {error, ContextEval} ->
+                    ContextEval
+            end;
+        _ -> 
+            Module:event({postback, Tag, TriggerId1, TargetId}, ContextRsc)
+    end,
 
     Script      = zp_script:get_script(EventContext),
-    CometScript = zp_session_page:get_scripts(Context#context.page_pid),
+    CometScript = zp_session_page:get_scripts(EventContext#context.page_pid),
 
-    Req = ?REQ(ReqProps),
-    Req:append_to_response_body(Script),
-    Req:append_to_response_body(CometScript),
+    RD  = zp_context:get_reqdata(EventContext),
+    RD1 = wrq:append_to_resp_body(Script, RD),
+    RD2 = wrq:append_to_resp_body(CometScript, RD1),
 
-    {true, EventContext}.
+    ReplyContext = zp_context:set_reqdata(RD2, EventContext),
+    ?WM_REPLY(true, ReplyContext).

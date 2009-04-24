@@ -6,7 +6,7 @@
 -author("Tim Benniks <tim@timbenniks.com>").
 -include_lib("resource_html.hrl").
  
-html(_ReqProps, Context) ->
+html(Context) ->
     {Count, Total, Backorder, Cart} = shop_cart:tpl_cart_allocated(Context),
     Vars = [
         {shop_cart, Cart},

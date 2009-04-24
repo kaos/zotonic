@@ -28,8 +28,8 @@ init(ConfigProps) ->
     {root, Root} = proplists:lookup(root, ConfigProps),
     {ok, #state{root=Root}}.
     
-allowed_methods(_ReqProps, State) ->
-    {['HEAD', 'GET', 'PUT', 'DELETE', 'POST'], State}.
+allowed_methods(ReqData, State) ->
+    {['HEAD', 'GET', 'PUT', 'DELETE', 'POST'], ReqData, State}.
 
 file_path(State, Name) ->
     RelName = case hd(Name) of
@@ -37,13 +37,16 @@ file_path(State, Name) ->
         _ -> Name
     end,
     case mochiweb_util:safe_relative_path(RelName) of
-        undefined -> undefined;
-        SafePath -> filename:join([State#state.root, SafePath])
+        undefined ->
+            undefined;
+        SafePath ->
+            filename:join([State#state.root, SafePath])
     end.
 
 file_exists(State, Name) ->
     case file_path(State, Name) of
-        undefined -> false;
+        undefined ->
+            false;
         NamePath ->
             case filelib:is_regular(NamePath) of 
         	true ->  {true, NamePath};
@@ -51,113 +54,99 @@ file_exists(State, Name) ->
             end
     end.
 
-resource_exists(ReqProps, State) ->
-    Path = ?PATH(ReqProps),
+resource_exists(ReqData, State) ->
+    Path = wrq:disp_path(ReqData),
     case file_exists(State, Path) of 
-	{true, _} ->
-	    {true, State};
-	_ ->
+    	{true, _} ->
+    	    {true, ReqData, State};
+    	_ ->
             case Path of
-                "p" -> {true, State};
-                _ -> {false, State}
+                "p" -> {true, ReqData, State};
+                _ -> {false, ReqData, State}
             end
     end.
 
 maybe_fetch_object(State, Path) ->
     % if returns {true, NewState} then NewState has response_body
     case State#state.response_body of
-	undefined ->
-	    case file_exists(State, Path) of 
-		{true, FullPath} ->
-		    {ok, Value} = file:read_file(FullPath),
-		    {true, State#state{response_body=Value}};
-		false ->
-		    {false, State}
-	    end;
-	_Body ->
-	    {true, State}
+    	undefined ->
+    	    case file_exists(State, Path) of 
+        		{true, FullPath} ->
+        		    {ok, Value} = file:read_file(FullPath),
+        		    {true, State#state{response_body=Value}};
+        		false ->
+        		    {false, State}
+    	    end;
+    	_Body ->
+    	    {true, State}
     end.
 
-content_types_provided(ReqProps, State) ->
-    CT = webmachine_util:guess_mime(?PATH(ReqProps)),
+content_types_provided(ReqData, State) ->
+    CT = webmachine_util:guess_mime(wrq:disp_path(ReqData)),
     {[{CT, provide_content}],
+     ReqData,
      State#state{metadata=[{'content-type', CT}|State#state.metadata]}}.
 
-content_types_accepted(ReqProps, State) ->
-    Req = ?REQ(ReqProps),
-    CT = Req:get_header_value("content-type"),
+content_types_accepted(ReqData, State) ->
+    CT = wrq:get_req_header("content-type", ReqData),
     {[{CT, accept_content}],
+     ReqData,
      State#state{metadata=[{'content-type', CT}|State#state.metadata]}}.
 
-accept_content(ReqProps, State) ->
-    Req = ?REQ(ReqProps),
-    Path = ?PATH(ReqProps),
+accept_content(ReqData, State) ->
+    Path = wrq:disp_path(ReqData),
     FP = file_path(State, Path),
     ok = filelib:ensure_dir(filename:dirname(FP)),
-    case file_exists(State, Path) of 
-	{true, _} ->
-            nop;
-	_ ->
-            LOC = "http://" ++ Req:get_header_value("host") ++ "/fs/" ++ Path,
-            Req:add_response_header("Location", LOC)
+    RD1 = case file_exists(State, Path) of 
+    	{true, _} ->
+                ReqData;
+    	_ ->
+                LOC = "http://" ++ wrq:get_req_header("host") ++ "/fs/" ++ Path,
+                wrq:set_resp_header("Location", LOC, ReqData)
     end,
-    Value = Req:recv_body(),
+    Value = wrq:req_body(RD1),
     case file:write_file(FP, Value) of
         ok ->
-            Req:append_to_response_body(Value),
-            {true, State};
+            RD2 = wrq:append_to_response_body(Value, RD1),
+            {true, RD2, State};
         _ ->
-            false
+            {false, RD1, State}
     end.    
 
-post_is_create(_ReqProps, State) ->
-    {true, State}.
+post_is_create(ReqData, State) ->
+    {true, ReqData, State}.
 
-create_path(ReqProps, State) ->
-    Req = ?REQ(ReqProps),
-    case Req:get_header_value("slug") of
-        undefined -> {undefined, State};
+create_path(ReqData, State) ->
+    case wrq:get_req_header("slug", ReqData) of
+        undefined -> {undefined, ReqData, State};
         Slug ->
             case file_exists(State, Slug) of
-                {true, _} -> {undefined, State};
-                _ -> {Slug, State}
+                {true, _} -> {undefined, ReqData, State};
+                _ -> {Slug, ReqData, State}
             end
     end.
 
-delete_resource(ReqProps, State) ->
-    Path = ?PATH(ReqProps),
+delete_resource(ReqData, State) ->
+    Path = wrq:disp_path(ReqData),
     case file:delete(file_path(State, Path)) of
-        ok -> {true, State};
-        _ -> {false, State}
+        ok -> {true, ReqData, State};
+        _ -> {false, ReqData, State}
     end.
 
-provide_content(ReqProps, State) ->
-    Path = ?PATH(ReqProps),
+provide_content(ReqData, State) ->
+    Path = wrq:disp_path(ReqData),
     case maybe_fetch_object(State, Path) of 
 	{true, NewState} ->
 	    Body = NewState#state.response_body,
-	    {Body, State};
+	    {Body, ReqData, State};
 	{false, NewState} ->
-	    {error, NewState}
+	    {error, ReqData, NewState}
     end.
 
-last_modified(ReqProps, State) ->
-    {true, FullPath} = file_exists(State,
-                                   proplists:get_value(path, ReqProps)),
+last_modified(ReqData, State) ->
+    Path = wrq:disp_path(ReqData),
+    {true, FullPath} = file_exists(State, Path),
     LMod = filelib:last_modified(FullPath),
-    {LMod, State#state{metadata=[{'last-modified',
+    {LMod, ReqData, State#state{metadata=[{'last-modified',
                     httpd_util:rfc1123_date(LMod)}|State#state.metadata]}}.
 
-%hash_body(Body) ->
-%    mochihex:to_hex(binary_to_list(crypto:sha(Body))).
-
-%generate_etag(ReqProps, State) ->
-%    case maybe_fetch_object(State, proplists:get_value(path, ReqProps)) of
-%        {true, BodyState} ->
-%            ETag = hash_body(BodyState#state.response_body),
-%            {ETag,
-%             BodyState#state{metadata=[{etag,ETag}|
-%                                           BodyState#state.metadata]}};
-%        _ ->
-%           {undefined, State}
-%    end.

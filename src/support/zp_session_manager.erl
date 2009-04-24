@@ -6,7 +6,7 @@
 %%      last request has been done.  The session manager manages all the ua session processes.
 
 %% TODO: make sure that all sessions and page sessions are linked to some process so that they will be killed 
-%%       when the application is unloaded.
+%%       when the zophrenic application is stopped.
 
 
 -module(zp_session_manager).
@@ -30,7 +30,6 @@
     tick/0
 ]).
 
--include_lib("webmachine.hrl").
 -include_lib("zophrenic.hrl").
 
 %% The session server state
@@ -93,10 +92,9 @@ handle_call({ensure_session, Context}, _From, State) ->
 
 %% Stop the session from the context or the request props
 handle_call({stop_session, Context}, _From, State) ->
-    ReqProps = zp_context:get_reqprops(Context),
     case Context#context.session_pid of
         undefined -> 
-            SessionId = get_session_id(ReqProps),
+            SessionId = get_session_id(Context),
             case SessionId of
                 undefined -> true;
                 S -> forget_session_id(S, State)
@@ -220,27 +218,25 @@ spawn_session(_State) ->
 %% @spec get_session_id(Context) -> undefined | string()
 %% @doc fetch the session id from the request, return error when not found
 get_session_id(Context) ->
-    ReqProps = zp_context:get_reqprops(Context),
-    Req      = ?REQ(ReqProps),
-    Req:get_cookie_value(?SESSION_COOKIE).
+    ReqData = zp_context:get_reqdata(Context),
+    wrq:get_cookie_value(?SESSION_COOKIE, ReqData).
 
 %% @spec set_session_id(SessionId::string(), Context::#context) -> #context
 %% @doc Save the session id in a cookie on the user agent
 set_session_id(SessionId, Context) ->
-    ReqProps = zp_context:get_reqprops(Context),
-    Req      = ?REQ(ReqProps),
+    RD = zp_context:get_reqdata(Context),
     %% TODO: set the {domain,"example.com"} of the session cookie
     {K,V}    = mochiweb_cookies:cookie(?SESSION_COOKIE, SessionId, [{path, "/"}]),
-    Req:add_response_header(K,V),
-    Context.
+    RD1 = wrq:set_resp_header(K, V, RD),
+    zp_context:set_reqdata(RD1, Context).
+
 
 %% @spec clear_session_id(Context::#context) -> #context
 %% @doc Remove the session id from the user agent and clear the session pid in the context
 clear_session_id(Context) ->
-    ReqProps = zp_context:get_reqprops(Context),
-    Req      = ?REQ(ReqProps),
+    RD = zp_context:get_reqdata(Context),
     %% TODO: set the {domain,"example.com"} of the session cookie
-    Hdr      = mochiweb_cookies:cookie(?SESSION_COOKIE, "", [{max_age, 0}, {path, "/"}]),
-    Req:merge_response_headers([Hdr]),
-    Context#context{session_pid=undefined}.
+    Hdr = mochiweb_cookies:cookie(?SESSION_COOKIE, "", [{max_age, 0}, {path, "/"}]),
+    RD1 = wrq:merge_response_headers([Hdr], RD),
+    zp_context:set_reqdata(RD1, Context#context{session_pid=undefined}).
 

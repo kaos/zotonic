@@ -1,14 +1,13 @@
 {application, webmachine,
  [{description, "webmachine"},
-  {vsn, "0.18"},
+  {vsn, "1.1"},
   {modules, [
     webmachine,
     webmachine_app,
     webmachine_decision_core,
     webmachine_deps,
-    webmachine_dispatch,
+    webmachine_dispatcher,
     webmachine_error_handler,
-    webmachine_fs_resource,
     webmachine_logger,
     webmachine_perf_logger,
     webmachine_resource,
@@ -16,7 +15,9 @@
     webmachine_request_srv,
     webmachine_sup,
     webmachine_mochiweb,
-    webmachine_util
+    webmachine_util,
+    wrq,
+    wmtrace_resource
   ]},
   {registered, []},
   {mod, {webmachine_app, []}},

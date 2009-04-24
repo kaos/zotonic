@@ -6,25 +6,32 @@
 -author("Tim Benniks <tim@timbenniks.com>").
 
 -export([
-    resource_exists/2, 
+    resource_exists/2,
+    is_authorized/2,
     event/2
 ]).
 
 -include_lib("resource_html.hrl").
 
-resource_exists(_ReqProps, Context) ->
-    Context1 = zp_context:ensure_all(Context),
-    Id = zp_context:get_q("id", Context1),
+is_authorized(ReqData, Context) ->
+    {true, ReqData, Context}.
+
+
+resource_exists(ReqData, Context) ->
+    Context1 = ?WM_REQ(ReqData, Context),
+    Context2 = zp_context:ensure_all(Context1),
+    Id = zp_context:get_q("id", Context2),
     try
         IdN = list_to_integer(Id),
-        {m_rsc:exists(IdN, Context1), zp_context:set(id, IdN, Context1)}
+        Context3 = zp_context:set(id, IdN, Context2),
+        ?WM_REPLY(m_rsc:exists(IdN, Context3), Context3)
     catch
         _:_ ->
-            {false, Context1}
+            ?WM_REPLY(false, Context2)
     end.
 
 
-html(_ReqProps, Context) ->
+html(Context) ->
     Vars = [
         {id, zp_context:get(id, Context)}
     ],
@@ -48,7 +55,6 @@ event({submit, rscform, _FormId, _TargetId}, Context) ->
 
 %% @doc Remove some properties that are part of the postback
 filter_props(Fs) ->
-    valid_fields(),
     Remove = [
         "triggervalue",
         "postback",
@@ -61,13 +67,3 @@ filter_props(Fs) ->
     [ {list_to_atom(K), list_to_binary(V)} || {K,V} <- Props ].
 
 
-valid_fields() ->
-    [
-        title,
-        intro,
-        body,
-        seo_noindex,
-        seo_title,
-        seo_keywords,
-        seo_desc
-    ].

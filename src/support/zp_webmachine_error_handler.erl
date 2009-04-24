@@ -11,7 +11,7 @@
 
 render_error(404, Req, _Reason) ->
     Req:add_response_header("Content-Type", "text/html; charset=utf-8"),
-    ErrorDump = mochiweb_html:escape(lists:flatten(io_lib:format("No dispatch path matching: ~p", [Req:path()]))),
+    ErrorDump = mochiweb_html:escape(lists:flatten(io_lib:format("Resource not found: ~p", [Req:path()]))),
     Context   = zp_context:new(),
 	Vars      = [{error_code, 404}, {error_dump, ErrorDump}],
     Html      = zp_template:render("error.tpl", Vars, Context),

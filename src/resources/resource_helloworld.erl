@@ -7,7 +7,7 @@
 
 -include_lib("resource_html.hrl").
 
-html(_ReqProps, Context) ->
+html(Context) ->
     {Incr, Context2} = zp_context:incr_session(helloworld_counter, 1, Context),
     Html = zp_template:render("helloworld.tpl", [{helloworld_counter,Incr}], Context2),
     % Html = zp_template:render("idtest.tpl", Context2),

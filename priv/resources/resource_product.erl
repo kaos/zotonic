@@ -11,17 +11,18 @@
 
 -include_lib("resource_html.hrl").
 
-resource_exists(_ReqProps, Context) ->
-    ContextQs = zp_context:ensure_qs(Context),
+resource_exists(ReqData, Context) ->
+    Context1  = ?WM_REQ(ReqData, Context),
+    ContextQs = zp_context:ensure_qs(Context1),
     try
         Id = list_to_integer(zp_context:get_q("id", ContextQs)),
         Ctx = zp_context:set(id, Id, ContextQs),
-        {m_rsc:exists(Id, Ctx), Ctx}
+        ?WM_REPLY(m_rsc:exists(Id, Ctx), Ctx)
     catch
-        _:_ -> {false, ContextQs}
+        _:_ -> ?WM_REPLY(false, ContextQs)
     end.
 
-html(_ReqProps, Context) ->
+html(Context) ->
 	Id = zp_context:get(id, Context),
 	CatId = m_rsc:p(Id, category_id, Context),
 	CatBrand = shop:category_brands(CatId, Context),

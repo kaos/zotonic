@@ -1,6 +1,6 @@
 %% @author Andy Gross <andy@basho.com> 
 %% @author Justin Sheehy <justin@basho.com>
-%% @copyright 2007-2008 Basho Technologies
+%% @copyright 2007-2009 Basho Technologies
 %% Portions derived from code Copyright 2007-2008 Bob Ippolito, Mochi Media
 %%
 %%    Licensed under the Apache License, Version 2.0 (the "License");
@@ -23,9 +23,10 @@
 -export([init/1, handle_call/3, handle_cast/2, handle_info/2,
 	 terminate/2, code_change/3]).
 -include("webmachine_logger.hrl").
+-include_lib("include/wm_reqdata.hrl").
 
--define(WMVSN, "0.18").
--define(QUIP, "The sky is pancakes.").
+-define(WMVSN, "1.1").
+-define(QUIP, "Doing it live.").
 
 % Maximum recv_body() length of 50MB
 -define(MAX_RECV_BODY, (50*(1024*1024))).
@@ -33,40 +34,25 @@
 % 120 second default idle timeout
 -define(IDLE_TIMEOUT, infinity).
 -record(state, {socket=undefined,
-		method=undefined,
-		raw_path=undefined,
-		path=undefined,
-		qs=undefined,
-		body=undefined,
-		version=undefined,
-		headers=undefined,
-		cookie=undefined,
-		out_headers=mochiweb_headers:empty(),
-		out_body=undefined,
-		response_code=undefined,
 		metadata=dict:new(),
-		path_info=dict:new(),
-		path_tokens=undefined,
-		app_root=undefined,
 		range=undefined,
 		peer=undefined,
+                reqdata=undefined,
 		log_data=#wm_log_data{}
 	       }).
 
 start_link(Socket, Method, RawPath, Version, Headers) ->
-    gen_server:start_link(?MODULE, [Socket, Method, RawPath, Version, Headers], []).
+    gen_server:start_link(?MODULE,
+                          [Socket, Method, RawPath, Version, Headers], []).
 
 init([Socket, Method, RawPath, Version, Headers]) ->
     %%process_flag(trap_exit, true),
     %% Calling get_peer() here is a little bit of an ugly way to populate the
     %% client IP address but it will do for now.
-    {_, State} = get_peer(#state{socket=Socket,
-				method=Method,
-				raw_path=RawPath,
-				version=Version,
-				headers=Headers,
-				out_body = <<>>,
-				 response_code=500}),
+    {Peer, State} = get_peer(#state{socket=Socket,
+         reqdata=wrq:create(Method,Version,RawPath,Headers)}),
+    BodyState = do_recv_body(State#state{
+                               reqdata=wrq:set_peer(Peer,State#state.reqdata)}),
     LogData = #wm_log_data{start_time=now(),
 			   method=Method,
 			   headers=Headers,
@@ -75,30 +61,36 @@ init([Socket, Method, RawPath, Version, Headers]) ->
 			   version=Version,
 			   response_code=404,
 			   response_length=0},
-    {ok, State#state{log_data=LogData}}.
+    {ok, BodyState#state{log_data=LogData}}.
 
 handle_call(socket, _From, State) ->
     Reply = State#state.socket,
     {reply, Reply, State};
+handle_call(get_reqdata, _From, State) ->
+    {reply, State#state.reqdata, State};
+handle_call({set_reqdata, RD}, _From, State) ->
+    {reply, ok, State#state{reqdata=RD}};
 handle_call(method, _From, State) ->
-    Reply = State#state.method,
-    {reply, Reply, State};
+    {reply, wrq:method(State#state.reqdata), State};
 handle_call(version, _From, State) ->
-    Reply = State#state.version,
-    {reply, Reply, State};
+    {reply, wrq:version(State#state.reqdata), State};
 handle_call(raw_path, _From, State) ->
-    Reply = State#state.raw_path,
+    {reply, wrq:raw_path(State#state.reqdata), State};
+handle_call(req_headers, _From, State) ->
+    {reply, wrq:req_headers(State#state.reqdata), State};
+handle_call(resp_headers, _From, State) ->
+    {reply, wrq:resp_headers(State#state.reqdata), State};
+handle_call(resp_redirect, _From, State) ->
+    {reply, wrq:resp_redirect(State#state.reqdata), State};
+handle_call({get_resp_header, HdrName}, _From, State) ->
+    Reply = mochiweb_headers:get_value(HdrName,
+                wrq:resp_headers(State#state.reqdata)),
     {reply, Reply, State};
-handle_call(headers, _From, State) ->
-    Reply = State#state.headers,
-    {reply, Reply, State};
-handle_call(out_headers, _From, State) ->
-    Reply = State#state.out_headers,
-    {reply, Reply, State};
-handle_call({get_out_header, HdrName}, _From,
-            State=#state{out_headers=OutHeaders}) ->
-    Reply = mochiweb_headers:get_value(HdrName, OutHeaders),
-    {reply, Reply, State};
+handle_call(get_path_info, _From, State) ->
+    PropList = dict:to_list(wrq:path_info(State#state.reqdata)),
+    {reply, PropList, State};
+handle_call({get_path_info, Key}, _From, State) ->
+    {reply, wrq:path_info(Key, State#state.reqdata), State};
 handle_call(peer, _From, State) ->
     {Reply, NewState} = get_peer(State),
     {reply, Reply, NewState};
@@ -106,28 +98,48 @@ handle_call(range, _From, State) ->
     {Reply, NewState} = get_range(State),
     {reply, Reply, NewState};
 handle_call(response_code, _From, State) ->
-    Reply = State#state.response_code,
-    {reply, Reply, State};
+    {reply, wrq:response_code(State#state.reqdata), State};
+handle_call(app_root, _From, State) ->
+    {reply, wrq:app_root(State#state.reqdata), State};
+handle_call(disp_path, _From, State) ->
+    {reply, wrq:disp_path(State#state.reqdata), State};
 handle_call(path, _From, State) ->
-    {Reply, NewState} = get_path(State),
-    {reply, Reply, NewState};
-handle_call({get_header_value, K}, _From, State) ->
-    {Reply, NewState} = get_header_value(K, State),
-    {reply, Reply, NewState};
-handle_call({add_response_header, K, V}, _From, State) ->
-    {Reply, NewState} = add_response_header(K, V, State),
-    {reply, Reply, NewState};
-handle_call({add_response_headers, Hdrs}, _From, State) ->
-    {Reply, NewState} = add_response_headers(Hdrs, State),
-    {reply, Reply, NewState};
-handle_call({merge_response_headers, Hdrs}, _From, State) ->
-    {Reply, NewState} = merge_response_headers(Hdrs, State),
-    {reply, Reply, NewState};
+    {reply, wrq:path(State#state.reqdata), State};
+handle_call({get_req_header, K}, _From, State) ->
+    {reply, wrq:get_req_header(K, State#state.reqdata), State};
+handle_call({set_response_code, Code}, _From, State) ->
+    NewState = State#state{reqdata=wrq:set_response_code(
+                                     Code, State#state.reqdata)},
+    {reply, ok, NewState};
+handle_call({set_resp_header, K, V}, _From, State) ->
+    NewState = State#state{reqdata=wrq:set_resp_header(
+                                     K, V, State#state.reqdata)},
+    {reply, ok, NewState};
+handle_call({set_resp_headers, Hdrs}, _From, State) ->
+    NewState = State#state{reqdata=wrq:set_resp_headers(
+                                     Hdrs, State#state.reqdata)},
+    {reply, ok, NewState};
+handle_call({remove_resp_header, K}, _From, State) ->
+    NewState = State#state{reqdata=wrq:remove_resp_header(
+                                     K, State#state.reqdata)},
+    {reply, ok, NewState};
+handle_call({merge_resp_headers, Hdrs}, _From, State) ->
+    NewState = State#state{reqdata=wrq:merge_resp_headers(
+                                     Hdrs, State#state.reqdata)},
+    {reply, ok, NewState};
 handle_call({append_to_response_body, Data}, _From, State) ->
-    {Reply, NewState} = append_to_response_body(Data, State),
-    {reply, Reply, NewState};
+    NewState = State#state{reqdata=wrq:append_to_response_body(
+                                     Data, State#state.reqdata)},
+    {reply, ok, NewState};
+handle_call({set_disp_path, P}, _From, State) ->
+    NewState = State#state{reqdata=wrq:set_disp_path(
+                                     P, State#state.reqdata)},
+    {reply, ok, NewState};
+handle_call(do_redirect, _From, State) ->
+    NewState = State#state{reqdata=wrq:do_redirect(true,
+                                     State#state.reqdata)},
+    {reply, ok, NewState};
 handle_call({send_response, Code}, _From, State) ->
-
     {Reply, NewState} = 
 	case Code of
 	    200 ->
@@ -138,28 +150,20 @@ handle_call({send_response, Code}, _From, State) ->
     LogData = NewState#state.log_data,
     NewLogData = LogData#wm_log_data{finish_time=now()},
     {reply, Reply, NewState#state{log_data=NewLogData}};
-handle_call({serve_file, Path, DocRoot}, _From, State) ->
-    {Reply, NewState} = serve_file(Path, DocRoot, State),
-    {reply, Reply, NewState};
-handle_call(response_body, _From, State) ->
-    {Reply, NewState} = {State#state.out_body, State},
-    {reply, Reply, NewState};
-handle_call(has_response_body, _From, State=#state{out_body=OutBody}) ->
-    Reply = case OutBody of
+handle_call(resp_body, _From, State) ->
+    {reply, wrq:resp_body(State#state.reqdata), State};
+handle_call({set_resp_body, Body}, _From, State) ->
+    NewState = State#state{reqdata=wrq:set_resp_body(Body,
+                                     State#state.reqdata)},
+    {reply, ok, NewState};
+handle_call(has_resp_body, _From, State) ->
+    Reply = case wrq:resp_body(State#state.reqdata) of
                 undefined -> false;
                 <<>> -> false;
                 [] -> false;
                 _ -> true
             end,
     {reply, Reply, State};
-handle_call(recv_body, _From, State) ->
-    case State#state.body of
-	undefined ->
-	    {Reply, NewState} = do_recv_body(State),
-	    {reply, Reply, NewState};
-	Body -> 
-	    {reply, Body, State}
-    end;
 handle_call({get_metadata, Key}, _From, State) ->
     Reply = case dict:find(Key, State#state.metadata) of
 		{ok, Value} -> Value;
@@ -169,76 +173,27 @@ handle_call({get_metadata, Key}, _From, State) ->
 handle_call({set_metadata, Key, Value}, _From, State) ->
     NewDict = dict:store(Key, Value, State#state.metadata),
     {reply, ok, State#state{metadata=NewDict}};
-handle_call(get_path_info, _From, State) ->
-    PropList = dict:to_list(State#state.path_info),
-    {reply, PropList, State};
-handle_call({get_path_info, Key}, _From, State) ->
-    Reply = case dict:find(Key, State#state.path_info) of
-		{ok, Value} -> Value;
-		error -> undefined
-	    end,
-    {reply, Reply, State};
-handle_call({set_path_info, Key, Value}, _From, State) ->
-    NewDict = dict:store(Key, Value, State#state.path_info),
-    {reply, ok, State#state{path_info=NewDict}};
-handle_call({load_path_info, PropList}, _From, State) ->
-    % Loads the path-info bindings dict from scratch.
-    NewDict = dict:from_list(PropList),
-    {reply, ok, State#state{path_info=NewDict}};
-handle_call(get_path_tokens, _From, State) ->
-    {reply, State#state.path_tokens, State};
-handle_call({set_path_tokens, TokenList}, _From, State) ->
-    {reply, ok, State#state{path_tokens=TokenList}};
-handle_call(parse_cookie, _From, State) ->
-    case State#state.cookie of
-	undefined ->
-	    {Reply, NewState} = do_parse_cookie(State),
-	    {reply, Reply, NewState};
-	Cookie ->
-	    {reply, Cookie, State}
-    end;
-handle_call(parse_qs, _From, State) ->
-    case State#state.qs of
-	undefined ->
-	    {Reply, NewState} = do_parse_qs(State),
-	    {reply, Reply, NewState};
-	QS ->
-	    {reply, QS, State}
-    end;
-handle_call(get_app_root, _From, State) ->
-    {reply, State#state.app_root, State};
-handle_call({set_app_root, AppRoot}, _From, State) ->
-    {reply, ok, State#state{app_root=AppRoot}};
-handle_call({load_dispatch_data, PathProps, PathTokens, AppRoot}, _From, State) ->
+handle_call(path_tokens, _From, State) ->
+    {reply, wrq:path_tokens(State#state.reqdata), State};
+handle_call(req_cookie, _From, State) ->
+    {reply, wrq:req_cookie(State#state.reqdata), State};
+handle_call(req_qs, _From, State) ->
+    {reply, wrq:req_qs(State#state.reqdata), State};
+handle_call({load_dispatch_data, PathProps, PathTokens, AppRoot, DispPath},
+            _From, State) ->
     PathInfo = dict:from_list(PathProps),
-    {reply, ok, State#state{app_root=AppRoot, path_info=PathInfo, path_tokens=PathTokens}};
-handle_call({recv, Length}, _From, State) ->
-    Reply = recv(State, Length),
-    {reply, Reply, State};
-handle_call(log_data, _From, State) ->
-    Reply = State#state.log_data,
-    {reply, Reply, State}.
+    NewState = State#state{reqdata=wrq:load_dispatch_data(
+                 PathInfo, PathTokens, AppRoot, DispPath, State#state.reqdata)},
+    {reply, ok, NewState};
+handle_call(log_data, _From, State) -> {reply, State#state.log_data, State}.
 
-handle_cast(stop, State) ->
-    {stop, normal, State}.
+handle_cast(stop, State) -> {stop, normal, State}.
 
-handle_info(_Info, State) ->
-    {noreply, State}.
+handle_info(_Info, State) -> {noreply, State}.
 
-terminate(_Reason, _State) ->
-    ok.
+terminate(_Reason, _State) -> ok.
 
-code_change(_OldVsn, State, _Extra) ->
-    {ok, State}.
-
-get_path(State) ->
-    case State#state.path of 
-	undefined ->
-	    {Path, _, _} = mochiweb_util:urlsplit_path(State#state.raw_path),
-	    {Path, State#state{path=Path}};
-	Cached ->
-	    {Cached, State}
-    end.
+code_change(_OldVsn, State, _Extra) -> {ok, State}.
 
 get_peer(State) ->
     case State#state.peer of
@@ -269,50 +224,28 @@ get_peer(State) ->
     end.
 
 get_header_value(K, State) ->
-    {mochiweb_headers:get_value(K, State#state.headers), State}.
+    {wrq:get_req_header(K, State#state.reqdata), State}.
 
 get_outheader_value(K, State) ->
-    {mochiweb_headers:get_value(K, State#state.out_headers), State}.    
-
-add_response_header(K, V, State) ->
-    NewHdrs = mochiweb_headers:enter(K, V, State#state.out_headers),
-    {NewHdrs, State#state{out_headers=NewHdrs}}.
-
-add_response_headers(Hdrs, State) ->
-    F = fun({K, V}, Acc) -> mochiweb_headers:enter(K, V, Acc) end,
-    NewHdrs = lists:foldl(F, State#state.out_headers, Hdrs),
-    {NewHdrs, State#state{out_headers=NewHdrs}}.
-
-merge_response_headers(Hdrs, State) ->
-    F = fun({K, V}, Acc) -> mochiweb_headers:insert(K, V, Acc) end,
-    NewHdrs = lists:foldl(F, State#state.out_headers, Hdrs),
-    {NewHdrs, State#state{out_headers=NewHdrs}}.
-
-append_to_response_body(Data, State) ->
-    case is_binary(Data) of
-	true ->
-	    Data0 = State#state.out_body,
-	    Data1 = <<Data0/binary,Data/binary>>,
-	    {ok, State#state{out_body=Data1}};
-	false -> % MUST BE an iolist! else, fail.
-	    append_to_response_body(iolist_to_binary(Data), State)
-    end.
+    {mochiweb_headers:get_value(K,
+      wrq:resp_headers(State#state.reqdata)), State}.
 
 send(Socket, Data) ->
     case gen_tcp:send(Socket, Data) of
-	ok ->
-	    ok;
-	_ ->
-	    exit(normal)
+	ok -> ok;
+	{error,closed} -> ok;
+	_ -> exit(normal)
     end.
 
 send_ok_response(200, InitState) ->
+    RD0 = InitState#state.reqdata,
     {Range, State} = get_range(InitState),
     case Range of
 	X when X =:= undefined; X =:= fail ->
 	    send_response(200, State);
 	Ranges ->
-	    {PartList, Size} = range_parts(State#state.out_body, Ranges),
+	    {PartList, Size} = range_parts(
+                   wrq:resp_body(RD0), Ranges),
 	    case PartList of
 		[] -> %% no valid ranges
 		    %% could be 416, for now we'll just return 200
@@ -320,31 +253,30 @@ send_ok_response(200, InitState) ->
 		PartList ->
 		    {RangeHeaders, RangeBody} =
 			parts_to_body(PartList, State, Size),
-		    ResponseHdrs1 = mochiweb_headers:enter_from_list(
-				      [{"Accept-Ranges", "bytes"} |
-				       RangeHeaders],
-				      mochiweb_headers:make(State#state.out_headers)),
-		    NewState = State#state{out_headers=ResponseHdrs1, out_body=RangeBody},
+		    RespHdrsRD = wrq:set_resp_headers(
+                        [{"Accept-Ranges", "bytes"} | RangeHeaders], RD0),
+                    RespBodyRD = wrq:set_resp_body(
+                                   RangeBody, RespHdrsRD),
+		    NewState = State#state{reqdata=RespBodyRD},
 		    send_response(206, NewState)
 	    end
     end.
-		     
 
-send_response(Code, State) ->
-    Length = iolist_size([State#state.out_body]),
+send_response(Code, State=#state{reqdata=RD}) ->
+    Length = iolist_size([wrq:resp_body(RD)]),
     send(State#state.socket,
-	 [make_version(State#state.version), make_code(Code), <<"\r\n">> | 
-         make_headers(Length, State)]),
-    case State#state.method of 
-	'HEAD' ->
-	    ok;
-	_ ->
-	    send(State#state.socket, [State#state.out_body])
+	 [make_version(wrq:version(RD)),
+          make_code(Code), <<"\r\n">> | 
+         make_headers(Code, Length, RD)]),
+    case wrq:method(RD) of 
+	'HEAD' -> ok;
+	_ -> send(State#state.socket, [wrq:resp_body(RD)])
     end,
     InitLogData = State#state.log_data,
     FinalLogData = InitLogData#wm_log_data{response_code=Code,
 					   response_length=Length},
-    {ok, State#state{response_code=Code, log_data=FinalLogData}}.
+    {ok, State#state{reqdata=wrq:set_response_code(Code, RD),
+                     log_data=FinalLogData}}.
 
 %% @spec body_length(state()) -> undefined | chunked | unknown_transfer_encoding | integer()
 %% @doc  Infer body length from transfer-encoding and content-length headers.
@@ -365,30 +297,32 @@ body_length(State) ->
 
 %% @spec do_recv_body(state()) -> binary()
 %% @doc Receive the body of the HTTP request (defined by Content-Length).
-%%      Will only receive up to the default max-body length of 1MB.
-do_recv_body(State) ->
-    do_recv_body(State, ?MAX_RECV_BODY).
+%%      Will only receive up to the default max-body length
+do_recv_body(State=#state{reqdata=RD}) ->
+    State#state{reqdata=wrq:set_req_body(
+                             do_recv_body(State, ?MAX_RECV_BODY), RD)}.
 
 %% @spec do_recv_body(state(), integer()) -> {binary(), state()}
 %% @doc Receive the body of the HTTP request (defined by Content-Length).
 %%      Will receive up to MaxBody bytes. 
-do_recv_body(State, MaxBody) ->
+do_recv_body(State = #state{reqdata=RD}, MaxBody) ->
     case get_header_value("expect", State) of
 	{"100-continue", _} ->
 	    send(State#state.socket, 
-		 [make_version(State#state.version), make_code(100), <<"\r\n">>]);
+		 [make_version(wrq:version(RD)),
+                  make_code(100), <<"\r\n">>]);
 	_Else ->
 	    ok
     end,
     Body = case body_length(State) of
                undefined ->
-                   {undefined, State};
+                   undefined;
                {unknown_transfer_encoding, Unknown} -> 
                    exit({unknown_transfer_encoding, Unknown});
                0 ->
-                   {<<>>, State};
+                   <<>>;
                Length when is_integer(Length), Length =< MaxBody ->
-                   {recv(State, Length), State};
+                   recv(State, Length);
                Length ->
                    exit({body_too_large, Length})
            end,
@@ -397,8 +331,7 @@ do_recv_body(State, MaxBody) ->
 %% @spec recv(state(), integer()) -> binary()
 %% @doc Receive Length bytes from the client as a binary, with the default
 %%      idle timeout.
-recv(State, Length) ->
-    recv(State, Length, ?IDLE_TIMEOUT).
+recv(State, Length) -> recv(State, Length, ?IDLE_TIMEOUT).
 
 %% @spec recv(state(), integer(), integer()) -> binary()
 %% @doc Receive Length bytes from the client as a binary, with the given
@@ -412,22 +345,6 @@ recv(State, Length, Timeout) ->
 	    io:format("got socket error ~p~n", [_R]),
 	    exit(normal)
     end.
-
-
-do_parse_cookie(State) ->
-    case get_header_value("cookie", State) of
-	{undefined, _} ->
-	    {[], State#state{cookie=[]}};
-	{Value, _} ->
-	    CookieVal = mochiweb_cookies:parse_cookie(Value),
-	    {CookieVal, State#state{cookie=CookieVal}}
-    end.
-
-
-do_parse_qs(State) ->
-    {_, QueryString, _} = mochiweb_util:urlsplit_path(State#state.raw_path),
-    Parsed = mochiweb_util:parse_qs(QueryString),
-    {Parsed, State#state{qs=Parsed}}.
 
 get_range(State) ->
     case get_header_value("range", State) of
@@ -537,7 +454,6 @@ parts_to_body(BodyList, State, Size) when is_list(BodyList) ->
                    ["multipart/byteranges; ",
                     "boundary=", Boundary]}],
     MultiPartBody = multipart_body(BodyList, ContentType, Boundary, Size),
-
     {HeaderList, MultiPartBody}.
 
 multipart_body([], _ContentType, Boundary, _Size) ->
@@ -556,31 +472,6 @@ iodevice_size(IoDevice) ->
     {ok, 0} = file:position(IoDevice, bof),
     Size.
 
-
-serve_file(Path, DocRoot, State) ->
-    FullPath = filename:join([DocRoot, Path]),
-    File = case filelib:is_dir(FullPath) of
-	       true ->
-		   filename:join([FullPath, "index.html"]);
-	       false ->
-		   FullPath
-	   end,
-    case lists:prefix(DocRoot, File) of
-	true ->
-	    case file:read_file(File) of
-		{ok, Binary} ->
-		    ContentType = webmachine_util:guess_mime(File),
-		    {_NewHdrs, NewState0} = add_response_header(
-					    "Content-Type", ContentType, State),
-		    {ok, NewState} = append_to_response_body(Binary, NewState0),
-		    {true, NewState};
-		_ ->
-		    {false, State}
-	    end;
-	false ->
-	    {false, State}
-    end.
-
 make_io(Atom) when is_atom(Atom) ->
     atom_to_list(Atom);
 make_io(Integer) when is_integer(Integer) ->
@@ -598,11 +489,16 @@ make_version({1, 0}) ->
 make_version(_) ->
     <<"HTTP/1.1 ">>.
 
-make_headers(Length, State) ->
-    WithCL = mochiweb_headers:enter("Content-Length",integer_to_list(Length),
-                             mochiweb_headers:make(State#state.out_headers)),
+make_headers(Code, Length, RD) ->
+    Hdrs0 = case Code of
+        304 ->
+            mochiweb_headers:make(wrq:resp_headers(RD));
+        _ -> 
+            mochiweb_headers:enter("Content-Length",integer_to_list(Length),
+                 mochiweb_headers:make(wrq:resp_headers(RD)))
+    end,
     ServerHeader = "MochiWeb/1.1 WebMachine/" ++ ?WMVSN ++ " (" ++ ?QUIP ++ ")",
-    WithSrv = mochiweb_headers:enter("Server", ServerHeader, WithCL),
+    WithSrv = mochiweb_headers:enter("Server", ServerHeader, Hdrs0),
     Hdrs = case mochiweb_headers:get_value("date", WithSrv) of
 	undefined ->
             mochiweb_headers:enter("Date", httpd_util:rfc1123_date(), WithSrv);
