@@ -169,7 +169,7 @@ tables_sql() ->
       modified timestamp with time zone NOT NULL DEFAULT now(),
       CONSTRAINT shop_order_pkey PRIMARY KEY (id),
       CONSTRAINT shop_order_name_key UNIQUE(name),
-      CONSTRAINT fk_shop_order_person_id FOREIGN KEY (visitor_id)
+      CONSTRAINT fk_shop_order_visitor_id FOREIGN KEY (visitor_id)
         REFERENCES visitor(id)
         ON UPDATE CASCADE ON DELETE RESTRICT        
     )
