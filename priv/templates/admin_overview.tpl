@@ -8,22 +8,28 @@
 
 			<h2>Zophrenic Overview</h2>
 
+		{% with m.search.paged[{fulltext cat=q.qcat text=q.qs page=q.page}] as result %}
+
 			<h3 class="above-list">Pagelist</h3>
+			
+			{% pager result=result dispatch="admin_overview_rsc" qargs %}
+			
 			<ul class="short-list">
 				<li class="headers clearfix">
 					<span class="zp-30">Title</span>
 					<span class="zp-15">Category</span>
-					<span class="zp-15">Publish date</span>
+					<span class="zp-15">Modify date</span>
 					<span class="zp-15">Create date</span>
 					<span class="zp-15">Created by</span>
 					<span class="zp-10">Options</span>
 				</li>
+			{% for id, rank in result %}
 				<li>
 					<a href="#" class="clearfix">
-						<span class="zp-30">Home</span>
-						<span class="zp-15">Struijk</span>
-						<span class="zp-15">March 10, 19:33</span>
-						<span class="zp-15">March 8, 18:43</span>
+						<span class="zp-30">{{ m.rsc[id].title|striptags }}</span>
+						<span class="zp-15">{{ m.rsc[id].category.name }}</span>
+						<span class="zp-15">{{ m.rsc[id].modified|date:"F d, H:i" }}</span>
+						<span class="zp-15">{{ m.rsc[id].created|date:"F d, H:i" }}</span>
 						<span class="zp-15">Tim Benniks</span>
 						<span class="zp-10">
 							{% button text="delete" %}
@@ -31,47 +37,17 @@
 						</span>
 					</a>
 				</li>
+			{% empty %}
 				<li>
-					<a href="#" class="clearfix">
-						<span class="zp-30">Home</span>
-						<span class="zp-15">Struijk</span>
-						<span class="zp-15">March 10, 19:33</span>
-						<span class="zp-15">March 8, 18:43</span>
-						<span class="zp-15">Tim Benniks</span>
-						<span class="zp-10">
-							{% button text="delete" %}
-							{% button text="edit &raquo;" action={redirect location="/admin/edit/2"} %}
-						</span>
-					</a>
+					No items found
 				</li>
-				<li>
-					<a href="#" class="clearfix">
-						<span class="zp-30">Home</span>
-						<span class="zp-15">Struijk</span>
-						<span class="zp-15">March 10, 19:33</span>
-						<span class="zp-15">March 8, 18:43</span>
-						<span class="zp-15">Tim Benniks</span>
-						<span class="zp-10">
-							{% button text="delete" %}
-							{% button text="edit &raquo;" action={redirect location="/admin/edit/2"} %}
-						</span>
-					</a>
-				</li>
-				<li>
-					<a href="#" class="clearfix">
-						<span class="zp-30">Home</span>
-						<span class="zp-15">Struijk</span>
-						<span class="zp-15">March 10, 19:33</span>
-						<span class="zp-15">March 8, 18:43</span>
-						<span class="zp-15">Tim Benniks</span>
-						<span class="zp-10">
-							{% button text="delete" %}
-							{% button text="edit &raquo;" action={redirect location="/admin/edit/2"} %}
-						</span>	
-					</a>
-				</li>
+			{% endfor %}
 			</ul>
-			
+
+			{% pager result=result dispatch="admin_overview_rsc" qargs %}
+
+		{% endwith %}
+
 			<form method="get" autocomplete="off">
 				<input type="text" value="" name="q" id="q" class="do_listfilter {list: '#posts'}" />
 			</form>

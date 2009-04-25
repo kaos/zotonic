@@ -64,20 +64,55 @@ search({latest, [{cat, Cat}]}, _OffsetLimit, Context) ->
         tables=[{rsc,"r"}]
     };
 
-search({fulltext, [{cat,Cat},{text,QueryText}]}, _OffsetLimit, Context) ->
-    CatId = m_category:name_to_id_check(Cat, Context),
+search({fulltext, [{cat,Cat},{text,QueryText}]}, OffsetLimit, Context) when Cat == undefined orelse Cat == [] orelse Cat == <<>> ->
+    search({fulltext, [{text,QueryText}]}, OffsetLimit, Context);
+
+search({fulltext, [{text,QueryText}]}, _OffsetLimit, Context) ->
     case QueryText of
-        A when A == undefined orelse A == "" ->
-            #search_result{result=[]};
+        A when A == undefined ->
+            #search_sql{
+                select="r.id, 1 AS rank",
+                from="rsc r",
+                order="r.modified desc",
+                args=[],
+                tables=[{rsc,"r"}]
+            };
         _ ->
             #search_sql{
                 select="r.id, ts_rank_cd(pivot_tsv, query, 32) AS rank",
-                from="rsc r, category rc, category ic, to_tsquery($3, $2) query",
-                where=" query @@ pivot_tsv  and r.category_id = rc.id and rc.nr >= ic.lft and rc.nr <= ic.rght and ic.id = $1",
+                from="rsc r, to_tsquery($2, $1) query",
+                where=" query @@ pivot_tsv",
                 order="rank desc",
-                args=[CatId, QueryText, zp_pivot_rsc:pg_lang(Context#context.language)],
+                args=[QueryText, zp_pivot_rsc:pg_lang(Context#context.language)],
                 tables=[{rsc,"r"}]
             }
+    end;
+
+search({fulltext, [{cat,Cat},{text,QueryText}]}, _OffsetLimit, Context) ->
+    case m_category:name_to_id(Cat, Context) of
+        {ok, CatId} -> 
+            case QueryText of
+                A when A == undefined orelse A == "" orelse A == <<>> ->
+                    #search_sql{
+                        select="r.id, 1 AS rank",
+                        from="rsc r, category rc, category ic",
+                        where=" r.category_id = rc.id and rc.nr >= ic.lft and rc.nr <= ic.rght and ic.id = $1",
+                        order="r.modified desc",
+                        args=[CatId, zp_pivot_rsc:pg_lang(Context#context.language)],
+                        tables=[{rsc,"r"}]
+                    };
+                _ ->
+                    #search_sql{
+                        select="r.id, ts_rank_cd(pivot_tsv, query, 32) AS rank",
+                        from="rsc r, category rc, category ic, to_tsquery($3, $2) query",
+                        where=" query @@ pivot_tsv  and r.category_id = rc.id and rc.nr >= ic.lft and rc.nr <= ic.rght and ic.id = $1",
+                        order="rank desc",
+                        args=[CatId, QueryText, zp_pivot_rsc:pg_lang(Context#context.language)],
+                        tables=[{rsc,"r"}]
+                    }
+            end;
+        _ ->
+            #search_result{result=[]}
     end;
 
 search({fulltext_catbrand, [{cat,Cat},{text,QueryText}]}, _OffsetLimit, Context) ->

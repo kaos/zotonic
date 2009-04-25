@@ -45,6 +45,10 @@
 
 %% @doc Fetch the value for the key from a model source
 %% @spec m_find_value(Key, Source, Context) -> term()
+m_find_value(paged, #m{value=undefined} = M, _Context) ->
+    M#m{value=paged};
+m_find_value(SearchProps, #m{value=paged} = M, Context) ->
+    M#m{value=search_pager(SearchProps, Context)};
 m_find_value(SearchProps, #m{value=undefined} = M, Context) ->
     M#m{value=search(SearchProps, Context)};
 m_find_value(Key, #m{value=#m_search_result{}} = M, Context) ->
@@ -70,15 +74,30 @@ m_value(#m{value=#m_search_result{result=Result}}, _Context) ->
 %% @doc Perform a search, wrap the result in a m_search_result record
 %% @spec search(Search, Context) -> #m_search_result{}
 search({SearchName, Props}=Search, Context) ->
-    {Page, PageLen, Props1} = get_paging_props(Props),
     Result = zp_search:search(Search, Context),
     Total1 = case Result#search_result.total of
         undefined -> length(Result#search_result.result);
         Total -> Total
     end,
-    #m_search_result{result=Result, total=Total1, search_name=SearchName, search_props=Props1};
+    #m_search_result{result=Result, total=Total1, search_name=SearchName, search_props=Props};
 search(SearchName, Context) ->
     search({zp_convert:to_atom(SearchName), []}, Context).
+
+
+%% @doc Perform a paged search, wrap the result in a m_search_result record
+%% @spec search_pager(Search, Context) -> #m_search_result{}
+search_pager({SearchName, Props}, Context) ->
+    {Page, _PageLen, Props1} = get_paging_props(Props),
+    Result = zp_search:search_pager({SearchName, Props1}, Page, Context),
+    Total1 = case Result#search_result.total of
+        undefined -> length(Result#search_result.result);
+        Total -> Total
+    end,
+    #m_search_result{result=Result, total=Total1, search_name=SearchName, search_props=Props1};
+search_pager(SearchName, Context) ->
+    search_pager({zp_convert:to_atom(SearchName), []}, Context).
+
+
 
 get_result(N, Result, _Context) when is_integer(N) ->
     try
@@ -98,8 +117,14 @@ get_result(_Key, _Result, _Context) ->
 
 
 get_paging_props(Props) ->
-    Page = proplists:get_value(page, Props, 1),
-    PageLen = proplists:get_value(pagelen, Props, ?SEARCH_PAGELEN),
+    Page = case proplists:get_value(page, Props) of
+        undefined -> 1;
+        PageProp -> try zp_convert:to_integer(PageProp) catch _:_ -> 1 end
+    end,
+    PageLen = case proplists:get_value(pagelen, Props) of
+        undefined -> 1;
+        PageLenProp -> try zp_convert:to_integer(PageLenProp) catch _:_ -> ?SEARCH_PAGELEN end
+    end,
     P1 = proplists:delete(page, Props),
     P2 = proplists:delete(pagelen, P1),
     {Page, PageLen, lists:keysort(1, P2)}.

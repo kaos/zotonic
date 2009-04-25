@@ -16,5 +16,5 @@ is_authorized(ReqData, Context) ->
 
 
 html(Context) ->
-    Html = zp_template:render("admin.tpl", [], Context),
+    Html = zp_template:render("admin.tpl", [{page_dashboard, true}], Context),
 	zp_context:output(Html, Context).

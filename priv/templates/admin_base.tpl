@@ -35,10 +35,10 @@
 		{% block navigation %}
 		{% wire id="zp-logoff" action={logoff} %}
 		<ul id="navigation" class="zp-100">
-			<li><a href="/admin/" class="current">Dashboard</a></li>
-			<li><a href="/admin/overview/">Pages</a></li>
-			<li><a href="#">Users</a></li>
-			<li><a href="#">Products</a></li>
+			<li><a href="/admin/" {% if page_dashboard %}class="current"{% endif %}>Dashboard</a></li>
+			<li><a href="/admin/overview/" {% if page_overview %}class="current"{% endif %}>Pages</a></li>
+			<li><a href="#" {% if page_users %}class="current"{% endif %}>Users</a></li>
+			<li><a href="#" {% if page_products %}class="current"{% endif %}>Products</a></li>
 			<li class="right"><a id="zp-logoff" href="#">Logoff</a></li>
 			<li class="right"><a href="#">Options</a></li>
 		</ul>
