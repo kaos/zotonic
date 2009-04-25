@@ -28,10 +28,13 @@ border:0; margin:0; padding:0; white-space:nowrap; text-decoration:none; font-we
 	line-height: 16px;
 	overflow: visible;
 	height: 20px;
-	border-top-width: 1px;
-	border-top-style: solid;
+	border-top: 1px solid #ddd;
+	padding: 4px;
+	-moz-border-radius: 0 0 4px 4px;
+	-webkit-border-bottom-left-radius: 4px;
+	-webkit-border-bottom-right-radius: 4px;
 }
-.wp_themeSkin .mceStatusbar div {float:left; padding:2px;}
+.wp_themeSkin .mceStatusbar div {float:left; padding:2px; color: #666;}
 .wp_themeSkin .mceStatusbar a.mceResize {
 	display: block;
 	float: right;
@@ -94,7 +97,6 @@ border:0; margin:0; padding:0; white-space:nowrap; text-decoration:none; font-we
 	background-image: url(img/butt2.png);
 	background-position: left top;
 	background-repeat: repeat-x;
-	font-family: Tahoma,Verdana,Arial,Helvetica; 
 	font-size: 11px; 
 	height: 20px; 
 	line-height: 20px; 
@@ -133,7 +135,7 @@ border:0; margin:0; padding:0; white-space:nowrap; text-decoration:none; font-we
 .wp_themeSkin .mceListBoxDisabled .mceText {color:gray}
 .wp_themeSkin .mceListBoxMenu {overflow:auto; overflow-x:hidden}
 .wp_themeSkin .mceOldBoxModel .mceListBox .mceText {height:22px}
-.wp_themeSkin select.mceListBox {font-family:Tahoma,Verdana,Arial,Helvetica; font-size:12px;}
+.wp_themeSkin select.mceListBox {font-size:12px;}
 
 /* SplitButton */
 .wp_themeSkin .mceSplitButton a, .wp_themeSkin .mceSplitButton span {display:block; height:20px}
@@ -214,7 +216,7 @@ border:0; margin:0; padding:0; white-space:nowrap; text-decoration:none; font-we
 .wp_themeSkin .mceColorSplitMenu td {padding:2px}
 .wp_themeSkin .mceColorSplitMenu a {display:block; width:9px; height:9px; overflow:hidden;}
 .wp_themeSkin .mceColorSplitMenu td.mceMoreColors {padding:1px 3px 1px 1px}
-.wp_themeSkin .mceColorSplitMenu a.mceMoreColors {width:100%; height:auto; text-align:center; font-family:Tahoma,Verdana,Arial,Helvetica; font-size:11px; line-height:20px;}
+.wp_themeSkin .mceColorSplitMenu a.mceMoreColors {width:100%; height:auto; text-align:center;  font-size:11px; line-height:20px;}
 .wp_themeSkin .mceColorSplitMenu a.mceMoreColors:hover {}
 .wp_themeSkin a.mceMoreColors:hover {}
 .wp_themeSkin .mceColorPreview {margin: -4px 0 0 2px; width:16px; height:4px; overflow:hidden}
@@ -234,7 +236,7 @@ border:0; margin:0; padding:0; white-space:nowrap; text-decoration:none; font-we
 .wp_themeSkin .mceMenu .mceText {
 	position:relative; 
 	display:block; 
-	font-family:Tahoma,Verdana,Arial,Helvetica; 
+	 
 	cursor:default; 
 	margin:0; 
 	padding:0 25px;

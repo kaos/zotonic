@@ -1,6 +1,6 @@
 $(function()
 {
-	$(window).bind('resize load', function()
+/*	$(window).bind('resize load', function()
 	{
 		if($(window).width() < 1200)
 		{
@@ -10,5 +10,5 @@ $(function()
 		{
 			$('body').removeClass('zp-normal').addClass('zp-wide');	
 		}
-	});
+	});*/
 });

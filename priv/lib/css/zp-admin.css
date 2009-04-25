@@ -304,7 +304,7 @@ button.save {
 		margin: 0;
 	}
 
-fieldset.admin-form:last-child {
+.admin-form fieldset:last-child {
 	margin: 0 0 9px 0;
 }
 
@@ -337,13 +337,17 @@ fieldset.admin-form:last-child {
 	-webkit-border-radius: 4px;
 	font-size: 12px;
 	color: #666;
-	width: 100%;
-	padding: 3px 0;
+	width: 724px;
+	padding: 5px;
 	font-family: "Lucida Sans", Helvetica, sans-serif;
 }
 
 .admin-form textarea.seo-desc {
-	height: 40px;
+	height: auto;
+}
+
+.admin-form textarea.intro {
+	height: auto;
 }
 
 .admin-form textarea.body {

@@ -64,12 +64,12 @@
 								<fieldset class="admin-form">
 									<div class="form-item clearfix">
 										<label for="field-title">Title</label>
-										<input type="text" id="title" name="title" value="{{ r.title|escape }}" />
+										<input type="text" id="field-title" name="title" value="{{ r.title|escape }}" />
 									</div>
 
 									<div class="form-item clearfix">
 										<label for="field-intro">Intro</label>
-										<textarea rows="10" cols="10" id="field-intro" name="intro" class="intro">{{ r.intro|escape }}</textarea>
+										<textarea rows="2" cols="10" id="field-intro" name="intro" class="intro">{{ r.intro|escape }}</textarea>
 									</div>
 
 									<div class="form-item clearfix">
@@ -101,7 +101,7 @@
 
 									<div class="form-item clearfix">
 										<label for="desc">Page description</label>
-										<textarea rows="10" cols="10" id="desc" name="seo_desc" class="seo-desc zp-100">{{ r.seo_desc|escape }}</textarea>
+										<textarea rows="2" cols="10" id="desc" name="seo_desc" class="seo-desc zp-100">{{ r.seo_desc|escape }}</textarea>
 									</div>
 								</fieldset>
 							</div>
@@ -124,19 +124,26 @@
 								<span class="arrow">make smaller</span>
 							</h3>
 							<div class="item clearfix">
-								<div class="admin-form form-item">
-									<div class="zp-33">
-										{% button class="save-resource save" text="save" %}
+								<div class="admin-form ">
+									<div class="form-item clearfix">
+										{% button class="save-resource" text="save" %}
 										{% button class="discard-resource" text="cancel" action={redirect back} %}
-									</div>
-									<div class="zp-67">
 										<label for="is_published">
 											<input type="checkbox" id="is_published" name="is_published" value="1" {% if r.is_published %}checked="checked"{% endif %}/> Published
 										</label>
-										<label>From</label> 
-										{% include "_edit_date.tpl" date=r.publication_start name="publication_start" is_end=0 %}
-										<label>Till</label>
-										{% include "_edit_date.tpl" date=r.publication_end name="publication_end" is_end=1 %}
+									</div>
+									<hr />
+									<div class="zp-100">
+										<fieldset>
+											<div class="form-item">
+												<label>From</label> 
+												{% include "_edit_date.tpl" date=r.publication_start name="publication_start" is_end=0 %}
+											</div>
+											<div class="form-item">
+												<label>Till</label>
+												{% include "_edit_date.tpl" date=r.publication_end name="publication_end" is_end=1 %}
+											</div>
+										</fieldset>
 									</div>
 								</div>
 							</div>
@@ -185,10 +192,16 @@
 							</h3>
 							<div class="item clearfix">
 								<div class="admin-form form-item">
-									<label>From</label>
-									{% include "_edit_date.tpl" date=r.date_start name="date_start" is_end=0 %}
-									<label>Till</label>
-									{% include "_edit_date.tpl" date=r.date_end name="date_end" is_end=1 %}
+									<fieldset>
+										<div class="form-item">
+											<label>From</label>
+											{% include "_edit_date.tpl" date=r.date_start name="date_start" is_end=0 %}
+										</div>
+										<div class="form-item">
+											<label>Till</label>
+											{% include "_edit_date.tpl" date=r.date_end name="date_end" is_end=1 %}
+										</div>
+									</fieldset>
 								</div>
 							</div>
 						</div>
