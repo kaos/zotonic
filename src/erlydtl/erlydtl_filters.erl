@@ -83,6 +83,8 @@ date([{{_,_,_} = Date,{_,_,_} = Time}], FormatStr) ->
     erlydtl_dateformat:format({Date, Time}, FormatStr);
 date([{_,_,_} = Date], FormatStr) ->
     erlydtl_dateformat:format(Date, FormatStr);
+date(undefined, _FormatStr) ->
+    "";
 date(Input, _FormatStr) when is_list(Input) ->
     io:format("Unexpected date parameter : ~p~n", [Input]),
     "".
