@@ -127,10 +127,10 @@
 								<div class="admin-form ">
 									<div class="form-item clearfix">
 										{% button class="save-resource" text="save" %}
-										{% button class="discard-resource" text="cancel" action={redirect back} %}
-										<label for="is_published">
+										<label for="is_published" class="left" style="float: left;">
 											<input type="checkbox" id="is_published" name="is_published" value="1" {% if r.is_published %}checked="checked"{% endif %}/> Published
 										</label>
+										{% button class="discard-resource right" text="cancel" action={redirect back} %}
 									</div>
 									<hr />
 									<div class="zp-100">
@@ -155,6 +155,11 @@
 								<span class="arrow">make smaller</span>
 							</h3>
 							<div class="item clearfix">
+								<p>
+									This page is able to connect to others. For example you can connect it to an actor or a brand. 
+									<a href="javascript:void(0)" class="do_dialog {title: 'Help about page connections.', text: 'his page is able to connect to others. For example you can connect it to an actor or a brand.'}">Need more help?</a>
+								</p>
+								
 								<div class="unlink-wrapper clearfix">
 									<h4>Brand</h4>
 									<div class="rsc-edge">

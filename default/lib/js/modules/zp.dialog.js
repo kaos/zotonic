@@ -34,30 +34,46 @@
 			if(!$('.dialog').length)
 			{
 				var defaults = {
-					title: 'This is the title',
-					text: 'Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.'
+					width: '450px',
+					text: '',
+					title: ''
 				}
-			
+				
 				// declare varaibles
-				var options, dialogWrapper, dialogTop, dialogTitle, dialogTLC, dialogTRC, dialogClose, dialogContent, dialogInnerContent, dialogRightContent, dialogBottom, dialogBLC, dialogBRC, dialogSizer;
+				var options, dialogWrapper, dialogTop, dialogTitle, dialogTLC, dialogTRC, dialogClose, dialogContent, dialogInnerContent, dialogRightContent, dialogBottom, dialogBLC, dialogBRC, dialogSizer, leftPos, topPos;
 			
 				options 			= $.extend({}, defaults, options);
 				dialogTitle			= $('<h5></h5>').addClass('dialog-title').text(options.title);
 				dialogTLC			= $('<span></span>').addClass('dialog-top-left');
 				dialogTRC			= $('<span></span>').addClass('dialog-top-right');
 				dialogClose			= $('<span></span>').addClass('dialog-close').click(function(){ $.dialogRemove(dialogWrapper); });
-				dialogInnerContent	= $('<div></div>').addClass('dialog-inner-content').html(options.text).resizable({handles: 'se', alsoResize: '.dialog'});
+				dialogInnerContent	= $('<div></div>').addClass('dialog-inner-content').html(options.text).resizable({handles: 'se', alsoResize: '.dialog', maxWidth: 700, minWidth: 250, minHeight: 20});
 				dialogRightContent	= $('<span></span>').addClass('dialog-content-right');
 				dialogBLC			= $('<span></span>').addClass('dialog-bottom-left');
 				dialogBRC			= $('<span></span>').addClass('dialog-bottom-right');
 				dialogSizer			= $('<span></span>').addClass('dialog-sizer');
+				leftPos				 = Math.floor((parseInt($(window).width()) / 2) - (parseInt(options.width) / 2));
+				topPos				 = Math.floor((parseInt($(window).height()) / 2) - 100);
 			
 				dialogTop			= $('<div></div>').addClass('dialog-top').append(dialogTitle, dialogTLC, dialogTRC, dialogClose);
 				dialogContent		= $('<div></div>').addClass('dialog-content clearfix').append(dialogInnerContent, dialogRightContent);
 				dialogBottom		= $('<div></div>').addClass('dialog-bottom').append(dialogBLC, dialogBRC, dialogSizer);
 			
-				dialogWrapper		= $('<div></div>').addClass('dialog').append(dialogTop, dialogContent, dialogBottom).fadeIn(300).draggable({ handle: dialogTop, opacity: 0.90, zIndex: 2700});
-			
+				dialogWrapper		= $('<div></div>')
+										.addClass('dialog')
+										.append(dialogTop, dialogContent, dialogBottom)
+										.fadeIn(300)
+										.css({left: leftPos, top: topPos})
+										.draggable({ handle: dialogTop, opacity: 0.90, zIndex: 2700, iframeFix: true, scroll: true});
+				
+				$(document).keypress(function(e)
+				{
+					if(e.which == $.ui.keyCode.ESCAPE) 
+					{
+						dialogClose.click();
+					}
+				});
+				
 				$('body').append(dialogWrapper);
 			}
 		},
@@ -81,7 +97,8 @@
 				$.dialogAdd(
 				{
 					title: self.options.title,
-					text:  self.options.text
+					text:  self.options.text,
+					width: self.options.width
 				})
 			})
 		}

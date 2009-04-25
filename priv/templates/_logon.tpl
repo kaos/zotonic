@@ -7,7 +7,7 @@
 		</div>
 		<div class="form-item">
 			<label for="zp-password">Password</label>
-			<input type="text" name="zp-password" id="zp-password" />
+			<input type="password" name="zp-password" id="zp-password" />
 		</div>
 		<div class="form-item clearfix">
 			{% button type="submit" text="Logon" %}
