@@ -33,7 +33,7 @@
 						<span class="zp-15">Tim Benniks</span>
 						<span class="zp-10">
 							{% button text="delete" %}
-							{% button text="edit &raquo;" action={redirect location="/admin/edit/2"} %}
+							{% button text="edit &raquo;" action={redirect dispatch="admin_edit_rsc" id=id} %}
 						</span>
 					</a>
 				</li>

@@ -43,9 +43,9 @@ html(Context) ->
 event({submit, rscform, _FormId, _TargetId}, Context) ->
     Post = zp_context:get_q_all(Context),
     Props = filter_props(Post),
-    Title = proplists:get_value(title, Props),
-    Id = proplists:get_value(id, Props),
-    Props1 = proplists:delete(id, Props),
+    Title = proplists:get_value("title", Props),
+    Id = proplists:get_value("id", Props),
+    Props1 = proplists:delete("id", Props),
     m_rsc:update(zp_convert:to_integer(Id), Props1, Context),
     zp_render:wire({growl, [{text,[["Saved ",zp_html:strip(Title)]]}]}, Context).
 
@@ -59,8 +59,7 @@ filter_props(Fs) ->
         "zp_pageid",
         "trigger_value"
     ],
-    Props = lists:foldl(fun(P, Acc) -> proplists:delete(P, Acc) end, Fs, Remove),
+    lists:foldl(fun(P, Acc) -> proplists:delete(P, Acc) end, Fs, Remove).
     %[ {list_to_existing_atom(K), list_to_binary(V)} || {K,V} <- Props ].
-    [ {list_to_atom(K), list_to_binary(V)} || {K,V} <- Props ].
 
 

@@ -124,8 +124,21 @@
 								<span class="arrow">make smaller</span>
 							</h3>
 							<div class="item clearfix">
-								{% button class="save-resource save" text="save" %}
-								{% button class="discard-resource" text="cancel" action={redirect back} %}
+								<div class="admin-form form-item">
+									<div class="zp-33">
+										{% button class="save-resource save" text="save" %}
+										{% button class="discard-resource" text="cancel" action={redirect back} %}
+									</div>
+									<div class="zp-67">
+										<label for="is_published">
+											<input type="checkbox" id="is_published" name="is_published" value="1" {% if r.is_published %}checked="checked"{% endif %}/> Published
+										</label>
+										<label>From</label> 
+										{% include "_edit_date.tpl" date=r.publication_start name="publication_start" is_end=0 %}
+										<label>Till</label>
+										{% include "_edit_date.tpl" date=r.publication_end name="publication_end" is_end=1 %}
+									</div>
+								</div>
 							</div>
 						</div>
 					
@@ -167,11 +180,16 @@
 					
 						<div class="item-wrapper" id="sort-date">
 							<h3 class="above-item clearfix do_blockminifier">
-								<span class="title">Date management</span>
+								<span class="title">Date Range</span>
 								<span class="arrow">make smaller</span>
 							</h3>
 							<div class="item clearfix">
-								<button class="do_tooltip" title="I'm am the tooptip popup, I'm am the tooptip popup">Yeah, give me a tooltip</button>
+								<div class="admin-form form-item">
+									<label>From</label>
+									{% include "_edit_date.tpl" date=r.date_start name="date_start" is_end=0 %}
+									<label>Till</label>
+									{% include "_edit_date.tpl" date=r.date_end name="date_end" is_end=1 %}
+								</div>
 							</div>
 						</div>
 					
