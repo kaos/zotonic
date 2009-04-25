@@ -2,6 +2,43 @@
 
 {% block title %} admin edit resource {% endblock %}
 
+{% block tinymce %}
+<script type="text/javascript" src="/lib/js/modules/tinymce/tiny_mce.js"></script>
+<script type="text/javascript">
+	tinyMCE.init({
+		mode: "exact",
+		elements: "field-content",
+		theme: "advanced",
+		skin: "wp_theme", 
+		theme_advanced_buttons1: "bold,italic,strikethrough,|,justifyleft,justifycenter,justifyright,|,bullist,numlist,|,outdent,indent,blockquote,|,undo,redo,|,link,unlink,|,formatselect",
+		theme_advanced_buttons2: "",
+		theme_advanced_buttons3: "",
+		theme_advanced_buttons4: "",
+		theme_advanced_toolbar_location: "top", 
+		theme_advanced_toolbar_align: "left", 
+		theme_advanced_statusbar_location: "bottom", 
+		theme_advanced_resizing: "1", 
+		theme_advanced_resize_horizontal: "", 
+		dialog_type: "modal", 
+		relative_urls: "", 
+		remove_script_host: "", 
+		convert_urls: "", 
+		apply_source_formatting: "", 
+		remove_linebreaks: "1", 
+		paste_convert_middot_lists: "1", 
+		paste_remove_spans: "1", 
+		paste_remove_styles: "1", 
+		gecko_spellcheck: "1", 
+		entities: "38,amp,60,lt,62,gt", 
+		accessibility_focus: "1", 
+		tab_focus: ":prev,:next", 
+		content_css: "/lib/js/modules/tinymce/zophrenic.css", 
+		wpeditimage_disable_captions: "", 
+		plugins: "safari"
+	});
+</script>	
+{% endblock %}
+
 {% block content %}
 {% with m.rsc[id] as r %}
 	<div id="content" class="zp-100">
@@ -19,7 +56,7 @@
 				
 				<input type="hidden" name="id" value="{{ id }}" />
 				
-				<div class="zp-67">
+				<div class="zp-67" id="poststuff">
 					<div class="padding">
 						<div class="item-wrapper">
 							<h3 class="above-item">Basic content</h3>
@@ -32,12 +69,12 @@
 
 									<div class="form-item clearfix">
 										<label for="field-intro">Intro</label>
-										<textarea rows="10" cols="10" id="field-intro" name="intro" class="intro do_wysiwyg {css: '/lib/css/zp-wysiwyg-iframe.css',  controls: {italic: { visible: true }, createLink: { visible: true }}}">{{ r.intro|escape }}</textarea>
+										<textarea rows="10" cols="10" id="field-intro" name="intro" class="intro">{{ r.intro|escape }}</textarea>
 									</div>
 
 									<div class="form-item clearfix">
 										<label for="field-content">Body</label>
-										<textarea rows="10" cols="10" id="field-content" name="body" class="do_wysiwyg {css: '/lib/css/zp-wysiwyg-iframe.css',  controls: $.fn.wysiwyg.defaultset} body">{{ r.body|escape }}</textarea>
+										<textarea rows="10" cols="10" id="field-content" name="body" class="body">{{ r.body|escape }}</textarea>
 									</div>
 								</fieldset>
 							</div>

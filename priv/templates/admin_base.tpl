@@ -14,7 +14,7 @@
 	<link href="/lib/css/zp-dialog.css" type="text/css" media="screen" rel="stylesheet" />
 	
 	<!--[if IE]><link href="/lib/css/zp-ie.css" type="text/css" media="screen" rel="stylesheet" /><![endif]-->
-
+	{% block tinymce %}{% endblock %}
 </head>
 <body class="zp-wide">
 	<div class="skip">
