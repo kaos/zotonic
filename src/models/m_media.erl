@@ -111,7 +111,7 @@ insert_file(File, Context) ->
 insert_file(File, Props, Context) ->
     PropsMedia = add_media_info(File, Props),
     PropsAccess = zp_acl:add_defaults(PropsMedia, Context),
-    PropsCreator = zp_acl:add_person(creator_id, PropsAccess, Context),
+    PropsCreator = zp_acl:add_user(creator_id, PropsAccess, Context),
     ArchiveFile = zp_media_archive:archive_copy_opt(File, Context),
     RootName = filename:rootname(filename:basename(ArchiveFile)),
     zp_db:insert(media, [{filename, ArchiveFile},{rootname, RootName}|PropsCreator], Context).
