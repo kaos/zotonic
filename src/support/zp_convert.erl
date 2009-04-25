@@ -11,6 +11,7 @@
 	to_atom/1, 
 	to_binary/1, 
 	to_integer/1,
+	to_bool/1,
 	html_encode/1, html_encode/2
 ]).
 
@@ -47,6 +48,18 @@ to_integer(A) when is_atom(A) -> to_integer(atom_to_list(A));
 to_integer(B) when is_binary(B) -> to_integer(binary_to_list(B));
 to_integer(I) when is_integer(I) -> I;
 to_integer(L) when is_list(L) -> list_to_integer(L).
+
+to_bool(undefined) -> false;
+to_bool(false) -> false;
+to_bool(0) -> false;
+to_bool(0.0) -> false;
+to_bool(<<>>) -> false;
+to_bool(<<0>>) -> false;
+to_bool(<<"0">>) -> false;
+to_bool([]) -> false;
+to_bool("0") -> false;
+to_bool([0]) -> false;
+to_bool(_) -> true.
 
 %%% HTML ENCODE %%%
 
