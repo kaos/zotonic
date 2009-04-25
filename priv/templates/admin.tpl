@@ -26,10 +26,10 @@
 					<h3 class="alt">Quick search</h3>
 
 					<div  id="quick-search">	
-						<form method="get" action="">
+						<form method="get" action="{% url admin_overview_rsc %}">
 							<fieldset>
 								<div class="form-element">
-									<input type="text" name="q" value="" class="left" />
+									<input type="text" name="qs" value="{{ q.qs|escape }}" class="left" />
 									<button>Search</button>
 								</div>
 							</fieldset>
