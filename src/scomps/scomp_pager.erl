@@ -42,6 +42,8 @@ render(Params, _Vars, Context, _State) ->
             {ok, ""};
         #m_search_result{result=undefined} ->
             {ok, ""};
+        #m_search_result{result=#search_result{pages=0}} ->
+            {ok, ""};
         #m_search_result{result=#search_result{page=Page, pages=Pages}} ->
             Html = build_html(Page, Pages, Dispatch, DispatchArgs, Context),
             {ok, Html};
@@ -102,7 +104,7 @@ urls(Start, Middle, End, Dispatch, DispatchArgs, Context) ->
     UrlEnd    = [ {N, zp_dispatcher:url_for(Dispatch, [{page,N}|DispatchArgs], Context)} || N <- End ],
     {Part1,Next} = case Middle of
         [] ->
-            {UrlStart, lists:max(Start) + 1};
+            {UrlStart, max(Start) + 1};
         [N|_] when N == 2 -> 
             % Now Start is always of the format [1]
             {UrlStart ++ UrlMiddle, lists:max(Middle) + 1};
@@ -119,6 +121,9 @@ urls(Start, Middle, End, Dispatch, DispatchArgs, Context) ->
             end
     end.
 
+
+max([]) -> 0;
+max(L) -> lists:max(L).
 
 seq(A,B) when B < A -> [];
 seq(A,B) -> lists:seq(A,B).
