@@ -80,7 +80,7 @@ search({fulltext, [{text,QueryText}]}, _OffsetLimit, Context) ->
         _ ->
             #search_sql{
                 select="r.id, ts_rank_cd(pivot_tsv, query, 32) AS rank",
-                from="rsc r, to_tsquery($2, $1) query",
+                from="rsc r, plainto_tsquery($2, $1) query",
                 where=" query @@ pivot_tsv",
                 order="rank desc",
                 args=[QueryText, zp_pivot_rsc:pg_lang(Context#context.language)],
@@ -104,7 +104,7 @@ search({fulltext, [{cat,Cat},{text,QueryText}]}, _OffsetLimit, Context) ->
                 _ ->
                     #search_sql{
                         select="r.id, ts_rank_cd(pivot_tsv, query, 32) AS rank",
-                        from="rsc r, category rc, category ic, to_tsquery($3, $2) query",
+                        from="rsc r, category rc, category ic, plainto_tsquery($3, $2) query",
                         where=" query @@ pivot_tsv  and r.category_id = rc.id and rc.nr >= ic.lft and rc.nr <= ic.rght and ic.id = $1",
                         order="rank desc",
                         args=[CatId, QueryText, zp_pivot_rsc:pg_lang(Context#context.language)],
@@ -124,7 +124,7 @@ search({fulltext_catbrand, [{cat,Cat},{text,QueryText}]}, _OffsetLimit, Context)
         _ ->
             #search_sql{
                 select="r.id, r.category_id, e.object_id, ts_rank_cd(pivot_tsv, query, 32) AS rank",
-                from="rsc r left join edge e on r.id = e.subject_id and e.predicate_id = $4, category rc, category ic, to_tsquery($3, $2) query",
+                from="rsc r left join edge e on r.id = e.subject_id and e.predicate_id = $4, category rc, category ic, plainto_tsquery($3, $2) query",
                 where=" query @@ pivot_tsv  and r.category_id = rc.id and rc.nr >= ic.lft and rc.nr <= ic.rght and ic.id = $1",
                 order="rank desc",
                 args=[CatId, QueryText, zp_pivot_rsc:pg_lang(Context#context.language), PredId],
@@ -150,7 +150,7 @@ search({fulltext_catbrand_filter, [{brand,BrandId},{cat,Cat},{text,QueryText}]},
         _ ->
             #search_sql{
                 select="r.id, r.category_id, e.object_id, ts_rank_cd(pivot_tsv, query, 32) AS rank",
-                from="rsc r left join edge e on r.id = e.subject_id and e.predicate_id = $4, category rc, category ic, to_tsquery($3, $2) query",
+                from="rsc r left join edge e on r.id = e.subject_id and e.predicate_id = $4, category rc, category ic, plainto_tsquery($3, $2) query",
                 where=" query @@ pivot_tsv and e.object_id = $5 and r.category_id = rc.id and rc.nr >= ic.lft and rc.nr <= ic.rght and ic.id = $1",
                 order="rank desc",
                 args=[CatId, QueryText, zp_pivot_rsc:pg_lang(Context#context.language), PredId, BrandId],
