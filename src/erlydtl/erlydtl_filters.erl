@@ -170,7 +170,7 @@ default_if_undefined(Input, Default) ->
 
 is_defined(undefined) ->
     false;
-is_defined(V) ->
+is_defined(_V) ->
     true.
 
 is_undefined(V) ->
