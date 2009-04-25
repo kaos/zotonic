@@ -43,13 +43,9 @@ delete(Id, Context) when is_integer(Id) ->
 update(Id, Props, Context) when is_integer(Id) ->
     case zp_acl:rsc_editable(Id, Context) of
         true ->
-            ?DEBUG(Props),
             TextProps = recombine_dates(Props),
-            ?DEBUG(TextProps),
             AtomProps = [ {zp_convert:to_atom(P), V} || {P, V} <- TextProps ],
-            ?DEBUG(AtomProps),
             FilteredProps = props_filter(Id, AtomProps, [], Context),
-            ?DEBUG(FilteredProps),
             zp_db:update(rsc, Id, FilteredProps, Context),
             zp_depcache:flush(#rsc{id=Id}),
             ok;
