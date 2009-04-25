@@ -129,9 +129,9 @@ h5.dialog-title {
 	font-weight: bold;
 }
 
-.ui-resizable-s {
+.ui-resizable-se {
 	bottom: -34px;
-	cursor: s-resize;
+	cursor: se-resize;
 	height: 17px;
 	right: 6px;
 	width: 23px;
