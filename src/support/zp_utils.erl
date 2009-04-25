@@ -45,7 +45,8 @@
 	randomize/1,
 	randomize/2,
 	split/2,
-	replace1/3
+	replace1/3,
+	guess_mime/1
 ]).
 
 %%% FORMAT %%%
@@ -457,3 +458,15 @@ replace1(F, T, [F|R], Acc) ->
     replace1(F, T, R, [T|Acc]);
 replace1(F, T, [C|R], Acc) ->
     replace1(F, T, R, [C|Acc]).
+
+
+
+%% @spec guess_mime(string()) -> string()
+%% @doc  Guess the mime type of a file by the extension of its filename.
+guess_mime(File) ->
+    case filename:extension(File) of
+	".htm" ->
+	    "text/html";
+	_ ->
+	    webmachine_util:guess_mime(File)
+end.

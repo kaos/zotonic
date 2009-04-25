@@ -72,7 +72,7 @@ content_types_provided(ReqData, State) ->
     case State#state.mime of
         undefined ->
             Path = wrq:disp_path(ReqData),
-            CT = webmachine_util:guess_mime(Path),
+            CT = zp_utils:guess_mime(Path),
             {[{CT, provide_content}], ReqData, State#state{mime=CT}};
         Mime -> 
             {[{Mime, provide_content}], ReqData, State}
