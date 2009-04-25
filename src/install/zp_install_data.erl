@@ -22,6 +22,7 @@ install(C) ->
     ok = install_group(C),
     ok = install_category(C),
     ok = install_rsc(C),
+    ok = install_identity(C),
     ok = install_predicate(C),
     ok = install_edge(C),
     ok.
@@ -117,6 +118,15 @@ install_rsc(C) ->
     pgsql:reset_id(C, "rsc_group"),
     ok.
 
+
+%% @doc Install the admin user as an user.  For now the hard coded password "admin"
+install_identity(C) ->
+    Hash = m_identity:hash("admin"),
+    {ok, 1} = pgsql:equery(C, "
+        insert into identity (rsc_id, type, key, is_unique, propb)
+        values (1, 'username_pw', 'admin', true, $1)", [Hash]),
+    ok.
+    
 
 %% @doc Install some initial predicates, this list should be extended with common and useful predicates
 %% @todo Extend and check this list.  Add allowed from/to categories.

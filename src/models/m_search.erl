@@ -23,7 +23,7 @@
 %% {% for id in m.search[{featured cat="accessoiries"}] %}
 %%
 %% Paging is done by fetching the first ?SEARCH_LIMIT rows and then return a slice from those rows.
-%% This result set can be cached for a short while (depending on writes by the person_id associated with the visitor).
+%% This result set can be cached for a short while (depending on writes by the user_id associated with the visitor).
 
 
 -module(m_search).

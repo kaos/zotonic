@@ -187,7 +187,7 @@ is_ingroup(Id, Context) ->
 is_me(Id, Context) -> 
     case rid(Id, Context) of
         #rsc{id=RscId} ->
-            zp_acl:person(Context) == RscId;
+            zp_acl:user(Context) == RscId;
         _ ->
             false
     end.

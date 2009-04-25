@@ -67,6 +67,10 @@ init([]) ->
     DbPoolConfig = [
         {dbdefault, 10, [{host, DbHost}, {port, DbPort}, {user, DbUser}, {password, DbPassword}, {database, DbDatabase}]}
     ],
+
+    Ids     = {zp_ids,
+	            {zp_ids, start_link, []}, 
+	            permanent, 5000, worker, dynamic},
     
     Postgres = {epgsql_pool,
                 {epgsql_pool, start_link, [DbPoolConfig]},
@@ -96,10 +100,6 @@ init([]) ->
 	            {zp_visitor_manager, start_link, []}, 
 	            permanent, 5000, worker, dynamic},
 
-    Ids     = {zp_ids,
-	            {zp_ids, start_link, []}, 
-	            permanent, 5000, worker, dynamic},
-
     Template = {zp_template,
 	            {zp_template, start_link, []}, 
 	            permanent, 5000, worker, dynamic},
@@ -116,6 +116,6 @@ init([]) ->
                 {zp_pivot_rsc, start_link, []}, 
                 permanent, 5000, worker, dynamic},
 
-    Processes = [MochiWeb, Postgres, Depcache, Installer, Ids, Dispatcher, Notifier, Session, Visitor, Template, Scomp, DropBox, Pivot],
+    Processes = [MochiWeb, Ids, Postgres, Depcache, Installer, Dispatcher, Notifier, Session, Visitor, Template, Scomp, DropBox, Pivot],
     {ok, {{one_for_one, 1000, 10}, Processes}}.
 

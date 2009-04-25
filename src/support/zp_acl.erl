@@ -2,7 +2,7 @@
 %% @copyright 2009 Marc Worrell
 %% @date 2009-04-10
 %%
-%% @doc Access Control for zophrenic. Defines what a person can do on the site.
+%% @doc Access Control for zophrenic. Defines what a user can do on the site.
 %% The access control is organized around people working together in groups. When you are
 %% member of a group then you can see all content belonging to that group, regardless of publication state.
 %% Other content must be published and is either visible to all or to authenticated users (community).
@@ -29,11 +29,11 @@
     has_role/2,
     publish_level/1,
     publish_level/2,
-    person/1,
-    person_check/1,
-    has_person/1,
+    user/1,
+    user_check/1,
+    has_user/1,
     add_defaults/2,
-    add_person/3
+    add_user/3
 ]).
 
 -include_lib("zophrenic.hrl").
@@ -198,21 +198,21 @@ publish_level(Requested, Context) ->
 
 
 %% @doc Return the current user id that has been authenticated.  This is the rsc id of a person record.
-%% @spec person(#context) -> int() | undefined
-person(Context) ->
+%% @spec user(#context) -> int() | undefined
+user(Context) ->
     Context#context.user_id.
 
 
 %% @doc Return the current user id, fail when no user logged on.
-person_check(#context{user_id=UserId}) when UserId /= undefined ->
+user_check(#context{user_id=UserId}) when UserId /= undefined ->
     UserId.
 
 
-%% @doc Check if the current context has a person attached
-%% @spec has_person(#context) -> bool()
-has_person(#context{user_id=undefined}) ->
+%% @doc Check if the current context has a user attached
+%% @spec has_user(#context) -> bool()
+has_user(#context{user_id=undefined}) ->
     false;
-has_person(#context{user_id=UserId}) when is_integer(UserId) ->
+has_user(#context{user_id=UserId}) when is_integer(UserId) ->
     true.
     
 
@@ -224,7 +224,6 @@ default(visible_for, Context) ->
 
 
 %% @doc Add default ACL settings to a resource or media definition.  Adds missing group_id and visible_for.
-%% @spec 
 add_defaults(PropList, Context) ->
     PropGroup = case proplists:get_value(group_id, PropList) of
         undefined -> 
@@ -246,17 +245,14 @@ add_defaults(PropList, Context) ->
 
 
 %% @doc Add the current user id as the prop, when the prop is not set.
-%% @spec add_person(atom(), PropList1, #context) -> PropList2
-add_person(Prop, PropList, Context) ->
+%% @spec add_user(atom(), PropList1, #context) -> PropList2
+add_user(Prop, PropList, Context) ->
     case proplists:get_value(Prop, PropList) of
         undefined ->
-            [{Prop,person(Context)}|PropList];
+            [{Prop,user(Context)}|PropList];
         _ ->
             PropList
     end.
-
-
-
 
 
 %% @doc Check if something with the given #acl fields is visible.

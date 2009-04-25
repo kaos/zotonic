@@ -116,7 +116,7 @@ delete_member(Id, RscId, Context) ->
 %% @doc Return the group ids the current person is member of
 %% @spec person_groups(Context) -> List
 groups_member(Context) ->
-    groups_member(zp_acl:person(Context), Context).
+    groups_member(zp_acl:user(Context), Context).
 
 %% @doc Return the group ids the person is member of
 %% @spec person_groups(PersonId, Context) -> List
@@ -127,7 +127,7 @@ groups_member(PersonId, Context) ->
 %% @doc Return the group ids the current person can only view
 %% @spec person_groups(Context) -> List
 groups_observer(Context) ->
-    groups_observer(zp_acl:person(Context), Context).
+    groups_observer(zp_acl:user(Context), Context).
 
 %% @doc Return the group ids the person can only view
 %% @spec person_groups(PersonId, Context) -> List
@@ -139,7 +139,7 @@ groups_observer(PersonId, Context) ->
 %% @doc Return the group ids the current person can view
 %% @spec person_groups(Context) -> List
 groups_visible(Context) ->
-    groups_visible(zp_acl:person(Context), Context).
+    groups_visible(zp_acl:user(Context), Context).
 
 %% @doc Return the group ids the person can view
 %% @spec person_groups(PersonId, Context) -> List
@@ -150,7 +150,7 @@ groups_visible(PersonId, Context) ->
 %% @doc Return the group ids the current person is leader of
 %% @spec person_groups(Context) -> List
 groups_leader(Context) ->
-    groups_leader(zp_acl:person(Context), Context).
+    groups_leader(zp_acl:user(Context), Context).
 
 %% @doc Return the group ids the person leads
 %% @spec person_groups(PersonId, Context) -> List
@@ -162,7 +162,7 @@ groups_leader(PersonId, Context) ->
 %% @doc Return the roles the current person has
 %% @spec roles(Context) -> [atom(), ..]
 roles(Context) ->
-    roles(zp_acl:person(Context), Context).
+    roles(zp_acl:user(Context), Context).
 
 %% @doc Return the roles the person has
 %% @spec roles(Context) -> [atom(), ..]

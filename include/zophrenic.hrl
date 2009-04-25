@@ -28,7 +28,7 @@
         %% The language selected, used by zp_trans and others
         language=en,
         
-        %% The current logged on user, derived from the session and visitor
+        %% The current logged on person, derived from the session and visitor
         acl=undefined,      %% opaque placeholder managed by the zp_acl module
         user_id=undefined,
 

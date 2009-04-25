@@ -13,6 +13,7 @@
     is_auth_recent/1,
     output_logon/1,
     
+    logon_pw/3,
     logoff/1,
     logon_from_session/1,
     
@@ -38,6 +39,22 @@ is_auth_recent(_) ->
     true.
 
 
+%% @doc Logon a username/password combination, checks passwords with m_identity.
+%% @spec logon_pw(Username, Password, Context) -> {bool(), NewContext}
+logon_pw(Username, Password, Context) ->
+    case m_identity:check_username_pw(Username, Password, Context) of
+        {ok, Id} ->
+            Context1 = zp_acl:logon(Id, Context),
+            zp_context:set_session(auth_user_id, Id, Context1),
+            zp_context:set_session(auth_timestamp, erlang:universaltime(), Context1),
+            {true, Context1};
+        {error, _Reason} ->
+            {false, Context}
+    end.
+
+
+%% @doc Forget about the user being logged on.
+%% @spec logoff(Context) -> NewContext
 logoff(Context) ->
     zp_context:set_session(auth_user_id, undefined, Context),
     zp_acl:logoff(Context).
@@ -109,9 +126,17 @@ output_logon(Context) ->
     zp_context:set_reqdata(RD3, ContextOut).
 
 
+
 %% @doc Handle logon events. When successful then reload the current page
+%% @spec event(Event, Context) -> NewContext
 event({submit, logon, _TriggerId, _TargetId}, Context) ->
     Context1 = zp_session_manager:rename_session(Context),
-    zp_context:set_session(auth_user_id, 1, Context1),
-    zp_context:set_session(auth_timestamp, erlang:universaltime(), Context1),
-    zp_render:wire({reload, []}, Context1).
+    Username = zp_context:get_q("zp-username", Context1),
+    Password = zp_context:get_q("zp-password", Context1),
+    case logon_pw(Username, Password, Context1) of
+        {true, ContextLogon} -> 
+            zp_render:wire({reload, []}, ContextLogon);
+        {_, ContextLogon} ->
+            zp_render:wire({growl, [{text, "Unknown username or password. Please try again."}]}, ContextLogon)
+    end.
+    
