@@ -1,21 +1,12 @@
-#poststuff .wp_themeSkin .mceStatusbar {
-	border-color: #EDEDED;
-}
+/* CSS for tinyMCE
+----------------------------------------------------------
 
-#poststuff #edButtonPreview,
-#poststuff #edButtonHTML {
-	background-color: #f1f1f1;
-	border-color: #dfdfdf;
-	color: #999;
-}
+@package:	zophrenic 2009	
+@Author: 	Tim Benniks <tim@timbenniks.com>
+@Created: 	25-04-2009
 
-#poststuff #editor-toolbar .active {
-	border-bottom-color: #e9e9e9;
-	background-color: #e9e9e9;
-	color: #333;
-}
+---------------------------------------------------------- */
 
-/* TinyMCE */
 #post-status-info {
 	background-color: #EDEDED;
 }
@@ -25,7 +16,7 @@
 .wp_themeSkin a:link,
 .wp_themeSkin a:visited,
 .wp_themeSkin a:active {
-	 color: #000;
+	color: #000;
 }
 
 /* Containers */
@@ -56,9 +47,8 @@
 	border-color: #ccc !important;
 }
 
-/* ListBox */
 .wp_themeSkin .mceListBox .mceText,
-.wp_themeSkin .mceListBox .mceOpen  {
+.wp_themeSkin .mceListBox .mceOpen {
 	border-color: #B2B2B2;
 	background-color: #d5d5d5;
 }
@@ -100,7 +90,6 @@
 	background-color: #B2B2B2;
 }
 
-/* ColorSplitButton */
 .wp_themeSkin div.mceColorSplitMenu table {
 	background-color: #ebebeb;
 	border-color: #B2B2B2;
