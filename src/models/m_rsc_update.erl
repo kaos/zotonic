@@ -46,7 +46,13 @@ update(Id, Props, Context) when is_integer(Id) ->
             TextProps = recombine_dates(Props),
             AtomProps = [ {zp_convert:to_atom(P), V} || {P, V} <- TextProps ],
             FilteredProps = props_filter(Id, AtomProps, [], Context),
-            zp_db:update(rsc, Id, FilteredProps, Context),
+            UpdateProps = [
+                {version, zp_db:q1("select version+1 from rsc where id = $1", [Id], Context)},
+                {modifier_id, zp_acl:user(Context)},
+                {modified, erlang:localtime()}
+                | FilteredProps
+            ],
+            zp_db:update(rsc, Id, UpdateProps, Context),
             zp_depcache:flush(#rsc{id=Id}),
             ok;
         false ->
