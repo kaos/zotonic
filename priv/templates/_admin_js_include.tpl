@@ -10,6 +10,7 @@
 <script type="text/javascript" src="/lib/js/modules/zp.tooltip.js"></script>
 <script type="text/javascript" src="/lib/js/modules/zp.blockminifier.js"></script>
 <script type="text/javascript" src="/lib/js/modules/zp.listfilter.js"></script>
+<script type="text/javascript" src="/lib/js/modules/zp.dialog.js"></script>
 
 <script type="text/javascript" src="/lib/js/modules/jquery.wysiwyg.js"></script>
 <script type="text/javascript" src="/lib/js/modules/livevalidation-1.3.js"></script>

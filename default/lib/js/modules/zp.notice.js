@@ -24,7 +24,7 @@
 *	
 *	@author 	Tim Benniks <tim@timbenniks.com>
 * 	@copyright  2009 timbenniks.com
-*	@version    $Id: jquery.notice.js 1 2009-01-24 12:24:18Z timbenniks $
+*	@version    $Id: zp.notice.js 1 2009-01-24 12:24:18Z timbenniks $
 **/
 (function(jQuery)
 {

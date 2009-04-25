@@ -11,6 +11,7 @@
 	<link href="/lib/css/zp-forms.css" type="text/css" media="screen" rel="stylesheet" />
 	<link href="/lib/css/zp-wysiwyg.css" type="text/css" media="screen" rel="stylesheet" />
 	<link href="/lib/css/zp-admin.css" type="text/css" media="screen" rel="stylesheet" />
+	<link href="/lib/css/zp-dialog.css" type="text/css" media="screen" rel="stylesheet" />
 	
 	<!--[if IE]><link href="/lib/css/zp-ie.css" type="text/css" media="screen" rel="stylesheet" /><![endif]-->
 
@@ -40,7 +41,7 @@
 			<li><a href="#" {% if page_users %}class="current"{% endif %}>Users</a></li>
 			<li><a href="#" {% if page_products %}class="current"{% endif %}>Products</a></li>
 			<li class="right"><a id="zp-logoff" href="#">Logoff</a></li>
-			<li class="right"><a href="#">Options</a></li>
+			<li class="right"><a href="#" class="do_dialog {title: 'Welcone to our admin', text: 'Testing, testing... Houston we have landed!'}">Options</a></li>
 		</ul>
 		{% endblock %}
 

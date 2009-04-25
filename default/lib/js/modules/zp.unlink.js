@@ -51,18 +51,6 @@ $.widget("ui.unlink",
 			{
 				$(this).remove();
 			});
-
-			//$.post(self.options.controller, 
-			//{
-			//	 object_id: self.options.object_id, 
-			//	 edge_id: self.options.edge_id, 
-			//	 subject_id: self.options.subject_id
-			//}, 
-			//function(data)
-			//{
-			//	$.misc.log('edge removed');
-			//	self.kill();
-			//});
 		});
 	},
 	

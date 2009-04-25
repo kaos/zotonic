@@ -1,0 +1,145 @@
+.dialog {
+	position: absolute !important;
+	color: #f9f9f9;
+	top: 200px;
+	left: 300px;
+	width: 450px;
+	height: auto;
+}
+
+.dialog-top {
+	background: transparent url(/lib/images/dialog_top_middle.png) repeat-x;
+	height: auto;
+	left: 0;
+	margin: 0 25px;
+	padding: 25px 0 0 0;
+	position: relative;
+	top: 0;
+	width: 100%;
+	cursor: move;
+}
+
+.dialog-top-left {
+	background: transparent url(/lib/images/dialog_top_left.png) no-repeat;
+	height: 100%;
+	left: -25px;
+	position: absolute;
+	top: 0;
+	width: 25px;
+	height: 25px;
+}
+
+.dialog-top-right {
+	background: transparent url(/lib/images/dialog_top_right.png) no-repeat;
+	height: 100%;
+	right: -25px;
+	position: absolute;
+	top: 0;
+	width: 25px;
+	height: 25px;
+}
+
+.dialog-content {
+	background: transparent url(/lib/images/dialog_content_left.png) repeat-y;
+	height: auto;
+	padding: 0 25px;
+	position: relative;
+	width: 100%;
+}
+
+.dialog-inner-content {
+	background: transparent url(/lib/images/dialog_content.png) repeat;
+	float: left;
+	padding: 10px 0 0 0;
+	width: 100%;
+}
+
+.dialog-content-right {
+	background: transparent url(/lib/images/dialog_content_right.png) repeat-y;
+	height: 100%;
+	position: absolute;
+	right: 0;
+	top: 0;
+	width: 25px;
+}
+
+.dialog-bottom {
+	background: transparent url(/lib/images/dialog_bottom_middle.png) repeat-x;
+	height: auto;
+	left: 0;
+	margin: 0 25px;
+	padding: 41px 0 0 0;
+	position: relative;
+	top: 0;
+	width: 100%;
+	z-index: 3;
+}
+
+.dialog-bottom-left {
+	background: transparent url(/lib/images/dialog_bottom_left.png) no-repeat;
+	height: 100%;
+	left: -25px;
+	position: absolute;
+	top: 0;
+	width: 25px;
+	height: 41px;
+}
+
+.dialog-bottom-right {
+	background: transparent url(/lib/images/dialog_bottom_right.png) no-repeat;
+	height: 100%;
+	right: -25px;
+	position: absolute;
+	top: 0;
+	width: 25px;
+	height: 41px;
+}
+
+.dialog-close {
+	background: transparent url(/lib/images/close.png) no-repeat top;
+	height: 15px;
+	width: 15px;
+	left: -17px;
+	top: 7px;
+	position: absolute;
+	cursor: pointer;
+}
+
+	.dialog-close:hover {
+		background-position: bottom;
+	}
+
+.dialog-sizer {
+	background: transparent url(/lib/images/sizer.png) no-repeat top;
+	width: 11px;
+	height: 11px;
+	right: -16px;
+	top: 21px;
+	position: absolute;
+}
+
+h5.dialog-title {
+	display: block;
+	font-size: 11px;
+	position: absolute;
+	text-align: center;
+	top: 6px;
+	width: 100%;
+	text-shadow: 2px 2px 2px #333;
+	font-weight: bold;
+}
+
+.ui-resizable-s {
+	bottom: -34px;
+	cursor: s-resize;
+	height: 17px;
+	right: 6px;
+	width: 23px;
+}
+
+.ui-resizable-handle {
+	display: block;
+	font-size: 0.1px;
+	position: absolute;
+	z-index: 99999;
+}
