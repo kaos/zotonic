@@ -5,37 +5,7 @@
 {% block tinymce %}
 <script type="text/javascript" src="/lib/js/modules/tinymce/tiny_mce.js"></script>
 <script type="text/javascript">
-	tinyMCE.init({
-		mode: "exact",
-		elements: "field-content",
-		theme: "advanced",
-		skin: "wp_theme", 
-		theme_advanced_buttons1: "bold,italic,strikethrough,|,justifyleft,justifycenter,justifyright,|,bullist,numlist,|,outdent,indent,blockquote,|,undo,redo,|,link,unlink,|,formatselect",
-		theme_advanced_buttons2: "",
-		theme_advanced_buttons3: "",
-		theme_advanced_buttons4: "",
-		theme_advanced_toolbar_location: "top", 
-		theme_advanced_toolbar_align: "left", 
-		theme_advanced_statusbar_location: "bottom", 
-		theme_advanced_resizing: "1", 
-		theme_advanced_resize_horizontal: "", 
-		dialog_type: "modal", 
-		relative_urls: "", 
-		remove_script_host: "", 
-		convert_urls: "", 
-		apply_source_formatting: "", 
-		remove_linebreaks: "1", 
-		paste_convert_middot_lists: "1", 
-		paste_remove_spans: "1", 
-		paste_remove_styles: "1", 
-		gecko_spellcheck: "1", 
-		entities: "38,amp,60,lt,62,gt", 
-		accessibility_focus: "1", 
-		tab_focus: ":prev,:next", 
-		content_css: "/lib/js/modules/tinymce/zophrenic.css", 
-		wpeditimage_disable_captions: "", 
-		plugins: "safari"
-	});
+	tinyMCE.init(tinyInit);
 </script>	
 {% endblock %}
 
@@ -53,15 +23,13 @@
 			
 			{% wire id="rscform" type="submit" postback="rscform" %}
 			<form id="rscform" method="post" action="postback">
-				
-				<input type="hidden" name="id" value="{{ id }}" />
-				
 				<div class="zp-67" id="poststuff">
 					<div class="padding">
 						<div class="item-wrapper">
 							<h3 class="above-item">Basic content</h3>
 							<div class="item">
 								<fieldset class="admin-form">
+									<input type="hidden" name="id" value="{{ id }}" />
 									<div class="form-item clearfix">
 										<label for="field-title">Title</label>
 										<input type="text" id="field-title" name="title" value="{{ r.title|escape }}" />
@@ -164,13 +132,13 @@
 									<h4>Brand</h4>
 									<div class="rsc-edge">
 										<span class="do_unlink { object_id: 2, edge_id: 33, subject_id: 4 } clearfix">
-											<span class="unlink-cross"></span>
+											<span class="unlink-cross do_tooltip" title="Disonnect Ortlieb as Brand of this page."></span>
 											<span class="unlink-item">Ortlieb</span>
 										</span>
 									</div>
 									<div class="rsc-edge">
 										<span class="do_unlink { object_id: 2, edge_id: 33, subject_id: 4 } clearfix">
-											<span class="unlink-cross"></span>
+											<span class="unlink-cross do_tooltip" title="Disonnect Ortlieb as Brand of this page."></span>
 											<span class="unlink-item">Ortlieb</span>
 										</span>
 									</div>
@@ -181,7 +149,7 @@
 									<h4>Tweede link</h4>
 									<div class="rsc-edge">
 										<span class="do_unlink { object_id: 2, edge_id: 33, subject_id: 4 } clearfix">
-											<span class="unlink-cross"></span>
+											<span class="unlink-cross do_tooltip" title="Disonnect Ortlieb as Brand of this page."></span>
 											<span class="unlink-item">Ortlieb</span>
 										</span>
 									</div>
@@ -225,6 +193,5 @@
 			</form>
 		</div>
 		<div class="push"></div>
-	</div>
 {% endwith %}
 {% endblock %}
