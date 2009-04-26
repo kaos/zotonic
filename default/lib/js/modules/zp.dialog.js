@@ -33,16 +33,9 @@
 		{	
 			if(!$('.dialog').length)
 			{
-				var defaults = {
-					width: '450px',
-					text: '',
-					title: ''
-				}
-				
 				// declare varaibles
 				var options, dialogWrapper, dialogTop, dialogTitle, dialogTLC, dialogTRC, dialogClose, dialogContent, dialogInnerContent, dialogRightContent, dialogBottom, dialogBLC, dialogBRC, dialogSizer, leftPos, topPos;
-			
-				options 			= $.extend({}, defaults, options);
+				
 				dialogTitle			= $('<h5></h5>').addClass('dialog-title').text(options.title);
 				dialogTLC			= $('<span></span>').addClass('dialog-top-left');
 				dialogTRC			= $('<span></span>').addClass('dialog-top-right');
@@ -52,8 +45,8 @@
 				dialogBLC			= $('<span></span>').addClass('dialog-bottom-left');
 				dialogBRC			= $('<span></span>').addClass('dialog-bottom-right');
 				dialogSizer			= $('<span></span>').addClass('dialog-sizer');
-				leftPos				 = Math.floor((parseInt($(window).width()) / 2) - (parseInt(options.width) / 2));
-				topPos				 = Math.floor((parseInt($(window).height()) / 2) - 100);
+				leftPos				= Math.floor((parseInt($(window).width()) / 2) - (parseInt(options.width) / 2));
+				topPos				= $(window).scrollTop() + Math.floor($(window).height() / 5);
 			
 				dialogTop			= $('<div></div>').addClass('dialog-top').append(dialogTitle, dialogTLC, dialogTRC, dialogClose);
 				dialogContent		= $('<div></div>').addClass('dialog-content clearfix').append(dialogInnerContent, dialogRightContent);
@@ -63,7 +56,7 @@
 										.addClass('dialog')
 										.append(dialogTop, dialogContent, dialogBottom)
 										.fadeIn(300)
-										.css({left: leftPos, top: topPos})
+										.css({left: leftPos, top: topPos, width: options.width})
 										.draggable({ handle: dialogTop, opacity: 0.90, zIndex: 2700, iframeFix: true, scroll: true});
 				
 				$(document).keypress(function(e)
@@ -91,16 +84,25 @@
 	{
 		_init: function() 
 		{
-			self = this;
+			var title	= this.options.title;
+			var text	= this.options.text;
+			var width	= this.options.width;
+
 			this.element.click(function()
 			{
 				$.dialogAdd(
 				{
-					title: self.options.title,
-					text:  self.options.text,
-					width: self.options.width
+					title: title,
+					text:  text,
+					width: width
 				})
 			})
 		}
 	});
+	
+	$.ui.dialog.defaults = {
+		title: 'Title',
+		text: 'tekst',
+		width: '450px'
+	}
 })(jQuery);

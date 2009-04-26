@@ -125,7 +125,7 @@
 							<div class="item clearfix">
 								<p>
 									This page is able to connect to others. For example you can connect it to an actor or a brand. 
-									<a href="javascript:void(0)" class="do_dialog {title: 'Help about page connections.', text: 'his page is able to connect to others. For example you can connect it to an actor or a brand.'}">Need more help?</a>
+									<a href="javascript:void(0)" class="do_dialog {title: 'Help about page connections.', text: 'his page is able to connect to others. For example you can connect it to an actor or a brand.', width: '450px'}">Need more help?</a>
 								</p>
 								
 								<div class="unlink-wrapper clearfix">
