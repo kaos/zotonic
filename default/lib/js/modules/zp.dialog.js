@@ -46,7 +46,7 @@
 				dialogBRC			= $('<span></span>').addClass('dialog-bottom-right');
 				dialogSizer			= $('<span></span>').addClass('dialog-sizer');
 				leftPos				= Math.floor((parseInt($(window).width()) / 2) - (parseInt(options.width) / 2));
-				topPos				= $(window).scrollTop() + Math.floor($(window).height() / 5);
+				topPos				= $(window).scrollTop() + 80;
 			
 				dialogTop			= $('<div></div>').addClass('dialog-top').append(dialogTitle, dialogTLC, dialogTRC, dialogClose);
 				dialogContent		= $('<div></div>').addClass('dialog-content clearfix').append(dialogInnerContent, dialogRightContent);
@@ -61,7 +61,10 @@
 				
 				$(document).keypress(function(e)
 				{
-					if(e.which == $.ui.keyCode.ESCAPE) 
+					if($.browser.msie) 	{ var key = e.which }
+					else 				{ key = e.keyCode } 
+					
+					if(key == $.ui.keyCode.ESCAPE)
 					{
 						dialogClose.click();
 					}

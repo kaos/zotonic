@@ -94,7 +94,7 @@
 							<div class="item clearfix">
 								<div class="admin-form ">
 									<div class="form-item clearfix">
-										{% button class="save-resource" text="save" %}
+										{% button class="save-resource save" text="save" %}
 										<label for="is_published" class="left" style="float: left;">
 											<input type="checkbox" id="is_published" name="is_published" value="1" {% if r.is_published %}checked="checked"{% endif %}/> Published
 										</label>
@@ -125,7 +125,7 @@
 							<div class="item clearfix">
 								<p>
 									This page is able to connect to others. For example you can connect it to an actor or a brand. 
-									<a href="javascript:void(0)" class="do_dialog {title: 'Help about page connections.', text: 'his page is able to connect to others. For example you can connect it to an actor or a brand.', width: '450px'}">Need more help?</a>
+									<a href="javascript:void(0)" class="do_dialog {title: 'Help about page connections.', text: 'This page is able to connect to others. For example you can connect it to an actor or a brand.', width: '450px'}">Need more help?</a>
 								</p>
 								
 								<div class="unlink-wrapper clearfix">
@@ -165,6 +165,11 @@
 							</h3>
 							<div class="item clearfix">
 								<div class="admin-form form-item">
+									<p>
+										This page is able to have a date range. For example if this would have been an event or description about someone's live. 
+										<a href="javascript:void(0)" class="do_dialog {title: 'Help about dateranges.', text: 'This page is able to have a date range. For example if this would have been an event or description about someone\'s live.', width: '450px'}">Need more help?</a>
+										
+									</p>
 									<fieldset>
 										<div class="form-item">
 											<label>From</label>
