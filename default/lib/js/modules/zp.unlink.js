@@ -32,8 +32,8 @@ $.widget("ui.unlink",
 {
 	_init: function() 
 	{
-		var self			= this;
-		var obj 			= this.element;
+		var self = this;
+		var obj  = this.element;
 		
 		$('.unlink-cross', obj).hover(function()
 		{
@@ -43,23 +43,5 @@ $.widget("ui.unlink",
 		{
 			$(this).closest('.rsc-edge').removeClass('rsc-edge-hover');
 		});
-		
-		$('.unlink-cross', obj).click(function()
-		{
-			$.misc.log('edge removed');
-			obj.parent().fadeOut(200, function()
-			{
-				$(this).remove();
-			});
-		});
-	},
-	
-	kill: function() 
-	{
-		this.destroy();
 	}
 });
-
-$.ui.unlink.defaults = {
-	controller: 'test.php'
-}

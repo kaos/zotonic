@@ -127,19 +127,22 @@
 									This page is able to connect to others. For example you can connect it to an actor or a brand. 
 									<a href="javascript:void(0)" class="do_dialog {title: 'Help about page connections.', text: 'This page is able to connect to others. For example you can connect it to an actor or a brand.', width: '450px'}">Need more help?</a>
 								</p>
+								
+								<p><input type="text" class="do_autocomplete"></p>
 
 								<div id="unlink-message"></div>
 								
 								{% for name, p in m.predicate %}
 									<h4>{{ p.title }}</h4>
 									<div class="unlink-wrapper clearfix">
-										<div id="links-{{id}}-{{name}}">
+										<div id="links-{{id}}-{{name}}" class="clearfix">
 										{% for o_id in r.o[name] %}
 											{% include "_rsc_edge.tpl" subject_id=id predicate=name object_id=o_id %}
 										{% endfor %}
 										</div>
-										<span class="link-add"><input type="text" class="do_autocomplete" /></span>
+										<span><a href="javascript:void(0);" class="link-add do_dialog {title:'Add a connection: {{ p.title }}', text:'Add a connection.'}">Add nother connection</a></span>
 									</div>
+									<hr />
 								{% endfor %}
 							</div>
 						</div>
@@ -154,7 +157,6 @@
 									<p>
 										This page is able to have a date range. For example if this would have been an event or description about someone's live. 
 										<a href="javascript:void(0)" class="do_dialog {title: 'Help about dateranges.', text: 'This page is able to have a date range. For example if this would have been an event or description about someone\'s live.', width: '450px'}">Need more help?</a>
-										
 									</p>
 									<fieldset>
 										<div class="form-item">

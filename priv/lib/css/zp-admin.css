@@ -197,6 +197,11 @@ a:focus {
 	color: #999;
 }
 
+.notification {
+	padding: 6px;
+}
+
+
 /* Header
 ---------------------------------------------------------- */
 
@@ -365,6 +370,7 @@ button.save {
 	margin: 0 6px 9px 0;
 }
 
+
 /* autocompleter
 ---------------------------------------------------------- */
 
@@ -409,6 +415,10 @@ button.save {
 	.rsc-edge-hover {
 		border-color: #db474c;
 	}
+
+	.rsc-edge a {
+		text-decoration: none;
+	}
 	
 
 .unlink-item {
@@ -431,8 +441,7 @@ button.save {
 	}
 	
 .link-add {
-	float: left;
-	margin: 6px 0 0 4px;
+	color: #666;
 }
 
 
