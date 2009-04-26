@@ -375,7 +375,7 @@ only_digits(_) ->
 %% @doc Return the id of the resource with a certain unique name.
 %% rid_name(Name, Context) -> #rsc{} | undefined
 rid_name(Name, Context) ->
-    Lower = zp_utils:to_lower(Name),
+    Lower = zp_string:to_lower(Name),
     case zp_depcache:get({rsc_name, Lower}) of
         {ok, undefined} ->
             undefined;

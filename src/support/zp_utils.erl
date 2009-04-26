@@ -29,14 +29,9 @@
 	combine/2,
 	combine_defined/2,
 	prefix/2,
-	replace/3,
 	coalesce/1,
 	is_process_alive/1,
-	trim/1,
 	is_true/1,
-	is_string/1,
-	to_lower/1,
-	to_upper/1,
 	assert/2,
 	prop_replace/3,
 	prop_delete/2,
@@ -301,18 +296,6 @@ prefix(_Sep, [], Acc) -> lists:reverse(Acc);
 prefix(Sep, [H|T], Acc) -> prefix(Sep, T, [H,Sep|Acc]).
 
 
-%%% STRING REPLACE %%%
-
-replace([], _, _) -> [];
-replace(String, S1, S2) when is_list(String), is_list(S1), is_list(S2) ->
-	Length = length(S1),
-	case string:substr(String, 1, Length) of 
-		S1 -> 
-			S2 ++ replace(string:substr(String, Length + 1), S1, S2);
-		_ -> 
-			[hd(String)|replace(tl(String), S1, S2)]
-	end.
-	
 %%% COALESCE %%%
 
 coalesce([]) -> undefined;
@@ -320,10 +303,6 @@ coalesce([H]) -> H;
 coalesce([undefined|T]) -> coalesce(T);
 coalesce([[]|T]) -> coalesce(T);
 coalesce([H|_]) -> H.
-
-%% @doc Remove whitespace at the start and end of the string
-%% @todo Check if we want to use a regexp (re) instead, needed for stripping newline, tab etc.
-trim(S) -> string:strip(S, both).
 
 
 %% @doc Check if the parameter could represent the logical value of "true"    
@@ -344,34 +323,6 @@ is_true(on) -> true;
 is_true(N) when is_integer(N) andalso N /= 0 -> true;
 
 is_true(_) -> false.
-
-
-%% @doc Check if the variable is a one dimensional list, probably a string
-is_string([]) -> 
-    true;
-is_string([C|Rest]) when is_integer(C) andalso (C >= 32 orelse C == 9 orelse C == 10 orelse C == 12 orelse C == 13) ->
-    is_string(Rest);
-is_string(_) -> 
-    false.
-
-%% @doc Return a lowercase string for the input
-%% @spec to_lower(Value) -> String
-to_lower(B) when is_binary(B) ->
-    string:to_lower(binary_to_list(B));
-to_lower(L) when is_list(L) ->
-    string:to_lower(lists:flatten(L));
-to_lower(A) when is_atom(A) ->
-    string:to_lower(atom_to_list(A)).
-
-
-%% @doc Return a uppercase string for the input
-%% @spec to_upper(Value) -> String
-to_upper(B) when is_binary(B) ->
-    string:to_upper(binary_to_list(B));
-to_upper(L) when is_list(L) ->
-    string:to_upper(lists:flatten(L));
-to_upper(A) when is_atom(A) ->
-    string:to_upper(atom_to_list(A)).
 
 
 %% @spec assert(bool(), error) -> none()
@@ -470,3 +421,4 @@ guess_mime(File) ->
 	_ ->
 	    webmachine_util:guess_mime(File)
 end.
+

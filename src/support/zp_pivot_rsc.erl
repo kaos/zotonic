@@ -328,7 +328,7 @@ fetch_texts({F, V}, {A,B} = Acc) ->
     case do_pivot_field(F) of
         false -> Acc;
         true ->
-            case zp_utils:is_string(V) of
+            case zp_string:is_string(V) of
                 true -> {A, [V|B]};
                 false -> {A,B}
             end

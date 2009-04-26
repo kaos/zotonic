@@ -22,7 +22,7 @@ render_validator(numericality, TriggerId, _TargetId, Args, Context)  ->
 %% @spec validate(Type, TriggerId, Values, Args, Context) -> {ok,AcceptableValues} | {error,Id,Error}
 %%          Error -> invalid | novalue | {script, Script}
 validate(numericality, Id, Value, [Min,Max], _Context) ->
-    Trimmed = zp_utils:trim(Value),
+    Trimmed = zp_string:trim(Value),
     case string:to_integer(Trimmed) of
         {error,_Error} -> 
             % Not a number

@@ -18,7 +18,7 @@ render_validator(presence, TriggerId, _TargetId, Args, Context)  ->
 validate(presence, Id, undefined, _Args, _Context) -> {error, Id, novalue};
 validate(presence, Id, [],        _Args, _Context) -> {error, Id, novalue};
 validate(presence, Id, Value,     _Args, _Context) ->
-    case zp_utils:trim(Value) of
+    case zp_string:trim(Value) of
         [] -> {error, Id, invalid};
         _Trimmed -> {ok, Value}
     end.

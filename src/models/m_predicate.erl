@@ -7,8 +7,14 @@
 -module(m_predicate).
 -author("Marc Worrell <marc@worrell.nl").
 
+-behaviour(gen_model).
+
 %% interface functions
 -export([
+    m_find_value/3,
+    m_to_list/2,
+    m_value/2,
+    
     is_predicate/2,
     name_to_id/2,
     name_to_id_check/2,
@@ -20,6 +26,26 @@
 ]).
 
 -include_lib("zophrenic.hrl").
+
+
+%% @doc Fetch the value for the key from a model source
+%% @spec m_find_value(Key, Source, Context) -> term()
+m_find_value(all, #m{value=undefined}, Context) ->
+    all(Context);
+m_find_value(Key, #m{value=undefined}, Context) ->
+    get(Key, Context).
+
+%% @doc Transform a model value to a list, used for template loops
+%% @spec m_to_list(Source, Context) -> List
+m_to_list(#m{value=undefined}, Context) ->
+    all(Context);
+m_to_list(#m{}, _Context) ->
+    [].
+
+%% @doc Transform a model value so that it can be formatted or piped through filters
+%% @spec m_value(Source, Context) -> term()
+m_value(#m{}, Context) ->
+    all(Context).
 
 
 %% @doc Test if the property is the name of a predicate
@@ -56,7 +82,7 @@ name_to_id_check(Name, Context) ->
 %% @doc Return the definition of the predicate
 %% @spec predicate(Pred, Context) -> PredicatePropList | undefined
 get(Pred, Context) when is_binary(Pred) ->
-    get(list_to_atom(zp_utils:to_lower(Pred)), Context);
+    get(list_to_atom(zp_string:to_lower(Pred)), Context);
 get(Pred, Context) when is_list(Pred) ->
     get(list_to_atom(string:to_lower(Pred)), Context);
 get(Pred, Context) ->
@@ -77,7 +103,7 @@ all(Context) ->
         {ok, Preds} -> 
             Preds;
         undefined ->
-            Preds = zp_db:assoc("select * from predicate order by name", Context),
+            Preds = zp_db:assoc_props("select * from predicate order by name", Context),
             FSetPred = fun(Pred) ->
                 Atom = list_to_atom(binary_to_list(proplists:get_value(name, Pred))),
                 {Atom, [{pred, Atom}|Pred]}

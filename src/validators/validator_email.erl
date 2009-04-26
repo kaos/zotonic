@@ -16,7 +16,7 @@ render_validator(email, TriggerId, _TargetId, Args, Context)  ->
 %% @spec validate(Type, TriggerId, Values, Args, Context) -> {ok,AcceptableValues} | {error,Id,Error}
 %%          Error -> invalid | novalue | {script, Script}
 validate(email, Id, Value, _Args, _Context) ->
-    case zp_utils:trim(Value) of
+    case zp_string:trim(Value) of
         [] -> {ok, []};
         Trimmed ->
             case re:run(Trimmed, re(), [extended]) of

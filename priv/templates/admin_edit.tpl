@@ -127,34 +127,20 @@
 									This page is able to connect to others. For example you can connect it to an actor or a brand. 
 									<a href="javascript:void(0)" class="do_dialog {title: 'Help about page connections.', text: 'This page is able to connect to others. For example you can connect it to an actor or a brand.', width: '450px'}">Need more help?</a>
 								</p>
+
+								<div id="unlink-message"></div>
 								
-								<div class="unlink-wrapper clearfix">
-									<h4>Brand</h4>
-									<div class="rsc-edge">
-										<span class="do_unlink { object_id: 2, edge_id: 33, subject_id: 4 } clearfix">
-											<span class="unlink-cross do_tooltip" title="Disonnect Ortlieb as Brand of this page."></span>
-											<span class="unlink-item">Ortlieb</span>
-										</span>
+								{% for name, p in m.predicate %}
+									<h4>{{ p.title }}</h4>
+									<div class="unlink-wrapper clearfix">
+										<div id="links-{{id}}-{{name}}">
+										{% for o_id in r.o[name] %}
+											{% include "_rsc_edge.tpl" subject_id=id predicate=name object_id=o_id %}
+										{% endfor %}
+										</div>
+										<span class="link-add"><input type="text" class="do_autocomplete" /></span>
 									</div>
-									<div class="rsc-edge">
-										<span class="do_unlink { object_id: 2, edge_id: 33, subject_id: 4 } clearfix">
-											<span class="unlink-cross do_tooltip" title="Disonnect Ortlieb as Brand of this page."></span>
-											<span class="unlink-item">Ortlieb</span>
-										</span>
-									</div>
-									<span class="link-add"><a href="javascript:void(0);">Add another link</a></span>
-								</div>
-								
-								<div class="unlink-wrapper clearfix">
-									<h4>Tweede link</h4>
-									<div class="rsc-edge">
-										<span class="do_unlink { object_id: 2, edge_id: 33, subject_id: 4 } clearfix">
-											<span class="unlink-cross do_tooltip" title="Disonnect Ortlieb as Brand of this page."></span>
-											<span class="unlink-item">Ortlieb</span>
-										</span>
-									</div>
-									<span class="link-add"><input type="text" class="do_autocomplete" /></span>
-								</div>
+								{% endfor %}
 							</div>
 						</div>
 					

@@ -46,22 +46,53 @@ update(Id, Props, Context) when is_integer(Id) ->
             TextProps = recombine_dates(Props),
             AtomProps = [ {zp_convert:to_atom(P), V} || {P, V} <- TextProps ],
             FilteredProps = props_filter(Id, AtomProps, [], Context),
-            UpdateProps = [
-                {version, zp_db:q1("select version+1 from rsc where id = $1", [Id], Context)},
-                {modifier_id, zp_acl:user(Context)},
-                {modified, erlang:localtime()}
-                | FilteredProps
-            ],
-            zp_db:update(rsc, Id, UpdateProps, Context),
-            zp_depcache:flush(#rsc{id=Id}),
-            ok;
+            case preflight_check(Id, FilteredProps, Context) of
+                ok ->
+                    UpdateProps = [
+                        {version, zp_db:q1("select version+1 from rsc where id = $1", [Id], Context)},
+                        {modifier_id, zp_acl:user(Context)},
+                        {modified, erlang:localtime()}
+                        | FilteredProps
+                    ],
+                    zp_db:update(rsc, Id, UpdateProps, Context),
+                    zp_depcache:flush(#rsc{id=Id}),
+                    ok;
+                {error, Reason} ->
+                    {error, Reason}
+            end;
         false ->
             {error, eacces}
     end.
 
 
+%% @doc Check if all props are acceptable. Examples are unique name, uri etc.
+%% @spec preflight_check(Id, Props, Context) -> ok | {error, Reason}
+preflight_check(_Id, [], _Context) ->
+    ok;
+preflight_check(Id, [{name, Name}|T], Context) ->
+    case zp_db:q1("select count(*) from rsc where name = $1 and id <> $2", [Name, Id], Context) of
+        0 ->  preflight_check(Id, T, Context);
+        _N -> {error, duplicate_name}
+    end;
+preflight_check(Id, [{uri, Uri}|T], Context) ->
+    case zp_db:q1("select count(*) from rsc where uri = $1 and id <> $2", [Uri, Id], Context) of
+        0 ->  preflight_check(Id, T, Context);
+        _N -> {error, duplicate_uri}
+    end;
+preflight_check(Id, [_H|T], Context) ->
+    preflight_check(Id, T, Context).
+
+
+%% @doc Remove protected properties and convert some other to the correct data type
+%% @spec props_filter(Id, Props1, Acc, Context) -> Props2
 props_filter(_Id, [], Acc, _Context) ->
     Acc;
+props_filter(Id, [{name, <<>>}|T], Acc, Context) ->
+    props_filter(Id, T, [{name, undefined} | Acc], Context);
+props_filter(Id, [{name, ""}|T], Acc, Context) ->
+    props_filter(Id, T, [{name, undefined} | Acc], Context);
+props_filter(Id, [{name, Name}|T], Acc, Context) ->
+    props_filter(Id, T, [{name, zp_utils:to_name(Name)} | Acc], Context);
 props_filter(Id, [{is_published, P}|T], Acc, Context) ->
     props_filter(Id, T, [{is_published, zp_convert:to_bool(P)} | Acc], Context);
 props_filter(Id, [{is_authoritative, P}|T], Acc, Context) ->

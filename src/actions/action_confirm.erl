@@ -9,7 +9,7 @@
 
 render_action(TriggerId, TargetId, Args, Context) ->
     Postback    = proplists:get_value(postback, Args),
-    Actions     = proplists:get_value(actions, Args, []),
+    Actions     = proplists:get_all_values(action, Args, []),
     Text        = proplists:get_value(text, Args, ""),
     
 	{PostbackMsgJS, _PickledPostback} = zp_render:make_postback(Postback, confirm, TriggerId, TargetId, undefined, Context),
