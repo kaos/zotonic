@@ -62,6 +62,7 @@
     
 -record(treewalker, {
     counter = 0,
+    has_auto_id = false,
     custom_tags = []}).    
 
 compile(Binary, Module) when is_binary(Binary) ->
@@ -117,8 +118,8 @@ compile(File, Module, Options) ->
 
 compile_to_binary(File, DjangoParseTree, Context, CheckSum) ->
     try body_ast(DjangoParseTree, Context, #treewalker{}) of
-        {{Ast, Info}, _} ->
-            case compile:forms(forms(File, Context#dtl_context.module, Ast, Info, CheckSum), 
+        {{Ast, Info}, TreeWalker} ->
+            case compile:forms(forms(File, Context#dtl_context.module, Ast, Info, CheckSum, Context, TreeWalker), 
                     Context#dtl_context.compiler_options) of
                 {ok, Module1, Bin} -> 
                     code:purge(Module1),
@@ -140,6 +141,7 @@ init_dtl_context(File, Module, Options) when is_list(Module) ->
 init_dtl_context(File, Module, Options) ->
     Ctx = #dtl_context{},
     #dtl_context{
+        local_scopes = [ [{'$autoid', erl_syntax:variable("AutoId_"++zp_ids:identifier())}] ],
         parse_trail = [File], 
         module = Module,
         doc_root = proplists:get_value(doc_root, Options, filename:dirname(File)),
@@ -216,7 +218,7 @@ parse(Data) ->
             Err
     end.        
   
-forms(File, Module, BodyAst, BodyInfo, CheckSum) ->
+forms(File, Module, BodyAst, BodyInfo, CheckSum, Context, TreeWalker) ->
     Function2 = erl_syntax:application(none, erl_syntax:atom(render2), 
         [erl_syntax:variable("Variables"), erl_syntax:variable("ZpContext")]),
     ClauseOk = erl_syntax:clause([erl_syntax:variable("Val")], none,
@@ -240,36 +242,40 @@ forms(File, Module, BodyAst, BodyInfo, CheckSum) ->
                         erl_syntax:tuple([erl_syntax:string(XFile), erl_syntax:string(XCheckSum)])
                 end, BodyInfo#ast_info.dependencies))])]),     
 
-    BodyAutoIdAst = erl_syntax:match_expr(
-                            erl_syntax:variable("AutoId"),
-                            erl_syntax:application(
-                                        erl_syntax:atom(zp_ids),
-                                        erl_syntax:atom(identifier),
-                                        [erl_syntax:integer(8)]
-                            )
-                     ),
-
 	BodyLanguageAst = erl_syntax:match_expr(
 							erl_syntax:variable("Language"),
 							erl_syntax:application(
-						        erl_syntax:atom(erlydtl_runtime), 
-						        erl_syntax:atom(fetch_value),
-						        [	erl_syntax:atom(language), 
-									erl_syntax:variable("Variables"), 
-									erl_syntax:variable("ZpContext")
-								]
+						        erl_syntax:atom(zp_context), 
+						        erl_syntax:atom(language),
+						        [ erl_syntax:variable("ZpContext") ]
 							)
 					),
+
+    BodyRenderAsts = case TreeWalker#treewalker.has_auto_id of
+        false ->
+            [BodyLanguageAst, BodyAst];
+        true -> 
+            AutoIdVar = resolve_scoped_variable_ast("$autoid", Context),
+            BodyAutoIdAst = erl_syntax:match_expr(
+                                    AutoIdVar,
+                                    erl_syntax:application(
+                                                erl_syntax:atom(zp_ids),
+                                                erl_syntax:atom(identifier),
+                                                [erl_syntax:integer(8)]
+                                    )
+                             ),
+            [BodyAutoIdAst, BodyLanguageAst, BodyAst]
+    end,
 
     RenderInternalFunctionAst = erl_syntax:function(
         erl_syntax:atom(render2), 
             [ erl_syntax:clause(
 					[erl_syntax:variable("Variables"), erl_syntax:variable("ZpContext")], 
 					none, 
-                	[BodyAutoIdAst, BodyLanguageAst, BodyAst])
+                	BodyRenderAsts)
 			]),   
     
-    ModuleAst  = erl_syntax:attribute(erl_syntax:atom(module), [erl_syntax:atom(Module)]),
+    ModuleAst = erl_syntax:attribute(erl_syntax:atom(module), [erl_syntax:atom(Module)]),
     
     ExportAst = erl_syntax:attribute(erl_syntax:atom(export),
         [erl_syntax:list([
@@ -468,7 +474,7 @@ value_ast(ValueToken, AsString, Context, TreeWalker) ->
                 false -> {{erl_syntax:integer(list_to_integer(Number)), #ast_info{}}, TreeWalker}
             end;
         {'auto_id', {identifier, _, Auto}} ->
-            {auto_id_ast(Auto), TreeWalker};
+            auto_id_ast(Auto, Context, TreeWalker);
         {'apply_filter', Variable, Filter} ->
             filter_ast(Variable, Filter, Context, TreeWalker);
         {'attribute', _} = Variable ->
@@ -516,13 +522,41 @@ include_ast(File, Args, Context, TreeWalker) ->
                             Args),
     case UseScomp of
         false ->
-            InterpretedArgs = interpreted_args(Args, Context),
+            {InterpretedArgs, TreeWalker1} = interpreted_args(Args, Context, TreeWalker),
+            {ScopedArgs, ArgAsts} = lists:foldr(
+                fun({AKey, AAst}, {ScopeAcc, AstAcc}) ->
+                    Var = "Arg_" ++ zp_ids:identifier(10),
+                    AssignAst = erl_syntax:match_expr(erl_syntax:variable(Var), AAst),
+                    { [{AKey, erl_syntax:variable(Var)}|ScopeAcc], [AssignAst|AstAcc] }
+                end,
+                {[], []},
+                InterpretedArgs),
+            AutoIdVar = "AutoId_"++zp_ids:identifier(),
+            IncludeScope = [ {'$autoid', erl_syntax:variable(AutoIdVar)} | ScopedArgs ],
             FilePath = full_path(File, Context#dtl_context.doc_root),
             case parse(FilePath, Context) of
                 {ok, InclusionParseTree, CheckSum} ->
-                    with_dependency({FilePath, CheckSum}, body_ast(InclusionParseTree, Context#dtl_context{
-                        local_scopes = [ InterpretedArgs | Context#dtl_context.local_scopes ],
-                        parse_trail = [FilePath | Context#dtl_context.parse_trail]}, TreeWalker));
+                    {{Ast,Info}, TreeWalker2} = 
+                                    with_dependency({FilePath, CheckSum}, 
+                                            body_ast(
+                                                InclusionParseTree,
+                                                Context#dtl_context{
+                                                        local_scopes = [ IncludeScope | Context#dtl_context.local_scopes ],
+                                                        parse_trail = [FilePath | Context#dtl_context.parse_trail]}, 
+                                                TreeWalker1#treewalker{has_auto_id=false})),
+                    Ast1 = case TreeWalker2#treewalker.has_auto_id of
+                        false -> erl_syntax:block_expr(ArgAsts++[Ast]);
+                        true ->  erl_syntax:block_expr(
+                                    ArgAsts ++ [
+                                    erl_syntax:match_expr(
+                                            erl_syntax:variable(AutoIdVar), 
+                                            erl_syntax:application(
+                                                erl_syntax:atom(zp_ids),
+                                                erl_syntax:atom(identifier),
+                                                [])),
+                                    Ast])
+                    end,
+                    {{Ast1,Info}, TreeWalker2#treewalker{has_auto_id=TreeWalker1#treewalker.has_auto_id}};
                 Err ->
                     throw(Err)
             end;
@@ -789,24 +823,30 @@ load_ast(Names, _Context, TreeWalker) ->
     {{erl_syntax:list([]), #ast_info{}}, TreeWalker#treewalker{custom_tags = CustomTags}}.  
 
 cycle_ast(Names, Context, TreeWalker) ->
-    NamesTuple = lists:map(fun({string_literal, _, Str}) ->
-                                   erl_syntax:string(unescape_string_literal(Str));
-							  ({trans_literal, _, Str}) ->
-							  	   trans_literal_ast(Str);
-                              ({number_literal, _, Num}) ->
-                                   format(erl_syntax:integer(Num), Context);
-                              ({variable, _}=Var) ->
-                                   {V, _} = resolve_variable_ast(Var, Context),
-                                   V;
-                              ({auto_id,{identifier,_,Name}}) ->
-                                   {V, _} = auto_id_ast(Name),
-                                   V;
-                              (_) ->
-                                   erl_syntax:string("undefined")
-                           end, Names),
+    {NamesTuple, TreeWalker1} = lists:foldr(
+                        fun
+                        ({string_literal, _, Str}, {Acc,TW}) ->
+                            {[ erl_syntax:string(unescape_string_literal(Str)) | Acc], TW};
+						({trans_literal, _, Str}, {Acc,TW}) ->
+						  	{[ trans_literal_ast(Str) | Acc ], TW};
+                        ({number_literal, _, Num}, {Acc,TW}) ->
+                            V = format(erl_syntax:integer(Num), Context),
+                            {[ V | Acc ], TW};
+                        ({variable, _}=Var, {Acc,TW}) ->
+                            {V, _} = resolve_variable_ast(Var, Context),
+                            {[ V | Acc ], TW};
+                        ({auto_id,{identifier,_,Name}}, {Acc,TW}) ->
+                            {{V, _}, TW1} = auto_id_ast(Name, Context, TW),
+                            {[ V |Acc ], TW1};
+                        (_, {Acc,TW}) ->
+                           {[ erl_syntax:atom(undefined) | Acc ], TW}
+                        end,
+                        {[],TreeWalker},
+                        Names),
+
     {{erl_syntax:application(
         erl_syntax:atom('erlydtl_runtime'), erl_syntax:atom('cycle'),
-        [erl_syntax:tuple(NamesTuple), erl_syntax:variable("Counters"), erl_syntax:variable("ZpContext")]), #ast_info{}}, TreeWalker}.
+        [erl_syntax:tuple(NamesTuple), erl_syntax:variable("Counters"), erl_syntax:variable("ZpContext")]), #ast_info{}}, TreeWalker1}.
 
 %% Older Django templates treat cycle with comma-delimited elements as strings
 cycle_compat_ast(Names, _Context, TreeWalker) ->
@@ -839,7 +879,7 @@ trans_ast(TransLiteral, _Context, TreeWalker) ->
 
 trans_ext_ast(String, Args, Context, TreeWalker) ->
 	Lit = unescape_string_literal(string:strip(String, both, 34), [], noslash),
-	ArgsTrans = interpreted_args(Args, Context),
+	{ArgsTrans, TreeWalker1} = interpreted_args(Args, Context, TreeWalker),
 	ArgsTransAst = [
 		erl_syntax:tuple([erl_syntax:atom(Lang), Ast]) || {Lang,Ast} <- ArgsTrans
 	],
@@ -855,7 +895,7 @@ trans_ext_ast(String, Args, Context, TreeWalker) ->
 			]),
 			erl_syntax:variable("Language")
 		]
-	), #ast_info{}}, TreeWalker}.
+	), #ast_info{}}, TreeWalker1}.
 	
 
 
@@ -900,13 +940,13 @@ full_path(File, DocRoot) ->
 tag_ast(Name, Args, Context, TreeWalker) ->
     case lists:member(Name, TreeWalker#treewalker.custom_tags) of
         true ->
-            InterpretedArgs = interpreted_args(Args, Context),
+            {InterpretedArgs, TreeWalker1} = interpreted_args(Args, Context, TreeWalker),
             DefaultFilePath = filename:join([erlydtl_deps:get_base_dir(), "priv", "custom_tags", Name]),
             case Context#dtl_context.custom_tags_dir of
                 [] ->
                     case parse(DefaultFilePath, Context) of
                         {ok, TagParseTree, CheckSum} ->
-                            tag_ast2({DefaultFilePath, CheckSum}, TagParseTree, InterpretedArgs, Context, TreeWalker);
+                            tag_ast2({DefaultFilePath, CheckSum}, TagParseTree, InterpretedArgs, Context, TreeWalker1);
                         _ ->
                             Reason = lists:concat(["Loading tag source for '", Name, "' failed: ", 
                                 DefaultFilePath]),
@@ -916,11 +956,11 @@ tag_ast(Name, Args, Context, TreeWalker) ->
                     CustomFilePath = filename:join([Context#dtl_context.custom_tags_dir, Name]),
                     case parse(CustomFilePath, Context) of
                         {ok, TagParseTree, CheckSum} ->
-                            tag_ast2({CustomFilePath, CheckSum},TagParseTree, InterpretedArgs, Context, TreeWalker);
+                            tag_ast2({CustomFilePath, CheckSum},TagParseTree, InterpretedArgs, Context, TreeWalker1);
                         _ ->
                             case parse(DefaultFilePath, Context) of
                                 {ok, TagParseTree, CheckSum} ->
-                                    tag_ast2({DefaultFilePath, CheckSum}, TagParseTree, InterpretedArgs, Context, TreeWalker);
+                                    tag_ast2({DefaultFilePath, CheckSum}, TagParseTree, InterpretedArgs, Context, TreeWalker1);
                                 _ ->
                                     Reason = lists:concat(["Loading tag source for '", Name, "' failed: ", 
                                         CustomFilePath, ", ", DefaultFilePath]),
@@ -1124,37 +1164,51 @@ scomp_ast_map_args(Args, Context, TreeWalker) ->
     erl_syntax:list(ArgsAst).
 
 
-%%  lists:append(AutoId,"_Name")
-auto_id_ast(Name) ->
-    {   erl_syntax:application(
+%%  lists:append(AutoId,"-Name")
+auto_id_ast(Name, Context, TreeWalker) ->
+    {{   erl_syntax:application(
                     erl_syntax:atom(lists), erl_syntax:atom(append),
-                    [erl_syntax:variable("AutoId"), erl_syntax:string([$-,$a,$u,$t,$o,$-|Name])]),
+                    [resolve_scoped_variable_ast("$autoid", Context), erl_syntax:string([$-|Name])]),
         #ast_info{}
-    }.
+    }, TreeWalker#treewalker{has_auto_id=true}}.
 
 
-interpreted_args(Args, Context) ->
-    lists:map(fun({{identifier, _, Key}, Value}) -> {list_to_atom(Key), interpreted_argval(Value, Context)} end, Args).
+interpreted_args(Args, Context, TreeWalker) ->
+    lists:foldr(
+        fun({{identifier, _, Key}, Value}, {Acc, TW}) ->
+            {Ast, TW1} = interpreted_argval(Value, Context, TW),
+            { [ {list_to_atom(Key), Ast} | Acc ], TW1 }
+        end,
+        {[], TreeWalker},
+        Args).
 
-interpreted_argval({number_literal, _, Value}, _Context) -> 
-    erl_syntax:integer(unescape_string_literal(Value));
-interpreted_argval({string_literal, _, Value}, _Context) -> 
-    erl_syntax:string(unescape_string_literal(Value));
-interpreted_argval({trans_literal, _, Value}, _Context) ->
-    trans_literal_ast(Value);
-interpreted_argval({auto_id,{identifier,_,AutoId}}, _Context) ->
-    {V, _} = auto_id_ast(AutoId), 
-    V;
-interpreted_argval({tuple_value, {identifier, _, TupleName}, TupleArgs}, Context) ->
-    erl_syntax:tuple([erl_syntax:atom(TupleName), erl_syntax:list(interpreted_args(TupleArgs, Context))]);
-interpreted_argval({value_list, Values}, Context) ->
-    List = lists:map(fun(V) -> interpreted_argval(V, Context) end, Values),
-    erl_syntax:list(List);
-interpreted_argval(true, _Context) ->
-    erl_syntax:atom(true);
-interpreted_argval(Value, Context) ->
+interpreted_argval({number_literal, _, Value}, _Context, TreeWalker) -> 
+    {erl_syntax:integer(unescape_string_literal(Value)), TreeWalker};
+interpreted_argval({string_literal, _, Value}, _Context, TreeWalker) -> 
+    {erl_syntax:string(unescape_string_literal(Value)), TreeWalker};
+interpreted_argval({trans_literal, _, Value}, _Context, TreeWalker) ->
+    {trans_literal_ast(Value), TreeWalker};
+interpreted_argval({auto_id,{identifier,_,AutoId}}, Context, TreeWalker) ->
+    {{V, _}, TreeWalker1} = auto_id_ast(AutoId, Context, TreeWalker), 
+    {V, TreeWalker1};
+interpreted_argval({tuple_value, {identifier, _, TupleName}, TupleArgs}, Context, TreeWalker) ->
+    {ArgList, TreeWalker1} = interpreted_args(TupleArgs, Context, TreeWalker),
+    {erl_syntax:tuple([erl_syntax:atom(TupleName), erl_syntax:list(ArgList)]), TreeWalker1};
+interpreted_argval({value_list, Values}, Context, TreeWalker) ->
+    {List, TreeWalker1} = lists:foldr(
+        fun(V, {Acc, TW}) -> 
+            {VAst, TW1} = interpreted_argval(V, Context, TW),
+            {[VAst|Acc], TW1}
+        end,
+        {[], TreeWalker},
+        Values
+    ),
+    {erl_syntax:list(List), TreeWalker1};
+interpreted_argval(true, _Context, TreeWalker) ->
+    {erl_syntax:atom(true), TreeWalker};
+interpreted_argval(Value, Context, TreeWalker) ->
     {Ast, _VarName} = resolve_variable_ast(Value, Context),
-    Ast.
+    {Ast, TreeWalker}.
 
 trans_literal_ast(String) ->
 	Lit = unescape_string_literal(String),
