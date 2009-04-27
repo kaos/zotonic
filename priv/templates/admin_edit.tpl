@@ -20,7 +20,7 @@
 			<p class="admin-chapeau">editing:</p>
 			<h2>{{ r.title|striptags }}</h2>
 		{% endif %}	
-			
+
 			{% wire id="rscform" type="submit" postback="rscform" %}
 			<form id="rscform" method="post" action="postback">
 				<div class="zp-67" id="poststuff">

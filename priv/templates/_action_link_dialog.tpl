@@ -6,6 +6,6 @@
 	<ul id="{{#suggestions}}" class="suggestions-list"></ul>
 </div>
 
-{% button text="Create new" action={growl text="create new"} %}
+{% button text="Make new..." action={dialog_close} action={dialog_new_rsc redirect=false subject_id=subject_id predicate=predicate} %}
 
 {% wire id=#input type="keyup" action={typeselect target=#suggestions subject_id=subject_id predicate=predicate} %}

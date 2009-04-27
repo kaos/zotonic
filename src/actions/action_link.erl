@@ -11,7 +11,8 @@
 %% interface functions
 -export([
     render_action/4,
-    event/2
+    event/2,
+    do_link/4
 ]).
 
 render_action(TriggerId, TargetId, Args, Context) ->
@@ -27,6 +28,10 @@ render_action(TriggerId, TargetId, Args, Context) ->
 %% @doc Unlink the edge, on success show an undo message in the element with id "unlink-message"
 %% @spec event(Event, Context1) -> Context2
 event({postback, {link, SubjectId, Predicate, ObjectId}, _TriggerId, _TargetId}, Context) ->
+    do_link(SubjectId, Predicate, ObjectId, Context).
+
+
+do_link(SubjectId, Predicate, ObjectId, Context) ->
     case zp_acl:rsc_editable(SubjectId, Context) of
         true ->
             {ok, _EdgeId} = m_edge:insert(SubjectId, Predicate, ObjectId, Context),
@@ -43,3 +48,4 @@ event({postback, {link, SubjectId, Predicate, ObjectId}, _TriggerId, _TargetId},
         false ->
             zp_render:wire({growl, [{text, "Sorry, you have no permission to add the connection."},{type, "error"}]}, Context)
     end.
+    

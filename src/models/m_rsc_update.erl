@@ -23,7 +23,16 @@
 %% @doc Insert a new resource
 %% @spec insert(Props, Context) -> {ok, Id}
 insert(Props, Context) ->
-    zp_db:insert(rsc, Props, Context).
+    {category_id, CategoryId} = proplists:lookup(category_id, Props),
+    {group_id, GroupId} = proplists:lookup(group_id, Props),
+    true = zp_acl:group_editable(GroupId, Context),
+    F = fun(Ctx) ->
+        {ok, Id} = zp_db:insert(rsc, [{category_id, CategoryId}, {group_id, GroupId}, {visible_for, 2}], Ctx),
+        ok = update(Id, Props, Ctx),
+        {ok, Id}
+    end,
+    zp_db:transaction(F, Context).
+    
 
 
 %% @doc Delete a resource
@@ -40,7 +49,7 @@ delete(Id, Context) when is_integer(Id) ->
     
 
 %% @doc Update a predicate
-%% @spec update(Props, Props, Context) -> void()
+%% @spec update(Props, Props, Context) -> ok | {error, Reason}
 update(Id, Props, Context) when is_integer(Id) ->
     case zp_acl:rsc_editable(Id, Context) of
         true ->

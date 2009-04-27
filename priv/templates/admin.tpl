@@ -17,6 +17,8 @@
 						<a class="button" href="/pages">manage categories &raquo;</a>
 						<a class="button" href="/pages">manage prodcuts &raquo;</a>
 						<a class="button" href="/pages">manage users &raquo;</a>
+						
+						{% button class="right" text="new page..." action={dialog_new_rsc title=""} %}
 					</div>
 				</div>
 			</div>
