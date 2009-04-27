@@ -77,17 +77,21 @@ $.widget("ui.tooltip",
 				$(this).remove();
 			});
 			
-			$.fn.tooltip.destroy();
+			self.destroy();
 			this.title = this.tip;
 		});
-		
-		$.fn.tooltip.destroy = function()
-		{
-			obj.unbind(self.options.inevent, self.options.outevent);
-			$(document).unbind('mousemove');
-		}
+	},
+	destroy: function()
+	{
+		obj.unbind(self.options.inevent, self.options.outevent);
+		$(document).unbind('mousemove');
 	}
 });
+
+$.fn.tooltip.destroy = function()
+{
+	$('.tooltip').tooltip('destroy');
+}
 
 $.ui.tooltip.defaults = {
 	offsetY: 	0,

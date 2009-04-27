@@ -42,6 +42,11 @@ $.widget("ui.unlink",
 		function()
 		{
 			$(this).closest('.rsc-edge').removeClass('rsc-edge-hover');
+			
+			if($.ui.tooltip)
+			{
+				$.fn.tooltip.destroy()
+			}
 		});
 	}
 });
