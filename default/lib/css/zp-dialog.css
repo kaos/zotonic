@@ -148,11 +148,29 @@ h5.dialog-title {
 .dialog input, .dialog textarea {
 	background: #333;
 	color: #eee;
-	border-color: #888;
+	border-color: #666;
 	padding: 4px;
 	width: 300px;
 }
 
-	.dialog input:focus, .dialog textarea :focus {
+	.dialog input:focus, .dialog textarea:focus {
 		background: #444;
+	}
+	
+.dialog button, 
+.dialog a.button {
+	-moz-border-radius:10px;
+	-webkit-border-radius: 10px;
+	background: #333;
+	border-color: #666;
+	color: #eee;
+}
+
+	.dialog button:hover, 
+	.dialog a.button:hover {
+		-moz-border-radius:10px;
+		-webkit-border-radius: 10px;
+		color: #fff;
+		background: #444;
+		border-color: #111;
 	}
