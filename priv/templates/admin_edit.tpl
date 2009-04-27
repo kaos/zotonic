@@ -121,6 +121,46 @@
 							</div>
 						</div>
 
+						<div class="item-wrapper" id="sort-access">
+							<h3 class="above-item clearfix do_blockminifier">
+								<span class="title">Access control</span>
+								<span class="arrow">make smaller</span>
+							</h3>
+							<div class="item clearfix">
+								<div class="admin-form form-item">
+									{#
+									<button class="do_tooltip" title="I'm am the tooptip popup, I'm am the tooptip popup">Yeah, give me a tooltip</button>
+									#}
+									<div class="zp-50">
+										<label for="visible_for">Visible for</label>
+										<select id="visible_for" name="visible_for">
+											<option value="0" 
+												{% ifequal 0 r.visible_for %}selected="selected"
+												{% else %}{% if not m.acl.is_public_publisher %}disabled="disabled"{% endif %}
+												{% endifequal %}>The whole world</option>
+											<option value="1"
+												{% ifequal 1 r.visible_for %}selected="selected"
+												{% else %}{% if not m.acl.is_community_publisher %}disabled="disabled"{% endif %}
+												{% endifequal %}>Community members</option>
+											<option value="2" {% ifequal 2 r.visible_for %}selected="selected"{% endifequal %}>Group members</option>
+										</select>
+									</div>
+									
+									<div class="zp-50">
+										<label for="group_id">Belongs to the group</label>
+										<select id="group_id" name="group_id">
+											<option value="{{ r.group_id }}">{{ m.group[r.group_id].title }}</option>
+										{% for group_id in m.group.member %}
+											{% ifnotequal r.group_id group_id %}
+											<option value="{{ group_id }}">{{ m.group[group_id].title }}</option>
+											{% endifnotequal %}
+										{% endfor %}
+										</select>
+									</div>
+								</div>
+							</div>
+						</div>
+
 						<div class="item-wrapper" id="sort-category">
 							<h3 class="above-item clearfix do_blockminifier">
 								<span class="title">Category</span>
@@ -179,8 +219,8 @@
 							<div class="item clearfix">
 								<div class="admin-form form-item">
 									<p>
-										This page is able to have a date range. For example if this would have been an event or description about someone's live. 
-										<a href="javascript:void(0)" class="do_dialog {title: 'Help about dateranges.', text: 'This page is able to have a date range. For example if this would have been an event or description about someone\'s live.', width: '450px'}">Need more help?</a>
+										Used for events and other periods.
+										<a href="javascript:void(0)" class="do_dialog {title: 'Help about dateranges.', text: 'Every page can have a date range. For example if the page is an event or description of someone\'s life.', width: '450px'}">Need more help?</a>
 									</p>
 									<fieldset>
 										<div class="form-item">
@@ -196,15 +236,6 @@
 							</div>
 						</div>
 					
-						<div class="item-wrapper" id="sort-access">
-							<h3 class="above-item clearfix do_blockminifier">
-								<span class="title">Access management</span>
-								<span class="arrow">make smaller</span>
-							</h3>
-							<div class="item clearfix">
-								<button class="do_tooltip" title="I'm am the tooptip popup, I'm am the tooptip popup">Yeah, give me a tooltip</button>
-							</div>
-						</div>
 					</div>
 				</div>
 			</form>

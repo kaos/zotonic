@@ -7,8 +7,14 @@
 -module(m_group).
 -author("Marc Worrell <marc@worrell.nl").
 
+-behaviour(gen_model).
+
 %% interface functions
 -export([
+    m_find_value/3,
+    m_to_list/2,
+    m_value/2,
+
     get/2,
     insert/2,
     add_member/3,
@@ -31,11 +37,30 @@
 -include_lib("zophrenic.hrl").
 
 
+%% @doc Fetch the value for the key from a model source
+%% @spec m_find_value(Key, Source, Context) -> term()
+m_find_value(member, #m{value=undefined}, Context) ->
+    groups_member(Context);
+m_find_value(Key, #m{value=undefined}, Context) when is_integer(Key) ->
+    get(Key, Context).
+
+%% @doc Transform a m_config value to a list, used for template loops
+%% @spec m_to_list(Source, Context)
+m_to_list(_, _Context) ->
+    [].
+
+%% @doc Transform a model value so that it can be formatted or piped through filters
+%% @spec m_value(Source, Context) -> term()
+m_value(#m{value=undefined}, _Context) ->
+    undefined.
+
+
 %% @doc Get the group
 %% @spec get(Id, Context) -> PropList
 get(Id, Context) ->
     case zp_depcache:get({group, Id}) of
-        {ok, Group} -> Group;
+        {ok, Group} -> 
+            Group;
         undefined ->
             Group = zp_db:assoc_props_row("select * from \"group\" where id = $1", [Id], Context),
             zp_depcache:set({group, Id}, Group, ?WEEK),

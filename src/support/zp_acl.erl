@@ -168,12 +168,12 @@ has_role(supervisor, Context) ->
 has_role(community_publisher, Context) ->
     case Context#context.acl of
         undefined -> false;
-        Acl -> Acl#acl.is_community_publisher
+        Acl -> Acl#acl.is_community_publisher orelse Acl#acl.is_admin
     end;
 has_role(public_publisher, Context) ->
     case Context#context.acl of
         undefined -> false;
-        Acl -> Acl#acl.is_public_publisher
+        Acl -> Acl#acl.is_public_publisher orelse Acl#acl.is_admin
     end.
 
 

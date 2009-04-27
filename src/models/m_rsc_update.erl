@@ -99,6 +99,35 @@ props_filter(Id, [{is_authoritative, P}|T], Acc, Context) ->
     props_filter(Id, T, [{is_authoritative, zp_convert:to_bool(P)} | Acc], Context);
 props_filter(Id, [{is_featured, P}|T], Acc, Context) ->
     props_filter(Id, T, [{is_featured, zp_convert:to_bool(P)} | Acc], Context);
+props_filter(Id, [{visible_for, Vis}|T], Acc, Context) ->
+    VisibleFor = zp_convert:to_integer(Vis),
+    case VisibleFor of
+        N when N==0; N==1; N==2 ->
+            case N >= zp_acl:publish_level(Context) of
+                true -> 
+                    props_filter(Id, T, [{visible_for, N} | Acc], Context);
+                false ->
+                    % Do not let the user upgrade visibility beyond his permissions
+                    props_filter(Id, T, Acc, Context)
+            end;
+        _ ->
+            props_filter(Id, T, Acc, Context)
+    end;
+props_filter(Id, [{group_id, Id}|T], Acc, Context) ->
+    GroupId = zp_convert:to_integer(Id),
+    case GroupId of
+        undefined -> 
+            props_filter(Id, T, Acc, Context);
+        N when N > 0 ->
+            case zp_acl:has_role(admin, Context) of
+                true ->
+                    props_filter(Id, T, [{group_id, GroupId}|Acc], Context);
+                false ->
+                    Gs = zp_acl:groups_member(Context),
+                    true = lists:member(GroupId, Gs),
+                    props_filter(Id, T, [{group_id, GroupId}|Acc], Context)
+            end
+    end;
 props_filter(Id, [{Prop, _V}=H|T], Acc, Context) ->
     case protected(Prop) of
         true ->
