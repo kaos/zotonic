@@ -12,6 +12,7 @@
     trim/1,
     is_string/1,
     to_name/1,
+    to_slug/1,
     to_lower/1,
     to_upper/1,
     replace/3
@@ -50,6 +51,13 @@ to_upper(L) when is_list(L) ->
     string:to_upper(lists:flatten(L));
 to_upper(A) when is_atom(A) ->
     string:to_upper(atom_to_list(A)).
+
+
+%% @doc Map a string to a slug that can be used in the uri of a page. Same as a name, but then with dashes instead of underscores.
+%% @spec to_slug(String) -> String
+to_slug(Title) ->
+    Slug = to_name(Title),
+    [ case C of $_ -> $-; _ -> C end || C <- Slug ].
 
 
 %% @doc Map a string to a value that can be used as a name or slug. Maps all characters to lowercase and remove non digalpha chars
@@ -104,6 +112,8 @@ to_name(Name) ->
     to_name("€"++T, Acc) -> to_name(T, [$e|Acc]);
     to_name("ÿ"++T, Acc) -> to_name(T, [$i,$j|Acc]);
     to_name("@"++T, Acc) -> to_name(T, [$_,$t,$a,$_|Acc]);
+    to_name([_C|T], [$_|_] = Acc) ->
+        to_name(T, Acc);
     to_name([_C|T], Acc) ->
         to_name(T, [$_|Acc]).
 
