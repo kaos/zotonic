@@ -82,6 +82,7 @@
 					
 						{% sorter id="sort" handle="h3 .title" axis="y" containment="" opacity="0.9" placeholder="sortable-placeholder" %}
 						{% sortable id="sort-publish" %}
+						{% sortable id="sort-category" %}
 						{% sortable id="sort-connections" %}
 						{% sortable id="sort-date" %}
 						{% sortable id="sort-access" %}
@@ -99,6 +100,10 @@
 											<input type="checkbox" id="is_published" name="is_published" value="1" {% if r.is_published %}checked="checked"{% endif %}/> Published
 										</label>
 										{% button class="discard-resource right" text="cancel" action={redirect back} %}
+										<br/>
+										<label for="is_featured" class="left">
+											<input type="checkbox" id="is_featured" name="is_featured" value="1" {% if r.is_featured %}checked="checked"{% endif %}/> Featured
+										</label>
 									</div>
 									<hr />
 									<div class="zp-100">
@@ -114,6 +119,32 @@
 										</fieldset>
 									</div>
 								</div>
+							</div>
+						</div>
+
+						<div class="item-wrapper" id="sort-category">
+							<h3 class="above-item clearfix do_blockminifier">
+								<span class="title">Category</span>
+								<span class="arrow">make smaller</span>
+							</h3>
+							<div class="item clearfix admin-form">
+								<p>
+									The category defines what the page represents.
+									<a href="javascript:void(0)" class="do_dialog {title: 'Help about category.', text: 'Every page is categorized in exactly one category.  The category defines what the page represents. For example an event, a product or a person.  The categories are hierarchically defined. In that way you can have a vehicles category with subcategories car and bicycle.', width: '450px'}">Need more help?</a>
+								</p>
+
+								<p>
+									
+								{% with r.category_id as r_cat %}
+									<select id="category_id" name="category_id">
+									{% for cat_id, level, indent, title in m.category.all_flat %}
+										<option value="{{cat_id}}" {% ifequal r_cat cat_id %}selected="selected"{% endifequal %}>
+											{{ indent }}{{ title }}
+										</option>
+									{% endfor %}
+									</select>
+								{% endwith %}
+								</p>
 							</div>
 						</div>
 					

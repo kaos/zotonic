@@ -27,6 +27,7 @@
     id_to_name/2,
     update_parent/3,
     update_sequence/2,
+    all_flat/1,
     tree/1,
     tree/2,
     tree_depth/2,
@@ -47,6 +48,8 @@ m_find_value(tree1, #m{value=undefined}, Context) ->
     get_root(Context);
 m_find_value(tree2, #m{value=undefined}, Context) ->
     tree_depth(2, Context);
+m_find_value(all_flat, #m{value=undefined}, Context) ->
+    all_flat(Context);
 
 m_find_value(Index, #m{value=undefined} = M, Context) ->
     case name_to_id(Index, Context) of
@@ -188,7 +191,25 @@ image(Id, Context) ->
 get_path(Id, Context) ->
     Cat = get(Id, Context),
     proplists:get_value(path, Cat).
-        
+
+
+%% @doc Return a flattened representation of the complete catgory tree.  Can be used for overviews or select boxes.
+all_flat(Context) ->
+    F = fun() ->
+        CatTuples = zp_db:q("select id, lvl, name, props from category order by nr", Context)
+    end,
+    All = zp_depcache:memo(F, {category_flat}, ?WEEK, [category]),
+    [
+        {Id, Lvl, string:copies("&nbsp;&nbsp;&nbsp;&nbsp;", Lvl-1), flat_title(Name, Props)} || {Id, Lvl, Name, Props} <- All
+    ].
+    
+    flat_title(Name, Props) ->
+        case proplists:get_value(title, Props) of
+            undefined -> Name;
+            Title -> Title
+        end.
+    
+    
 
 %% @doc Return the tree of all categories
 %% @spec tree(Context) -> Tree
