@@ -123,12 +123,12 @@
 								<span class="arrow">make smaller</span>
 							</h3>
 							<div class="item clearfix">
+								<div id="unlink-message">
 								<p>
 									This page is able to connect to others. For example you can connect it to an actor or a brand. 
 									<a href="javascript:void(0)" class="do_dialog {title: 'Help about page connections.', text: 'This page is able to connect to others. For example you can connect it to an actor or a brand.', width: '450px'}">Need more help?</a>
 								</p>
-								
-								<div id="unlink-message"></div>
+								</div>
 								
 								{% for name, p in m.predicate %}
 									<h4>{{ p.title }}</h4>

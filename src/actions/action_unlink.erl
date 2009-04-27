@@ -40,7 +40,7 @@ event({postback, {unlink, SubjectId, Predicate, ObjectId, Hide}, _TriggerId, _Ta
             Context1 = zp_render:update("unlink-message", Html, Context),
             case Hide of
                 undefined -> Context1;
-                _ -> zp_render:wire({slide_fade_out, [{target, Hide}]}, Context1)
+                _ -> zp_render:wire({fade_out, [{target, Hide}]}, Context1)
             end;
         false ->
             zp_render:wire({growl, [{text, "Sorry, you have no permission to edit this page."},{type, "error"}]}, Context)

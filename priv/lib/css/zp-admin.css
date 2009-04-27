@@ -426,7 +426,7 @@ button.save {
 
 .rsc-edge {
 	line-height: 11px;
-	margin: 6px 6px 6px 0;
+	margin: 0 6px 6px 0;
 	float: left;
 	-moz-border-radius: 5px;
 	-webkit-border-radius: 5px;
@@ -470,6 +470,9 @@ button.save {
 	color: #666;
 }
 
+#unlink-message {
+	height: 60px;
+}
 
 /* tooltip
 ---------------------------------------------------------- */
