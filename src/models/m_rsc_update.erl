@@ -3,6 +3,7 @@
 %% @date 2009-04-24
 %%
 %% @doc Update routines for resources.  For use by the m_rsc module.
+%% @todo Filter fields on html, only allow html in the body and intro fields.  Escape all other text fields.
 
 -module(m_rsc_update).
 -author("Marc Worrell <marc@worrell.nl").
@@ -46,13 +47,15 @@ update(Id, Props, Context) when is_integer(Id) ->
             TextProps = recombine_dates(Props),
             AtomProps = [ {zp_convert:to_atom(P), V} || {P, V} <- TextProps ],
             FilteredProps = props_filter(Id, AtomProps, [], Context),
-            case preflight_check(Id, FilteredProps, Context) of
+            FilledProps = props_defaults(FilteredProps, Context),
+            SafeProps = zp_html:escape_props(FilledProps),
+            case preflight_check(Id, SafeProps, Context) of
                 ok ->
                     UpdateProps = [
                         {version, zp_db:q1("select version+1 from rsc where id = $1", [Id], Context)},
                         {modifier_id, zp_acl:user(Context)},
                         {modified, erlang:localtime()}
-                        | FilteredProps
+                        | SafeProps
                     ],
                     zp_db:update(rsc, Id, UpdateProps, Context),
                     zp_depcache:flush(#rsc{id=Id}),
@@ -92,7 +95,9 @@ props_filter(Id, [{name, <<>>}|T], Acc, Context) ->
 props_filter(Id, [{name, ""}|T], Acc, Context) ->
     props_filter(Id, T, [{name, undefined} | Acc], Context);
 props_filter(Id, [{name, Name}|T], Acc, Context) ->
-    props_filter(Id, T, [{name, zp_utils:to_name(Name)} | Acc], Context);
+    props_filter(Id, T, [{name, zp_string:to_name(Name)} | Acc], Context);
+props_filter(Id, [{slug, Slug}|T], Acc, Context) ->
+    props_filter(Id, T, [{slug, zp_string:to_slug(Slug)} | Acc], Context);
 props_filter(Id, [{is_published, P}|T], Acc, Context) ->
     props_filter(Id, T, [{is_published, zp_convert:to_bool(P)} | Acc], Context);
 props_filter(Id, [{is_authoritative, P}|T], Acc, Context) ->
@@ -134,6 +139,24 @@ props_filter(Id, [{Prop, _V}=H|T], Acc, Context) ->
             props_filter(Id, T, Acc, Context);
         false ->
             props_filter(Id, T, [H|Acc], Context)
+    end.
+
+
+%% @doc Fill in some defaults for empty props.
+%% @spec props_defaults(Props1, Context) -> Props2
+props_defaults(Props, _Context) ->
+    case proplists:get_value(slug, Props) of
+        L when L == <<>>; L == [] ->
+            case proplists:get_value(title, Props) of
+                undefined ->
+                    Props;
+                Title ->
+                    Text = ?TR(Title, en),
+                    Slug = zp_string:to_slug(Text),
+                    lists:keystore(slug, 1, Props, {slug, Slug})
+            end;
+        _ -> 
+            Props
     end.
 
 

@@ -32,12 +32,12 @@
 									<input type="hidden" name="id" value="{{ id }}" />
 									<div class="form-item clearfix">
 										<label for="field-title">Title</label>
-										<input type="text" id="field-title" name="title" value="{{ r.title|escape }}" />
+										<input type="text" id="field-title" name="title" value="{{ r.title }}" />
 									</div>
 
 									<div class="form-item clearfix">
 										<label for="field-intro">Intro</label>
-										<textarea rows="2" cols="10" id="field-intro" name="intro" class="intro">{{ r.intro|escape }}</textarea>
+										<textarea rows="2" cols="10" id="field-intro" name="intro" class="intro">{{ r.intro }}</textarea>
 									</div>
 
 									<div class="form-item clearfix">
@@ -47,29 +47,48 @@
 								</fieldset>
 							</div>
 						</div>
+
+						<div class="item-wrapper">
+							<h3 class="above-item">Media</h3>
+							
+							<div class="item clearfix">
+							{% for media in r.media %}
+								<div class="edit_media">
+									{% image media.filename width=200 height=200 crop %}<br/>
+									{{media.filename}} ({{ media.width }}x{{ media.height }})
+								</div>
+							{% endfor %}
+							</div>
+						</div>
 					
 						<div class="item-wrapper">
-							<h3 class="above-item">Seo Content</h3>
+							<h3 class="above-item">Seo content</h3>
 							<div class="item clearfix">
 								<fieldset class="admin-form">
 									<div class="form-item clearfix">
 										<label for="no-google">
-											<input id="no-google" type="checkbox" name="seo_noindex" {% if r.seo_noindex %}checked="checked"{% endif %} value="1" />Ask google not to index this page
+											<input id="no-google" type="checkbox" name="seo_noindex" {% if r.seo_noindex %}checked="checked"{% endif %} value="1" />Ask google to not index this page
 										</label>
 									</div>
+
 									<div class="form-item clearfix">
-										<label for="title">Page title</label>
-										<input type="text" id="title" name="seo_title" class="zp-100" value="{{ r.seo_title|escape }}"/>
+										<label for="seo_title">Page title</label>
+										<input type="text" id="seo_title" name="seo_title" class="zp-100" value="{{ r.seo_title }}"/>
 									</div>
 
 									<div class="form-item clearfix">
-										<label for="keywords">Page keywords</label>
-										<input type="text" id="keywords" name="seo_keywords" class="zp-100" value="{{ r.seo_keywords|escape }}"/>
+										<label for="title">Page slug</label>
+										<input type="text" id="slug" name="slug" class="zp-100" value="{{ r.slug }}"/>
 									</div>
 
 									<div class="form-item clearfix">
-										<label for="desc">Page description</label>
-										<textarea rows="2" cols="10" id="desc" name="seo_desc" class="seo-desc zp-100">{{ r.seo_desc|escape }}</textarea>
+										<label for="seo_keywords">Page keywords</label>
+										<input type="text" id="seo_keywords" name="seo_keywords" class="zp-100" value="{{ r.seo_keywords }}"/>
+									</div>
+
+									<div class="form-item clearfix">
+										<label for="seo_desc">Page description</label>
+										<textarea rows="2" cols="10" id="seo_desc" name="seo_desc" class="seo-desc zp-100">{{ r.seo_desc }}</textarea>
 									</div>
 								</fieldset>
 							</div>
@@ -213,7 +232,7 @@
 					
 						<div class="item-wrapper" id="sort-date">
 							<h3 class="above-item clearfix do_blockminifier">
-								<span class="title">Date Range</span>
+								<span class="title">Date range</span>
 								<span class="arrow">make smaller</span>
 							</h3>
 							<div class="item clearfix">
