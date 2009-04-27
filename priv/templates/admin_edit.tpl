@@ -44,6 +44,10 @@
 										<label for="field-content">Body</label>
 										<textarea rows="10" cols="10" id="field-content" name="body" class="body">{{ r.body|escape }}</textarea>
 									</div>
+									<div class="form-item clearfix">
+										{% button class="save-resource right" text="save this page" %}
+										{% button class="discard-resource right" text="cancel" action={redirect back} %}
+									</div>
 								</fieldset>
 							</div>
 						</div>
