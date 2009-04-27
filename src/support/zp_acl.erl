@@ -18,6 +18,7 @@
     rsc_ingroup/2,
     media_visible/2,
     media_editable/2,
+    group_editable/2,
     sudo/2,
     logon/2,
     logoff/1,
@@ -83,6 +84,20 @@ media_editable(_Id, #context{user_id=undefined}) ->
     false;
 media_editable(Id, Context) ->
     acl_editable(m_media:get_acl_props(Id, Context), Context).
+
+
+%% @doc Check if the user is allowed to edit content in the group
+%% @spec group_editable(GroupId, Context) -> bool()
+group_editable(_GroupId,  #context{user_id=undefined}) ->
+    false;
+group_editable(GroupId, Context) ->
+    case has_role(admin, Context) of
+        true ->
+            true;
+        false ->
+            Gs = zp_acl:groups_member(Context),
+            lists:member(GroupId, Gs)
+    end.
 
 
 %% @doc Call a function with admin privileges.
