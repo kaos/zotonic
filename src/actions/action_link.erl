@@ -29,6 +29,7 @@ render_action(TriggerId, TargetId, Args, Context) ->
 event({postback, {link, SubjectId, Predicate, ObjectId}, _TriggerId, _TargetId}, Context) ->
     case zp_acl:rsc_editable(SubjectId, Context) of
         true ->
+            {ok, _EdgeId} = m_edge:insert(SubjectId, Predicate, ObjectId, Context),
             Vars = [
                 {subject_id, SubjectId},
                 {predicate, Predicate},

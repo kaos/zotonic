@@ -30,6 +30,7 @@ render_action(TriggerId, TargetId, Args, Context) ->
 event({postback, {unlink, SubjectId, Predicate, ObjectId, Hide}, _TriggerId, _TargetId}, Context) ->
     case zp_acl:rsc_editable(SubjectId, Context) of
         true ->
+            ok = m_edge:delete(SubjectId, Predicate, ObjectId, Context),
             Vars = [
                 {subject_id, SubjectId},
                 {predicate, Predicate},

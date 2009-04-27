@@ -10,11 +10,25 @@ var	zp_comet_is_running      = false;
 var zp_is_in_postback        = false;
 var zp_postbacks             = [];
 var zp_default_form_postback = false;
+var zp_input_updater         = false;
 
-// We also need to set the domain of the session cookie to 'test'
+// We need to set the domain of the session cookie to 'test'
 // Then we can try to make an xhr request to 0.test, 1.test etc.
 //document.domain = 'test';
 //var zp_xhr_domain = 'test';
+
+
+function zp_dialog_open(title, text)
+{
+    zp_dialog_close();
+    $.dialogAdd({title: title, text: text, width: "450px"});
+}
+
+function zp_dialog_close()
+{
+    $('.dialog-close').click();
+}
+
 
 /*** Growl messages ***/
 
@@ -253,6 +267,29 @@ function zp_sorter(sortBlock, sortOptions, sortPostbackInfo)
 	};
 	
 	$(sortBlock).sortable(sortOptions);
+}
+
+
+/*** typeselect input field ***/
+
+function zp_typeselect(ElementId, postbackInfo)
+{
+	if (zp_input_updater)
+	{
+		clearTimeout(zp_input_updater);
+		zp_input_updater = false;
+	}
+	
+	zp_input_updater = setTimeout(function()
+	{
+        var obj = $('#'+ElementId);
+
+		if(obj.val().length >= 2)
+		{
+			obj.addClass('loading');
+			zp_queue_postback(ElementId, postbackInfo)
+		}
+	}, 400);
 }
 
 /*** Form element validations ***/

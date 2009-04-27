@@ -128,8 +128,6 @@
 									<a href="javascript:void(0)" class="do_dialog {title: 'Help about page connections.', text: 'This page is able to connect to others. For example you can connect it to an actor or a brand.', width: '450px'}">Need more help?</a>
 								</p>
 								
-								<p><input type="text" class="do_autocomplete"></p>
-
 								<div id="unlink-message"></div>
 								
 								{% for name, p in m.predicate %}
@@ -140,7 +138,7 @@
 											{% include "_rsc_edge.tpl" subject_id=id predicate=name object_id=o_id %}
 										{% endfor %}
 										</div>
-										<span><a href="javascript:void(0);" class="link-add do_dialog {title:'Add a connection: {{ p.title }}', text:'Add a connection.'}">Add nother connection</a></span>
+										{% link_add subject_id=id predicate=name %}
 									</div>
 									<hr />
 								{% endfor %}
