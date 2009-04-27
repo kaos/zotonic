@@ -23,14 +23,17 @@ render_tag(TagName, Props) ->
 
 
 %% @doc Render a tag into the context
-render_tag("div", Props, Context) ->
+render_tag("div", Props, #context{} = Context) ->
     render_tag(<<"div">>, Props, Context);
-render_tag(<<"div">>, Props, Context) ->
+render_tag(<<"div">>, Props, #context{} = Context) ->
 	Render   = [<<"<div ">>, write_props(Props), <<"></div>">> ],
 	zp_render:render(Render, Context);
-render_tag(TagName, Props, Context) ->
+render_tag(TagName, Props, #context{} = Context) ->
 	Render   = [$<, TagName, write_props(Props), $/, $> ],
-	zp_render:render(Render, Context).
+	zp_render:render(Render, Context);
+
+render_tag(TagName, Props, Content) ->
+	[ $<, TagName, write_props(Props), $>, Content, $<, $/, TagName, $> ].
 	
 
 %%% Tags with child content %%%
