@@ -45,8 +45,8 @@
 										<textarea rows="10" cols="10" id="field-content" name="body" class="body">{{ r.body|escape }}</textarea>
 									</div>
 									<div class="form-item clearfix">
-										{% button class="save-resource right" text="save this page" %}
-										{% button class="discard-resource right" text="cancel" action={redirect back} %}
+										{% button class="save-resource right" text="save this page" title="test" %}
+										{% button class="discard-resource right" text="discard" action={redirect back} %}
 									</div>
 								</fieldset>
 							</div>
@@ -93,6 +93,10 @@
 										<label for="seo_desc">Page description</label>
 										<textarea rows="2" cols="10" id="seo_desc" name="seo_desc" class="seo-desc zp-100">{{ r.seo_desc }}</textarea>
 									</div>
+									<div class="form-item clearfix">
+										{% button class="save-resource right" text="save this page" %}
+										{% button class="discard-resource right" text="discard" action={redirect back} %}
+									</div>
 								</fieldset>
 							</div>
 						</div>
@@ -117,7 +121,7 @@
 							<div class="item clearfix">
 								<div class="admin-form ">
 									<div class="form-item clearfix">
-										{% button class="save-resource save" text="save" %}
+										{% button class="save-resource do_tooltip" text="save" title="Save this page and all the connections it has." %}
 										<label for="is_published" class="left">
 											<input type="checkbox" id="is_published" name="is_published" value="1" {% if r.is_published %}checked="checked"{% endif %}/> Published
 										</label>
