@@ -20,7 +20,7 @@ var zp_input_updater         = false;
 
 function zp_dialog_open(title, text)
 {
-    zp_dialog_close();
+    $('.dialog').remove();
     $.dialogAdd({title: title, text: text, width: "450px"});
 }
 
