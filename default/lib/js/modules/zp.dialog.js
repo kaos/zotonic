@@ -58,7 +58,7 @@
 										.fadeIn(300)
 										.css({left: leftPos, top: topPos, width: options.width})
 										.draggable({ handle: dialogTop, opacity: 0.90, zIndex: 2700, iframeFix: true, scroll: true});
-				
+								
 				$(document).keypress(function(e)
 				{
 					if($.browser.msie) 	{ var key = e.which }

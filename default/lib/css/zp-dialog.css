@@ -144,3 +144,15 @@ h5.dialog-title {
 	position: absolute;
 	z-index: 99999;
 }
+
+.dialog input, .dialog textarea {
+	background: #333;
+	color: #eee;
+	border-color: #888;
+	padding: 4px;
+	width: 300px;
+}
+
+	.dialog input:focus, .dialog textarea :focus {
+		background: #444;
+	}

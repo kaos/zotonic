@@ -14,7 +14,7 @@ html, body {
 
 body {
 	background: #f1f1f1 url(../images/admin_bg.jpg) repeat-x top;
-	font: 11px/18px "Lucida Grande", "Lucida Sans", Helvetica, sans-serif;
+	font: 11px/18px "Lucida Grande", Helvetica, sans-serif;
 	color: #333;
 }
 
@@ -344,7 +344,7 @@ button.save {
 	color: #666;
 	width: 724px;
 	padding: 5px;
-	font-family: "Lucida Sans", Helvetica, sans-serif;
+	font-family: "Lucida Grande", Helvetica, sans-serif;
 }
 
 .admin-form textarea.seo-desc {
@@ -374,20 +374,46 @@ button.save {
 /* autocompleter
 ---------------------------------------------------------- */
 
+.autocomplete-wrapper {
+	position: relative;
+}
+
 .suggestions-list {
-	background: #f9f9f9;
-	border: solid;
-	border-width: 1px;
-	border-color: #eee #888 #888 #888;
+	background: #888;
+	width: 310px;
+	-moz-border-radius-bottomleft: 5px;
+	-moz-border-radius-bottomright: 5px;
+	-webkit-border-bottom-left-radius: 5px;
+	-webkit-border-bottom-right-radius: 5px;
+	top: 23px;
+	left: 0;
+	position: absolute;
+	filter: alpha(opacity=95);
+	-moz-opacity: .95;
+	opacity: .95;
+	z-index: 999999;
 }
 
 	.suggestions-list li.suggestions-result {
-		padding: 2px 4px;
-		cursor: pointer;
 	}
-	
-		.suggestions-list li.suggestions-result.hovering {
-			background: #eee;
+
+		.suggestions-list li.suggestions-result a {
+			display: block;
+			text-decoration: none;
+			color: #eee;
+			padding: 4px;
+		}
+		
+			.suggestions-list li.suggestions-result a:hover {
+				background: #eee;
+				color: #444;
+			}
+		
+		.suggestions-list li.suggestions-result a:last-child {
+			-moz-border-radius-bottomleft: 5px;
+			-moz-border-radius-bottomright: 5px;
+			-webkit-border-bottom-left-radius: 5px;
+			-webkit-border-bottom-right-radius: 5px;
 		}
 
 
