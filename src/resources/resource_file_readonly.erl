@@ -144,8 +144,8 @@ expires(ReqData, State) ->
 
 provide_content(ReqData, State) ->
     RD1 = case State#state.content_disposition of
-        inline ->     wrq:add_response_header("Content-Disposition", "inline", ReqData);
-        attachment -> wrq:add_response_header("Content-Disposition", "attachment", ReqData);
+        inline ->     wrq:set_resp_header("Content-Disposition", "inline", ReqData);
+        attachment -> wrq:set_resp_header("Content-Disposition", "attachment", ReqData);
         undefined ->  ReqData
     end,
     {Content, State1} = case State#state.body of
@@ -273,12 +273,10 @@ encode_data(Data) when is_binary(Data) ->
     <<Size:32, Data/binary, Gzip/binary>>.
 
 decode_data(identity, Data) ->
-    <<Size:32, Rest/binary>> = Data,
+    <<Size:32, _Rest/binary>> = Data,
     <<Size:32, Identity:Size/binary, _Gzip/binary>> = Data,
     Identity;
 decode_data(gzip, Data) ->
-    <<Size:32, Rest/binary>> = Data,
+    <<Size:32, _Rest/binary>> = Data,
     <<Size:32, _Identity:Size/binary, Gzip/binary>> = Data,
     Gzip.
-        
-
