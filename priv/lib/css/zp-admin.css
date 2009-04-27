@@ -333,6 +333,15 @@ button.save {
 	font-weight: normal;
 }
 
+.admin-form label.left {
+	float: left;
+	margin: 0 6px 0 0;
+}
+
+	.admin-form label.left input {
+		margin: 3px 0 0 0;
+	}
+
 .admin-form textarea,
 .admin-form input[type="text"] { 
 	padding: 3px 3px 2px;

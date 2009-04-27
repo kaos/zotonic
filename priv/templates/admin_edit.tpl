@@ -96,14 +96,13 @@
 								<div class="admin-form ">
 									<div class="form-item clearfix">
 										{% button class="save-resource save" text="save" %}
-										<label for="is_published" class="left" style="float: left;">
+										<label for="is_published" class="left">
 											<input type="checkbox" id="is_published" name="is_published" value="1" {% if r.is_published %}checked="checked"{% endif %}/> Published
 										</label>
-										{% button class="discard-resource right" text="cancel" action={redirect back} %}
-										<br/>
 										<label for="is_featured" class="left">
 											<input type="checkbox" id="is_featured" name="is_featured" value="1" {% if r.is_featured %}checked="checked"{% endif %}/> Featured
 										</label>
+										{% button class="discard-resource right" text="cancel" action={redirect back} %}
 									</div>
 									<hr />
 									<div class="zp-100">
@@ -128,22 +127,18 @@
 								<span class="arrow">make smaller</span>
 							</h3>
 							<div class="item clearfix admin-form">
-								<p>
-									The category defines what the page represents.
-									<a href="javascript:void(0)" class="do_dialog {title: 'Help about category.', text: 'Every page is categorized in exactly one category.  The category defines what the page represents. For example an event, a product or a person.  The categories are hierarchically defined. In that way you can have a vehicles category with subcategories car and bicycle.', width: '450px'}">Need more help?</a>
-								</p>
+								<p>The category defines what the page represents. <a href="javascript:void(0)" class="do_dialog {title: 'Help about category.', text: 'Every page is categorized in exactly one category.  The category defines what the page represents. For example an event, a product or a person.  The categories are hierarchically defined. In that way you can have a vehicles category with subcategories car and bicycle.', width: '450px'}">Need more help?</a></p>
 
 								<p>
-									
-								{% with r.category_id as r_cat %}
-									<select id="category_id" name="category_id">
-									{% for cat_id, level, indent, title in m.category.all_flat %}
-										<option value="{{cat_id}}" {% ifequal r_cat cat_id %}selected="selected"{% endifequal %}>
-											{{ indent }}{{ title }}
-										</option>
-									{% endfor %}
-									</select>
-								{% endwith %}
+									{% with r.category_id as r_cat %}
+										<select id="category_id" name="category_id">
+										{% for cat_id, level, indent, title in m.category.all_flat %}
+											<option value="{{cat_id}}" {% ifequal r_cat cat_id %}selected="selected"{% endifequal %}>
+												{{ indent }}{{ title }}
+											</option>
+										{% endfor %}
+										</select>
+									{% endwith %}
 								</p>
 							</div>
 						</div>
