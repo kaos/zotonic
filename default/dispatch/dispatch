@@ -4,6 +4,8 @@
 	{comet,    ["comet"],     resource_comet, []},
 	{postback, ["postback"],  resource_postback, []},
 
+	{id,	   ["id", id],	  resource_id, []},
+
 	{lib,      ["lib",'*'],   resource_file_readonly, [ 
 											{root,["priv/lib", "default/lib"]}, 
 											{use_cache, false}

@@ -33,7 +33,8 @@
 	op/2, o/2, o/3, o/4,
 	sp/2, s/2, s/3, s/4,
 	media/2, media/3,
-	page_url/2
+	page_url/2,
+	rid/2
 ]).
 
 -include_lib("zophrenic.hrl").
@@ -135,7 +136,11 @@ rsc(Id, _Context) -> #rsc{id=Id}.
 
 exists([C|_] = Name, Context) when is_list(Name) and is_integer(C) ->
     case rid_name(Name, Context) of
-        undefined -> false;
+        undefined -> 
+            case only_digits(Name) of
+                true -> exists(list_to_integer(Name), Context);
+                false -> false
+            end;
         _ -> true
     end;
 exists(Name, Context) when is_binary(Name) ->
@@ -350,7 +355,7 @@ rid(#rsc_list{list=[R|_]}, _Context) ->
 	R;
 rid(#rsc_list{list=[]}, _Context) ->
 	undefined;
-rid([C|_] = UniqueName, Context) when is_list(UniqueName) and is_integer(C) ->
+rid([C|_] = UniqueName, Context) when is_list(UniqueName) andalso is_integer(C) ->
     case only_digits(UniqueName) of
         true -> #rsc{id=list_to_integer(UniqueName)};
         false -> rid_name(UniqueName, Context)

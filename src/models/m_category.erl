@@ -190,7 +190,10 @@ image(Id, Context) ->
 %% @spec path(Id, Context) -> [CatId]
 get_path(Id, Context) ->
     Cat = get(Id, Context),
-    proplists:get_value(path, Cat).
+    case proplists:get_value(path, Cat) of
+        <<>> -> [];
+        Path -> Path
+    end.
 
 
 %% @doc Return a flattened representation of the complete catgory tree.  Can be used for overviews or select boxes.
