@@ -380,7 +380,21 @@ button.save {
 }
 
 
-/* autocompleter
+/* Edit page Media
+---------------------------------------------------------- */
+
+.edit_media {
+	margin: 0 6px 0 0;
+}
+
+.edit_media img {
+	border: 4px solid #ccc;
+	-moz-border-radius: 3px;
+	-webkit-border-radius: 3px;
+}
+
+
+/* Modules - Autocompleter
 ---------------------------------------------------------- */
 
 .autocomplete-wrapper {
@@ -403,30 +417,27 @@ button.save {
 	z-index: 999999;
 }
 
-	.suggestions-list li.suggestions-result {
+	.suggestions-list li.suggestions-result a {
+		display: block;
+		text-decoration: none;
+		color: #eee;
+		padding: 4px;
+	}
+	
+		.suggestions-list li.suggestions-result a:hover {
+			background: #eee;
+			color: #444;
+		}
+	
+	.suggestions-list li.suggestions-result a:last-child {
+		-moz-border-radius-bottomleft: 5px;
+		-moz-border-radius-bottomright: 5px;
+		-webkit-border-bottom-left-radius: 5px;
+		-webkit-border-bottom-right-radius: 5px;
 	}
 
-		.suggestions-list li.suggestions-result a {
-			display: block;
-			text-decoration: none;
-			color: #eee;
-			padding: 4px;
-		}
-		
-			.suggestions-list li.suggestions-result a:hover {
-				background: #eee;
-				color: #444;
-			}
-		
-		.suggestions-list li.suggestions-result a:last-child {
-			-moz-border-radius-bottomleft: 5px;
-			-moz-border-radius-bottomright: 5px;
-			-webkit-border-bottom-left-radius: 5px;
-			-webkit-border-bottom-right-radius: 5px;
-		}
 
-
-/* unlinker
+/* Modules - Unlinker
 ---------------------------------------------------------- */
 
 .unlink-wrapper {
@@ -483,7 +494,7 @@ button.save {
 	height: 60px;
 }
 
-/* tooltip
+/* Modules - Tooltip
 ---------------------------------------------------------- */
 
 .tooltip {
@@ -502,7 +513,7 @@ button.save {
 }
 
 
-/* sortable
+/* Modules - Sortable
 ---------------------------------------------------------- */
 
 .sortable-placeholder {
@@ -512,4 +523,36 @@ button.save {
 	height: 20px;
 	margin: 0 0 18px 0;
 	border: 2px dashed #e0e0e0;
+}
+
+
+/* Modules - image viewer
+---------------------------------------------------------- */
+
+.image-magnifier {
+	background: #f2f2f2 url(/lib/images/mf.gif) 50% 50% no-repeat;
+	font-size: 12px;
+	padding: 0;
+	position: absolute;
+	z-index: 2;
+	bottom: 0;
+	display: none;
+	height: 20px;
+	cursor: pointer;
+	width: 20px;
+	filter: alpha(opacity=75);
+	-moz-opacity: .75;
+	opacity: .75;
+}
+
+.popup-overlay {
+	position: absolute;
+	right: 0;
+	top: 0;
+	width: 100%;
+	background: #eee;
+}
+
+.loaded-bigImage {
+	border: 3px solid #ccc;
 }

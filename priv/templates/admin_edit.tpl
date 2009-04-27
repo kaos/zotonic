@@ -50,12 +50,11 @@
 
 						<div class="item-wrapper">
 							<h3 class="above-item">Media</h3>
-							
 							<div class="item clearfix">
 							{% for media in r.media %}
-								<div class="edit_media">
-									{% image media.filename width=200 height=200 crop %}<br/>
-									{{media.filename}} ({{ media.width }}x{{ media.height }})
+								<div class="edit_media left cleafix">
+									{% image media.filename width=200 height=200 crop class="do_quickview" %}
+									<p>{{media.filename}} ({{ media.width }}x{{ media.height }})</p>
 								</div>
 							{% endfor %}
 							</div>
@@ -146,11 +145,8 @@
 								<span class="arrow">make smaller</span>
 							</h3>
 							<div class="item clearfix">
-								<div class="admin-form form-item">
-									{#
-									<button class="do_tooltip" title="I'm am the tooptip popup, I'm am the tooptip popup">Yeah, give me a tooltip</button>
-									#}
-									<div class="zp-50">
+								<div class="admin-form clearfix">
+									<div class="form-item zp-50">
 										<label for="visible_for">Visible for</label>
 										<select id="visible_for" name="visible_for">
 											<option value="0" 
@@ -165,7 +161,7 @@
 										</select>
 									</div>
 									
-									<div class="zp-50">
+									<div class="form-item  zp-50">
 										<label for="group_id">Belongs to the group</label>
 										<select id="group_id" name="group_id">
 											<option value="{{ r.group_id }}">{{ m.group[r.group_id].title }}</option>

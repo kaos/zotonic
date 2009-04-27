@@ -145,13 +145,25 @@ h5.dialog-title {
 	z-index: 99999;
 }
 
-.dialog input, .dialog textarea {
+.dialog input, .dialog textarea, .dialog select {
 	background: #333;
 	color: #eee;
 	border-color: #666;
 	padding: 4px;
 	width: 300px;
 }
+
+	.dialog select {
+		width: 310px;
+		-moz-border-radius: 3px;
+		-webkit-border-radius: 3px;
+	}
+	
+		.dialog option {
+			background: #333;
+			color: #eee;
+			border: none;
+		}
 
 	.dialog input:focus, .dialog textarea:focus {
 		background: #444;
@@ -174,3 +186,7 @@ h5.dialog-title {
 		background: #444;
 		border-color: #111;
 	}
+	
+.dialog label {
+	color: #eee;
+}
