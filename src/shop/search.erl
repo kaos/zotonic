@@ -64,6 +64,22 @@ search({latest, [{cat, Cat}]}, _OffsetLimit, Context) ->
         tables=[{rsc,"r"}]
     };
 
+search({autocomplete, [{text,QueryText}]}, _OffsetLimit, Context) ->
+    TsQuery = to_tsquery(QueryText, Context),
+    case TsQuery of
+        A when A == undefined orelse A == [] ->
+            #search_result{};
+        _ ->
+            #search_sql{
+                select="r.id, ts_rank_cd(pivot_tsv, query, 32) AS rank",
+                from="rsc r, to_tsquery($2, $1) query",
+                where=" query @@ pivot_tsv",
+                order="rank desc",
+                args=[TsQuery, zp_pivot_rsc:pg_lang(Context#context.language)],
+                tables=[{rsc,"r"}]
+            }
+    end;
+
 search({fulltext, [{cat,Cat},{text,QueryText}]}, OffsetLimit, Context) when Cat == undefined orelse Cat == [] orelse Cat == <<>> ->
     search({fulltext, [{text,QueryText}]}, OffsetLimit, Context);
 
@@ -168,4 +184,32 @@ search({media_category_image, [{cat,Cat}]}, _OffsetLimit, Context) ->
         tables=[{rsc,"r"}, {media, "m"}],
         args=[CatId]
     }.
+
+
+
+
+%% @doc Expand a search string like "hello wor" to "'hello' & 'wor:*'"
+to_tsquery(undefined, _Context) ->
+    [];
+to_tsquery(Text, Context) when is_binary(Text) ->
+    to_tsquery(binary_to_list(Text), Context);
+to_tsquery(Text, Context) ->
+    [{TsQuery, Version}] = zp_db:q("
+        select plainto_tsquery($2, $1) , version()
+    ", [Text, zp_pivot_rsc:pg_lang(zp_context:language(Context))], Context),
+    % Version is something like "PostgreSQL 8.3.5 on i386-apple-darwin8.11.1, compiled by ..."
+    case TsQuery of
+        [] -> 
+            [];
+        _ ->
+            case Version < <<"PostgreSQL 8.4">> of
+                true ->
+                    TsQuery;
+                false ->
+                    % Replace the last ' with :*' 
+                    N = length(TsQuery),
+                    {A, "'"} = lists:split(N-1, TsQuery),
+                    A ++ ":*'"
+            end
+    end.
 
