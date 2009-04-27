@@ -74,6 +74,32 @@ hr {
 		padding: 9px 9px 0;
 	}
 
+#sort-publish .item {
+	background: #0C8DB2;
+	border-color: #0C8DB2;
+	color: #fff;
+}
+
+	#sort-publish .item label {
+		color: #fff;
+	}
+
+	#sort-publish button {
+		background: #fff;
+		color: #0C8DB2;
+		border-color: #0C8DB2;
+		font-weight: bold;
+	}
+
+		#sort-publish button:hover {
+			background: #0C8DB2;
+			color: #fff;
+			border-color: #fff;
+		}
+	
+	#sort-publish h3 {
+		border-bottom: 1px solid #ddd;
+	}
 
 .short-list li {
 	display: block;
@@ -164,7 +190,6 @@ h3.above-item {
 	h3.above-item span.title {
 		display: block;
 		float: left;
-		cursor: move;
 	}
 
 	h3.above-item span.arrow {
@@ -178,6 +203,10 @@ h3.above-item {
 		width: 22px;
 		cursor: pointer;
 		display: none;
+	}
+	
+	h3.do_blockminifier {
+		cursor: move;
 	}
 	
 	h3.do_blockminifier:hover span.arrow {
@@ -280,18 +309,6 @@ a.button {
 	-moz-border-radius: 5px;
 	-webkit-border-radius: 5px;
 }
-
-button.save {
-	background: #0C8DB2;
-	color: #fff;
-	border-color: #0C8DB2;
-}
-
-	button.save:hover {
-		background: #fff;
-		color: #0C8DB2;
-		border-color: #999;
-	}
 
 .form-item button {
 	margin: 0 3px 0 0;

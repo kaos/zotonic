@@ -98,7 +98,7 @@
 				<div class="zp-33" id="sidebar">
 					<div class="padding" id="sort">
 					
-						{% sorter id="sort" handle="h3 .title" axis="y" containment="" opacity="0.9" placeholder="sortable-placeholder" %}
+						{% sorter id="sort" handle="h3" axis="y" containment="" opacity="0.9" placeholder="sortable-placeholder" %}
 						{% sortable id="sort-publish" %}
 						{% sortable id="sort-category" %}
 						{% sortable id="sort-connections" %}
@@ -106,7 +106,7 @@
 						{% sortable id="sort-access" %}
 					
 						<div class="item-wrapper" id="sort-publish">
-							<h3 class="above-item clearfix">
+							<h3 class="above-item clearfix do_blockminifier">
 								<span class="title">Publish this page</span>
 								<span class="arrow">make smaller</span>
 							</h3>
@@ -122,7 +122,7 @@
 										</label>
 										{% button class="discard-resource right" text="cancel" action={redirect back} %}
 									</div>
-									<hr />
+									{#<hr />
 									<div class="zp-100">
 										<fieldset>
 											<div class="form-item">
@@ -134,7 +134,7 @@
 												{% include "_edit_date.tpl" date=r.publication_end name="publication_end" is_end=1 %}
 											</div>
 										</fieldset>
-									</div>
+									</div>#}
 								</div>
 							</div>
 						</div>
@@ -183,7 +183,6 @@
 							</h3>
 							<div class="item clearfix admin-form">
 								<p>The category defines what the page represents. <a href="javascript:void(0)" class="do_dialog {title: 'Help about category.', text: 'Every page is categorized in exactly one category.  The category defines what the page represents. For example an event, a product or a person.  The categories are hierarchically defined. In that way you can have a vehicles category with subcategories car and bicycle.', width: '450px'}">Need more help?</a></p>
-
 								<p>
 									{% with r.category_id as r_cat %}
 										<select id="category_id" name="category_id">
