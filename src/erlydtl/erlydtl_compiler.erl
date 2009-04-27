@@ -473,8 +473,8 @@ value_ast(ValueToken, AsString, Context, TreeWalker) ->
                 true  -> string_ast(Number, TreeWalker);
                 false -> {{erl_syntax:integer(list_to_integer(Number)), #ast_info{}}, TreeWalker}
             end;
-        {'auto_id', {identifier, _, Auto}} ->
-            auto_id_ast(Auto, Context, TreeWalker);
+        {'auto_id', Name} ->
+            auto_id_ast(Name, Context, TreeWalker);
         {'apply_filter', Variable, Filter} ->
             filter_ast(Variable, Filter, Context, TreeWalker);
         {'attribute', _} = Variable ->
@@ -835,7 +835,7 @@ cycle_ast(Names, Context, TreeWalker) ->
                         ({variable, _}=Var, {Acc,TW}) ->
                             {V, _} = resolve_variable_ast(Var, Context),
                             {[ V | Acc ], TW};
-                        ({auto_id,{identifier,_,Name}}, {Acc,TW}) ->
+                        ({auto_id, Name}, {Acc,TW}) ->
                             {{V, _}, TW1} = auto_id_ast(Name, Context, TW),
                             {[ V |Acc ], TW1};
                         (_, {Acc,TW}) ->
@@ -1165,10 +1165,27 @@ scomp_ast_map_args(Args, Context, TreeWalker) ->
 
 
 %%  lists:append(AutoId,"-Name")
-auto_id_ast(Name, Context, TreeWalker) ->
+auto_id_ast({identifier, _, Name}, Context, TreeWalker) ->
     {{   erl_syntax:application(
                     erl_syntax:atom(lists), erl_syntax:atom(append),
                     [resolve_scoped_variable_ast("$autoid", Context), erl_syntax:string([$-|Name])]),
+        #ast_info{}
+    }, TreeWalker#treewalker{has_auto_id=true}};
+
+auto_id_ast({{identifier, _, Name}, {identifier, _, _} = Var}, Context, TreeWalker) ->
+    {V, _} = resolve_variable_ast({variable, Var}, Context),
+    {{   erl_syntax:application(
+                    erl_syntax:atom(lists), erl_syntax:atom(append),
+                    [   
+                        erl_syntax:list([
+                            resolve_scoped_variable_ast("$autoid", Context), 
+                            erl_syntax:string([$-|Name]++"-"),
+                            erl_syntax:application(
+                                erl_syntax:atom(zp_convert),
+                                erl_syntax:atom(to_list),
+                                [V])
+                        ])
+                    ]),
         #ast_info{}
     }, TreeWalker#treewalker{has_auto_id=true}}.
 
@@ -1188,8 +1205,8 @@ interpreted_argval({string_literal, _, Value}, _Context, TreeWalker) ->
     {erl_syntax:string(unescape_string_literal(Value)), TreeWalker};
 interpreted_argval({trans_literal, _, Value}, _Context, TreeWalker) ->
     {trans_literal_ast(Value), TreeWalker};
-interpreted_argval({auto_id,{identifier,_,AutoId}}, Context, TreeWalker) ->
-    {{V, _}, TreeWalker1} = auto_id_ast(AutoId, Context, TreeWalker), 
+interpreted_argval({auto_id, Name}, Context, TreeWalker) ->
+    {{V, _}, TreeWalker1} = auto_id_ast(Name, Context, TreeWalker), 
     {V, TreeWalker1};
 interpreted_argval({tuple_value, {identifier, _, TupleName}, TupleArgs}, Context, TreeWalker) ->
     {ArgList, TreeWalker1} = interpreted_args(TupleArgs, Context, TreeWalker),

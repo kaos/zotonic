@@ -89,7 +89,8 @@ Nonterminals
     Value
     Variable
     Filter
-
+	AutoId
+	
     LoadTag
     LoadNames
     
@@ -289,9 +290,12 @@ Args -> Args identifier equal Value : '$1' ++ [{'$2', '$4'}].
 Value -> Value pipe Filter : {apply_filter, '$1', '$3'}.
 Value -> Variable : '$1'.
 Value -> Literal : '$1'.
-Value -> hash identifier : {auto_id, '$2'}.
+Value -> hash AutoId : {auto_id, '$2'}.
 Value -> open_curly identifier Args close_curly : {tuple_value, '$2', '$3'}.
 Value -> open_bracket ValueList close_bracket : {value_list, '$2'}.
+
+AutoId -> identifier dot identifier : { '$1', '$3' }.
+AutoId -> identifier : '$1'.
 
 Variable -> model_index identifier : {model, '$2'}.
 Variable -> identifier : {variable, '$1'}.
