@@ -5,14 +5,13 @@
 {% block content %}
 	<div id="content-area" class="zp-75">
 		<div class="padding">
-			<h2>Persoonlijke gegevens</h2>
-			<div class="block clearfix">
-				<p>Vul uw naam en adres in om de bestelling af te ronden. Heeft u al eens eerder besteld, klik dan <a href="#">hier om in te loggen</a>.</p>
+			<form method="post" action="postback" id="checkout-form">
+				<h2>Persoonlijke gegevens</h2>
+				<div class="block clearfix">
+					<p>Vul uw naam en adres in om de bestelling af te ronden. Heeft u al eens eerder besteld, klik dan <a href="#">hier om in te loggen</a>.</p>
 			
-				{# {% wire id="checkout-form" type="submit" postback="doe_iets"} %} #}
-				<form method="post" action="postback" id="checkout-form">
+					{# {% wire id="checkout-form" type="submit" postback="doe_iets"} %} #}
 					<fieldset>
-						<h3>Persoonlijke gegevens</h3>
 						<div class="form-item">
 							<label for="client-name">Naam</label>
 							<input type="text" id="client-name" name="client-name" value="" />
@@ -29,9 +28,10 @@
 							{% validate id="client-email" type={presence} type={email}%}
 						</div>
 					</fieldset>
-				
-					<hr />
-				
+				</div>
+
+				<h2>Adres gegevens</h2>
+				<div class="block clearfix">
 					<div class="zp-50 clearfix">
 						<fieldset>
 							<h3>Afleveradres</h3>
@@ -55,19 +55,15 @@
 								{% validate id="client-delivery-postal-code" type={presence} %}
 							</div>
 							<div class="form-item">
-								<label for="client-delivery-postal-code">Land</label>
-								<input type="text" name="client-delivery-country" id="client-delivery-country" value="" />
+								<label for="client-delivery-country">Land</label>
+								<select name="client-delivery-country" id="client-delivery-country">
+									{% include "_countries.tpl" %}
+								</select>
 								{% validate id="client-delivery-country" type={presence} %}
-							</div>
-							<div class="form-item clearfix">
-								<label class="billing-address-label" for="billing-address">
-									<input id="billing-address" type="checkbox" />Mijn factuuradres is anders dan mijn afleveradres.
-									{% wire id="billing-address" action={toggle target="billing-address-form"} %}
-								</label>
 							</div>
 						</fieldset>
 					</div>
-					
+				
 					<div class="zp-50 clearfix" id="billing-address-form">
 						<fieldset>
 							<h3>Factuuradres</h3>
@@ -88,20 +84,24 @@
 								<input type="text" name="client-billing-postal-code" id="client-billing-postal-code" value="" />
 							</div>
 							<div class="form-item">
-								<label for="client-billing-postal-code">Land</label>
-								<input type="text" name="client-billing-country" id="client-billing-country" value="" />
+								<label for="client-billing-country">Land</label>
+								<select name="client-delivery-country" id="client-billing-country">
+									{% include "_countries.tpl" %}
+								</select>
 							</div>
 						</fieldset>
 					</div>
-					<div class="button-wrapper clear">
-						{% button id="edit_cart" class="buy-me left-side-button" text="&laquo; Bewerk winkelmand" action={redirect dispatch="shop_cart"} %}
-						{% button id="do_payment" class="buy-me right-side-button" text="Naar betalen &raquo;" %}
-					</div>
-				</form>
-			</div>
-
+				</div>
+				
+				<div class="block button-wrapper clearfix">
+					{% button id="edit_cart" class="buy-me left-side-button" text="&laquo; Bewerk winkelmand" action={redirect dispatch="shop_cart"} %}
+					{% button id="do_payment" class="buy-me right-side-button" text="Naar betalen &raquo;" %}
+				</div>
+				
+			</form>
+			
 			{% include "_cart_backorder.tpl" %}
-
+			
 		</div>
 	</div>
 {% endblock %}
@@ -122,7 +122,7 @@
 						{% if c.variant %}
 							<span>{{ m.shop_product[c.id].sku[c.variant].title }}</span>
 						{% endif %}
-						<p style="clear: left">
+						<p>
 							{% if c.price_avg|is_defined %}
 								{{ c.n }} stuks à &euro; {{ c.price_avg|format_price }}
 							{% else %}
