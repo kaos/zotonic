@@ -129,6 +129,7 @@
 											<input type="checkbox" id="is_featured" name="is_featured" value="1" {% if r.is_featured %}checked="checked"{% endif %}/> Featured
 										</label>
 										{% button class="discard-resource right" text="cancel" action={redirect back} %}
+										{% button class="discard-resource right" text="delete" action={dialog_delete_rsc id=r.id on_success={redirect back}} %}
 									</div>
 									{#<hr />
 									<div class="zp-100">
