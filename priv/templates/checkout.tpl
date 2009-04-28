@@ -32,6 +32,9 @@
 
 				<h2>Adres gegevens</h2>
 				<div class="block clearfix">
+					<div class="notification notice">
+						U hoeft het factuuradres alleen in te vullen indien het anders is dan het afleveradres.
+					</div>
 					<div class="zp-50 clearfix">
 						<fieldset>
 							<h3>Afleveradres</h3>
