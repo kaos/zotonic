@@ -41,7 +41,7 @@
 		
 		<div class="block clearfix">
 			<div class="zp-33">
-				<h4>Bestellen en betalen</h4>
+				<h3>Bestellen en betalen</h3>
 				<ul class="misc-list">
 					<li><a href="#">Betaalmogelijkheden</a></li>
 					<li><a href="#">Verzendkosten</a></li>
@@ -50,7 +50,7 @@
 			</div>	
 
 			<div class="zp-33">
-				<h4>Over Hans Struijk Fietsen</h4>
+				<h3>Over Hans Struijk Fietsen</h3>
 				<ul class="misc-list">
 					<li><a href="#">Over Hans Struijk</a></li>
 					<li><a href="#">Filialen</a></li>
@@ -59,7 +59,7 @@
 			</div>
 
 			<div class="zp-333">
-				<h4>Overigen</h4>
+				<h3>Overigen</h3>
 				<ul class="misc-list">
 					<li><a href="#">Contact</a></li>
 					<li><a href="#">Privacy policy</a></li>
@@ -76,17 +76,17 @@
 			
 			{% include "_subnav.tpl" %}
 			
-			{#<!-- Newsletter -->
+			<!-- Newsletter -->
 			<h3 class="block">Nieuwsbrief</h3>
 			<div class="block clearfix newsletter">
 				<p>Schrijf je nu in!</p>
 				<form action="">
 					<fieldset>
 						<input type="text" name="newsletter" id="newsletter" class="input-newsletter" />
-						<button>Aanmelden</button>
+						<button class="right-side-button">Aanmelden</button>
 					</fieldset>
 				</form>
-			</div>#}
+			</div>
 
 			<!-- Latest news -->
 			<h3 class="block">Laatste nieuws</h3>

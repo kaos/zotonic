@@ -379,18 +379,15 @@ ul#navigation li.lang a.english {
 		font-size: 11px;
 	}
 	
-		.news-list li span { 
-			color: #000;
-			font-weight: bold;
-		}
-		
 		.news-list li a,
 		.news-list li a:focus {
+			text-decoration: none;
 			color: #666;
 		}
 		
 		.news-list li a:hover {
 			color: #333;
+			text-decoration: underline;
 		}
 
 		
