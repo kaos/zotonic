@@ -106,6 +106,7 @@ hr {
 	.short-list li a {
 		text-decoration: none;
 		color: #666;
+		cursor: default;
 	}
 	
 		.short-list li a:hover {
@@ -130,7 +131,12 @@ ul.pager {
 .pager li {
 	display: inline;
 	margin: 0 6px 0 0;
-}	
+}
+
+	.pager li.current a {
+		color: #000;
+		font-weight: bold;
+	}
 
 	
 /* admin typography  
