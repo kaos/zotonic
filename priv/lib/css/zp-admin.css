@@ -122,7 +122,16 @@ hr {
 		float: left;
 		display: block;
 	}
+
+ul.pager {
+	padding: 6px;
+}
 	
+.pager li {
+	display: inline;
+	margin: 0 6px 0 0;
+}	
+
 	
 /* admin typography  
 ---------------------------------------------------------- */

@@ -10,10 +10,10 @@
 
 		{% with m.search.paged[{fulltext cat=q.qcat text=q.qs page=q.page}] as result %}
 
-			<h3 class="above-list">Pagelist</h3>
-			
+			<p class="admin-chapeau">Pagelist</p>
 			{% pager result=result dispatch="admin_overview_rsc" qargs %}
 			
+			<h3 class="above-list">Overview</h3>
 			<ul class="short-list">
 				<li class="headers clearfix">
 					<span class="zp-30">Title</span>
@@ -49,7 +49,7 @@
 
 		{% endwith %}
 
-			<form method="get" autocomplete="off">
+			{#<form method="get" autocomplete="off">
 				<input type="text" value="" name="q" id="q" class="do_listfilter {list: '#posts'}" />
 			</form>
 
@@ -68,7 +68,7 @@
 				<li><span class="title">FeedBurner FeedSmith</span></li> 
 				<li><span class="title">Download Counter Update 1.3</span></li> 
 				<li><span class="title">Branding Reworked</span></li>
-			</ul>
+			</ul>#}
 		</div>
 		<div class="push"></div>
 	</div>
