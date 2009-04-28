@@ -34,7 +34,7 @@
 								{% button class="buy-me right-side-button" text="Meer info &raquo;" action={redirect id=id} %}
 							{% else %}
 								{% button class="buy-me" text="Meer info" action={redirect id=id} %}
-								{% button class="buy-me right-side-button" text="Moop direct &raquo;" action={shop_buynow id=id} %}
+								{% button class="buy-me right-side-button" text="Koop direct &raquo;" action={shop_buynow id=id} %}
 							{% endif %}
 							</div>
 						</div>
