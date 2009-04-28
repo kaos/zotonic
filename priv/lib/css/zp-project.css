@@ -480,10 +480,11 @@ ul#navigation li.lang a.english {
 	.cart-product-price button,
 	button.buy-me {
 		margin: 0 0 0 3px;
-		color: #EEB714;
-		background: #444;
+		color: #ffd65d;
+		background: #444 url(/lib/images/button-buy-me.png) repeat-x top;
 		padding: 2px 3px;
-		border: 1px solid #000;
+		border: 1px solid #444;
+		font-weight: bold;
 	}
 		
 		.product-price button:hover,

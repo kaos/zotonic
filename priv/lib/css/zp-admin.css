@@ -310,6 +310,7 @@ button,
 a.button {
 	-moz-border-radius: 5px;
 	-webkit-border-radius: 5px;
+	text-transform: lowercase;
 }
 
 	button.save {

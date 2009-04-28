@@ -176,6 +176,7 @@ h5.dialog-title {
 	background: #333;
 	border-color: #666;
 	color: #eee;
+	text-transform: lowercase;
 }
 
 	.dialog button:hover, 
