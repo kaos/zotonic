@@ -26,8 +26,8 @@
 						<div class="product-price clearfix clear">
 							<h3>&euro;{% include "_price.tpl" id=id %} <!--span>incl. btw</span--></h3>
 							<div class="clearfix button-wrapper right">
-								{% button class="buy-me" text="meer info" action={redirect id=id} %}
-								{% button class="buy-me right-side-button" text="koop direct &raquo;" action={shop_buynow id=id} %}
+								{% button class="buy-me" text="Meer info" action={redirect id=id} %}
+								{% button class="buy-me right-side-button" text="Koop direct &raquo;" action={shop_buynow id=id} %}
 							</div>
 						</div>
 					</div>

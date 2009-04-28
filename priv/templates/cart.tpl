@@ -80,8 +80,8 @@
 		<div class="block cart-product-price clearfix">
 			<h3>&euro;<strong id="cart-price-total">{{ shop_cart_total|format_price }}</strong> <span>incl. btw</span></h3>
 			<div class="clearfix button-wrapper right">
-				{% button id="product-add-basket" class="buy-me left-side-button" text="&laquo; winkel verder" action={redirect dispatch="overview"} %}
-				{% button id="product-buy-basket" class="buy-me right-side-button" text="reken af &raquo;" action={redirect dispatch="shop_checkout"} %}
+				{% button id="product-add-basket" class="buy-me left-side-button" text="&laquo; Winkel verder" action={redirect dispatch="overview"} %}
+				{% button id="product-buy-basket" class="buy-me right-side-button" text="Reken af &raquo;" action={redirect dispatch="shop_checkout"} %}
 			</div>
 		</div>
 		

@@ -13,8 +13,11 @@
 					<a href="{% ifequal cat.name "product" %}{% url overview cat=sub.name brand=brand_name %}{% else %}{% url overview cat=cat.name subcat=sub.name brand=brand_name %}{% endifequal %}">
 						{% image m.category[sub.id].image width=200 height=70 crop alt="bags" class="left" %}
 					</a>
-					<h3><a href="{% ifequal cat.name "product" %}{% url overview cat=sub.name brand=brand_name %}{% else %}{% url overview cat=cat.name subcat=sub.name brand=brand_name %}{% endifequal %}" title="{{ sub.title }}">
-							{{ sub.title }}</a></h3>
+					<h3>
+						<a href="{% ifequal cat.name "product" %}{% url overview cat=sub.name brand=brand_name %}{% else %}{% url overview cat=cat.name subcat=sub.name brand=brand_name %}{% endifequal %}" title="{{ sub.title }}">
+						{{ sub.title }}
+						</a>
+					</h3>
 					<p>
 						{{ sub.intro }}
 						<a href="{% ifequal cat.name "product" %}{% url overview cat=sub.name brand=brand_name %}{% else %}{% url overview cat=cat.name subcat=sub.name brand=brand_name %}{% endifequal %}">Lees&nbsp;meer&nbsp;&raquo;</a>
