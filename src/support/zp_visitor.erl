@@ -13,7 +13,7 @@
 -export([start_link/0, start_link/1]).
 
 %% interface functions
--export([new_anonymous/2, new_returning/2, associate_session/2, get/2, set/3]).
+-export([new_anonymous/2, new_returning/2, associate_session/2, get/2, set/3, ensure_visitor_id/1]).
 
 -include_lib("zophrenic.hrl").
 
@@ -74,6 +74,12 @@ get(Key, Pid) ->
     gen_server:call(Pid, {get, Key}).
 
 
+%% @doc Force the visitor to have an id, return the id.
+%% @spec get_id(Pid) -> integer()
+ensure_visitor_id(Pid) ->
+    gen_server:call(Pid, ensure_visitor_id).
+
+
 %%====================================================================
 %% gen_server callbacks
 %%====================================================================
@@ -99,6 +105,15 @@ init(Args) ->
 %%                                      {stop, Reason, Reply, State} |
 %%                                      {stop, Reason, State}
 %% Description: Handling call messages
+handle_call(ensure_visitor_id, _From, State) ->
+    case State#state.id of
+        undefined ->
+            State1 = save_props(State#state{associate_count=2, dirty=true}),
+            {reply, State1#state.id, State1, ?VISITOR_TIMEOUT};
+        Id ->
+            {reply, Id, State, ?VISITOR_TIMEOUT}
+    end;
+
 handle_call({get, Key}, _From, State) ->
     {reply, proplists:get_value(Key, State#state.props), State, ?VISITOR_TIMEOUT};
 
