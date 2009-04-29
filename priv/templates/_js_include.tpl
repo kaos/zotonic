@@ -6,6 +6,7 @@
 
 <script type="text/javascript" src="/lib/js/modules/zp.notice.js"></script>
 <script type="text/javascript" src="/lib/js/modules/zp.imageviewer.js"></script>
+<script type="text/javascript" src="/lib/js/modules/zp.dialog.js"></script>
 
 <script type="text/javascript" src="/lib/js/modules/livevalidation-1.3.js"></script>
 

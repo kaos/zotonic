@@ -20,12 +20,12 @@
     add_product/3,
     decr_product/3,
     del_product/3,
-    format_price/1
+    format_price/1,
+    get_cart/1
 ]).
 
 -include_lib("zophrenic.hrl").
-
--record(cart, {idv, n, sku}).
+-include_lib("shop.hrl").
 
 
 %% @doc Return the expected allocation, backorders and price for the cart. This is done

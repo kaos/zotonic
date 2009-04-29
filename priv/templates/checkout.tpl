@@ -5,7 +5,9 @@
 {% block content %}
 	<div id="content-area" class="zp-75">
 		<div class="padding">
-			<form method="post" action="postback" id="checkout-form">
+			
+			{% wire id="form-checkout" type="submit" postback={payment total=shop_cart_total} %}
+			<form id="form-checkout" method="post" action="postback" id="checkout-form">
 				<h2>Persoonlijke gegevens</h2>
 				<div class="block clearfix">
 					<p>Vul uw naam en adres in om de bestelling af te ronden. Heeft u al eens eerder besteld, klik dan <a href="#">hier om in te loggen</a>.</p>
@@ -24,7 +26,7 @@
 						</div>
 						<div class="form-item">
 							<label for="client-email">E-mail</label>
-							<input type="text" id="client-email" name="cient-email" value="" />
+							<input type="text" id="client-email" name="client-email" value="" />
 							{% validate id="client-email" type={presence} type={email}%}
 						</div>
 					</fieldset>
@@ -54,8 +56,8 @@
 							</div>
 							<div class="form-item">
 								<label for="client-delivery-postal-code">Postcode</label>
-								<input type="text" name="client-delivery-postal-code" id="client-delivery-postal-code" value="" />
-								{% validate id="client-delivery-postal-code" type={presence} %}
+								<input type="text" name="client-delivery-postcode" id="client-delivery-postcode" value="" />
+								{% validate id="client-delivery-postcode" type={presence} %}
 							</div>
 							<div class="form-item">
 								<label for="client-delivery-country">Land</label>
@@ -84,11 +86,11 @@
 							</div>
 							<div class="form-item">
 								<label for="client-billing-postal-code">Postcode</label>
-								<input type="text" name="client-billing-postal-code" id="client-billing-postal-code" value="" />
+								<input type="text" name="client-billing-postcode" id="client-billing-postcode" value="" />
 							</div>
 							<div class="form-item">
 								<label for="client-billing-country">Land</label>
-								<select name="client-delivery-country" id="client-billing-country">
+								<select name="client-billing-country" id="client-billing-country">
 									{% include "_countries.tpl" %}
 								</select>
 							</div>
@@ -98,6 +100,7 @@
 				
 				<div class="block button-wrapper clearfix">
 					{% button id="edit_cart" class="buy-me left-side-button" text="&laquo; Bewerk winkelmand" action={redirect dispatch="shop_cart"} %}
+
 					{% button id="do_payment" class="buy-me right-side-button" text="Naar betalen &raquo;" %}
 				</div>
 				

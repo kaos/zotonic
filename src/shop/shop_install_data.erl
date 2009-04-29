@@ -121,7 +121,7 @@ tables_sql() ->
     ON shop_sku FOR EACH ROW EXECUTE PROCEDURE shop_sku_trigger()",
 
     % Valid status for the shop_order
-    % checkout, canceled, timeout, mailed, delivered
+    % new, payment_requested, payment_authorized, payment_refused, payment_pending, payment_error, processed, canceled
     "
     CREATE TABLE shop_order_status
     (
@@ -140,9 +140,10 @@ tables_sql() ->
 
       status character varying(20) NOT NULL DEFAULT '',
       status_modified timestamp with time zone NOT NULL DEFAULT now(),
+      expires timestamp with time zone,
       
-      delivery_costs integer NOT NULL DEFAULT 0,
-      total_price integer NOT NULL DEFAULT 0,
+      total_price_incl integer NOT NULL DEFAULT 0,
+      total_price_excl integer NOT NULL DEFAULT 0,
       payment_method character varying(20),
 
       first_name character varying(50) not null default '',
@@ -151,13 +152,13 @@ tables_sql() ->
       email character varying(100) not null default '',
       phone character varying(40) not null default '',
       
+      attn character varying(100) not null default '',
       street character varying(100) not null default '',
       postcode character varying(20) not null default '',
       city character varying(100) not null default '',
       state character varying(100) not null default '',
       country character varying(50) not null default '',
 
-      has_delivery_address boolean not null default false,
       delivery_attn character varying(100) not null default'',
       delivery_street character varying(100) not null default '',
       delivery_postcode character varying(20) not null default '',
@@ -252,18 +253,6 @@ tables_sql() ->
 
     ].
 
-
-install_order_status(Context) ->
-    % checkout, canceled, timeout, mailed, delivered
-    Status = [
-        [{status, "checkout"}],
-        [{status, "canceled"}],
-        [{status, "timeout"}],
-        [{status, "mailed"}],
-        [{status, "delivered"}]
-    ],
-    [ {ok, _} = zp_db:insert(shop_order_status, S, Context) || S <- Status ],
-    ok.
 
 
 install_cat(Context) ->
@@ -530,3 +519,17 @@ install_sku(Context) ->
     [ {ok, _} = zp_db:insert(shop_sku, Sku, Context) || Sku <- Skus ],
     ok.
 
+
+install_order_status(Context) ->
+    zp_db:q("
+        insert into shop_order_status (status) values
+            ('new'),
+            ('payment_requested'),
+            ('payment_authorized'),
+            ('payment_refused'),
+            ('payment_pending'),
+            ('payment_error'),
+            ('processed'),
+            ('canceled')
+        ", Context),
+    ok.

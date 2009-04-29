@@ -21,6 +21,7 @@
 ]).
 
 -include_lib("zophrenic.hrl").
+-include_lib("../shop.hrl").
 
 %% @doc Fetch the value for the key from a model source
 %% @spec m_find_value(Key, Source, Context) -> term()
@@ -186,7 +187,7 @@ get_variants_as_proplist(Id, Context) ->
 allocate_sku_price(Id, Variant, N, Context) ->
     {Skus, BoSku} = allocate_sku(Id, Variant, N, Context),
     case BoSku of
-        {undefined, N, undefined, undefined} ->
+        #sku_alloc{sku_id=undefined, n=N} ->
             {
                 Id,
                 Variant,
@@ -196,10 +197,10 @@ allocate_sku_price(Id, Variant, N, Context) ->
                 undefined,
                 undefined
             };
-        {_, BoN, _, _} ->
+        #sku_alloc{n=BoN} ->
             {SumPrice, SumOldPrice} = lists:foldl(
-                    fun({_SNr, SN, SP, SOP}, {Tot, OldTot}) ->
-                        {Tot + SN*SP, OldTot + SN * SOP}
+                    fun(#sku_alloc{n=SN, price_incl=SP, old_price_incl=SOP}, {Tot, OldTot}) ->
+                        {Tot + SN*SP, OldTot + SN*SOP}
                     end,
                     {0,0},
                     [BoSku|Skus]),
@@ -222,7 +223,7 @@ allocate_sku_price(Id, Variant, N, Context) ->
 %% @spec allocate_sku(Id, Variant, N, Context) -> {Allocated, {BoNr, BoN, BoPrice, BoOldPrice}}
 allocate_sku(Id, Variant, N, Context) ->
     Skus = zp_db:q("
-            select article_nr, stock_avail, price_incl, special_price_incl, special_start, special_end
+            select id, article_nr, stock_avail, price_incl, price_excl, special_price_incl, special_price_excl, special_start, special_end
             from shop_sku
             where stock > 0
               and rsc_id = $1
@@ -230,20 +231,22 @@ allocate_sku(Id, Variant, N, Context) ->
               and available", [Id, Variant], Context),
     {Date,_} = calendar:local_time(),
     PricedSkus = [ select_price(S, Date) || S <- Skus ],
-    Sorted = lists:keysort(3, PricedSkus),
-    % {Allocated, {BoNr, BoN, BoPrice, BoOldPrice}} = 
-    allocate_sku1(Sorted, N, {[], undefined, undefined, undefined}).
+    Sorted = lists:keysort(#sku_alloc.price_incl, PricedSkus),
+    % {Allocated, [{BoNr, BoN, BoPrice, BoOldPrice}]} = 
+    allocate_sku1(Sorted, N, {[], #sku_alloc{}}).
 
 
-    select_price({Nr, Stock, Price, SpecialPrice, Start, End}, Date) 
-        when SpecialPrice > 0 andalso Start =< Date andalso End >= Date ->
-            {Nr, Stock, SpecialPrice, Price};
-    select_price({Nr, Stock, Price, _SpecialPrice, _Start, _End}, _Date) ->
-        {Nr, Stock, Price, Price}.
+    select_price({Id, Nr, Stock, PriceIncl, PriceExcl, SpecialPriceIncl, SpecialPriceExcl, Start, End}, Date) 
+        when SpecialPriceIncl > 0 andalso Start =< Date andalso End >= Date ->
+            #sku_alloc{ sku_id=Id, sku_nr=Nr, price_incl=SpecialPriceIncl, price_excl=SpecialPriceExcl, 
+                        old_price_incl=PriceIncl, old_price_excl=PriceExcl, n=Stock};
+    select_price({Id, Nr, Stock, PriceIncl, PriceExcl, _SpecialPriceIncl, _SpecialPriceExcl, _Start, _End}, _Date) ->
+            #sku_alloc{sku_id=Id, sku_nr=Nr, price_incl=PriceIncl, price_excl=PriceExcl, 
+                        old_price_incl=PriceIncl, old_price_excl=PriceExcl, n=Stock}.
     
-    allocate_sku1([], N, {Alloc, LastNr, LastPrice, LastOldPrice}) ->
-        {Alloc, {LastNr, N, LastPrice, LastOldPrice}};
-    allocate_sku1([{Nr, Stock, Price, OldPrice}|_], N, {Alloc, _LastNr, _LastPrice, _LastOldPrice}) when Stock >= N ->
-        {[{Nr, N, Price, OldPrice} | Alloc], {Nr, 0, Price, OldPrice}};
-    allocate_sku1([{Nr, Stock, Price, OldPrice}|Rest], N, {Alloc, _LastNr, _LastPrice, _LastOldPrice}) ->
-        allocate_sku1(Rest, N-Stock, {[{Nr, Stock, Price, OldPrice} | Alloc], Nr, Price, OldPrice}).
+    allocate_sku1([], N, {Alloc, LastSku}) ->
+        {Alloc, LastSku#sku_alloc{n=N, backorder=true}};
+    allocate_sku1([#sku_alloc{n=Stock}=Sku|_], N, {Alloc, _LastSku}) when Stock >= N ->
+        {[Sku#sku_alloc{n=N} | Alloc], #sku_alloc{backorder=true, n=0}};
+    allocate_sku1([#sku_alloc{n=Stock} = Sku|Rest], N, {Alloc, _LastSku}) ->
+        allocate_sku1(Rest, N-Stock, {[Sku#sku_alloc{n=Stock} | Alloc], Sku}).
