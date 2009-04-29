@@ -6,6 +6,7 @@
     C =:= $A orelse
     C =:= $b orelse
     C =:= $B orelse
+    C =:= $c orelse
     C =:= $d orelse
     C =:= $D orelse
     C =:= $f orelse
@@ -149,6 +150,23 @@ tag_to_value($s, _, {_,_,S}) ->
 % Month, textual, 3 letters, lowercase; e.g. 'jan'
 tag_to_value($b, {_,M,_}, _) ->
    string:sub_string(monthname(M), 1, 3);
+
+% ISO 8601 date format - 2004-02-12T15:19:21+00:00
+tag_to_value($c, Date, Time) ->
+    LTime = {Date, Time},
+    UTime = erlang:localtime_to_universaltime(LTime),
+    DiffSecs = calendar:datetime_to_gregorian_seconds(LTime) - 
+       calendar:datetime_to_gregorian_seconds(UTime),
+    {Secs, Sign} = case DiffSecs < 0 of
+        true -> {0-DiffSecs, $-};
+        false -> {DiffSecs, $+}
+    end,    
+    Hours   = Secs div 3600,
+    Minutes = (Secs rem 3600) div 60,
+    replace_tags(Date, Time, "Y-m-d") 
+        ++ [$T | replace_tags(Date, Time, "H:i:s")]
+        ++ [Sign|integer_to_list_zerofill(Hours)]
+        ++ [$:|integer_to_list_zerofill(Minutes)];
 
 % Day of the month, 2 digits with leading zeros; i.e. '01' to '31'
 tag_to_value($d, {_, _, D}, _) ->
