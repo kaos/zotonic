@@ -21,6 +21,7 @@
     ensure_all/1,
     ensure_session/1,
     ensure_visitor/1,
+    ensure_visitor_id/1,
     ensure_page_session/1,
     ensure_qs/1,
     
@@ -335,6 +336,11 @@ spawn_link_page(Module, Func, Args, Context) ->
                 },
     zp_session_page:spawn_link(Module, Func, Args, LinkContext).
 
+
+%% @doc Ensure that we have an id for the visitor
+ensure_visitor_id(Context) ->
+    Context1 = ensure_visitor(Context),
+    {zp_visitor:ensure_visitor_id(Context1#context.visitor_pid), Context1}.
 
 
 %% ------------------------------------------------------------------------------------
