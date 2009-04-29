@@ -37,9 +37,8 @@
 			
 		</div>
 
+		<h2>Uw bestelling</h2>
 		<div class="block clearfix">
-			<h3>Uw bestelling</h3>
-			
 			{% include "_shop_order_view.tpl" order=order %}
 		</div>
 	{% endif %}

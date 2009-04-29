@@ -25,7 +25,10 @@
 get(OrderId, Context) ->
     Order = zp_db:assoc_row("select * from shop_order where id = $1", [OrderId], Context),
     Lines = zp_db:assoc("
-            select ol.*, s.rsc_id, s.variant, s.article_nr, s.description1, s.description2
+            select ol.*, 
+                ol.quantity * ol.price_incl as total_price_incl, 
+                ol.quantity * ol.price_excl as total_price_excl, 
+                s.rsc_id, s.variant, s.article_nr, s.description1, s.description2
             from shop_order_line ol join shop_sku s on ol.shop_sku_id = s.id 
             where ol.shop_order_id = $1", [OrderId], Context),
     [{lines, Lines} | Order].
