@@ -47,7 +47,6 @@ content_types_provided(ReqData, Context) ->
 process_post(ReqData, Context) ->
     Context1 = ?WM_REQ(ReqData, Context),
     QArgs = zp_context:get_q_all(Context1),
-    ?DEBUG(QArgs),
 
     % Handle the notification, save it in the database
     shop_adyen:notification(zp_context:get_q_all(Context1), Context1),
