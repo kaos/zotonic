@@ -31,6 +31,7 @@
 	{shop_cart, 	["cart"],										resource_cart,			[]},
 	{shop_checkout, ["checkout"],									resource_checkout,		[]},
 	{shop_checkout_confirm, ["confirm"],							resource_confirm,		[]},
+	{shop_order_view, ["order","view", name],						resource_shop_order_view, []},
 
 	{admin,   				["admin"],								resource_admin,			[]},
 	{admin_logon,   		["admin", "logon"],						resource_admin_logon,	[]},

@@ -10,14 +10,15 @@
 %% interface functions
 -export([
     get/2,
+    get_by_name/2,
     order_from_cart/3,
-    payment_completion/5
+    payment_completion/5,
+    deallocate_order/2
 ]).
 
 -include_lib("zophrenic.hrl").
 -include_lib("shop.hrl").
-
-
+   
 
 %% @doc Get the full details of an order, including the order lines.
 %% @todo Add also the order history
@@ -32,6 +33,14 @@ get(OrderId, Context) ->
             from shop_order_line ol join shop_sku s on ol.shop_sku_id = s.id 
             where ol.shop_order_id = $1", [OrderId], Context),
     [{lines, Lines} | Order].
+
+
+get_by_name(Name, Context) ->
+    Id = zp_db:q1("select id from shop_order where name = $1", [Name], Context),
+    case Id of
+        undefined -> undefined;
+        _ -> get(Id, Context)
+    end.
 
 
 %% @doc Make an order from the cart.  Returns an error if the payment due is unequal to the amount the user ok'd.
@@ -90,9 +99,54 @@ order_from_cart(TotalAmount, Address, Context) ->
 
 
 %% @doc Received a completion from the PSP, check the order if we can mark it as paid
-payment_completion(OrderId, AuthResult, PaymentMethod, PspReference, Context) ->
+%% This function should be evaluated within a transaction.
+payment_completion(OrderId, NewState, PaymentMethod, _PspReference, Context) ->
+    OldState = zp_convert:to_atom(zp_db:q1("select status from shop_order where id = $1", [OrderId], Context)),
+    UpdateState = case NewState of
+        payment_authorized when OldState /= payment_authorized ->
+            zp_db:q("
+                update shop_order 
+                set status = $1,
+                    payment_method = $2,
+                    paid = true,
+                    status_modified = now()
+                where id = $3", [NewState, PaymentMethod, OrderId], Context),
+            % @todo Send e-mail to customer
+            % @todo Send e-mail to VMSII
+            skip;
+        payment_refused when OldState == new; OldState == payment_pending ->
+            deallocate_order(OrderId, Context),
+            payment_refused;
+        payment_error when OldState == new; OldState == payment_pending ->
+            deallocate_order(OrderId, Context),
+            payment_error;
+        payment_pending when OldState == new; OldState == payment_error; OldState == payment_refused ->
+            payment_pending;
+        _ -> skip
+    end,
+    
+    case UpdateState of
+        skip -> ok;
+        _ -> zp_db:q("update shop_order set status = $1, status_modified = now() where id = $2", [UpdateState, OrderId], Context)   
+    end,
     {ok, OrderId}.
 
+
+%% @doc Move the stock allocation in the order lines back to the stock of the skus. All allocated units will be mentioned as backorders.
+deallocate_order(OrderId, Context) ->
+    zp_db:q("
+        update shop_sku
+        set stock_avail = stock_avail + shop_order_line.allocated
+        from shop_order_line 
+        where shop_sku.id = shop_order_line.shop_sku_id
+          and shop_order_line.shop_order_id = $1", [OrderId], Context),
+    zp_db:q("
+        update shop_order_line
+        set backorder  = backorder + allocated,
+            allocated  = 0
+        where shop_order_id = $1", [OrderId], Context),
+    ok.
+    
 
 %% @doc Allocate the order in the database. Throw error on failure.
 insert_order(VisitorId, SkuAmountIncl, SkuAmountExcl, Skus, Address, Context) ->

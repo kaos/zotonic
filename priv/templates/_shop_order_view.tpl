@@ -43,7 +43,7 @@
 			<h4>Bestelling</h4>
 			
 			Nummer: {{ order.id }}<br/>
-			<a href="/order/view/{{ order.name }}">Bestellings pagina op Internet &raquo;</a>
+			<a href="{% url shop_order_view name=order.name %}">Bestellings pagina op Internet &raquo;</a>
 		</td>
 	</tr>
 	
@@ -84,7 +84,7 @@
 	<td style="border-top: 1px solid #222" align="right">&euro;{{ order.total_price_incl|format_price }}</td>
 </tr>
 
-{#
+{% if order.payment_method %}
 <tr>
 	<td>&nbsp;</td>
 	<td>&nbsp;</td>
@@ -101,13 +101,13 @@
 			{% else %}
 				{% ifequal order.payment_method "paypal" %}PayPal
 				{% else %}
-					{{ order.payment_method }}
+					{{ order.payment_method|escape }}
 				{% endifequal %}
 			{% endifequal %}
 		{% endifequal %}
 	</td>
 </tr>
-#}
+{% endif %}
 
 </table>
 

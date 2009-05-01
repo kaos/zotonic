@@ -42,8 +42,8 @@ upgrade() ->
 %% @doc supervisor callback.
 init([]) ->
     % Listen to IP address and Port
-    WebIp      = case os:getenv("ZP_IP")   of false -> "0.0.0.0"; Anyip -> Anyip end,   
-    WebPort    = case os:getenv("ZP_PORT") of false -> 8000; Anyport -> Anyport end,   
+    WebIp      = case os:getenv("ZP_IP")   of false -> any; Anyip -> Anyip end,   
+    WebPort    = case os:getenv("ZP_PORT") of false -> 8000; Anyport -> list_to_integer(Anyport) end,   
 
     % Default connection for database
     DbHost     = case os:getenv("ZP_DBHOST")     of false -> "localhost"; AnyDbHost -> AnyDbHost end,
@@ -116,6 +116,14 @@ init([]) ->
                 {zp_pivot_rsc, start_link, []}, 
                 permanent, 5000, worker, dynamic},
 
-    Processes = [MochiWeb, Ids, Postgres, Depcache, Installer, Dispatcher, Notifier, Session, Visitor, Template, Scomp, DropBox, Pivot],
+    Shop = {shop,
+                {shop, start_link, []}, 
+                permanent, 5000, worker, dynamic},
+
+    Processes = [
+            MochiWeb, Ids, Postgres, Depcache, Installer, Session, Visitor, 
+            Dispatcher, Notifier, Template, Scomp, DropBox, Pivot,
+            Shop
+    ],
     {ok, {{one_for_one, 1000, 10}, Processes}}.
 

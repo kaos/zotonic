@@ -107,6 +107,8 @@ compile(File, Module, Options) ->
                 Err ->
                     Err
             end;
+        {error, {ErrLineCol, ErrModule, ErrMsg}} ->
+            {error, {ErrLineCol, ErrModule, lists:flatten(ErrMsg)}};
         Err ->
             Err
     end.

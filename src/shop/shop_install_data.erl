@@ -145,7 +145,8 @@ tables_sql() ->
       total_price_incl integer NOT NULL DEFAULT 0,
       total_price_excl integer NOT NULL DEFAULT 0,
       payment_method character varying(20),
-
+      paid boolean not null default false,
+      
       first_name character varying(50) not null default '',
       lastname_prefix character varying(20) not null default '',
       lastname character varying(100) not null default '',
@@ -172,6 +173,9 @@ tables_sql() ->
       CONSTRAINT shop_order_name_key UNIQUE(name),
       CONSTRAINT fk_shop_order_visitor_id FOREIGN KEY (visitor_id)
         REFERENCES visitor(id)
+        ON UPDATE CASCADE ON DELETE RESTRICT,   
+      CONSTRAINT fk_shop_order_status FOREIGN KEY (status)
+        REFERENCES shop_order_status(status)
         ON UPDATE CASCADE ON DELETE RESTRICT        
     )
     ",
@@ -208,26 +212,38 @@ tables_sql() ->
     "CREATE INDEX fki_shop_order_line_shop_sku_id ON shop_order_line(shop_sku_id)",
     "CREATE INDEX fki_shop_order_line_shop_order_id ON shop_order_line(shop_order_id)",
     
-    % Logging table for orders
+    % Logging table for notification received from the payment service provider Adyen
     "
-    CREATE TABLE shop_log
+    CREATE TABLE shop_adyen_log
     (
       id serial NOT NULL,
+      handled boolean not null default false,
       shop_order_id integer,
-      visitor_id bigint,
-      user_id int,
-      action character varying(20) not null default ''::character varying,
-      message character varying(500) not null default ''::character varying,
-      ip_address character varying(40),
-      user_agent character varying(128),
+      live boolean not null,
+      order_status_old character varying(20) not null default '',
+      order_status_new character varying(20) not null default '',
+      
+      event_code character varying(50) not null default '',
+      psp_reference character varying(50) not null default '',
+      original_reference character varying(50) not null default '',
+      merchant_account_code character varying(50) not null default '',
+      event_date character varying(50) not null default '',
+      success boolean not null,
+      payment_method character varying(50) not null default '',
+      operations character varying(100) not null default '',
+      reason character varying(100) not null default '',
+      currency character varying(10) not null default '',
+      value integer,
+      request bytea,
       created timestamp with time zone NOT NULL DEFAULT now(),
-      CONSTRAINT shop_log_pkey PRIMARY KEY (id)
+      CONSTRAINT shop_adyen_log_pkey PRIMARY KEY (id)
     )
     ",
 
-    "CREATE INDEX shop_log_created_key ON shop_log(created)",
-    "CREATE INDEX shop_log_order_id_key ON shop_log(shop_order_id, created)",
-    "CREATE INDEX shop_log_visitor_id_key ON shop_log(visitor_id, created)",
+    "CREATE INDEX shop_adyen_log_created_key ON shop_adyen_log(created)",
+    "CREATE INDEX shop_adyen_log_psp_reference_key ON shop_adyen_log(psp_reference, event_code)",
+    "CREATE INDEX shop_adyen_log_order_id_key ON shop_adyen_log(shop_order_id, created)",
+    "CREATE INDEX shop_adyen_log_handled_created_key ON shop_adyen_log(handled, created)",
 
     % Statistics about which products are sold together
     % Every row is twice present, to facilitate easy querying

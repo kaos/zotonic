@@ -59,6 +59,14 @@ to_bool(<<"0">>) -> false;
 to_bool([]) -> false;
 to_bool("0") -> false;
 to_bool([0]) -> false;
+to_bool("false") -> false;
+to_bool("FALSE") -> false;
+to_bool("n") -> false;
+to_bool("N") -> false;
+to_bool(<<"false">>) -> false;
+to_bool(<<"FALSE">>) -> false;
+to_bool(<<"n">>) -> false;
+to_bool(<<"N">>) -> false;
 to_bool(_) -> true.
 
 %%% HTML ENCODE %%%

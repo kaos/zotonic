@@ -4,14 +4,19 @@
 %%
 %% @doc Interface to the payment solution provider Adyen
 
+%% https://ca-test.adyen.com/ca/ca/payments/searchPayments.shtml?query=8512411676185576&g=true&skipList=&search=Payment+Search
 
 -module(shop_adyen).
 -author("Marc Worrell <marc@worrell.nl").
 
 %% interface functions
 -export([
+    init/1,
+    periodic_log_check/1,
     payment_start/2,
     payment_completion/1,
+    notification/2,
+    handle_notification/2,
     test/0
 ]).
 
@@ -23,6 +28,24 @@
 -define(SKINCODE, "OnCtxIfz").
 -define(SECRET, "hemaworst!").
 
+
+%% Start a timer for periodic check of all incoming adyen notifications.
+init(Context) ->
+    {ok, _} = timer:apply_interval(1000 * 60 * 10, ?MODULE, periodic_log_check, [Context]),
+    ok.
+
+
+%% Handle log entries that were not handled, might be because of crashed between saving the entry and running the queries.
+periodic_log_check(Context) ->
+    LogIds = zp_db:q("
+        select id from shop_adyen_log
+        where created < now() - interval '30 minutes'
+          and handled = false
+        limit 100
+        ", Context),
+    [ handle_notification(LogId, Context)  || {LogId} <- LogIds ].
+    
+    
 
 %% @doc Build the payment uri to be used for paying the order.
 %% @spec payment_uri(Id, Context) -> String
@@ -92,12 +115,160 @@ payment_completion(Context) ->
     end,
     
     case CheckSig of
-        {error, Reason} -> {error, Reason};
+        {error, Reason} -> 
+            {error, Reason};
         _ ->
             % Signature valid, go ahead with this order.
             OrderId = list_to_integer(MerchantReference),
-            shop_order:payment_completion(OrderId, AuthResult, PaymentMethod, PspReference, Context)
+            shop_order:payment_completion(OrderId, auth_completion_result(AuthResult), PaymentMethod, PspReference, Context)
     end.
+
+    auth_completion_result("AUTHORISED") -> payment_authorized;
+    auth_completion_result("REFUSED") -> payment_refused;
+    auth_completion_result("PENDING") -> payment_pending;
+    auth_completion_result("ERROR") -> payment_error.
+
+
+%% @doc Handle a notification sent by Adyen.  First saved in the database and then processed in another process.
+notification(Qs, Context) ->
+    case save_notification(Qs, Context) of
+        {ok, LogId, _OrderId} ->
+            % Start a separate process to handle this notification (and maybe older ones)
+            spawn(?MODULE, handle_notification, [LogId, Context]),
+            Context;
+        {duplicate, _LogId, _OrderId} ->
+            Context
+    end.
+
+
+%% @doc Handle a notification from Adyen, adapt the order status when needed (which might send some emails)
+%% @spec handle_notification(LogId::integer(), #context) -> ok
+handle_notification(LogId, Context) ->
+    F = fun(Ctx) ->
+        handle_notification_trans(LogId, Ctx),
+        ok
+    end,
+    ok = zp_db:transaction(F, Context).
+
+handle_notification_trans(LogId, Context) ->
+    {OrderId, EventCode, Success, PaymentMethod, PspReference} = zp_db:q_row("
+                select shop_order_id, event_code, success, payment_method, psp_reference
+                from shop_adyen_log
+                where id = $1", [LogId], Context),
+
+    case OrderId of
+        undefined -> 
+            ok;
+        _ ->
+            NewState = case zp_string:to_upper(EventCode) of
+                "AUTHORISATION" ->
+                    % When success = true then we got a payment
+                    case Success of
+                        true -> payment_authorized;
+                        false -> payment_refused
+                    end;
+
+                "PENDING" -> payment_pending;
+
+                "CAPTURE" -> % We received the money
+                    skip;
+
+                _ ->
+                    % skip (cancellation, refund, dispute, report_available)
+                    % We might want to warn the operator about cancellation, refund and dispute messages
+                    skip
+            end,
+
+            case NewState of
+                skip -> ok;
+                _ -> shop_order:payment_completion(OrderId, NewState, PaymentMethod, PspReference, Context)
+            end
+    end,
+    zp_db:q("update shop_adyen_log set handled = true where id = $1", [LogId], Context),
+    ok.
+    
+
+%% @doc Save the notification.  {ok, LogId, OrderId} when saved or {duplicate, LogId, OrderId}
+save_notification(Qs, Context) ->
+    OrderId = try zp_convert:to_integer(proplists:get_value("merchantReference", Qs)) catch _:_ -> undefined end,
+    Cols = [
+        {shop_order_id, OrderId},
+        {handled, false},
+        {live, zp_convert:to_bool(proplists:get_value("live", Qs))},
+        {event_code, proplists:get_value("eventCode", Qs)},
+        {psp_reference, proplists:get_value("pspReference", Qs)},
+        {original_reference, proplists:get_value("originalReference", Qs)},
+        {merchant_account_code, proplists:get_value("merchantAccountCode", Qs)},
+        {event_date, proplists:get_value("eventDate", Qs)},
+        {success, zp_convert:to_bool(proplists:get_value("success", Qs))},
+        {payment_method, proplists:get_value("paymentMethod", Qs)},
+        {operations, proplists:get_value("operations", Qs)},
+        {reason, proplists:get_value("reason", Qs)},
+        {currency, proplists:get_value("currency", Qs)},
+        {value, zp_convert:to_integer(proplists:get_value("value", Qs))},
+        {request, Qs}
+    ],
+
+    % Check for a duplicate
+    Row = zp_db:q_row("
+                    select shop_order_id, max(id), max(success::integer)
+                    from shop_adyen_log 
+                    where event_code = $1 
+                      and psp_reference = $2 
+                    group by shop_order_id", 
+                    [proplists:get_value(event_code, Cols),
+                     proplists:get_value(psp_reference, Cols)], Context),
+
+    case Row of
+        undefined ->
+            % new
+            {ok, Id} = zp_db:insert(shop_adyen_log, Cols, Context),
+            {ok, Id, OrderId};
+        {_Found, MaxId, MaxSuccess} ->
+            % duplicate
+            Success = proplists:get_value(success, Cols),
+            case Success of
+                true ->
+                    case MaxSuccess of
+                        1 ->
+                            {duplicate, MaxId, OrderId};
+                        0 ->
+                            {ok, Id} = zp_db:insert(shop_adyen_log, Cols, Context),
+                            {ok, Id, OrderId}
+                    end;
+                false ->
+                    % We might already have an success for this event.
+                    {duplicate, MaxId, OrderId}
+            end
+    end.
+
+
+
+
+%    DEBUG: resource_shop_adyen:50  [{"eventDate","2009-05-01T08:47:00.04Z"},
+%                                    {"reason",[]},
+%                                    {"originalReference",[]},
+%                                    {"merchantReference","4"},
+%                                    {"currency","EUR"},
+%                                    {"pspReference","8512411676185576"},
+%                                    {"merchantAccountCode","HansStruijkFietsenNL"},
+%                                    {"eventCode","AUTHORISATION"},
+%                                    {"value","43475"},
+%                                    {"operations","REFUND"},
+%                                    {"success","true"},
+%                                    {"paymentMethod","ideal"},
+%                                    {"live","false"}]
+
+% Notification api stati    :
+% <input type="radio" name="eventCode"  value="AUTHORISATION" />AUTHORISATION<br />
+% <input type="radio" name="eventCode"  value="CANCELLATION" />CANCELLATION<br />
+% <input type="radio" name="eventCode"  value="PENDING" />PENDING<br />		
+% <input type="radio" name="eventCode"  value="REFUND" />REFUND<br />
+% <input type="radio" name="eventCode"  value="CAPTURE" />CAPTURE<br />
+% <input type="radio" name="eventCode"  value="DISPUTE" />DISPUTE<br />
+% <input type="radio" name="eventCode"  value="REPORT_AVAILABLE" />REPORT_AVAILABLE<br />
+% <input type="radio" name="eventCode"  value="RECURRING_CONTRACT" />RECURRING_CONTRACT<br />
+% <input type="radio" name="eventCode"  value="UKNOWN" />UKNOWN
 
 
 

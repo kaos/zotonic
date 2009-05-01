@@ -9,12 +9,24 @@
 
 %% interface functions
 -export([
+    start_link/0,
+    start_link/1,
     category_brands/2,
     category_subcat_bybrand/3,
     category_rsc_count/2
 ]).
 
 -include_lib("zophrenic.hrl").
+
+
+%% @doc Start the shop processes. Only a periodic Adyen notification checker is needed (should make that into a server...)
+start_link() ->
+    start_link([]).
+start_link([]) ->
+    Context = zp_context:new(),
+    shop_adyen:init(Context),
+    ignore.
+    
 
 %% @doc Return the list of brands in a certain category, and with each brand the number of resources attached to that brand
 %% @spec category_brands(CatId, Context) -> [ {Id,Count} ]
