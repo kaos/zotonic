@@ -69,9 +69,8 @@
 							<div class="item clearfix">
 								<fieldset class="admin-form">
 									<div class="form-item clearfix">
-										<label for="no-google">
-											<input id="no-google" type="checkbox" name="seo_noindex" {% if r.seo_noindex %}checked="checked"{% endif %} value="1" />Ask google to not index this page
-										</label>
+											<input id="no-google" type="checkbox" class="do_fieldreplace" name="seo_noindex" {% if r.seo_noindex %}checked="checked"{% endif %} value="1" />
+											<label for="no-google">Ask google to not index this page</label>
 									</div>
 
 									<div class="form-item clearfix">
@@ -122,12 +121,12 @@
 								<div class="admin-form ">
 									<div class="form-item clearfix">
 										{% button class="save-resource do_tooltip" text="save" title="Save this page and all the connections it has." %}
-										<label for="is_published" class="left">
-											<input type="checkbox" id="is_published" name="is_published" value="1" {% if r.is_published %}checked="checked"{% endif %}/> Published
-										</label>
-										<label for="is_featured" class="left">
-											<input type="checkbox" id="is_featured" name="is_featured" value="1" {% if r.is_featured %}checked="checked"{% endif %}/> Featured
-										</label>
+										<input type="checkbox" class="do_fieldreplace" id="is_published" name="is_published" value="1" {% if r.is_published %}checked="checked"{% endif %}/> 
+										<label for="is_published" class="left">Published</label>
+										
+										<input type="checkbox" class="do_fieldreplace" id="is_featured" name="is_featured" value="1" {% if r.is_featured %}checked="checked"{% endif %}/> 
+										<label for="is_featured" class="left">Featured</label>
+										
 										{% button class="discard-resource right" text="cancel" action={redirect back} %}
 										{% button class="discard-resource right" text="delete" action={dialog_delete_rsc id=r.id on_success={redirect back}} %}
 									</div>

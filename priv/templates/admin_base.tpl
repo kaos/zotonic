@@ -12,6 +12,7 @@
 	<link href="/lib/css/zp-wysiwyg.css" type="text/css" media="screen" rel="stylesheet" />
 	<link href="/lib/css/zp-admin.css" type="text/css" media="screen" rel="stylesheet" />
 	<link href="/lib/css/zp-dialog.css" type="text/css" media="screen" rel="stylesheet" />
+	<link href="/lib/css/zp-formreplace.css" type="text/css" media="screen" rel="stylesheet" />
 	
 	<!--[if IE]><link href="/lib/css/zp-ie.css" type="text/css" media="screen" rel="stylesheet" /><![endif]-->
 </head>
