@@ -9,11 +9,12 @@
 		<h2>Er ging iets fout</h2>
 		
 		<div class="block clearfix">
-		<p>We konden uw betalingsstatus niet afhandelen. De verwijzing naar deze pagina was waarschijnlijk niet correct.</p>
-		
-		<p>Heeft u wel betaald?  Neem dan <a href="mailto:">contact met ons op</a>.
+		<p>
+			We konden uw betalingsstatus niet afhandelen. De verwijzing naar deze pagina was waarschijnlijk niet correct.
+			Heeft u wel betaald? Neem dan <a href="mailto:">contact met ons op</a>.
+		</p>
 			
-		<p>De foutmelding was: <span class="error">controlegetal gegevens is fout</a>.</p>
+		<p>De foutmelding was: <span class="notification error">controlegetal gegevens is fout</a>.</p>
 		
 		<p>U kunt <a href="/">verder winkelen</a> of <a href="{% url shop_cart %}">naar uw boodschappenmand</a>.</p>
 
@@ -22,8 +23,11 @@
 		<h2>Order status</h2>
 		<div class="block clearfix">
 		
-			<p>Bedankt voor uw bestelling bij Hans Struijk Fietsen.  Uw bestelling is met succes afgerond.
-				U kunt deze pagina afdrukken voor uw administratie.</p>
+			<p>
+				Bedankt voor uw bestelling bij Hans Struijk Fietsen.  Uw bestelling is met succes afgerond.
+				U kunt deze pagina afdrukken voor uw administratie.
+			</p>
+			
 			<h3>Uw opties</h3>
 			<p>U heeft een aantal vervolg opties. Geen van deze opties zijn verplicht.  U kunt ook <a href="/">verder winkelen.</a></p>
 			
