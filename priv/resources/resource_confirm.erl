@@ -9,9 +9,19 @@
 html(Context) ->
     case shop_adyen:payment_completion(Context) of
         {ok, OrderId} ->
+            Order = shop_order:get(OrderId, Context),
+            case proplists:get_value(paid, Order) of
+                true -> shop_cart:clear(Context);
+                false ->
+                    case proplists:get_value(status, Order) of
+                        payment_pending -> shop_cart:clear(Context);
+                        _ -> nop
+                    end
+            end,
+            
             Vars = [
                 {order_id, OrderId},
-                {order, shop_order:get(OrderId, Context)}
+                {order, Order}
             ],
             Html = zp_template:render("checkout_confirm.tpl", Vars, Context),
             zp_context:output(Html, Context);

@@ -21,7 +21,8 @@
     decr_product/3,
     del_product/3,
     format_price/1,
-    get_cart/1
+    get_cart/1,
+    clear/1
 ]).
 
 -include_lib("zophrenic.hrl").
@@ -148,6 +149,10 @@ get_cart(Context) ->
         undefined -> [];
         Cart -> Cart
     end.
+
+%% @doc Clear the shopping cart, used after receiving payments
+clear(Context) ->
+    zp_context:set_visitor(shop_cart, [], Context).
 
 
 %% @doc Get the count of the product in the cart, regardless of the variant
