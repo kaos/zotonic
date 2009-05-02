@@ -442,7 +442,7 @@ install_rsc(Context) ->
             undefined -> ok;
             ProdNr ->
                 File = "priv/files/archive/" ++ integer_to_list(ProdNr) ++ ".jpg",
-                m_media:insert_file_rsc(File, Id, [], Context)
+                m_media:insert_file_rsc(File, Id, [{visible_for, 0}], Context)
         end
     end,
     [ M(IR) || IR <- IdRsc],
