@@ -18,7 +18,7 @@
 		{% for rsc_id, cid, bid, rank in result %}
 		<h3 class="block">{{ m.rsc[rsc_id].title }}</h3>
 		<div class="block clearfix">
-			<a href="{{ m.rsc[rsc_id].page_url }}">{% image m.rsc[rsc_id].media[1].filename width=180 height=140 crop alt="Handgrepen" class="left" %}</a>
+			<a href="{{ m.rsc[rsc_id].page_url }}">{% image m.rsc[rsc_id].media[1].filename width=180 height=140 crop alt=m.rsc[rsc_id].title class="left" %}</a>
 			<div class="zp-70">
 				<h4>Beschrijving</h4>
 				<p>{{ m.rsc[rsc_id].intro }}</p>

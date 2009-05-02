@@ -2,13 +2,20 @@
 <html xmlns="http://www.w3.org/1999/xhtml" lang="en">
 <head>
 	<title>{% block title %}{% endblock %} &ndash; Hans Struijk Fietsen</title>
+
 	<meta http-equiv="Content-type" content="text/html; charset=utf-8" />
-	
+	<meta name="keywords" content="" />
+	<meta name="description" content="" />
+	<meta name="author" content="Zophrenic &copy; 2009" />
+	<meta name="robots" content="index,follow" />
+
 	<link href="/lib/css/zp-base.css" type="text/css" media="screen" rel="stylesheet" /> 
 	<link href="/lib/css/zp-type.css" type="text/css" media="screen" rel="stylesheet" /> 
 	<link href="/lib/css/zp-forms.css" type="text/css" media="screen" rel="stylesheet" /> 
 	<link href="/lib/css/zp-project.css" type="text/css" media="screen" rel="stylesheet" /> 
 	<link href="/lib/css/zp-dialog.css" type="text/css" media="screen" rel="stylesheet" />
+
+	<link rel="icon" href="" type="image/x-icon" />
 
 	<!--[if IE]><link href="/lib/css/zp-ie.css" type="text/css" media="screen" rel="stylesheet" /><![endif]--> 
 </head>
