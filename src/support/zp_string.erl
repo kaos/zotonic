@@ -11,6 +11,7 @@
 -export([
     trim/1,
     is_string/1,
+    line/1,
     to_name/1,
     to_slug/1,
     to_lower/1,
@@ -31,6 +32,20 @@ is_string([C|Rest]) when is_integer(C) andalso (C >= 32 orelse C == 9 orelse C =
     is_string(Rest);
 is_string(_) -> 
     false.
+
+
+%% @doc Make sure that the string is on one line only, replace control characters with spaces
+line(B) when is_binary(B) ->
+    line(binary_to_list(B));
+line(L) ->
+    line1(L, []).
+    
+    line1([], Acc) ->
+        lists:reverse(Acc);
+    line1([H|T], Acc) when H < 32 ->
+        line1(T, [32 , Acc]);
+    line1([H|T], Acc) ->
+        line1(T, [H|Acc]).
 
 
 %% @doc Return a lowercase string for the input

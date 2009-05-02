@@ -522,6 +522,24 @@ model_pgsql() ->
     "CREATE INDEX identity_visited_key ON identity (visited)",
     "CREATE INDEX identity_created_key ON identity (created)",
 
+    % Email send queue and log
+    "CREATE TABLE emailq (
+        id serial NOT NULL,
+        status character varying(10) not null default 'new', -- new, sent, fail
+        retry_on timestamp with time zone default (now() + '00:10:00'::interval),
+        retry int not null default 0,
+        sender character varying(100),
+        recipient character varying(100),
+        props bytea,
+        sent timestamp with time zone,
+        created timestamp with time zone not null default now(),
+        CONSTRAINT email_pkey PRIMARY KEY (id)
+    )",
+
+    "CREATE INDEX email_recipient_key ON emailq (recipient)",
+    "CREATE INDEX email_created_key ON emailq (created)",
+    "CREATE INDEX email_status_retry_key ON emailq (status, retry_on)",
+
 
     % pivot queue for rsc, all things that are updated are queued here for later full text indexing
     "CREATE TABLE rsc_pivot_queue
