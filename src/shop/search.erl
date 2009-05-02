@@ -64,6 +64,18 @@ search({latest, [{cat, Cat}]}, _OffsetLimit, Context) ->
         tables=[{rsc,"r"}]
     };
 
+search({upcoming, [{cat, Cat}]}, _OffsetLimit, Context) ->
+    CatId = m_category:name_to_id_check(Cat, Context),
+    #search_sql{
+        select="r.id",
+        from="rsc r, category rc, category ic",
+        where="r.category_id = rc.id and rc.nr >= ic.lft and rc.nr <= ic.rght and ic.id = $1
+            and pivot_date_end >= current_date",
+        order="r.pivot_date_start asc",
+        args=[CatId],
+        tables=[{rsc,"r"}]
+    };
+
 search({autocomplete, [{text,QueryText}]}, _OffsetLimit, Context) ->
     TsQuery = to_tsquery(QueryText, Context),
     case TsQuery of
