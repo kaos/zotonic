@@ -147,6 +147,7 @@ format_price(Price) ->
 get_cart(Context) ->
     case zp_context:get_visitor(shop_cart, Context) of
         undefined -> [];
+        <<>> -> [];
         Cart -> Cart
     end.
 

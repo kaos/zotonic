@@ -294,6 +294,7 @@ cleanup_props(Ps) when is_list(Ps) ->
 cleanup_props(P) -> 
     P.
 
+    to_binary_string([]) -> [];
     to_binary_string(L) when is_list(L) ->
         case zp_string:is_string(L) of
             true -> list_to_binary(L);
