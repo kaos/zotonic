@@ -92,10 +92,9 @@
 			<h3 class="block">Laatste nieuws</h3>
 			<div class="block clearfix news">
 				<ul class="news-list">
-					<li><a href="#"><span>15/03/2009</span> &ndash; Website relesase is...</a></li>
-					<li><a href="#"><span>22/02/2009</span> &ndash; Design fase van star...</a></li>
-					<li><a href="#"><span>13/01/2009</span> &ndash; Nieuwe website in on...</a></li>
-					<li><a href="#"><span>01/01/2009</span> &ndash; Eerste overleggen ge...</a></li>
+					{% for id in m.search[{latest cat="news"}] %}
+					<li><a href="{% url news %}"><span>{{ m.rsc[id].created|date:"d/m/Y" }}</span> &ndash; {{ m.rsc[id].title|ljust:15}}...</a></li>
+					{% endfor %}
 				</ul>
 			</div>
 		</div>	
