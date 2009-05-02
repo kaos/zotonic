@@ -11,7 +11,6 @@
 
 %% interface functions
 -export([
-    init/1,
     periodic_log_check/1,
     payment_start/2,
     payment_completion/1,
@@ -28,11 +27,6 @@
 -define(SKINCODE, "OnCtxIfz").
 -define(SECRET, "hemaworst!").
 
-
-%% Start a timer for periodic check of all incoming adyen notifications.
-init(Context) ->
-    {ok, _} = timer:apply_interval(1000 * 60 * 10, ?MODULE, periodic_log_check, [Context]),
-    ok.
 
 
 %% Handle log entries that were not handled, might be because of crashed between saving the entry and running the queries.

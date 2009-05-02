@@ -13,6 +13,7 @@
     get_by_name/2,
     order_from_cart/3,
     payment_completion/5,
+    set_status/3,
     deallocate_order/2
 ]).
 
@@ -48,6 +49,8 @@ get_by_name(Name, Context) ->
 order_from_cart(TotalAmount, Address, Context) ->
     
     %% 1. Cancel all orders for this visitor that are still waiting for payment (should also do this on the cart and checkout page?)
+    deallocate_open_orders(Context),
+    
     %% 2. Cleanup all orders that are past their waiting time
 
     Allocated = [
@@ -117,10 +120,8 @@ payment_completion(OrderId, NewState, PaymentMethod, _PspReference, Context) ->
             % @todo Send e-mail to VMSII
             skip;
         payment_refused when OldState == new; OldState == payment_pending ->
-            deallocate_order(OrderId, Context),
             payment_refused;
         payment_error when OldState == new; OldState == payment_pending ->
-            deallocate_order(OrderId, Context),
             payment_error;
         payment_pending when OldState == new; OldState == payment_error; OldState == payment_refused ->
             payment_pending;
@@ -129,7 +130,7 @@ payment_completion(OrderId, NewState, PaymentMethod, _PspReference, Context) ->
     
     case UpdateState of
         skip -> ok;
-        _ -> zp_db:q("update shop_order set status = $1, status_modified = now() where id = $2", [UpdateState, OrderId], Context)   
+        _ -> set_status(OrderId, UpdateState, Context)
     end,
     {ok, OrderId}.
 
@@ -137,6 +138,25 @@ mail_customer(Order, Context) ->
     {email, To} = proplists:lookup(email, Order),
     zp_emailer:send_render(To, "email/email_order_confirmation.tpl", [{order, Order}], Context).
     
+
+%% @doc Set a new status of the order. Deallocate order on problems.
+set_status(OrderId, Status, Context) ->
+    zp_db:q("update shop_order set status = $1, status_modified = now() where id = $2", [Status, OrderId], Context),
+    case Status of
+        canceled        -> deallocate_order(OrderId, Context);
+        payment_error   -> deallocate_order(OrderId, Context);
+        payment_refused -> deallocate_order(OrderId, Context);
+        _ -> ok
+    end.
+
+
+%% @doc Deallocate all orders of a visitor that are still open.
+deallocate_open_orders(Context) ->
+    {VisitorId, Context1} = zp_context:ensure_visitor_id(Context),
+    Ids = zp_db:q("select id from shop_order where visitor_id = $1 and status = 'new'", [VisitorId], Context1),
+    [ deallocate_order(Id, Context1) || {Id} <- Ids ].
+    
+
 %% @doc Move the stock allocation in the order lines back to the stock of the skus. All allocated units will be mentioned as backorders.
 deallocate_order(OrderId, Context) ->
     zp_db:q("
@@ -144,12 +164,13 @@ deallocate_order(OrderId, Context) ->
         set stock_avail = stock_avail + shop_order_line.allocated
         from shop_order_line 
         where shop_sku.id = shop_order_line.shop_sku_id
-          and shop_order_line.shop_order_id = $1", [OrderId], Context),
+          and shop_order_line.shop_order_id = $1
+          and shop_order_line.allocated > 0", [OrderId], Context),
     zp_db:q("
         update shop_order_line
         set backorder  = backorder + allocated,
             allocated  = 0
-        where shop_order_id = $1", [OrderId], Context),
+        where shop_order_id = $1 and allocated > 0", [OrderId], Context),
     ok.
     
 
