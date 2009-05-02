@@ -179,7 +179,7 @@ code_change(_OldVsn, State, _Extra) ->
 
 %% @doc Deallocate all orders that are past their expire time
 expire_orders(Context) ->
-    Ids = zp_db:q("select id from shop_order where expire > now() and status = 'new'", Context),
+    Ids = zp_db:q("select id from shop_order where expires > now() and status = 'new'", Context),
     F = fun(Ctx) ->
         [ shop_order:set_status(Id, canceled, Ctx) || {Id} <- Ids ]
     end,
