@@ -81,7 +81,7 @@
 %% Used for search results
 -record(search_result, {result=[], page=1, pagelen, total, all, pages, next, prev}).
 -record(m_search_result, {search_name, search_props, result, page, pagelen, total, pages, next, prev}).
--record(search_sql, {select, from, where="", order="", limit, tables=[], args=[], run_func, extra}).
+-record(search_sql, {select, from, where="", order="", group_by="", limit, tables=[], args=[], run_func, extra}).
 
 %% ACL visibility levels
 -define(ACL_VIS_GROUP, 2).

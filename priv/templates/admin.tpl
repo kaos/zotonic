@@ -109,46 +109,31 @@
 					<div id="dashboard-selling-products">
 						<h3 class="above-list">Best selling products in the last two weeks</h3>
 						{% chart_pie
-								data=[ ['Tacx Cycle Motion Stand',10], ['Duracell AA Plus',30], ['Ortlieb Mud Racer XS',15], ['Shimano v-brake',15], [' Rudy Project Jekyll', 30]]
-								colors='0D8BB1' width=465 height=150 %}
+								data=m.search[{shop_best_selling}].result
+								colors='0D8BB1' width=580 height=150 %}
 					</div>
 
 					<div id="dashboard-orders">
 						<h3 class="above-list">Latest sold products</h3>
 						<ul class="short-list">
 							<li class="headers clearfix">
-								<span class="zp-33">Item(s)</span>
-								<span class="zp-33">Price</span>
-								<span class="zp-33">Date</span>
+								<span class="zp-35">Product</span>
+								<span class="zp-25">Variant</span>
+								<span class="zp-20">Price</span>
+								<span class="zp-20">Date</span>
 							</li>
-							<li>
-								<a href="#" class="clearfix">
-									<span class="zp-33">Shimano v-brake</span>
-									<span class="zp-33">&euro; 22,-</span>
-									<span class="zp-33">March 15, 22:56</span>
-								</a>
-							</li>
-							<li>
-								<a href="#" class="clearfix">
-									<span class="zp-33">Shimano v-brake</span>
-									<span class="zp-33">&euro; 22,-</span>
-									<span class="zp-33">March 15, 22:58</span>
-								</a>
-							</li>
-							<li>
-								<a href="#" class="clearfix">
-									<span class="zp-33">Shimano v-brake</span>
-									<span class="zp-33">&euro; 22,-</span>
-									<span class="zp-33">March 15, 22:56</span>
-								</a>
-							</li>
-							<li>
-								<a href="#" class="clearfix">
-									<span class="zp-33">Shimano v-brake</span>
-									<span class="zp-33">&euro; 22,-</span>
-									<span class="zp-33">March 15, 22:58</span>
-								</a>
-							</li>
+							{% for id, variant, price, date in m.search[{shop_latest_sold}] %}
+								<li>
+									<a href="#" class="clearfix">
+										<span class="zp-35">{{ m.rsc[id].title }}</span>
+										<span class="zp-25">{{ variant|default:"-" }}</span>
+										<span class="zp-20">&euro;{{ price|format_price }}</span>
+										<span class="zp-20">{{ date|date:"F d, H:i" }}</span>
+									</a>
+								</li>
+							{% empty %}
+								<li>Nothing sold yet.</li>
+							{% endfor %}
 						</ul>
 					</div>
 				</div>

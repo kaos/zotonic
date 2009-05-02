@@ -17,7 +17,7 @@ varies(_Params, _Context) -> undefined.
 code_change(_OldVsn, State, _Extra) -> {ok, State}.    
 terminate(_Reason) -> ok.
 
-render(Params, _Vars, _Context, _State) ->
+render(Params, _Vars, Context, _State) ->
     Class      = proplists:get_value(class, Params),
     Style      = proplists:get_value(style, Params),
     Id         = proplists:get_value(id, Params),
@@ -101,7 +101,7 @@ render(Params, _Vars, _Context, _State) ->
     		[]          -> [];
     		<<>>        -> <<>>;
     		AxesRecords ->			
-    			ProcessedAxes = [process_axis(N - 1, lists:nth(N, AxesRecords)) || N <- lists:seq(1, length(AxesRecords))],
+    			ProcessedAxes = [process_axis(N - 1, lists:nth(N, AxesRecords), Context) || N <- lists:seq(1, length(AxesRecords))],
     			AxesPositions = "&chxt=" ++ string:join([X || [X, _, _] <- ProcessedAxes], ","),
     			AxesLabels    = "&chxl=" ++ string:join([X || [_, X, _] <- ProcessedAxes], "|"),
     			AxesColors    = "&chxs=" ++ string:join([X || [_, _, X] <- ProcessedAxes], "|"),
@@ -161,7 +161,7 @@ render(Params, _Vars, _Context, _State) ->
         	])}.
 
 
-process_axis(N, {axis, Axis}) ->
+process_axis(N, {axis, Axis}, Context) ->
     FontSize = proplists:get_value(font_size, Axis, 10),
     Color    = proplists:get_value(color, Axis, "909090"),
     
@@ -173,7 +173,7 @@ process_axis(N, {axis, Axis}) ->
             		OtherPosition -> erlang:error({unknown_axis_position, OtherPosition})
             	end,
 
-	StringLabels = [zp_convert:to_list(X) || X <- proplists:get_value(labels, Axis, [])],
+	StringLabels = [make_label(X, Context) || X <- proplists:get_value(labels, Axis, [])],
 	Labels       = integer_to_list(N) ++ ":|" ++ string:join(StringLabels, "|"),
 	Style        = io_lib:format("~b,~s,~b", [N, zp_convert:to_list(Color), FontSize]),
 	[Position, Labels, Style].
@@ -198,4 +198,10 @@ flatten_color([A|_] = List) when is_list(A) or is_binary(A) or is_atom(A) ->
     string:join([ zp_convert:to_list(Color) || Color <- List ], ",");
 flatten_color(A) ->
     zp_convert:to_list(A).
+
+
+make_label(N, Context) when is_integer(N) ->
+    zp_convert:to_list(m_rsc:p(N, title, Context));
+make_label(L, _Context) -> 
+    zp_convert:to_list(L).
     

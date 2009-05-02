@@ -183,7 +183,37 @@ search({media_category_image, [{cat,Cat}]}, _OffsetLimit, Context) ->
                 and rm.rsc_id = r.id and rm.media_id = m.id",
         tables=[{rsc,"r"}, {media, "m"}],
         args=[CatId]
+    };
+
+
+%% Return the top 10 best selling products in the last two weeks
+search({shop_best_selling, []}, _OffsetLimit, _Context) ->
+    #search_sql{
+        select="sku.rsc_id, count(*) as ct",
+        from="shop_order o, shop_order_line ol, shop_sku sku",
+        where="     ol.shop_sku_id = sku.id 
+                and ol.shop_order_id = o.id 
+                and o.paid 
+                and o.created >= now() - interval '14 days'",
+        group_by="sku.rsc_id",
+        order="ct desc",
+        tables=[],
+        args=[]
+    };
+
+%% Return the latest sold products
+search({shop_latest_sold, []}, _OffsetLimit, _Context) ->
+    #search_sql{
+        select="sku.rsc_id, sku.variant, ol.price_incl, o.created",
+        from="shop_order o, shop_order_line ol, shop_sku sku",
+        where="     ol.shop_sku_id = sku.id 
+                and ol.shop_order_id = o.id 
+                and o.paid",
+        order="o.created desc",
+        tables=[],
+        args=[]
     }.
+
 
 
 

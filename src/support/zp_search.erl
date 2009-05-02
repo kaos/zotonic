@@ -100,7 +100,7 @@ search_result(#search_sql{} = Q, Limit, Context) ->
     end.
 
 
-concat_sql_query(#search_sql{select=Select, from=From, where=Where, order=Order, limit=Limit, args=Args}, {OffsetN, LimitN}) ->
+concat_sql_query(#search_sql{select=Select, from=From, where=Where, group_by=GroupBy, order=Order, limit=Limit, args=Args}, {OffsetN, LimitN}) ->
     Where1 = case Where of
         [] -> [];
         _ -> "where " ++ Where
@@ -109,13 +109,17 @@ concat_sql_query(#search_sql{select=Select, from=From, where=Where, order=Order,
         [] -> [];
         _ -> "order by "++Order
     end,
+    GroupBy1 = case GroupBy of
+        [] -> [];
+        _ -> "group by "++GroupBy
+    end,
     {Parts, FinalArgs} = case Limit of
         undefined ->
             N = length(Args),
             Args1 = Args ++ [OffsetN-1, LimitN],
-            {["select", Select, "from", From, Where1, Order1, "offset", [$$|integer_to_list(N+1)], "limit", [$$|integer_to_list(N+2)]], Args1};
+            {["select", Select, "from", From, Where1, GroupBy1, Order1, "offset", [$$|integer_to_list(N+1)], "limit", [$$|integer_to_list(N+2)]], Args1};
         _ ->
-            {["select", Select, "from", From, Where1, Order1, Limit], Args}
+            {["select", Select, "from", From, Where1, GroupBy1, Order1, Limit], Args}
     end,
     {string:join(Parts, " "), FinalArgs}.
     

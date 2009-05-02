@@ -99,12 +99,14 @@ search_pager(SearchName, Context) ->
 
 
 
-get_result(N, Result, _Context) when is_integer(N) ->
+get_result(N, #m_search_result{result=Result}, _Context) when is_integer(N) ->
     try
-        lists:nth(N, Result#m_search_result.result)
+        lists:nth(N, Result#search_result.result)
     catch
         _:_ -> undefined
     end;
+get_result(result, #m_search_result{result=Result}, _Context) ->
+    Result#search_result.result;
 get_result(name, Result, _Context) ->
     Result#m_search_result.search_name;
 get_result(props, Result, _Context) ->
