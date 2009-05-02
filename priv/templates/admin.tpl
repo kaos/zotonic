@@ -45,7 +45,7 @@
 			<div class="zp-50">
 				<div class="padding">
 					<div id="dashboard-pages">
-						<h3 class="above-list">Last modified articles</h3>
+						<h3 class="above-list">Latest modified articles</h3>
 						<ul class="short-list">
 							<li class="headers clearfix">
 								<span class="zp-35">Title</span>
@@ -55,7 +55,7 @@
 							</li>
 							{% for id in m.search[{latest cat="article"}] %}
 							<li>
-								<a href="#" class="clearfix">
+								<a href="{% url admin_edit_rsc id=id %}" class="clearfix">
 									<span class="zp-35">{{ m.rsc[id].title }}</span>
 									<span class="zp-25">{{ m.rsc[id].category.name }}</span>
 									<span class="zp-20">{{ m.rsc[id].modified|date:"F d, H:i" }}</span>
@@ -74,7 +74,7 @@
 					</div>
 				
 					<div id="dashboard-products">
-						<h3 class="above-list">Last modified products</h3>
+						<h3 class="above-list">Latest modified products</h3>
 						<ul class="short-list">
 							<li class="headers clearfix">
 								<span class="zp-35">Title</span>
@@ -84,7 +84,7 @@
 							</li>
 							{% for id in m.search[{latest cat="product"}] %}
 							<li>
-								<a href="#" class="clearfix">
+								<a href="{% url admin_edit_rsc id=id %}" class="clearfix">
 									<span class="zp-35">{{ m.rsc[id].title }}</span>
 									<span class="zp-25">{{ m.rsc[id].category.name }}</span>
 									<span class="zp-20">{{ m.rsc[id].modified|date:"F d, H:i" }}</span>
@@ -124,7 +124,7 @@
 							</li>
 							{% for id, variant, price, date in m.search[{shop_latest_sold}] %}
 								<li>
-									<a href="#" class="clearfix">
+									<a href="{% url admin_edit_rsc id=id %}" class="clearfix">
 										<span class="zp-35">{{ m.rsc[id].title }}</span>
 										<span class="zp-25">{{ variant|default:"-" }}</span>
 										<span class="zp-20">&euro;{{ price|format_price }}</span>
