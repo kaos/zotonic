@@ -111,7 +111,9 @@ payment_completion(OrderId, NewState, PaymentMethod, _PspReference, Context) ->
                     paid = true,
                     status_modified = now()
                 where id = $3", [NewState, PaymentMethod, OrderId], Context),
-            % @todo Send e-mail to customer
+            
+            Order = get(OrderId, Context),
+            mail_customer(Order, Context),
             % @todo Send e-mail to VMSII
             skip;
         payment_refused when OldState == new; OldState == payment_pending ->
@@ -131,7 +133,10 @@ payment_completion(OrderId, NewState, PaymentMethod, _PspReference, Context) ->
     end,
     {ok, OrderId}.
 
-
+mail_customer(Order, Context) ->
+    {email, To} = proplists:lookup(email, Order),
+    zp_emailer:send_render(To, "email/email_order_confirmation.tpl", [{order, Order}], Context).
+    
 %% @doc Move the stock allocation in the order lines back to the stock of the skus. All allocated units will be mentioned as backorders.
 deallocate_order(OrderId, Context) ->
     zp_db:q("
