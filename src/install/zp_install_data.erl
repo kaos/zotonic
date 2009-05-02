@@ -58,8 +58,8 @@ install_group(C) ->
     Groups = [
         %   tp name                admin  spvsr  cpub   ppub   props
         [1, 2, "admins",           true,  true,  true,  true,  [{title, {trans, [{en, "Administrators"},   {nl, "Beheerders"}]}}]],
-        [2, 2, "editors",          false, false, true,  true,  [{title, {trans, [{en, "Editors"},          {nl, "Redacteurs"}]}}]],
-        [3, 2, "communityeditors", false, false, true,  false, [{title, {trans, [{en, "Community Editors"},{nl, "Gemeenschap Redacteurs"}]}}]],
+        [2, 2, "editors",          false, false, true,  true,  [{title, {trans, [{en, "Editors"},          {nl, "Redacteuren"}]}}]],
+        [3, 2, "communityeditors", false, false, true,  false, [{title, {trans, [{en, "Community Editors"},{nl, "Gemeenschap redacteuren"}]}}]],
         [4, 2, "supervisors",      false, true,  false, false, [{title, {trans, [{en, "Supervisors"},      {nl, "Toezichthouders"}]}}]],
         [5, 2, "content",          false, false, false, false, [{title, {trans, [{en, "Content"},          {nl, "Inhoud"}]}}]]
     ],
@@ -73,13 +73,15 @@ install_group(C) ->
 
 install_category(C) ->
     Cats = [
-        {1, undefined, 1, other,       [{title, {trans, [{en, "Uncategorized"},  {nl, "Geen categorie"}]}}] },
+        {1, undefined, 1, other,       [{title, {trans, [{en, "Uncategorized"},  {nl, "Zonder categorie"}]}}] },
         {2, undefined, 1, person,      [{title, {trans, [{en, "Person"},         {nl, "Persoon"}]}}] },
         {3, undefined, 1, artifact,    [{title, {trans, [{en, "Artifact"},       {nl, "Artefact"}]}}] },
         {4, 3,         1, publication, [{title, {trans, [{en, "Publication"},    {nl, "Publicatie"}]}}] },
         {5, 4,         2, review,      [{title, {trans, [{en, "Review"},         {nl, "Beoordeling"}]}}] },
         {6, 4,         1, article,     [{title, {trans, [{en, "Article"},        {nl, "Artikel"}]}}] },
-        {7, 3,         2, product,     [{title, {trans, [{en, "Product"},        {nl, "Product"}]}}] }
+        {7, 3,         3, product,     [{title, {trans, [{en, "Product"},        {nl, "Product"}]}}] },
+        {8, 3,         2, event,       [{title, {trans, [{en, "Event"},          {nl, "Evenement"}]}}] },
+        {9, 6,         1, news,        [{title, {trans, [{en, "News"},           {nl, "Nieuws"}]}}] }
     ],
     [ {ok,1} = pgsql:equery(C, "
             insert into category (id, parent_id, seq, name, props)
@@ -95,7 +97,8 @@ install_rsc(C) ->
     Rsc = [
         % id  uri       vsfr  grp  cat  name,     props
         [ 1,  "/id/1",  0,    1,   2,   "admin",  [{title,"Site Administrator"}] ],
-        [ 2,  "/id/2",  0,    1,   6,   "about",  [{title,"About Zophrenic"}, {body, "<p>Some nice text in the body.</p>"}] ]
+        [ 2,  "/id/2",  0,    1,   6,   "about",  [{title,"About Zophrenic"}, {body, "<p>Some nice text in the body.</p>"}] ],
+        [ 3,  "/id/3",  0,    1,   9,   undefined,[{title,"Some News"}, {body, "<p>And the text of the news should be typed here.</p>"}] ]
     ],
     
     [ {ok,1} = pgsql:equery(C, "
