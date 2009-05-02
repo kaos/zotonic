@@ -11,7 +11,7 @@
 			{% pager result=result dispatch="news" %}
 
 			{% for id in result %}
-			<h3 class="block">{{ m.rsc[id].title }} <span class="right">{{ m.rsc[id].created|date:"Y-m-d" }}&nbsp;</span></h3>
+			<h3 class="block">{{ m.rsc[id].title }} <span>{{ m.rsc[id].created|date:"Y-m-d" }}&nbsp;</span></h3>
 			<div class="block clearfix">
 				{% image m.rsc[id].media[1].filename width=180 height=140 crop alt=m.rsc[rsc_id].title class="left" %}
 				<div class="zp-70">
