@@ -40,16 +40,6 @@
 					</div>
 				</div>
 				{% endwith %}
-
-{#
-				<div class="product-price clearfix">
-					<h3>&euro;{% include "_price.tpl" id=rsc_id %} <!--span>incl. btw</span--></h3>
-
-					<div class="clearfix button-wrapper right">
-						{% button class="buy-me right-side-button" text="Bekijk product &raquo;" action={redirect id=rsc_id} %}
-					</div>
-				</div>
-#}
 			</div>
 		</div>
 		{% empty %}
