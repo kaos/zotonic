@@ -21,6 +21,7 @@
 -include_lib("webmachine_resource.hrl").
 -include_lib("include/zophrenic.hrl").
 
+-define(AUTH_HEAD, "Basic realm=AdyenNotification").
 
 dispatch() ->
     [
@@ -35,7 +36,21 @@ init([]) -> {ok, []}.
 is_authorized(ReqData, _Context) ->
     Context1 = zp_context:new(ReqData, ?MODULE),
     Context2 = zp_context:ensure_qs(Context1),
-    ?WM_REPLY(true, Context2).
+    case wrq:get_req_header("Authorization", ReqData) of
+        "Basic " ++ Base64 ->
+            Username = zp_convert:to_list(m_config:get_value(adyen, notification_username, "adyen", Context2)),
+            Password = zp_convert:to_list(m_config:get_value(adyen, notification_password, "plop!", Context2)),
+            case string:tokens(base64:mime_decode_to_string(string:strip(Base64)), ":") of
+                [Username, Password] -> 
+                    ?WM_REPLY(true, Context2);
+                _ ->
+                    ?LOG("Adyen notification: wrong username and/or password.", []),
+                    ?WM_REPLY(?AUTH_HEAD, Context2)
+            end;
+        _ ->
+            ?WM_REPLY(?AUTH_HEAD, Context2)
+    end.
+   
 
 allowed_methods(ReqData, Context) ->
     {['POST'], ReqData, Context}.
@@ -46,7 +61,6 @@ content_types_provided(ReqData, Context) ->
 
 process_post(ReqData, Context) ->
     Context1 = ?WM_REQ(ReqData, Context),
-    QArgs = zp_context:get_q_all(Context1),
 
     % Handle the notification, save it in the database
     shop_adyen:notification(zp_context:get_q_all(Context1), Context1),

@@ -17,6 +17,7 @@
 
 install(Context) ->
     F = fun(Ctx) ->
+        shop_adyen:install(Ctx),
         ok = install_tables(Ctx),
         ok = install_order_status(Ctx),
         ok = install_cat(Ctx),

@@ -11,6 +11,7 @@
 
 %% interface functions
 -export([
+    install/1,
     periodic_log_check/1,
     payment_start/2,
     payment_completion/1,
@@ -22,11 +23,14 @@
 -include_lib("zophrenic.hrl").
 -include_lib("shop.hrl").
 
--define(PAYMENT_PAGE, "https://test.adyen.com/hpp/pay.shtml").
--define(MERCHANT_ACCOUNT, "HansStruijkFietsenNL").
--define(SKINCODE, "OnCtxIfz").
--define(SECRET, "hemaworst!").
 
+install(Context) ->
+    m_config:set_value(adyen, notification_username, "adyen", Context),
+    m_config:set_value(adyen, notification_password, "plop!", Context),
+    m_config:set_value(adyen, payment_page, "https://test.adyen.com/hpp/pay.shtml", Context),
+    m_config:set_value(adyen, merchant_account, "HansStruijkFietsenNL", Context),
+    m_config:set_value(adyen, skincode, "OnCtxIfz", Context),
+    m_config:set_value(adyen, secret, "hemaworst!", Context).
 
 
 %% Handle log entries that were not handled, might be because of crashed between saving the entry and running the queries.
@@ -44,25 +48,25 @@ periodic_log_check(Context) ->
 %% @doc Build the payment uri to be used for paying the order.
 %% @spec payment_uri(Id, Context) -> String
 payment_start(Id, Context) ->
-    
     NowSecs = calendar:datetime_to_gregorian_seconds(calendar:local_time()),
     Order = zp_db:assoc_row("select * from shop_order where id = $1", [Id], Context),
 
     MerchantReference = integer_to_list(Id),
-    PaymentAmount = integer_to_list(proplists:get_value(total_price_incl, Order)),
-    CurrencyCode = "EUR",
-    ShipBeforeDate = erlydtl_dateformat:format(calendar:gregorian_seconds_to_datetime(NowSecs + ?SHOP_ORDER_SHIPMENT), "Y-m-d"),
-    SkinCode = ?SKINCODE,
-    MerchantAccount = ?MERCHANT_ACCOUNT,
-    ShopperLocale = case zp_context:language(Context) of en -> "en_GB"; Lang -> atom_to_list(Lang) end,
-    SessionValidity = erlydtl_dateformat:format(calendar:universal_time_to_local_time(proplists:get_value(expires, Order)), "c"),
-    ShopperEmail = proplists:get_value(email, Order),
-    ShopperReference = integer_to_list(proplists:get_value(visitor_id, Order)),
-    AllowedMethods = "paypal,card,ideal",
-    BlockedMethods = "",
-    OrderData = "",
+    PaymentAmount     = integer_to_list(proplists:get_value(total_price_incl, Order)),
+    CurrencyCode      = "EUR",
+    ShipBeforeDate    = erlydtl_dateformat:format(calendar:gregorian_seconds_to_datetime(NowSecs + ?SHOP_ORDER_SHIPMENT), "Y-m-d"),
+    SkinCode          = m_config:get_value(adyen, skincode, Context),
+    MerchantAccount   = m_config:get_value(adyen, merchant_account, Context),
+    ShopperLocale     = case zp_context:language(Context) of en -> "en_GB"; Lang -> atom_to_list(Lang) end,
+    SessionValidity   = erlydtl_dateformat:format(calendar:universal_time_to_local_time(proplists:get_value(expires, Order)), "c"),
+    ShopperEmail      = proplists:get_value(email, Order),
+    ShopperReference  = integer_to_list(proplists:get_value(visitor_id, Order)),
+    AllowedMethods    = "paypal,card,ideal",
+    BlockedMethods    = "",
+    OrderData         = "",
+    Secret            = m_config:get_value(adyen, secret, Context),
 
-    MerchantSig = sign(?SECRET, [PaymentAmount, CurrencyCode, ShipBeforeDate, MerchantReference, 
+    MerchantSig = sign(Secret, [PaymentAmount, CurrencyCode, ShipBeforeDate, MerchantReference, 
                                 SkinCode, MerchantAccount, SessionValidity, ShopperEmail, ShopperReference, 
                                 AllowedMethods, BlockedMethods]),
 
@@ -86,7 +90,8 @@ payment_start(Id, Context) ->
         {"merchantSig", MerchantSig}
     ],
 
-    ?PAYMENT_PAGE ++ "?" ++ mochiweb_util:urlencode(Args).
+    PaymentPage = zp_convert:to_list(m_config:get_value(adyen, payment_page, Context)),
+    PaymentPage ++ [$? | mochiweb_util:urlencode(Args)].
 
 
 
@@ -95,15 +100,16 @@ payment_start(Id, Context) ->
 payment_completion(Context) ->
     % http://127.0.0.1:8000/adyen/result?merchantReference=16&skinCode=OnCtxIfz&shopperLocale=nl&paymentMethod=ideal&authResult=AUTHORISED&pspReference=8612409656055305&merchantSig=8AjEyaKiP1xz%2Bp8Ef3BK50T%2Fu1Y%3D
     MerchantReference = zp_context:get_q("merchantReference", Context, ""),
-    SkinCode      = zp_context:get_q("skinCode", Context, ""),
+    SkinCode       = zp_context:get_q("skinCode", Context, ""),
     _ShopperLocale = zp_context:get_q("shopperLocale", Context, ""),
-    PaymentMethod = zp_context:get_q("paymentMethod", Context, ""),
-    AuthResult    = zp_context:get_q("authResult", Context, ""),
-    PspReference  = zp_context:get_q("pspReference", Context, ""),
-    MerchantSig   = zp_context:get_q("merchantSig", Context),
+    PaymentMethod  = zp_context:get_q("paymentMethod", Context, ""),
+    AuthResult     = zp_context:get_q("authResult", Context, ""),
+    PspReference   = zp_context:get_q("pspReference", Context, ""),
+    MerchantSig    = zp_context:get_q("merchantSig", Context),
+    Secret         = m_config:get_value(adyen, secret, Context),
 
     CheckSig = try
-        MerchantSig = binary_to_list(sign(?SECRET, [AuthResult, PspReference, MerchantReference, SkinCode]))
+        MerchantSig = binary_to_list(sign(Secret, [AuthResult, PspReference, MerchantReference, SkinCode]))
     catch
         error:{badmatch, _} -> {error, sig_invalid}
     end,
