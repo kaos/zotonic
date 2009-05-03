@@ -51,7 +51,7 @@
 					{% if brand_id %} en het merk <em>{{ m.rsc[brand_id].title }}</em>{% endif %}
 					</h4>
 			{% else %}
-				<h4>Vul uw zoekvraag in en probeer opnieuw.</em></h4>
+				<h4>Vul uw zoekvraag in en probeer opnieuw.</h4>
 			{% endif %}
 		</div>
 
@@ -60,7 +60,7 @@
 			{% for id in m.search[{featured cat="product"}] %}
 				<li class="zp-33 {% ifequal forloop.counter "1" %}first{% endifequal %} {% ifequal forloop.counter "4" %}first{% endifequal %}">
 					<div class="block">
-						<a href="{{ m.rsc[id].page_url }}">{% image m.rsc[id].media[1].filename width=216 height=130 crop %}</a>
+						<a href="{{ m.rsc[id].page_url }}">{% image m.rsc[id].media[1].filename width=216 height=130 crop alt=m.rsc[id].title %}</a>
 						<h3><a href="{{ m.rsc[id].page_url }}">{{ m.rsc[id].title }}</a></h3>
 						<div class="product-price clearfix">
 							<h3>&euro;{% include "_price.tpl" %}</h3>
