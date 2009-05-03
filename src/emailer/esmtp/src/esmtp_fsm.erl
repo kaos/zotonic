@@ -102,28 +102,31 @@ ehlo(Fsm,Name) -> gen_fsm:sync_send_event(Fsm,{ehlo,Name}).
 sendemail(Fsm,From,To,Message) ->
     case mail_from(Fsm,From) of
 	{ok, _Resp}         -> sendemail(Fsm,To,Message);
-	{mfrom_error, _Resp} -> 
+	{mfrom_error, _Resp} = Resp -> 
 	    %io:format("mfrom_error ~p~n",[Resp]),
-	    rset(Fsm);
+	    rset(Fsm),
+	    Resp;
 	Resp                -> Resp
     end.
 %% sendemail/3 only used by sendemail/4
 sendemail(Fsm,To,Message) ->
 	case rcpt_to(Fsm,To) of
-	    {ok, _Resp}        -> sendemail(Fsm,Message);
-	    {rcpt_error, _Resp} -> 
+    {ok, _Resp}        -> sendemail(Fsm,Message);
+    {rcpt_error, _Resp} = Resp -> 
 		%io:format("rcpt_error ~p~n",[Resp]),
-		rset(Fsm);
-	    Resp               -> Resp
+		rset(Fsm),
+		Resp;
+    Resp               -> Resp
 	end.
 %% sendemail/2 only used by sendemail/3
 sendemail(Fsm,Message) ->
 	case message(Fsm,Message) of
-	    {ok, _Resp}        -> ok;
-	    {data_error, _Resp} -> 
+    {ok, _Resp}        -> ok;
+    {data_error, _Resp} = Resp -> 
 		%io:format("data_error ~p~n",[Resp]),
-		rset(Fsm);
-	    Resp               -> Resp
+	    rset(Fsm),
+	    Resp;
+	Resp               -> Resp
 	end.
 
 %% individual functions used for sending emails
