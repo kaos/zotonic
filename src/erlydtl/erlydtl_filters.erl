@@ -202,6 +202,12 @@ stringify(In) when is_float(In) ->
 stringify(In) ->
     In.
 
+slugify(undefined) ->
+    undefined;
+slugify(Input) ->
+    zp_string:to_slug(Input).
+
+
 join([Input], Separator) when is_list(Input) ->
     string:join(Input, Separator).
 
