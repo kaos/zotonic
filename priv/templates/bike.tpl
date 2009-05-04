@@ -28,7 +28,7 @@
 		</div>
 		
 		<div class="notification notice clearfix" id="test-drive-form" style="display: none;">
-			<form action="postbak" type="post">
+			<form action="postback" type="post">
 				<fieldset>
 					<h3>Vraag een proefrit aan</h3>
 						<div class="form-item">
@@ -47,7 +47,7 @@
 						{% validate id="client-email" type={presence} type={email}%}
 					</div>
 					<div class="form-item clearfix">
-						{% button id="product-review-form-trigger" text="Verstuur formulier" class="buy-me" %}
+						{% button id="test-drive-form-trigger" text="Verstuur formulier" class="buy-me" %}
 					</div>
 				</fieldset>
 			</form>

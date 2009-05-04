@@ -149,11 +149,12 @@ render(Params, _Vars, Context, _State) ->
 
     ImageUri = lists:flatten([Path, Type, TitleText, TitleStyle, Size, Grid, BGColors, LegendLocation, BarSize, Axes, Data]),
 	{ok, zp_tags:render_tag(
-	        <<"image">>, 
+	        <<"img">>, 
 	        [
         		{<<"id">>,     Id},
         		{<<"name">>,   Id},
         		{<<"class">>,  [<<"google_chart">>, Class]},
+				{<<"alt">>,    <<"google chart">>},
         		{<<"style">>,  Style},
         		{<<"src">>,    ImageUri},
         		{<<"width">>,  Width},
