@@ -109,7 +109,7 @@ urls(Start, Middle, End, Dispatch, DispatchArgs, Context) ->
             % Now Start is always of the format [1]
             {UrlStart ++ UrlMiddle, lists:max(Middle) + 1};
         _ ->
-            {UrlStart ++ [sep|UrlMiddle], lists:max(Middle) + 1}
+            {UrlStart ++ [{none, sep}|UrlMiddle], lists:max(Middle) + 1}
     end,
     case End of
         [] ->
@@ -117,7 +117,7 @@ urls(Start, Middle, End, Dispatch, DispatchArgs, Context) ->
         [M|_] -> 
             if
                 M == Next -> Part1 ++ UrlEnd;
-                true -> Part1 ++ [sep, UrlEnd]
+                true -> Part1 ++ [{none, sep}|UrlEnd]
             end
     end.
 
