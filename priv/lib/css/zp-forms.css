@@ -40,6 +40,11 @@ label {
 	margin: 0 0 11px 0;
 }
 
+	.form-item button,
+	.form-item button.buy-me {
+		margin: 0;
+	}
+
 textarea,
 input[type="text"],
 input[type="password"] { 

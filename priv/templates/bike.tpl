@@ -15,7 +15,7 @@
 					<h3>&euro;1950 <span>incl. btw</span></h3>
 					
 					<div class="clearfix button-wrapper right">
-						<button class="buy-me right-side-button">Vraag een proefrit aan &raquo;</button>
+						{% button class="right right-side-button" text="Vraag een proefrit aan &raquo;" action={slide_fade_in target="test-drive-form"} %}
 					</div>
 				</div>
 				
@@ -25,7 +25,33 @@
 				<h3>Extra gegevens</h3>
 				<p>At Trek, we believe in simplicity, and the idea that complex problems can be solved in simple ways.</p>
 			</div>
-		</div>	
+		</div>
+		
+		<div class="notification notice clearfix" id="test-drive-form" style="display: none;">
+			<form action="postbak" type="post">
+				<fieldset>
+					<h3>Vraag een proefrit aan</h3>
+						<div class="form-item">
+						<label for="client-name">Naam</label>
+						<input type="text" id="client-name" name="client-name" value="" />
+						{% validate id="client-name" type={presence} %}
+					</div>
+					<div class="form-item">
+						<label for="client-phone">Telefoon</label>
+						<input type="text" id="client-phone" name="client-phone" value="" />
+						{% validate id="client-phone" type={presence} %}
+					</div>
+					<div class="form-item">
+						<label for="client-email">E-mail</label>
+						<input type="text" id="client-email" name="client-email" value="" />
+						{% validate id="client-email" type={presence} type={email}%}
+					</div>
+					<div class="form-item clearfix">
+						{% button id="product-review-form-trigger" text="Verstuur formulier" class="buy-me" %}
+					</div>
+				</fieldset>
+			</form>
+		</div>
 	</div>
 {% endblock %}
 
@@ -42,27 +68,15 @@
 			{% endfor %}
 			</ul>
 			
-			<h2>Gerelateerde producten</h2>
-			<ul class="related-articles">
-				<li class="block clearfix">
-					{% image "trapper_klein.jpg" width=67 height=50 crop alt="trapper" %}
-					<h4><a href="#">Shimano</a></h4>
-					<p>PD-6620-G Trapper</p> 
-					<p><a href="#">Bestel snel &raquo;</a></p>
-				</li>
-				<li class="block clearfix">
-					{% image "trapper_klein.jpg" width=67 height=50 crop alt="trapper" %}
-					<h4><a href="#">Shimano</a></h4>
-					<p>PD-6620-G Trapper</p> 
-					<p><a href="#">Bestel snel &raquo;</a></p>
-				</li>
-				<li class="block clearfix">
-					{% image "trapper_klein.jpg" width=67 height=50 crop alt="trapper" %}
-					<h4><a href="#">Shimano</a></h4>
-					<p>PD-6620-G Trapper</p> 
-					<p><a href="#">Bestel snel &raquo;</a></p>
-				</li>
+		{% with m.rsc[rsc_id].brand[1] as brand_id %}
+			<h3 class="block">Merken</h3>
+			<ul class="sub-navigation">
+				<li><a href="{% url overview cat=parent_cat.name subcat=cat.name %}">Alle merken <span class="amount">({{ prod_count|default:"-" }})</span></a></li>
+				{% for b_id, b_name, b_count in cat_brand %}
+				    <li><a {% ifequal brand_id b_id %}class="current" {% endifequal %} href="{% url overview cat=parent_cat.name subcat=cat.name brand=b_name %}">{{m.rsc[b_id].title}} <span class="amount">({{ b_count|default:"-" }})</span></a></li>
+				{% endfor %}
 			</ul>
+		{% endwith %}
 		</div>
 	</div>
 {% endblock %}
