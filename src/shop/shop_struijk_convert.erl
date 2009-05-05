@@ -126,6 +126,7 @@ import_rsc(Id, Name, _Variant, Descr, Brand, Group, Context) ->
                 {is_published, true},
                 {is_authoritative, true},
                 {title, {trans, [{nl, Name}]}},
+                {slug, Name},
                 {body, {trans, [{nl, Descr}]}},
                 {category_id, CatId},
                 {group_id, 1}
