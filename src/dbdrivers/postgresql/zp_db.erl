@@ -55,7 +55,7 @@ transaction(Function, #context{dbc=undefined} = Context) ->
              catch
                 _:Why ->
                     pgsql:squery(C, "ROLLBACK"),
-                    {rollback, Why}
+                    {rollback, {Why, erlang:get_stacktrace()}}
              end,
     pgsql_pool:return_connection(Db, C),
     Result;
