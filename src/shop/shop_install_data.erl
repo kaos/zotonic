@@ -328,7 +328,7 @@ install_rsc(Context) ->
             {slug, "ortlieb-ultimate-5-classic"},
             {category_id, m_category:name_to_id_check(bags, Context)},
             {product_nr, 735},
-            {name, "product-735"},
+            {name, "product_735"},
             {intro, "De ULTIMATE5 modellen zijn van bijzonder duurzaam weefsel en wegen praktisch niets."},
             {body, {trans, [{nl, "
 <p>Landkaart, zonnebril, papieren of energierepen - aan het stuur heeft u alles binnen handbereik. De ULTIMATE5 modellen zijn van bijzonder duurzaam weefsel en wegen praktisch niets. Ze zijn even snel aangebracht als weer verwijderd en bewijzen hun diensten ook graag als schoudertas. Aan de fiets zijn ze betrouwbaar tegen diefstal beveiligd dankzij de afsluitbare montage aan het stuur. Een verlengadapter voor sterk gebogen sturen wordt meegeleverd (extra accessoire).</p>
@@ -346,7 +346,7 @@ install_rsc(Context) ->
             {slug, "ortlieb-mud-racer-xs"},
             {category_id, m_category:name_to_id_check(bags, Context)},
             {product_nr, 1271},
-            {name, "product-1271"},
+            {name, "product_1271"},
             {intro, "Lorem ipsum dolor sit amet, consectetur adipisicing elit"},
             {body, "<p>Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.</p>"}
         ],
@@ -356,7 +356,7 @@ install_rsc(Context) ->
             {category_id, m_category:name_to_id_check(glasses, Context)},
             {intro, "Lorem ipsum dolor sit amet, consectetur adipisicing elit"},
             {product_nr, 712},
-            {name, "product-712"}
+            {name, "product_712"}
         ],
         [
             {title, "Duracell AA Plus"},
@@ -364,14 +364,14 @@ install_rsc(Context) ->
             {category_id, m_category:name_to_id_check(batteries, Context)},
 			{intro, "Lorem ipsum dolor sit amet, consectetur adipisicing elit"},
             {product_nr, 1610},
-            {name, "product-1610"}
+            {name, "product_1610"}
         ],
         [
             {title, "Cateye Strada (Draadloos)"},
             {slug, "cateye-strada-draadloos"},
             {category_id, m_category:name_to_id_check(bikecomputers, Context)},
             {product_nr, 1591},
-            {name, "product-1591"},
+            {name, "product_1591"},
             {intro, "Strak, ligt gewicht en elegant, Cateye perfectioneert het design van een fietscomputer met de Strada."},
             {body, "<p>Strak, ligt gewicht en elegant, Cateye perfectioneert het design van een fietscomputer met de Strada. Laat het slanke design u niet misleiden, de Strada heeft het grootste display en lettertype uit zijn klasse en alle functies die u nodig heeft. De Strada monteert handig en snel op praktische iedere fiets.</p>
             <p>De Strada is draadloos, met draad of met cadans meter verkrijgbaar.</p>
@@ -394,7 +394,7 @@ install_rsc(Context) ->
             {slug, "tacx-cycle-motion-stand"},
             {category_id, m_category:name_to_id_check(montagestands, Context)},
             {product_nr, 1636},
-            {name, "product-1636"},
+            {name, "product_1636"},
             {intro, "Ideale montagestandaard voor de zwaardere werkzaamheden."},
             {body, "<p>Ideale montagestandaard voor de zwaardere werkzaamheden. Uitgevoerd met verplaatsbaar montageblad. De fiets wordt gefixeerd aan de voor- of achtervork en staat stevig op een kunststof bracketsteun. De vorkhouders zijn zowel in hoogte als in lengte verschuifbaar. Geschikt voor racefietsen en mountainbikes met een wieldiameter van 24 t/m 28 inch.</p>"}
         ],
@@ -433,12 +433,12 @@ install_rsc(Context) ->
     ],
     
     BrandEdges = [
-        {"product-735", "ortlieb"},
-        {"product-1271", "ortlieb"},
-        {"product-712", "rudy"},
-        {"product-1610", "duracell"},
-        {"product-1591", "cateye"},
-        {"product-1636", "tacx"}
+        {"product_735", "ortlieb"},
+        {"product_1271", "ortlieb"},
+        {"product_712", "rudy"},
+        {"product_1610", "duracell"},
+        {"product_1591", "cateye"},
+        {"product_1636", "tacx"}
     ],
     
     Rets = [ zp_db:insert(rsc, [{is_published, true}, {visible_for, 0}, {group_id, 1}, {modifier_id, 1}, {creator_id, 1} | R], Context) || R <- Rsc ],
