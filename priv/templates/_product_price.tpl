@@ -8,25 +8,26 @@
 		Via event handler: rsc_id, variant
 #}
 
+{% with m.shop_product[rsc_id].variants as variants %}
 {% with m.shop_product[rsc_id].price as p %}
 	{% if p.old_price %}
 		<div class="notification notice">Oude prijs &euro;{{ p.old_price|format_price }} nu voor:</div>
 	{% endif %}
 	
-	{% if p.is_variant %}
+	{% if not variants|length_is:1 %}
 		<div class="notification notice">Dit product heeft meerdere varianten.</div>
 	{% endif %}
 
 	<div class="product-price clearfix">
-		{% if p.is_variant %}
+		{% if not variants|length_is:1 %}
 			<div class="product-choose-variant">
 				{% wire id="choose-variant" type="change" action={shop_select_variant id=rsc_id} %}
 				<select id="choose-variant">
 					<option value="">Maak uw keuze</option>
 				
-					{% for v in m.shop_product[rsc_id].variants %}
+					{% for v in variants %}
 						<option value="{{ v.variant }}"{% ifequal v.variant variant %} selected="selected" {% endifequal %}>
-							{{ v.title }} - &euro;{{ v.price_actual|format_price }}
+							{% if v.title %}{{ v.title }}{% else %}{{ v.variant }}{% endif %} - &euro;{{ v.price_actual|format_price }}
 						</option>
 					{% endfor %}
 				</select>
@@ -50,7 +51,9 @@
 			<div class="clearfix button-wrapper right">
 				{% button id="product-buy-basket" class="buy-me right-side-button" text="In winkelmand &raquo;" action={shop_buynow id=rsc_id variant=""} %}
 			</div>
+			
 		{% endif %}
 		
 	</div>
+{% endwith %}
 {% endwith %}

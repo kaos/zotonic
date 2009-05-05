@@ -255,6 +255,7 @@ model_pgsql() ->
     "CREATE TABLE media
     (
       id serial NOT NULL,
+      name character varying(80),
       visible_for integer NOT NULL DEFAULT 1, -- 0 = public, 1 = community, 2 = group
       group_id int NOT NULL,
       created timestamp with time zone NOT NULL DEFAULT now(),
@@ -266,6 +267,7 @@ model_pgsql() ->
       props bytea,
       CONSTRAINT media_pkey PRIMARY KEY (id),
       CONSTRAINT media_filename_key UNIQUE (filename),
+      CONSTRAINT media_name_key UNIQUE (name),
       CONSTRAINT fk_media_group_id FOREIGN KEY (group_id)
         REFERENCES \"group\" (id)
         ON UPDATE CASCADE ON DELETE CASCADE,
@@ -304,72 +306,72 @@ model_pgsql() ->
     "CREATE INDEX rsc_media_seq_key ON rsc_media(rsc_id, seq)",
 
     % Table prop_group
-    % Defines a group of properties
+    % Defines a group of features
 
-    "CREATE TABLE prop_group
+    "CREATE TABLE feature_group
     (
         id serial NOT NULL,
         props bytea,
-        CONSTRAINT prop_group_pkey PRIMARY KEY (id)
+        CONSTRAINT feature_group_pkey PRIMARY KEY (id)
     )",
 
-    % Table prop
-    % Defines the name(s) of a property.
+    % Table feature
+    % Defines the name(s) of a feature.
 
-    "CREATE TABLE prop
+    "CREATE TABLE feature
     (
       id serial NOT NULL,
-      prop_group_id int NOT NULL,
+      feature_group_id int NOT NULL,
       props bytea,
-      CONSTRAINT prop_pkey PRIMARY KEY (id),
-      CONSTRAINT fk_prop_prop_group_id FOREIGN KEY (prop_group_id)
-        REFERENCES prop_group(id)
+      CONSTRAINT feature_pkey PRIMARY KEY (id),
+      CONSTRAINT fk_feature_feature_group_id FOREIGN KEY (feature_group_id)
+        REFERENCES feature_group(id)
         ON UPDATE CASCADE ON DELETE CASCADE
     )",
 
-    "CREATE INDEX fki_prop_prop_group_id ON prop(prop_group_id)",
+    "CREATE INDEX fki_feature_feature_group_id ON feature(feature_group_id)",
 
-    % Table prop_value
-    % Holds the different values a property can have.
+    % Table feature_value
+    % Holds the different values a feature can have.
 
-    "CREATE TABLE prop_value
+    "CREATE TABLE feature_value
     (
       id serial NOT NULL,
-      prop_id int NOT NULL,
+      feature_id int NOT NULL,
       props bytea,
-      CONSTRAINT prop_value_pkey PRIMARY KEY (id),
-      CONSTRAINT fk_prop_value_prop_id FOREIGN KEY (prop_id)
-        REFERENCES prop(id)
+      CONSTRAINT feature_value_pkey PRIMARY KEY (id),
+      CONSTRAINT fk_feature_value_feature_id FOREIGN KEY (feature_id)
+        REFERENCES feature(id)
         ON UPDATE CASCADE ON DELETE CASCADE
     )",
 
-    "CREATE INDEX fki_prop_value_prop_id ON prop_value(prop_id)",
+    "CREATE INDEX fki_feature_value_prop_id ON feature_value(feature_id)",
 
-    % Table rsc_prop
-    % Holds a property (w/ value) of a resource
+    % Table rsc_feature
+    % Holds a feature (w/ value) of a resource
 
-    "CREATE TABLE rsc_prop
+    "CREATE TABLE rsc_feature
     (
       rsc_id int NOT NULL,
-      prop_id int NOT NULL,
-      prop_value_id int,
+      feature_id int NOT NULL,
+      feature_value_id int,
       props bytea,
 
-      CONSTRAINT rsc_prop_pkey PRIMARY KEY (rsc_id, prop_id),
-      CONSTRAINT fk_rsc_prop_rsc_id FOREIGN KEY (rsc_id)
+      CONSTRAINT rsc_feature_pkey PRIMARY KEY (rsc_id, feature_id),
+      CONSTRAINT fk_rsc_feature_rsc_id FOREIGN KEY (rsc_id)
         REFERENCES rsc (id)
         ON UPDATE CASCADE ON DELETE CASCADE,
-      CONSTRAINT fk_rsc_prop_prop_id FOREIGN KEY (prop_id)
-        REFERENCES prop (id)
+      CONSTRAINT fk_rsc_feature_feature_id FOREIGN KEY (feature_id)
+        REFERENCES feature (id)
         ON UPDATE CASCADE ON DELETE CASCADE,
-      CONSTRAINT fk_rsc_prop_prop_value_id FOREIGN KEY (prop_value_id)
-        REFERENCES prop_value (id)
+      CONSTRAINT fk_rsc_feature_feature_value_id FOREIGN KEY (feature_value_id)
+        REFERENCES feature_value (id)
         ON UPDATE CASCADE ON DELETE CASCADE
     )",
 
-    "CREATE INDEX fki_rsc_prop_rsc_id ON rsc_prop (rsc_id)",
-    "CREATE INDEX fki_rsc_prop_prop_id ON rsc_prop (prop_id)",
-    "CREATE INDEX fki_rsc_prop_prop_value_id ON rsc_prop (prop_value_id)",
+    "CREATE INDEX fki_rsc_feature_rsc_id ON rsc_feature (rsc_id)",
+    "CREATE INDEX fki_rsc_feature_feature_id ON rsc_feature (feature_id)",
+    "CREATE INDEX fki_rsc_feature_feature_value_id ON rsc_feature (feature_value_id)",
 
 
     % Table comment

@@ -68,6 +68,11 @@ update(Id, Props, Context) when is_integer(Id) ->
                     ],
                     zp_db:update(rsc, Id, UpdateProps, Context),
                     zp_depcache:flush(#rsc{id=Id}),
+
+                    case proplists:get_value(name, UpdateProps) of
+                        undefined -> nop;
+                        Name -> zp_depcache:flush({rsc_name, zp_convert:to_list(Name)})
+                    end,
                     ok;
                 {error, Reason} ->
                     {error, Reason}

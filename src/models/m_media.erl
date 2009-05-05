@@ -7,12 +7,18 @@
 -module(m_media).
 -author("Marc Worrell <marc@worrell.nl").
 
+-behaviour(gen_model).
+
 %% interface functions
 -export([
+    m_find_value/3,
+    m_to_list/2,
+    m_value/2,
     get/2,
     get_acl_props/2,
     get_rsc/2,
     get_rsc/3,
+    get_rsc_media/3,
     delete/2,
     insert_file/2,
     insert_file/3,
@@ -24,6 +30,27 @@
 ]).
 
 -include_lib("zophrenic.hrl").
+
+
+
+%% @doc Fetch the value for the key from a model source
+%% @spec m_find_value(Key, Source, Context) -> term()
+m_find_value(Id, #m{value=undefined}, Context) ->
+    get(Id, Context);
+m_find_value(_Key, #m{}, _Context) ->
+    undefined.
+
+%% @doc Transform a m_config value to a list, used for template loops
+%% @spec m_to_list(Source, Context)
+m_to_list(#m{}, _Context) ->
+    [].
+    
+%% @doc Transform a model value so that it can be formatted or piped through filters
+%% @spec m_value(Source, Context) -> term()
+m_value(#m{}, _Context) ->
+    undefined.
+
+
 
 %% @doc Get the media record with the id
 %% @spec get(MediaId, Context) -> PropList
@@ -83,6 +110,21 @@ get_rsc(RscId, N, Context) ->
     end.
 
 
+%% @doc Check if the 
+%% @spec get_rsc_media(RscId, MediaId, Context) -> [PropList]
+get_rsc_media(RscId, MediaId, Context) ->
+    F = fun() ->
+        zp_db:assoc_props("
+            select m.*, rm.id as rsc_media_id 
+            from media m, rsc_media rm
+            where rm.rsc_id = $1
+              and rm.media_id = m.id
+              and rm.media_id = $2
+            order by rm.seq, rm.id", [RscId, MediaId], Context)
+    end,
+    zp_depcache:memo(F, {media_rsc_id, RscId, MediaId}, ?DAY, [{media_rsc, RscId}]).
+
+
 %% @doc Delete the media at the id, the file is also deleted.
 %% @spec delete(MediaId, Context) -> ok | {error, Reason}
 delete(MediaId, Context) ->
@@ -129,15 +171,17 @@ insert_file_rsc(File, RscId, Props, Context) ->
         insert_rsc_media(RscId, Id, Ctx),
         {ok, Id}
     end,
-    zp_db:transaction(F, Context),
-    zp_depcache:flush({media_rsc, RscId}).
+    {ok, Id} = zp_db:transaction(F, Context),
+    zp_depcache:flush({media_rsc, RscId}),
+    {ok, Id}.
 
 
 %% @doc Couple the media to the resource
 %% @spec insert_rsc_media(RscId, Id, Context) -> {ok, RscMediaId}
 insert_rsc_media(RscId, Id, Context) ->
-    zp_db:insert(rsc_media, [{rsc_id, RscId}, {media_id, Id}], Context),
-    zp_depcache:flush({media_rsc, RscId}).
+    {ok, RscMediaId} = zp_db:insert(rsc_media, [{rsc_id, RscId}, {media_id, Id}], Context),
+    zp_depcache:flush({media_rsc, RscId}),
+    {ok, RscMediaId}.
     
 
 %% @doc Decouple a media from an resource

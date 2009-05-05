@@ -116,7 +116,7 @@ get_acl_props(Id, Context) when is_integer(Id) ->
 %% @doc Insert a new resource
 %% @spec insert(Props, Context) -> {ok, Id}
 insert(Props, Context) ->
-    m_rsc_update:insert(rsc, Props, Context).
+    m_rsc_update:insert(Props, Context).
 
 %% @doc Delete a resource
 %% @spec delete(Props, Context) -> void()
@@ -380,7 +380,7 @@ only_digits(_) ->
 %% @doc Return the id of the resource with a certain unique name.
 %% rid_name(Name, Context) -> #rsc{} | undefined
 rid_name(Name, Context) ->
-    Lower = zp_string:to_lower(Name),
+    Lower = zp_string:to_name(Name),
     case zp_depcache:get({rsc_name, Lower}) of
         {ok, undefined} ->
             undefined;
@@ -391,7 +391,7 @@ rid_name(Name, Context) ->
                 undefined -> undefined;
                 Value -> #rsc{id=Value}
             end,
-            zp_depcache:set({rsc_name, Lower}, Id, ?DAY, [Id]),
+            zp_depcache:set({rsc_name, Lower}, Id, ?DAY, [Id, {rsc_name, Lower}]),
             Id
     end.
 

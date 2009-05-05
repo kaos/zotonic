@@ -47,9 +47,10 @@ tables_sql() ->
 
       -- The product and the properties distinguishing this sku within the product
       rsc_id integer,
+      media_id integer,
       variant character varying(100) not null default '',
       props bytea,
-      stock_avail int not null default 0,           -- Imported stock, minus sold and reserved items
+      stock_avail integer not null default 0,       -- Imported stock, minus sold and reserved items
       is_special boolean not null default false,
       price_actual integer not null default 0,      -- For later use, when sorting on price
 
@@ -92,9 +93,13 @@ tables_sql() ->
       CONSTRAINT fk_shop_sku_rsc_id FOREIGN KEY (rsc_id)
         REFERENCES rsc(id)
         ON UPDATE CASCADE ON DELETE SET NULL
+      CONSTRAINT fk_shop_sku_media_id FOREIGN KEY (media_id)
+        REFERENCES media(id)
+        ON UPDATE CASCADE ON DELETE SET NULL
     )",
 
     "CREATE INDEX fki_shop_sku_rsc_id ON shop_sku (rsc_id)",
+    "CREATE INDEX fki_shop_sku_media_id ON shop_sku (media_id)",
     "CREATE INDEX shop_sku_rsc_id_variant ON shop_sku (rsc_id, variant)",
     "CREATE INDEX shop_sku_imported ON shop_sku (imported)",
 

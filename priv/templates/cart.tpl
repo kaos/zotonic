@@ -16,11 +16,19 @@
 			</li>
 			
 			{% for c in shop_cart %}
-				<li id="cart-product-{{c.id}}-{{c.variant}}">
+				<li id="cart-product-{{c.id}}-{{c.variant|slugify}}">
 					<div class="block clearfix">
 					
 						<div class="zp-10">
+							{% if c.media_id %}
+								<a href="{{ m.rsc[c.id].page_url }}">{% image m.media[c.media_id].filename width=75 height=60 crop alt="{{ m.rsc[c.id].title }}" class="left" %}</a>
+							{% else %}
+								{% if m.rsc[c.id].media[1].filename %}
 							<a href="{{ m.rsc[c.id].page_url }}">{% image m.rsc[c.id].media[1].filename width=75 height=60 crop alt="{{ m.rsc[c.id].title }}" class="left" %}</a>
+								{% else %}
+								&nbsp;
+								{% endif %}
+							{% endif %}
 						</div>
 					
 						<div class="zp-20">
@@ -29,15 +37,15 @@
 								<p class="notification error">Momenteel niet leverbaar.</p>
 							{% endif %}
 						
-							<div id="cart-backorder-p-{{c.id}}-{{c.variant}}" class="notification notice clear {% if not c.backorder %}hide{% endif %}">
-								Nabestelling: <span id="cart-backorder-{{c.id}}-{{c.variant}}"><strong>{{ c.backorder }}</strong></span> stuks.
+							<div id="cart-backorder-p-{{c.id}}-{{c.variant|slugify}}" class="notification notice clear {% if not c.backorder %}hide{% endif %}">
+								Nabestelling: <span id="cart-backorder-{{c.id}}-{{c.variant|slugify}}"><strong>{{ c.backorder }}</strong></span> stuks.
 							</div>
 						</div>
 					
 						<div class="zp-20">
 							{% with m.shop_product[c.id].sku[c.variant] as sku %}
 								{% if sku %}
-									{{ sku.title|default:"-" }}
+									{% if sku.title %}{{ sku.title }}{% else %}{{ sku.variant|default:"-" }}{% endif %}
 								{% else %}
 									{{ c.variant|default:"&nbsp;" }}
 								{% endif %}
@@ -46,22 +54,22 @@
 					
 						<div class="zp-15">
 							<span class="price">&euro;</span>
-							<span class="price" id="cart-price-avg-{{c.id}}-{{c.variant}}">
+							<span class="price" id="cart-price-avg-{{c.id}}-{{c.variant|slugify}}">
 								{{ c.price_avg|format_price }}
 							</span>
-							<span class="old-price" id="cart-price-old-{{c.id}}-{{c.variant}}">
+							<span class="old-price" id="cart-price-old-{{c.id}}-{{c.variant|slugify}}">
 								{% ifnotequal c.price_avg c.price_old %}&euro;{{ c.price_old|format_price }}{% endifnotequal %}
 							</span>
 						</div>
 					
 						<div class="zp-20">
-							<h3><span id="count-{{c.id}}-{{c.variant}}">{{ c.n }}</span> stuks</h3>
+							<h3><span id="count-{{c.id}}-{{c.variant|slugify}}">{{ c.n }}</span> stuks</h3>
 							{% button text="+" action={shop_cart_incr id=c.id variant=c.variant} %}
 							{% button text="-" action={shop_cart_decr id=c.id variant=c.variant} %}
 						</div>
 					
 						<div class="zp-15">
-							<h3>&euro; <span id="cart-price-{{c.id}}-{{c.variant}}">{{ c.total|format_price }}</span></h3>
+							<h3>&euro; <span id="cart-price-{{c.id}}-{{c.variant|slugify}}">{{ c.total|format_price }}</span></h3>
 							{% button text="verwijder" action={shop_cart_delete id=c.id variant=c.variant} %}
 						</div>
 					</div>

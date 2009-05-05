@@ -25,7 +25,7 @@ render_action(TriggerId, TargetId, Args, Context) ->
 event({postback, {shop_cart_incr, Id, Variant}, _TriggerId, _TargetId}, Context) ->
     N = shop_cart:add_product(Id, Variant, Context),
     ContextIncr = zp_render:update(
-                        "count-"++integer_to_list(Id)++[$- | zp_convert:to_list(Variant)],
+                        "count-"++integer_to_list(Id)++[$- | zp_string:to_slug(zp_convert:to_list(Variant))],
                         integer_to_list(N),
                         Context),
     shop_cart:tpl_sync_cart_prices(ContextIncr).

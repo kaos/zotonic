@@ -44,12 +44,13 @@ tpl_cart_allocated(Context) ->
             {backorder, BackorderN},
             {price_avg, AvgPrice},
             {price_old, AvgOldPrice},
-            {total, SumPrice}
+            {total, SumPrice},
+            {media_id, MediaId}
         ] 
-        || {Id, Variant, N, BackorderN, AvgPrice, AvgOldPrice, SumPrice} <- Allocated 
+        || {Id, Variant, N, BackorderN, AvgPrice, AvgOldPrice, SumPrice, MediaId} <- Allocated 
     ],
     {Count, Total, Backorders} = lists:foldl(
-            fun({_Id, _Variant, N, BackorderN, _AvgPrice, _AvgOldPrice, SumPrice}, {C,T,B}) ->
+            fun({_Id, _Variant, N, BackorderN, _AvgPrice, _AvgOldPrice, SumPrice, _MediaId}, {C,T,B}) ->
                 case SumPrice of
                     undefined -> {C,T,B};
                     _ -> {C + N, T + SumPrice, B + BackorderN}
@@ -94,7 +95,7 @@ tpl_sync_cart_prices(Context) ->
             OldPrice   = proplists:get_value(price_old, CartProd),
             Backorder  = proplists:get_value(backorder, CartProd),
             
-            ID = integer_to_list(Id) ++ [$- | zp_convert:to_list(Variant)],
+            ID = integer_to_list(Id) ++ [$- | zp_string:to_slug(zp_convert:to_list(Variant))],
             Cback = case Backorder of
                 0 ->
                     zp_render:wire("cart-backorder-p-"++ID, {fade_out, []}, C);

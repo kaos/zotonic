@@ -3,29 +3,55 @@
 {% block title %} {{m.rsc[rsc_id].title}} {% endblock %}
 
 {% block content %} 	
+	{% with m.shop_product[rsc_id].variants as variants %}
+
 	<div id="content-area" class="zp-75">
 		<!-- Area for the main content -->
 		<h2>{{m.rsc[rsc_id].title}}</h2>
 		<div class="product-wrapper clearfix block">
-			
+
+			<div class="product-images zp-50">
+				<ul class="clearfix">
+					{% for sku in variants %}
+						<li>
+							{% if sku.media_id %}
+								{% image m.media[sku.media_id].filename width=300 crop alt=sku.variant title=sku.variant class="do_imageviewer" %}
+							{% endif %}
+							{% if not variants|length_is:1 %}
+							<div class="product-price clearfix" style="width: 286px">
+								<div class="clearfix button-wrapper right">
+									{% button class="buy-me right-side-button" title="In winkelmand" text=" &raquo;" action={shop_buynow id=rsc_id variant=sku.variant} %}
+								</div>
+								<p>
+								<strong>&euro;{{ sku.price_actual|format_price }}</strong> {% if sku.title %}{{ sku.title }}{% else %}{{ sku.variant }}{% endif %}
+								</p>
+							</div>
+							{% endif %}
+						</li>
+					{% endfor %}
+				</ul>
+			</div>
+
+			{#
 			{% if m.rsc[rsc_id].media %}
 				<div class="product-images zp-50">
 					<ul class="clearfix">
-						{% if m.rsc[rsc_id].media[1].filename %}
-							<li>{% image m.rsc[rsc_id].media[1].filename width=300 crop alt=m.rsc[rsc_id].media[1].filename class="do_imageviewer" %}</li>
-						{% endif %}
-				
-						{% if m.rsc[rsc_id].media[2].filename %}
-							<li>{% image m.rsc[rsc_id].media[2].filename width=300 crop alt=m.rsc[rsc_id].media[2].filename class="do_imageviewer" %}</li>
-						{% endif %}
+						{% for media in m.rsc[rsc_id].media %}
+							<li>{% image media.filename width=300 crop alt=media.filename class="do_imageviewer" %}</li>
+						{% endfor %}
 					</ul>
 				</div>
 			{% endif %}
+			#}
 			
 			<div class="product-description zp-50">
 				<div id="product-price">
 					{% include "_product_price.tpl" %}
 				</div>
+
+				{% if variants|length_is:1 %}
+				<p>{% if variants[1].title %}{{ variants[1].title }}{% else %}{{ variants[1].variant }}{% endif %}
+				{% endif %}
 
 				{% if m.rsc[rsc_id].body %}
 					<h3>{% _ "Description" nl="Omschrijving" %}</h3>
@@ -36,8 +62,8 @@
 		
 		<h3 class="block">Related products</h3>
 		<ul class="compare-list clearfix">
-			{% for id in m.search[{featured cat="product"}] %}
-				<li class="zp-33 {% ifequal forloop.counter "1" %}first{% endifequal %} {% ifequal forloop.counter "4" %}first{% endifequal %}">
+			{% for id in m.search[{featured cat=m.rsc[rsc_id].category_id}] %}
+				<li class="zp-33 {% cycle "first" "" "" %}">
 					<div class="block">
 						<a href="{{ m.rsc[id].page_url }}">{% image m.rsc[id].media[1].filename width=216 height=70 crop alt=m.rsc[id].title %}</a>
 						<h3><a href="{{ m.rsc[id].page_url }}">{{ m.rsc[id].title }}</a></h3>
@@ -95,6 +121,7 @@
 		</ul>
 		#}
 	</div>
+{% endwith %}
 {% endblock %}
 
 {% block sidebar %}

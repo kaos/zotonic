@@ -39,6 +39,8 @@ m_find_value(variants, #m{value=Id}, Context) ->
 
 %% @doc Transform a m_config value to a list, used for template loops
 %% @spec m_to_list(Source, Context) -> List
+m_to_list(#m{value={sku, Id}}, Context) ->
+    get_skus(Id, Context);
 m_to_list(#m{}, _Context) ->
     [].
 
@@ -187,7 +189,7 @@ get_variants_as_proplist(Id, Context) ->
 allocate_sku_price(Id, Variant, N, Context) ->
     {Skus, BoSku} = allocate_sku(Id, Variant, N, Context),
     case BoSku of
-        #sku_alloc{sku_id=undefined, n=N} ->
+        #sku_alloc{sku_id=undefined, n=N, media_id=MediaId} ->
             {
                 Id,
                 Variant,
@@ -195,9 +197,10 @@ allocate_sku_price(Id, Variant, N, Context) ->
                 0,
                 undefined,
                 undefined,
-                undefined
+                undefined,
+                MediaId
             };
-        #sku_alloc{n=BoN} ->
+        #sku_alloc{n=BoN, media_id=MediaId} ->
             {SumPrice, SumOldPrice} = lists:foldl(
                     fun(#sku_alloc{n=SN, price_incl=SP, old_price_incl=SOP}, {Tot, OldTot}) ->
                         {Tot + SN*SP, OldTot + SN*SOP}
@@ -213,7 +216,8 @@ allocate_sku_price(Id, Variant, N, Context) ->
                 BoN,
                 AvgPrice,
                 AvgOldPrice,
-                SumPrice
+                SumPrice,
+                MediaId
             }
     end.
 
@@ -223,10 +227,11 @@ allocate_sku_price(Id, Variant, N, Context) ->
 %% @spec allocate_sku(Id, Variant, N, Context) -> {Allocated, {BoNr, BoN, BoPrice, BoOldPrice}}
 allocate_sku(Id, Variant, N, Context) ->
     Skus = zp_db:q("
-            select id, article_nr, stock_avail, price_incl, price_excl, special_price_incl, special_price_excl, special_start, special_end
+            select id, article_nr, stock_avail, price_incl, price_excl, 
+                    special_price_incl, special_price_excl, special_start, special_end,
+                    media_id
             from shop_sku
-            where stock > 0
-              and rsc_id = $1
+            where rsc_id = $1
               and variant = $2
               and available", [Id, Variant], Context),
     {Date,_} = calendar:local_time(),
@@ -236,17 +241,19 @@ allocate_sku(Id, Variant, N, Context) ->
     allocate_sku1(Sorted, N, {[], #sku_alloc{}}).
 
 
-    select_price({Id, Nr, Stock, PriceIncl, PriceExcl, SpecialPriceIncl, SpecialPriceExcl, Start, End}, Date) 
+    select_price({Id, Nr, Stock, PriceIncl, PriceExcl, SpecialPriceIncl, SpecialPriceExcl, Start, End, MediaId}, Date) 
         when SpecialPriceIncl > 0 andalso Start =< Date andalso End >= Date ->
             #sku_alloc{ sku_id=Id, sku_nr=Nr, price_incl=SpecialPriceIncl, price_excl=SpecialPriceExcl, 
-                        old_price_incl=PriceIncl, old_price_excl=PriceExcl, n=Stock};
-    select_price({Id, Nr, Stock, PriceIncl, PriceExcl, _SpecialPriceIncl, _SpecialPriceExcl, _Start, _End}, _Date) ->
+                        old_price_incl=PriceIncl, old_price_excl=PriceExcl, n=Stock, media_id=MediaId};
+    select_price({Id, Nr, Stock, PriceIncl, PriceExcl, _SpecialPriceIncl, _SpecialPriceExcl, _Start, _End, MediaId}, _Date) ->
             #sku_alloc{sku_id=Id, sku_nr=Nr, price_incl=PriceIncl, price_excl=PriceExcl, 
-                        old_price_incl=PriceIncl, old_price_excl=PriceExcl, n=Stock}.
+                        old_price_incl=PriceIncl, old_price_excl=PriceExcl, n=Stock, media_id=MediaId}.
     
     allocate_sku1([], N, {Alloc, LastSku}) ->
         {Alloc, LastSku#sku_alloc{n=N, backorder=true}};
     allocate_sku1([#sku_alloc{n=Stock}=Sku|_], N, {Alloc, _LastSku}) when Stock >= N ->
         {[Sku#sku_alloc{n=N} | Alloc], #sku_alloc{backorder=true, n=0}};
+    allocate_sku1([#sku_alloc{n=Stock} = Sku|Rest], N, {Alloc, _LastSku}) when Stock =< 0 ->
+        allocate_sku1(Rest, N, {Alloc, Sku});
     allocate_sku1([#sku_alloc{n=Stock} = Sku|Rest], N, {Alloc, _LastSku}) ->
         allocate_sku1(Rest, N-Stock, {[Sku#sku_alloc{n=Stock} | Alloc], Sku}).

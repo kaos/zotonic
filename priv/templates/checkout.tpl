@@ -123,7 +123,16 @@
 				{% for c in shop_cart %}
 				<li class="block">
 					<div class=" clearfix">
-						<a href="{{ m.rsc[c.id].page_url }}">{% image m.rsc[c.id].media[1].filename width=35 height=35 crop alt="m.rsc[id].title" class="left" %}</a>
+						{% if c.media_id %}
+							<a href="{{ m.rsc[c.id].page_url }}">{% image m.media[c.media_id].filename width=35 height=35 crop alt="{{ m.rsc[c.id].title }}" class="left" %}</a>
+						{% else %}
+							{% if m.rsc[c.id].media[1].filename %}
+						<a href="{{ m.rsc[c.id].page_url }}">{% image m.rsc[c.id].media[1].filename width=35 height=35 crop alt="{{ m.rsc[c.id].title }}" class="left" %}</a>
+							{% else %}
+							&nbsp;
+							{% endif %}
+						{% endif %}
+
 						<h3><a href="{{ m.rsc[c.id].page_url }}">{{ m.rsc[c.id].title }}</a></h3>
 						{% if c.variant %}
 							<span>{{ m.shop_product[c.id].sku[c.variant].title }}</span>

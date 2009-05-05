@@ -25,7 +25,7 @@ render_action(TriggerId, TargetId, Args, Context) ->
 event({postback, {shop_cart_delete, Id, Variant}, _TriggerId, _TargetId}, Context) ->
     shop_cart:del_product(Id, Variant, Context),
     ContextDel = zp_render:wire(
-                        "cart-product-"++integer_to_list(Id)++[$- | zp_convert:to_list(Variant)], 
+                        "cart-product-"++integer_to_list(Id)++[$- | zp_string:to_slug(zp_convert:to_list(Variant))], 
                         {slide_fade_out, []}, 
                         Context),
     shop_cart:tpl_sync_cart_prices(ContextDel).
