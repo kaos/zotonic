@@ -92,7 +92,7 @@ tables_sql() ->
       CONSTRAINT shop_sku_article_nr_key UNIQUE (article_nr),
       CONSTRAINT fk_shop_sku_rsc_id FOREIGN KEY (rsc_id)
         REFERENCES rsc(id)
-        ON UPDATE CASCADE ON DELETE SET NULL
+        ON UPDATE CASCADE ON DELETE SET NULL,
       CONSTRAINT fk_shop_sku_media_id FOREIGN KEY (media_id)
         REFERENCES media(id)
         ON UPDATE CASCADE ON DELETE SET NULL
