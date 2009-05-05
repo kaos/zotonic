@@ -12,23 +12,15 @@
 
 			<div class="product-images zp-50">
 				<ul class="clearfix">
-					{% for sku in variants %}
-						<li>
-							{% if sku.media_id %}
-								{% image m.media[sku.media_id].filename width=300 crop alt=sku.variant title=sku.variant class="do_imageviewer" %}
-							{% endif %}
-							{% if not variants|length_is:1 %}
-							<div class="product-price clearfix" style="width: 286px">
-								<div class="clearfix button-wrapper right">
-									{% button class="buy-me right-side-button" title="In winkelmand" text=" &raquo;" action={shop_buynow id=rsc_id variant=sku.variant} %}
-								</div>
-								<p>
-								<strong>&euro;{{ sku.price_actual|format_price }}</strong> {% if sku.title %}{{ sku.title }}{% else %}{{ sku.variant }}{% endif %}
-								</p>
-							</div>
-							{% endif %}
+					{% if variants|length_is:1 %}
+						{% for media in m.rsc[rsc_id].media %}
+							<li>{% image media.filename width=300 crop alt=media.filename class="do_imageviewer" %}</li>
+						{% endfor %}
+					{% else %}
+						<li id="variant-image">
+							{% image m.rsc[rsc_id].media[1].filename width=300 crop alt=m.rsc[rsc_id].title class="do_imageviewer" %}
 						</li>
-					{% endfor %}
+					{% endif %}
 				</ul>
 			</div>
 

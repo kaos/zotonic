@@ -4,11 +4,10 @@
 
 	Parameters are:
 
-		When direct: rsc_id
-		Via event handler: rsc_id, variant
+		When direct: rsc_id, variants
+		Via event handler: rsc_id, variant, variants
 #}
 
-{% with m.shop_product[rsc_id].variants as variants %}
 {% with m.shop_product[rsc_id].price as p %}
 	{% if p.old_price %}
 		<div class="notification notice">Oude prijs &euro;{{ p.old_price|format_price }} nu voor:</div>
@@ -55,5 +54,4 @@
 		{% endif %}
 		
 	</div>
-{% endwith %}
 {% endwith %}

@@ -17,7 +17,8 @@
     get_best_price/2,
     get_best_price/3,
     allocate_sku_price/4,
-    allocate_sku/4
+    allocate_sku/4,
+    get_variants_as_proplist/2
 ]).
 
 -include_lib("zophrenic.hrl").
