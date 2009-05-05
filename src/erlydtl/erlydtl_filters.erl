@@ -225,9 +225,9 @@ last(Input) when is_list(Input) ->
     [lists:last(Input)].
 
 length([]) -> "0";
-length([Input]) when is_list(Input) ->
+length(Input) when is_list(Input) ->
     integer_to_list(erlang:length(Input));
-length([Input]) when is_binary(Input) ->
+length(Input) when is_binary(Input) ->
     integer_to_list(size(Input)).
 
 length_is(Input, Number) when is_list(Input), is_integer(Number) ->
