@@ -6,22 +6,36 @@
 	<div id="content-area" class="zp-75 category-overview">
 		<!-- Area for the main content -->
 		<h2>{{ m.rsc[brand_id].title }} {{ m.category[cat_id].title }}</h2>
+		{% if m.rsc[cat_id].body %}
 		<div class="block clearfix">
+			{% if m.rsc[cat_id].intro %}
 			<p class="intro">{{ m.category[cat_id].intro }}</p>
-			{{ m.category[cat_id].body }}
+			{% endif %}
+
+			{% if m.rsc[cat_id].body %}
+				{{ m.category[cat_id].body }}
+			{% endif %}
 		</div>
+		{% endif %}
 		
 		<ul class="subcategory-list clearfix">
 			{% for id in products %}
-				<li class="zp-50 {% ifequal forloop.counter "1" %}first{% endifequal %} {% ifequal forloop.counter "3" %}first{% endifequal %}">
+				<li class="zp-50 {% cycle "first" "last" %}">
 					<div class="block clearfix">
 						<a href="{% url product id=id slug=m.rsc[id].slug %}">
-							{% image m.rsc[id].media[1].filename width=60 height=60 crop alt=m.rsc[id].title class="left" %}
+							{% image m.rsc[id].media[1].filename width=140 height=80 crop alt=m.rsc[id].title class="left" %}
 						</a>
 						<h3>
 							<a href="{% url product id=id slug=m.rsc[id].slug %}">{{ m.rsc[id].title }}</a>
 						</h3>
-						<p>{{ m.rsc[id].intro }}</p>
+						<p>
+						{% if m.rsc[id].intro %}
+							{{ m.rsc[id].intro|ljust:40 }}...
+						{% else %}
+							{{ m.rsc[id].body|striptags|ljust:40 }}...
+						{% endif %}
+						</p>
+						
 						{% with m.shop_product[id].price as p %}
 						<div class="product-price clearfix clear">
 							<h3>

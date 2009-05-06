@@ -14,7 +14,7 @@
 		<h3 class="block">Featured products</h3>
 		<ul class="subcategory-list clearfix">
 			{% for id in m.search[{featured cat="product"}] %}
-				<li class="zp-50 {% ifequal forloop.counter "1" %}first{% endifequal %} {% ifequal forloop.counter "3" %}first{% endifequal %} {% ifequal forloop.counter "5" %}first{% endifequal %}">
+				<li class="zp-50 {% ifequal forloop.counter "1" %}first{% endifequal %} {% ifequal forloop.counter "3" %}first{% endifequal %} {% ifequal forloop.counter "5" %}first{% endifequal %} {% ifequal forloop.counter "7" %}first{% endifequal %} {% ifequal forloop.counter "9" %}first{% endifequal %}">
 					<div class="block clearfix">
 						<a href="{% url product id=id slug=m.rsc[id].slug %}">
 							{% image m.rsc[id].media[1].filename width=120 height=120 crop alt=m.rsc[id].title class="left" %}
@@ -22,7 +22,13 @@
 						<h3>
 							<a href="{% url product id=id slug=m.rsc[id].slug %}">{{ m.rsc[id].title }}</a>
 						</h3>
-						<p>{{ m.rsc[id].intro }}</p>
+						<p>
+							{% if m.rsc[id].intro %}
+								{{ m.rsc[id].intro|ljust:120 }}...
+							{% else %}
+								{{ m.rsc[id].body|striptags|ljust:120 }}...
+							{% endif %}
+						</p>
 						<div class="product-price clearfix clear">
 							<h3>&euro;{% include "_price.tpl" id=id %}</h3>
 							<div class="clearfix button-wrapper right">
