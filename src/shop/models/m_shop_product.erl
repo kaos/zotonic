@@ -252,8 +252,8 @@ allocate_sku(Id, Variant, N, Context) ->
     
     allocate_sku1([], N, {Alloc, LastSku}) ->
         {Alloc, LastSku#sku_alloc{n=N, backorder=true}};
-    allocate_sku1([#sku_alloc{n=Stock}=Sku|_], N, {Alloc, _LastSku}) when Stock >= N ->
-        {[Sku#sku_alloc{n=N} | Alloc], #sku_alloc{backorder=true, n=0}};
+    allocate_sku1([#sku_alloc{n=Stock, media_id=MediaId}=Sku|_], N, {Alloc, _LastSku}) when Stock >= N ->
+        {[Sku#sku_alloc{n=N} | Alloc], #sku_alloc{backorder=true, n=0, media_id=MediaId}};
     allocate_sku1([#sku_alloc{n=Stock} = Sku|Rest], N, {Alloc, _LastSku}) when Stock =< 0 ->
         allocate_sku1(Rest, N, {Alloc, Sku});
     allocate_sku1([#sku_alloc{n=Stock} = Sku|Rest], N, {Alloc, _LastSku}) ->
