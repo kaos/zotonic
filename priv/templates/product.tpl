@@ -42,7 +42,7 @@
 				</div>
 
 				{% if variants|length_is:1 %}
-				<p>{% if variants[1].title %}{{ variants[1].title }}{% else %}{{ variants[1].variant }}{% endif %}
+				<p>{% if variants[1].title %}{{ variants[1].title|escape }}{% else %}{{ variants[1].variant|escape }}{% endif %}
 				{% endif %}
 
 				{% if m.rsc[rsc_id].body %}

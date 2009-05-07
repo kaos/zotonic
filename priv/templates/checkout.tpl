@@ -135,7 +135,9 @@
 
 						<h3><a href="{{ m.rsc[c.id].page_url }}">{{ m.rsc[c.id].title }}</a></h3>
 						{% if c.variant %}
-							<span>{{ m.shop_product[c.id].sku[c.variant].title }}</span>
+							{% with m.shop_product[c.id].sku[c.variant] as sku %}
+							<span>{% if sku.title %}{{ sku.title|escape }}{% else %}{{c.variant|escape}}{% endif %}</span>
+							{% endwith %}
 						{% endif %}
 						<p>
 							{% if c.price_avg|is_defined %}

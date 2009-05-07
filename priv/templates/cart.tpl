@@ -45,9 +45,9 @@
 						<div class="zp-20">
 							{% with m.shop_product[c.id].sku[c.variant] as sku %}
 								{% if sku %}
-									{% if sku.title %}{{ sku.title }}{% else %}{{ sku.variant|default:"-" }}{% endif %}
+									{% if sku.title %}{{ sku.title|escape }}{% else %}{{ sku.variant|force_escape|default:"-" }}{% endif %}
 								{% else %}
-									{{ c.variant|default:"&nbsp;" }}
+									{{ c.variant|force_escape|default:"&nbsp;" }}
 								{% endif %}
 							{% endwith %}
 						</div>

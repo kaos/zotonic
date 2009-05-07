@@ -25,8 +25,8 @@
 					<option value="">Maak uw keuze</option>
 				
 					{% for v in variants %}
-						<option value="{{ v.variant }}"{% ifequal v.variant variant %} selected="selected" {% endifequal %}>
-							{% if v.title %}{{ v.title }}{% else %}{{ v.variant }}{% endif %} - &euro;{{ v.price_actual|format_price }}
+						<option value="{{ v.variant|escape }}"{% ifequal v.variant variant %} selected="selected" {% endifequal %}>
+							{% if v.title %}{{ v.title|escape }}{% else %}{{ v.variant|escape }}{% endif %} - &euro;{{ v.price_actual|format_price }}
 						</option>
 					{% endfor %}
 				</select>
