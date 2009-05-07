@@ -587,7 +587,8 @@ filter_ast(Variable, Filter, Context, TreeWalker) ->
     end.
 
 filter_ast_noescape(Variable, [{identifier, _, "escape"}], Context, TreeWalker) ->
-    body_ast([Variable], Context, TreeWalker);
+    %body_ast([Variable], Context, TreeWalker);
+    value_ast(Variable, true, Context, TreeWalker);
 filter_ast_noescape(Variable, Filter, Context, TreeWalker) ->
     % {{VariableAst, Info}, TreeWalker2} = body_ast([Variable], Context, TreeWalker),
     {{VariableAst,Info},TreeWalker2} = value_ast(Variable, true, Context, TreeWalker),

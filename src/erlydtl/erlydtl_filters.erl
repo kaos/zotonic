@@ -50,8 +50,8 @@ opttrans({trans, _}=Trans, Language) ->
 opttrans(V, _Language) ->
 	V.
 
-add([Input], Number) when is_list(Input) or is_binary(Input) ->
-    add(Input, Number);
+add(undefined, _Number) ->
+    undefined;
 add(Input, Number) when is_binary(Input) ->
     list_to_binary(add(binary_to_list(Input), Number));
 add(Input, Number) when is_list(Input) ->
@@ -59,22 +59,22 @@ add(Input, Number) when is_list(Input) ->
 add(Input, Number) when is_integer(Input) ->
     Input + Number.
 
-capfirst([Input]) when is_list(Input) or is_binary (Input) ->
-    capfirst(Input);
+capfirst(undefined) ->
+    undefined;
 capfirst([H|T]) when H >= $a andalso H =< $z ->
     [H + $A - $a | T];
 capfirst(<<Byte:8/integer, Binary/binary>>) when Byte >= $a andalso Byte =< $z ->
     [<<(Byte + $A - $a)>>, Binary].
 
-center([Input], Number) when is_list(Input) or is_binary(Input) ->
-    center(Input, Number);
+center(undefined, _Number) ->
+    undefined;
 center(Input, Number) when is_binary(Input) ->
     list_to_binary(center(binary_to_list(Input), Number));
 center(Input, Number) when is_list(Input) ->
     string:centre(Input, Number).
 
-date([Input], FormatStr) when is_list(Input) or is_binary(Input) ->
-    date(Input, FormatStr);
+date(undefined, _FormatStr) ->
+    undefined;
 date(Input, FormatStr) when is_binary(Input) ->
     list_to_binary(date(binary_to_list(Input), FormatStr));
 date({{_,_,_} = Date,{_,_,_} = Time}, FormatStr) ->
@@ -83,36 +83,35 @@ date([{{_,_,_} = Date,{_,_,_} = Time}], FormatStr) ->
     erlydtl_dateformat:format({Date, Time}, FormatStr);
 date([{_,_,_} = Date], FormatStr) ->
     erlydtl_dateformat:format(Date, FormatStr);
-date(undefined, _FormatStr) ->
-    "";
 date(Input, _FormatStr) when is_list(Input) ->
     io:format("Unexpected date parameter : ~p~n", [Input]),
     "".
 
-
-escapejs([Input]) when is_list(Input) or is_binary(Input) ->
-    escapejs(Input);
+escapejs(undefined) ->
+    <<>>;
 escapejs(Input) when is_binary(Input) ->
     escapejs(Input, 0);
 escapejs(Input) when is_list(Input) ->
     escapejs(Input, []).
 
-first([Input]) when is_list(Input) or is_binary(Input) ->
-    first(Input);
+first(undefined) ->
+    undefined;
 first([First|_Rest]) ->
     [First];
 first(<<First, _/binary>>) ->
-    <<First>>.
+    <<First>>;
+first(_Other) ->
+    <<>>.
 
-fix_ampersands([Input]) when is_list(Input) or is_binary(Input) ->
-    fix_ampersands(Input);
+fix_ampersands(undefined) ->
+    undefined;
 fix_ampersands(Input) when is_binary(Input) ->
     fix_ampersands(Input, 0);
 fix_ampersands(Input) when is_list(Input) ->
     fix_ampersands(Input, []).
 
-force_escape([Input]) when is_list(Input) or is_binary(Input) ->
-    force_escape(Input);
+force_escape(undefined) -> 
+    <<>>;
 force_escape(Input) when is_list(Input) ->
     escape(Input, []);
 force_escape(Input) when is_binary(Input) ->
@@ -208,11 +207,13 @@ slugify(Input) ->
     zp_string:to_slug(Input).
 
 
-join([Input], Separator) when is_list(Input) ->
-    string:join(Input, Separator).
+join(Input, Separator) when is_list(Input) ->
+    string:join(Input, Separator);
+join(Input, _) ->
+    Input.
 
-last([Input]) when is_list(Input) or is_binary(Input) ->
-    last(Input);
+last(undefined) ->
+    undefined;
 last(Input) when is_binary(Input) ->
     case size(Input) of
         0 -> Input;
@@ -222,61 +223,83 @@ last(Input) when is_binary(Input) ->
             Byte
     end;
 last(Input) when is_list(Input) ->
-    [lists:last(Input)].
+    [lists:last(Input)];
+last(Input) ->
+    Input.
 
-length([]) -> "0";
+length(undefined) ->
+    undefined;
+length([]) -> 
+    "0";
+length(<<>>) -> 
+    "0";
 length(Input) when is_list(Input) ->
     integer_to_list(erlang:length(Input));
 length(Input) when is_binary(Input) ->
-    integer_to_list(size(Input)).
+    integer_to_list(size(Input));
+length(_Input) ->
+    "1".
 
+length_is(undefined, _Number) ->
+    undefined;
 length_is(Input, Number) when is_list(Input), is_integer(Number) ->
     length_is(Input, integer_to_list(Number));
 length_is(Input, Number) when is_list(Input), is_list(Number) ->
-    ?MODULE:length(Input) =:= Number.
+    ?MODULE:length(Input) =:= Number;
+length_is(_Input, Number) ->
+    1 =:= zp_convert:to_integer(Number).
 
-linebreaksbr([Input]) when is_list(Input) or is_binary(Input) ->
-    linebreaksbr(Input);
+
+linebreaksbr(undefined) ->
+    undefined;
 linebreaksbr(Input) when is_binary(Input) ->
     linebreaksbr(Input, 0);
 linebreaksbr(Input) ->
     linebreaksbr(Input, []).
 
-ljust([Input], Number) when is_list(Input) or is_binary(Input) ->
-    ljust(Input, Number);
+
+ljust(undefined, _Number) -> 
+    undefined;
 ljust(Input, Number) when is_binary(Input) ->
     list_to_binary(ljust(binary_to_list(Input), Number));
 ljust(Input, Number) when is_list(Input) ->
-    string:left(Input, Number).
+    string:left(Input, Number);
+ljust(Input, _Number) -> 
+    Input.
 
-lower([Input]) when is_list(Input) or is_binary(Input) ->
-    lower(Input);
-lower(Input) when is_binary(Input) ->
-    lower(Input, 0);
+
+lower(undefined) ->
+    undefined;
+lower(Input) when is_list(Input) or is_binary(Input) ->
+    zp_string:to_lower(Input);
 lower(Input) ->
-    string:to_lower(Input).
+    Input.
 
-rjust([Input], Number) when is_list(Input) or is_binary(Input) ->
-    rjust(Input, Number);
+
+rjust(undefined, _Number) -> 
+    undefined;
 rjust(Input, Number) when is_binary(Input) ->
     list_to_binary(rjust(binary_to_list(Input), Number));
-rjust(Input, Number) ->
-    string:right(Input, Number).
+rjust(Input, Number) when is_list(Input) ->
+    string:right(Input, Number);
+rjust(Input, _Number) -> 
+    Input.
 
-upper([Input]) when is_list(Input) or is_binary(Input) ->
-    upper(Input);
-upper(Input) when is_binary(Input) ->
-    list_to_binary(upper(binary_to_list(Input)));
+upper(undefined) ->
+    undefined;
+upper(Input) when is_list(Input) or is_binary(Input) ->
+    zp_string:to_upper(Input);
 upper(Input) ->
-    string:to_upper(Input).
+    Input.
 
-urlencode([Input]) when is_list(Input) or is_binary(Input) ->
-    urlencode(Input);
+urlencode(undefined) ->
+    undefined;
 urlencode(Input) when is_binary(Input) ->
     urlencode(Input, 0);
 urlencode(Input) when is_list(Input) ->
-    urlencode(Input, []).
-
+    urlencode(Input, []);
+urlencode(_Input) ->
+    <<>>.
 
 % internal
 
