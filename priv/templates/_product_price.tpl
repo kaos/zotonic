@@ -48,7 +48,7 @@
 			<h3>&euro;{{p.price|format_price}}</h3>
 
 			<div class="clearfix button-wrapper right">
-				{% button id="product-buy-basket" class="buy-me right-side-button" text="In winkelmand &raquo;" action={shop_buynow id=rsc_id variant=""} %}
+				{% button id="product-buy-basket" class="buy-me right-side-button" text="In winkelmand &raquo;" action={shop_buynow id=rsc_id variant=variants[1].variant} %}
 			</div>
 			
 		{% endif %}
