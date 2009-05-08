@@ -63,9 +63,24 @@ build_html(Page, Pages, Dispatch, DispatchArgs, Context) ->
     Urls = urls(S, M, E, Dispatch, DispatchArgs, Context),
     [
         "\n<ul class=\"pager block\">",
+            prev(Page, Pages, Dispatch, DispatchArgs, Context),
             [ url_to_li(Url, N, N == Page) || {N, Url} <- Urls ],
+            next(Page, Pages, Dispatch, DispatchArgs, Context),
         "\n</ul"
     ].
+
+prev(Page, _Pages, _Dispatch, _DispatchArgs, _Context) when Page =< 1 ->
+    ["\n<li>&laquo;</li>"];
+prev(Page, _Pages, Dispatch, DispatchArgs, Context) ->
+    Url = zp_dispatcher:url_for(Dispatch, [{page,Page-1}|DispatchArgs], Context),
+    ["\n<li><a href=\"",Url,"\">&laquo;</a></li>"].
+
+next(Page, Pages, _Dispatch, _DispatchArgs, _Context) when Page >= Pages ->
+    ["\n<li>&raquo;</li>"];
+next(Page, _Pages, Dispatch, DispatchArgs, Context) ->
+    Url = zp_dispatcher:url_for(Dispatch, [{page,Page+1}|DispatchArgs], Context),
+    ["\n<li><a href=\"",Url,"\"> &raquo;</a></li>"].
+
 
 url_to_li(sep, _, _) ->
     "\n<li class=\"pager-sep\">…</li>";
