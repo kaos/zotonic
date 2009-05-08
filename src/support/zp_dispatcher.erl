@@ -151,25 +151,37 @@ dispatch_webmachine(DispatchList) ->
 
 %% @doc Fetch a dispatch list from a module (if the module exports dispatch/0)
 get_module_dispatch(Mod) ->
-    Exports = Mod:module_info(exports),
-    case proplists:is_defined(dispatch, Exports) of
-        true -> Mod:dispatch();
-        false -> []
+    try
+        Exports = Mod:module_info(exports),
+        case proplists:is_defined(dispatch, Exports) of
+            true -> Mod:dispatch();
+            false -> []
+        end
+    catch 
+        M:E ->
+            ?ERROR("Module dispatch error: ~p  ~p", [Mod, {M,E}]),
+            []
     end.
 
 %% @doc Read a dispatch file, the file should contain a valid Erlang dispatch datastructure.
 get_file_dispatch(File) ->
-    case filelib:is_regular(File) of
-        true ->
-            Basename = filename:basename(File),
-            case Basename of
-                "." ++ _ -> 
-                    [];
-                _Other  ->
-                    {ok, Disp} = file:consult(File),
-                    Disp
-            end;
-        false -> 
+    try
+        case filelib:is_regular(File) of
+            true ->
+                Basename = filename:basename(File),
+                case Basename of
+                    "." ++ _ -> 
+                        [];
+                    _Other  ->
+                        {ok, Disp} = file:consult(File),
+                        Disp
+                end;
+            false -> 
+                []
+        end
+    catch 
+        M:E ->
+            ?ERROR("File dispatch error: ~p  ~p", [File, {M,E}]),
             []
     end.
 
