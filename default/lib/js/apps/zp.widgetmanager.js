@@ -5,10 +5,9 @@
 	{
 		widgetManager: function(context)
 		{
-			context = context || document.body;
-			
-			var stack 	  = [context];
-			
+			context 	= context || document.body;
+			var stack 	= [context];
+
 			while(stack.length > 0)
 			{
 				var objectClass, objectOptions, functionName, defaults, element = stack.pop();
