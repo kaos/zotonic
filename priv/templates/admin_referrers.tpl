@@ -25,18 +25,18 @@
 					<span class="zp-30">Title</span>
 					<span class="zp-15">Predicate</span>
 					<span class="zp-15">Category</span>
-					<span class="zp-15">Modify date</span>
-					<span class="zp-15">Create date</span>
+					<span class="zp-15">Modified on</span>
+					<span class="zp-15">Modified by</span>
 					<span class="zp-10">Options</span>
 				</li>
 			{% for id, pred_id in result %}
 				<li id="{{ #li.id }}">
 					<a href="{% url admin_edit_rsc id=id %}" class="clearfix">
-						<span class="zp-30">{{ m.rsc[id].title|striptags }}</span>
+						<span class="zp-30">{{ m.rsc[id].title }}</span>
 						<span class="zp-15">{{ m.predicate[pred_id].title }}</span>
 						<span class="zp-15">{{ m.rsc[id].category.name }}</span>
 						<span class="zp-15">{{ m.rsc[id].modified|date:"F d, H:i" }}</span>
-						<span class="zp-15">{{ m.rsc[id].created|date:"F d, H:i" }}</span>
+						<span class="zp-15">{{ m.rsc[m.rsc[id].modifier_id].title|default:"-" }}</span>
 						<span class="zp-10">
 							{% button text="delete" 
 									action={dialog_delete_rsc id=id on_success={slide_fade_out target=#li.id}} %}

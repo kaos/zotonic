@@ -18,9 +18,9 @@
 				<li class="headers clearfix">
 					<span class="zp-30">Title</span>
 					<span class="zp-15">Category</span>
-					<span class="zp-15">Modify date</span>
-					<span class="zp-15">Create date</span>
-					<span class="zp-15">Created by</span>
+					<span class="zp-15">Modified on</span>
+					<span class="zp-15">Modified by</span>
+					<span class="zp-15">Created on</span>
 					<span class="zp-10">Options</span>
 				</li>
 			{% for id, rank in result %}
@@ -29,8 +29,8 @@
 						<span class="zp-30">{{ m.rsc[id].title|striptags }}</span>
 						<span class="zp-15">{{ m.rsc[id].category.name }}</span>
 						<span class="zp-15">{{ m.rsc[id].modified|date:"F d, H:i" }}</span>
+						<span class="zp-15">{{ m.rsc[m.rsc[id].modifier_id].title|default:"-" }}</span>
 						<span class="zp-15">{{ m.rsc[id].created|date:"F d, H:i" }}</span>
-						<span class="zp-15">Tim Benniks</span>
 						<span class="zp-10">
 							{% button text="delete" 
 									action={dialog_delete_rsc id=id on_success={slide_fade_out target=#li.id}} %}
