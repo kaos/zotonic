@@ -160,6 +160,8 @@ model_pgsql() ->
       predicate_id int NOT NULL,
       object_id int NOT NULL,
       seq int NOT NULL DEFAULT 1000000,
+      creator_id int NOT NULL,
+      created timestamp with time zone NOT NULL DEFAULT now(),
 
       CONSTRAINT edge_pkey PRIMARY KEY (id),
       CONSTRAINT edge_ops_key UNIQUE (object_id, predicate_id, subject_id),
@@ -172,12 +174,16 @@ model_pgsql() ->
         ON UPDATE CASCADE ON DELETE CASCADE,
       CONSTRAINT fk_edge_predicate_id FOREIGN KEY (predicate_id)
         REFERENCES predicate (id)
-        ON UPDATE CASCADE ON DELETE CASCADE
+        ON UPDATE CASCADE ON DELETE CASCADE,
+      CONSTRAINT fk_edge_creator_id FOREIGN KEY (creator_id)
+        REFERENCES rsc (id)
+        ON UPDATE CASCADE ON DELETE SET NULL
     )",
 
-    "CREATE INDEX fki_edge_subject ON edge (subject_id)",
-    "CREATE INDEX fki_edge_predicate ON edge (predicate_id)",
-    "CREATE INDEX fki_edge_object ON edge (object_id)",
+    "CREATE INDEX fki_edge_subject_id ON edge (subject_id)",
+    "CREATE INDEX fki_edge_predicate_id ON edge (predicate_id)",
+    "CREATE INDEX fki_edge_object_id ON edge (object_id)",
+    "CREATE INDEX fki_edge_creator_id ON edge (creator_id)",
     "CREATE INDEX edge_sp_seq_key ON edge (subject_id, predicate_id, seq)",
 
 
