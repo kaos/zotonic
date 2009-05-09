@@ -19,7 +19,7 @@
 
 -include_lib("zophrenic.hrl").
 
--define(OFFSET_LIMIT, {1,10}).
+-define(OFFSET_LIMIT, {1,?SEARCH_PAGELEN}).
 -define(OFFSET_PAGING, {1,1000}).
 
 %% @doc Search items and handle the paging.  Uses the default page length.
@@ -30,7 +30,7 @@ search_pager(Search, Page, Context) ->
 %% @doc Search items and handle the paging
 %% @spec search_pager({Name, SearchPropList}, Page, PageLen, #context) -> #search_result
 search_pager(Search, Page, PageLen, Context) ->
-    SearchResult = search(Search, {1,1000}, Context),
+    SearchResult = search(Search, ?OFFSET_PAGING, Context),
     pager(SearchResult, Page, PageLen, Context).
 
 

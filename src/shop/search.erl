@@ -186,6 +186,16 @@ search({fulltext_catbrand_filter, [{brand,BrandId},{cat,Cat},{text,QueryText}]},
             }
     end;
 
+search({referrers, [{id,Id}]}, _OffsetLimit, _Context) ->
+    #search_sql{
+        select="o.id, e.predicate_id",
+        from="edge e join rsc o on o.id = e.subject_id",
+        where="e.object_id = $1",
+        order="e.id desc",
+        args=[Id],
+        tables=[{rsc,"o"}]
+    };
+
 search({media_category_image, [{cat,Cat}]}, _OffsetLimit, Context) ->
     CatId = m_category:name_to_id_check(Cat, Context),
     #search_sql{

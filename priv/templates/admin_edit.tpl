@@ -230,6 +230,11 @@
 									</div>
 									<hr />
 								{% endfor %}
+								
+								<div class="clearfix">
+									{# todo: add a "submit" action #}
+									<p>{% button action={redirect dispatch="admin_referrers" id=id} text="View all referrers"%}</p>
+								</div>
 							</div>
 						</div>
 					

@@ -31,5 +31,6 @@
 	{admin,   				["admin"],								resource_admin,			[]},
 	{admin_logon,   		["admin", "logon"],						resource_admin_logon,	[]},
 	{admin_overview_rsc,  	["admin", "overview"],					resource_admin_overview,[]},
-	{admin_edit_rsc, 		["admin", "edit", id],					resource_admin_edit,	[]}
+	{admin_edit_rsc, 		["admin", "edit", id],					resource_admin_edit,	[]},
+	{admin_referrers,       ["admin", "referrer", id],              resource_admin_referrers,[]}
 ].

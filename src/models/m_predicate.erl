@@ -16,6 +16,7 @@
     m_value/2,
     
     is_predicate/2,
+    id_to_name/2,
     name_to_id/2,
     name_to_id_check/2,
     all/1,
@@ -56,6 +57,19 @@ is_predicate(Pred, Context) ->
         _ -> false
     end.
 
+
+%% @doc Lookup the name of a predicate with an id
+%% @spec id_to_name(Id, Context) -> {ok, atom()} | {error, Reason}
+id_to_name(Id, Context) when is_integer(Id) ->
+    F = fun() ->
+        case zp_db:q1("select name from predicate where id = $1", [Id], Context) of
+            undefined -> {error, {enoent, predicate, Id}};
+            Name -> {ok, zp_convert:to_atom(Name)}
+        end
+    end,
+    zp_depcache:memo(F, {predicate_name, Id}, ?DAY, [predicate]).
+
+    
 %% @doc Return the id of the predicate
 %% @spec name_to_id(Pred, Context) -> {ok, int()} | {error, Reason}
 name_to_id(Pred, Context) when is_atom(Pred) ->
@@ -81,9 +95,10 @@ name_to_id_check(Name, Context) ->
 
 %% @doc Return the definition of the predicate
 %% @spec predicate(Pred, Context) -> PredicatePropList | undefined
-get(Pred, Context) when is_binary(Pred) ->
-    get(list_to_atom(zp_string:to_lower(Pred)), Context);
-get(Pred, Context) when is_list(Pred) ->
+get(PredId, Context) when is_integer(PredId) ->
+    {ok, Pred} = id_to_name(PredId, Context),
+    get(Pred, Context);
+get(Pred, Context) when is_list(Pred) orelse is_binary(Pred) ->
     get(list_to_atom(string:to_lower(Pred)), Context);
 get(Pred, Context) ->
     case zp_depcache:get(predicate, Pred) of
