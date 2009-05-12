@@ -40,6 +40,7 @@
 			<li><a href="/admin/overview/" {% if page_overview %}class="current"{% endif %}>Pages</a></li>
 			<li><a href="#" {% if page_users %}class="current"{% endif %}>Users</a></li>
 			<li><a href="{% url admin_shop_sku %}" {% if page_shop_sku %}class="current"{% endif %}>Skus</a></li>
+			<li><a href="{% url admin_shop_order %}" {% if page_shop_order %}class="current"{% endif %}>Orders</a></li>
 			<li><a href="{% url admin_predicate %}" {% if page_predicate %}class="current"{% endif %}>Predicates</a></li>
 			<li class="right"><a id="zp-logoff" href="#">Logoff</a></li>
 		</ul>

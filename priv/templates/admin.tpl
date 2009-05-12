@@ -122,9 +122,9 @@
 								<span class="zp-20">Price</span>
 								<span class="zp-20">Date</span>
 							</li>
-							{% for id, variant, price, date in m.search[{shop_latest_sold}] %}
+							{% for id, variant, price, date, order_id in m.search[{shop_latest_sold}] %}
 								<li>
-									<a href="{% url admin_edit_rsc id=id %}" class="clearfix">
+									<a href="{% url admin_shop_order_view id=order_id %}" class="clearfix">
 										<span class="zp-35">{{ m.rsc[id].title }}</span>
 										<span class="zp-25">{{ variant|default:"-" }}</span>
 										<span class="zp-20">&euro;{{ price|format_price }}</span>

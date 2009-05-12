@@ -207,16 +207,42 @@ search({media_category_image, [{cat,Cat}]}, _OffsetLimit, Context) ->
         args=[CatId]
     };
 
-%% Return all skus
-search({shop_sku_list, [{text,_Text}]}, _OffsetLimit, _Context) ->
+
+
+%% Return all orders
+search({shop_order_list, []}, _OffsetLimit, _Context) ->
     #search_sql{
-        select="sku.*",
-        from="shop_sku sku",
-        order="sku.article_nr",
+        select="o.*",
+        from="shop_order o",
+        order="o.id desc",
         tables=[],
         args=[],
         assoc=true
     };
+
+%% Return all skus
+search({shop_sku_list, [{text,QueryText}]}, _OffsetLimit, Context) ->
+    case QueryText of
+        A when A == undefined orelse A == "" ->
+            #search_sql{
+                select="sku.*",
+                from="shop_sku sku",
+                order="sku.article_nr",
+                tables=[],
+                args=[],
+                assoc=true
+            };
+        _ ->
+            #search_sql{
+                select="sku.*, ts_rank_cd(sku.tsv, query, 32) AS rank",
+                from="shop_sku sku, plainto_tsquery($2, $1) query",
+                where="query @@ sku.tsv",
+                order="rank desc",
+                tables=[],
+                args=[QueryText, zp_pivot_rsc:pg_lang(Context#context.language)],
+                assoc=true
+            }
+    end;
 
 %% Return the top 10 best selling products in the last two weeks
 search({shop_best_selling, []}, _OffsetLimit, _Context) ->
@@ -236,7 +262,7 @@ search({shop_best_selling, []}, _OffsetLimit, _Context) ->
 %% Return the latest sold products
 search({shop_latest_sold, []}, _OffsetLimit, _Context) ->
     #search_sql{
-        select="sku.rsc_id, sku.variant, ol.price_incl, o.created",
+        select="sku.rsc_id, sku.variant, ol.price_incl, o.created, o.id",
         from="shop_order o, shop_order_line ol, shop_sku sku",
         where="     ol.shop_sku_id = sku.id 
                 and ol.shop_order_id = o.id 

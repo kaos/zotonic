@@ -36,5 +36,8 @@
     {admin_predicate,       ["admin", "predicate"],                 resource_admin_predicate,[]},
     {admin_predicate_edit,  ["admin", "predicate", id],             resource_admin_predicate_edit,[]},
     {admin_shop_sku,        ["admin", "sku"],                       resource_admin_shop_sku,[]},
-    {admin_shop_sku_edit,   ["admin", "sku", id],                   resource_admin_shop_sku_edit,[]}
+    {admin_shop_sku_edit,   ["admin", "sku", id],                   resource_admin_shop_sku_edit,[]},
+    {admin_shop_order,      ["admin", "order"],                     resource_admin_shop_order,[]},
+    {admin_shop_order_view, ["admin", "order", "view"],             resource_admin_shop_order_view,[]},
+    {admin_shop_order_view, ["admin", "order", id],                 resource_admin_shop_order_view,[]}
 ].

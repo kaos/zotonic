@@ -3,7 +3,6 @@
 {% block title %} Admin Sku {{ sku.description1|escape }} {% endblock %}
 
 {% block content %}
-{% with m.predicate[id] as p %}
 	<div id="content" class="zp-100">
 		<div class="block clearfix">
 
@@ -76,5 +75,4 @@
 			</form>
 		</div>
 		<div class="push"></div>
-{% endwith %}
 {% endblock %}
