@@ -419,6 +419,7 @@ model_pgsql() ->
       id serial NOT NULL,
       parent_id int,
       name character varying(80),
+      media_id int,
       seq int NOT NULL DEFAULT 1000000,
       nr int NOT NULL DEFAULT 0,
       lvl int NOT NULL DEFAULT 0,
@@ -426,13 +427,20 @@ model_pgsql() ->
       rght int NOT NULL DEFAULT 0,
       props bytea,
       CONSTRAINT category_pkey PRIMARY KEY (id),
-      CONSTRAINT category_name_key UNIQUE (name)
+      CONSTRAINT category_name_key UNIQUE (name),
+      CONSTRAINT fk_category_media_id FOREIGN KEY (media_id)
+        REFERENCES media(id)
+        ON UPDATE CASCADE ON DELETE SET NULL,
+      CONSTRAINT fk_category_parent_id FOREIGN KEY (parent_id)
+        REFERENCES category(id)
+        ON UPDATE CASCADE ON DELETE SET NULL
     )",
 
     "ALTER TABLE category ADD CONSTRAINT fk_category_parent_id FOREIGN KEY (parent_id)
       REFERENCES category (id)
       ON UPDATE CASCADE ON DELETE SET NULL",
     "CREATE INDEX fki_category_parent_id ON category(parent_id)",
+    "CREATE INDEX fki_category_media_id ON category(media_id)",
     "CREATE INDEX category_nr_key ON category (nr)",
 
     % Table visitor
