@@ -41,7 +41,7 @@ do_link(SubjectId, Predicate, ObjectId, Context) ->
                 {object_id, ObjectId}
             ],
             Html  = zp_template:render("_rsc_edge.tpl", Vars, Context),
-            Title = zp_html:strip(m_rsc:p(ObjectId, title, Context)),
+            Title = zp_html:strip(?TR(m_rsc:p(ObjectId, title, Context), Context)),
             ElementId = "links-"++zp_convert:to_list(SubjectId)++"-"++zp_convert:to_list(Predicate),
             Context1 = zp_render:insert_bottom(ElementId, Html, Context),
             zp_render:wire({growl, [{text, "Added the connection to “"++zp_convert:to_list(Title)++"”."}]}, Context1);
