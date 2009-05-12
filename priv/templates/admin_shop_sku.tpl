@@ -6,7 +6,20 @@
 	<div id="content" class="zp-100">
 		<div class="block clearfix">
 
-			<h2>Zophrenic Skus Overview</h2>
+			<div class="zp-80">
+				<h2>Zophrenic Skus Overview</h2>
+			</div>	
+			<div class="zp-20">
+				<form method="get" action="{% url admin_shop_sku %}">
+					<fieldset>
+						<div class="form-element">
+							<input type="text" name="qs" value="{{ q.qs|escape }}" class="left" />
+							<button>Search</button>
+						</div>
+					</fieldset>
+				</form>
+			</div>
+
 
 		{% with m.search.paged[{shop_sku_list text=q.qs page=q.page}] as result %}
 
@@ -31,7 +44,7 @@
 						<span class="zp-25">{{ sku.description1|escape|default:"-" }}</span>
 						<span class="zp-20">{{ sku.variant|escape|default:"-" }}</span>
 						<span class="zp-10">{{ sku.stock }}</span>
-						<span class="zp-10">{{ sku.price_incl|format_price }}</span>
+						<span class="zp-10">&euro;{{ sku.price_incl|format_price }}</span>
 						<span class="zp-15">{{ sku.imported|date:"F d, H:i" }}</span>
 						<span class="zp-10">
 							{% button text="edit &raquo;" action={redirect dispatch="admin_shop_sku_edit" id=sku.id} %}
