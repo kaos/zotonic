@@ -56,7 +56,7 @@
 							<h3 class="above-item">Media</h3>
 							<div class="item clearfix">
 							{% for media in r.media %}
-								<div class="edit_media left cleafix">
+								<div class="edit_media left clearfix">
 									{% image media.filename width=200 height=200 crop class="do_quickview" %}
 									<p>{{media.filename}} ({{ media.width }}x{{ media.height }})</p>
 								</div>
