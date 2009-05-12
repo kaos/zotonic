@@ -14,6 +14,8 @@
     m_to_list/2,
     m_value/2,
     
+    get_sku/2,
+    update_sku/3,
     get_best_price/2,
     get_best_price/3,
     allocate_sku_price/4,
@@ -50,6 +52,15 @@ m_to_list(#m{}, _Context) ->
 m_value(#m{}, _Context) ->
     undefined.
 
+
+%% @doc Return the sku with the id.
+get_sku(Id, Context) ->
+    zp_db:assoc_row("select * from shop_sku where id = $1", [Id], Context).
+
+update_sku(Id, Props, Context) ->
+    true = zp_acl:has_role(admin, Context),
+    zp_db:update(shop_sku, Id, Props, Context).
+    
 
 get_best_price_as_proplist(Id, Context) ->
     case get_best_price(Id, Context) of

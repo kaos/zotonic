@@ -1,8 +1,8 @@
 %% @author Tim Benniks <tim@timbenniks.com>
 %% @copyright 2009 Tim Benniks.
-%% @doc Admin webmachine_resource.
+%% @doc List all skus.
 
--module(resource_admin_overview).
+-module(resource_admin_shop_sku).
 -author("Tim Benniks <tim@timbenniks.com>").
 
 -export([
@@ -16,5 +16,5 @@ is_authorized(ReqData, Context) ->
 
 
 html(Context) ->
-	Html = zp_template:render("admin_overview.tpl", [{page_overview, true}], Context),
+	Html = zp_template:render("admin_shop_sku.tpl", [{page_shop_sku, true}], Context),
 	zp_context:output(Html, Context).

@@ -91,12 +91,17 @@ search_result(#search_sql{} = Q, Limit, Context) ->
         F when is_function(F) ->
             F(Q, Sql, Args, Context);
         _ -> 
-            Rows = zp_db:q(Sql, Args, Context),
-            Rows1 = case Rows of
-                [{_}|_] -> [ R || {R} <- Rows ];
-                _ -> Rows
+            Rows = case Q#search_sql.assoc of
+                false ->
+                    Rs = zp_db:q(Sql, Args, Context),
+                    case Rs of
+                        [{_}|_] -> [ R || {R} <- Rs ];
+                        _ -> Rs
+                    end;
+                true ->
+                    zp_db:assoc(Sql, Args, Context)
             end,
-            #search_result{result=Rows1}
+            #search_result{result=Rows}
     end.
 
 

@@ -207,6 +207,16 @@ search({media_category_image, [{cat,Cat}]}, _OffsetLimit, Context) ->
         args=[CatId]
     };
 
+%% Return all skus
+search({shop_sku_list, [{text,_Text}]}, _OffsetLimit, _Context) ->
+    #search_sql{
+        select="sku.*",
+        from="shop_sku sku",
+        order="sku.article_nr",
+        tables=[],
+        args=[],
+        assoc=true
+    };
 
 %% Return the top 10 best selling products in the last two weeks
 search({shop_best_selling, []}, _OffsetLimit, _Context) ->

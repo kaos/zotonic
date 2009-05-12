@@ -90,7 +90,7 @@ assoc_row(Sql, Context) ->
 
 assoc_row(Sql, Parameters, Context) ->
     case assoc(Sql, Parameters, Context) of
-        [Row] -> Row;
+        [Row|_] -> Row;
         [] -> undefined
     end.
 
@@ -99,7 +99,7 @@ assoc_props_row(Sql, Context) ->
 
 assoc_props_row(Sql, Parameters, Context) ->
     case assoc_props(Sql, Parameters, Context) of
-        [Row] -> Row;
+        [Row|_] -> Row;
         [] -> undefined
     end.
     

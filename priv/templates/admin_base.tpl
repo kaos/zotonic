@@ -2,7 +2,7 @@
 <html xmlns="http://www.w3.org/1999/xhtml" lang="en">
 <head>
 	<meta http-equiv="Content-type" content="text/html; charset=utf-8" />
-	<title>Zophrenic admin</title>
+	<title>Zophrenic {% block title %}admin{% endblock %}</title>
 
 	<meta name="author" content="Tim Benniks" />
 	
@@ -39,7 +39,8 @@
 			<li><a href="/admin/" {% if page_dashboard %}class="current"{% endif %}>Dashboard</a></li>
 			<li><a href="/admin/overview/" {% if page_overview %}class="current"{% endif %}>Pages</a></li>
 			<li><a href="#" {% if page_users %}class="current"{% endif %}>Users</a></li>
-			<li><a href="#" {% if page_products %}class="current"{% endif %}>Products</a></li>
+			<li><a href="{% url admin_shop_sku %}" {% if page_shop_sku %}class="current"{% endif %}>Skus</a></li>
+			<li><a href="{% url admin_predicate %}" {% if page_predicate %}class="current"{% endif %}>Predicates</a></li>
 			<li class="right"><a id="zp-logoff" href="#">Logoff</a></li>
 		</ul>
 		{% endblock %}

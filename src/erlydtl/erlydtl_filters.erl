@@ -79,9 +79,7 @@ date(Input, FormatStr) when is_binary(Input) ->
     list_to_binary(date(binary_to_list(Input), FormatStr));
 date({{_,_,_} = Date,{_,_,_} = Time}, FormatStr) ->
      erlydtl_dateformat:format({Date, Time}, FormatStr);
-date([{{_,_,_} = Date,{_,_,_} = Time}], FormatStr) ->
-    erlydtl_dateformat:format({Date, Time}, FormatStr);
-date([{_,_,_} = Date], FormatStr) ->
+date({_,_,_} = Date, FormatStr) ->
     erlydtl_dateformat:format(Date, FormatStr);
 date(Input, _FormatStr) when is_list(Input) ->
     io:format("Unexpected date parameter : ~p~n", [Input]),
@@ -115,7 +113,18 @@ force_escape(undefined) ->
 force_escape(Input) when is_list(Input) ->
     escape(Input, []);
 force_escape(Input) when is_binary(Input) ->
-    escape(Input, 0).
+    escape(Input, 0);
+force_escape(Input) when is_integer(Input) ->
+    integer_to_list(Input);
+force_escape({{Y,M,D}, {_H,_I,_S}} = Input) when is_integer(Y) andalso is_integer(M) andalso is_integer(D) ->
+    date(Input, "Y-m-d H:i:s");
+force_escape({Y,M,D} = Input) when is_integer(Y) andalso is_integer(M) andalso is_integer(D) ->
+    date(Input, "Y-m-d");
+force_escape(true) ->
+    yesno(true);
+force_escape(false) ->
+    yesno(false).
+    
 
 format_integer(Input) when is_integer(Input) ->
     integer_to_list(Input);
@@ -300,6 +309,28 @@ urlencode(Input) when is_list(Input) ->
     urlencode(Input, []);
 urlencode(_Input) ->
     <<>>.
+
+
+yesno(B) ->
+    case erlydtl_runtime:is_false(B) of
+        true -> "no";
+        false -> "yes"
+    end.
+yesno(undefined, Values) ->
+    case string:tokens(zp_convert:to_list(Values), ",") of
+        [_Yes, _No, Maybe] -> Maybe;
+        [_Yes, No] -> No
+    end;
+yesno(B, Values) ->
+    case erlydtl_runtime:is_false(B) of
+        true ->
+            [_Yes,No|_Rest] = string:tokens(zp_convert:to_list(Values), ","),
+            No;
+        false -> 
+            [Yes|_Rest] = string:tokens(zp_convert:to_list(Values), ","),
+            Yes
+    end.
+
 
 % internal
 

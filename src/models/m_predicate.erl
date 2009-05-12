@@ -96,8 +96,10 @@ name_to_id_check(Name, Context) ->
 %% @doc Return the definition of the predicate
 %% @spec predicate(Pred, Context) -> PredicatePropList | undefined
 get(PredId, Context) when is_integer(PredId) ->
-    {ok, Pred} = id_to_name(PredId, Context),
-    get(Pred, Context);
+    case id_to_name(PredId, Context) of
+        {ok, Pred} -> get(Pred, Context);
+        {error, {enoent, predicate, _Id}} -> undefined
+    end;
 get(Pred, Context) when is_list(Pred) orelse is_binary(Pred) ->
     get(list_to_atom(string:to_lower(Pred)), Context);
 get(Pred, Context) ->
@@ -131,13 +133,17 @@ all(Context) ->
 %% @doc Insert a new predicate
 %% @spec insert(Props, Context) -> {ok, Id}
 insert(Props, Context) ->
-    {ok, Id} = zp_db:insert(predicate, Props, Context),
+    true = zp_acl:has_role(admin, Context),
+    Props1 = lists:filter(fun valid_prop/1, Props),
+    Props2 = [ {zp_convert:to_atom(N), V} || {N,V} <- Props1 ],
+    {ok, Id} = zp_db:insert(predicate, Props2, Context),
     zp_depcache:flush(predicate),
     {ok, Id}.
 
 %% @doc Delete a predicate, crashes when the predicate is in use
 %% @spec delete(Props, Context) -> void()
 delete(Id, Context) ->
+    true = zp_acl:has_role(admin, Context),
     zp_db:delete(predicate, Id, Context),
     zp_depcache:flush(predicate).
 
@@ -145,6 +151,19 @@ delete(Id, Context) ->
 %% @doc Update a predicate
 %% @spec update(Props, Props, Context) -> void()
 update(Id, Props, Context) ->
-    zp_db:update(predicate, Id, Props, Context),
+    true = zp_acl:has_role(admin, Context),
+    Props1 = lists:filter(fun valid_prop/1, Props),
+    Props2 = [ {zp_convert:to_atom(N), V} || {N,V} <- Props1 ],
+    zp_db:update(predicate, Id, Props2, Context),
     zp_depcache:flush(predicate).
+
+
+valid_prop({Name, _Value}) when is_atom(Name) -> true;
+valid_prop({"title", _Value}) -> true;
+valid_prop({"descr", _Value}) -> true;
+valid_prop({"name", _Value}) -> true;
+valid_prop({"uri", _Value}) -> true;
+valid_prop({"reversed", _Value}) -> true;
+valid_prop(_) -> false.
+
 

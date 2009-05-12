@@ -53,6 +53,7 @@ delete(Id, Context) when is_integer(Id) ->
 update(Id, Props, Context) when is_integer(Id) ->
     case zp_acl:rsc_editable(Id, Context) of
         true ->
+            ?DEBUG(Props),
             TextProps = recombine_dates(Props),
             AtomProps = [ {zp_convert:to_atom(P), V} || {P, V} <- TextProps ],
             FilteredProps = props_filter(Id, AtomProps, [], Context),

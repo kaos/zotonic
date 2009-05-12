@@ -202,7 +202,7 @@ flatten_color(A) ->
 
 
 make_label(N, Context) when is_integer(N) ->
-    zp_convert:to_list(m_rsc:p(N, title, Context));
-make_label(L, _Context) -> 
-    zp_convert:to_list(L).
+    zp_convert:to_list(?TR(m_rsc:p(N, title, Context), Context));
+make_label(L, Context) -> 
+    zp_convert:to_list(?TR(L, Context)).
     
