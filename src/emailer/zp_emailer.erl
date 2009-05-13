@@ -20,7 +20,6 @@
 ]).
 
 -include_lib("esmtp/include/esmtp_mime.hrl").
--include_lib("zophrenic.hrl").
 
 -define(SMTP_PORT_TLS, 587).
 -define(SMTP_PORT_SSL, 465).
@@ -102,7 +101,7 @@ handle_cast({send, To, Subject, Message, Context}, State) ->
         {render, false},
         {subject, Subject},
         {message, Message},
-        {context, Context},
+        {context, zp_context:pickle(Context)},
         {retry, 0}
     ],
     {ok, Id} = zp_db:insert(emailq, Cols, Context),
@@ -116,7 +115,7 @@ handle_cast({send_render, To, HtmlTemplate, TextTemplate, Vars, Context}, State)
         {html_tpl, HtmlTemplate},
         {text_tpl, TextTemplate},
         {vars, Vars},
-        {context, Context},
+        {context, zp_context:pickle(Context)},
         {retry, 0}
     ],
     {ok, Id} = zp_db:insert(emailq, Cols, Context),
@@ -173,7 +172,8 @@ poll_queued(Context, State) ->
 send_queued(Cols, State) ->
     {id, Id} = proplists:lookup(id, Cols),
     {recipient, To} = proplists:lookup(recipient, Cols),
-    {context, Context} = proplists:lookup(context, Cols),
+    {context, PickledContext} = proplists:lookup(context, Cols),
+    Context = zp_context:depickle(PickledContext),
     {retry, Retry} = proplists:lookup(retry, Cols),
     case proplists:get_value(render, Cols) of
         true ->

@@ -16,6 +16,9 @@
     prune_for_scomp/1,
     output/2,
 
+    pickle/1,
+    depickle/1,
+    
     combine_results/2,
 
     ensure_all/1,
@@ -109,6 +112,7 @@ prune_for_database(Context) ->
 %% between different (cached) renderings.
 prune_for_scomp(Context) ->
     Context#context{
+        dbc=undefined,
 	    wm_reqdata=undefined,
         dict=undefined,
 		updates=[],
@@ -120,6 +124,21 @@ prune_for_scomp(Context) ->
 		render=[]
     }.
 
+
+%% @doc Pickle a context for storing in the database
+%% @todo pickle/depickle the visitor id (when any)
+%% @spec pickle(Context) -> tuple()
+pickle(Context) ->
+    {pickled_context, Context#context.db, Context#context.user_id, Context#context.language, undefined}.
+
+%% @doc Depickle a context for restoring from a database
+%% @todo pickle/depickle the visitor id (when any)
+depickle({pickled_context, Db, UserId, Language, _VisitorId}) ->
+    Context = #context{db=Db, language=Language},
+    case UserId of
+        undefined -> Context;
+        _ -> zp_acl:logon(UserId, Context)
+    end.
 
 %% @spec output(list(), Context) -> {io_list(), Context}
 %% @doc Replace the contexts in the output with their rendered content and collect all scripts

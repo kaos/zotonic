@@ -120,9 +120,9 @@ payment_completion(OrderId, NewState, PaymentMethod, _PspReference, Context) ->
                     status_modified = now()
                 where id = $3", [NewState, PaymentMethod, OrderId], Context),
             
+            % @todo Send e-mail to VMSII
             Order = get(OrderId, Context),
             mail_customer(Order, Context),
-            % @todo Send e-mail to VMSII
             skip;
         payment_refused when OldState == new; OldState == payment_pending ->
             payment_refused;
@@ -139,10 +139,11 @@ payment_completion(OrderId, NewState, PaymentMethod, _PspReference, Context) ->
     end,
     {ok, OrderId}.
 
+%% @doc Send the order confirmation to the customer
 mail_customer(Order, Context) ->
     {email, To} = proplists:lookup(email, Order),
     zp_emailer:send_render(To, "email/email_order_confirmation.tpl", [{order, Order}], Context).
-    
+
 
 %% @doc Set a new status of the order. Deallocate order on problems.
 set_status(OrderId, Status, Context) ->
