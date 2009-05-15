@@ -110,7 +110,7 @@ get_rsc(RscId, N, Context) ->
     end.
 
 
-%% @doc Check if the 
+%% @doc Fetch the media information for the media coupled to the resource
 %% @spec get_rsc_media(RscId, MediaId, Context) -> [PropList]
 get_rsc_media(RscId, MediaId, Context) ->
     F = fun() ->
@@ -128,20 +128,25 @@ get_rsc_media(RscId, MediaId, Context) ->
 %% @doc Delete the media at the id, the file is also deleted.
 %% @spec delete(MediaId, Context) -> ok | {error, Reason}
 delete(MediaId, Context) ->
-    case zp_db:q1("select filename from media where id = $1", [MediaId], Context) of
-        undefined ->
-            {error, enoent};
-        Filename ->
-            Abs = zp_media_archive:abspath(Filename, Context),
-            DeleteF = fun(Ctx) ->
-                zp_db:delete(media, MediaId, Ctx),
-                case file:delete(Abs) of
-                    {error, enoent} -> ok;
-                    {error, enotdir} -> ok;
-                    ok -> ok
-                end
-            end,
-            zp_db:transaction(DeleteF, Context)
+    case zp_acl:media_editable(MediaId, Context) of
+        true ->
+            case zp_db:q1("select filename from media where id = $1", [MediaId], Context) of
+                undefined ->
+                    {error, enoent};
+                Filename ->
+                    Abs = zp_media_archive:abspath(Filename, Context),
+                    DeleteF = fun(Ctx) ->
+                        zp_db:delete(media, MediaId, Ctx),
+                        case file:delete(Abs) of
+                            {error, enoent} -> ok;
+                            {error, enotdir} -> ok;
+                            ok -> ok
+                        end
+                    end,
+                    zp_db:transaction(DeleteF, Context)
+            end;
+        false ->
+            {error, eacces}
     end.
 
 
@@ -151,12 +156,20 @@ insert_file(File, Context) ->
     insert_file(File, [], Context).
 
 insert_file(File, Props, Context) ->
+    OriginalFilename = proplists:get_value(original_filename, Props, File),
     PropsMedia = add_media_info(File, Props),
     PropsAccess = zp_acl:add_defaults(PropsMedia, Context),
     PropsCreator = zp_acl:add_user(creator_id, PropsAccess, Context),
-    ArchiveFile = zp_media_archive:archive_copy_opt(File, Context),
-    RootName = filename:rootname(filename:basename(ArchiveFile)),
-    zp_db:insert(media, [{filename, ArchiveFile},{rootname, RootName}|PropsCreator], Context).
+    case zp_acl:group_editable(proplists:get_value(group_id, PropsCreator), Context) of
+        true ->
+            SafeRootName = zp_string:to_rootname(OriginalFilename),
+            SafeFilename = SafeRootName ++ zp_media_identify:extension(proplists:get_value(mime, PropsCreator)),
+            ArchiveFile = zp_media_archive:archive_copy_opt(File, SafeFilename, Context),
+            RootName = filename:rootname(filename:basename(ArchiveFile)),
+            zp_db:insert(media, [{filename, ArchiveFile},{rootname, RootName}|PropsCreator], Context);
+        false ->
+            {error, eacces}
+    end.
 
 
 %% @doc Insert a file, when the file is not in archive then a copy is made in the archive.  After inserting it is coupled
@@ -166,37 +179,62 @@ insert_file_rsc(File, RscId, Context) ->
     insert_file_rsc(File, RscId, [], Context).
 
 insert_file_rsc(File, RscId, Props, Context) ->
-    F = fun(Ctx) ->
-        {ok, Id} = insert_file(File, Props, Ctx),
-        insert_rsc_media(RscId, Id, Ctx),
-        {ok, Id}
-    end,
-    {ok, Id} = zp_db:transaction(F, Context),
-    zp_depcache:flush({media_rsc, RscId}),
-    {ok, Id}.
+    case zp_acl:rsc_editable(RscId, Context) of
+        true ->
+            F = fun(Ctx) ->
+                {ok, Id} = insert_file(File, Props, Ctx),
+                insert_rsc_media(RscId, Id, Ctx),
+                {ok, Id}
+            end,
+            {ok, Id} = zp_db:transaction(F, Context),
+            zp_depcache:flush({media_rsc, RscId}),
+            {ok, Id};
+        false ->
+            {error, eacces}
+    end.
 
 
 %% @doc Couple the media to the resource
-%% @spec insert_rsc_media(RscId, Id, Context) -> {ok, RscMediaId}
+%% @spec insert_rsc_media(RscId, Id, Context) -> {ok, RscMediaId} | {error, Reason}
 insert_rsc_media(RscId, Id, Context) ->
-    {ok, RscMediaId} = zp_db:insert(rsc_media, [{rsc_id, RscId}, {media_id, Id}], Context),
-    zp_depcache:flush({media_rsc, RscId}),
-    {ok, RscMediaId}.
+    case zp_acl:rsc_editable(RscId, Context) of
+        true ->
+            {ok, RscMediaId} = zp_db:insert(rsc_media, [{rsc_id, RscId}, {media_id, Id}], Context),
+            zp_depcache:flush({media_rsc, RscId}),
+            {ok, RscMediaId};
+        false ->
+            {error, eacces}
+    end.
     
 
 %% @doc Decouple a media from an resource
+%% @spec delete_rsc_media(RscId, MediaId, Context) -> ok | {error, Reason}
 delete_rsc_media(RscId, Id, Context) ->
-    zp_db:q("delete from rsc_media where rsc_id = $1 and media_id = $2", [RscId, Id], Context),
-    zp_depcache:flush({media_rsc, RscId}).
+    case zp_acl:rsc_editable(RscId, Context) of
+        true ->
+            zp_db:q("delete from rsc_media where rsc_id = $1 and media_id = $2", [RscId, Id], Context),
+            zp_depcache:flush({media_rsc, RscId}),
+            ok;
+        false ->
+            {error, eacces}
+    end.
 
-
-%% @doc Delete a media
+%% @doc Remove a media from a resource
+%% @spec delete_rsc_media(RscMediaId, Context) -> ok | {error, Reason}
 delete_rsc_media(RscMediaId, Context) ->
     RscId = zp:q1("select rsc_id from rsc_media where id = $2", [RscMediaId], Context),
-    zp_db:delete(rsc_media, RscMediaId, Context),
     case RscId of
-        undefined -> ok;
-        _ -> zp_depcache:flush({media_rsc, RscId})
+        undefined ->
+            {error, enoent};
+        _ ->
+            case zp_acl:rsc_editable(RscId, Context) of
+                true ->
+                    zp_db:delete(rsc_media, RscMediaId, Context),
+                    zp_depcache:flush({media_rsc, RscId}),
+                    ok;
+                false ->
+                    {error, eacces}
+            end
     end.
 
 %% @doc Fetch the media information of the file, if they are not set in the Props
@@ -209,7 +247,7 @@ add_media_info(File, Props) ->
     end,
     PropsMime = case proplists:get_value(mime, PropsSize) of
         undefined ->
-            case zp_media_identify:identify_cached(File) of
+            case zp_media_identify:identify(File) of
                 {ok, MediaInfo} -> MediaInfo ++ PropsSize;
                 {error, _Reason} -> PropsSize
             end;

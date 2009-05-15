@@ -69,8 +69,12 @@ process_post(ReqData, Context) ->
     CometScript = zp_session_page:get_scripts(EventContext#context.page_pid),
 
     RD  = zp_context:get_reqdata(EventContext),
-    RD1 = wrq:append_to_resp_body(Script, RD),
-    RD2 = wrq:append_to_resp_body(CometScript, RD1),
-
-    ReplyContext = zp_context:set_reqdata(RD2, EventContext),
+    RD1 = case wrq:get_req_header("content-type", ReqData) of
+        "multipart/form-data" ++ _ ->
+            RDct = wrq:set_resp_header("Content-Type", "text/html; charset=utf-8", RD),
+            wrq:append_to_resp_body(["<textarea>", Script, CometScript, "</textarea>"], RDct);
+        _ ->
+            wrq:append_to_resp_body([Script, CometScript], RD)
+    end,
+    ReplyContext = zp_context:set_reqdata(RD1, EventContext),
     ?WM_REPLY(true, ReplyContext).

@@ -40,9 +40,8 @@ render_action(TriggerId, TargetId, Args, Context) ->
                         _  -> [SubmitPostback, <<".data('zp_submit_action', \"">>, zp_utils:js_escape(ActionsJS), <<"\");\n">>]
                     end;
 
-                %% TODO: WARNING: experimental, for adding actions to submits (ie. no 'click')  [Also removed the 'click']
                 %% Should check this against the wire() function.
-                EventType == undefined ->
+                EventType == undefined orelse EventType == "none" ->
                     [
                         PostbackMsgJS, ActionsJS
                     ];

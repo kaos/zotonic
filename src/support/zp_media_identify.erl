@@ -11,7 +11,8 @@
 %% interface functions
 -export([
     identify_cached/1,
-    identify/1
+    identify/1,
+    extension/1
 ]).
 
 -include_lib("zophrenic.hrl").
@@ -80,3 +81,14 @@ mime("PNG24") -> "image/png";
 mime("PNG32") -> "image/png";
 mime(Type) -> "image/" ++ string:to_lower(Type).
 
+
+%% @doc Return the extension for a known mime type.
+%% @todo Include extra mime types when we can identify them.
+extension("image/jpeg") -> ".jpg";
+extension("image/gif") -> ".gif";
+extension("image/tiff") -> ".tiff";
+extension("image/bmp") -> ".bmp";
+extension("image/png") -> ".png";
+extension("application/pdf") -> ".pdf";
+extension("application/postscript") -> ".ps";
+extension(_) -> ".bin".

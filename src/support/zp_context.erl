@@ -241,11 +241,11 @@ ensure_qs(Context) ->
             PathArgs = lists:map(
                             fun ({T,V}) -> {atom_to_list(T),mochiweb_util:unquote(V)} end, 
                             dict:to_list(PathDict)),
-            Body     = parse_form_urlencoded(ReqData),
+            {Body, ContextParsed} = parse_form_urlencoded(Context),
             Query    = wrq:req_qs(ReqData),
             Combined = PathArgs ++ Body ++ Query,
-            Dict2    = dict:store('q', Combined, Context#context.dict),
-            Context#context{dict=Dict2}
+            Dict2    = dict:store('q', Combined, ContextParsed#context.dict),
+            ContextParsed#context{dict=Dict2}
     end.
 
 
@@ -482,19 +482,24 @@ language(Context) ->
 %% Local helper functions
 %% ------------------------------------------------------------------------------------
 
-%% @spec parse_form_urlencoded(#wm_reqdata) -> list()
+%% @spec parse_form_urlencoded(context()) -> {list(), NewContext}
 %% @doc Return the keys in the body of the request, only if the request is application/x-www-form-urlencoded
-parse_form_urlencoded(ReqData) ->
+parse_form_urlencoded(Context) ->
+    ReqData = get_reqdata(Context),
     case wrq:get_req_header("content-type", ReqData) of
         "application/x-www-form-urlencoded" ++ _ ->
             case wrq:req_body(ReqData) of
                 undefined ->
-                     [];
+                     {[], Context};
                 Binary ->
-                     mochiweb_util:parse_qs(Binary)
+                     {mochiweb_util:parse_qs(Binary), Context}
             end;
-        _ ->
-            []
+        "multipart/form-data" ++ _ ->
+            {Form, ContextRcv} = zp_parse_multipart:recv_parse(Context),
+            FileArgs = [ {Name, {Filename, TmpFile}} || {Name, Filename, TmpFile} <- Form#multipart_form.files ],
+            {Form#multipart_form.args ++ FileArgs, ContextRcv};
+        _Other ->
+            {[], Context}
     end.
 
 

@@ -322,6 +322,7 @@ do_recv_body(State = #state{reqdata=RD}, MaxBody) ->
                0 ->
                    <<>>;
                Length when is_integer(Length), Length =< MaxBody ->
+                   %% @todo When multipart/form-data, wait with receiving until called again.
                    recv(State, Length);
                Length ->
                    exit({body_too_large, Length})

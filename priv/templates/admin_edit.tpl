@@ -55,12 +55,16 @@
 						<div class="item-wrapper">
 							<h3 class="above-item">Media</h3>
 							<div class="item clearfix">
-							{% for media in r.media %}
-								<div class="edit_media left clearfix">
-									{% image media.filename width=200 height=200 crop class="do_quickview" %}
-									<p>{{media.filename}} ({{ media.width }}x{{ media.height }})</p>
+								<div id="{{ #media }}">
+									{% include "_edit_media.tpl" media=media %}
 								</div>
-							{% endfor %}
+								<div class="clear">
+									<hr/>
+									{% button
+											text="add media..." 
+											action={dialog_media_upload rsc_id=id group_id=r.group_id action={postback postback={reload_media rsc_id=id div_id=#media} delegate="resource_admin_edit"}}
+									%}
+								</div>
 							</div>
 						</div>
 					

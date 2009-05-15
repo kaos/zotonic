@@ -65,6 +65,8 @@
     publication_end={{9999,1,1}, {0,0,0}}
 }).
 
+%% Record used for parsing multipart body (see zp_parse_multipart)
+-record(multipart_form, {name, data, filename, tmpfile, file, files=[], args=[]}).
 
 %% Model value interface for templates
 -record(m, {model, value}).

@@ -152,7 +152,7 @@ add_update(TargetId, Terms, JSFormatString, Context) ->
 make_postback_info(Tag, EventType, TriggerId, TargetId, Delegate, Context) ->
 	Delegate1 = case Delegate of
             		undefined -> zp_context:get_resource_module(Context);
-            		_         -> Delegate
+            		_         -> zp_convert:to_atom(Delegate)
             	end,
 	PostbackInfo = {EventType, TriggerId, TargetId, Tag, Delegate1},
 	zp_utils:pickle(PostbackInfo).
@@ -190,6 +190,8 @@ wire(undefined, TargetId, Actions, Context) ->
     wire(<<>>, TargetId, Actions, Context);
 wire(TriggerId, undefined, Actions, Context) ->
     wire(TriggerId, <<>>, Actions, Context);
+wire(_TriggerId, _TargetId, [], Context) ->
+    Context;
 wire(TriggerId, TargetId, Actions, Context) ->
     Context#context{actions=[{TriggerId, TargetId, Actions}|Context#context.actions]}.
 

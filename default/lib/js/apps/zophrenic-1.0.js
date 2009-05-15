@@ -89,9 +89,14 @@ function zp_opt_cancel(obj)
 
 function zp_queue_postback(triggerID, postback, extraParams) 
 {
-	extraParams = extraParams || new Array(); 
-	var triggerValue = $('#'+triggerID).val() || '';
+    var triggerValue;
+
+    if (triggerID != '')
+	    triggerValue = $('#'+triggerID).val() || '';
+	else
+	    triggerValue = '';
 	
+	extraParams = extraParams || new Array(); 
 	extraParams.push({name: 'triggervalue', value: triggerValue})
 	
 	var o 			= new Object();
@@ -145,7 +150,7 @@ function zp_ajax(params)
 		    zp_is_in_postback--;
 			zp_stop_spinner();
 		    
-		$.misc.error("FAIL: " + textStatus);
+		    $.misc.error("FAIL: " + textStatus);
 	    }
 	});			
 }
@@ -310,16 +315,229 @@ function zp_init_postback_forms()
 		{
 			postback = zp_default_form_postback;
 		}
-		zp_queue_postback(form_id, postback, arguments.concat(validations)); 
+
 		if(action)
 		{
 			setTimeout(action, 10);
 		}
+
+        var files = $('input:file', this).fieldValue();
+        var found = false;
+        for (var j=0; j < files.length; j++)
+        {
+            if (files[j])
+            {
+                found = true;
+            }
+        }
+
+        if(found) 
+        {
+            $(this).postbackFileForm(form_id, postback, validations);
+        }
+        else
+        {
+            zp_queue_postback(form_id, postback, arguments.concat(validations)); 
+		}
+
 		event.stopPropagation();
 		return false;
 	})
 	.attr('action', 'pb:installed');
 }
+
+
+
+$.fn.postbackFileForm = function(trigger_id, postback, validations)
+{
+    var a = validations;
+
+    a.push({name: "postback", value: postback});
+    a.push({name: "zp_trigger_id", value: trigger_id});
+    a.push({name: "zp_pageid", value: zp_pageid});
+
+    var $form = this;
+    var options = {
+        url:  '/postback?' + $.param(a),
+        type: 'POST',
+        dataType: 'text/javascript'
+    };
+
+    // hack to fix Safari hang (thanks to Tim Molendijk for this)
+    // see:  http://groups.google.com/group/jquery-dev/browse_thread/thread/36395b7ab510dd5d
+    if ($.browser.safari)
+        $.get('/close-connection', fileUpload);
+    else
+        fileUpload();
+    
+    // private function for handling file uploads (hat tip to YAHOO!)
+    function fileUpload() {
+        var form = $form[0];
+
+        if ($(':input[name=submit]', form).length) {
+            alert('Error: Form elements must not be named "submit".');
+            return;
+        }
+
+        var opts = $.extend({}, $.ajaxSettings, options);
+		var s = $.extend(true, {}, $.extend(true, {}, $.ajaxSettings), opts);
+
+        var id = 'jqFormIO' + (new Date().getTime());
+        var $io = $('<iframe id="' + id + '" name="' + id + '" src="about:blank" />');
+        var io = $io[0];
+
+        $io.css({ position: 'absolute', top: '-1000px', left: '-1000px' });
+
+        var xhr = { // mock object
+            aborted: 0,
+            responseText: null,
+            responseXML: null,
+            status: 0,
+            statusText: 'n/a',
+            getAllResponseHeaders: function() {},
+            getResponseHeader: function() {},
+            setRequestHeader: function() {},
+            abort: function() {
+                this.aborted = 1;
+                $io.attr('src','about:blank'); // abort op in progress
+            }
+        };
+
+        var g = opts.global;
+        
+        // trigger ajax global events so that activity/block indicators work like normal
+        if (g && ! $.active++) $.event.trigger("ajaxStart");
+        if (g) $.event.trigger("ajaxSend", [xhr, opts]);
+
+		if (s.beforeSend && s.beforeSend(xhr, s) === false) {
+			s.global && $.active--;
+			return;
+        }
+        if (xhr.aborted)
+            return;
+
+        var cbInvoked = 0;
+        var timedOut = 0;
+
+        // add submitting element to data if we know it
+        var sub = form.clk;
+        if (sub) {
+            var n = sub.name;
+            if (n && !sub.disabled) {
+                options.extraData = options.extraData || {};
+                options.extraData[n] = sub.value;
+                if (sub.type == "image") {
+                    options.extraData[name+'.x'] = form.clk_x;
+                    options.extraData[name+'.y'] = form.clk_y;
+                }
+            }
+        }
+
+        // take a breath so that pending repaints get some cpu time before the upload starts
+        setTimeout(function() {
+            // make sure form attrs are set
+            var t = $form.attr('target');
+            var a = $form.attr('action');
+
+			// update form attrs in IE friendly way
+			form.setAttribute('target',id);
+			if (form.getAttribute('method') != 'POST')
+				form.setAttribute('method', 'POST');
+			if (form.getAttribute('action') != opts.url)
+				form.setAttribute('action', opts.url);
+
+            // ie borks in some cases when setting encoding
+            if (! options.skipEncodingOverride) {
+                $form.attr({
+                    encoding: 'multipart/form-data',
+                    enctype:  'multipart/form-data'
+                });
+            }
+
+            // support timout
+            if (opts.timeout)
+                setTimeout(function() { timedOut = true; cb(); }, opts.timeout);
+
+            // add "extra" data to form if provided in options
+            var extraInputs = [];
+            try {
+                if (options.extraData)
+                    for (var n in options.extraData)
+                        extraInputs.push(
+                            $('<input type="hidden" name="'+n+'" value="'+options.extraData[n]+'" />')
+                                .appendTo(form)[0]);
+                
+                // add iframe to doc and submit the form
+                $io.appendTo('body');
+                io.attachEvent ? io.attachEvent('onload', cb) : io.addEventListener('load', cb, false);
+                form.submit();
+            }
+            finally {
+                // reset attrs and remove "extra" input elements
+				form.setAttribute('action',a);
+                t ? form.setAttribute('target', t) : $form.removeAttr('target');
+                $(extraInputs).remove();
+            }
+        }, 10);
+
+        var nullCheckFlag = 0;
+
+        function cb() {
+            if (cbInvoked++) return;
+
+            io.detachEvent ? io.detachEvent('onload', cb) : io.removeEventListener('load', cb, false);
+
+            var ok = true;
+            try {
+                if (timedOut) throw 'timeout';
+                // extract the server response from the iframe
+                var data, doc;
+
+                doc = io.contentWindow ? io.contentWindow.document : io.contentDocument ? io.contentDocument : io.document;
+
+                if ((doc.body == null || doc.body.innerHTML == '') && !nullCheckFlag) {
+                    // in some browsers (cough, Opera 9.2.x) the iframe DOM is not always traversable when
+                    // the onload callback fires, so we give them a 2nd chance
+                    nullCheckFlag = 1;
+                    cbInvoked--;
+                    setTimeout(cb, 100);
+                    return;
+                }
+
+                xhr.responseText = doc.body ? doc.body.innerHTML : null;
+
+                xhr.getResponseHeader = function(header){
+                    var headers = {'content-type': opts.dataType};
+                    return headers[header];
+                };
+
+                var ta = doc.getElementsByTagName('textarea')[0];
+                xhr.responseText = ta ? ta.value : xhr.responseText;
+                data = $.httpData(xhr, opts.dataType);
+            }
+            catch(e){
+                ok = false;
+                $.handleError(opts, xhr, 'error', e);
+            }
+
+            // ordering of these callbacks/triggers is odd, but that's how $.ajax does it
+            if (ok) {
+                eval(data),
+                if (g) $.event.trigger("ajaxSuccess", [xhr, opts]);
+            }
+            if (g) $.event.trigger("ajaxComplete", [xhr, opts]);
+            if (g && ! --$.active) $.event.trigger("ajaxStop");
+            if (opts.complete) opts.complete(xhr, ok ? 'success' : 'error');
+
+            // clean up
+            setTimeout(function() {
+                $io.remove();
+                xhr.responseXML = null;
+            }, 100);
+        };
+    };
+}
+
 
 // Collect all postback validations from the form elements
 $.fn.formValidationPostback = function() 
@@ -424,7 +642,25 @@ function urlencode(s)
     return s;
 }
 
+// HTML escape a string so it is safe to concatenate when making tags.
+function html_escape(s)
+{
+    s.replace(/&/, "&amp;").replace(/</, "&lt;").replace(/>/, "&gt;").replace(/"/, "&quot;");
+}
+
+
 // From: http://malsup.com/jquery/form/jquery.form.js
+
+/*
+ * jQuery Form Plugin
+ * version: 2.28 (10-MAY-2009)
+ * @requires jQuery v1.2.2 or later
+ *
+ * Examples and documentation at: http://malsup.com/jquery/form/
+ * Dual licensed under the MIT and GPL licenses:
+ *   http://www.opensource.org/licenses/mit-license.php
+ *   http://www.gnu.org/licenses/gpl.html
+ */
 
 /**
  * formToArray() gathers form element data into an array of objects that can
@@ -577,3 +813,83 @@ $.fieldValue = function(el, successful) {
     }
     return el.value;
 };
+
+
+/**
+ * Clears the form data.  Takes the following actions on the form's input fields:
+ *  - input text fields will have their 'value' property set to the empty string
+ *  - select elements will have their 'selectedIndex' property set to -1
+ *  - checkbox and radio inputs will have their 'checked' property set to false
+ *  - inputs of type submit, button, reset, and hidden will *not* be effected
+ *  - button elements will *not* be effected
+ */
+$.fn.clearForm = function() {
+    return this.each(function() {
+        $('input,select,textarea', this).clearFields();
+    });
+};
+
+/**
+ * Clears the selected form elements.
+ */
+$.fn.clearFields = $.fn.clearInputs = function() {
+    return this.each(function() {
+        var t = this.type, tag = this.tagName.toLowerCase();
+        if (t == 'text' || t == 'password' || tag == 'textarea')
+            this.value = '';
+        else if (t == 'checkbox' || t == 'radio')
+            this.checked = false;
+        else if (tag == 'select')
+            this.selectedIndex = -1;
+    });
+};
+
+/**
+ * Resets the form data.  Causes all form elements to be reset to their original value.
+ */
+$.fn.resetForm = function() {
+    return this.each(function() {
+        // guard against an input with the name of 'reset'
+        // note that IE reports the reset function as an 'object'
+        if (typeof this.reset == 'function' || (typeof this.reset == 'object' && !this.reset.nodeType))
+            this.reset();
+    });
+};
+
+/**
+ * Enables or disables any matching elements.
+ */
+$.fn.enable = function(b) {
+    if (b == undefined) b = true;
+    return this.each(function() {
+        this.disabled = !b;
+    });
+};
+
+/**
+ * Checks/unchecks any matching checkboxes or radio buttons and
+ * selects/deselects and matching option elements.
+ */
+$.fn.selected = function(select) {
+    if (select == undefined) select = true;
+    return this.each(function() {
+        var t = this.type;
+        if (t == 'checkbox' || t == 'radio')
+            this.checked = select;
+        else if (this.tagName.toLowerCase() == 'option') {
+            var $sel = $(this).parent('select');
+            if (select && $sel[0] && $sel[0].type == 'select-one') {
+                // deselect all other options
+                $sel.find('option').selected(false);
+            }
+            this.selected = select;
+        }
+    });
+};
+
+// helper fn for console logging
+// set $.fn.ajaxSubmit.debug to true to enable debug logging
+function log() {
+    if ($.fn.ajaxSubmit.debug && window.console && window.console.log)
+        window.console.log('[jquery.form] ' + Array.prototype.join.call(arguments,''));
+}

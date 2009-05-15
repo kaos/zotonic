@@ -12,6 +12,7 @@
     trim/1,
     is_string/1,
     line/1,
+    to_rootname/1,
     to_name/1,
     to_slug/1,
     to_lower/1,
@@ -66,6 +67,12 @@ to_upper(L) when is_list(L) ->
     string:to_upper(lists:flatten(L));
 to_upper(A) when is_atom(A) ->
     string:to_upper(atom_to_list(A)).
+
+
+%% @doc Filter a filename so that we obtain a basename that is safe to use.
+%% @spec to_rootname(string()) -> string()
+to_rootname(Filename) ->
+    to_slug(filename:rootname(filename:basename(Filename))).
 
 
 %% @doc Map a string to a slug that can be used in the uri of a page. Same as a name, but then with dashes instead of underscores.

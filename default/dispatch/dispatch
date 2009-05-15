@@ -3,6 +3,7 @@
 	{home,     [],            resource_home, []},
 	{comet,    ["comet"],     resource_comet, []},
 	{postback, ["postback"],  resource_postback, []},
+	{close_connection, ["close-connection"],  resource_close_connection, []},
 
 	{id,	   ["id", id],	  resource_id, []},
 

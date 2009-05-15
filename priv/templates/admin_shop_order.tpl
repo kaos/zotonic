@@ -52,7 +52,7 @@
 						<span class="zp-15">{{ order.delivery_street|escape }}</span>
 						<span class="zp-15">{{ order.delivery_city|escape }}</span>
 						<span class="zp-5">{{ order.delivery_country|escape }}</span>
-						<span class="zp-10">{{ order.created|date:"M i, H:i" }}</span>
+						<span class="zp-10">{{ order.created|date:"M d, H:i" }}</span>
 						<span class="zp-5">
 							{% button text="view &raquo;" action={redirect dispatch="admin_shop_order_view" id=id} %}
 						</span>

@@ -11,11 +11,15 @@
 -export([
     abspath/2,
     ensure_relative/2,
+    ensure_relative/3,
     path_archive/1,
     is_archived/2,
     archive_file/2,
+    archive_file/3,
     archive_copy/2,
+    archive_copy/3,
     archive_copy_opt/2,
+    archive_copy_opt/3,
     archive_filename/2,
     rel_archive/2,
     safe_filename/1
@@ -29,24 +33,33 @@ abspath(File, Context) ->
 
 %% @doc Ensure that the filename is relative to the archive.  When needed move the file to the archive.  Return the relative path.
 ensure_relative(File, Context) ->
+    ensure_relative(File, filename:basename(File), Context).
+
+ensure_relative(File, NewBasenameIfMoved, Context) ->
     Fileabs = filename:absname(File),
     case is_archived(Fileabs, Context) of
         true ->
             rel_archive(Fileabs, Context);
         false ->
             % Not in the archive dir, move the file
-            archive_file(Fileabs, Context)
+            archive_file(Fileabs, NewBasenameIfMoved, Context)
     end.
+
 
 %% @doc Move a file to the archive directory (when it is not archived yet)
 %% @spec archive_file(Filename, Context) -> ArchivedFilename
 archive_file(Filename, Context) ->
+    archive_file(Filename, filename:basename(Filename), Context).
+
+%% @doc Move a file to the archive directory (when it is not archived yet)
+%% @spec archive_file(Filename, NewBasename, Context) -> ArchivedFilename
+archive_file(Filename, NewBasename, Context) ->
     Fileabs = filename:absname(Filename),
     case is_archived(Fileabs, Context) of
         true ->
             rel_archive(Fileabs, Context);
         false ->
-            NewFile = archive_filename(Fileabs, Context),
+            NewFile = archive_filename(NewBasename, Context),
             AbsPath = abspath(NewFile, Context),
             ok = filelib:ensure_dir(AbsPath),
             ok = file:rename(Fileabs, AbsPath),
@@ -56,8 +69,11 @@ archive_file(Filename, Context) ->
 %% @doc Always archive a copy of a file in the archive directory
 %% @spec archive_file(Filename, Context) -> ArchivedFilename
 archive_copy(Filename, Context) ->
+    archive_copy(Filename, filename:basename(Filename), Context).
+
+archive_copy(Filename, NewBasename, Context) ->
     Fileabs = filename:absname(Filename),
-    NewFile = archive_filename(Filename, Context),
+    NewFile = archive_filename(NewBasename, Context),
     AbsPath = abspath(NewFile, Context),
     ok = filelib:ensure_dir(AbsPath),
     {ok, _Bytes} = file:copy(Fileabs, AbsPath),
@@ -66,10 +82,13 @@ archive_copy(Filename, Context) ->
 %% @doc Optionally archive a copy of a file in the archive directory (when it is not archived yet)
 %% @spec archive_file(Filename, Context) -> ArchivedFilename
 archive_copy_opt(Filename, Context) ->
+    archive_copy_opt(Filename, filename:basename(Filename), Context).
+
+archive_copy_opt(Filename, NewBasename, Context) ->
     Fileabs = filename:absname(Filename),
     case is_archived(Fileabs, Context) of
         false ->
-            NewFile = archive_filename(Filename, Context),
+            NewFile = archive_filename(NewBasename, Context),
             AbsPath = abspath(NewFile, Context),
             ok = filelib:ensure_dir(AbsPath),
             {ok, _Bytes} = file:copy(Fileabs, AbsPath),

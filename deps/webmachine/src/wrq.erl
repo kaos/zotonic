@@ -28,6 +28,9 @@
          append_to_resp_body/2,append_to_response_body/2,
          get_cookie_value/2,get_qs_value/2,get_qs_value/3,set_peer/2]).
 
+%% Added by Marc Worrell
+-export([req_body/3]).
+
 -include_lib("include/wm_reqdata.hrl").
 
 create(Method,Version,RawPath,Headers) ->
@@ -88,6 +91,11 @@ req_headers(_RD = #wm_reqdata{req_headers=ReqH}) -> ReqH. % mochiheaders
 
 req_body(_RD = #wm_reqdata{req_body=undefined}) -> undefined;
 req_body(_RD = #wm_reqdata{req_body=ReqB}) when is_binary(ReqB) -> ReqB.
+
+%% Added by Marc Worrell
+req_body(Offset, Length, _RD = #wm_reqdata{req_body=ReqB}) when is_binary(ReqB) ->
+    <<_Start:Offset/binary, Data:Length/binary, _Rest/binary>> = ReqB,
+    Data.
 
 resp_redirect(_RD = #wm_reqdata{resp_redirect=true}) -> true;
 resp_redirect(_RD = #wm_reqdata{resp_redirect=false}) -> false.
