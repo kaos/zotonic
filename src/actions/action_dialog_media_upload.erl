@@ -43,12 +43,12 @@ event({postback, {media_upload_dialog, Title, RscId, GroupId, Actions}, _Trigger
 
 event({submit, {media_upload, EventProps}, _TriggerId, _TargetId}, Context) ->
     Actions = proplists:get_value(actions, EventProps, []),
-    Title   = zp_context:get_q("new_media_title", Context),
+    Title   = zp_context:get_q_validated("new_media_title", Context),
     GroupId = list_to_integer(zp_context:get_q("group_id", Context)),
     RscId   = zp_convert:to_integer(zp_context:get_q("rsc_id", Context)),
-    File    = zp_context:get_q("file", Context),
+    File    = zp_context:get_q_validated("upload_file", Context),
     Context1 = case File of
-        {OriginalFilename, TmpFile} ->
+        #upload{filename=OriginalFilename, tmpfile=TmpFile} ->
             Props = [{title, Title}, {original_filename, OriginalFilename}, {group_id, GroupId}],
             Result = case RscId of
                 undefined -> m_media:insert_file(TmpFile, Props, Context);
@@ -56,7 +56,6 @@ event({submit, {media_upload, EventProps}, _TriggerId, _TargetId}, Context) ->
             end,
             case Result of
                 {ok, _MediaId} ->
-                    ?DEBUG(Actions),
                     zp_render:wire([{growl, [{text, "Uploaded the file."}]} | Actions], Context);
                 {error, _Error} ->
                     zp_render:wire({growl, [{text, "Error uploading the file."}, {type, "error"}]}, Context)

@@ -67,6 +67,7 @@
 
 %% Record used for parsing multipart body (see zp_parse_multipart)
 -record(multipart_form, {name, data, filename, tmpfile, file, files=[], args=[]}).
+-record(upload, {filename, tmpfile}).
 
 %% Model value interface for templates
 -record(m, {model, value}).

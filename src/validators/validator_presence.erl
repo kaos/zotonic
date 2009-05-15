@@ -17,6 +17,8 @@ render_validator(presence, TriggerId, _TargetId, Args, Context)  ->
 %%          Error -> invalid | novalue | {script, Script}
 validate(presence, Id, undefined, _Args, _Context) -> {error, Id, novalue};
 validate(presence, Id, [],        _Args, _Context) -> {error, Id, novalue};
+validate(presence, _Id, #upload{} = Value, _Args, _Context) ->
+    {ok, Value};
 validate(presence, Id, Value,     _Args, _Context) ->
     case zp_string:trim(Value) of
         [] -> {error, Id, invalid};

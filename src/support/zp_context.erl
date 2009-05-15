@@ -496,7 +496,7 @@ parse_form_urlencoded(Context) ->
             end;
         "multipart/form-data" ++ _ ->
             {Form, ContextRcv} = zp_parse_multipart:recv_parse(Context),
-            FileArgs = [ {Name, {Filename, TmpFile}} || {Name, Filename, TmpFile} <- Form#multipart_form.files ],
+            FileArgs = [ {Name, #upload{filename=Filename, tmpfile=TmpFile}} || {Name, Filename, TmpFile} <- Form#multipart_form.files ],
             {Form#multipart_form.args ++ FileArgs, ContextRcv};
         _Other ->
             {[], Context}
