@@ -522,8 +522,11 @@ $.fn.postbackFileForm = function(trigger_id, postback, validations)
 
             // ordering of these callbacks/triggers is odd, but that's how $.ajax does it
             if (ok) {
-                eval(data),
-                if (g) $.event.trigger("ajaxSuccess", [xhr, opts]);
+                eval(data);
+                if (g) 
+				{
+					$.event.trigger("ajaxSuccess", [xhr, opts]);
+				}
             }
             if (g) $.event.trigger("ajaxComplete", [xhr, opts]);
             if (g && ! --$.active) $.event.trigger("ajaxStop");
