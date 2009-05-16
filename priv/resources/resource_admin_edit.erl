@@ -49,7 +49,7 @@ event({submit, rscform, _FormId, _TargetId}, Context) ->
     m_rsc:update(zp_convert:to_integer(Id), Props1, Context),
     zp_render:wire({growl, [{text,[["Saved ",zp_html:strip(Title)]]}]}, Context);
 
-event({postback, {reload_media, Opts}, _TriggerId, _TargetId} = Postback, Context) ->
+event({postback, {reload_media, Opts}, _TriggerId, _TargetId}, Context) ->
     RscId = proplists:get_value(rsc_id, Opts),
     DivId = proplists:get_value(div_id, Opts),
     Html = zp_template:render("_edit_media.tpl", [{id,RscId}], Context),

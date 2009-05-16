@@ -24,8 +24,9 @@
 		
 		
 		<p>
-			<label for="{{ #file }}">Media file</label>
-			<input type="file" id="{{ #file }}" name="file" />
+			<label for="upload_file">Media file</label>
+			<input type="file" id="upload_file" name="upload_file" />
+			{% validate id="upload_file" type={presence} %}
 		</p>
 		
 		<button type="submit">Upload file</button>
