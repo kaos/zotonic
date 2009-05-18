@@ -223,6 +223,7 @@ make_url_for1(_Args, [], _Escape, undefined) ->
     undefined;
 make_url_for1(Args, [], Escape, {QueryStringArgs, Pattern}) -> 
     ReplArgs =  fun 
+                    ('*') -> proplists:get_value(star, Args);
                     (V) when is_atom(V) -> mochiweb_util:quote_plus(proplists:get_value(V, Args));
                     (S) -> S
                 end,
@@ -247,7 +248,11 @@ select_best_pattern(Args, {PCount, PArgs, Pattern}, Best) ->
     if 
         length(Args) >= PCount ->
             %% Check if all PArgs are part of Args
-            {PathArgs, QueryStringArgs} = lists:partition(fun({A,_}) -> lists:member(A, PArgs) end, Args),
+            {PathArgs, QueryStringArgs} = lists:partition(
+                                            fun
+                                                ({star,_}) -> lists:member('*', PArgs);
+                                                ({A,_}) -> lists:member(A, PArgs) 
+                                            end, Args),
             case length(PathArgs) of
                 PCount ->
                     % Could fill all path args, this match satisfies
