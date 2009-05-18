@@ -59,6 +59,25 @@ add(Input, Number) when is_list(Input) ->
 add(Input, Number) when is_integer(Input) ->
     Input + Number.
 
+lt(undefined, _Number) ->
+    undefined;
+lt(Input, Number) ->
+    try
+        zp_convert:to_integer(Input) < zp_convert:to_integer(Number)
+    catch
+        _:_ -> undefined
+    end.
+
+le(undefined, _Number) ->
+    undefined;
+le(Input, Number) ->
+    try
+        zp_convert:to_integer(Input) =< zp_convert:to_integer(Number)
+    catch
+        _:_ -> undefined
+    end.
+
+
 capfirst(undefined) ->
     undefined;
 capfirst([H|T]) when H >= $a andalso H =< $z ->

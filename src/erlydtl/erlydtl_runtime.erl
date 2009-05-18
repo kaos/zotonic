@@ -147,10 +147,6 @@ are_equal(Arg1, Arg2) when is_integer(Arg1) ->
     are_equal(integer_to_list(Arg1), Arg2);
 are_equal(Arg1, Arg2) when is_integer(Arg2) ->
     are_equal(Arg1, integer_to_list(Arg2));
-are_equal([Arg1], Arg2) when is_list(Arg1) ->
-    are_equal(Arg1, Arg2);
-are_equal(Arg1, [Arg2]) when is_list(Arg1) ->
-    are_equal(Arg1, Arg2);
 are_equal(_Arg1, _Arg2) ->
     false.
 
