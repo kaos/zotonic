@@ -3,7 +3,6 @@
 %% @date 2009-04-24
 %%
 %% @doc Update routines for resources.  For use by the m_rsc module.
-%% @todo Filter fields on html, only allow html in the body and intro fields.  Escape all other text fields.
 
 -module(m_rsc_update).
 -author("Marc Worrell <marc@worrell.nl").
@@ -13,6 +12,8 @@
     insert/2,
     delete/2,
     update/3,
+    
+    props_filter/3,
     
     test/0
 ]).
@@ -48,23 +49,23 @@ delete(Id, Context) when is_integer(Id) ->
     end.
     
 
-%% @doc Update a predicate
+%% @doc Update a resource
 %% @spec update(Props, Props, Context) -> ok | {error, Reason}
 update(Id, Props, Context) when is_integer(Id) ->
     case zp_acl:rsc_editable(Id, Context) of
         true ->
-            ?DEBUG(Props),
             TextProps = recombine_dates(Props),
             AtomProps = [ {zp_convert:to_atom(P), V} || {P, V} <- TextProps ],
-            FilteredProps = props_filter(Id, AtomProps, [], Context),
-            FilledProps = props_defaults(FilteredProps, Context),
+            FilteredProps = props_filter(AtomProps, [], Context),
+            EditableProps = props_filter_protected(FilteredProps),
+            FilledProps = props_defaults(EditableProps, Context),
             SafeProps = zp_html:escape_props(FilledProps),
             case preflight_check(Id, SafeProps, Context) of
                 ok ->
                     UpdateProps = [
                         {version, zp_db:q1("select version+1 from rsc where id = $1", [Id], Context)},
                         {modifier_id, zp_acl:user(Context)},
-                        {modified, erlang:localtime()}
+                        {modified, erlang:universaltime()}
                         | SafeProps
                     ],
                     zp_db:update(rsc, Id, UpdateProps, Context),
@@ -102,59 +103,54 @@ preflight_check(Id, [_H|T], Context) ->
 
 
 %% @doc Remove protected properties and convert some other to the correct data type
-%% @spec props_filter(Id, Props1, Acc, Context) -> Props2
-props_filter(_Id, [], Acc, _Context) ->
+%% @spec props_filter(Props1, Acc, Context) -> Props2
+props_filter([], Acc, _Context) ->
     Acc;
-props_filter(Id, [{name, <<>>}|T], Acc, Context) ->
-    props_filter(Id, T, [{name, undefined} | Acc], Context);
-props_filter(Id, [{name, ""}|T], Acc, Context) ->
-    props_filter(Id, T, [{name, undefined} | Acc], Context);
-props_filter(Id, [{name, Name}|T], Acc, Context) ->
-    props_filter(Id, T, [{name, zp_string:to_name(Name)} | Acc], Context);
-props_filter(Id, [{slug, Slug}|T], Acc, Context) ->
-    props_filter(Id, T, [{slug, zp_string:to_slug(Slug)} | Acc], Context);
-props_filter(Id, [{is_published, P}|T], Acc, Context) ->
-    props_filter(Id, T, [{is_published, zp_convert:to_bool(P)} | Acc], Context);
-props_filter(Id, [{is_authoritative, P}|T], Acc, Context) ->
-    props_filter(Id, T, [{is_authoritative, zp_convert:to_bool(P)} | Acc], Context);
-props_filter(Id, [{is_featured, P}|T], Acc, Context) ->
-    props_filter(Id, T, [{is_featured, zp_convert:to_bool(P)} | Acc], Context);
-props_filter(Id, [{visible_for, Vis}|T], Acc, Context) ->
+props_filter([{name, <<>>}|T], Acc, Context) ->
+    props_filter(T, [{name, undefined} | Acc], Context);
+props_filter([{name, ""}|T], Acc, Context) ->
+    props_filter(T, [{name, undefined} | Acc], Context);
+props_filter([{name, Name}|T], Acc, Context) ->
+    props_filter(T, [{name, zp_string:to_name(Name)} | Acc], Context);
+props_filter([{slug, Slug}|T], Acc, Context) ->
+    props_filter(T, [{slug, zp_string:to_slug(Slug)} | Acc], Context);
+props_filter([{is_published, P}|T], Acc, Context) ->
+    props_filter(T, [{is_published, zp_convert:to_bool(P)} | Acc], Context);
+props_filter([{is_authoritative, P}|T], Acc, Context) ->
+    props_filter(T, [{is_authoritative, zp_convert:to_bool(P)} | Acc], Context);
+props_filter([{is_featured, P}|T], Acc, Context) ->
+    props_filter(T, [{is_featured, zp_convert:to_bool(P)} | Acc], Context);
+props_filter([{visible_for, Vis}|T], Acc, Context) ->
     VisibleFor = zp_convert:to_integer(Vis),
     case VisibleFor of
         N when N==0; N==1; N==2 ->
             case N >= zp_acl:publish_level(Context) of
                 true -> 
-                    props_filter(Id, T, [{visible_for, N} | Acc], Context);
+                    props_filter(T, [{visible_for, N} | Acc], Context);
                 false ->
                     % Do not let the user upgrade visibility beyond his permissions
-                    props_filter(Id, T, Acc, Context)
+                    props_filter(T, Acc, Context)
             end;
         _ ->
-            props_filter(Id, T, Acc, Context)
+            props_filter(T, Acc, Context)
     end;
-props_filter(Id, [{group_id, Id}|T], Acc, Context) ->
-    GroupId = zp_convert:to_integer(Id),
+props_filter([{group_id, GId}|T], Acc, Context) ->
+    GroupId = zp_convert:to_integer(GId),
     case GroupId of
         undefined -> 
-            props_filter(Id, T, Acc, Context);
+            props_filter(T, Acc, Context);
         N when N > 0 ->
             case zp_acl:has_role(admin, Context) of
                 true ->
-                    props_filter(Id, T, [{group_id, GroupId}|Acc], Context);
+                    props_filter(T, [{group_id, GroupId}|Acc], Context);
                 false ->
                     Gs = zp_acl:groups_member(Context),
                     true = lists:member(GroupId, Gs),
-                    props_filter(Id, T, [{group_id, GroupId}|Acc], Context)
+                    props_filter(T, [{group_id, GroupId}|Acc], Context)
             end
     end;
-props_filter(Id, [{Prop, _V}=H|T], Acc, Context) ->
-    case protected(Prop) of
-        true ->
-            props_filter(Id, T, Acc, Context);
-        false ->
-            props_filter(Id, T, [H|Acc], Context)
-    end.
+props_filter([{_Prop, _V}=H|T], Acc, Context) ->
+    props_filter(T, [H|Acc], Context).
 
 
 %% @doc Fill in some defaults for empty props.
@@ -174,6 +170,9 @@ props_defaults(Props, _Context) ->
             Props
     end.
 
+
+props_filter_protected(Props) ->
+    lists:filter(fun({K,_V}) -> not protected(K) end, Props).
 
 %% @doc Properties that can't be updated with m_rsc_update:update/3 or m_rsc_update:insert/2
 protected(id) -> true;

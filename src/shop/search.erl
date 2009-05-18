@@ -208,6 +208,16 @@ search({media_category_image, [{cat,Cat}]}, _OffsetLimit, Context) ->
     };
 
 
+search({media, []}, _OffsetLimit, _Context) ->
+    #search_sql{
+        select="m.*",
+        from="media m",
+        tables=[{media, "m"}],
+        order="m.created desc",
+        args=[],
+        assoc=true
+    };
+
 
 %% Return all orders
 search({shop_order_list, []}, _OffsetLimit, _Context) ->

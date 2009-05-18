@@ -14,12 +14,17 @@
     m_find_value/3,
     m_to_list/2,
     m_value/2,
+    name_to_id/2,
     get/2,
     get_acl_props/2,
     get_rsc/2,
     get_rsc/3,
     get_rsc_media/3,
+    get_referrers/2,
+    count_referrers/2,
+    exists/2,
     delete/2,
+    update/3,
     insert_file/2,
     insert_file/3,
     insert_file_rsc/3,
@@ -50,6 +55,36 @@ m_to_list(#m{}, _Context) ->
 m_value(#m{}, _Context) ->
     undefined.
 
+
+%% @doc Translate the name of a media record to the id
+name_to_id(undefined, _Context) ->
+    undefined;
+name_to_id(Name, Context) ->
+    zp_db:q1("select id from media where name = $1", [zp_string:to_name(Name)], Context).
+
+
+%% @doc Check if a media record exists
+exists(undefined, _Context) ->
+    false;
+exists([C|_] = Name, Context) when is_integer(C) ->
+    case name_to_id(Name, Context) of
+        undefined -> 
+            case zp_utils:only_digits(Name) of
+                true -> exists(list_to_integer(Name), Context);
+                false -> false
+            end;
+        _ -> true
+    end;
+exists(Name, Context) when is_binary(Name) ->
+    case name_to_id(Name, Context) of
+        undefined -> false;
+        _ -> true
+    end;
+exists(Id, Context) -> 
+    case zp_db:q1("select id from media where id = $1", [Id], Context) of
+        undefined -> false;
+        _ -> true
+    end.
 
 
 %% @doc Get the media record with the id
@@ -125,6 +160,19 @@ get_rsc_media(RscId, MediaId, Context) ->
     zp_depcache:memo(F, {media_rsc_id, RscId, MediaId}, ?DAY, [{media_rsc, RscId}]).
 
 
+%% @doc Get all referring resources
+%% @spec get_referrers(MediaId, Context) -> list()
+get_referrers(MediaId, Context) ->
+    Rs = zp_db:q("select rsc_id from rsc_media where media_id = $1 order by id desc", [MediaId], Context),
+    [ R || {R} <- Rs ].
+
+
+%% @doc Return the number of referring resources, including the ones the user is allowed to see
+%% @spec count_referrers(MediaId, Context) -> integer()
+count_referrers(MediaId, Context) ->
+    zp_db:q1("select count(media_id) from rsc_media where media_id = $1", [MediaId], Context).
+ 
+
 %% @doc Delete the media at the id, the file is also deleted.
 %% @spec delete(MediaId, Context) -> ok | {error, Reason}
 delete(MediaId, Context) ->
@@ -148,6 +196,69 @@ delete(MediaId, Context) ->
         false ->
             {error, eacces}
     end.
+
+
+%% @doc Update the editable media properties
+%% @spec update(Props, Props, Context) -> ok | {error, Reason}
+update(Id, Props, Context) when is_integer(Id) ->
+    case zp_acl:media_editable(Id, Context) of
+        true ->
+            AtomProps = [ {zp_convert:to_atom(P), V} || {P, V} <- Props ],
+            FilteredProps = m_rsc_update:props_filter(AtomProps, [], Context),
+            EditableProps = props_filter_protected(FilteredProps),
+            SafeProps = zp_html:escape_props(EditableProps),
+            case preflight_check(Id, SafeProps, Context) of
+                ok ->
+                    UpdateProps = [
+                        {modifier_id, zp_acl:user(Context)},
+                        {modified, erlang:universaltime()}
+                        | SafeProps
+                    ],
+                    zp_db:update(media, Id, UpdateProps, Context),
+                    zp_depcache:flush({media, Id}),
+
+                    case proplists:get_value(name, UpdateProps) of
+                        undefined -> nop;
+                        Name -> zp_depcache:flush({media_name, zp_convert:to_list(Name)})
+                    end,
+                    ok;
+                {error, Reason} ->
+                    {error, Reason}
+            end;
+        false ->
+            {error, eacces}
+    end.
+
+
+%% @doc Check if all props are acceptable. Examples are unique name, uri etc.
+%% @spec preflight_check(Id, Props, Context) -> ok | {error, Reason}
+preflight_check(_Id, [], _Context) ->
+    ok;
+preflight_check(Id, [{name, Name}|T], Context) ->
+    case zp_db:q1("select count(*) from media where name = $1 and id <> $2", [Name, Id], Context) of
+        0 ->  preflight_check(Id, T, Context);
+        _N -> {error, duplicate_name}
+    end;
+preflight_check(Id, [_H|T], Context) ->
+    preflight_check(Id, T, Context).
+
+
+props_filter_protected(Props) ->
+    lists:filter(fun({K,_V}) -> not protected(K) end, Props).
+
+%% @doc Properties that can't be updated with m_media:update/3
+protected(id) -> true;
+protected(creator_id) -> true;
+protected(modifier_id) -> true;
+protected(created) -> true;
+protected(modified) -> true;
+protected(props) -> true;
+protected(filename) -> true;
+protected(rootname) -> true;
+protected(mime) -> true;
+protected(size) -> true;
+protected(_) -> false.
+
 
 
 %% @doc Insert a file, when the file is not in archive then a copy is made in the archive
@@ -255,3 +366,4 @@ add_media_info(File, Props) ->
             PropsSize
     end,
     PropsMime.
+

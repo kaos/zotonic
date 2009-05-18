@@ -137,7 +137,7 @@ rsc(Id, _Context) -> #rsc{id=Id}.
 exists([C|_] = Name, Context) when is_list(Name) and is_integer(C) ->
     case rid_name(Name, Context) of
         undefined -> 
-            case only_digits(Name) of
+            case zp_utils:only_digits(Name) of
                 true -> exists(list_to_integer(Name), Context);
                 false -> false
             end;
@@ -356,7 +356,7 @@ rid(#rsc_list{list=[R|_]}, _Context) ->
 rid(#rsc_list{list=[]}, _Context) ->
 	undefined;
 rid([C|_] = UniqueName, Context) when is_list(UniqueName) andalso is_integer(C) ->
-    case only_digits(UniqueName) of
+    case zp_utils:only_digits(UniqueName) of
         true -> #rsc{id=list_to_integer(UniqueName)};
         false -> rid_name(UniqueName, Context)
     end;
@@ -369,13 +369,6 @@ rid(UniqueName, Context) when is_atom(UniqueName) ->
 rid(<<>>, _Context) -> 
 	undefined.
 
-
-only_digits([]) -> 
-    true;
-only_digits([C|R]) when C >= $0 andalso C =< $9 ->
-    only_digits(R);
-only_digits(_) ->
-    false.
 
 %% @doc Return the id of the resource with a certain unique name.
 %% rid_name(Name, Context) -> #rsc{} | undefined

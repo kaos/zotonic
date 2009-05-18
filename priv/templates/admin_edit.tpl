@@ -46,7 +46,7 @@
 									</div>
 									<div class="form-item clearfix">
 										{% button class="save-resource right" text="save this page" title="test" %}
-										{% button class="discard-resource right" text="discard" action={redirect back} %}
+										{% button class="discard-resource right" text="cancel" action={redirect back} %}
 									</div>
 								</fieldset>
 							</div>
@@ -98,7 +98,7 @@
 									</div>
 									<div class="form-item clearfix">
 										{% button class="save-resource right" text="save this page" %}
-										{% button class="discard-resource right" text="discard" action={redirect back} %}
+										{% button class="discard-resource right" text="cancel" action={redirect back} %}
 									</div>
 								</fieldset>
 							</div>
@@ -112,6 +112,7 @@
 						{% sorter id="sort" handle="h3" axis="y" containment="" opacity="0.9" placeholder="sortable-placeholder" %}
 						{% sortable id="sort-publish" %}
 						{% sortable id="sort-category" %}
+						{% sortable id="sort-name" %}
 						{% sortable id="sort-connections" %}
 						{% sortable id="sort-date" %}
 						{% sortable id="sort-access" %}
@@ -187,6 +188,21 @@
 								</div>
 							</div>
 						</div>
+
+						{% if m.acl.is_admin %}
+						<div class="item-wrapper" id="sort-name">
+							<h3 class="above-item clearfix do_blockminifier">
+								<span class="title">Unique name</span>
+								<span class="arrow">make smaller</span>
+							</h3>
+							<div class="item clearfix">
+								<div class="form-item clearfix">
+									<label for="field-name">Name</label>
+									<input style="width: 60%" type="text" id="field-name" name="name" value="{{ r.name }}" />
+								</div>
+							</div>
+						</div>
+						{% endif %}
 
 						<div class="item-wrapper" id="sort-category">
 							<h3 class="above-item clearfix do_blockminifier">

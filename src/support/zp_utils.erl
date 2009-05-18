@@ -28,6 +28,8 @@
 	js_object/2,
 	combine/2,
 	combine_defined/2,
+	only_letters/1,
+	only_digits/1,
 	prefix/2,
 	coalesce/1,
 	is_process_alive/1,
@@ -280,6 +282,13 @@ only_letters([]) ->
 only_letters([C|T]) when (C >= $a andalso C =< $z) orelse (C >= $A andalso C =< $Z) ->
     only_letters(T);
 only_letters(_) ->
+    false.
+
+only_digits([]) -> 
+    true;
+only_digits([C|R]) when C >= $0 andalso C =< $9 ->
+    only_digits(R);
+only_digits(_) ->
     false.
 
 combine_defined(Sep, List) ->

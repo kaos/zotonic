@@ -129,7 +129,7 @@
 
 									<div class="form-item clearfix">
 										{% button class="save-resource right" text="save this sku" %}
-										{% button class="discard-resource right" text="discard" action={redirect back} %}
+										{% button class="discard-resource right" text="cancel" action={redirect back} %}
 									</div>
 								</fieldset>
 							</div>

@@ -35,6 +35,9 @@
     {admin_referrers,       ["admin", "referrer", id],              resource_admin_referrers,[]},
     {admin_predicate,       ["admin", "predicate"],                 resource_admin_predicate,[]},
     {admin_predicate_edit,  ["admin", "predicate", id],             resource_admin_predicate_edit,[]},
+    {admin_media,           ["admin", "media"],                     resource_admin_media,    []},
+    {admin_media_edit,      ["admin", "media", id],                 resource_admin_media_edit,[]},
+
     {admin_shop_sku,        ["admin", "sku"],                       resource_admin_shop_sku,[]},
     {admin_shop_sku_edit,   ["admin", "sku", id],                   resource_admin_shop_sku_edit,[]},
     {admin_shop_order,      ["admin", "order"],                     resource_admin_shop_order,[]},

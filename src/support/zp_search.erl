@@ -99,7 +99,7 @@ search_result(#search_sql{} = Q, Limit, Context) ->
                         _ -> Rs
                     end;
                 true ->
-                    zp_db:assoc(Sql, Args, Context)
+                    zp_db:assoc_props(Sql, Args, Context)
             end,
             #search_result{result=Rows}
     end.
