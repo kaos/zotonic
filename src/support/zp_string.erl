@@ -86,6 +86,8 @@ to_slug(Title) ->
 %% @spec to_name(String) -> String
 to_name(Name) when is_binary(Name) ->
     to_name(binary_to_list(Name));
+to_name(Name) when is_atom(Name) ->
+    to_name(atom_to_list(Name));
 to_name(Name) ->
     to_name(Name, []).
 
