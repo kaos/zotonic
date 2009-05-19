@@ -160,7 +160,7 @@ model_pgsql() ->
       predicate_id int NOT NULL,
       object_id int NOT NULL,
       seq int NOT NULL DEFAULT 1000000,
-      creator_id int NOT NULL,
+      creator_id int,
       created timestamp with time zone NOT NULL DEFAULT now(),
 
       CONSTRAINT edge_pkey PRIMARY KEY (id),
