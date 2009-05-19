@@ -16,6 +16,9 @@
 -include_lib("zophrenic.hrl").
 
 install(Context) ->
+    zp_acl:sudo(fun(Ctx) -> install1(Ctx) end, Context).
+
+install1(Context) ->
     F = fun(Ctx) ->
         shop_adyen:install(Ctx),
         ok = install_tables(Ctx),
