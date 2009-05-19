@@ -430,9 +430,6 @@ model_pgsql() ->
       CONSTRAINT category_name_key UNIQUE (name),
       CONSTRAINT fk_category_media_id FOREIGN KEY (media_id)
         REFERENCES media(id)
-        ON UPDATE CASCADE ON DELETE SET NULL,
-      CONSTRAINT fk_category_parent_id FOREIGN KEY (parent_id)
-        REFERENCES category(id)
         ON UPDATE CASCADE ON DELETE SET NULL
     )",
 
