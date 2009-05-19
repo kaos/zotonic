@@ -157,7 +157,7 @@ get_rsc_media(RscId, MediaId, Context) ->
               and rm.media_id = $2
             order by rm.seq, rm.id", [RscId, MediaId], Context)
     end,
-    zp_depcache:memo(F, {media_rsc_id, RscId, MediaId}, ?DAY, [{media_rsc, RscId}]).
+    zp_depcache:memo(F, {media_rsc_id, RscId, MediaId}, ?DAY, [{media_rsc, RscId}, {media, MediaId}]).
 
 
 %% @doc Get all referring resources
@@ -191,7 +191,11 @@ delete(MediaId, Context) ->
                             ok -> ok
                         end
                     end,
-                    zp_db:transaction(DeleteF, Context)
+                    Refs = get_referrers(MediaId, Context),
+                    Result = zp_db:transaction(DeleteF, Context),
+                    zp_depcache:flush({media, MediaId}),
+                    [ zp_depcache:flush({media_rsc, RscId}) || RscId <- Refs ],
+                    Result
             end;
         false ->
             {error, eacces}
