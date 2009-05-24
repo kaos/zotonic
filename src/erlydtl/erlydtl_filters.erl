@@ -304,6 +304,22 @@ lower(Input) ->
     Input.
 
 
+member(_S, undefined) ->
+    false;
+member(S, [H|_] = L) when is_list(S) andalso is_binary(H) ->
+    lists:member(list_to_binary(S), L);
+member(S, [H|_] = L) when is_list(S) andalso is_integer(H) ->
+    try
+        lists:member(list_to_integer(S), L)
+    catch
+        _:_ -> false
+    end;
+member(S, L) when is_list(L) ->
+    lists:member(S, L);
+member(_S, _L) ->
+    undefined.
+
+
 rjust(undefined, _Number) -> 
     undefined;
 rjust(Input, Number) when is_binary(Input) ->

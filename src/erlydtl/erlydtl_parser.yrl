@@ -87,6 +87,7 @@ Nonterminals
 	EndWithBraced
 	
     Value
+	TermValue
     Variable
     Filter
 	AutoId
@@ -265,7 +266,7 @@ WithBraced -> open_tag with_keyword Value as_keyword identifier close_tag : ['$3
 EndWithBraced -> open_tag endwith_keyword close_tag.
 
 Filter -> identifier : ['$1'].
-Filter -> identifier colon Literal : ['$1', '$3'].
+Filter -> identifier colon TermValue : ['$1', '$3'].
 
 Literal -> string_literal : '$1'.
 Literal -> trans_literal  : '$1'.
@@ -288,11 +289,13 @@ Args -> Args identifier : '$1' ++ [{'$2', true}].
 Args -> Args identifier equal Value : '$1' ++ [{'$2', '$4'}].
 
 Value -> Value pipe Filter : {apply_filter, '$1', '$3'}.
-Value -> Variable : '$1'.
-Value -> Literal : '$1'.
-Value -> hash AutoId : {auto_id, '$2'}.
-Value -> open_curly identifier Args close_curly : {tuple_value, '$2', '$3'}.
-Value -> open_bracket ValueList close_bracket : {value_list, '$2'}.
+Value -> TermValue : '$1'.
+
+TermValue -> Variable : '$1'.
+TermValue -> Literal : '$1'.
+TermValue -> hash AutoId : {auto_id, '$2'}.
+TermValue -> open_curly identifier Args close_curly : {tuple_value, '$2', '$3'}.
+TermValue -> open_bracket ValueList close_bracket : {value_list, '$2'}.
 
 AutoId -> identifier dot identifier : { '$1', '$3' }.
 AutoId -> identifier : '$1'.
