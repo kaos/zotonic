@@ -19,6 +19,8 @@
     id_to_name/2,
     name_to_id/2,
     name_to_id_check/2,
+    objects/2,
+    subjects/2,
     all/1,
     get/2,
     insert/2,
@@ -112,6 +114,16 @@ get(Pred, Context) ->
             proplists:get_value(Pred, all(Context))
     end.
 
+%% @doc Return the category ids that are valid as objects
+objects(Id, Context) ->
+    Objects = zp_db:q("select category_id from predicate_category where predicate_id = $1 and is_subject = false", [Id], Context),
+    [ R || {R} <- Objects  ].
+
+%% @doc Return the category ids that are valid as subjects
+subjects(Id, Context) ->
+    Subjects = zp_db:q("select category_id from predicate_category where predicate_id = $1 and is_subject = true", [Id], Context),
+    [ R || {R} <- Subjects  ].
+
 
 %% @doc Return the list of all predicates
 %% @spec all(Context) -> PropList
@@ -122,8 +134,9 @@ all(Context) ->
         undefined ->
             Preds = zp_db:assoc_props("select * from predicate order by name", Context),
             FSetPred = fun(Pred) ->
+                Id = proplists:get_value(id, Pred),
                 Atom = list_to_atom(binary_to_list(proplists:get_value(name, Pred))),
-                {Atom, [{pred, Atom}|Pred]}
+                {Atom, [{pred, Atom},{subject,subjects(Id,Context)},{object,objects(Id,Context)}|Pred]}
             end,
             Preds1 = [ FSetPred(Pred) || Pred <- Preds],
             zp_depcache:set(predicate, Preds1, ?DAY, [predicate]),
@@ -152,9 +165,20 @@ delete(Id, Context) ->
 %% @spec update(Props, Props, Context) -> void()
 update(Id, Props, Context) ->
     true = zp_acl:has_role(admin, Context),
+    Subjects = proplists:get_all_values("subject", Props),
+    Objects = proplists:get_all_values("object", Props),
+    ?DEBUG(Subjects),
+    SubjectIds = [ list_to_integer(N) || N <- Subjects, N /= [] ],
+    ObjectIds = [ list_to_integer(N) || N <- Objects, N /= [] ],
     Props1 = lists:filter(fun valid_prop/1, Props),
     Props2 = [ {zp_convert:to_atom(N), V} || {N,V} <- Props1 ],
-    zp_db:update(predicate, Id, Props2, Context),
+    F = fun(Ctx) ->
+        zp_db:update(predicate, Id, Props2, Ctx),
+        update_predicate_category(Id, true, SubjectIds, Ctx),
+        update_predicate_category(Id, false, ObjectIds, Ctx),
+        ok
+    end,
+    ok = zp_db:transaction(F, Context),
     zp_depcache:flush(predicate).
 
 
@@ -166,4 +190,18 @@ valid_prop({"uri", _Value}) -> true;
 valid_prop({"reversed", _Value}) -> true;
 valid_prop(_) -> false.
 
+
+
+update_predicate_category(Id, IsSubject, CatIds, Context) ->
+    OldIdsR = zp_db:q("select category_id from predicate_category where predicate_id = $1 and is_subject = $2", [Id, IsSubject], Context),
+    OldIds  = [ N || {N} <- OldIdsR ],
+    % Delete the ones that are not there anymore
+    [ zp_db:q("delete from predicate_category where predicate_id = $1 and category_id = $2 and is_subject = $3", [Id, OldId, IsSubject], Context)
+    || OldId <- OldIds, not lists:member(OldId, CatIds)
+    ],
+    [ zp_db:insert(predicate_category, [{predicate_id, Id}, {category_id, NewId}, {is_subject, IsSubject}], Context)
+    || NewId <- CatIds, not lists:member(NewId, OldIds)
+    ],
+    ok.
+    
 

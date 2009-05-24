@@ -35,8 +35,9 @@ resource_exists(ReqData, Context) ->
 
 
 html(Context) ->
+    Id = zp_context:get(id, Context),
     Vars = [
-        {id, zp_context:get(id, Context)}
+        {id, Id}
     ],
     Html = zp_template:render("admin_predicate_edit.tpl", Vars, Context),
 	zp_context:output(Html, Context).

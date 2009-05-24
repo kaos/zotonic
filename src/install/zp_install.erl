@@ -269,6 +269,9 @@ model_pgsql() ->
       filename character varying(400) NOT NULL,
       rootname character varying(100) NOT NULL,
       mime character varying(64) NOT NULL DEFAULT 'application/octet-stream'::character varying,
+      width int NOT NULL DEFAULT 0,
+      height int NOT NULL DEFAULT 0,
+      orientation int NOT NULL DEFAULT 1,
       size int NOT NULL DEFAULT 0,
       props bytea,
       CONSTRAINT media_pkey PRIMARY KEY (id),
@@ -439,6 +442,31 @@ model_pgsql() ->
     "CREATE INDEX fki_category_parent_id ON category(parent_id)",
     "CREATE INDEX fki_category_media_id ON category(media_id)",
     "CREATE INDEX category_nr_key ON category (nr)",
+
+    % Table: predicate_category
+    % Defines which categories are valid for a predicate as subject or object
+
+    "CREATE TABLE predicate_category
+    (
+      id serial NOT NULL,
+      is_subject boolean NOT NULL DEFAULT true,
+      predicate_id int NOT NULL,
+      category_id int NOT NULL,
+
+      CONSTRAINT predicate_category_pkey PRIMARY KEY (id),
+      CONSTRAINT predicate_category_key UNIQUE (predicate_id, is_subject, category_id),
+      CONSTRAINT fk_predicate_category_predicate_id FOREIGN KEY (predicate_id)
+        REFERENCES predicate(id)
+        ON UPDATE CASCADE
+        ON DELETE CASCADE,
+      CONSTRAINT fk_predicate_category_category_id FOREIGN KEY (category_id)
+        REFERENCES category(id)
+        ON UPDATE CASCADE
+        ON DELETE CASCADE
+    )",
+    
+    "CREATE INDEX fki_predicate_category_predicate_id ON predicate_category (predicate_id)",
+    "CREATE INDEX fki_predicate_category_category_id ON predicate_category (category_id)",
 
     % Table visitor
     % Holds information of a visitor.  Can be shopping cart, click history etc

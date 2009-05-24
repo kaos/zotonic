@@ -69,7 +69,7 @@
 										<p>
 											{% for cat_id, level, indent, title in m.category.all_flat %}
 											<label for="{{ #subject.cat_id }}">
-												{{ indent }}<input type="checkbox" id="{{ #subject.cat_id }}" name="subject" />{{ title }}<br/>
+												{{ indent }}<input type="checkbox" id="{{ #subject.cat_id }}" name="subject" {% if cat_id|member:p.subject %}checked="checked" {% endif %} value="{{ cat_id }}" />{{ title }}<br/>
 											</label>
 											{% endfor %}
 										</p>
@@ -84,7 +84,7 @@
 										<p>
 											{% for cat_id, level, indent, title in m.category.all_flat %}
 											<label for="{{ #object.cat_id }}">
-												{{ indent }}<input type="checkbox" id="{{ #object.cat_id }}" name="object" />{{ title }}<br/>
+												{{ indent }}<input type="checkbox" id="{{ #object.cat_id }}" name="object"  {% if cat_id|member:p.object %}checked="checked" {% endif %} value="{{ cat_id }}" />{{ title }}<br/>
 											</label>
 											{% endfor %}
 										</p>
