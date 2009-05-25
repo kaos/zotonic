@@ -16,7 +16,6 @@
 				<p>The following {% ifequal result.total 1 %}page has{% else %}{{ result.total }} pages have{% endifequal %} a connection to the page “{{ m.rsc[q.id].title }}”.</p>
 			{% endifequal %}
 
-			<p class="admin-chapeau">Pagelist</p>
 			{% pager result=result dispatch="admin_referrers" id=q.id qargs %}
 			
 			<h3 class="above-list">Referrers</h3>
