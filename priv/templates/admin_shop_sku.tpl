@@ -6,27 +6,13 @@
 	<div id="content" class="zp-100">
 		<div class="block clearfix">
 
-			<div class="zp-80">
-				<h2>Zophrenic Skus Overview</h2>
-			</div>	
-			<div class="zp-20">
-				<form method="get" action="{% url admin_shop_sku %}">
-					<fieldset>
-						<div class="form-element">
-							<input type="text" name="qs" value="{{ q.qs|escape }}" class="left" />
-							<button>Search</button>
-						</div>
-					</fieldset>
-				</form>
-			</div>
-
+		<h2>Zophrenic stock keeping units overview</h2>
 
 		{% with m.search.paged[{shop_sku_list text=q.qs page=q.page}] as result %}
 
-			<p class="admin-chapeau">Sku list</p>
 			{% pager result=result dispatch="admin_shop_sku" qargs %}
 			
-			<h3 class="above-list">Skus</h3>
+			<h3 class="above-list">Sku's overview</h3>
 			<ul class="short-list">
 				<li class="headers clearfix">
 					<span class="zp-10">Article Nr</span>

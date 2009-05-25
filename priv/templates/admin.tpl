@@ -18,7 +18,7 @@
 						<a class="button" href="{% url admin_shop_sku %}">manage skus &raquo;</a>
 						<a class="button" href="#">manage users &raquo;</a>
 						
-						{% button class="right" text="new page..." action={dialog_new_rsc title=""} %}
+						{% button class="right" text="Make a new page" action={dialog_new_rsc title=""} %}
 					</div>
 				</div>
 			</div>

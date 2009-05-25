@@ -12,7 +12,7 @@
 
 			<div class="clearfix">
 				{% button
-						text="upload media new media" 
+						text="new media item" 
 						action={dialog_media_upload}
 				%}
 			</div>
@@ -21,7 +21,7 @@
 			{% with m.search.paged[{media page=q.page}] as result %}
 
 				{% pager result=result dispatch="admin_media" qargs %}
-				<h3 class="above-list">Media</h3>
+				<h3 class="above-list">Media overview</h3>
 
 				<ul class="media-list short-list">
 					<li class="headers clearfix">

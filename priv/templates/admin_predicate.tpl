@@ -15,8 +15,7 @@
 				{% button text="New predicate" action={dialog_predicate_new title=""} %}
 			</div>
 			
-			<h3 class="above-list">Predicates</h3>
-
+			<h3 class="above-list">Predicate overview</h3>
 			<ul class="short-list">
 				<li class="headers clearfix">
 					<span class="zp-30">Title</span>

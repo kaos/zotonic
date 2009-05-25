@@ -7,13 +7,15 @@
 		<div class="block clearfix">
 
 		<h2>Zophrenic Page Overview</h2>
+		<div class="clearfix">
+			{% button class="" text="Make a new page" action={dialog_new_rsc title=""} %}
+		</div>
 
 		{% with m.search.paged[{fulltext cat=q.qcat text=q.qs page=q.page}] as result %}
 
-			<p class="admin-chapeau">Pagelist</p>
 			{% pager result=result dispatch="admin_overview_rsc" qargs %}
 			
-			<h3 class="above-list">Overview</h3>
+			<h3 class="above-list ">Pages overview</h3>
 			<ul class="short-list">
 				<li class="headers clearfix">
 					<span class="zp-30">Title</span>
