@@ -13,6 +13,7 @@
 	<link href="/lib/css/zp-admin.css" type="text/css" media="screen" rel="stylesheet" />
 	<link href="/lib/css/zp-dialog.css" type="text/css" media="screen" rel="stylesheet" />
 	<link href="/lib/css/zp-formreplace.css" type="text/css" media="screen" rel="stylesheet" />
+	<link href="/lib/css/zp-finder.css" type="text/css" media="screen" rel="stylesheet" />
 	
 	<!--[if IE]><link href="/lib/css/zp-ie.css" type="text/css" media="screen" rel="stylesheet" /><![endif]-->
 </head>
@@ -65,6 +66,7 @@
 
 	{% include "_admin_js_include.tpl" %}
 	{% block tinymce %}{% endblock %}
+	{% block js_extra %}{% endblock %}
 	
 	{% script %}
 	
