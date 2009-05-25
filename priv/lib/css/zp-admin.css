@@ -137,6 +137,37 @@ ul.pager {
 		font-weight: bold;
 	}
 
+.table-list {
+	margin: 0 0 9px 0;
+	border-top: 1px solid #ddd;
+	-moz-border-radius: 5px;
+	-webkit-border-radius: 5px;
+}
+	
+.table-list li {
+	display: block;
+	padding: 6px;
+	border: solid #ddd;
+	border-width: 0 1px 1px 1px;
+}
+
+	.table-list li span {
+		display: block;
+		float: left;
+	}
+
+		.table-list li span.label {
+			width: 200px;
+		}
+
+.item-even {
+	background: #f2f2f2;	
+}
+
+.item-uneven {
+	background: #f9f9f9;	
+}
+
 	
 /* admin typography  
 ---------------------------------------------------------- */
