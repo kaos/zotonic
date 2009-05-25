@@ -26,7 +26,7 @@
 				<div class="zp-67" id="poststuff">
 					<div class="padding">
 						<div class="item-wrapper">
-							<h3 class="above-item">Description</h3>
+							<h3 class="above-item">About this media item</h3>
 							<div class="item">
 								<fieldset class="admin-form">
 									<input type="hidden" name="id" value="{{ id }}" />
@@ -34,6 +34,13 @@
 										<label for="field-title">Title</label>
 										<input type="text" id="field-title" name="title" value="{{ r.title }}" />
 									</div>
+
+									{% if m.acl.is_admin %}
+									<div class="form-item clearfix">
+										<label for="field-name">Unique name</label>
+										<input type="text" id="field-name" name="name" value="{{ r.name }}" />
+									</div>
+									{% endif %}
 
 									<div class="form-item clearfix">
 										<label for="field-content">Description</label>
@@ -77,7 +84,6 @@
 					
 						{% sorter id="sort" handle="h3" axis="y" containment="" opacity="0.9" placeholder="sortable-placeholder" %}
 						{% sortable id="sort-publish" %}
-						{% sortable id="sort-name" %}
 						{% sortable id="sort-access" %}
 						{% sortable id="sort-referrers" %}
 					
@@ -135,21 +141,6 @@
 							</div>
 						</div>
 
-						{% if m.acl.is_admin %}
-						<div class="item-wrapper" id="sort-name">
-							<h3 class="above-item clearfix do_blockminifier">
-								<span class="title">Unique name</span>
-								<span class="arrow">make smaller</span>
-							</h3>
-							<div class="item clearfix">
-								<div class="form-item clearfix">
-									<label for="field-name">Name</label>
-									<input style="width: 60%" type="text" id="field-name" name="name" value="{{ r.name }}" />
-								</div>
-							</div>
-						</div>
-						{% endif %}
-
 						<div class="item-wrapper" id="sort-referrers">
 							<h3 class="above-item clearfix do_blockminifier">
 								<span class="title">In use by the pages</span>
@@ -162,7 +153,7 @@
 										Only showing pages you are allowed to see.
 									</p>
 								
-									<ul>
+									<ul class="list-referrers">
 									{% for p in referrers %}
 										{% if m.rsc[p].is_visible %}
 											<li><a href="{% url admin_edit_rsc id=p %}">{{ m.rsc[p].title }}</a></li>
