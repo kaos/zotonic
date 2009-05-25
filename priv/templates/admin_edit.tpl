@@ -35,6 +35,13 @@
 										<input type="text" id="field-title" name="title" value="{{ r.title }}" />
 									</div>
 
+									{% if m.acl.is_admin %}
+									<div class="form-item clearfix">
+										<label for="field-name">Unique name</label>
+										<input type="text" id="field-name" name="name" value="{{ r.name }}" />
+									</div>
+									{% endif %}
+
 									<div class="form-item clearfix">
 										<label for="field-intro">Intro</label>
 										<textarea rows="2" cols="10" id="field-intro" name="intro" class="intro">{{ r.intro }}</textarea>
@@ -61,7 +68,7 @@
 								<div class="clear">
 									<hr/>
 									{% button
-											text="add media..." 
+											text="add a new media item" 
 											action={dialog_media_upload rsc_id=id group_id=r.group_id action={postback postback={reload_media rsc_id=id div_id=#media} delegate="resource_admin_edit"}}
 									%}
 								</div>
@@ -112,7 +119,6 @@
 						{% sorter id="sort" handle="h3" axis="y" containment="" opacity="0.9" placeholder="sortable-placeholder" %}
 						{% sortable id="sort-publish" %}
 						{% sortable id="sort-category" %}
-						{% sortable id="sort-name" %}
 						{% sortable id="sort-connections" %}
 						{% sortable id="sort-date" %}
 						{% sortable id="sort-access" %}
@@ -188,22 +194,7 @@
 								</div>
 							</div>
 						</div>
-
-						{% if m.acl.is_admin %}
-						<div class="item-wrapper" id="sort-name">
-							<h3 class="above-item clearfix do_blockminifier">
-								<span class="title">Unique name</span>
-								<span class="arrow">make smaller</span>
-							</h3>
-							<div class="item clearfix">
-								<div class="form-item clearfix">
-									<label for="field-name">Name</label>
-									<input style="width: 60%" type="text" id="field-name" name="name" value="{{ r.name }}" />
-								</div>
-							</div>
-						</div>
-						{% endif %}
-
+						
 						<div class="item-wrapper" id="sort-category">
 							<h3 class="above-item clearfix do_blockminifier">
 								<span class="title">Category</span>

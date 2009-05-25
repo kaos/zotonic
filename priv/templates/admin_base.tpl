@@ -43,6 +43,12 @@
 			<li><a href="{% url admin_predicate %}" {% if page_predicate %}class="current"{% endif %}>Predicates</a></li>
 			<li><a href="{% url admin_shop_sku %}" {% if page_shop_sku %}class="current"{% endif %}>Skus</a></li>
 			<li><a href="{% url admin_shop_order %}" {% if page_shop_order %}class="current"{% endif %}>Orders</a></li>
+			<li class="search-box">
+				<form method="get" action="{% url admin_overview_rsc %}">
+					<input type="text" name="qs" value="{{ q.qs|escape }}" class="left" />
+					<button>Search</button>
+				</form>
+			</li>
 			<li class="right"><a id="zp-logoff" href="#">Logoff</a></li>
 		</ul>
 		{% endblock %}

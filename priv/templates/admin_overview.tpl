@@ -6,19 +6,7 @@
 	<div id="content" class="zp-100">
 		<div class="block clearfix">
 
-			<div class="zp-80">
-				<h2>Zophrenic Page Overview</h2>
-			</div>	
-			<div class="zp-20">
-				<form method="get" action="{% url admin_overview_rsc %}">
-					<fieldset>
-						<div class="form-element">
-							<input type="text" name="qs" value="{{ q.qs|escape }}" class="left" />
-							<button>Search</button>
-						</div>
-					</fieldset>
-				</form>
-			</div>
+		<h2>Zophrenic Page Overview</h2>
 
 		{% with m.search.paged[{fulltext cat=q.qcat text=q.qs page=q.page}] as result %}
 
