@@ -80,8 +80,8 @@
 							<div class="item clearfix">
 								<fieldset class="admin-form">
 									<div class="form-item clearfix">
-											<input id="no-google" type="checkbox" class="do_fieldreplace" name="seo_noindex" {% if r.seo_noindex %}checked="checked"{% endif %} value="1" />
-											<label for="no-google">Ask google to not index this page</label>
+										<input id="no-google" type="checkbox" class="do_fieldreplace" name="seo_noindex" {% if r.seo_noindex %}checked="checked"{% endif %} value="1" />
+										<label for="no-google">Ask google to not index this page</label>
 									</div>
 
 									<div class="form-item clearfix">

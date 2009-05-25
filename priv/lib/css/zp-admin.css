@@ -282,7 +282,22 @@ a:focus {
 		color: #000;
 	}
 	
+	#navigation li.search-box {
+		float: left;
+		padding: 6px 0 0 0;
+	}
 	
+	#navigation li.search-box .quick-search-wrapper {
+		margin: 2px 0 0 6px;
+	}
+
+		#navigation li.search-box .quick-search-wrapper input {
+			margin: 0 3px 0 0;
+		}
+
+		#navigation li.search-box .quick-search-wrapper button {
+			margin: 0;
+		}
 /* footer
 ---------------------------------------------------------- */
 		

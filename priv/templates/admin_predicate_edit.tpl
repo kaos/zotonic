@@ -34,12 +34,10 @@
 										<label for="field-title">Title</label>
 										<input type="text" id="field-title" name="title" value="{{ p.title }}" />
 									</div>
-
+										
 									<div class="form-item clearfix">
-										<label for="field-reversed">
-											<input type="checkbox" id="field-reversed" name="reversed" {% if p.reversed %}checked="checked"{% endif %} value="1" />
-											The subject/object of this predicate are reversed from the normal definition.
-										</label>
+										<input id="field-reversed" type="checkbox" class="do_fieldreplace" name="reversed" {% if r.reversed %}checked="checked"{% endif %} value="1" />
+										<label for="field-reversed">The subject/object of this predicate are reversed from the normal definition.</label>
 									</div>
 
 									<div class="form-item clearfix">
