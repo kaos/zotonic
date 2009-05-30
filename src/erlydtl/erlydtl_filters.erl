@@ -90,7 +90,7 @@ center(undefined, _Number) ->
 center(Input, Number) when is_binary(Input) ->
     list_to_binary(center(binary_to_list(Input), Number));
 center(Input, Number) when is_list(Input) ->
-    string:centre(Input, Number).
+    string:centre(Input, zp_convert:to_integer(Number)).
 
 date(undefined, _FormatStr) ->
     undefined;
@@ -291,7 +291,7 @@ ljust(undefined, _Number) ->
 ljust(Input, Number) when is_binary(Input) ->
     list_to_binary(ljust(binary_to_list(Input), Number));
 ljust(Input, Number) when is_list(Input) ->
-    string:left(Input, Number);
+    string:left(Input, zp_convert:to_integer(Number));
 ljust(Input, _Number) -> 
     Input.
 
@@ -325,7 +325,7 @@ rjust(undefined, _Number) ->
 rjust(Input, Number) when is_binary(Input) ->
     list_to_binary(rjust(binary_to_list(Input), Number));
 rjust(Input, Number) when is_list(Input) ->
-    string:right(Input, Number);
+    string:right(Input, zp_convert:to_integer(Number));
 rjust(Input, _Number) -> 
     Input.
 
