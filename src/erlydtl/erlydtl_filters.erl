@@ -57,7 +57,7 @@ add(Input, Number) when is_binary(Input) ->
 add(Input, Number) when is_list(Input) ->
     integer_to_list(add(list_to_integer(Input), Number));
 add(Input, Number) when is_integer(Input) ->
-    Input + Number.
+    Input + zp_convert:to_integer(Number).
 
 lt(undefined, _Number) ->
     undefined;
@@ -94,6 +94,8 @@ center(Input, Number) when is_list(Input) ->
 
 date(undefined, _FormatStr) ->
     undefined;
+date(Input, FormatStr) when is_binary(FormatStr) ->
+    date(Input, binary_to_list(FormatStr));
 date(Input, FormatStr) when is_binary(Input) ->
     list_to_binary(date(binary_to_list(Input), FormatStr));
 date({{_,_,_} = Date,{_,_,_} = Time}, FormatStr) ->
@@ -235,8 +237,10 @@ slugify(Input) ->
     zp_string:to_slug(Input).
 
 
+join(Input, Separator) when is_binary(Input) ->
+    join(binary_to_list(Input), Separator);
 join(Input, Separator) when is_list(Input) ->
-    string:join(Input, Separator);
+    string:join(Input, zp_binary:to_list(Separator));
 join(Input, _) ->
     Input.
 
