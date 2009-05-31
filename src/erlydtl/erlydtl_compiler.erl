@@ -596,7 +596,7 @@ filter_ast1([{identifier, _, Name}], VariableAst, _Context, TreeWalker) ->
     FilterAst = erl_syntax:application(erl_syntax:atom(erlydtl_filters), erl_syntax:atom(Name), [VariableAst]),
     {{FilterAst, #ast_info{}}, TreeWalker};
 filter_ast1([{identifier, _, Name}, Arg], VariableAst, Context, TreeWalker) ->
-    {{ArgAst, Info},TreeWalker2} = value_ast(Arg, true, Context, TreeWalker),
+    {{ArgAst, Info},TreeWalker2} = value_ast(Arg, false, Context, TreeWalker),
     FilterAst = erl_syntax:application(erl_syntax:atom(erlydtl_filters), erl_syntax:atom(Name), [VariableAst, ArgAst]),
     {{FilterAst, Info}, TreeWalker2}.
     
