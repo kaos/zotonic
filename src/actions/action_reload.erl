@@ -7,5 +7,5 @@
 -include("zophrenic.hrl").
 -export([render_action/4]).
 
-render_action(_TriggerId, _TargetId, Args, Context) ->
+render_action(_TriggerId, _TargetId, _Args, Context) ->
 	{"window.location.reload(true)", Context}.
