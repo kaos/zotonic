@@ -64,7 +64,7 @@ find_all(What, Name, _Context) ->
 %% @doc Initiates the server.
 init(Args) ->
     {context, Context} = proplists:lookup(context, Args),
-    zp_notifier:subscribe(module_ready, self(), Context),
+    zp_notifier:observe(module_ready, self(), Context),
     {ok, #state{}}.
 
 

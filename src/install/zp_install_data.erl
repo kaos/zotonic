@@ -50,7 +50,7 @@ install_modules(C) ->
         "mod_base"
     ],
     [
-        {ok, 1} = pgsql:equery(C, "insert into modules (name, is_active) values ($1, true)", [M]) || M <- Modules
+        {ok, 1} = pgsql:equery(C, "insert into module (name, is_active) values ($1, true)", [M]) || M <- Modules
     ],
     ok.
 

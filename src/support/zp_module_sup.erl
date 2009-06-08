@@ -27,7 +27,11 @@
 start_link() ->
     start_link([]).
 start_link(Args) ->
-    supervisor:start_link({local, ?MODULE}, ?MODULE, Args).
+    Context = zp_context:new(),
+    Args1 = [{context, Context} | Args],
+    Result = supervisor:start_link({local, ?MODULE}, ?MODULE, Args1),
+    zp_notifier:notify({module_ready}, Context),
+    Result.
 
 
 %% @spec upgrade(context()) -> ok
@@ -136,7 +140,7 @@ all(Context) ->
 %% @spec scan(context()) -> [ {atom(), dirname()} ]
 scan(_Context) ->
     Priv  = filename:join([code:lib_dir(zophrenic, priv), "modules", "mod_*"]),
-    Src   = filename:join([code:lib_dir(zophrenic, src), "modules", "mod_*"]),
+    Src   = filename:join([code:lib_dir(zophrenic, modules), "mod_*"]),
     Files = filelib:wildcard(Priv) ++ filelib:wildcard(Src),
     [ {zp_convert:to_atom(filename:basename(F)), F} ||  F <- Files ].
 

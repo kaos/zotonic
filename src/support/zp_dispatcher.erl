@@ -143,7 +143,7 @@ collect_dispatch_lists(Context) ->
     ModDisp    = lists:concat(
         [ filelib:wildcard(filename:join([proplists:get_value(M, ModuleDirs), "dispatch", "*"])) || M <- Modules ]
     ),
-    
+
     Dispatch   = [
                     lists:map(fun get_module_dispatch/1, RscModules),
                     lists:map(fun get_file_dispatch/1, Files2++ModDisp++Files1)
