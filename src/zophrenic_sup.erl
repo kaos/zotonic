@@ -24,8 +24,7 @@ start_link() ->
 upgrade() ->
     {ok, {_, Specs}} = init([]),
 
-    Old = sets:from_list(
-	    [Name || {Name, _, _, _} <- supervisor:which_children(?MODULE)]),
+    Old = sets:from_list([Name || {Name, _, _, _} <- supervisor:which_children(?MODULE)]),
     New = sets:from_list([Name || {Name, _, _, _, _, _} <- Specs]),
     Kill = sets:subtract(Old, New),
 
@@ -72,7 +71,7 @@ init([]) ->
         {from, "mworrell@wanadoo.nl"},
         {host, "smtp.wanadoo.nl"}
     ],
-
+    
     Ids     = {zp_ids,
 	            {zp_ids, start_link, []}, 
 	            permanent, 5000, worker, dynamic},
@@ -125,6 +124,10 @@ init([]) ->
                 {zp_emailer, start_link, [EmailerConfig]},
                 permanent, 5000, worker, dynamic},
 
+    Modules = {zp_module_sup,
+                {zp_module_sup, start_link, []},
+                permanent, 5000, worker, dynamic},
+
     Shop = {shop,
                 {shop, start_link, []}, 
                 permanent, 5000, worker, dynamic},
@@ -132,6 +135,7 @@ init([]) ->
     Processes = [
             MochiWeb, Ids, Postgres, Depcache, Installer, Session, Visitor, 
             Dispatcher, Notifier, Template, Scomp, DropBox, Pivot, Emailer,
+            Modules,
             Shop
     ],
     {ok, {{one_for_one, 1000, 10}, Processes}}.

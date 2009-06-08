@@ -15,8 +15,9 @@
 %%      varies(Params, Context) -> {EssentialParams, MaxAge, Varies} | undefined
 %%      
 %%      	Params = proplist()
+%%          EssentialParams = proplist()
 %%      	MaxAge = integer()
-%%          Varies = TermList
+%%          Varies = TermList  (used as dependencies for the depcache)
 
 
 -module(gen_scomp).

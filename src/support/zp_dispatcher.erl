@@ -13,7 +13,7 @@
 -export([start_link/0, start_link/1]).
 
 %% zp_dispatch exports
--export([url_for/2, url_for/3, url_for/4, reload/0, test/0]).
+-export([url_for/2, url_for/3, url_for/4, reload/1, test/0]).
 
 -include_lib("zophrenic.hrl").
 
@@ -53,8 +53,8 @@ url_for(Name, Args, Escape, #context{} = Context) ->
 
 
 %% @doc Reload all dispatch lists.  Finds new dispatch lists and adds them to the dispatcher
-reload() ->
-    gen_server:cast(?MODULE, 'reload').
+reload(Context) ->
+    gen_server:cast(?MODULE, {'reload', Context}).
 
 
 %%====================================================================
@@ -68,7 +68,8 @@ reload() ->
 %% @doc Initiates the server, loads the dispatch list into the webmachine dispatcher
 init(_Args) ->
     State  = #state{dispatchlist=[], lookup=dict:new()},
-    State1 = reload_dispatch_list(State),
+    Context = zp_context:new(),
+    State1 = reload_dispatch_list(Context, State),
     {ok, State1}.
 
 
@@ -88,8 +89,8 @@ handle_call({'url_for', Name, Args, Escape}, _From, State) ->
 %%                                  {noreply, State, Timeout} |
 %%                                  {stop, Reason, State}
 %% @doc Handling cast messages
-handle_cast('reload', State) ->
-    State1 = reload_dispatch_list(State),
+handle_cast({'reload', Context}, State) ->
+    State1 = reload_dispatch_list(Context, State),
     {noreply, State1}.
 
 
@@ -122,23 +123,30 @@ code_change(_OldVsn, State, _Extra) ->
 
 
 %% @doc Reload the dispatch list and send it to the webmachine dispatcher.
-reload_dispatch_list(State) ->
-    DispatchList = collect_dispatch_lists(),
+reload_dispatch_list(Context, State) ->
+    DispatchList = collect_dispatch_lists(Context),
     LookupDict   = dispatch_for_uri_lookup(DispatchList),
     dispatch_webmachine(DispatchList),
     State#state{dispatchlist=DispatchList, lookup=LookupDict}.
 
 
 %% @doc Collect all dispatch lists.  Checks priv/dispatch for all dispatch list definitions.
-collect_dispatch_lists() ->
-    Files1     = filelib:wildcard("default/dispatch/*"),
-    Files2     = filelib:wildcard("priv/dispatch/*"),
-    Resources1 = filelib:wildcard("src/resources/resource_*.erl"),
-    Resources2 = filelib:wildcard("priv/resources/resource_*.erl"),
-    Modules    = [list_to_atom(filename:basename(X, ".erl")) || X <- Resources1 ++ Resources2],
+collect_dispatch_lists(Context) ->
+    Files1     = filelib:wildcard(filename:join([code:lib_dir(zophrenic, default), "dispatch", "*"])),
+    Files2     = filelib:wildcard(filename:join([code:lib_dir(zophrenic, priv), "dispatch", "*"])),
+    Resources1 = filelib:wildcard(filename:join([code:lib_dir(zophrenic, rsc), "resources", "resource_*.erl"])),
+    Resources2 = filelib:wildcard(filename:join([code:lib_dir(zophrenic, priv), "resources", "resource_*.erl"])),
+    RscModules = [list_to_atom(filename:basename(X, ".erl")) || X <- Resources1 ++ Resources2],
+    
+    Modules    = zp_module_sup:active(Context),
+    ModuleDirs = zp_module_sup:scan(Context),
+    ModDisp    = lists:concat(
+        [ filelib:wildcard(filename:join([proplists:get_value(M, ModuleDirs), "dispatch", "*"])) || M <- Modules ]
+    ),
+    
     Dispatch   = [
-                    lists:map(fun get_module_dispatch/1, Modules),
-                    lists:map(fun get_file_dispatch/1, Files2++Files1)
+                    lists:map(fun get_module_dispatch/1, RscModules),
+                    lists:map(fun get_file_dispatch/1, Files2++ModDisp++Files1)
                  ],
     lists:flatten(Dispatch).
     
@@ -319,7 +327,8 @@ append_qargs(Args, Context) ->
 % {value, Value, _NewBindings} = erl_eval:exprs(Y, [])}.
 
 test() ->
-    List = collect_dispatch_lists(),
+    Ctx  = zp_context:new(),
+    List = collect_dispatch_lists(Ctx),
     Dict = dispatch_for_uri_lookup(List),
     dict:to_list(Dict),
 

@@ -100,7 +100,8 @@ add_member(Id, RscId, Context) ->
                 RscGroupId
         end
     end,
-    zp_db:transaction(F, Context).
+    zp_db:transaction(F, Context),
+    zp_depcache:flush({groups, RscId}).
 
 
 add_observer(Id, RscId, Context) ->
@@ -114,7 +115,9 @@ add_observer(Id, RscId, Context) ->
                 RscGroupId
         end
     end,
-    zp_db:transaction(F, Context).
+    Result = zp_db:transaction(F, Context),
+    zp_depcache:flush({groups, RscId}),
+    Result.
 
 
 add_leader(Id, RscId, Context) ->
@@ -128,14 +131,21 @@ add_leader(Id, RscId, Context) ->
                 RscGroupId
         end
     end,
-    zp_db:transaction(F, Context).
+    Result = zp_db:transaction(F, Context),
+    zp_depcache:flush({groups, RscId}),
+    Result.
 
 
 delete_member(RscGroupId, Context) ->
-    zp_db:delete(rsc_group, RscGroupId, Context).
+    RscId = zp_db:q("select rsc_id from rsc_group where id = $1", [RscGroupId], Context),
+    Result = zp_db:delete(rsc_group, RscGroupId, Context),
+    zp_depcache:flush({groups, RscId}),
+    Result.
 
 delete_member(Id, RscId, Context) ->
-    zp_db:q("delete from rsc_group where group_id = $1 and rsc_id = $2",[Id, RscId], Context).
+    Result = zp_db:q("delete from rsc_group where group_id = $1 and rsc_id = $2",[Id, RscId], Context),
+    zp_depcache:flush({groups, RscId}),
+    Result.
     
     
 %% @doc Return the group ids the current person is member of
@@ -143,22 +153,31 @@ delete_member(Id, RscId, Context) ->
 groups_member(Context) ->
     groups_member(zp_acl:user(Context), Context).
 
-%% @doc Return the group ids the person is member of
+
+%% @doc Return the group ids the person is member or leader of
 %% @spec person_groups(PersonId, Context) -> List
 groups_member(PersonId, Context) ->
-    Groups = zp_db:q("select group_id from rsc_group where rsc_id = $1 and is_observer = false", [PersonId], Context),
-    [ G || {G} <- Groups ].
+    F = fun() ->
+        Groups = zp_db:q("select group_id from rsc_group where rsc_id = $1 and is_observer = false", [PersonId], Context),
+        [ G || {G} <- Groups ]
+    end,
+    zp_depcache:memo(F, {groups_member, PersonId}, ?DAY, [{groups, PersonId}]).
+
 
 %% @doc Return the group ids the current person can only view
 %% @spec person_groups(Context) -> List
 groups_observer(Context) ->
     groups_observer(zp_acl:user(Context), Context).
 
+
 %% @doc Return the group ids the person can only view
 %% @spec person_groups(PersonId, Context) -> List
 groups_observer(PersonId, Context) ->
-    Groups = zp_db:q("select group_id from rsc_group where rsc_id = $1 and is_observer = true", [PersonId], Context),
-    [ G || {G} <- Groups ].
+    F = fun() ->
+        Groups = zp_db:q("select group_id from rsc_group where rsc_id = $1 and is_observer = true", [PersonId], Context),
+        [ G || {G} <- Groups ]
+    end,
+    zp_depcache:memo(F, {groups_observer, PersonId}, ?DAY, [{groups, PersonId}]).
 
 
 %% @doc Return the group ids the current person can view
@@ -169,8 +188,12 @@ groups_visible(Context) ->
 %% @doc Return the group ids the person can view
 %% @spec person_groups(PersonId, Context) -> List
 groups_visible(PersonId, Context) ->
-    Groups = zp_db:q("select group_id from rsc_group where rsc_id = $1", [PersonId], Context),
-    [ G || {G} <- Groups ].
+    F = fun() ->
+        Groups = zp_db:q("select group_id from rsc_group where rsc_id = $1", [PersonId], Context),
+        [ G || {G} <- Groups ]
+    end,
+    zp_depcache:memo(F, {groups_visible, PersonId}, ?DAY, [{groups, PersonId}]).
+
 
 %% @doc Return the group ids the current person is leader of
 %% @spec person_groups(Context) -> List
@@ -180,8 +203,11 @@ groups_leader(Context) ->
 %% @doc Return the group ids the person leads
 %% @spec person_groups(PersonId, Context) -> List
 groups_leader(PersonId, Context) ->
-    Groups = zp_db:q("select group_id from rsc_group where rsc_id = $1 and is_leader = true", [PersonId], Context),
-    [ G || {G} <- Groups ].
+    F = fun() ->
+        Groups = zp_db:q("select group_id from rsc_group where rsc_id = $1 and is_leader = true", [PersonId], Context),
+        [ G || {G} <- Groups ]
+    end,
+    zp_depcache:memo(F, {groups_leader, PersonId}, ?DAY, [{groups, PersonId}]).
 
 
 %% @doc Return the roles the current person has

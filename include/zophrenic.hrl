@@ -87,6 +87,7 @@
 -record(search_sql, {select, from, where="", order="", group_by="", limit, tables=[], args=[], run_func, extra, assoc=false}).
 
 %% ACL visibility levels
+-define(ACL_VIS_USER, 3).
 -define(ACL_VIS_GROUP, 2).
 -define(ACL_VIS_COMMUNITY, 1).
 -define(ACL_VIS_PUBLIC, 0).

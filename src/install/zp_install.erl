@@ -54,6 +54,21 @@ model_pgsql() ->
         CONSTRAINT config_module_key_key UNIQUE (module, key)
     )",
     
+    % Table module
+    % Holds install state of all known modules
+    "CREATE TABLE module
+    (
+        id serial NOT NULL,
+        name character varying(80) NOT NULL DEFAULT ''::character varying,
+        uri character varying(250) NOT NULL DEFAULT ''::character varying,
+        is_active boolean NOT NULL DEFAULT false,
+        created timestamp with time zone NOT NULL DEFAULT now(),
+        modified timestamp with time zone NOT NULL DEFAULT now(),
+        
+        CONSTRAINT module_pkey PRIMARY KEY (id),
+        CONSTRAINT module_name_key UNIQUE (name)
+    )",
+    
     % Table: rsc
     % Holds all resources (posts, persons etc.)
 

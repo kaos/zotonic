@@ -15,6 +15,7 @@
     m_to_list/2,
     m_value/2,
     name_to_id/2,
+    identify/2,
     get/2,
     get_acl_props/2,
     get_rsc/2,
@@ -61,6 +62,26 @@ name_to_id(undefined, _Context) ->
     undefined;
 name_to_id(Name, Context) ->
     zp_db:q1("select id from media where name = $1", [zp_string:to_name(Name)], Context).
+
+
+%% @doc Return the identification of a media. Compatible with zp_media_identify:identify()
+%% @spec identify(ImageFilePath, Context) -> {ok, PropList} | {error, Reason}
+identify(ImageFile, Context) ->
+    F = fun() ->
+        case zp_media_archive:is_archived(ImageFile, Context) of
+            true ->
+                RelFile = zp_media_archive:rel_archive(ImageFile, Context),
+                case zp_db:q_assoc("select id, mime, width, height, orientation from media where filename = $1", [RelFile], Context) of
+                    undefined ->
+                        {error, enoent};
+                    Props ->
+                        {ok, Props}
+                end;
+            false ->
+                {error, enoent}
+        end
+    end,
+    zp_depcache:memo(F, {media_identify, ImageFile}, ?DAY).
 
 
 %% @doc Check if a media record exists

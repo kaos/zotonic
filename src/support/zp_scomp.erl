@@ -26,7 +26,6 @@
 %% @doc The state of the scomp server.  'Cache' holds the cached entries, 'waiting' holds the list
 %%      of entries being rendered for the cache.  'Now' is the current time in seconds, updated with 
 %%      a timer to prevent too many time lookups.
-%% @todo do performance checks if we want to use ets for this, nice with dicts is that the content is not copied
 -record(state, {waiting, scomps}).
 
 
@@ -44,7 +43,7 @@ start_link() ->
 %% @spec render(ScompName, Args, Vars, Context) -> {ok, Context} | {ok, io_list} | {error, Reason}
 %% @doc Render the names scomp, Args are the scomp arguments and Vars are the variables given to the template
 render(ScompName, Args, Vars, Context) ->
-	ScompContext = zp_context:prune_for_scomp(Context), 
+	ScompContext = zp_context:prune_for_scomp(visible_for(Args), Context), 
     case gen_server:call(?MODULE, {render, ScompName, Args, ScompContext}) of
         {renderer, M, F, ScompState} ->
             erlang:apply(M, F, [Args, Vars, Context, ScompState]);
@@ -102,7 +101,7 @@ handle_call({render, ScompName, Args, Context}, From, State) ->
                             {Essential, Max, Vary} ->
                                 case Max of
                                     0 -> {undefined, State};
-                                    _ -> {cache_lookup(ScompName, Essential, Vary), State}
+                                    _ -> {cache_lookup(ScompName, Essential, Vary, Context), State}
                                 end
                         end,
     case Cached of 
@@ -195,10 +194,11 @@ code_change(_OldVsn, State, _Extra) ->
 %% Internal functions
 %%--------------------------------------------------------------------
 
-cache_lookup(_ScompName, undefined, _Varies) ->
+cache_lookup(_ScompName, undefined, _Varies, _Context) ->
     undefined;
-cache_lookup(ScompName, EssentialParams, _Varies) ->
-    case zp_depcache:get({ScompName,EssentialParams}) of
+cache_lookup(ScompName, EssentialParams, _Varies, Context) ->
+    Key = key(ScompName, EssentialParams, Context),
+    case zp_depcache:get(Key) of
         {ok, Result} -> Result;
         _ -> undefined
     end.
@@ -208,7 +208,7 @@ cache_lookup(ScompName, EssentialParams, _Varies) ->
 %%      back to this scomp server, which then replies all callee processes that are waiting and
 %%      caches the result.
 spawn_cacheable_renderer(ScompName, ScompState, EssentialParams, MaxAge, Varies, Context, From, State) ->
-    Key = {ScompName, EssentialParams},
+    Key = key(ScompName, EssentialParams, Context),
     Waiting = try
                 dict:append(Key, From, State#state.waiting)
              catch
@@ -241,4 +241,25 @@ scomp_state(ScompName, State) ->
 scomp_list(State) ->
     dict:fetch_keys(State#state.scomps).
 
-    
+
+%% @doc Translate "visible_for" scomp parameter to the appropriate visible for level.
+%% @spec visible_for(proplist()) -> 0 | 1 | 2 | 3
+visible_for(Args) ->
+    case proplists:get_value(visible_for, Args) of
+        undefined   -> ?ACL_VIS_USER;
+        "user"      -> ?ACL_VIS_USER;
+        3           -> ?ACL_VIS_USER;
+        "group"     -> ?ACL_VIS_GROUP;
+        2           -> ?ACL_VIS_GROUP;
+        "community" -> ?ACL_VIS_COMMUNITY;
+        1           -> ?ACL_VIS_COMMUNITY;
+        "world"     -> ?ACL_VIS_PUBLIC;
+        "public"    -> ?ACL_VIS_PUBLIC;
+        0           -> ?ACL_VIS_PUBLIC
+    end.
+
+
+%% @doc Create an unique key for the scomp and the visibility level it is rendered for
+%% @spec key(atom(), proplist(), context()) -> term()
+key(ScompName, EssentialParams, Context) ->
+    {ScompName, EssentialParams, Context#context.user_id, Context#context.acl, Context#context.language}.

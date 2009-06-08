@@ -4,6 +4,12 @@
 	"src/*/*",
 	"src/*/*/*",
 	"src/*/*/*/*",
+	"modules/*",
+	"modules/*/*",
+	"modules/*/*/*",
+	"priv/modules/*",
+	"priv/modules/*/*",
+	"priv/modules/*/*/*",
 	"priv/resources/*",
 	"priv/models/*",
 	"priv/scomps/*"

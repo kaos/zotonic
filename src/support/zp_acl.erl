@@ -34,10 +34,13 @@
     user_check/1,
     has_user/1,
     add_defaults/2,
+    set_visible_for/2,
     add_user/3
 ]).
 
 -include_lib("zophrenic.hrl").
+
+-define(ANONYMOUS_COMMUNITY_USER, -1).
 
 -record(acl, {
     is_admin = false,
@@ -154,12 +157,20 @@ groups_member(#context{user_id=UserId} = Context) ->
     m_group:groups_member(UserId, Context).
 
 
-%% @doc Return the groups the current user is full member or observer
+%% @doc Return the groups the current user is observer
 %% @spec groups(#context) -> list()
 groups_observer(#context{user_id=undefined}) ->
     [];
 groups_observer(#context{user_id=UserId} = Context) ->
-    m_group:groups_leader(UserId, Context).
+    m_group:groups_observer(UserId, Context).
+
+
+%% @doc Return the groups the current user can view
+%% @spec groups(#context) -> list()
+groups_visible(#context{user_id=undefined}) ->
+    [];
+groups_visible(#context{user_id=UserId} = Context) ->
+    m_group:groups_visible(UserId, Context).
 
 
 %% @doc Return the groups the current user is full member or observer
@@ -259,6 +270,20 @@ add_defaults(PropList, Context) ->
     PropVis.
 
 
+%% @doc Set the acl fields of the context for the 'visible_for' setting.  Used when rendering scomps.
+%% @spec set_visible_for(integer(), context()) -> context()
+set_visible_for(_VisibleFor, #context{user_id=undefined} = Context) ->
+    Context;
+set_visible_for(?ACL_VIS_PUBLIC, Context) ->
+    Context#context{user_id=undefined, acl=#acl{}};
+set_visible_for(?ACL_VIS_COMMUNITY, Context) ->
+    Context#context{user_id=?ANONYMOUS_COMMUNITY_USER, acl=#acl{}};
+set_visible_for(?ACL_VIS_GROUP, Context) ->
+    Context#context{acl=#acl{}};
+set_visible_for(?ACL_VIS_USER, Context) ->
+    Context.
+
+
 %% @doc Add the current user id as the prop, when the prop is not set.
 %% @spec add_user(atom(), PropList1, #context) -> PropList2
 add_user(Prop, PropList, Context) ->
@@ -301,7 +326,7 @@ acl_visible(Acl, Context) ->
                     true;
                 false ->
                     %% Must be in one of our groups
-                    Gs = groups_observer(Context),
+                    Gs = groups_visible(Context),
                     lists:member(Acl#acl_props.group_id, Gs)
             end
     end.

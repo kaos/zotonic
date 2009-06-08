@@ -517,6 +517,7 @@ include_ast(File, Args, Context, TreeWalker) ->
                                     "maxage" -> true;
                                     "vary"   -> true;
                                     "scomp"  -> true;
+                                    "visible_for" -> true;
                                     _ -> IsC
                                 end
                             end,

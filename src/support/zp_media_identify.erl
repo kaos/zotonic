@@ -18,16 +18,13 @@
 -include_lib("zophrenic.hrl").
 
 
-%% @spec identify(ImageFile) -> {ok, Meta} | {error, Error}
+%% @spec identify_cached(ImageFile) -> {ok, Meta} | {error, Error}
 %% @doc Caching version of identify/1. Fetches information about an image, returns width, height, type, etc.
 identify_cached(ImageFile) ->
-    case zp_depcache:get({identify, ImageFile}) of
-        {ok, Meta} -> Meta;
-        undefined ->
-            Result = identify(ImageFile),
-            zp_depcache:set({identify, ImageFile}, Result, ?YEAR, [identify, ImageFile]),
-            Result
-    end.
+    F = fun() ->
+        identify(ImageFile)
+    end,
+    zp_depcache:memo(F, {identify, ImageFile}, ?YEAR, [media_identify]).
     
     
 %% @spec identify(ImageFile) -> PropList

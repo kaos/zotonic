@@ -21,8 +21,9 @@ m() ->
     flush().
 
 flush() ->
+    C = zp_context:new(),
     zp_depcache:flush(),
-    zp_dispatcher:reload().
+    zp_dispatcher:reload(C).
 
 restart() ->
     zophrenic:stop(),

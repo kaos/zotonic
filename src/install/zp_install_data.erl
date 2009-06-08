@@ -19,6 +19,7 @@
 %% @spec install(Connection) -> ok
 install(C) ->
     ok = install_config(C),
+    ok = install_modules(C),
     ok = install_group(C),
     ok = install_category(C),
     ok = install_rsc(C),
@@ -39,7 +40,20 @@ install_config(C) ->
         ["i18n", "language", "nl", []]),
     pgsql:reset_id(C, "config"),
     ok.
-    
+
+
+install_modules(C) ->
+    Modules = [
+        "mod_test",
+        "mod_module_indexer",
+        "mod_module_admin"
+        "mod_base"
+    ],
+    [
+        {ok, 1} = pgsql:equery(C, "insert into modules (name, is_active) values ($1, true)", [M]) || M <- Modules
+    ],
+    ok.
+
 
 %% @doc Install the default admin, editor, supervisor, community and public groups
 install_group(C) ->

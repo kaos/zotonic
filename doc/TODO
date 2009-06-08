@@ -407,3 +407,113 @@ For template ->
 		...
 	]
 	
+== Module/ how they extend the system ==
+
+Modules:
+
+	module_indexer:
+	- listen to {scomp/ template/ action/ validator/ model} notifications, maps them to the ones
+	  found in the module folders
+	- listen to {module_activate/ module_deactivate} notifications, rescan the list of scomps (etc)
+	  after receiving, also instructs the dispatcher to reload the dispatch rules
+	- listen to {module_rescan} message, as send from the dev module to force a rescan when in
+	  development mode.
+
+	module_admin
+	- for overview of modules, activate/deactivate modules in the admin
+
+	admin
+	- basic admin controllers
+	
+	shop
+	- the webshop site
+
+	google_chart
+	- The google chart scomp, and also chart_pie and chart_pie3d
+
+	base
+	- all normal buttons, drag/drop, validators etc.
+
+	dropbox
+	- handle new images in the upload folder, move & publish them
+
+	pivot
+	- handles extraction of texts for indexing rsc entries
+
+	
+When looking up an item:
+
+	Send a notification {item-kind, item-name, Args, Context}.
+
+		{scomp, button, [{text,"Click Me"}], Context}
+	
+	The module manager will receive this notification and check against the known list of items.
+	Other modules can also hook into the notification manager to intercept the message and return
+	an alternative.  This can be on the basis of the arguments or the supplied context.
+	
+Get a list of all admin menu items:
+
+	{% for title, url in m.notify.admin_menu %}
+
+	This sends a notification {admin_menu} to all modules.
+	The resulting list is filtered from empty results and returned.
+
+Call a scomp in a module:
+
+	{% scompname arg=value %}
+	
+	The module manager scans the scomp directory of every module, so it can do a mapping 
+	from the name of scomps found there to scomps requested.
+	Scomp names should be:  scomp_<modulename>_<scompname>.erl
+
+	It uses the -module_priority() attribute of the module or the scomp to sort the scomps, enabling
+	a scomp to be overruled by another module.
+
+	LATER:
+	
+	A fallback is to send a notification {scomp, scompname, [Arg]}, the first answer that
+	is non-undefined will be returned.  
+
+	The answer can be:
+	- an iolist() for direct result
+	- an atom, comprising the name of the module that should handle the scomp
+	- a context, which should be updated with the result of the scomp rendering
+	- a tuple {iolist(), Context}, comprising the rendered result of the scomp
+
+Call all scomps by all modules:
+
+	{% all scompname arg=value %}
+
+
+Include a template from a module:
+
+ 	{% include "templatename.tpl" %}
+
+	The module manager scans the templates directory in all modules. It can map a requested name to
+	a found template.  <modulename>_<templatename>.tpl
+
+	It uses the -module_priority() attribute to sort the templates, enabling a template to be overruled
+	by another module.
+	
+Include all templates by all modules:
+
+	{% all include "templatename.tpl" %}
+	
+Refer to an action in a module:
+
+	The module manager scans the actions directory of the every module, so it can do a mapping
+	from the name of the actions.  action_<modulename>_<actionname>.erl
+
+	It uses the -module_priority() attribute of the module or the action to sort the actions, enabling
+	an action to be overruled by another module.
+
+Refer to a validator in a module:
+
+	The module manager scans the validators directory of the every module, so it can do a mapping
+	from the name of the validators.   validator_<modulename>_<validator>.erl
+
+Refer to a model in a module:
+
+	The module manager scans the model directory of every module. It maps the names found to the
+	names requested.  m_<modulename>_<modelname>.erl
+

@@ -13,7 +13,7 @@
 
     prune_for_template/1,
     prune_for_database/1,
-    prune_for_scomp/1,
+    prune_for_scomp/2,
     output/2,
 
     pickle/1,
@@ -110,8 +110,8 @@ prune_for_database(Context) ->
 
 %% @doc Cleanup a context for cacheable scomp handling.  Resets most of the accumulators to prevent duplicating
 %% between different (cached) renderings.
-prune_for_scomp(Context) ->
-    Context#context{
+prune_for_scomp(VisibleFor, Context) ->
+    zp_acl:set_visible_for(VisibleFor, Context#context{
         dbc=undefined,
 	    wm_reqdata=undefined,
         dict=undefined,
@@ -122,7 +122,7 @@ prune_for_scomp(Context) ->
 		wire=[],
 		validators=[],
 		render=[]
-    }.
+    }).
 
 
 %% @doc Pickle a context for storing in the database

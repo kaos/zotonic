@@ -19,6 +19,7 @@
     send_render/5
 ]).
 
+-include_lib("zophrenic.hrl").
 -include_lib("esmtp/include/esmtp_mime.hrl").
 
 -define(SMTP_PORT_TLS, 587).
@@ -33,7 +34,7 @@
 
 %% @doc Send a simple text message to an email address
 send(To, Subject, Message, Context) ->
-    Context1 = zp_context:prune_for_scomp(Context),
+    Context1 = zp_context:prune_for_scomp(?ACL_VIS_USER, Context),
     gen_server:cast(?MODULE, {send, To, Subject, Message, Context1}).
 
 
@@ -43,7 +44,7 @@ send_render(To, HtmlTemplate, Vars, Context) ->
 
 %% @doc Send a html and text message to an email address, render the message using two templates.
 send_render(To, HtmlTemplate, TextTemplate, Vars, Context) ->
-    Context1 = zp_context:prune_for_scomp(Context),
+    Context1 = zp_context:prune_for_scomp(?ACL_VIS_USER, Context),
     gen_server:cast(?MODULE, {send_render, To, HtmlTemplate, TextTemplate, Vars, Context1}).
 
 
