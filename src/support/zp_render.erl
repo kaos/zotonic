@@ -81,8 +81,13 @@ render_actions(TriggerId, TargetId, {Action, Args}, Context) ->
 		true -> 
             Trigger      = proplists:get_value(trigger, Args, TriggerId),
 	        Target       = proplists:get_value(target,  Args, TargetId),
-	        ActionModule = list_to_atom("action_"++atom_to_list(Action)),
-			ActionModule:render_action(Trigger, Target, Args, Context);
+	        case mod_module_indexer:find(action, Action, Context) of
+	            {ok, ActionModule} ->
+			        ActionModule:render_action(Trigger, Target, Args, Context);
+			    {error, enoent} ->
+			        ?LOG("No action enabled for \"~p\"", [Action]),
+			        {[], Context}
+			end;
 		false -> 
 			{[],Context}
 	end.
@@ -116,17 +121,35 @@ render_validator(TriggerId, TargetId, Args, Context) ->
     % The Postback contains all information to perform a server side validation
     % The Script is the script that ties the client side validation to the element
     RValidation = fun({VType,VArgs}, {PostbackAcc,ScriptAcc,Ctx}) ->
-                    ValidatorModule =   case proplists:get_value(delegate, VArgs) of
-                                            undefined -> list_to_atom("validator_"++atom_to_list(VType));
-                                            Delegate  -> Delegate
-                                        end,
-                    {VPostback,VScript,VCtx} = ValidatorModule:render_validator(VType, Trigger, Target, VArgs, Ctx),
-                    {[{VType,ValidatorModule,VPostback}|PostbackAcc],[VScript|ScriptAcc],VCtx}
-                  end,
+                    VMod = case proplists:get_value(delegate, VArgs) of
+                                undefined -> 
+                                    case mod_module_indexer:find(validator, VType, Context) of
+                                        {ok, Mod} ->
+                                            {ok, Mod};
+                                        {error, enoent} ->
+                                            ?LOG("No validator found for \"~p\"", [VType])
+                                    end;
+                                Delegate  -> 
+                                    {ok, Delegate}
+                             end,
+                     case VMod of
+                        {ok, ValidatorModule} ->
+                            {VPostback,VScript,VCtx} = ValidatorModule:render_validator(VType, Trigger, Target, VArgs, Ctx),
+                            {[{VType,ValidatorModule,VPostback}|PostbackAcc],[VScript|ScriptAcc],VCtx};
+                        _ ->
+                            {PostbackAcc, ScriptAcc, Ctx}
+                     end
+                 end,
+
     {Postback,Append,Context1} = lists:foldr(RValidation, {[],[],Context}, Validations),
-    Pickled  = zp_utils:pickle({Trigger,Postback}),
-    PbScript = [<<"zp_set_validator_postback('">>,Trigger,<<"', '">>, Pickled, <<"');\n">>],
-    {[PbScript,VldScript|Append], Context1}.
+    case Postback of
+        [] ->
+            {[VldScript|Append], Context1};
+        _ ->
+            Pickled  = zp_utils:pickle({Trigger,Postback}),
+            PbScript = [<<"zp_set_validator_postback('">>,Trigger,<<"', '">>, Pickled, <<"');\n">>],
+            {[PbScript,VldScript|Append], Context1}
+    end.
 
 
 

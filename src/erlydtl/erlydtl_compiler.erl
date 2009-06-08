@@ -1122,7 +1122,7 @@ scomp_ast(ScompName, Args, Context, TreeWalker) ->
     AppAst = erl_syntax:application(
                 erl_syntax:atom(zp_scomp),
                 erl_syntax:atom(render),
-                [   erl_syntax:atom("scomp_" ++ ScompName), 
+                [   erl_syntax:atom(ScompName), 
                     scomp_ast_map_args(Args, Context, TreeWalker), 
                     erl_syntax:variable("Variables"),
                     erl_syntax:variable("ZpContext")

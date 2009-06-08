@@ -94,39 +94,46 @@ init([]) ->
 %%      at the moment of the call to the template engine.  The scomp is a module that
 %%      must be present in the ebin directory. 
 handle_call({render, ScompName, Args, Context}, From, State) ->
-    ScompVaries = ScompName:varies(Args, Context),
-    {Cached, State1} =  case ScompVaries of
-                            undefined -> 
-                                {undefined, State};
-                            {Essential, Max, Vary} ->
-                                case Max of
-                                    0 -> {undefined, State};
-                                    _ -> {cache_lookup(ScompName, Essential, Vary, Context), State}
-                                end
-                        end,
-    case Cached of 
-        undefined ->
-            case scomp_state(ScompName, State1) of
-                {error, Error} ->
-                    Err = io_lib:format("Error initializing scomp ~p: ~p", [ScompName, Error]),
-                    {reply, Err, State1};
+    case mod_module_indexer:find(scomp, ScompName, Context) of
+        {ok, ModuleName} ->
+            ScompVaries = ModuleName:varies(Args, Context),
+            {Cached, State1} =  case ScompVaries of
+                                    undefined -> 
+                                        {undefined, State};
+                                    {Essential, Max, Vary} ->
+                                        case Max of
+                                            0 -> {undefined, State};
+                                            _ -> {cache_lookup(ModuleName, Essential, Vary, Context), State}
+                                        end
+                                end,
+            case Cached of 
+                undefined ->
+                    case scomp_state(ModuleName, State1) of
+                        {error, Error} ->
+                            ?ERROR("Error initializing scomp ~p: ~p", [ScompName, Error]),
+                            {reply, {ok, <<>>}, State1};
 
-                {ok, ScompState, State2} ->
-                    %% No cached entry, we need to redo the scomp.
-                    %% When the scomp is cacheable we record it to prevent parallel rendering
-                    %% When the scomp is not cacheable we just return the renderer to be evaluated in the process of the caller
-                    case ScompVaries of
-                        undefined ->
-                            {reply, {renderer, ScompName, render, ScompState}, State2};
-                        {EssentialParams, MaxAge, Varies} ->
-                            StateSpawned = spawn_cacheable_renderer(ScompName, ScompState, EssentialParams, MaxAge, Varies, Context, From, State2),
-                            {noreply, StateSpawned}
-                    end
+                        {ok, ScompState, State2} ->
+                            %% No cached entry, we need to redo the scomp.
+                            %% When the scomp is cacheable we record it to prevent parallel rendering
+                            %% When the scomp is not cacheable we just return the renderer to be evaluated in the process of the caller
+                            case ScompVaries of
+                                undefined ->
+                                    {reply, {renderer, ModuleName, render, ScompState}, State2};
+                                {EssentialParams, MaxAge, Varies} ->
+                                    StateSpawned = spawn_cacheable_renderer(ModuleName, ScompState, EssentialParams, MaxAge, Varies, Context, From, State2),
+                                    {noreply, StateSpawned}
+                            end
+                    end;
+                CachedResult ->
+                    %% Cached content, return the html and context
+                    %% The context must be filtered from the returned html before serving
+                    {reply, CachedResult, State1}
             end;
-        CachedResult ->
-            %% Cached content, return the html and context
-            %% The context must be filtered from the returned html before serving
-            {reply, CachedResult, State1}
+        {error, enoent} ->
+            %% No such scomp, as we can switch on/off functionality we do a quiet skip
+            ?LOG("No scomp enabled for \"~p\"", [ScompName]),
+            {reply, {ok, <<>>}, State}
     end.
 
 

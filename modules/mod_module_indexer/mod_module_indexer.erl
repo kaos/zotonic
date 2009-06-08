@@ -27,6 +27,7 @@
 
 -record(state, {scomps=[], actions=[], validators=[], models=[], templates=[]}).
 
+-include("zophrenic.hrl").
 
 %%====================================================================
 %% API
@@ -39,7 +40,7 @@ start_link(Args) when is_list(Args) ->
     
 %% @doc Reindex the list of all scomps, etc for the site in the context.
 reindex(Context) ->
-    gen_server:call(?MODULE, {{module_ready}, Context}).
+    gen_server:cast(?MODULE, {{module_ready}, Context}).
 
 
 %% @doc Find a scomp, validator etc.
@@ -109,6 +110,7 @@ handle_call(Message, _From, State) ->
 %% @doc Scan for all scomps etc. for the context given.
 handle_cast({{module_ready}, Context}, State) ->
     Scanned = scan(Context),
+    ?DEBUG(Scanned),
     State1 = State#state{
         scomps     = proplists:get_value(scomp, Scanned),
         actions    = proplists:get_value(action, Scanned),
@@ -138,7 +140,7 @@ handle_info(_Info, State) ->
 %% The return value is ignored.
 terminate(_Reason, _State) ->
     Context = zp_context:new(),
-    zp_notifier:unsubscribe(module_ready, self(), Context),
+    zp_notifier:detach(module_ready, self(), Context),
     ok.
 
 %% @spec code_change(OldVsn, State, Extra) -> {ok, NewState}
@@ -176,18 +178,18 @@ scan1(What, Context) ->
     {Subdir, Prefix, Extension} = subdir(What),
     Scan = scan_subdir(Subdir, Prefix, Extension, Context), 
     Sorted = zp_module_sup:prio_sort(Scan),
-    FlattenFun = fun({_Module, Files}, Acc) ->
+    FlattenFun = fun({_Module, {_ModuleDir, Files}}, Acc) ->
         Files1 = [ file2index(What, F) || F <- Files ],
         Files1 ++ Acc
     end,
     lists:foldr(FlattenFun, [], Sorted).
 
 
-    subdir(scomp)     -> { "scomps", "scomp_", ".erl" };
-    subdir(action)    -> { "action", "action_", ".erl" };
+    subdir(scomp)     -> { "scomps",     "scomp_",     ".erl" };
+    subdir(action)    -> { "actions",    "action_",    ".erl" };
     subdir(validator) -> { "validators", "validator_", ".erl" };
-    subdir(model)     -> { "models", "m_", ".erl" };
-    subdir(template)  -> { "templates", "", "" }.
+    subdir(model)     -> { "models",     "m_",         ".erl" };
+    subdir(template)  -> { "templates",  "",           ""     }.
 
     file2index(template, {Basename, File}) ->
         {Basename, File};
@@ -201,7 +203,7 @@ scan1(What, Context) ->
 scan_subdir(Subdir, Prefix, Extension, Context) ->
     Modules = zp_module_sup:active_dir(Context),
     Scan1 = fun({Module, Dir}, Acc) ->
-        Prefix1 = Prefix ++ atom_to_list(Module) ++ "_",
+        Prefix1 = Prefix ++ module2prefix(Module) ++ "_",
         Pattern = filename:join([Dir, Subdir, Prefix1 ++ "*" ++ Extension]),
         Files   = filelib:wildcard(Pattern),
         case Files of
@@ -214,6 +216,11 @@ scan_subdir(Subdir, Prefix, Extension, Context) ->
     end,
     lists:foldl(Scan1, [], Modules).
     
+    module2prefix(Module) ->
+        case atom_to_list(Module) of
+            "mod_" ++ Rest -> Rest;
+            Name -> Name
+        end.
 
     scan_remove_prefix_ext(Filename, PrefixLen, Ext) ->
         Basename = filename:basename(Filename, Ext),
