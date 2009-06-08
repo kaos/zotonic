@@ -21,7 +21,7 @@
 ]).
 
 -include_lib("zophrenic.hrl").
--include_lib("shop.hrl").
+-include_lib("../include/shop.hrl").
 
 
 install(Context) ->

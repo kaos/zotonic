@@ -18,7 +18,7 @@
 ]).
 
 -include_lib("zophrenic.hrl").
--include_lib("shop.hrl").
+-include_lib("../include/shop.hrl").
    
 
 %% @doc Get the full details of an order, including the order lines.

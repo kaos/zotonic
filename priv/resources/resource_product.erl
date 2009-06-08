@@ -25,8 +25,8 @@ resource_exists(ReqData, Context) ->
 html(Context) ->
 	Id = zp_context:get(id, Context),
 	CatId = m_rsc:p(Id, category_id, Context),
-	CatBrand = shop:category_brands(CatId, Context),
-    RscCount = shop:category_rsc_count(CatId, Context),
+	CatBrand = mod_shop:category_brands(CatId, Context),
+    RscCount = mod_shop:category_rsc_count(CatId, Context),
 	Vars = [
         {rsc_id, Id},
 	    {cat_brand, CatBrand},

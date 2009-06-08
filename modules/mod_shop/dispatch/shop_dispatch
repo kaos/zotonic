@@ -1,0 +1,25 @@
+%% Dispatch rules for mod_shop.
+
+[
+	{home,			[],												resource_home,			[]},
+	{overview,		["overview"],   								resource_category,		[]},
+	{overview,		["overview", "bybrand", brand],					resource_category,		[]},
+	{overview,		["overview", cat, "bybrand", brand],			resource_category,		[]},
+	{overview,		["overview", cat, subcat, "bybrand", brand], 	resource_category,		[]},
+	{overview,		["overview", cat],								resource_category,		[]},
+	{overview,		["overview", cat, subcat],						resource_category,		[]},
+	{product,		["product", id],								resource_product,		[]},
+	{product,		["product", id, slug],							resource_product,		[]},
+	{page,			["page", id],									resource_page,			[]},
+	{page,			["page", id, slug],								resource_page,			[]},
+	{news,			["news"],										resource_news,			[]},
+	{agenda,		["agenda"],										resource_agenda,		[]},
+	{about,			["about"],										resource_template,		[{template,"page.tpl"}]},
+	{bikes,			["bike", id, slug],								resource_bike,			[]},
+	{compare,		["compare", cat, id],							resource_compare,		[]},
+	{search,   		["search"],										resource_search,		[]},
+	{shop_cart, 	["cart"],										resource_cart,			[]},
+	{shop_checkout, ["checkout"],									resource_checkout,		[]},
+	{shop_checkout_confirm, ["confirm"],							resource_confirm,		[]},
+	{shop_order_view, ["order","view", name],						resource_shop_order_view, []}
+].

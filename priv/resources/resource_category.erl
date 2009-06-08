@@ -61,8 +61,8 @@ html(Context) ->
 	IsSubCat = zp_context:get(is_subcat, Context),
 	CatId    = zp_context:get(cat_id, Context),
 	BrandId  = zp_context:get(brand_id, Context),
-	CatBrand = shop:category_brands(CatId, Context),
-    RscCount = shop:category_rsc_count(CatId, Context),
+	CatBrand = mod_shop:category_brands(CatId, Context),
+    RscCount = mod_shop:category_rsc_count(CatId, Context),
 
 	Vars = [
 	    {cat_id, CatId},
@@ -87,7 +87,7 @@ html(Context) ->
             Vars1 = [
                 {featured, FeatShown},
                 {cat_name, zp_context:get(cat_name, Context)},
-                {subcats, shop:category_subcat_bybrand(CatId, BrandId, Context)}
+                {subcats, mod_shop:category_subcat_bybrand(CatId, BrandId, Context)}
                 | Vars ],
 		    zp_template:render("category.tpl", Vars1, Context);
 		true ->

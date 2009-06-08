@@ -110,7 +110,6 @@ handle_call(Message, _From, State) ->
 %% @doc Scan for all scomps etc. for the context given.
 handle_cast({{module_ready}, Context}, State) ->
     Scanned = scan(Context),
-    ?DEBUG(Scanned),
     State1 = State#state{
         scomps     = proplists:get_value(scomp, Scanned),
         actions    = proplists:get_value(action, Scanned),

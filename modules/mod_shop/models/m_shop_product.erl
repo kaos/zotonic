@@ -24,7 +24,7 @@
 ]).
 
 -include_lib("zophrenic.hrl").
--include_lib("../shop.hrl").
+-include_lib("../include/shop.hrl").
 
 %% @doc Fetch the value for the key from a model source
 %% @spec m_find_value(Key, Source, Context) -> term()

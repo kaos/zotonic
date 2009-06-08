@@ -26,7 +26,7 @@
 ]).
 
 -include_lib("zophrenic.hrl").
--include_lib("shop.hrl").
+-include_lib("../include/shop.hrl").
 
 
 %% @doc Return the expected allocation, backorders and price for the cart. This is done

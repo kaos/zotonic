@@ -47,7 +47,8 @@ install_modules(C) ->
         "mod_test",
         "mod_module_indexer",
         "mod_module_admin"
-        "mod_base"
+        "mod_base",
+        "mod_shop"
     ],
     [
         {ok, 1} = pgsql:equery(C, "insert into module (name, is_active) values ($1, true)", [M]) || M <- Modules

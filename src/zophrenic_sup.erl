@@ -128,15 +128,10 @@ init([]) ->
                 {zp_module_sup, start_link, []},
                 permanent, 5000, worker, dynamic},
 
-    Shop = {shop,
-                {shop, start_link, []}, 
-                permanent, 5000, worker, dynamic},
-
     Processes = [
             MochiWeb, Ids, Postgres, Depcache, Installer, Session, Visitor, 
             Dispatcher, Notifier, Template, Scomp, DropBox, Pivot, Emailer,
-            Modules,
-            Shop
+            Modules
     ],
     {ok, {{one_for_one, 1000, 10}, Processes}}.
 
