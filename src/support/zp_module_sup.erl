@@ -39,8 +39,8 @@ start_link(Args) ->
 upgrade(Context) ->
     {ok, {_, Specs}} = init([{context, Context}]),
 
-    Old = sets:from_list([Name || {Name, _, _, _} <- supervisor:which_children(?MODULE)]),
-    New = sets:from_list([Name || {Name, _, _, _, _, _} <- Specs]),
+    Old  = sets:from_list([Name || {Name, _, _, _} <- supervisor:which_children(?MODULE)]),
+    New  = sets:from_list([Name || {Name, _, _, _, _, _} <- Specs]),
     Kill = sets:subtract(Old, New),
 
     sets:fold(fun (Id, ok) ->
@@ -51,8 +51,14 @@ upgrade(Context) ->
 
     [ start_child(Spec) || Spec <- Specs ],
 
-    [ zp_notifier:notify({module_activate, Name}, Context)   || Name <- New ],
-    [ zp_notifier:notify({module_deactivate, Name}, Context) || Name <- Kill ],
+    sets:fold(fun(Id, ok) -> 
+                zp_notifier:notify({module_activate, Id}, Context), 
+                ok
+            end, ok, New),
+    sets:fold(fun(Id, ok) -> 
+                zp_notifier:notify({module_deactivate, Id}, Context), 
+                ok 
+            end, ok, Kill),
     zp_notifier:notify({module_ready}, Context),
     ok.
 

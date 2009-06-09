@@ -9,6 +9,8 @@
 
 %% interface functions
 -export([
+    n/2,
+    n1/2,
     m/0,
     flush/0,
     restart/0
@@ -16,6 +18,12 @@
 
 -include_lib("zophrenic.hrl").
 
+n(Msg, Context) ->
+    zp_notifier:notify(Msg, Context).
+
+n1(Msg, Context) ->
+    zp_notifier:notify1(Msg, Context).
+    
 m() -> 
     make:all([load]), 
     flush().

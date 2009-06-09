@@ -4,16 +4,17 @@
 %%
 %% @doc Email server.  Queues, renders and sends e-mails.
 
--module(zp_emailer).
+-module(mod_emailer).
 -author("Marc Worrell <marc@worrell.nl").
 -behaviour(gen_server).
 
 %% gen_server exports
 -export([init/1, handle_call/3, handle_cast/2, handle_info/2, terminate/2, code_change/3]).
--export([start_link/0, start_link/1]).
+-export([start_link/1]).
 
 %% interface functions
 -export([
+    observe/2,
     send/4,
     send_render/4,
     send_render/5
@@ -25,11 +26,29 @@
 -define(SMTP_PORT_TLS, 587).
 -define(SMTP_PORT_SSL, 465).
 
+-define(EMAILER_FROM, "mworrell@wanadoo.nl").
+-define(EMAILER_HOST, "smtp.wanadoo.nl").
+-define(EMAILER_EHLO, "localhost").
+
 % Maximum times we retry to send a message before we mark it as failed.
 -define(MAX_RETRY, 7).
 
 
 -record(state, {from, ehlo, host, ssl, port, username, password}).
+
+
+%% @doc Receive a notification for sending email.
+observe({email, To, Subject, Message}, Context) ->
+    send(To, Subject, Message, Context);
+
+%% @doc Receive a notification for sending email that is rendered using a template.
+observe({email_render, To, HtmlTemplate, Vars}, Context) ->
+    send_render(To, HtmlTemplate, Vars, Context);
+
+%% @doc Send a html and text message to an email address, render the message using two templates.
+observe({email_render, To, HtmlTemplate, TextTemplate, Vars}, Context) ->
+    send_render(To, HtmlTemplate, TextTemplate, Vars, Context).
+
 
 
 %% @doc Send a simple text message to an email address
@@ -54,8 +73,6 @@ send_render(To, HtmlTemplate, TextTemplate, Vars, Context) ->
 %%====================================================================
 %% @spec start_link() -> {ok,Pid} | ignore | {error,Error}
 %% @doc Starts the server
-start_link() -> 
-    start_link([]).
 start_link(Args) when is_list(Args) ->
     gen_server:start_link({local, ?MODULE}, ?MODULE, Args, []).
 
@@ -69,15 +86,18 @@ start_link(Args) when is_list(Args) ->
 %%                     {stop, Reason}
 %% @doc Initiates the server.
 init(Args) ->
+    {context, Context} = proplists:lookup(context, Args),
+    zp_notifier:observe(email, {?MODULE, observe}, Context),
+    zp_notifier:observe(emai_render, {?MODULE, observe}, Context),
     timer:send_interval(60000, poll),
     {ok, #state{
-        from = proplists:get_value(from, Args, "nobody@example.com"),
-        host = proplists:get_value(host, Args, "localhost"),
-        port = zp_convert:to_integer(proplists:get_value(port, Args, 25)),
-        ssl = zp_convert:to_bool(proplists:get_value(ssl, Args, false)),
-        ehlo = proplists:get_value(ehlo, Args, "localhost"),
-        username = proplists:get_value(username, Args),
-        password = proplists:get_value(password, Args)
+        from     = m_config:get_value(?MODULE, from, ?EMAILER_FROM, Context),
+        host     = m_config:get_value(?MODULE, host, ?EMAILER_HOST, Context),
+        port     = zp_convert:to_integer(m_config:get_value(?MODULE, port, 25, Context)),
+        ssl      = zp_convert:to_bool(m_config:get_value(?MODULE, ssl, false, Context)),
+        ehlo     = m_config:get_value(?MODULE, ehlo, ?EMAILER_EHLO, Context),
+        username = m_config:get_value(?MODULE, username, Context),
+        password = m_config:get_value(?MODULE, password, Context)
     }}.
 
 

@@ -67,11 +67,6 @@ init([]) ->
         {dbdefault, 10, [{host, DbHost}, {port, DbPort}, {user, DbUser}, {password, DbPassword}, {database, DbDatabase}]}
     ],
 
-    EmailerConfig = [
-        {from, "mworrell@wanadoo.nl"},
-        {host, "smtp.wanadoo.nl"}
-    ],
-    
     Ids     = {zp_ids,
 	            {zp_ids, start_link, []}, 
 	            permanent, 5000, worker, dynamic},
@@ -120,10 +115,6 @@ init([]) ->
                 {zp_pivot_rsc, start_link, []}, 
                 permanent, 5000, worker, dynamic},
 
-    Emailer = {zp_emailer,
-                {zp_emailer, start_link, [EmailerConfig]},
-                permanent, 5000, worker, dynamic},
-
     ModuleIndexer = {zp_module_indexer,
                 {zp_module_indexer, start_link, []},
                 permanent, 5000, worker, dynamic},
@@ -134,7 +125,7 @@ init([]) ->
 
     Processes = [
             MochiWeb, Ids, Postgres, Depcache, Installer, Session, Visitor, 
-            Dispatcher, Notifier, Template, Scomp, DropBox, Pivot, Emailer,
+            Dispatcher, Notifier, Template, Scomp, DropBox, Pivot,
             ModuleIndexer, Modules
     ],
     {ok, {{one_for_one, 1000, 10}, Processes}}.

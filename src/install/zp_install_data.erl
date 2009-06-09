@@ -48,6 +48,7 @@ install_modules(C) ->
         "mod_base",
         "mod_admin",
         "mod_module_admin",
+        "mod_emailer",
         "mod_shop"
     ],
     [

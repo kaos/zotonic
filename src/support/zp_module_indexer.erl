@@ -201,15 +201,25 @@ scan1(What, Context) ->
 scan_subdir(Subdir, Prefix, Extension, Context) ->
     Modules = zp_module_sup:active_dir(Context),
     Scan1 = fun({Module, Dir}, Acc) ->
-        Prefix1 = Prefix ++ module2prefix(Module) ++ "_",
-        Pattern = filename:join([Dir, Subdir, Prefix1 ++ "*" ++ Extension]),
-        Files   = filelib:wildcard(Pattern),
+        {Pattern, PrefixLen} = case Prefix of
+            [] -> 
+                {filename:join([Dir, Subdir, "*" ++ Extension]), 0};
+            _ ->
+                Prefix1 = Prefix ++ module2prefix(Module) ++ "_",
+                {filename:join([Dir, Subdir, Prefix1 ++ "*" ++ Extension]), length(Prefix1)}
+        end,
+        Files = filelib:wildcard(Pattern),
         case Files of
             [] -> Acc;
             _  -> 
-                PrefixLen = length(Prefix1),
-                Files1    = [ {scan_remove_prefix_ext(F, PrefixLen, Extension), F} || F <- Files ],
-                [{Module, {Dir, Files1}} | Acc]
+                Files1 = [ {scan_remove_prefix_ext(F, PrefixLen, Extension), F} || F <- Files ],
+                Files2 = lists:filter(
+                            fun
+                                ( {[$.|_], _} ) -> false;
+                                ( _ ) -> true
+                            end,
+                            Files1), 
+                [{Module, {Dir, Files2}} | Acc]
         end
     end,
     lists:foldl(Scan1, [], Modules).

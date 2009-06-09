@@ -135,7 +135,7 @@ savechar(C) when C >= $0 andalso C =< $9 ->
 savechar(C) when C >= $a andalso C =< $z ->
     C;
 savechar(C) when C >= $A andalso C =< $Z ->
-    C-32;
+    C+32;
 savechar(_C) ->
     $_.
 

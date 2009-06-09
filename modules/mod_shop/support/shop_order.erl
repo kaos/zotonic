@@ -142,7 +142,7 @@ payment_completion(OrderId, NewState, PaymentMethod, _PspReference, Context) ->
 %% @doc Send the order confirmation to the customer
 mail_customer(Order, Context) ->
     {email, To} = proplists:lookup(email, Order),
-    zp_emailer:send_render(To, "email/email_order_confirmation.tpl", [{order, Order}], Context).
+    zp_notifier:notify({send_render, To, "email_order_confirmation.tpl", [{order, Order}]}, Context).
 
 
 %% @doc Set a new status of the order. Deallocate order on problems.
