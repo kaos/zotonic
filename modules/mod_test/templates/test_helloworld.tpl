@@ -153,7 +153,7 @@
 
 				<p>Include below is cached for 10 seconds</p>
 				
-				{% include "included.tpl" maxage=10 %}
+				{% include "test_included.tpl" maxage=10 %}
 
 				<h2>Some images</h2>
 

@@ -2,14 +2,14 @@
 %% @copyright YYYY author.
 %% @doc Example webmachine_resource.
 
--module(resource_helloworld).
+-module(resource_test_helloworld).
 -export([event/2, periodic/2]).
 
 -include_lib("resource_html.hrl").
 
 html(Context) ->
     {Incr, Context2} = zp_context:incr_session(helloworld_counter, 1, Context),
-    Html = zp_template:render("helloworld.tpl", [{helloworld_counter,Incr}], Context2),
+    Html = zp_template:render("test_helloworld.tpl", [{helloworld_counter,Incr}], Context2),
     % Html = zp_template:render("idtest.tpl", Context2),
     % _Pid = zp_context:spawn_link_page(?MODULE, periodic, [], Context3),
     zp_context:output(Html, Context2).

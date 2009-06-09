@@ -1,7 +1,4 @@
 [
 %% Just for testing
-%% @todo Remove when releasing
-{demo,     ["demo"],      resource_helloworld,        []},
-{home,     [],            resource_helloworld,        []},
-{home,     ["a",a],       resource_helloworld,        []}
+{test,     ["test"],      resource_test_helloworld,        []}
 ].
