@@ -145,11 +145,15 @@ template_is_modified(File, ModuleName) ->
     BeamFile = filename:join("ebin", ModuleName ++ ".beam"),
     case filelib:is_file(BeamFile) of
         true ->
-            Module  = list_to_atom(ModuleName),
-            BeamMod = filelib:last_modified(BeamFile),
-            Deps    = Module:dependencies(),
-            Files   = lists:map(fun({F,_CheckSum}) -> F end, Deps),
-            is_modified([File|Files], BeamMod);
+            Module = list_to_atom(ModuleName),
+            case filelib:last_modified(BeamFile) of
+                0 ->
+                    true; 
+                BeamMod ->
+                    Deps  = Module:dependencies(),
+                    Files = lists:map(fun({F,_CheckSum}) -> F end, Deps),
+                    is_modified([File|Files], BeamMod)
+            end;
         false ->
             true
     end.
@@ -159,10 +163,13 @@ template_is_modified(File, ModuleName) ->
 is_modified([], _DateTime) ->
     false;
 is_modified([File|Rest], DateTime) ->
-    FileMod = filelib:last_modified(File),
-    case FileMod > DateTime of
-        true -> true;
-        _    -> is_modified(Rest, DateTime)
+    case filelib:last_modified(File) of
+        0 -> 
+            true;
+        FileMod when FileMod > DateTime ->
+            true;
+        _ ->
+            is_modified(Rest, DateTime)
     end.
 
    

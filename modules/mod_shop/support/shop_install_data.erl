@@ -332,16 +332,11 @@ install_rsc(Context) ->
             {category_id, m_category:name_to_id_check(bags, Context)},
             {product_nr, 735},
             {name, "product_735"},
-            {intro, "De ULTIMATE5 modellen zijn van bijzonder duurzaam weefsel en wegen praktisch niets."},
+            {intro, "Spatwaterdichte stuurtas met verstevigde klepsluiting."},
             {body, {trans, [{nl, "
-<p>Landkaart, zonnebril, papieren of energierepen - aan het stuur heeft u alles binnen handbereik. De ULTIMATE5 modellen zijn van bijzonder duurzaam weefsel en wegen praktisch niets. Ze zijn even snel aangebracht als weer verwijderd en bewijzen hun diensten ook graag als schoudertas. Aan de fiets zijn ze betrouwbaar tegen diefstal beveiligd dankzij de afsluitbare montage aan het stuur. Een verlengadapter voor sterk gebogen sturen wordt meegeleverd (extra accessoire).</p>
-<p>Altijd op koers blijven! Op de dekselsluiting van de ULTIMATE5 Plus en Classic kan een kaarttas of een GPS-hoesje worden aangebracht, beide zijn als toebehoren verkrijgbaar. De ORTLIEB stuurtassen zijn uiterst vormbestendig en duurzaam met verstevigd deksel en binnenversteviging. In maat M en L verkrijgbaar fascineren ze met hun veelzijdige functionaliteit zoals het geïntegreerde vakje voor waardevolle spullen. Met 3M-Scotchlite reflecterend materiaal zorgen de beide multitalenten ervoor, dat ze ook in het donker worden gezien. Ze zijn tot 3 kg belastbaar en voor sturen tot 31,8 mm diameter.</p>
-
-<h3>ULTIMATE5 CLASSIC</h3>
-<ul>
-<li>Weefsel PD620/PS490</li>
-<li>Uitneembare tussenschotten als toebehoren verkrijgbaar</li>
-</ul>"}
+<p>Spatwaterdichte stuurtas met verstevigde klepsluiting. Afsluitbare montage aan het stuur (buisdiameter maximaal 31,8 mm). Landkaart, zonnebril, papieren of energierepen, aan het stuur heeft u alles binnen handbereik. De Ultimate5 modellen zijn van duurzaam weefsel. </p>
+<p>Makkelijk te bevestigen aan het stuur en ook te gebruiken als schoudertas. Aan de fiets zijn ze tegen diefstal beveiligd. Een verlengadapter voor sterk gebogen sturen wordt meegeleverd (extra accessoire).</p>
+<p>Afmetingen (HxBxD): 24×25×18 cm. Inhoud: 7 liter. Gewicht: 650gr.</p>"}
             ]}}
         ],
         [
@@ -375,22 +370,13 @@ install_rsc(Context) ->
             {category_id, m_category:name_to_id_check(bikecomputers, Context)},
             {product_nr, 1591},
             {name, "product_1591"},
-            {intro, "Strak, ligt gewicht en elegant, Cateye perfectioneert het design van een fietscomputer met de Strada."},
-            {body, "<p>Strak, ligt gewicht en elegant, Cateye perfectioneert het design van een fietscomputer met de Strada. Laat het slanke design u niet misleiden, de Strada heeft het grootste display en lettertype uit zijn klasse en alle functies die u nodig heeft. De Strada monteert handig en snel op praktische iedere fiets.</p>
-            <p>De Strada is draadloos, met draad of met cadans meter verkrijgbaar.</p>
+            {intro, "Cateye Strada is de perfecte fietscomputer."},
+            {body, "<p>Cateye fietscomputers vind je op flink wat tweewielers terug en dat is geen toeval. Ze zijn bekend om hun gebruiksgemak en dat telt voor een fietscomputer. 
 
-            <h3>Functies</h3>
-
-            <ul>
-            <li>Actuele snelheid</li>
-            <li>Maximum snelheid</li>
-            <li>Gemiddelde snelheid</li>
-            <li>Odometer (Totaal afstand)</li>
-            <li>Dag afstand teller</li>
-            <li>Tijd over dag afstand</li>
-            <li>Dag afstand teller 2</li>
-            <li>Klok</li>
-            </ul>"}
+            <p>Benelux-distributeur Juncker stelde ons de nieuwe Strada Wireless ter beschikking om onze trainingskilometers om te zetten in digitale informatie.</p>
+            <p>Via een handige, herbruikbare plastic ring die met een stelwieltje om het stuur of de stuurpen wordt geklemd, zet je de Strada Wireless waar je hem het liefste hebt. In ons geval op de stuurpen, want zo blijft de volledige bovenkant van het stuur vrij om over de kasseien te dokkeren. </p>
+            <p>De cijfers op het scherm zijn niet kolossaal groot, maar wel voldoende duidelijk.</p>
+            <p>Enig minpuntje aan de Strada Wireless is dat voor de instelling van de klok (wat we dankzij de zomer- en wintertijd 2 keer per jaar mogen doen) alle data opnieuw moeten worden ingevoerd.</p>"}
         ],
         [
             {title, "Tacx Cycle Motion Stand"},
@@ -398,8 +384,9 @@ install_rsc(Context) ->
             {category_id, m_category:name_to_id_check(montagestands, Context)},
             {product_nr, 1636},
             {name, "product_1636"},
-            {intro, "Ideale montagestandaard voor de zwaardere werkzaamheden."},
-            {body, "<p>Ideale montagestandaard voor de zwaardere werkzaamheden. Uitgevoerd met verplaatsbaar montageblad. De fiets wordt gefixeerd aan de voor- of achtervork en staat stevig op een kunststof bracketsteun. De vorkhouders zijn zowel in hoogte als in lengte verschuifbaar. Geschikt voor racefietsen en mountainbikes met een wieldiameter van 24 t/m 28 inch.</p>"}
+            {intro, "Ideale montagestandaard voor zware werkzaamheden."},
+            {body, "De Cycle Motion Stand is stabiele standaard voor de wat zwaardere werkzaamheden zoals het verwijderen van crankstel of pedalen. De fiets wordt bevestigd aan de voor- of achtervork. De vorkhouders zijn zowel in hoogte als
+            in lengte verschuifbaar waardoor ATB's, race- en hybride fietsen met een wielmaat van 24 tot 28 inch kunnen worden geplaatst. Uitgevoerd met een verplaatsbaar montageblad. Optie: Exact wielrichter."}
         ],
         
         % Some brands

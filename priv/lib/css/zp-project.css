@@ -2,7 +2,7 @@
 ----------------------------------------------------------
 
 @package:	zophrenic 2009
-@Project	Hans Struijk Bikes
+@Project	Shop
 @Author: 	Tim Benniks <tim@timbenniks.com>
 @Created: 	25-02-2009
 
@@ -102,7 +102,7 @@ body {
 		.basket-basket-image {
 			height: 14px;
 			width: 16px;
-			background: url(../images/hs-icons.gif) -17px 0;
+			background: url(../images/shop-icons.gif) -17px 0;
 			float: left;
 			display: block;
 			margin: 12px 0 0 0;
@@ -119,7 +119,7 @@ body {
 		.basket-logos {
 			width: 108px;
 			height: 25px;
-			background: url(../images/hs-ideal.gif) 0 0;
+			background: url(../images/shop-ideal.gif) 0 0;
 			float: left;
 			margin: 6px 0 0 6px;
 		}
@@ -220,7 +220,7 @@ ul#navigation li.lang a {
 	margin: 10px 0 0 7px;
 	height: 14px;
 	width: 16px;
-	background: url(../images/hs-icons.gif);
+	background: url(../images/shop-icons.gif);
 }
 
 ul#navigation li.lang a.dutch {
@@ -313,30 +313,30 @@ ul#navigation li.lang a.english {
 	margin: 18px 0 0 0;
 }
 
-.footer-bike-logos {
+.footer-logos {
 	margin: 0 0 45px;
 }
 
-	.footer-bike-logos li {
-		background: #eaeaea url(../images/hs-logos.gif) no-repeat 0 0;
+	.footer-logos li {
+		background: #eaeaea url(../images/shop-logos.gif) no-repeat 0 0;
 		height: 30px;
 		display: block;
 		float: left;
 		margin: 0 7px 0 0;
 	}
 
-	.footer-bike-logos li span {
+	.footer-logos li span {
 		display: none;
 	}
 
-		.footer-bike-logos li.footer-logo1 { background-position: 0 0; width: 19px; }
-		.footer-bike-logos li.footer-logo2 { background-position: -26px 0; width: 73px; }
-		.footer-bike-logos li.footer-logo3 { background-position: -103px 0; width: 48px; }
-		.footer-bike-logos li.footer-logo4 { background-position: -162px 0; width: 50px; }
-		.footer-bike-logos li.footer-logo5 { background-position: -227px 0; width: 60px; }
-		.footer-bike-logos li.footer-logo6 { background-position: -299px 0; width: 25px; }
-		.footer-bike-logos li.footer-logo7 { background-position: -335px 0; width: 52px; }
-		.footer-bike-logos li.footer-logo8 { background-position: -405px 0; width: 35px; }
+		.footer-logos li.footer-logo1 { background-position: 0 0; width: 19px; }
+		.footer-logos li.footer-logo2 { background-position: -26px 0; width: 73px; }
+		.footer-logos li.footer-logo3 { background-position: -103px 0; width: 48px; }
+		.footer-logos li.footer-logo4 { background-position: -162px 0; width: 50px; }
+		.footer-logos li.footer-logo5 { background-position: -227px 0; width: 60px; }
+		.footer-logos li.footer-logo6 { background-position: -299px 0; width: 25px; }
+		.footer-logos li.footer-logo7 { background-position: -335px 0; width: 52px; }
+		.footer-logos li.footer-logo8 { background-position: -405px 0; width: 35px; }
 
 .footer-text p {
 	font-size: 10px;

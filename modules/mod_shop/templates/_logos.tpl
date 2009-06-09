@@ -1,4 +1,4 @@
-<ul class="footer-bike-logos list clearfix">
+<ul class="footer-logos list clearfix">
 	<li class="footer-logo1"><span>3T</span></li>
 	<li class="footer-logo2"><span>Campagnolo</span></li>
 	<li class="footer-logo3"><span>Alexrims</span></li>

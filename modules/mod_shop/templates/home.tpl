@@ -6,7 +6,7 @@
 	<div id="content-area" class="zp-75">
 		<!-- Area for the main content -->
 		
-		<h2>Welkom bij Hans Struijk Fietsen</h2>
+		<h2>Welkom bij Mijn Fietsen</h2>
 		<div class="block">
 			<p>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Fusce ultricies nisi in lectus. Morbi et sem nec eros bibendum vestibulum. Ut vitae erat vitae dui tempor dictum. Nam sem. Sed iaculis lorem non ipsum. Donec aliquet. Fusce vel elit.ccumsan tellus orci id nisi. </p>
 		</div>
@@ -56,9 +56,9 @@
 			</div>	
 
 			<div class="zp-33">
-				<h3>Over Hans Struijk Fietsen</h3>
+				<h3>Over Mijn Fietsen</h3>
 				<ul class="misc-list">
-					<li><a href="#">Over Hans Struijk</a></li>
+					<li><a href="#">Over ons</a></li>
 					<li><a href="#">Filialen</a></li>
 					<li><a href="#">Veel gestelde vragen</a></li>
 				</ul>
@@ -107,6 +107,6 @@
 	</div>
 {% endblock %}
 
-{% block bike_logos %}
-	{% include "_bikelogos.tpl" %}
+{% block logos %}
+	{% include "_logos.tpl" %}
 {% endblock %}

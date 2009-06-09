@@ -25,7 +25,7 @@
 		<div class="block clearfix">
 		
 			<p>
-				Bedankt voor uw bestelling bij Hans Struijk Fietsen.  Uw bestelling is met succes afgerond.
+				Bedankt voor uw bestelling bij Mijn Fietsen.  Uw bestelling is met succes afgerond.
 				U kunt deze pagina afdrukken voor uw administratie.
 			</p>
 

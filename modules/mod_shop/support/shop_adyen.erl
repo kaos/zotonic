@@ -26,11 +26,11 @@
 
 install(Context) ->
     m_config:set_value(adyen, notification_username, "adyen", Context),
-    m_config:set_value(adyen, notification_password, "plop!", Context),
+    m_config:set_value(adyen, notification_password, "", Context),
     m_config:set_value(adyen, payment_page, "https://test.adyen.com/hpp/pay.shtml", Context),
-    m_config:set_value(adyen, merchant_account, "HansStruijkFietsenNL", Context),
-    m_config:set_value(adyen, skincode, "OnCtxIfz", Context),
-    m_config:set_value(adyen, secret, "hemaworst!", Context).
+    m_config:set_value(adyen, merchant_account, "", Context),
+    m_config:set_value(adyen, skincode, "", Context),
+    m_config:set_value(adyen, secret, "", Context).
 
 
 %% Handle log entries that were not handled, might be because of crashed between saving the entry and running the queries.
@@ -250,8 +250,8 @@ save_notification(Qs, Context) ->
 %                                    {"originalReference",[]},
 %                                    {"merchantReference","4"},
 %                                    {"currency","EUR"},
-%                                    {"pspReference","8512411676185576"},
-%                                    {"merchantAccountCode","HansStruijkFietsenNL"},
+%                                    {"pspReference","46598465465"},
+%                                    {"merchantAccountCode","xxx"},
 %                                    {"eventCode","AUTHORISATION"},
 %                                    {"value","43475"},
 %                                    {"operations","REFUND"},

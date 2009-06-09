@@ -1,7 +1,7 @@
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml" lang="en">
 <head>
-	<title>{% block title %}m.rsc[id].seo_title{% endblock %} &ndash; Hans Struijk Fietsen</title>
+	<title>{% block title %}m.rsc[id].seo_title{% endblock %} &ndash; Mijn Fietsen</title>
 
 	<meta http-equiv="Content-type" content="text/html; charset=utf-8" />
 	<meta name="keywords" content="{{ m.rsc[id].seo_keywords }}" />
@@ -34,10 +34,10 @@
 				<ul id="navigation" class="zp-60">
 					<li class="logo">
 						<h1>
-							<a href="/" title="Hans Struijk Fietsen">
-								<img class="hide_id6" src="/lib/images/hans_struijk_logo.png" alt="hans Struijk Fietsen" />
+							<a href="/" title="Mijn Fietsen">
+								<img class="hide_id6" src="/lib/images/shop_logo.png" alt="Mijn Fietsen" />
 								<!--[if lte IE 6]>
-									<img src="/lib/images/hans_struijk_logo.gif" alt="hans Struijk Fietsen" />
+									<img src="/lib/images/shop_logo.gif" alt="Mijn Fietsen" />
 								<![endif]-->
 							</a>
 						</h1>

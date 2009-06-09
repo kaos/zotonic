@@ -2,6 +2,8 @@
 <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
 <plist version="1.0">
 <dict>
+	<key>currentDocument</key>
+	<string>src/install/zp_install_data.erl</string>
 	<key>documents</key>
 	<array>
 		<dict>
@@ -44,6 +46,16 @@
 			<key>expanded</key>
 			<true/>
 			<key>name</key>
+			<string>modules</string>
+			<key>regexFolderFilter</key>
+			<string>!.*/(\.[^/]*|CVS|_darcs|_MTN|\{arch\}|blib|.*~\.nib|.*\.(framework|app|pbproj|pbxproj|xcode(proj)?|bundle))$</string>
+			<key>sourceDirectory</key>
+			<string>modules</string>
+		</dict>
+		<dict>
+			<key>expanded</key>
+			<true/>
+			<key>name</key>
 			<string>priv</string>
 			<key>regexFolderFilter</key>
 			<string>!.*/(\.[^/]*|CVS|_darcs|_MTN|\{arch\}|blib|.*~\.nib|.*\.(framework|app|pbproj|pbxproj|xcode(proj)?|bundle))$</string>
@@ -57,22 +69,14 @@
 			<string>src</string>
 			<key>regexFolderFilter</key>
 			<string>!.*/(\.[^/]*|CVS|_darcs|_MTN|\{arch\}|blib|.*~\.nib|.*\.(framework|app|pbproj|pbxproj|xcode(proj)?|bundle))$</string>
+			<key>selected</key>
+			<true/>
 			<key>sourceDirectory</key>
 			<string>src</string>
-		</dict>
-		<dict>
-			<key>expanded</key>
-			<true/>
-			<key>name</key>
-			<string>modules</string>
-			<key>regexFolderFilter</key>
-			<string>!.*/(\.[^/]*|CVS|_darcs|_MTN|\{arch\}|blib|.*~\.nib|.*\.(framework|app|pbproj|pbxproj|xcode(proj)?|bundle))$</string>
-			<key>sourceDirectory</key>
-			<string>modules</string>
 		</dict>
 	</array>
 	<key>fileHierarchyDrawerWidth</key>
-	<integer>360</integer>
+	<integer>273</integer>
 	<key>metaData</key>
 	<dict>
 		<key>deps/mochiweb/src/mochiweb.app</key>
@@ -161,6 +165,34 @@
 			<key>firstVisibleLine</key>
 			<integer>100</integer>
 		</dict>
+		<key>src/install/zp_install_data.erl</key>
+		<dict>
+			<key>caret</key>
+			<dict>
+				<key>column</key>
+				<integer>21</integer>
+				<key>line</key>
+				<integer>48</integer>
+			</dict>
+			<key>firstVisibleColumn</key>
+			<integer>0</integer>
+			<key>firstVisibleLine</key>
+			<integer>21</integer>
+		</dict>
+		<key>src/shop/search.erl</key>
+		<dict>
+			<key>caret</key>
+			<dict>
+				<key>column</key>
+				<integer>0</integer>
+				<key>line</key>
+				<integer>12</integer>
+			</dict>
+			<key>firstVisibleColumn</key>
+			<integer>0</integer>
+			<key>firstVisibleLine</key>
+			<integer>0</integer>
+		</dict>
 		<key>src/support/zp_convert.erl</key>
 		<dict>
 			<key>caret</key>
@@ -192,6 +224,11 @@
 			</dict>
 		</dict>
 	</dict>
+	<key>openDocuments</key>
+	<array>
+		<string>src/shop/search.erl</string>
+		<string>src/install/zp_install_data.erl</string>
+	</array>
 	<key>showFileHierarchyDrawer</key>
 	<false/>
 	<key>showFileHierarchyPanel</key>
@@ -217,8 +254,15 @@
 			<key>isExpanded</key>
 			<true/>
 			<key>subItems</key>
+			<dict/>
+		</dict>
+		<key>priv</key>
+		<dict>
+			<key>isExpanded</key>
+			<true/>
+			<key>subItems</key>
 			<dict>
-				<key>mod_module_indexer</key>
+				<key>resources</key>
 				<dict>
 					<key>isExpanded</key>
 					<true/>
@@ -227,20 +271,13 @@
 				</dict>
 			</dict>
 		</dict>
-		<key>priv</key>
-		<dict>
-			<key>isExpanded</key>
-			<true/>
-			<key>subItems</key>
-			<dict/>
-		</dict>
 		<key>src</key>
 		<dict>
 			<key>isExpanded</key>
 			<true/>
 			<key>subItems</key>
 			<dict>
-				<key>erlydtl</key>
+				<key>install</key>
 				<dict>
 					<key>isExpanded</key>
 					<true/>
