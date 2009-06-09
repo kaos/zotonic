@@ -35,6 +35,8 @@
 %% @doc Render adds output to the render field of the context state, makes sure that the added output is an iolist
 render(undefined, Context) -> 
     Context;
+render(<<>>, Context) -> 
+    Context;
 render([], Context) -> 
     Context;
 render(#context{} = C, Context) ->
@@ -81,7 +83,7 @@ render_actions(TriggerId, TargetId, {Action, Args}, Context) ->
 		true -> 
             Trigger      = proplists:get_value(trigger, Args, TriggerId),
 	        Target       = proplists:get_value(target,  Args, TargetId),
-	        case mod_module_indexer:find(action, Action, Context) of
+	        case zp_module_indexer:find(action, Action, Context) of
 	            {ok, ActionModule} ->
 			        ActionModule:render_action(Trigger, Target, Args, Context);
 			    {error, enoent} ->
@@ -123,7 +125,7 @@ render_validator(TriggerId, TargetId, Args, Context) ->
     RValidation = fun({VType,VArgs}, {PostbackAcc,ScriptAcc,Ctx}) ->
                     VMod = case proplists:get_value(delegate, VArgs) of
                                 undefined -> 
-                                    case mod_module_indexer:find(validator, VType, Context) of
+                                    case zp_module_indexer:find(validator, VType, Context) of
                                         {ok, Mod} ->
                                             {ok, Mod};
                                         {error, enoent} ->

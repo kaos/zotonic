@@ -94,7 +94,7 @@ init([]) ->
 %%      at the moment of the call to the template engine.  The scomp is a module that
 %%      must be present in the ebin directory. 
 handle_call({render, ScompName, Args, Context}, From, State) ->
-    case mod_module_indexer:find(scomp, ScompName, Context) of
+    case zp_module_indexer:find(scomp, ScompName, Context) of
         {ok, ModuleName} ->
             ScompVaries = ModuleName:varies(Args, Context),
             {Cached, State1} =  case ScompVaries of

@@ -45,9 +45,9 @@ install_config(C) ->
 install_modules(C) ->
     Modules = [
         "mod_test",
-        "mod_module_indexer",
-        "mod_module_admin"
         "mod_base",
+        "mod_admin",
+        "mod_module_admin",
         "mod_shop"
     ],
     [

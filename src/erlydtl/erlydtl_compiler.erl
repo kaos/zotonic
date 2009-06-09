@@ -46,11 +46,11 @@
     local_scopes = [], 
     block_dict = dict:new(), 
     auto_escape = off, 
-    doc_root = "", 
     parse_trail = [],
     vars = [],
     custom_tags_dir = [],
     reader = {file, read_file},
+    finder = undefined,
     module = [],
     compiler_options = [verbose, report_errors],
     force_recompile = false}).
@@ -146,10 +146,10 @@ init_dtl_context(File, Module, Options) ->
         local_scopes = [ [{'$autoid', erl_syntax:variable("AutoId_"++zp_ids:identifier())}] ],
         parse_trail = [File], 
         module = Module,
-        doc_root = proplists:get_value(doc_root, Options, filename:dirname(File)),
         custom_tags_dir = proplists:get_value(custom_tags_dir, Options, Ctx#dtl_context.custom_tags_dir),
         vars = proplists:get_value(vars, Options, Ctx#dtl_context.vars), 
         reader = proplists:get_value(reader, Options, Ctx#dtl_context.reader),
+        finder = proplists:get_value(finder, Options, Ctx#dtl_context.finder),
         compiler_options = proplists:get_value(compiler_options, Options, Ctx#dtl_context.compiler_options),
         force_recompile = proplists:get_value(force_recompile, Options, Ctx#dtl_context.force_recompile)}.
 
@@ -158,7 +158,7 @@ is_up_to_date(_, #dtl_context{force_recompile = true}) ->
     false;
 is_up_to_date(CheckSum, Context) ->
     Module = Context#dtl_context.module,
-    {M, F} = Context#dtl_context.reader,
+    {M,F}  = Context#dtl_context.reader,
     case catch Module:source() of
         {_, CheckSum} -> 
             case catch Module:dependencies() of
@@ -190,13 +190,13 @@ is_up_to_date(CheckSum, Context) ->
     
     
 parse(File, Context) ->  
-    {M, F} = Context#dtl_context.reader,
+    {M,F} = Context#dtl_context.reader,
     case catch M:F(File) of
         {ok, Data} ->
             CheckSum = binary_to_list(crypto:sha(Data)),
             parse(CheckSum, Data, Context);
-        _ ->
-            {error, "reading " ++ File ++ " failed "}
+        Error ->
+            {error, io_lib:format("reading ~p failed (~p)", [File, Error])}  
     end.
         
 parse(CheckSum, Data, Context) ->
@@ -292,29 +292,36 @@ forms(File, Module, BodyAst, BodyInfo, CheckSum, Context, TreeWalker) ->
         
 % child templates should only consist of blocks at the top level
 body_ast([{extends, {string_literal, _Pos, String}} | ThisParseTree], Context, TreeWalker) ->
-    File = full_path(unescape_string_literal(String), Context#dtl_context.doc_root),
-    case lists:member(File, Context#dtl_context.parse_trail) of
-        true ->
-            throw({error, "Circular file inclusion!"});
-        _ ->
-            case parse(File, Context) of
-                {ok, ParentParseTree, CheckSum} ->
-                    BlockDict = lists:foldl(
-                        fun
-                            ({block, {identifier, _, Name}, Contents}, Dict) ->
-                                dict:store(Name, Contents, Dict);
-                            (_, Dict) ->
-                                Dict
-                        end, dict:new(), ThisParseTree),
-                    with_dependency({File, CheckSum}, body_ast(ParentParseTree, Context#dtl_context{
-                        block_dict = dict:merge(fun(_Key, _ParentVal, ChildVal) -> ChildVal end,
-                            BlockDict, Context#dtl_context.block_dict),
-                                parse_trail = [File | Context#dtl_context.parse_trail]}, TreeWalker));
-                Err ->
-                    throw(Err)
-            end        
+    Extends = unescape_string_literal(String),
+    case full_path(Extends, Context#dtl_context.finder) of
+        {ok, File} ->
+            case lists:member(File, Context#dtl_context.parse_trail) of
+                true ->
+                    throw({error, "Circular file inclusion: " ++ File});
+                _ ->
+                    case parse(File, Context) of
+                        {ok, ParentParseTree, CheckSum} ->
+                            BlockDict = lists:foldl(
+                                fun
+                                    ({block, {identifier, _, Name}, Contents}, Dict) ->
+                                        dict:store(Name, Contents, Dict);
+                                    (_, Dict) ->
+                                        Dict
+                                end, dict:new(), ThisParseTree),
+                            with_dependency({File, CheckSum}, body_ast(ParentParseTree, Context#dtl_context{
+                                block_dict = dict:merge(fun(_Key, _ParentVal, ChildVal) -> ChildVal end,
+                                    BlockDict, Context#dtl_context.block_dict),
+                                        parse_trail = [File | Context#dtl_context.parse_trail]}, TreeWalker));
+                        Err ->
+                            throw(Err)
+                    end        
+            end;
+        {error, Reason} ->
+            ?ERROR("body_ast: could not find template ~p (~p)", [Extends, Reason]),
+            throw({error, "Could not find the template \" ++ Extends ++ \""}),
+            {{erl_syntax:string(""), #ast_info{}}, TreeWalker}
     end;
- 
+
     
 body_ast(DjangoParseTree, Context, TreeWalker) ->
     {AstInfoList, TreeWalker2} = lists:mapfoldl(
@@ -536,32 +543,37 @@ include_ast(File, Args, Context, TreeWalker) ->
                 InterpretedArgs),
             AutoIdVar = "AutoId_"++zp_ids:identifier(),
             IncludeScope = [ {'$autoid', erl_syntax:variable(AutoIdVar)} | ScopedArgs ],
-            FilePath = full_path(File, Context#dtl_context.doc_root),
-            case parse(FilePath, Context) of
-                {ok, InclusionParseTree, CheckSum} ->
-                    {{Ast,Info}, TreeWalker2} = 
-                                    with_dependency({FilePath, CheckSum}, 
-                                            body_ast(
-                                                InclusionParseTree,
-                                                Context#dtl_context{
-                                                        local_scopes = [ IncludeScope | Context#dtl_context.local_scopes ],
-                                                        parse_trail = [FilePath | Context#dtl_context.parse_trail]}, 
-                                                TreeWalker1#treewalker{has_auto_id=false})),
-                    Ast1 = case TreeWalker2#treewalker.has_auto_id of
-                        false -> erl_syntax:block_expr(ArgAsts++[Ast]);
-                        true ->  erl_syntax:block_expr(
-                                    ArgAsts ++ [
-                                    erl_syntax:match_expr(
-                                            erl_syntax:variable(AutoIdVar), 
-                                            erl_syntax:application(
-                                                erl_syntax:atom(zp_ids),
-                                                erl_syntax:atom(identifier),
-                                                [])),
-                                    Ast])
-                    end,
-                    {{Ast1,Info}, TreeWalker2#treewalker{has_auto_id=TreeWalker1#treewalker.has_auto_id}};
-                Err ->
-                    throw(Err)
+            case full_path(File, Context#dtl_context.finder) of
+                {ok, FilePath} ->
+                    case parse(FilePath, Context) of
+                        {ok, InclusionParseTree, CheckSum} ->
+                            {{Ast,Info}, TreeWalker2} = 
+                                            with_dependency({FilePath, CheckSum}, 
+                                                    body_ast(
+                                                        InclusionParseTree,
+                                                        Context#dtl_context{
+                                                                local_scopes = [ IncludeScope | Context#dtl_context.local_scopes ],
+                                                                parse_trail = [FilePath | Context#dtl_context.parse_trail]}, 
+                                                        TreeWalker1#treewalker{has_auto_id=false})),
+                            Ast1 = case TreeWalker2#treewalker.has_auto_id of
+                                false -> erl_syntax:block_expr(ArgAsts++[Ast]);
+                                true ->  erl_syntax:block_expr(
+                                            ArgAsts ++ [
+                                            erl_syntax:match_expr(
+                                                    erl_syntax:variable(AutoIdVar), 
+                                                    erl_syntax:application(
+                                                        erl_syntax:atom(zp_ids),
+                                                        erl_syntax:atom(identifier),
+                                                        [])),
+                                            Ast])
+                            end,
+                            {{Ast1,Info}, TreeWalker2#treewalker{has_auto_id=TreeWalker1#treewalker.has_auto_id}};
+                        Err ->
+                            throw(Err)
+                    end;
+                {error, Reason} ->
+                    ?LOG("include_ast: could not find template ~p (~p)", [File, Reason]),
+                    {{erl_syntax:string(""), #ast_info{}}, TreeWalker}
             end;
         true ->
             Args1 = [{{identifier, none, "file"},{string_literal, none, File}} | Args],
@@ -931,9 +943,10 @@ unescape_string_literal([C | Rest], Acc, slash) ->
     unescape_string_literal(Rest, [C | Acc], noslash).
 
 
-full_path(File, DocRoot) ->
-    filename:join([DocRoot, File]).
-        
+full_path(File, FinderFun) ->
+    FinderFun(File).
+
+
 %%-------------------------------------------------------------------
 %% Custom tags
 %%-------------------------------------------------------------------

@@ -124,6 +124,10 @@ init([]) ->
                 {zp_emailer, start_link, [EmailerConfig]},
                 permanent, 5000, worker, dynamic},
 
+    ModuleIndexer = {zp_module_indexer,
+                {zp_module_indexer, start_link, []},
+                permanent, 5000, worker, dynamic},
+
     Modules = {zp_module_sup,
                 {zp_module_sup, start_link, []},
                 permanent, 5000, worker, dynamic},
@@ -131,7 +135,7 @@ init([]) ->
     Processes = [
             MochiWeb, Ids, Postgres, Depcache, Installer, Session, Visitor, 
             Dispatcher, Notifier, Template, Scomp, DropBox, Pivot, Emailer,
-            Modules
+            ModuleIndexer, Modules
     ],
     {ok, {{one_for_one, 1000, 10}, Processes}}.
 

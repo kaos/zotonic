@@ -15,7 +15,7 @@
 -include_lib("zophrenic.hrl").
 
 %% External exports
--export([compile/1, render/3, reader/1]).
+-export([compile/2, render/3, find_template/2]).
 
 
 start_link() -> 
@@ -24,32 +24,57 @@ start_link() ->
 
 %% @spec render(File, Variables, Context) -> iolist()
 %% @doc Render a template.  First requests the template module from the template server, then renders the template.
-%%      We do not let the template server render the template to prevent that the whole context is copied whilst passing
-%%      the message to the template server.
 render(File, Variables, Context) ->
-    case gen_server:call(?MODULE, {compile_if_modified, File}) of
-        {ok, Module} ->
-            case Module:render(Variables, Context) of
-                {ok, Output}   -> Output;
-                {error, Reason} -> "<strong>Error rendering template: "++ File ++ " ("++Reason++")</strong>"
-             end;
-        {error, Error} ->
-            io:format("<strong>Error compiling template: ~s (~p)</strong>", [File, Error])
+    case find_template(File, Context) of
+        {ok, FoundFile} ->
+            Result = case gen_server:call(?MODULE, {check_modified, FoundFile}) of
+                modified -> compile(File, Context);
+                Other -> Other
+            end,
+
+            case Result of
+                {ok, Module} ->
+                    case Module:render(Variables, Context) of
+                        {ok, Output}   -> 
+                            Output;
+                        {error, Reason} ->
+                            ?ERROR("Error rendering template: ~p (~p)", [File, Reason]),
+                            <<>>
+                     end;
+                {error, Reason} ->
+                    ?ERROR("Error compiling template: ~s (~p)", [File, Reason]),
+                    <<>>
+            end;
+        {error, Reason} ->
+            ?LOG("Could not find template: ~s (~p)", [File, Reason]),
+            <<>>
+    end.
+            
+
+
+%% @spec compile(File, Context) -> {ok, atom()} | {error, Reason}
+%% @doc Compile a template, retun the module name.
+compile(File, Context) ->
+    case find_template(File, Context) of
+        {ok, FoundFile} ->
+            gen_server:call(?MODULE, {compile, FoundFile, Context});
+        {error, Reason} ->
+            {error, Reason}
     end.
 
 
-%% @spec compile(File) -> {ok, atom()} | {error, Reason}
-%% @doc Compile a template, retun the module name.
-compile(File) ->
-    gen_server:call(?MODULE, {compile, File}).
-
-
-%% @spec reader(File) -> {ok, binary()} | {error, code} 
-%% @doc Read the template designated by the file, check project and default directory
-reader(File) ->
-    case find_template(File) of
-        {ok, Filename} -> file:read_file(Filename);
-        _ -> {error, enoent}
+%% @spec find_template(File, Context) -> {ok, binary()} | {error, code} 
+%% @doc Finds the template designated by the file, check modules, project and default directory
+find_template(File, Context) ->
+    case zp_module_indexer:find(template, File, Context) of
+        {ok, FoundFile} ->
+            {ok, FoundFile};
+        {error, enoent} ->
+            Dirs =  [
+                        "priv/templates",
+                        "default/templates"
+                    ],
+            find_template_dirs(File, Dirs)
     end.
 
 
@@ -59,29 +84,30 @@ init(Options) ->
     {ok, Options}.
 
 
-%% @spec compile_if_modified(File) -> {ok, Module} | {error, Reason}
+%% @spec check_modified(File) -> {ok, Module} | {error, Reason}
 %% @doc Compile the template if its has been modified, return the template module for rendering.
-handle_call({compile_if_modified, File}, _From, State) ->
+handle_call({check_modified, File}, _From, State) ->
     ModuleName = filename_to_modulename(File),
-    Module     = list_to_atom(ModuleName),
-    ErlyResult = case template_is_modified(File, ModuleName) of
-                    true  -> 
-                        case erlydtl:compile(File, Module, [{reader, {?MODULE,reader}}]) of
-                            ok -> {ok, Module};
-                            Error -> Error
-                        end;
-                    false -> 
-                        {ok, Module}
-                 end,
-    {reply, ErlyResult, State};
+    Module = list_to_atom(ModuleName),
+    Result = case template_is_modified(File, ModuleName) of
+                true  -> modified;
+                false -> {ok, Module}
+             end,
+    {reply, Result, State};
 
 
 %% @doc Compile the template, creates a beam file in the ebin directory.  Make sure that we only compile
 %%      one template at a time to prevent overwriting the beam file with two processes.
-handle_call({compile, File}, _From, State) ->
+handle_call({compile, File, Context}, _From, State) ->
+    FinderFun  = fun(FinderFile) ->
+        ?MODULE:find_template(FinderFile, Context)
+    end,
     ModuleName = filename_to_modulename(File),
     Module     = list_to_atom(ModuleName),
-    ErlyResult = erlydtl:compile(File, Module, [{reader, {?MODULE,reader}}]),
+    ErlyResult = case erlydtl:compile(File, Module, [{finder, FinderFun}]) of
+                    ok -> {ok, Module};
+                    Other -> Other
+                 end,
     {reply, ErlyResult, State}.
 
 
@@ -133,28 +159,16 @@ template_is_modified(File, ModuleName) ->
 is_modified([], _DateTime) ->
     false;
 is_modified([File|Rest], DateTime) ->
-    case find_template(File) of
-        {ok, Filename} -> 
-                FileMod = filelib:last_modified(Filename),
-                case FileMod > DateTime of
-                    true -> true;
-                    _    -> is_modified(Rest, DateTime)
-                end;
-        _ ->
-            true
+    FileMod = filelib:last_modified(File),
+    case FileMod > DateTime of
+        true -> true;
+        _    -> is_modified(Rest, DateTime)
     end.
 
-
-find_template(File) ->
-    Dirs =  [
-                "priv/templates",
-                "default/templates"
-            ],
-    find_template(File, Dirs).
-    
-find_template(_File, []) ->
+   
+find_template_dirs(_File, []) ->
     {error, enoent};
-find_template(File, [Dir|Rest]) ->
+find_template_dirs(File, [Dir|Rest]) ->
     Filename = filename:join(Dir, File),
     case filelib:is_file(Filename) of
         true  -> {ok, Filename};

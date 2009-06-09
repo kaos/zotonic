@@ -142,6 +142,8 @@ depickle({pickled_context, Db, UserId, Language, _VisitorId}) ->
 
 %% @spec output(list(), Context) -> {io_list(), Context}
 %% @doc Replace the contexts in the output with their rendered content and collect all scripts
+output(<<>>, Context) ->
+    {[], Context};
 output(List, Context) ->
     output1(List, Context, []).
 
