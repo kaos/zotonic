@@ -8,6 +8,10 @@
 -author("Marc Worrell <marc@worrell.nl").
 -behaviour(gen_server).
 
+-mod_title("e-Mail sending").
+-mod_description("Provided sending of e-mails. e-Mails are queued before sending.").
+-mod_prio(1000).
+
 %% gen_server exports
 -export([init/1, handle_call/3, handle_cast/2, handle_info/2, terminate/2, code_change/3]).
 -export([start_link/1]).
@@ -34,7 +38,7 @@
 -define(MAX_RETRY, 7).
 
 
--record(state, {from, ehlo, host, ssl, port, username, password}).
+-record(state, {from, ehlo, host, ssl, port, username, password, context}).
 
 
 %% @doc Receive a notification for sending email.
@@ -87,7 +91,7 @@ start_link(Args) when is_list(Args) ->
 %% @doc Initiates the server.
 init(Args) ->
     {context, Context} = proplists:lookup(context, Args),
-    zp_notifier:observe(email, {?MODULE, observe}, Context),
+    zp_notifier:observe(email,       {?MODULE, observe}, Context),
     zp_notifier:observe(emai_render, {?MODULE, observe}, Context),
     timer:send_interval(60000, poll),
     {ok, #state{
@@ -97,7 +101,8 @@ init(Args) ->
         ssl      = zp_convert:to_bool(m_config:get_value(?MODULE, ssl, false, Context)),
         ehlo     = m_config:get_value(?MODULE, ehlo, ?EMAILER_EHLO, Context),
         username = m_config:get_value(?MODULE, username, Context),
-        password = m_config:get_value(?MODULE, password, Context)
+        password = m_config:get_value(?MODULE, password, Context),
+        context  = zp_context:prune_for_database(Context)
     }}.
 
 
@@ -155,8 +160,7 @@ handle_cast(Message, State) ->
 %% @doc Poll the database queue for any retrys.
 %% @todo We should have a context per db, to be implemented with the multi-homing :)
 handle_info(poll, State) ->
-    Context = zp_context:new(),
-    poll_queued(Context, State),
+    poll_queued(State#state.context, State),
     {noreply, State};
 
 %% @doc Handling all non call/cast messages
@@ -168,7 +172,9 @@ handle_info(_Info, State) ->
 %% terminate. It should be the opposite of Module:init/1 and do any necessary
 %% cleaning up. When it returns, the gen_server terminates with Reason.
 %% The return value is ignored.
-terminate(_Reason, _State) ->
+terminate(_Reason, State) ->
+    zp_notifier:detach(email,       {?MODULE, observe}, State#state.context),
+    zp_notifier:detach(emai_render, {?MODULE, observe}, State#state.context),
     ok.
 
 %% @spec code_change(OldVsn, State, Extra) -> {ok, NewState}

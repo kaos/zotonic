@@ -73,7 +73,7 @@ search(Search, Context) ->
 search({SearchName, Props}, Limit, Context) ->
     % todo: fetch paging information from props
     PropsSorted = lists:keysort(1, Props),
-    Result = search:search({SearchName, PropsSorted}, Limit, Context),
+    Result = zp_notifier:first({search_query, {SearchName, PropsSorted}, Limit}, Context),
     search_result(Result, Limit, Context);
 search(Name, Limit, Context) ->
     search({zp_convert:to_atom(Name), []}, Limit, Context).

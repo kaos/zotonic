@@ -46,6 +46,7 @@ install_modules(C) ->
     Modules = [
         "mod_test",
         "mod_base",
+        "mod_search",
         "mod_admin",
         "mod_module_admin",
         "mod_emailer",

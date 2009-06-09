@@ -18,14 +18,23 @@
 
 %% interface functions
 -export([
+    observe/2,
     category_brands/2,
     category_subcat_bybrand/3,
     category_rsc_count/2
 ]).
 
+-record(state, {context}).
+
 %%====================================================================
 %% API
 %%====================================================================
+
+
+observe({search_query, Req, OffsetLimit}, Context) ->
+    shop_queries:search(Req, OffsetLimit, Context).
+
+
 %% @spec start_link() -> {ok,Pid} | ignore | {error,Error}
 %% @doc Starts the server
 start_link() -> 
@@ -111,10 +120,13 @@ category_rsc_count(Cat, Context) ->
 %%                     ignore               |
 %%                     {stop, Reason}
 %% @doc Initiates the server.
-init(_Args) ->
+init(Args) ->
+    {context, Context} = proplists:lookup(context, Args),
+    zp_notifier:observe(search_query, {?MODULE, observe}, Context),
+
     % Every 10 minutes a periodic check of Adyen logs and old orders
     timer:send_interval(60 * 1000 * 10, periodic),
-    {ok, []}.
+    {ok, #state{context=zp_context:prune_for_database(Context)}}.
 
 %% @spec handle_call(Request, From, State) -> {reply, Reply, State} |
 %%                                      {reply, Reply, State, Timeout} |
@@ -143,11 +155,10 @@ handle_cast(Message, State) ->
 
 %% @doc Periodic checks on unhandled payment notifications, also expire orders that have not been paid.
 handle_info(periodic, State) ->
-    Context = zp_context:new(),
     % Check if there are any unhandled payment notifications
-    shop_adyen:periodic_log_check(Context),
+    shop_adyen:periodic_log_check(State#state.context),
     % Check if there are expired orders
-    expire_orders(Context),
+    expire_orders(State#state.context),
     {noreply, State};
 
 %% @doc Handling all non call/cast messages
@@ -159,7 +170,8 @@ handle_info(_Info, State) ->
 %% terminate. It should be the opposite of Module:init/1 and do any necessary
 %% cleaning up. When it returns, the gen_server terminates with Reason.
 %% The return value is ignored.
-terminate(_Reason, _State) ->
+terminate(_Reason, State) ->
+    zp_notifier:detach(search_query, {?MODULE, observe}, State#state.context),
     ok.
 
 %% @spec code_change(OldVsn, State, Extra) -> {ok, NewState}
