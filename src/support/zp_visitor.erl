@@ -45,14 +45,14 @@ start_link(Args) when is_list(Args) ->
 %% @doc Start a new anonymous user process, link to the new process.
 new_anonymous(CookieId, Context) ->
     SessionPid = Context#context.session_pid,
-    start_link([{session, SessionPid}, {cookie, CookieId}, {context, zp_context:prune_for_database(Context)}]).
+    start_link([{session, SessionPid}, {cookie, CookieId}, {is_new, true}, {context, zp_context:prune_for_database(Context)}]).
 
 
 %% @spec new_returning(CookieId, SessionPid) -> {ok, pid()} | error
 %% @doc Start a new process for the visitor associated with the cookie, return error when no person associated.
 new_returning(CookieId, Context) ->
     SessionPid = Context#context.session_pid,
-    start_link([{session, SessionPid}, {cookie, CookieId}, {context, zp_context:prune_for_database(Context)}]).
+    start_link([{session, SessionPid}, {cookie, CookieId}, {is_new, false}, {context, zp_context:prune_for_database(Context)}]).
 
 
 %% @spec associate_session(Pid, SessionPid) -> void()
@@ -95,7 +95,10 @@ init(Args) ->
         context=proplists:get_value(context, Args)
     },
     State1 = add_session(proplists:get_value(session, Args), State),
-    {Id, RscId, Props} = get_props(State1),
+    {Id, RscId, Props} = case proplists:get_value(is_new, Args, false) of
+        false -> get_props(State1);
+        true  -> {undefined, undefined, []}
+    end,
     {ok, State1#state{props=Props, id=Id, rsc_id=RscId}, ?VISITOR_TIMEOUT}.
 
 %% @spec handle_call(Request, From, State) -> {reply, Reply, State} |
