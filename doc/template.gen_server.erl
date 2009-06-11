@@ -4,7 +4,7 @@
 %% @doc 
 
 -module(module_name).
--author("Marc Worrell <marc@worrell.nl").
+-author("Marc Worrell <marc@worrell.nl>").
 -behaviour(gen_server).
 
 %% gen_server exports
