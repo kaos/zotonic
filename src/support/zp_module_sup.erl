@@ -89,7 +89,7 @@ init(Args) ->
     Processes = [
         {M, 
             {M, start_link, [[{context, Context}]]},
-            permanent, 5000, worker, dynamic} || M <- active(Context)
+            permanent, 5000, worker, [M]} || M <- active(Context)
     ],
     {ok, {{one_for_one, 1000, 10}, Processes}}.
 

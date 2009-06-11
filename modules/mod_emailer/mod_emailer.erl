@@ -90,6 +90,7 @@ start_link(Args) when is_list(Args) ->
 %%                     {stop, Reason}
 %% @doc Initiates the server.
 init(Args) ->
+    process_flag(trap_exit, true),
     {context, Context} = proplists:lookup(context, Args),
     zp_notifier:observe(email,       {?MODULE, observe}, Context),
     zp_notifier:observe(emai_render, {?MODULE, observe}, Context),

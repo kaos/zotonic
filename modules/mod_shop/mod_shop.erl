@@ -121,6 +121,7 @@ category_rsc_count(Cat, Context) ->
 %%                     {stop, Reason}
 %% @doc Initiates the server.
 init(Args) ->
+    process_flag(trap_exit, true),
     {context, Context} = proplists:lookup(context, Args),
     zp_notifier:observe(search_query, {?MODULE, observe}, Context),
 

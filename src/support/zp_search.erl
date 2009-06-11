@@ -70,11 +70,16 @@ search(Search, Context) ->
 
 %% @doc Perform the named search and its arguments
 %% @spec search({Name, SearchPropList}, {Offset, Limit}, Context) -> #search_result
-search({SearchName, Props}, Limit, Context) ->
+search({SearchName, Props} = Search, Limit, Context) ->
     % todo: fetch paging information from props
     PropsSorted = lists:keysort(1, Props),
-    Result = zp_notifier:first({search_query, {SearchName, PropsSorted}, Limit}, Context),
-    search_result(Result, Limit, Context);
+    case zp_notifier:first({search_query, {SearchName, PropsSorted}, Limit}, Context) of
+        undefined -> 
+            ?LOG("Unknown search query ~p", [Search]),
+            #search_result{};
+        Result -> 
+            search_result(Result, Limit, Context)
+    end;
 search(Name, Limit, Context) ->
     search({zp_convert:to_atom(Name), []}, Limit, Context).
 

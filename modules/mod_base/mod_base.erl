@@ -41,6 +41,7 @@ start_link(Args) when is_list(Args) ->
 %%                     {stop, Reason}
 %% @doc Initiates the server.
 init(_Args) ->
+    process_flag(trap_exit, true),
     {ok, []}.
 
 %% @spec handle_call(Request, From, State) -> {reply, Reply, State} |
