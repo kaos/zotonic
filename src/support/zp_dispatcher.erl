@@ -13,7 +13,7 @@
 -export([start_link/0, start_link/1]).
 
 %% zp_dispatch exports
--export([url_for/2, url_for/3, url_for/4, reload/1, test/0]).
+-export([url_for/2, url_for/3, url_for/4, reload/1, reload/2, test/0]).
 
 -include_lib("zophrenic.hrl").
 
@@ -56,6 +56,9 @@ url_for(Name, Args, Escape, #context{} = Context) ->
 reload(Context) ->
     gen_server:cast(?MODULE, {'reload', Context}).
 
+reload({module_ready}, Context) ->
+    gen_server:cast(?MODULE, {'reload', Context}).
+    
 
 %%====================================================================
 %% gen_server callbacks
@@ -67,9 +70,11 @@ reload(Context) ->
 %%                     {stop, Reason}
 %% @doc Initiates the server, loads the dispatch list into the webmachine dispatcher
 init(_Args) ->
-    State  = #state{dispatchlist=[], lookup=dict:new()},
     Context = zp_context:new(),
+    process_flag(trap_exit, true),
+    State  = #state{dispatchlist=[], lookup=dict:new()},
     State1 = reload_dispatch_list(Context, State),
+    zp_notifier:observe(module_ready, {?MODULE, reload}, Context),
     {ok, State1}.
 
 
@@ -108,6 +113,8 @@ handle_info(_Info, State) ->
 %% cleaning up. When it returns, the gen_server terminates with Reason.
 %% The return value is ignored.
 terminate(_Reason, _State) ->
+    Context = zp_context:new(),
+    zp_notifier:detach(module_ready, {?MODULE, reload}, Context),
     ok.
 
 %% @spec code_change(OldVsn, State, Extra) -> {ok, NewState}

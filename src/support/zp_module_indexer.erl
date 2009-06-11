@@ -63,6 +63,7 @@ find_all(What, Name, _Context) ->
 %%                     {stop, Reason}
 %% @doc Initiates the server.
 init(Args) ->
+    process_flag(trap_exit, true),
     {context, Context} = proplists:lookup(context, Args),
     zp_notifier:observe(module_ready, self(), Context),
     {ok, #state{}}.
