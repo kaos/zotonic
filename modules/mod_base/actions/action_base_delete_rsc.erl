@@ -36,5 +36,5 @@ event({postback, {delete_rsc, Id, OnSuccess}, _TriggerId, _TargetId}, Context) -
                 Context,
                 lists:flatten(OnSuccess));
         false ->
-            zp_render:wire({growl, [{text, "You are not allowed to delete this page."}, {type, "error"}]})
+            zp_render:wire({growl, [{text, "You are not allowed to delete this page."}, {type, "error"}]}, Context)
     end.

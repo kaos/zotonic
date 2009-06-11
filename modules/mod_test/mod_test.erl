@@ -5,7 +5,7 @@
 %% @doc Simple module for testing the module system.
 
 -module(mod_test).
--author("Marc Worrell <marc@worrell.nl").
+-author("Marc Worrell <marc@worrell.nl>").
 -behaviour(gen_server).
 
 %% gen_server exports

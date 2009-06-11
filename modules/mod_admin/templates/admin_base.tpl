@@ -44,6 +44,7 @@
 			<li><a href="{% url admin_predicate %}" {% if page_predicate %}class="current"{% endif %}>Predicates</a></li>
 			<li><a href="{% url admin_shop_sku %}" {% if page_shop_sku %}class="current"{% endif %}>Sku's</a></li>
 			<li><a href="{% url admin_shop_order %}" {% if page_shop_order %}class="current"{% endif %}>Orders</a></li>
+			<li><a href="{% url admin_modules %}" {% if page_admin_modules %}class="current"{% endif %}>Modules</a></li>
 			<li class="search-box">
 				<div class="quick-search-wrapper">
 					<form method="get" action="{% url admin_overview_rsc %}">

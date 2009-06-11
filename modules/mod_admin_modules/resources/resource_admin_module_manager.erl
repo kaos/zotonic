@@ -2,7 +2,7 @@
 %% @copyright 2009 Marc Worrell
 %% @doc Overview of modules, allows activating/deactivating the modules.
 
--module(resource_admin_module_admin).
+-module(resource_admin_module_manager).
 -author("Marc Worrell <marc@worrell.nl>").
 
 -export([
@@ -17,7 +17,8 @@ is_authorized(ReqData, Context) ->
 
 html(Context) ->
     Vars = [
-        {modules, mod_module_admin:all(Context)}
+        {page_admin_modules, true},
+        {modules, mod_admin_modules:all(Context)}
     ],
-	Html = zp_template:render("admin_module_admin.tpl", Vars, Context),
+	Html = zp_template:render("admin_modules.tpl", Vars, Context),
 	zp_context:output(Html, Context).

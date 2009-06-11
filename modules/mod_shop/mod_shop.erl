@@ -5,7 +5,7 @@
 %% @doc A complete shop in Zophrenic
 
 -module(mod_shop).
--author("Marc Worrell <marc@worrell.nl").
+-author("Marc Worrell <marc@worrell.nl>").
 -behaviour(gen_server).
 
 -mod_title("Shop").

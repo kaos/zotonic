@@ -37,5 +37,5 @@ event({postback, {delete_media_dialog, Id, OnSuccess}, _TriggerId, _TargetId}, C
             {Html1, Context1} = zp_render:render_to_string(Html, Context),
             zp_render:wire({dialog, [{title, DTitle}, {text, Html1}]}, Context1);
         false ->
-            zp_render:wire({growl, [{text, "You are not allowed to delete this media."}, {type, "error"}]})
+            zp_render:wire({growl, [{text, "You are not allowed to delete this media."}, {type, "error"}]}, Context)
     end.

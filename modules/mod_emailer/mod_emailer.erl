@@ -5,7 +5,7 @@
 %% @doc Email server.  Queues, renders and sends e-mails.
 
 -module(mod_emailer).
--author("Marc Worrell <marc@worrell.nl").
+-author("Marc Worrell <marc@worrell.nl>").
 -behaviour(gen_server).
 
 -mod_title("e-Mail sending").

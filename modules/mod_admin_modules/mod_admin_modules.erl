@@ -6,10 +6,11 @@
  
 
 -module(mod_admin_modules).
--author("Marc Worrell <marc@worrell.nl").
+-author("Marc Worrell <marc@worrell.nl>").
 -behaviour(gen_server).
 
--description("Manages modules. Adds an admin interface to activate and deactivate modules.").
+-mod_title("Zophrenic Module Administration").
+-mod_description("Manages modules. Adds an admin interface to activate and deactivate modules.").
 
 
 %% gen_server exports

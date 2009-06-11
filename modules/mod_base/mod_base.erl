@@ -5,10 +5,10 @@
 %% @doc The base module, implementing basic Zophrenic scomps, actions, models and validators.
 
 -module(mod_base).
--author("Marc Worrell <marc@worrell.nl").
+-author("Marc Worrell <marc@worrell.nl>").
 -behaviour(gen_server).
 
--mod_title("Base Zophrenic").
+-mod_title("Zophrenic Base").
 -mod_description("Base supplies all basic scomps, actions and validators.").
 -mod_prio(1000).
 

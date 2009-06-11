@@ -7,7 +7,7 @@
 %% support other databases (like MySQL).
 
 -module(mod_search).
--author("Marc Worrell <marc@worrell.nl").
+-author("Marc Worrell <marc@worrell.nl>").
 -behaviour(gen_server).
 
 -mod_title("Search Queries").

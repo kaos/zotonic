@@ -66,16 +66,7 @@ compile(File, Context) ->
 %% @spec find_template(File, Context) -> {ok, binary()} | {error, code} 
 %% @doc Finds the template designated by the file, check modules, project and default directory
 find_template(File, Context) ->
-    case zp_module_indexer:find(template, File, Context) of
-        {ok, FoundFile} ->
-            {ok, FoundFile};
-        {error, enoent} ->
-            Dirs =  [
-                        "priv/templates",
-                        "default/templates"
-                    ],
-            find_template_dirs(File, Dirs)
-    end.
+    zp_module_indexer:find(template, File, Context).
 
 
 %% @spec init([]) -> {ok, [])}
@@ -171,14 +162,3 @@ is_modified([File|Rest], DateTime) ->
         _ ->
             is_modified(Rest, DateTime)
     end.
-
-   
-find_template_dirs(_File, []) ->
-    {error, enoent};
-find_template_dirs(File, [Dir|Rest]) ->
-    Filename = filename:join(Dir, File),
-    case filelib:is_file(Filename) of
-        true  -> {ok, Filename};
-        false -> find_template(File, Rest)
-    end.
-
