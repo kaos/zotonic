@@ -1,4 +1,5 @@
 [
 %% Just for testing
-{test,     ["test"],      resource_test_helloworld,        []}
+{test,       ["test"],       resource_test_helloworld,        []},
+{helloworld, ["helloworld"], resource_template, [{template, "helloworld.tpl"}]}
 ].
