@@ -43,7 +43,8 @@
 	randomize/2,
 	split/2,
 	replace1/3,
-	guess_mime/1
+	guess_mime/1,
+	list_dir_recursive/1
 ]).
 
 %%% FORMAT %%%
@@ -430,4 +431,40 @@ guess_mime(File) ->
 	_ ->
 	    webmachine_util:guess_mime(File)
 end.
+
+
+%% @doc Return a list of all files in a directory, recursive depth first search for files not starting with a '.'
+list_dir_recursive(Dir) ->
+    case file:list_dir(Dir) of 
+        {ok, Files} ->
+            list_dir_recursive(Files, Dir, []);
+        {error, _} ->
+            []
+    end.
+
+    list_dir_recursive([], _BaseDir, Acc) -> 
+        Acc;
+    list_dir_recursive([[$.|_]|OtherFiles], BaseDir, Acc) ->
+        list_dir_recursive(OtherFiles, BaseDir, Acc);
+    list_dir_recursive([File|OtherFiles], BaseDir, Acc) ->
+        Path = filename:join(BaseDir, File),
+        case filelib:is_regular(Path) of
+            true ->
+                list_dir_recursive(OtherFiles, BaseDir, [File|Acc]);
+            false ->
+                case filelib:is_dir(Path) of
+                    true ->
+                        Acc1 = case file:list_dir(Path) of
+                            {ok, Files} ->
+                                NonDotFiles = lists:filter(fun([$.|_]) -> false; (_) -> true end, Files),
+                                RelFiles = [ filename:join(File, F) || F <- NonDotFiles],
+                                list_dir_recursive(RelFiles, BaseDir, Acc);
+                            {error, _} ->
+                                Acc
+                        end,
+                        list_dir_recursive(OtherFiles, BaseDir, Acc1);
+                    false -> 
+                        list_dir_recursive(OtherFiles, BaseDir, Acc)
+                end
+        end.
 

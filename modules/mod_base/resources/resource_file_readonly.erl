@@ -91,6 +91,7 @@ encodings_provided(ReqData, State) ->
 
 
 resource_exists(ReqData, State) ->
+    Context = zp_context:new(ReqData, ?MODULE),
     Path   = wrq:disp_path(ReqData),
     Cached = case State#state.use_cache of
         true -> zp_depcache:get(cache_key(Path));
@@ -98,7 +99,7 @@ resource_exists(ReqData, State) ->
     end,
     case Cached of
         undefined ->
-            case file_exists(State, Path) of 
+            case file_exists(State, Path, Context) of 
             	{true, FullPath} -> 
             	    {true, ReqData, State#state{path=Path, fullpath=FullPath}};
             	_ -> 
@@ -194,18 +195,11 @@ finish_request(ReqData, State) ->
 %%%%%%%%%%%%%% Helper functions %%%%%%%%%%%%%%
     
 cache_key(Path) ->
-    {resource_file,Path}.
+    {resource_file, Path}.
 
-file_paths(State, Name) ->
-    RelName = case hd(Name) of
-        "/" -> tl(Name);
-        _ -> Name
-    end,
-    lists:map(fun(R) -> filename:join([R,RelName]) end, State#state.root).
-
-file_exists(_State, []) ->
+file_exists(_State, [], _Context) ->
     false;
-file_exists(State, Name) ->
+file_exists(State, Name, Context) ->
     RelName = case hd(Name) of
         "/" -> tl(Name);
         _ -> Name
@@ -213,18 +207,27 @@ file_exists(State, Name) ->
     case mochiweb_util:safe_relative_path(RelName) of
         undefined -> false;
         SafePath ->
-            NamePaths = file_paths(State, SafePath),
-            file_exists1(NamePaths)
+            RelName = case hd(SafePath) of
+                "/" -> tl(SafePath);
+                _ -> SafePath
+            end,
+            file_exists1(State#state.root, RelName, Context)
     end.
 
-file_exists1([]) ->
+file_exists1([], _RelName, _Context) ->
     false;
-file_exists1([NamePath|T]) ->
+file_exists1([ModuleIndex|T], RelName, Context) when is_atom(ModuleIndex) ->
+    case zp_module_indexer:find(ModuleIndex, RelName, Context) of
+        {ok, File} -> {true, File};
+        {error, _} -> file_exists1(T, RelName, Context)
+    end;
+file_exists1([DirName|T], RelName, Context) ->
+    NamePath = filename:join([DirName,RelName]),
     case filelib:is_regular(NamePath) of 
 	true ->
 	    {true, NamePath};
 	false ->
-	    file_exists1(T)
+	    file_exists1(T, RelName, Context)
     end.
 
 

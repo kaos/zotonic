@@ -1,3 +1,3 @@
 [
-	{admin_module_manager,     [],            resource_admin_module_manager, []}
+	{admin_modules,     [],            resource_admin_module_manager, []}
 ].

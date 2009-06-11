@@ -5,7 +5,7 @@
 %% @doc Add a module management screen to the admin.
  
 
--module(mod_module_admin).
+-module(mod_admin_modules).
 -author("Marc Worrell <marc@worrell.nl").
 -behaviour(gen_server).
 

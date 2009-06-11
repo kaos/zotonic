@@ -8,7 +8,7 @@
 	{id,	   ["id", id],	  resource_id, []},
 
 	{lib,      ["lib",'*'],   resource_file_readonly, [ 
-											{root,["priv/lib", "default/lib"]}, 
+											{root,[lib, "default/lib", "priv/lib"]}, 
 											{use_cache, false}
 										]},
 	{image,    ["image",'*'], resource_file_readonly, [ 

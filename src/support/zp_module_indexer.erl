@@ -21,7 +21,7 @@
     find_all/3
 ]).
 
--record(state, {scomps=[], actions=[], validators=[], models=[], templates=[]}).
+-record(state, {scomps=[], actions=[], validators=[], models=[], templates=[], lib=[]}).
 
 -include("zophrenic.hrl").
 
@@ -86,6 +86,8 @@ handle_call({find, model, Name}, _From, State) ->
     {reply, lookup(Name, State#state.models), State};
 handle_call({find, template, Name}, _From, State) ->
     {reply, lookup(Name, State#state.templates), State};
+handle_call({find, lib, Name}, _From, State) ->
+    {reply, lookup(Name, State#state.lib), State};
 
 handle_call({find_all, scomp, Name}, _From, State) ->
     {reply, lookup_all(Name, State#state.scomps), State};
@@ -97,6 +99,8 @@ handle_call({find_all, model, Name}, _From, State) ->
     {reply, lookup_all(Name, State#state.models), State};
 handle_call({find_all, template, Name}, _From, State) ->
     {reply, lookup_all(Name, State#state.templates), State};
+handle_call({find_all, lib, Name}, _From, State) ->
+    {reply, lookup_all(Name, State#state.lib), State};
 
 %% @doc Trap unknown calls
 handle_call(Message, _From, State) ->
@@ -114,7 +118,8 @@ handle_cast({{module_ready}, Context}, State) ->
         actions    = proplists:get_value(action, Scanned),
         validators = proplists:get_value(validator, Scanned),
         models     = proplists:get_value(model, Scanned),
-        templates  = proplists:get_value(template, Scanned)
+        templates  = proplists:get_value(template, Scanned),
+        lib        = proplists:get_value(lib, Scanned)
     },
     {noreply, State1};
 
@@ -168,10 +173,16 @@ lookup_all(Name, List) ->
 
 %% @doc Scan the module directories for scomps, actions etc.
 scan(Context) ->
-    [ {What, scan1(What, Context)} || What <- [ scomp, action, validator, model, template ] ].
+    [ {What, scan1(What, Context)} || What <- [ scomp, action, validator, model, template, lib ] ].
 
 
-%% @doc Scan module directories for specific kinds of parts. Returns a lookup list [ {itemname, rootname, File} ]
+%% @doc Scan module directories for specific kinds of parts. Returns a lookup list [ {lookup-name, fullpath} ]
+scan1(What, Context) when What == template orelse What == lib ->
+    Subdir = case What of
+        template -> "templates";
+        lib -> "lib"
+    end,
+    scan_subdir_files(Subdir, Context);
 scan1(What, Context) ->
     {Subdir, Prefix, Extension} = subdir(What),
     Scan = scan_subdir(Subdir, Prefix, Extension, Context), 
@@ -182,19 +193,30 @@ scan1(What, Context) ->
     end,
     lists:foldr(FlattenFun, [], Sorted).
 
-
     subdir(scomp)     -> { "scomps",     "scomp_",     ".erl" };
     subdir(action)    -> { "actions",    "action_",    ".erl" };
     subdir(validator) -> { "validators", "validator_", ".erl" };
-    subdir(model)     -> { "models",     "m_",         ".erl" };
-    subdir(template)  -> { "templates",  "",           ""     }.
+    subdir(model)     -> { "models",     "m_",         ".erl" }.
 
-    file2index(template, {Basename, File}) ->
-        {Basename, File};
     file2index(_, {NoPrefixExt, File}) ->
         ModuleName = list_to_atom(filename:basename(File, ".erl")),
         {list_to_atom(NoPrefixExt), ModuleName}.
 
+
+%% @doc Scan the whole subdir hierarchy for files, used for templates and lib folders.
+scan_subdir_files(Subdir, Context) ->
+    Modules = zp_module_sup:active_dir(Context),
+    Scan1 = fun({_Module, Dir}, Acc) ->
+        case zp_utils:list_dir_recursive(filename:join(Dir, Subdir)) of
+            [] -> 
+                Acc;
+            Files -> 
+                AbsFiles = [ {F, filename:join([Dir, Subdir, F])} || F <- Files ],
+                AbsFiles ++ Acc
+        end
+    end,
+    lists:foldl(Scan1, [], Modules).
+    
 
 %% @doc Scan all module directories for templates/scomps/etc.  Example: scan("scomps", "scomp_", ".erl", Context)
 %% @spec scan_subdir(Subdir, Prefix, Extension, context()) -> [ {ModuleAtom, {ModuleDir, [{Name, File}]}} ]
