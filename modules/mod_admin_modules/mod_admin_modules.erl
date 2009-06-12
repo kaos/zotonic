@@ -36,10 +36,15 @@ all(Context) ->
 %% @spec descr(ModuleName) -> proplist()
 %% @doc Return a property list with the title and other attributes of the module.
 descr(Module) ->
-    Descr = try
-        erlang:get_module_info(Module, attributes)
-    catch 
-        _M:E -> [{error, E}]
+    Descr = case zp_module_sup:module_exists(Module) of
+        true ->
+            try
+                erlang:get_module_info(Module, attributes)
+            catch 
+                _M:E -> [{error, E}]
+            end;
+        false ->
+            [{error, enoent}]
     end,
     case proplists:get_value(title, Descr) of
         undefined ->

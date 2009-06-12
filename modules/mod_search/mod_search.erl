@@ -90,7 +90,6 @@ handle_info(_Info, State) ->
 %% cleaning up. When it returns, the gen_server terminates with Reason.
 %% The return value is ignored.
 terminate(_Reason, State) ->
-    ?DEBUG(terminate), 
     zp_notifier:detach(search_query, {?MODULE, observe}, State#state.context),
     ok.
 

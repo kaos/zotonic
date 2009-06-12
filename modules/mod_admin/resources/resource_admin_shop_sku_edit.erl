@@ -34,7 +34,6 @@ resource_exists(ReqData, Context) ->
         end
     catch
         M:E ->
-            ?DEBUG({M,E}), 
             ?WM_REPLY(false, Context2)
     end.
 

@@ -53,14 +53,14 @@ scan(Template) ->
     scan(Template, [], {1, 1}, in_text).
 
 
-identifier_to_keyword({identifier, Pos, String}, {open_tag, Acc}) ->
+identifier_to_keyword({identifier, Pos, String}, {PrevTag, Acc}) when PrevTag == open_tag; PrevTag == all_keyword ->
     RevString = lists:reverse(String),
     Keywords = ["for", "empty", "endfor", "in", "include", "block", "endblock",
         "extends", "autoescape", "endautoescape", "if", "else", "endif",
         "not", "or", "and", "comment", "endcomment", "cycle", "firstof",
         "ifchanged", "ifequal", "endifequal", "ifnotequal", "endifnotequal",
         "now", "regroup", "rsc", "spaceless", "endspaceless", "ssi", "templatetag",
-        "load", "call", "with", "url", "print", "image", "image_url", "_", "with", "endwith"], 
+        "load", "call", "with", "url", "print", "image", "image_url", "_", "with", "endwith", "all" ], 
     Type = case lists:member(RevString, Keywords) of
         true -> list_to_atom(RevString ++ "_keyword");
         _ ->    identifier

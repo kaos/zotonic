@@ -167,7 +167,6 @@ update(Id, Props, Context) ->
     true = zp_acl:has_role(admin, Context),
     Subjects = proplists:get_all_values("subject", Props),
     Objects = proplists:get_all_values("object", Props),
-    ?DEBUG(Subjects),
     SubjectIds = [ list_to_integer(N) || N <- Subjects, N /= [] ],
     ObjectIds = [ list_to_integer(N) || N <- Objects, N /= [] ],
     Props1 = lists:filter(fun valid_prop/1, Props),

@@ -21,7 +21,7 @@
 				<a href="#" class="clearfix">
 					<span class="zp-20">{{ props.mod_title|default:props.title }}</span>
 					<span class="zp-50">{{ props.mod_description|default:"-" }}</span>
-					<span class="zp-20">{{ props.author|escape }}</span>
+					<span class="zp-20">{{ props.author|escape|default:"-" }}</span>
 					<span class="zp-10">
 						{% if props.active %}
 							{% button text="Deactivate" action={module_toggle module=module} %}

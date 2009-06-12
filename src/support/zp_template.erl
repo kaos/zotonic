@@ -15,7 +15,7 @@
 -include_lib("zophrenic.hrl").
 
 %% External exports
--export([compile/2, render/3, find_template/2]).
+-export([compile/2, render/3, find_template/2, find_template/3]).
 
 
 start_link() -> 
@@ -63,10 +63,22 @@ compile(File, Context) ->
     end.
 
 
-%% @spec find_template(File, Context) -> {ok, binary()} | {error, code} 
-%% @doc Finds the template designated by the file, check modules, project and default directory
+%% @spec find_template(File, Context) -> {ok, filename()} | {error, code} 
+%% @doc Finds the template designated by the file, check modules.
 find_template(File, Context) ->
     zp_module_indexer:find(template, File, Context).
+    
+
+%% @spec find_template(File, All, Context) -> FilenameList
+%% @doc Finds the first or all templates designated by the file, check modules.
+find_template(File, false, Context) ->
+    case zp_module_indexer:find(template, File, Context) of
+        {ok, TemplateFile} -> [TemplateFile];
+        {error, _Reason} -> []
+    end;
+find_template(File, true, Context) ->
+    zp_module_indexer:find_all(template, File, Context).
+
 
 
 %% @spec init([]) -> {ok, [])}
@@ -90,8 +102,8 @@ handle_call({check_modified, File}, _From, State) ->
 %% @doc Compile the template, creates a beam file in the ebin directory.  Make sure that we only compile
 %%      one template at a time to prevent overwriting the beam file with two processes.
 handle_call({compile, File, Context}, _From, State) ->
-    FinderFun  = fun(FinderFile) ->
-        ?MODULE:find_template(FinderFile, Context)
+    FinderFun  = fun(FinderFile, All) ->
+        ?MODULE:find_template(FinderFile, All, Context)
     end,
     ModuleName = filename_to_modulename(File),
     Module     = list_to_atom(ModuleName),

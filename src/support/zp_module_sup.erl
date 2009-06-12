@@ -14,7 +14,7 @@
 -export([start_link/0, start_link/1, upgrade/1]).
 
 %% supervisor callbacks
--export([init/1, deactivate/2, activate/2, active/1, active_dir/1, all/1, scan/1, prio/1, prio_sort/1]).
+-export([init/1, deactivate/2, activate/2, active/1, active_dir/1, all/1, scan/1, prio/1, prio_sort/1, module_exists/1]).
 
 -include_lib("zophrenic.hrl").
 
@@ -86,10 +86,11 @@ init([]) ->
     init([{context, zp_context:new()}]);
 init(Args) ->
     {context, Context} = proplists:lookup(context, Args),
+    Ms = lists:filter(fun module_exists/1, active(Context)),
     Processes = [
         {M, 
             {M, start_link, [[{context, Context}]]},
-            permanent, 5000, worker, [M]} || M <- active(Context)
+            permanent, 5000, worker, [M]} || M <- Ms
     ],
     {ok, {{one_for_one, 1000, 10}, Processes}}.
 
@@ -169,3 +170,10 @@ prio_sort(ModuleProps) ->
     Sorted = lists:sort(WithPrio),
     [ X || {_Prio, X} <- Sorted ].
 
+
+module_exists(M) ->
+    case code:ensure_loaded(M) of
+        {module,M} -> true;
+        {error, _} -> false
+    end.
+    

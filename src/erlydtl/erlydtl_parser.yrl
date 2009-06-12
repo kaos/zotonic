@@ -107,9 +107,12 @@ Nonterminals
 	ImageUrlTag
 	TransTag
 	TransExtTag
-	ValueList.
+	ValueList
+
+	OptionalAll.
 
 Terminals
+	all_keyword
 	as_keyword
     autoescape_keyword
     block_keyword
@@ -202,8 +205,11 @@ ValueBraced -> open_var Value close_var : '$2'.
 TransTag -> open_trans trans_text close_trans : {trans, '$2'}.
 TransExtTag -> open_tag '__keyword' string_literal Args close_tag : {trans_ext, '$3', '$4'}.
 ExtendsTag -> open_tag extends_keyword string_literal close_tag : {extends, '$3'}.
-IncludeTag -> open_tag include_keyword string_literal Args close_tag : {include, '$3', '$4'}.
+IncludeTag -> open_tag OptionalAll include_keyword string_literal Args close_tag : {include, '$4', '$5', '$2'}.
 NowTag -> open_tag now_keyword string_literal close_tag : {date, now, '$3'}.
+
+OptionalAll -> all_keyword : true.
+OptionalAll -> '$empty' : false.
 
 LoadTag -> open_tag load_keyword LoadNames close_tag : {load, '$3'}.
 LoadNames -> identifier : ['$1'].
@@ -272,7 +278,7 @@ Literal -> string_literal : '$1'.
 Literal -> trans_literal  : '$1'.
 Literal -> number_literal : '$1'.
 
-CustomTag -> open_tag identifier Args close_tag : {tag, '$2', '$3'}.
+CustomTag -> open_tag OptionalAll identifier Args close_tag : {tag, '$3', '$4', '$2'}.
 
 CallTag -> open_tag call_keyword identifier close_tag : {call, '$3'}.
 CallWithTag -> open_tag call_keyword identifier with_keyword Value close_tag : {call, '$3', '$5'}.

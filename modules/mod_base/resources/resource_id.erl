@@ -23,8 +23,7 @@
 init([]) -> {ok, []}.
 
 resource_exists(ReqData, _Context) ->
-    ?DEBUG(ReqData),
-    Context = zp_context:new(ReqData, ?MODULE   ),
+    Context = zp_context:new(ReqData, ?MODULE),
     ContextQs = zp_context:ensure_qs(Context),
     Id = zp_context:get_q("id", ContextQs),
     ?WM_REPLY(m_rsc:exists(Id, ContextQs), ContextQs).
