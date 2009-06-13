@@ -21,5 +21,12 @@
 	{shop_cart, 	["cart"],										resource_cart,			[]},
 	{shop_checkout, ["checkout"],									resource_checkout,		[]},
 	{shop_checkout_confirm, ["confirm"],							resource_confirm,		[]},
-	{shop_order_view, ["order","view", name],						resource_shop_order_view, []}
+	{shop_order_view, ["order","view", name],						resource_shop_order_view, []},
+
+    % Extensions to the admin
+    {admin_shop_sku,        ["admin", "sku"],                       resource_admin_shop_sku,[]},
+    {admin_shop_sku_edit,   ["admin", "sku", id],                   resource_admin_shop_sku_edit,[]},
+    {admin_shop_order,      ["admin", "order"],                     resource_admin_shop_order,[]},
+    {admin_shop_order_view, ["admin", "order", "view"],             resource_admin_shop_order_view,[]},
+    {admin_shop_order_view, ["admin", "order", id],                 resource_admin_shop_order_view,[]}
 ].

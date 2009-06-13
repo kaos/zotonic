@@ -2,7 +2,7 @@
 <html xmlns="http://www.w3.org/1999/xhtml" lang="en">
 <head>
 	<meta http-equiv="Content-type" content="text/html; charset=utf-8" />
-	<title>Zophrenic {% block title %}admin{% endblock %}</title>
+	<title>Zophrenic {% block title %}Admin{% endblock %}</title>
 
 	<meta name="author" content="Tim Benniks" />
 	
@@ -39,12 +39,9 @@
 		<ul id="navigation" class="zp-100">
 			<li><a href="/admin/" {% if page_dashboard %}class="current"{% endif %}>Dashboard</a></li>
 			<li><a href="/admin/overview/" {% if page_overview %}class="current"{% endif %}>Pages</a></li>
-			<li><a href="#" {% if page_users %}class="current"{% endif %}>Users</a></li>
 			<li><a href="{% url admin_media %}" {% if page_media %}class="current"{% endif %}>Media</a></li>
 			<li><a href="{% url admin_predicate %}" {% if page_predicate %}class="current"{% endif %}>Predicates</a></li>
-			<li><a href="{% url admin_shop_sku %}" {% if page_shop_sku %}class="current"{% endif %}>Sku's</a></li>
-			<li><a href="{% url admin_shop_order %}" {% if page_shop_order %}class="current"{% endif %}>Orders</a></li>
-			<li><a href="{% url admin_modules %}" {% if page_admin_modules %}class="current"{% endif %}>Modules</a></li>
+			{% all include "admin_menu_module.tpl" %}
 			<li class="search-box">
 				<div class="quick-search-wrapper">
 					<form method="get" action="{% url admin_overview_rsc %}">

@@ -534,7 +534,7 @@ include_ast(File, Args, All, Context, TreeWalker) ->
                     end,
                     {{erl_syntax:string(""), #ast_info{}}, TreeWalkerN};
                 {AstList, AstInfo, TreeWalkerN} ->
-                    AstN = erl_syntax:block_expr(ArgAsts ++ lists:reverse(AstList)),
+                    AstN = erl_syntax:block_expr(ArgAsts ++ [erl_syntax:list(lists:reverse(AstList))]),
                     {{AstN, AstInfo}, TreeWalkerN}
             end;
         true ->
@@ -913,7 +913,6 @@ full_path(File, FinderFun) ->
 
 full_path(File, All, FinderFun) ->
     FinderFun(File, All).
-
 
 
 %%-------------------------------------------------------------------

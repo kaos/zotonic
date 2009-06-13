@@ -11,12 +11,6 @@
     {admin_media,           ["admin", "media"],                     resource_admin_media,    []},
     {admin_media_edit,      ["admin", "media", id],                 resource_admin_media_edit,[]},
 
-    {admin_shop_sku,        ["admin", "sku"],                       resource_admin_shop_sku,[]},
-    {admin_shop_sku_edit,   ["admin", "sku", id],                   resource_admin_shop_sku_edit,[]},
-    {admin_shop_order,      ["admin", "order"],                     resource_admin_shop_order,[]},
-    {admin_shop_order_view, ["admin", "order", "view"],             resource_admin_shop_order_view,[]},
-    {admin_shop_order_view, ["admin", "order", id],                 resource_admin_shop_order_view,[]},
-
     {admin_categories_manager, ["admin", "categories"],             resource_admin_categories_manager,[]}
 
 ].

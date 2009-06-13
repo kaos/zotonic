@@ -15,8 +15,6 @@
 					<div class="clearfix">
 						<a class="button" href="{% url admin_overview_rsc %}">manage pages &raquo;</a>
 						<a class="button" href="#">manage categories &raquo;</a>
-						<a class="button" href="{% url admin_shop_sku %}">manage skus &raquo;</a>
-						<a class="button" href="#">manage users &raquo;</a>
 						
 						{% button class="right" text="Make a new page" action={dialog_new_rsc title=""} %}
 					</div>

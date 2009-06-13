@@ -170,7 +170,6 @@ template_is_modified(File, ModuleName, ResetDateTime) ->
                 0 ->
                     true; 
                 BeamMod when BeamMod =< ResetDateTime ->
-                    ?DEBUG({BeamMod, ResetDateTime, "modified due to reset"}),
                     true;
                 BeamMod ->
                     Deps = Module:dependencies(),
