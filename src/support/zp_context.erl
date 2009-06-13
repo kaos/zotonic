@@ -166,6 +166,8 @@ output1([{script}|Rest], Context, Acc) ->
 output1([List|Rest], Context, Acc) when is_list(List) ->
     {Rendered, Context1} = output1(List, Context, []),
     output1(Rest, Context1, [Rendered|Acc]);
+output1([undefined|Rest], Context, Acc) ->
+    output1(Rest, Context, Acc);
 output1([C|Rest], Context, Acc) ->
     output1(Rest, Context, [C|Acc]).
 
