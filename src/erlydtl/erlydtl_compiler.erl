@@ -73,11 +73,9 @@ compile(File, Module) ->
 
 compile(Binary, Module, Options) when is_binary(Binary) ->
     File = "",
-    CheckSum = "",
     case parse(Binary) of
         {ok, DjangoParseTree} ->
-            case compile_to_binary(File, DjangoParseTree, 
-                    init_dtl_context(File, Module, Options), CheckSum) of
+            case compile_to_binary(File, DjangoParseTree, init_dtl_context(File, Module, Options)) of
                 {ok, Module1, _} ->
                     {ok, Module1};
                 Err ->
@@ -93,10 +91,10 @@ compile(File, Module, Options) ->
     case parse(File, Context) of  
         ok ->
             ok;
-        {ok, DjangoParseTree, CheckSum} ->
-            case compile_to_binary(File, DjangoParseTree, Context, CheckSum) of
+        {ok, DjangoParseTree} ->
+            case compile_to_binary(File, DjangoParseTree, Context) of
                 {ok, Module1, Bin} ->
-                    OutDir = proplists:get_value(out_dir, Options, "ebin"),       
+                    OutDir = proplists:get_value(out_dir, Options, code:lib_dir(zophrenic, ebin)),       
                     BeamFile = filename:join([OutDir, atom_to_list(Module1) ++ ".beam"]),
                     case file:write_file(BeamFile, Bin) of
                         ok ->
@@ -118,10 +116,10 @@ compile(File, Module, Options) ->
 %% Internal functions
 %%====================================================================
 
-compile_to_binary(File, DjangoParseTree, Context, CheckSum) ->
+compile_to_binary(File, DjangoParseTree, Context) ->
     try body_ast(DjangoParseTree, Context, #treewalker{}) of
         {{Ast, Info}, TreeWalker} ->
-            case compile:forms(forms(File, Context#dtl_context.module, Ast, Info, CheckSum, Context, TreeWalker), 
+            case compile:forms(forms(File, Context#dtl_context.module, Ast, Info, Context, TreeWalker), 
                     Context#dtl_context.compiler_options) of
                 {ok, Module1, Bin} -> 
                     code:purge(Module1),
@@ -151,67 +149,22 @@ init_dtl_context(File, Module, Options) ->
         reader = proplists:get_value(reader, Options, Ctx#dtl_context.reader),
         finder = proplists:get_value(finder, Options, Ctx#dtl_context.finder),
         compiler_options = proplists:get_value(compiler_options, Options, Ctx#dtl_context.compiler_options),
-        force_recompile = proplists:get_value(force_recompile, Options, Ctx#dtl_context.force_recompile)}.
-
-
-is_up_to_date(_, #dtl_context{force_recompile = true}) ->
-    false;
-is_up_to_date(CheckSum, Context) ->
-    Module = Context#dtl_context.module,
-    {M,F}  = Context#dtl_context.reader,
-    case catch Module:source() of
-        {_, CheckSum} -> 
-            case catch Module:dependencies() of
-                L when is_list(L) ->
-                    RecompileList = lists:foldl(fun
-                            ({XFile, XCheckSum}, Acc) ->
-                                case catch M:F(XFile) of
-                                    {ok, Data} ->
-                                        case binary_to_list(crypto:sha(Data)) of
-                                            XCheckSum ->
-                                                Acc;
-                                            _ ->
-                                                [recompile | Acc]
-                                        end;
-                                    _ ->
-                                        [recompile | Acc]
-                                end                                        
-                        end, [], L),
-                    case RecompileList of
-                        [] -> true; 
-                        _ -> false
-                    end;
-                _ ->
-                    false
-            end;
-        _ ->
-            false
-    end.
-    
+        force_recompile = proplists:get_value(force_recompile, Options, Ctx#dtl_context.force_recompile)}.   
     
 parse(File, Context) ->  
     {M,F} = Context#dtl_context.reader,
     case catch M:F(File) of
         {ok, Data} ->
-            CheckSum = binary_to_list(crypto:sha(Data)),
-            parse(CheckSum, Data, Context);
+            case parse(Data) of
+                {ok, Val} ->
+                    {ok, Val};
+                Err ->
+                    Err
+            end;
         Error ->
             {error, io_lib:format("reading ~p failed (~p)", [File, Error])}  
     end.
         
-parse(CheckSum, Data, Context) ->
-    case is_up_to_date(CheckSum, Context) of
-        true ->
-            ok;
-        _ ->
-            case parse(Data) of
-                {ok, Val} ->
-                    {ok, Val, CheckSum};
-                Err ->
-                    Err
-            end
-    end.
-
 parse(Data) ->
     case erlydtl_scanner:scan(binary_to_list(Data)) of
         {ok, Tokens} ->
@@ -220,7 +173,7 @@ parse(Data) ->
             Err
     end.        
   
-forms(File, Module, BodyAst, BodyInfo, CheckSum, Context, TreeWalker) ->
+forms(File, Module, BodyAst, BodyInfo, Context, TreeWalker) ->
     Function2 = erl_syntax:application(none, erl_syntax:atom(render2), 
         [erl_syntax:variable("Variables"), erl_syntax:variable("ZpContext")]),
     ClauseOk = erl_syntax:clause([erl_syntax:variable("Val")], none,
@@ -231,18 +184,15 @@ forms(File, Module, BodyAst, BodyInfo, CheckSum, Context, TreeWalker) ->
         [erl_syntax:clause([erl_syntax:variable("Variables"), erl_syntax:variable("ZpContext")], none, 
             [erl_syntax:try_expr([Function2], [ClauseOk], [ClauseCatch])])]),  
      
-    SourceFunctionTuple = erl_syntax:tuple(
-        [erl_syntax:string(File), erl_syntax:string(CheckSum)]),
     SourceFunctionAst = erl_syntax:function(
         erl_syntax:atom(source),
-            [erl_syntax:clause([], none, [SourceFunctionTuple])]),
+            [ erl_syntax:clause([], none, [ erl_syntax:string(File) ]) ]),
     
     DependenciesFunctionAst = erl_syntax:function(
-        erl_syntax:atom(dependencies), [erl_syntax:clause([], none, 
-            [erl_syntax:list(lists:map(fun 
-                    ({XFile, XCheckSum}) -> 
-                        erl_syntax:tuple([erl_syntax:string(XFile), erl_syntax:string(XCheckSum)])
-                end, BodyInfo#ast_info.dependencies))])]),     
+        erl_syntax:atom(dependencies), [
+                erl_syntax:clause([], none, 
+                    [ erl_syntax:list( lists:map(fun (XFile) -> erl_syntax:string(XFile) end, BodyInfo#ast_info.dependencies)) ])
+            ]),     
 
 	BodyLanguageAst = erl_syntax:match_expr(
 							erl_syntax:variable("Language"),
@@ -300,7 +250,7 @@ body_ast([{extends, {string_literal, _Pos, String}} | ThisParseTree], Context, T
                     throw({error, "Circular file inclusion: " ++ File});
                 _ ->
                     case parse(File, Context) of
-                        {ok, ParentParseTree, CheckSum} ->
+                        {ok, ParentParseTree} ->
                             BlockDict = lists:foldl(
                                 fun
                                     ({block, {identifier, _, Name}, Contents}, Dict) ->
@@ -308,7 +258,7 @@ body_ast([{extends, {string_literal, _Pos, String}} | ThisParseTree], Context, T
                                     (_, Dict) ->
                                         Dict
                                 end, dict:new(), ThisParseTree),
-                            with_dependency({File, CheckSum}, body_ast(ParentParseTree, Context#dtl_context{
+                            with_dependency(File, body_ast(ParentParseTree, Context#dtl_context{
                                 block_dict = dict:merge(fun(_Key, _ParentVal, ChildVal) -> ChildVal end,
                                     BlockDict, Context#dtl_context.block_dict),
                                         parse_trail = [File | Context#dtl_context.parse_trail]}, TreeWalker));
@@ -545,12 +495,12 @@ include_ast(File, Args, All, Context, TreeWalker) ->
             % {AstList, Info, TreeWalker}
             IncludeFun = fun(FilePath, {AstList, InclInfo, TreeW}) ->
                     case parse(FilePath, Context) of
-                        {ok, InclusionParseTree, CheckSum} ->
+                        {ok, InclusionParseTree} ->
                             AutoIdVar = "AutoId_"++zp_ids:identifier(),
                             IncludeScope = [ {'$autoid', erl_syntax:variable(AutoIdVar)} | ScopedArgs ],
 
                             {{Ast,Info}, InclTW2} = 
-                                            with_dependency({FilePath, CheckSum}, 
+                                            with_dependency(FilePath, 
                                                     body_ast(
                                                         InclusionParseTree,
                                                         Context#dtl_context{
@@ -978,8 +928,8 @@ tag_ast(Name, Args, All, Context, TreeWalker) ->
             case Context#dtl_context.custom_tags_dir of
                 [] ->
                     case parse(DefaultFilePath, Context) of
-                        {ok, TagParseTree, CheckSum} ->
-                            tag_ast2({DefaultFilePath, CheckSum}, TagParseTree, InterpretedArgs, Context, TreeWalker1);
+                        {ok, TagParseTree} ->
+                            tag_ast2(DefaultFilePath, TagParseTree, InterpretedArgs, Context, TreeWalker1);
                         _ ->
                             Reason = lists:concat(["Loading tag source for '", Name, "' failed: ", 
                                 DefaultFilePath]),
@@ -988,12 +938,12 @@ tag_ast(Name, Args, All, Context, TreeWalker) ->
                 _ ->
                     CustomFilePath = filename:join([Context#dtl_context.custom_tags_dir, Name]),
                     case parse(CustomFilePath, Context) of
-                        {ok, TagParseTree, CheckSum} ->
-                            tag_ast2({CustomFilePath, CheckSum},TagParseTree, InterpretedArgs, Context, TreeWalker1);
+                        {ok, TagParseTree} ->
+                            tag_ast2(CustomFilePath,TagParseTree, InterpretedArgs, Context, TreeWalker1);
                         _ ->
                             case parse(DefaultFilePath, Context) of
-                                {ok, TagParseTree, CheckSum} ->
-                                    tag_ast2({DefaultFilePath, CheckSum}, TagParseTree, InterpretedArgs, Context, TreeWalker1);
+                                {ok, TagParseTree} ->
+                                    tag_ast2(DefaultFilePath, TagParseTree, InterpretedArgs, Context, TreeWalker1);
                                 _ ->
                                     Reason = lists:concat(["Loading tag source for '", Name, "' failed: ", 
                                         CustomFilePath, ", ", DefaultFilePath]),
@@ -1007,8 +957,8 @@ tag_ast(Name, Args, All, Context, TreeWalker) ->
             scomp_ast(Name, Args, All, Context, TreeWalker)
     end.
  
- tag_ast2({Source, _} = Dep, TagParseTree, InterpretedArgs, Context, TreeWalker) ->
-    with_dependency(Dep, body_ast(TagParseTree, Context#dtl_context{
+ tag_ast2(Source, TagParseTree, InterpretedArgs, Context, TreeWalker) ->
+    with_dependency(Source, body_ast(TagParseTree, Context#dtl_context{
         local_scopes = [ InterpretedArgs | Context#dtl_context.local_scopes ],
         parse_trail = [ Source | Context#dtl_context.parse_trail ]}, TreeWalker)).
 

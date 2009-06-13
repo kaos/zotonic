@@ -4,6 +4,7 @@
 %%
 %% @doc Implements the module extension mechanisms for scomps, templates, actions etc.  Scans all active modules
 %% for scomps (etc) and maintains lookup lists for when the system tries to find a scomp (etc).
+%% @todo Make the lookup lists dependent on the host of the context (hosts have different modules enabled).
 
 -module(zp_module_indexer).
 -author("Marc Worrell <marc@worrell.nl").
@@ -122,12 +123,15 @@ handle_cast({{module_ready}, Context}, State) ->
         templates  = proplists:get_value(template, Scanned),
         lib        = proplists:get_value(lib, Scanned)
     },
+    % Reset the template server after reindexing the templates, the templates might originate now from
+    % different modules than before, or are using templates that are not available anymore.
+    zp_template:reset(Context),
     {noreply, State1};
+
 
 %% @doc Trap unknown casts
 handle_cast(Message, State) ->
     {stop, {unknown_cast, Message}, State}.
-
 
 
 %% @spec handle_info(Info, State) -> {noreply, State} |
@@ -136,6 +140,7 @@ handle_cast(Message, State) ->
 %% @doc Handling all non call/cast messages
 handle_info(_Info, State) ->
     {noreply, State}.
+
 
 %% @spec terminate(Reason, State) -> void()
 %% @doc This function is called by a gen_server when it is about to
@@ -149,7 +154,6 @@ terminate(_Reason, _State) ->
 
 %% @spec code_change(OldVsn, State, Extra) -> {ok, NewState}
 %% @doc Convert process state when code is changed
-
 code_change(_OldVsn, State, _Extra) ->
     {ok, State}.
 

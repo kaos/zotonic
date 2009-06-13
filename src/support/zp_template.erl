@@ -2,6 +2,7 @@
 %% @copyright 2009 Marc Worrell
 
 %% @doc Template handling, compiles and renders django compatible templates using an extended version of erlydtl
+%% @todo Make the template handling dependent on the host of the context (hosts have different modules enabled).
 
 -module(zp_template).
 -behaviour(gen_server).
@@ -15,11 +16,17 @@
 -include_lib("zophrenic.hrl").
 
 %% External exports
--export([compile/2, render/3, find_template/2, find_template/3]).
+-export([compile/2, render/3, find_template/2, find_template/3, reset/1]).
 
+-record(state, {reset_date_time}).
 
 start_link() -> 
     gen_server:start_link({local, ?MODULE}, ?MODULE, [], []).
+
+
+%% @doc Force a reset of all templates, used after a module has been activated or deactivated.
+reset(_Context) ->
+    gen_server:cast(?MODULE, reset).
 
 
 %% @spec render(File, Variables, Context) -> iolist()
@@ -80,11 +87,17 @@ find_template(File, true, Context) ->
     zp_module_indexer:find_all(template, File, Context).
 
 
+%%====================================================================
+%% gen_server callbacks
+%%====================================================================
 
-%% @spec init([]) -> {ok, [])}
-%% @doc Initialize the template server, handles template compiles and rendering
-init(Options) ->
-    {ok, Options}.
+%% @spec init(Args) -> {ok, State} |
+%%                     {ok, State, Timeout} |
+%%                     ignore               |
+%%                     {stop, Reason}
+%% @doc Initialize the template server, handles template compiles and rendering.
+init(_Options) ->
+    {ok, #state{reset_date_time=calendar:local_time()}}.
 
 
 %% @spec check_modified(File) -> {ok, Module} | {error, Reason}
@@ -92,7 +105,7 @@ init(Options) ->
 handle_call({check_modified, File}, _From, State) ->
     ModuleName = filename_to_modulename(File),
     Module = list_to_atom(ModuleName),
-    Result = case template_is_modified(File, ModuleName) of
+    Result = case template_is_modified(File, ModuleName, State#state.reset_date_time) of
                 true  -> modified;
                 false -> {ok, Module}
              end,
@@ -113,8 +126,12 @@ handle_call({compile, File, Context}, _From, State) ->
                  end,
     {reply, ErlyResult, State}.
 
+%% @doc Reset all compiled templates, done by the module_indexer after the module list changed.
+handle_cast(reset, State) -> 
+    {noreply, State#state{reset_date_time=calendar:local_time()}};
+handle_cast(_Msg, State) -> 
+    {noreply, State}.
 
-handle_cast(_Msg, State) -> {noreply, State}.
 handle_info(_Msg, State) -> {noreply, State}.
 
 terminate(_Reason, _State) ->
@@ -144,7 +161,7 @@ savechar(_C) ->
 
 
 %% Check if the template or one of the by the template included files is modified with respect to the beam file
-template_is_modified(File, ModuleName) ->
+template_is_modified(File, ModuleName, ResetDateTime) ->
     BeamFile = filename:join("ebin", ModuleName ++ ".beam"),
     case filelib:is_file(BeamFile) of
         true ->
@@ -152,10 +169,12 @@ template_is_modified(File, ModuleName) ->
             case filelib:last_modified(BeamFile) of
                 0 ->
                     true; 
+                BeamMod when BeamMod =< ResetDateTime ->
+                    ?DEBUG({BeamMod, ResetDateTime, "modified due to reset"}),
+                    true;
                 BeamMod ->
-                    Deps  = Module:dependencies(),
-                    Files = lists:map(fun({F,_CheckSum}) -> F end, Deps),
-                    is_modified([File|Files], BeamMod)
+                    Deps = Module:dependencies(),
+                    is_modified([File|Deps], BeamMod)
             end;
         false ->
             true
