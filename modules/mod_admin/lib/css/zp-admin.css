@@ -214,6 +214,12 @@ h3.above-item {
 	position: relative;
 }
 
+    h3.above-list button {
+        float: none;
+        display: inline;
+        margin: 0px;    
+    }
+
 	.above-item-all-corners {
 		-moz-border-radius: 5px;
 		-webkit-border-radius: 5px;

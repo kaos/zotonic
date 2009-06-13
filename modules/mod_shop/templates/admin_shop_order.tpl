@@ -12,7 +12,7 @@
 
 			{% pager result=result dispatch="admin_shop_order" qargs %}
 			
-			<h3 class="above-list">Skus</h3>
+			<h3 class="above-list">Orders</h3>
 			<ul class="short-list">
 				<li class="headers clearfix">
 					<span class="zp-5">Order Nr</span>
@@ -47,7 +47,7 @@
 				{% endwith %}
 			{% empty %}
 				<li>
-					No skus found.
+					No orders found.
 				</li>
 			{% endfor %}
 			</ul>

@@ -20,7 +20,7 @@
 
 %% interface functions
 -export([
-    observe/2
+    observe/2, to_tsquery/2
 ]).
 
 -include("zophrenic.hrl").

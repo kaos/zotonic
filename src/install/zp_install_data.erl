@@ -49,6 +49,7 @@ install_modules(C) ->
         "mod_search",
         "mod_admin",
         "mod_admin_modules",
+        "mod_admin_users",
         "mod_emailer",
         "mod_shop"
     ],

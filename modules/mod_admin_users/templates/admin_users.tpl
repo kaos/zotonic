@@ -1,28 +1,40 @@
 {% extends "admin_base.tpl" %}
 
-{% block title %} admin overview {% endblock %}
+{% block title %} users overview {% endblock %}
 
 {% block content %}
 	<div id="content" class="zp-100">
 		<div class="block clearfix">
 
-		<h2>Zophrenic Page Overview</h2>
+		<h2>Zophrenic User Overview</h2>
+		
+		<p>Every page/person can be made into an user on the edit page.  The difference between an user and a normal page is only
+			that the former has logon credentials attached to its page record.</p>
+	
 		<div class="clearfix">
 			{% button class="" text="Make a new page" action={dialog_new_rsc title=""} %}
+
+			<div class="quick-search-wrapper right">
+				<form method="get" action="{% url admin_user %}">
+					<input type="text" name="qs" value="{{ q.qs|escape }}" class="left" />
+					<button>Search user</button>
+				</form>
+			</div>
 		</div>
 
-		{% with m.search.paged[{fulltext cat=q.qcat text=q.qs page=q.page}] as result %}
+		{% with m.search.paged[{users text=q.qs page=q.page}] as result %}
 
 			{% pager result=result dispatch="admin_overview_rsc" qargs %}
 			
 			<h3 class="above-list ">
-				Pages overview{% if q.qs %}, 
-				matching “{{ q.qs|escape }}”
-				{% button text="show all" action={redirect dispatch="admin_overview_rsc"} %}
-			{% endif %}</h3>
+				Users overview{% if q.qs %}, 
+					matching “{{ q.qs|escape }}”
+					{% button text="show all" action={redirect dispatch="admin_user"} %}
+				{% endif %}
+			</h3>
 			<ul class="short-list">
 				<li class="headers clearfix">
-					<span class="zp-30">Title</span>
+					<span class="zp-30">Name</span>
 					<span class="zp-15">Category</span>
 					<span class="zp-15">Modified on</span>
 					<span class="zp-15">Modified by</span>
@@ -46,7 +58,7 @@
 				</li>
 			{% empty %}
 				<li>
-					No pages found.
+					No users found.
 				</li>
 			{% endfor %}
 			</ul>
