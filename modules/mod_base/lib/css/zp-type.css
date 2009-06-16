@@ -27,20 +27,22 @@ h2,
 h3.block { 
 	font-size: 18px;   	
 	line-height: 27px; 
-	color: #eeb714; 
+	color: #1a596e; 
 	font-weight: normal;
 	background: #fff;
 	padding: 0 0 0 8px;
 	margin: 0 0 2px 0;
 	border: none;
+	text-transform: lowercase;
 }
 
 h3.in-block { 
 	font-size: 18px;   	
 	line-height: 18px; 
-	color: #eeb714; 
+	color: #1a596e; 
 	font-weight: normal;
 	float: left;
+	text-transform: lowercase;
 }
 
 .header-alone {

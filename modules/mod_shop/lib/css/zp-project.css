@@ -142,7 +142,7 @@ body {
 }
 
 ul#navigation { 
-	padding: 0 0 0 122px;
+	padding: 0;
 }
 
 ul#navigation li { 
@@ -155,15 +155,20 @@ ul#navigation li {
 }
 
 	ul#navigation li.first {
-		margin: 0 0 0 10px;
+		margin: 0;
 	}
 
+	ul#navigation li.logo {
+		display: block;
+		float: none;
+	}
+	
 	ul#navigation li.logo h1 {
 		position: absolute;
-		top: -63px;
+		top: -31px;
 		left: 0;
 		width: 149px;
-		height: 94px;
+		height: 27px;
 		border: none;
 	}
 	
@@ -172,7 +177,7 @@ ul#navigation li {
 	}
 	
 		ul#navigation li.logo h1 a {
-			height: 94px;
+			height: 27px;
 		}
 	
 		ul#navigation li.logo h1 a,
@@ -477,7 +482,7 @@ ul#navigation li.lang a.english {
 	.cart-product-price button,
 	button.buy-me {
 		margin: 0 0 0 3px;
-		color: #ffd65d;
+		color: #fff;
 		background: #444 url(/lib/images/button-buy-me.png) repeat-x top;
 		padding: 2px 3px;
 		border: 1px solid #444;
@@ -486,7 +491,7 @@ ul#navigation li.lang a.english {
 		
 		.product-price button:hover,
 		.cart-product-price button:hover {
-			background: #000;
+			background: #1A596E;
 		}
 	
 	#product-notice {

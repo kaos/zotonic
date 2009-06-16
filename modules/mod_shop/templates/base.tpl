@@ -28,10 +28,9 @@
 		<div id="header" class="zp-100 clearfix">
 			
 			{% include "_shopping_card_small.tpl" %}
-			
 			<div class="navigation-wrapper clearfix">
 				<!-- Main navigation -->
-				<ul id="navigation" class="zp-60">
+				<ul id="navigation" class="zp-70">
 					<li class="logo">
 						<h1>
 							<a href="/" title="Mijn Fietsen">
@@ -42,11 +41,11 @@
 							</a>
 						</h1>
 					</li>
-
-					{# <li class="first"><a href="/compare/mtb/1" title="compare-bikes">Fietsen</a></li> #}
+						
+					<li class="first"><a href="/" title="Home">Home</a></li>
 
 					{% for cat in m.category.product.tree1 %}
-						<li class="{% if forloop.first %} first {% endif %} "><a href="{% url overview cat=cat.name %}" title="{{ cat.title }}">{{ cat.title }}</a></li>
+						<li><a href="{% url overview cat=cat.name %}" title="{{ cat.title }}">{{ cat.title }}</a></li>
 					{% endfor %}
 
 					<li class="lang" title="Nederlands"><a href="#" title="Nederlands" class="dutch"><span>Nederlands</span></a></li>
