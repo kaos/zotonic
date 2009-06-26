@@ -25,9 +25,9 @@
 -export([do_log/1]).
 -include("webmachine_logger.hrl").
 
-handle_request(Req, Pid) ->
+handle_request(Req, Resource) ->
     put(req, Req),
-    put(pid, Pid),
+    put(resource, Resource),
     try
         d(v3b13)
     catch
@@ -49,10 +49,11 @@ d(DecisionID) ->
     decision(DecisionID).
     
 respond(Code) ->
+    Resource = get(resource),
     EndTime = now(),
     case Code of
 	404 ->
-	    ErrorHandler = webmachine_dispatcher:get_error_handler(),
+	    {ok, ErrorHandler} = application:get_env(webmachine, error_handler),
 	    Reason = {none, none, []},
 	    ErrorHTML = ErrorHandler:render_error(Code, get(req), Reason),
             wrcall({set_resp_body, ErrorHTML});
@@ -80,7 +81,7 @@ respond(Code) ->
     LogData = LogData0#wm_log_data{resource_module=RMod,
 				   end_time=EndTime},
     spawn(fun() -> do_log(LogData) end),
-    webmachine_resource:stop(get(pid)),
+    Resource:stop(),
     Req = get(req),
     Req:stop().
 
@@ -89,7 +90,7 @@ respond(Code, Headers) ->
     respond(Code).
 
 error_response(Code, Reason) ->
-    ErrorHandler = webmachine_dispatcher:get_error_handler(),
+    {ok, ErrorHandler} = application:get_env(webmachine, error_handler),
     ErrorHTML = ErrorHandler:render_error(Code, get(req), Reason),
     wrcall({set_resp_body, ErrorHTML}),
     respond(Code).
@@ -127,9 +128,15 @@ do_log(LogData) ->
 	    ignore
     end.
 
-resource_call(Fun) -> webmachine_resource:do(Fun, get()).
+resource_call(Fun) ->
+    Resource = get(resource),
+    {Reply, NewResource} = Resource:do(Fun,get()),
+    put(resource, NewResource),
+    Reply.
 
-log_decision(DecisionID) -> webmachine_resource:log_d(DecisionID,get()).
+log_decision(DecisionID) -> 
+    Resource = get(resource),
+    Resource:log_d(DecisionID).
 
 %% "Service Available"
 decision(v3b13) ->	
@@ -490,7 +497,7 @@ decision(v3o18) ->
         {halt, Code} -> respond(Code);
         nop -> d(v3o18b);
         _ -> wrcall({set_resp_body,
-                     encode_body(iolist_to_binary(FinalBody))}),
+                     encode_body(FinalBody)}),
              d(v3o18b)
     end;
 
@@ -545,7 +552,18 @@ encode_body(Body) ->
     ChosenEnc = wrcall({get_metadata, 'content-encoding'}),
     Encoder = hd([Fun || {Enc,Fun} <- resource_call(encodings_provided),
                          ChosenEnc =:= Enc]),
-    Encoder(Charsetter(Body)).
+    case Body of
+        {stream, StreamBody} ->
+            {stream, make_encoder_stream(Encoder, Charsetter, StreamBody)};
+        _ ->
+            Encoder(Charsetter(iolist_to_binary(Body)))
+    end.
+
+make_encoder_stream(Encoder, Charsetter, {Body, done}) ->
+    {Encoder(Charsetter(Body)), done};
+make_encoder_stream(Encoder, Charsetter, {Body, Next}) ->
+    {Encoder(Charsetter(Body)),
+     fun() -> make_encoder_stream(Encoder, Charsetter, Next()) end}.
             
 choose_encoding(AccEncHdr) ->
     Encs = [Enc || {Enc,_Fun} <- resource_call(encodings_provided)],

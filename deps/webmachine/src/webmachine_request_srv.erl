@@ -25,11 +25,8 @@
 -include("webmachine_logger.hrl").
 -include_lib("include/wm_reqdata.hrl").
 
--define(WMVSN, "1.1").
--define(QUIP, "Doing it live.").
-
-% Maximum recv_body() length of 50MB
--define(MAX_RECV_BODY, (50*(1024*1024))).
+-define(WMVSN, "1.3").
+-define(QUIP, "scale automagically into the cloud").
 
 % 120 second default idle timeout
 -define(IDLE_TIMEOUT, infinity).
@@ -38,6 +35,7 @@
 		range=undefined,
 		peer=undefined,
                 reqdata=undefined,
+                bodyfetch=undefined,
 		log_data=#wm_log_data{}
 	       }).
 
@@ -51,8 +49,7 @@ init([Socket, Method, RawPath, Version, Headers]) ->
     %% client IP address but it will do for now.
     {Peer, State} = get_peer(#state{socket=Socket,
          reqdata=wrq:create(Method,Version,RawPath,Headers)}),
-    BodyState = do_recv_body(State#state{
-                               reqdata=wrq:set_peer(Peer,State#state.reqdata)}),
+    PeerState = State#state{reqdata=wrq:set_peer(Peer,State#state.reqdata)},
     LogData = #wm_log_data{start_time=now(),
 			   method=Method,
 			   headers=Headers,
@@ -61,15 +58,23 @@ init([Socket, Method, RawPath, Version, Headers]) ->
 			   version=Version,
 			   response_code=404,
 			   response_length=0},
-    {ok, BodyState#state{log_data=LogData}}.
+    {ok, PeerState#state{log_data=LogData}}.
 
 handle_call(socket, _From, State) ->
     Reply = State#state.socket,
     {reply, Reply, State};
 handle_call(get_reqdata, _From, State) ->
     {reply, State#state.reqdata, State};
-handle_call({set_reqdata, RD}, _From, State) ->
-    {reply, ok, State#state{reqdata=RD}};
+handle_call({set_reqdata, RD=#wm_reqdata{req_body=RBody}}, _From, State) ->
+    TheRD = case RBody of
+        not_fetched_yet ->
+            OldRD = State#state.reqdata,
+            OldBody = OldRD#wm_reqdata.req_body,
+            RD#wm_reqdata{req_body=OldBody};
+        _ ->
+            RD
+    end,
+    {reply, ok, State#state{reqdata=TheRD}};
 handle_call(method, _From, State) ->
     {reply, wrq:method(State#state.reqdata), State};
 handle_call(version, _From, State) ->
@@ -78,6 +83,24 @@ handle_call(raw_path, _From, State) ->
     {reply, wrq:raw_path(State#state.reqdata), State};
 handle_call(req_headers, _From, State) ->
     {reply, wrq:req_headers(State#state.reqdata), State};
+handle_call(req_body, _From, State=#state{bodyfetch=stream}) ->
+    {reply, stream_conflict, State};
+handle_call({req_body, MaxRecvBody}, _From, State0=#state{reqdata=RD0}) ->
+    RD=RD0#wm_reqdata{max_recv_body=MaxRecvBody},
+    State=State0#state{reqdata=RD},
+    {Body, FinalState} = case RD#wm_reqdata.req_body of
+        not_fetched_yet ->
+            NewBody = do_recv_body(State),
+            NewRD = RD#wm_reqdata{req_body=NewBody},
+            {NewBody, State#state{bodyfetch=standard,reqdata=NewRD}};
+        X ->
+            {X, State#state{bodyfetch=standard}}
+    end,
+    {reply, Body, FinalState};
+handle_call({stream_req_body,_}, _From, State=#state{bodyfetch=standard}) ->
+    {reply, stream_conflict, State};
+handle_call({stream_req_body, MaxHunk}, _From, State) ->
+    {reply, recv_stream_body(State, MaxHunk), State#state{bodyfetch=stream}};
 handle_call(resp_headers, _From, State) ->
     {reply, wrq:resp_headers(State#state.reqdata), State};
 handle_call(resp_redirect, _From, State) ->
@@ -179,11 +202,11 @@ handle_call(req_cookie, _From, State) ->
     {reply, wrq:req_cookie(State#state.reqdata), State};
 handle_call(req_qs, _From, State) ->
     {reply, wrq:req_qs(State#state.reqdata), State};
-handle_call({load_dispatch_data, PathProps, PathTokens, AppRoot, DispPath},
+handle_call({load_dispatch_data, PathProps,PathTokens,AppRoot,DispPath,WMReq},
             _From, State) ->
     PathInfo = dict:from_list(PathProps),
     NewState = State#state{reqdata=wrq:load_dispatch_data(
-                 PathInfo, PathTokens, AppRoot, DispPath, State#state.reqdata)},
+               PathInfo,PathTokens,AppRoot,DispPath,WMReq,State#state.reqdata)},
     {reply, ok, NewState};
 handle_call(log_data, _From, State) -> {reply, State#state.log_data, State}.
 
@@ -231,11 +254,28 @@ get_outheader_value(K, State) ->
       wrq:resp_headers(State#state.reqdata)), State}.
 
 send(Socket, Data) ->
-    case gen_tcp:send(Socket, Data) of
+    case gen_tcp:send(Socket, iolist_to_binary(Data)) of
 	ok -> ok;
 	{error,closed} -> ok;
 	_ -> exit(normal)
     end.
+
+send_stream_body(Socket, X) -> send_stream_body(Socket, X, 0).
+send_stream_body(Socket, {Data, done}, SoFar) ->
+    Size = send_chunk(Socket, Data),
+    send_chunk(Socket, <<>>),
+    Size + SoFar;
+send_stream_body(Socket, {Data, Next}, SoFar) ->
+    Size = send_chunk(Socket, Data),
+    send_stream_body(Socket, Next(), Size + SoFar).
+
+send_chunk(Socket, Data) ->
+    Size = iolist_size(Data),
+    send(Socket, mochihex:to_hex(Size)),
+    send(Socket, <<"\r\n">>),
+    send(Socket, Data),
+    send(Socket, <<"\r\n">>),
+    Size.
 
 send_ok_response(200, InitState) ->
     RD0 = InitState#state.reqdata,
@@ -244,8 +284,7 @@ send_ok_response(200, InitState) ->
 	X when X =:= undefined; X =:= fail ->
 	    send_response(200, State);
 	Ranges ->
-	    {PartList, Size} = range_parts(
-                   wrq:resp_body(RD0), Ranges),
+	    {PartList, Size} = range_parts(RD0, Ranges),
 	    case PartList of
 		[] -> %% no valid ranges
 		    %% could be 416, for now we'll just return 200
@@ -263,18 +302,26 @@ send_ok_response(200, InitState) ->
     end.
 
 send_response(Code, State=#state{reqdata=RD}) ->
-    Length = iolist_size([wrq:resp_body(RD)]),
+    Body0 = wrq:resp_body(RD),
+    {Body,Length} = case Body0 of
+        {stream, StreamBody} -> {StreamBody, chunked};
+        _ -> {Body0, iolist_size([Body0])}
+    end,
     send(State#state.socket,
 	 [make_version(wrq:version(RD)),
           make_code(Code), <<"\r\n">> | 
          make_headers(Code, Length, RD)]),
-    case wrq:method(RD) of 
-	'HEAD' -> ok;
-	_ -> send(State#state.socket, [wrq:resp_body(RD)])
+    FinalLength = case wrq:method(RD) of 
+	'HEAD' -> Length;
+	_ -> 
+            case Length of
+                chunked -> send_stream_body(State#state.socket, Body);
+                _ -> send(State#state.socket, Body), Length
+            end
     end,
     InitLogData = State#state.log_data,
     FinalLogData = InitLogData#wm_log_data{response_code=Code,
-					   response_length=Length},
+					   response_length=FinalLength},
     {ok, State#state{reqdata=wrq:set_response_code(Code, RD),
                      log_data=FinalLogData}}.
 
@@ -284,28 +331,37 @@ body_length(State) ->
     case get_header_value("transfer-encoding", State) of
         {undefined, _} ->
             case get_header_value("content-length", State) of
-                {undefined, _} -> 
-                    undefined;
-                {Length, _} ->
-                    list_to_integer(Length)
+                {undefined, _} -> undefined;
+                {Length, _} -> list_to_integer(Length)
             end;
-        {"chunked", _} -> 
-            chunked;
-        Unknown ->
-            {unknown_transfer_encoding, Unknown}
+        {"chunked", _} -> chunked;
+        Unknown -> {unknown_transfer_encoding, Unknown}
     end.
 
 %% @spec do_recv_body(state()) -> binary()
 %% @doc Receive the body of the HTTP request (defined by Content-Length).
 %%      Will only receive up to the default max-body length
 do_recv_body(State=#state{reqdata=RD}) ->
-    State#state{reqdata=wrq:set_req_body(
-                             do_recv_body(State, ?MAX_RECV_BODY), RD)}.
+    MRB = RD#wm_reqdata.max_recv_body,
+    read_whole_stream(recv_stream_body(State, MRB), [], MRB, 0).
 
-%% @spec do_recv_body(state(), integer()) -> {binary(), state()}
-%% @doc Receive the body of the HTTP request (defined by Content-Length).
-%%      Will receive up to MaxBody bytes. 
-do_recv_body(State = #state{reqdata=RD}, MaxBody) ->
+read_whole_stream({Hunk,_}, _, MaxRecvBody, SizeAcc)
+  when SizeAcc + byte_size(Hunk) > MaxRecvBody -> 
+    {error, req_body_too_large};
+read_whole_stream({Hunk,Next}, Acc0, MaxRecvBody, SizeAcc) ->
+    HunkSize = byte_size(Hunk),
+    if SizeAcc + HunkSize > MaxRecvBody -> 
+            {error, req_body_too_large};
+       true ->
+            Acc = [Hunk|Acc0],
+            case Next of
+                done -> iolist_to_binary(lists:reverse(Acc));
+                _ -> read_whole_stream(Next(), Acc,
+                                       MaxRecvBody, SizeAcc + HunkSize)
+            end
+    end.
+
+recv_stream_body(State = #state{reqdata=RD}, MaxHunkSize) ->
     case get_header_value("expect", State) of
 	{"100-continue", _} ->
 	    send(State#state.socket, 
@@ -314,37 +370,61 @@ do_recv_body(State = #state{reqdata=RD}, MaxBody) ->
 	_Else ->
 	    ok
     end,
-    Body = case body_length(State) of
-               undefined ->
-                   undefined;
-               {unknown_transfer_encoding, Unknown} -> 
-                   exit({unknown_transfer_encoding, Unknown});
-               0 ->
-                   <<>>;
-               Length when is_integer(Length), Length =< MaxBody ->
-                   %% @todo When multipart/form-data, wait with receiving until called again.
-                   recv(State, Length);
-               Length ->
-                   exit({body_too_large, Length})
-           end,
-    Body.
+    case body_length(State) of
+        {unknown_transfer_encoding, X} -> exit({unknown_transfer_encoding, X});
+        undefined -> {<<>>, done};
+        0 -> {<<>>, done};
+        chunked -> recv_chunked_body(State#state.socket, MaxHunkSize);
+        Length -> recv_unchunked_body(State#state.socket, MaxHunkSize, Length)
+    end.
 
-%% @spec recv(state(), integer()) -> binary()
-%% @doc Receive Length bytes from the client as a binary, with the default
-%%      idle timeout.
-recv(State, Length) -> recv(State, Length, ?IDLE_TIMEOUT).
+recv_unchunked_body(Socket, MaxHunk, DataLeft) ->
+    case MaxHunk >= DataLeft of
+        true ->
+            {ok,Data1} = gen_tcp:recv(Socket,DataLeft,?IDLE_TIMEOUT),
+            {Data1, done};
+        false ->
+            {ok,Data2} = gen_tcp:recv(Socket,MaxHunk,?IDLE_TIMEOUT),
+            {Data2,
+             fun() -> recv_unchunked_body(
+                        Socket, MaxHunk, DataLeft-MaxHunk)
+             end}
+    end.
+    
+recv_chunked_body(Socket, MaxHunk) ->
+    case read_chunk_length(Socket) of
+        0 -> {<<>>, done};
+        ChunkLength -> recv_chunked_body(Socket,MaxHunk,ChunkLength)
+    end.
+recv_chunked_body(Socket, MaxHunk, LeftInChunk) ->
+    case MaxHunk >= LeftInChunk of
+        true ->
+            {ok,Data1} = gen_tcp:recv(Socket,LeftInChunk,?IDLE_TIMEOUT),
+            {Data1,
+             fun() -> recv_chunked_body(Socket, MaxHunk)
+             end};
+        false ->
+            {ok,Data2} = gen_tcp:recv(Socket,MaxHunk,?IDLE_TIMEOUT),
+            {Data2,
+             fun() -> recv_chunked_body(Socket, MaxHunk, LeftInChunk-MaxHunk)
+             end}
+    end.
 
-%% @spec recv(state(), integer(), integer()) -> binary()
-%% @doc Receive Length bytes from the client as a binary, with the given
-%%      Timeout in msec.
-recv(State, Length, Timeout) ->
-    Socket = State#state.socket,
-    case gen_tcp:recv(Socket, Length, Timeout) of
-	{ok, Data} ->
-	    Data;
-	_R ->
-	    io:format("got socket error ~p~n", [_R]),
-	    exit(normal)
+read_chunk_length(Socket) ->
+    inet:setopts(Socket, [{packet, line}]),
+    case gen_tcp:recv(Socket, 0, ?IDLE_TIMEOUT) of
+        {ok, Header} ->
+            inet:setopts(Socket, [{packet, raw}]),
+            Splitter = fun (C) ->
+                               C =/= $\r andalso C =/= $\n andalso C =/= $
+                       end,
+            {Hex, _Rest} = lists:splitwith(Splitter, binary_to_list(Header)),
+            case Hex of
+                [] -> 0;
+                _ -> erlang:list_to_integer(Hex, 16)
+            end;
+        _ ->
+            exit(normal)
     end.
 
 get_range(State) ->
@@ -356,7 +436,7 @@ get_range(State) ->
 	    {Range, State#state{range=Range}}
     end.
 
-range_parts({file, IoDevice}, Ranges) ->
+range_parts(_RD=#wm_reqdata{resp_body={file, IoDevice}}, Ranges) ->
     Size = iodevice_size(IoDevice),
     F = fun (Spec, Acc) ->
                 case range_skip_length(Spec, Size) of
@@ -374,7 +454,12 @@ range_parts({file, IoDevice}, Ranges) ->
                            LocNums, Data),
     {Bodies, Size};
 
-range_parts(Body0, Ranges) ->
+range_parts(RD=#wm_reqdata{resp_body={stream, {Hunk,Next}}}, Ranges) ->
+    % for now, streamed bodies are read in full for range requests
+    MRB = RD#wm_reqdata.max_recv_body,
+    range_parts(read_whole_stream({Hunk,Next}, [], MRB, 0), Ranges);
+
+range_parts(_RD=#wm_reqdata{resp_body=Body0}, Ranges) ->
     Body = iolist_to_binary(Body0),
     Size = size(Body),
     F = fun(Spec, Acc) ->
@@ -495,8 +580,16 @@ make_headers(Code, Length, RD) ->
         304 ->
             mochiweb_headers:make(wrq:resp_headers(RD));
         _ -> 
-            mochiweb_headers:enter("Content-Length",integer_to_list(Length),
-                 mochiweb_headers:make(wrq:resp_headers(RD)))
+            case Length of
+                chunked ->
+                    mochiweb_headers:enter(
+                      "Transfer-Encoding","chunked",
+                      mochiweb_headers:make(wrq:resp_headers(RD)));
+                _ ->
+                    mochiweb_headers:enter(
+                      "Content-Length",integer_to_list(Length),
+                      mochiweb_headers:make(wrq:resp_headers(RD)))
+            end
     end,
     ServerHeader = "MochiWeb/1.1 WebMachine/" ++ ?WMVSN ++ " (" ++ ?QUIP ++ ")",
     WithSrv = mochiweb_headers:enter("Server", ServerHeader, Hdrs0),

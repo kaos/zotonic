@@ -22,7 +22,7 @@
 
 -define(CHUNKSIZE, 4096).
 
--record(mp, {state, boundary, content_length, length, buffer, callback, progress, context}).
+-record(mp, {state, boundary, content_length, length, buffer, next_chunk, callback, progress, context}).
 
 
 %% @doc Receive and parse the form data in the request body.  
@@ -113,7 +113,7 @@ parse_multipart_request(ProgressFunction, Callback, Context) ->
     Boundary = iolist_to_binary(get_boundary(wrq:get_req_header("content-type", ReqData))),
     Prefix = <<"\r\n--", Boundary/binary>>,
     BS = size(Boundary),
-    Chunk = read_chunk(ReqData, Length, Length),
+    {Chunk, Next} = wrq:stream_req_body(ReqData, ?CHUNKSIZE),
     Length1 = Length - size(Chunk),
     <<"--", Boundary:BS/binary, "\r\n", Rest/binary>> = Chunk,
     feed_mp(headers, #mp{boundary=Prefix,
@@ -122,6 +122,7 @@ parse_multipart_request(ProgressFunction, Callback, Context) ->
                          buffer=Rest,
                          callback=Callback,
                          progress=ProgressFunction,
+                         next_chunk=Next,
                          context=Context}).
 
 
@@ -160,26 +161,17 @@ feed_mp(body, State=#mp{boundary=Prefix, buffer=Buffer, callback=Callback}) ->
 
 
 
-%% @doc Receive the next chunck of data, max ?CHUNKSIZE bytes at a time.
-%% Returns the received chunck and the new webmachine reqdata
-%% @spec read_chunk(ReqData, ContentLength, Length) -> binary()
-read_chunk(ReqData, ContentLength, Length) when Length > 0 ->
-    case Length of
-        Length when Length < ?CHUNKSIZE ->
-            wrq:req_body(ContentLength - Length, Length, ReqData);
-        _ ->
-            wrq:req_body(ContentLength - Length, ?CHUNKSIZE, ReqData)
-    end.
-
-
 %% @doc Read more data for the feed_mp functions.
 %% @spec read_more(mp()) -> mp()
 %% @todo Call the progress function with the newly received data sizes
-read_more(State=#mp{content_length=ContentLength, length=Length, buffer=Buffer, context=Context}) ->
-    ReqData  = zp_context:get_reqdata(Context),
-    Data = read_chunk(ReqData, ContentLength, Length),
+read_more(State=#mp{next_chunk=done, content_length=ContentLength, length=Length} = State) when ContentLength =:= Length ->
+    State;
+read_more(State=#mp{next_chunk=done} = State) ->
+    throw({error, wrong_content_length});
+read_more(State=#mp{length=Length, buffer=Buffer, next_chunk=Next}) ->
+    {Data, Next1} = Next(),
     Buffer1 = <<Buffer/binary, Data/binary>>,
-    State#mp{length=Length - size(Data), buffer=Buffer1}.
+    State#mp{length=Length - size(Data), buffer=Buffer1, next_chunk=Next1}.
 
 
 %% @doc Parse the headers of a part in the form data
