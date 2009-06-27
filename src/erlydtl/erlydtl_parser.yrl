@@ -67,6 +67,11 @@ Nonterminals
     IfExpression
     ElseBraced
     EndIfBraced
+
+	IfSimpleExpression
+	IfAndOrExpression
+	IfOrExpression
+	IfAndExpression
     
     IfEqualBlock
     IfEqualBraced
@@ -165,6 +170,8 @@ Terminals
 	trans_text
 	close_trans
 	trans_literal
+	or_keyword
+	and_keyword
 	'__keyword'
 	model_index
  	hash.
@@ -245,8 +252,21 @@ ForGroup -> ForGroup comma identifier : '$1' ++ ['$3'].
 IfBlock -> IfBraced Elements ElseBraced Elements EndIfBraced : {ifelse, '$1', '$2', '$4'}.
 IfBlock -> IfBraced Elements EndIfBraced : {'if', '$1', '$2'}.
 IfBraced -> open_tag if_keyword IfExpression close_tag : '$3'.
-IfExpression -> not_keyword IfExpression : {'not', '$2'}.
-IfExpression -> Value : '$1'.
+
+IfExpression -> IfSimpleExpression IfAndOrExpression : {'expr', '$1', '$2'}.
+
+IfAndOrExpression -> '$empty' : none.
+IfAndOrExpression -> or_keyword IfSimpleExpression IfOrExpression : {'or', ['$2' | '$3']}.
+IfAndOrExpression -> and_keyword IfSimpleExpression IfAndExpression : {'and', ['$2' | '$3']}.
+
+IfOrExpression -> '$empty' : [].
+IfOrExpression -> or_keyword IfSimpleExpression IfOrExpression : ['$2' | '$3'].
+
+IfAndExpression -> '$empty' : [].
+IfAndExpression -> and_keyword IfSimpleExpression IfAndExpression : ['$2' | '$3'].
+
+IfSimpleExpression -> not_keyword IfSimpleExpression : {'not', '$2'}.
+IfSimpleExpression -> Value : '$1'.
 
 ElseBraced -> open_tag else_keyword close_tag.
 EndIfBraced -> open_tag endif_keyword close_tag.
