@@ -18,7 +18,7 @@
 %% External exports
 -export([compile/2, render/3, find_template/2, find_template/3, reset/1]).
 
--record(state, {reset_date_time}).
+-record(state, {reset_counter}).
 
 start_link() -> 
     gen_server:start_link({local, ?MODULE}, ?MODULE, [], []).
@@ -97,7 +97,7 @@ find_template(File, true, Context) ->
 %%                     {stop, Reason}
 %% @doc Initialize the template server, handles template compiles and rendering.
 init(_Options) ->
-    {ok, #state{reset_date_time=calendar:local_time()}}.
+    {ok, #state{reset_counter=0}}.
 
 
 %% @spec check_modified(File) -> {ok, Module} | {error, Reason}
@@ -105,7 +105,7 @@ init(_Options) ->
 handle_call({check_modified, File}, _From, State) ->
     ModuleName = filename_to_modulename(File),
     Module = list_to_atom(ModuleName),
-    Result = case template_is_modified(File, ModuleName, State#state.reset_date_time) of
+    Result = case template_is_modified(Module, State#state.reset_counter) of
                 true  -> modified;
                 false -> {ok, Module}
              end,
@@ -120,15 +120,15 @@ handle_call({compile, File, Context}, _From, State) ->
     end,
     ModuleName = filename_to_modulename(File),
     Module     = list_to_atom(ModuleName),
-    ErlyResult = case erlydtl:compile(File, Module, [{finder, FinderFun}]) of
-                    ok -> {ok, Module};
-                    Other -> Other
+    ErlyResult = case erlydtl:compile(File, Module, [{finder, FinderFun}, {template_reset_counter, State#state.reset_counter}]) of
+                    {ok, Module1} -> {ok, Module1};
+                    Error -> Error
                  end,
     {reply, ErlyResult, State}.
 
 %% @doc Reset all compiled templates, done by the module_indexer after the module list changed.
 handle_cast(reset, State) -> 
-    {noreply, State#state{reset_date_time=calendar:local_time()}};
+    {noreply, State#state{reset_counter=State#state.reset_counter+1}};
 handle_cast(_Msg, State) -> 
     {noreply, State}.
 
@@ -160,35 +160,28 @@ savechar(_C) ->
     $_.
 
 
-%% Check if the template or one of the by the template included files is modified with respect to the beam file
-template_is_modified(File, ModuleName, ResetDateTime) ->
-    BeamFile = filename:join("ebin", ModuleName ++ ".beam"),
-    case filelib:is_file(BeamFile) of
+%% Check if the template or one of the by the template included files is modified since compilation
+%% or if the template has been compiled before a reset of all compiled templates.
+template_is_modified(Module, ResetCounter) ->
+    case catch Module:template_reset_counter() < ResetCounter of
         true ->
-            Module = list_to_atom(ModuleName),
-            case filelib:last_modified(BeamFile) of
-                0 ->
-                    true; 
-                BeamMod when BeamMod =< ResetDateTime ->
-                    true;
-                BeamMod ->
-                    Deps = Module:dependencies(),
-                    is_modified([File|Deps], BeamMod)
-            end;
+            true;
         false ->
+            Deps = Module:dependencies(),
+            is_modified(Deps);
+        _Error -> 
             true
     end.
-    
 
 %% Check if one of the template files is newer than the given datetime
-is_modified([], _DateTime) ->
+is_modified([]) ->
     false;
-is_modified([File|Rest], DateTime) ->
+is_modified([{File, DateTime}|Rest]) ->
     case filelib:last_modified(File) of
         0 -> 
             true;
-        FileMod when FileMod > DateTime ->
+        FileMod when FileMod =/= DateTime ->
             true;
         _ ->
-            is_modified(Rest, DateTime)
+            is_modified(Rest)
     end.

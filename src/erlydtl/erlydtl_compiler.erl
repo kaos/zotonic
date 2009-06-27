@@ -30,10 +30,15 @@
 %%% THE SOFTWARE.
 %%%
 %%% @since 2007-12-16 by Roberto Saccon, Evan Miller
+%%%
 %%%-------------------------------------------------------------------
+%%% Adapted and expanded for Zophrenic by Marc Worrell <marc@worrell.nl>
+%%%-------------------------------------------------------------------
+
 -module(erlydtl_compiler).
 -author('rsaccon@gmail.com').
 -author('emmiller@gmail.com').
+-author('marc@worrell.nl').
 
 -include_lib("zophrenic.hrl").
 
@@ -73,10 +78,11 @@ compile(File, Module) ->
 
 compile(Binary, Module, Options) when is_binary(Binary) ->
     File = "",
+    TemplateResetCounter =  proplists:get_value(template_reset_counter, Options, 0),
     case parse(Binary) of
         {ok, DjangoParseTree} ->
-            case compile_to_binary(File, DjangoParseTree, init_dtl_context(File, Module, Options)) of
-                {ok, Module1, _} ->
+            case compile_to_binary(File, DjangoParseTree, init_dtl_context(File, Module, Options), TemplateResetCounter) of
+                {ok, Module1, _Bin} ->
                     {ok, Module1};
                 Err ->
                     Err
@@ -86,22 +92,13 @@ compile(Binary, Module, Options) when is_binary(Binary) ->
     end;
     
 compile(File, Module, Options) ->  
-    crypto:start(),
     Context = init_dtl_context(File, Module, Options),
+    TemplateResetCounter =  proplists:get_value(template_reset_counter, Options, 0),
     case parse(File, Context) of  
-        ok ->
-            ok;
         {ok, DjangoParseTree} ->
-            case compile_to_binary(File, DjangoParseTree, Context) of
-                {ok, Module1, Bin} ->
-                    OutDir = proplists:get_value(out_dir, Options, code:lib_dir(zophrenic, ebin)),       
-                    BeamFile = filename:join([OutDir, atom_to_list(Module1) ++ ".beam"]),
-                    case file:write_file(BeamFile, Bin) of
-                        ok ->
-                            ok;
-                        {error, Reason} ->
-                            {error, lists:concat(["beam generation failed (", Reason, "): ", BeamFile])}
-                    end;
+            case compile_to_binary(File, DjangoParseTree, Context, TemplateResetCounter) of
+                {ok, Module1, _Bin} ->
+                    {ok, Module1};
                 Err ->
                     Err
             end;
@@ -116,10 +113,10 @@ compile(File, Module, Options) ->
 %% Internal functions
 %%====================================================================
 
-compile_to_binary(File, DjangoParseTree, Context) ->
+compile_to_binary(File, DjangoParseTree, Context, TemplateResetCounter) ->
     try body_ast(DjangoParseTree, Context, #treewalker{}) of
         {{Ast, Info}, TreeWalker} ->
-            case compile:forms(forms(File, Context#dtl_context.module, Ast, Info, Context, TreeWalker), 
+            case compile:forms(forms(File, Context#dtl_context.module, Ast, Info, Context, TreeWalker, TemplateResetCounter), 
                     Context#dtl_context.compiler_options) of
                 {ok, Module1, Bin} -> 
                     code:purge(Module1),
@@ -173,7 +170,16 @@ parse(Data) ->
             Err
     end.        
   
-forms(File, Module, BodyAst, BodyInfo, Context, TreeWalker) ->
+forms(File, Module, BodyAst, BodyInfo, Context, TreeWalker, TemplateResetCounter) ->
+    TemplateResetCounterFunctionAst = erl_syntax:function(
+        erl_syntax:atom(template_reset_counter),
+            [ erl_syntax:clause(
+                    [],
+                    none,
+                    [erl_syntax:integer(TemplateResetCounter)]
+                    )
+            ]),
+
     Function2 = erl_syntax:application(none, erl_syntax:atom(render2), 
         [erl_syntax:variable("Variables"), erl_syntax:variable("ZpContext")]),
     ClauseOk = erl_syntax:clause([erl_syntax:variable("Val")], none,
@@ -187,11 +193,22 @@ forms(File, Module, BodyAst, BodyInfo, Context, TreeWalker) ->
     SourceFunctionAst = erl_syntax:function(
         erl_syntax:atom(source),
             [ erl_syntax:clause([], none, [ erl_syntax:string(File) ]) ]),
-    
+
+    Dependencies = lists:usort([{File, filelib:last_modified(File)} | BodyInfo#ast_info.dependencies]),
     DependenciesFunctionAst = erl_syntax:function(
         erl_syntax:atom(dependencies), [
                 erl_syntax:clause([], none, 
-                    [ erl_syntax:list( lists:map(fun (XFile) -> erl_syntax:string(XFile) end, BodyInfo#ast_info.dependencies)) ])
+                    [ erl_syntax:list( lists:map(
+                            fun ({XFile, {{Year,Month,Day},{Hour,Min,Sec}}}) ->
+                                erl_syntax:tuple([
+                                    erl_syntax:string(XFile),
+                                    erl_syntax:tuple([
+                                        erl_syntax:tuple([erl_syntax:integer(Year), erl_syntax:integer(Month), erl_syntax:integer(Day)]),
+                                        erl_syntax:tuple([erl_syntax:integer(Hour), erl_syntax:integer(Min), erl_syntax:integer(Sec)])
+                                    ])
+                                ])
+                            end, 
+                            Dependencies)) ])
             ]),     
 
 	BodyLanguageAst = erl_syntax:match_expr(
@@ -231,11 +248,12 @@ forms(File, Module, BodyAst, BodyInfo, Context, TreeWalker) ->
     
     ExportAst = erl_syntax:attribute(erl_syntax:atom(export),
         [erl_syntax:list([
+		            erl_syntax:arity_qualifier(erl_syntax:atom(template_reset_counter), erl_syntax:integer(0)),
 					erl_syntax:arity_qualifier(erl_syntax:atom(render), erl_syntax:integer(2)),
                     erl_syntax:arity_qualifier(erl_syntax:atom(source), erl_syntax:integer(0)),
                     erl_syntax:arity_qualifier(erl_syntax:atom(dependencies), erl_syntax:integer(0))])]),
-    
-    [erl_syntax:revert(X) || X <- [ModuleAst, ExportAst,
+
+    [erl_syntax:revert(X) || X <- [ModuleAst, ExportAst, TemplateResetCounterFunctionAst,
             Render2FunctionAst, SourceFunctionAst, DependenciesFunctionAst, RenderInternalFunctionAst
             | BodyInfo#ast_info.pre_render_asts]].    
 
@@ -412,7 +430,7 @@ with_dependencies([H, T], Args) ->
      with_dependencies(T, with_dependency(H, Args)).
         
 with_dependency(FilePath, {{Ast, Info}, TreeWalker}) ->
-    {{Ast, Info#ast_info{dependencies = [FilePath | Info#ast_info.dependencies]}}, TreeWalker}.
+    {{Ast, Info#ast_info{dependencies = [{FilePath, filelib:last_modified(FilePath)} | Info#ast_info.dependencies]}}, TreeWalker}.
 
 
 empty_ast(TreeWalker) ->
