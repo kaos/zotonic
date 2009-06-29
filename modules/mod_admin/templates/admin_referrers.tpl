@@ -31,7 +31,7 @@
 			{% for id, pred_id in result %}
 				<li id="{{ #li.id }}">
 					<a href="{% url admin_edit_rsc id=id %}" class="clearfix">
-						<span class="zp-30">{{ m.rsc[id].title }}</span>
+						<span class="zp-30">{{ m.rsc[id].title|striptags|default:"<em>untitled</em>" }}</span>
 						<span class="zp-15">{{ m.predicate[pred_id].title }}</span>
 						<span class="zp-15">{{ m.rsc[id].category.name }}</span>
 						<span class="zp-15">{{ m.rsc[id].modified|date:"F d, H:i" }}</span>

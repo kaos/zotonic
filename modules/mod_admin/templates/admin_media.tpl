@@ -39,7 +39,7 @@
 						<li id="{{ #li.id }}">
 							<a href="{% url admin_edit_rsc id=id %}" class="clearfix">
 								<span class="zp-10">{% image medium.filename width=80 height=60 crop %}</span>
-								<span class="zp-20">{{ r.title|default:"&nbsp;" }}</span>
+								<span class="zp-20">{{ r.title|striptags|default:"<em>untitled</em>" }}</span>
 								<span class="zp-10">{{ medium.mime|default:"&nbsp;" }}</span>
 								<span class="zp-30">{{ medium.filename }}</span>
 								<span class="zp-10">{{ medium.width }} x {{ medium.height }}</span>

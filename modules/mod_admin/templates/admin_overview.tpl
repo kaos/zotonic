@@ -32,7 +32,7 @@
 			{% for id, rank in result %}
 				<li id="{{ #li.id }}">
 					<a href="{% url admin_edit_rsc id=id %}" class="clearfix">
-						<span class="zp-30">{{ m.rsc[id].title|striptags }}</span>
+						<span class="zp-30">{{ m.rsc[id].title|striptags|default:"<em>untitled</em>" }}</span>
 						<span class="zp-15">{{ m.rsc[id].category.name }}</span>
 						<span class="zp-15">{{ m.rsc[id].modified|date:"F d, H:i" }}</span>
 						<span class="zp-15">{{ m.rsc[m.rsc[id].modifier_id].title|default:"-" }}</span>

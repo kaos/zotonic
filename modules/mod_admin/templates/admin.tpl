@@ -54,7 +54,7 @@
 							{% for id in m.search[{latest cat="article"}] %}
 							<li>
 								<a href="{% url admin_edit_rsc id=id %}" class="clearfix">
-									<span class="zp-35">{{ m.rsc[id].title }}</span>
+									<span class="zp-35">{{ m.rsc[id].title|striptags|default:"<em>untitled</em>" }}</span>
 									<span class="zp-25">{{ m.rsc[id].category.name }}</span>
 									<span class="zp-20">{{ m.rsc[id].modified|date:"F d, H:i" }}</span>
 									<span class="zp-20">
@@ -83,7 +83,7 @@
 							{% for id in m.search[{latest cat="product"}] %}
 							<li>
 								<a href="{% url admin_edit_rsc id=id %}" class="clearfix">
-									<span class="zp-35">{{ m.rsc[id].title }}</span>
+									<span class="zp-35">{{ m.rsc[id].title|striptags|default:"<em>untitled</em>" }}</span>
 									<span class="zp-25">{{ m.rsc[id].category.name }}</span>
 									<span class="zp-20">{{ m.rsc[id].modified|date:"F d, H:i" }}</span>
 									<span class="zp-20">
@@ -123,7 +123,7 @@
 							{% for id, variant, price, date, order_id in m.search[{shop_latest_sold}] %}
 								<li>
 									<a href="{% url admin_shop_order_view id=order_id %}" class="clearfix">
-										<span class="zp-35">{{ m.rsc[id].title }}</span>
+										<span class="zp-35">{{ m.rsc[id].title|striptags|default:"<em>untitled</em>" }}</span>
 										<span class="zp-25">{{ variant|default:"-" }}</span>
 										<span class="zp-20">&euro;{{ price|format_price }}</span>
 										<span class="zp-20">{{ date|date:"F d, H:i" }}</span>
