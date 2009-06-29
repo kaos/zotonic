@@ -60,47 +60,57 @@ install_modules(C) ->
 
 
 %% @doc Install the default admin, editor, supervisor, community and public groups
+%% The resources will be inserted later, which is possible because the fk check is deferred till commit time.
 install_group(C) ->
-    % Install the group types
-    GroupTypes = [
-        [1, "general",    [{title, {trans, [{en, "Generic"},       {nl, "Generiek"}]}}]],
-        [2, "workgroup",  [{title, {trans, [{en, "Working Group"}, {nl, "Werkgroep"}]}}]],
-        [3, "family",     [{title, {trans, [{en, "Family"},        {nl, "Familie"}]}}]]
-    ],
-
-    [ {ok,1} = pgsql:equery(C, "
-            insert into grouptype (id, name, props) 
-            values ($1, $2, $3)", R) || R <- GroupTypes],
-    pgsql:reset_id(C, "grouptype"),
-
     Groups = [
-        %   tp name                admin  spvsr  cpub   ppub   props
-        [1, 2, "admins",           true,  true,  true,  true,  [{title, {trans, [{en, "Administrators"},   {nl, "Beheerders"}]}}]],
-        [2, 2, "editors",          false, false, true,  true,  [{title, {trans, [{en, "Editors"},          {nl, "Redacteuren"}]}}]],
-        [3, 2, "communityeditors", false, false, true,  false, [{title, {trans, [{en, "Community Editors"},{nl, "Gemeenschap redacteuren"}]}}]],
-        [4, 2, "supervisors",      false, true,  false, false, [{title, {trans, [{en, "Supervisors"},      {nl, "Toezichthouders"}]}}]],
-        [5, 2, "content",          false, false, false, false, [{title, {trans, [{en, "Content"},          {nl, "Inhoud"}]}}]]
+        %   rsc admin  spvsr  cpub   ppub
+        [4,  true,  true,  true,  true  ],
+        [5,  false, false, true,  true  ],
+        [6,  false, false, true,  false ],
+        [7,  false, true,  false, false ],
+        [8,  false, false, false, false ]
     ],
     
     [ {ok,1} = pgsql:equery(C, "
-            insert into \"group\" (id, grouptype_id, name, is_admin, is_supervisor, is_community_publisher, is_public_publisher, props) 
-            values ($1, $2, $3, $4, $5, $6, $7, $8)", R) || R <- Groups],
-    
-    pgsql:reset_id(C, "group"),
+            insert into \"group\" (id, is_admin, is_supervisor, is_community_publisher, is_public_publisher) 
+            values ($1, $2, $3, $4, $5)", R) || R <- Groups],
     ok.
 
 install_category(C) ->
     Cats = [
         {1, undefined, 1, other,       [{title, {trans, [{en, "Uncategorized"},  {nl, "Zonder categorie"}]}}] },
         {2, undefined, 1, person,      [{title, {trans, [{en, "Person"},         {nl, "Persoon"}]}}] },
+        % http://purl.org/dc/dcmitype/PhysicalObject
         {3, undefined, 1, artifact,    [{title, {trans, [{en, "Artifact"},       {nl, "Artefact"}]}}] },
-        {4, 3,         1, publication, [{title, {trans, [{en, "Publication"},    {nl, "Publicatie"}]}}] },
+        % http://purl.org/dc/dcmitype/Text
+        {4, undefined, 1, text,        [{title, {trans, [{en, "Text"},           {nl, "Tekst"}]}}] },
         {5, 4,         2, review,      [{title, {trans, [{en, "Review"},         {nl, "Beoordeling"}]}}] },
         {6, 4,         1, article,     [{title, {trans, [{en, "Article"},        {nl, "Artikel"}]}}] },
+
         {7, 3,         3, product,     [{title, {trans, [{en, "Product"},        {nl, "Product"}]}}] },
-        {8, 3,         2, event,       [{title, {trans, [{en, "Event"},          {nl, "Evenement"}]}}] },
+
+        % http://purl.org/dc/dcmitype/Event
+        {8, undefined, 1, event,       [{title, {trans, [{en, "Event"},          {nl, "Evenement"}]}}] },
+
         {9, 6,         1, news,        [{title, {trans, [{en, "News"},           {nl, "Nieuws"}]}}] },
-        {10,1,         1, media,       [{title, {trans, [{en, "Media"},          {nl, "Media"}]}}] }
+
+        {10,undefined, 1, media,       [{title, {trans, [{en, "Media"},          {nl, "Media"}]}}] }, 
+        % http://purl.org/dc/dcmitype/Image
+        % http://purl.org/dc/dcmitype/StillImage
+        {11,10,        1, image,       [{title, {trans, [{en, "Image"},          {nl, "Media"}]}}] },
+        % http://purl.org/dc/dcmitype/MovingImage
+        {12,10,        2, video,       [{title, {trans, [{en, "Video"},          {nl, "Video"}]}}] },
+        % http://purl.org/dc/dcmitype/Sound
+        {13,10,        3, sound,       [{title, {trans, [{en, "Sound"},          {nl, "Sound"}]}}] },
+
+        % http://purl.org/dc/dcmitype/Collection
+        {14,undefined, 1, collection,  [{title, {trans, [{en, "Collection"},     {nl, "Collectie"}]}}] },
+
+        % Meta categories for defining categories, predicates and groups.
+        {15,undefined, 1, meta,        [{title, {trans, [{en, "Meta"},          {nl, "Meta"}]}}] },
+        {16,15,        1, category,    [{title, {trans, [{en, "Category"},      {nl, "Categorie"}]}}] },
+        {17,15,        1, predicate,   [{title, {trans, [{en, "Predicate"},     {nl, "Predikaat"}]}}] },
+        {18,15,        1, usergroup,   [{title, {trans, [{en, "User Group"},    {nl, "Gebruikersgroep"}]}}] }
     ],
     [ {ok,1} = pgsql:equery(C, "
             insert into category (id, parent_id, seq, name, props)
@@ -114,15 +124,21 @@ install_category(C) ->
 %% @todo Add the hostname to the uri
 install_rsc(C) ->
     Rsc = [
-        % id  uri       vsfr  grp  cat  name,     props
-        [ 1,  "/id/1",  0,    1,   2,   "admin",  [{title,"Site Administrator"}] ],
-        [ 2,  "/id/2",  0,    1,   6,   "about",  [{title,"About Zophrenic"}, {body, "<p>Some nice text in the body.</p>"}] ],
-        [ 3,  "/id/3",  0,    1,   9,   undefined,[{title,"Some News"}, {body, "<p>And the text of the news should be typed here.</p>"}] ]
+        % id  vsfr  grp  cat  name,     props
+        [ 4,  0,    4,   18,  "admins", [{title,"Admins"}] ],
+        [ 5,  0,    5,   18,  "editors", [{title,"Site Administrators"}] ],
+        [ 6,  0,    6,   18,  "communityeditors", [{title,"Community Editors"}] ],
+        [ 7,  0,    7,   18,  "supervisors", [{title,"Supervisors"}] ],
+        [ 8,  0,    8,   18,  "content", [{title,"Content"}] ],
+
+        [ 1,  0,    4,   2,   "admin",  [{title,"Site Administrator"}] ],
+        [ 2,  0,    4,   6,   "about",  [{title,"About Zophrenic"}, {body, "<p>Some nice text in the body.</p>"}] ],
+        [ 3,  0,    4,   9,   undefined,[{title,"Some News"}, {body, "<p>And the text of the news should be typed here.</p>"}] ]
     ],
     
     [ {ok,1} = pgsql:equery(C, "
-            insert into rsc (id, uri, visible_for, group_id, category_id, name, props)
-            values ($1, $2, $3, $4, $5, $6, $7)
+            insert into rsc (id, visible_for, group_id, category_id, name, props)
+            values ($1, $2, $3, $4, $5, $6)
             ", R) || R <- Rsc ],
     {ok, _} = pgsql:squery(C, "update rsc set creator_id = 1, modifier_id = 1, is_published = true"),
     pgsql:reset_id(C, "rsc"),
@@ -130,7 +146,7 @@ install_rsc(C) ->
     % Connect person resources to the correct groups
     RscGroup = [
         % Id, Rsc  Grp  obsvr   leader
-        [ 1,  1,   1,   false,  true ]
+        [ 1,  1,   4,   false,  true ]
     ],
 
     [ {ok,1} = pgsql:equery(C, "

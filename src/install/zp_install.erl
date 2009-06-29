@@ -207,46 +207,26 @@ model_pgsql() ->
     "CREATE INDEX fki_edge_creator_id ON edge (creator_id)",
     "CREATE INDEX edge_sp_seq_key ON edge (subject_id, predicate_id, seq)",
 
-
-    % Table: grouptype
-    % The possible types of a group, with multilingual titles
-    % @todo Move this into the category system (or remove it for now)
-
-    "CREATE TABLE grouptype
-    (
-      id serial NOT NULL,
-      name character varying(80) NOT NULL,
-      props bytea,
-      CONSTRAINT grouptype_pkey PRIMARY KEY (id),
-      CONSTRAINT name_key UNIQUE (name)
-    )",
-
     % Table: group
     % A group is the form in which people work together on content. 
     % Every resource is part of exactly one group (one and only one).
-    % @todo Connect "group" to a resource, make the resource part of the group.
 
     "CREATE TABLE \"group\"
     (
-      id serial NOT NULL,
-      grouptype_id int NOT NULL,
-      name character varying(80) NOT NULL default ''::character varying,
-      description character varying(2000) NOT NULL default ''::character varying,
+      id int NOT NULL,
       is_admin boolean NOT NULL DEFAULT false,
       is_supervisor boolean NOT NULL DEFAULT false,
       is_community_publisher boolean NOT NULL DEFAULT false,
       is_public_publisher boolean NOT NULL DEFAULT false,
-      props bytea,
+
       CONSTRAINT group_pkey PRIMARY KEY (id),
-      CONSTRAINT fk_group_grouptype_id FOREIGN KEY (grouptype_id)
-        REFERENCES grouptype (id)
-        ON UPDATE CASCADE ON DELETE SET NULL
+      CONSTRAINT fk_group_id FOREIGN KEY (id)
+        REFERENCES rsc(id)
+        ON UPDATE CASCADE ON DELETE CASCADE
+        DEFERRABLE INITIALLY DEFERRED
     )",
 
-    "CREATE INDEX fki_group_grouptype_id ON \"group\" (grouptype_id)",
-
-
-    % Now that we have the group table we can add rsc/group foreign key
+    % Now that we have the group table we can add group foreign key to the rsc table
     "ALTER TABLE rsc ADD CONSTRAINT fk_rsc_group FOREIGN KEY (group_id)
       REFERENCES \"group\"(id)
       ON UPDATE CASCADE ON DELETE RESTRICT",
@@ -280,7 +260,7 @@ model_pgsql() ->
 
 
     % Table medium
-    % Holds all references to media, used in the context of resources
+    % Holds all references to media (files), used in the context of resources
     % Every medium is a resource
 
     "CREATE TABLE medium

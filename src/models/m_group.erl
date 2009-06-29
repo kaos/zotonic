@@ -58,36 +58,23 @@ m_value(#m{value=undefined}, _Context) ->
 %% @doc Get the group
 %% @spec get(Id, Context) -> PropList
 get(Id, Context) ->
-    case zp_depcache:get({group, Id}) of
-        {ok, Group} -> 
-            Group;
-        undefined ->
-            Group = zp_db:assoc_props_row("select * from \"group\" where id = $1", [Id], Context),
-            zp_depcache:set({group, Id}, Group, ?WEEK),
-            Group
-    end.
+    F = fun() ->
+        zp_db:assoc_row("select * from \"group\" where id = $1", [Id], Context)
+    end,
+    zp_depcache:memo(F, {group, Id}, ?WEEK, [#rsc{id=Id}]).
 
 
 %% @doc Insert a new group, make sure that the roles are only set by the admin
 %% @spec insert(PropList, Context) -> {ok, int()}
 insert(Props, Context) ->
-    PropsSafe = case zp_acl:has_role(admin, Context) of
-        true -> Props;
+    case zp_acl:has_role(admin, Context) of
+        true -> 
+            {ok, Id} = zp_db:insert(group, Props, Context),
+            zp_depcache:flush(group),
+            {ok, Id};
         false ->
-            zp_utils:prop_delete(is_admin, 
-                zp_utils:prop_delete(is_supervisor, 
-                    zp_utils:prop_delete(is_community_publisher, 
-                        zp_utils:prop_delete(is_public_publisher, Props))))
-    end,
-    PropsType = case proplists:get_value(grouptype_id, PropsSafe) of
-        undefined -> [ {grouptype_id, m_grouptype:default(Context)} | PropsSafe];
-        _ -> PropsSafe
-    end,
-    {ok, Id} = zp_db:insert(group, PropsType, Context),
-    zp_depcache:flush(group),
-    {ok, Id}.
-
-
+            {error, eacces}
+    end.
 
 add_member(Id, RscId, Context) ->
     F = fun(Ctx) ->
