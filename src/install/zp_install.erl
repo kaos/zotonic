@@ -577,9 +577,9 @@ model_pgsql() ->
     % Queue for deleted medium files, periodically checked for deleting files that are not referenced anymore
     "CREATE TABLE medium_deleted
     (
-        id int NOT NULL,
+        id serial NOT NULL,
         filename character varying (400) NOT NULL,
-        deleted timestamp NOT NULL,
+        deleted timestamp NOT NULL default now(),
         
         CONSTRAINT medium_deleted_pkey PRIMARY KEY (id)
     )",
