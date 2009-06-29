@@ -100,11 +100,11 @@ pages(Page, Pages) ->
     end,
     Middle = case Page - ?DELTA > 1 of
         true ->
-            seq(max(1,Page-?DELTA), min(Pages-1,Page+?DELTA));
+            seq(max(1,Page-?DELTA), min(Pages,Page+?DELTA));
         false ->
             []
     end,
-    End = case Pages > 1 of
+    End = case Pages > Page + ?DELTA of
         true ->
             [Pages];
         false ->

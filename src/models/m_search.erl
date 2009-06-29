@@ -87,8 +87,8 @@ search(SearchName, Context) ->
 %% @doc Perform a paged search, wrap the result in a m_search_result record
 %% @spec search_pager(Search, Context) -> #m_search_result{}
 search_pager({SearchName, Props}, Context) ->
-    {Page, _PageLen, Props1} = get_paging_props(Props),
-    Result = zp_search:search_pager({SearchName, Props1}, Page, Context),
+    {Page, PageLen, Props1} = get_paging_props(Props),
+    Result = zp_search:search_pager({SearchName, Props1}, Page, PageLen, Context),
     Total1 = case Result#search_result.total of
         undefined -> length(Result#search_result.result);
         Total -> Total
@@ -124,7 +124,7 @@ get_paging_props(Props) ->
         PageProp -> try zp_convert:to_integer(PageProp) catch _:_ -> 1 end
     end,
     PageLen = case proplists:get_value(pagelen, Props) of
-        undefined -> 1;
+        undefined -> ?SEARCH_PAGELEN;
         PageLenProp -> try zp_convert:to_integer(PageLenProp) catch _:_ -> ?SEARCH_PAGELEN end
     end,
     P1 = proplists:delete(page, Props),
