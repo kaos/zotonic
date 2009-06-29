@@ -23,8 +23,8 @@
 							{% if c.media_id %}
 								<a href="{{ m.rsc[c.id].page_url }}">{% image m.media[c.media_id].filename width=75 height=60 crop alt="{{ m.rsc[c.id].title }}" class="left" %}</a>
 							{% else %}
-								{% if m.rsc[c.id].media[1].filename %}
-							<a href="{{ m.rsc[c.id].page_url }}">{% image m.rsc[c.id].media[1].filename width=75 height=60 crop alt="{{ m.rsc[c.id].title }}" class="left" %}</a>
+								{% if m.rsc[c.id].depiction %}
+							<a href="{{ m.rsc[c.id].page_url }}">{% image m.rsc[c.id].depiction.filename width=75 height=60 crop alt="{{ m.rsc[c.id].title }}" class="left" %}</a>
 								{% else %}
 								&nbsp;
 								{% endif %}

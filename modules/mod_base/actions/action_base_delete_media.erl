@@ -2,7 +2,7 @@
 %% @copyright 2009 Marc Worrell
 %% @date 2009-04-28
 %%
-%% @doc Delete a media, no confirmation.
+%% @doc Delete a media file from a resource, no confirmation.
 
 -module(action_base_delete_media).
 -author("Marc Worrell <marc@worrell.nl").
@@ -26,7 +26,7 @@ render_action(TriggerId, TargetId, Args, Context) ->
 %% @doc Delete a media.  After the deletion the user is redirected, and/or some items on the page are faded out.
 %% @spec event(Event, Context1) -> Context2
 event({postback, {delete_media, Id, OnSuccess}, _TriggerId, _TargetId}, Context) ->
-    case zp_acl:media_editable(Id, Context) of
+    case zp_acl:rsc_editable(Id, Context) of
         true ->
             ok = m_media:delete(Id, Context),
             lists:foldl(

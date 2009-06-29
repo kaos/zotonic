@@ -59,6 +59,38 @@
 							</div>
 						</div>
 
+						{% all include "_admin_edit_content.tpl" %}
+
+						{% with r.medium as medium %}
+							{% if medium or r.is_a.media %}
+							<div class="item-wrapper">
+								<h3 class="above-item">File</h3>
+								<div class="item clearfix">
+									{% if medium %}
+										<p>
+											{{ medium.mime }} 
+											&mdash; {{ medium.width }} x {{ medium.height }} pixels
+											&mdash; {{ medium.filename }}
+											&mdash; uploaded on {{ medium.created|date:"Y-m-d H:i:s" }}
+										</p>
+										<div class="edit_media">
+										{% if medium.width|lt:725  %}
+											{% image medium.filename class="do_quickview" %}
+										{% else %}
+											{% image medium.filename width=725 height=725 class="do_quickview" %}
+										{% endif %}
+										</div>
+										<div>
+											{% button text="download" action={redirect dispatch="media_attachment" star=medium.filename} %}
+										</div>
+									{% else %}
+										Upload file button...
+									{% endif %}
+								</div>
+							</div>
+							{% endif %}
+						{% endwith %}
+
 						<div class="item-wrapper">
 							<h3 class="above-item">Media</h3>
 							<div class="item clearfix">
@@ -194,7 +226,9 @@
 								</div>
 							</div>
 						</div>
-						
+
+						{% all include "_admin_edit_sidebar.tpl" %}
+
 						<div class="item-wrapper" id="sort-category">
 							<h3 class="above-item clearfix do_blockminifier">
 								<span class="title">Category</span>

@@ -13,12 +13,12 @@
 			<div class="product-images zp-50">
 				<ul class="clearfix">
 					{% if variants|length_is:1 %}
-						{% for media in m.rsc[rsc_id].media %}
-							<li>{% image media.filename width=300 crop alt=media.filename class="do_imageviewer" %}</li>
+						{% for media_id in m.rsc[rsc_id].media %}
+							<li>{% image m.media[media_id].filename width=300 crop alt=m.media[media_id].filename class="do_imageviewer" %}</li>
 						{% endfor %}
 					{% else %}
 						<li id="variant-image">
-							{% image m.rsc[rsc_id].media[1].filename width=300 crop alt=m.rsc[rsc_id].title class="do_imageviewer" %}
+							{% image m.rsc[rsc_id].depiction.filename width=300 crop alt=m.rsc[rsc_id].title class="do_imageviewer" %}
 						</li>
 					{% endif %}
 				</ul>
@@ -57,7 +57,7 @@
 			{% for id in m.search[{featured cat=m.rsc[rsc_id].category_id}] %}
 				<li class="zp-33 {% cycle "first" "" "" %}">
 					<div class="block">
-						<a href="{{ m.rsc[id].page_url }}">{% image m.rsc[id].media[1].filename width=216 height=70 crop alt=m.rsc[id].title %}</a>
+						<a href="{{ m.rsc[id].page_url }}">{% image m.rsc[id].depiction.filename width=216 height=70 crop alt=m.rsc[id].title %}</a>
 						<h3><a href="{{ m.rsc[id].page_url }}">{{ m.rsc[id].title }}</a></h3>
 						<div class="product-price clearfix">
 							<h3>&euro;{% include "_price.tpl" %}</h3>

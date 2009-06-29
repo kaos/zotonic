@@ -9,7 +9,6 @@
     {admin_predicate,       ["admin", "predicate"],                 resource_admin_predicate,[]},
     {admin_predicate_edit,  ["admin", "predicate", id],             resource_admin_predicate_edit,[]},
     {admin_media,           ["admin", "media"],                     resource_admin_media,    []},
-    {admin_media_edit,      ["admin", "media", id],                 resource_admin_media_edit,[]},
 
     {admin_categories_manager, ["admin", "categories"],             resource_admin_categories_manager,[]}
 

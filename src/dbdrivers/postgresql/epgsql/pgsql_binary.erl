@@ -5,12 +5,15 @@
 
 -export([encode/2, decode/2, supports/1]).
 
+-include_lib("zophrenic.hrl").
+
 -define(int32, 1/big-signed-unit:32).
 -define(TERM_MAGIC_NUMBER, 16#01326A3A:1/big-unsigned-unit:32).
 
 
 encode(_Any, null)  -> <<-1:?int32>>;
 encode(_Any, undefined)  -> <<-1:?int32>>;
+encode(Type, #rsc{id=Id}) -> encode(Type, Id);
 encode(bool, <<1>>) -> <<1:?int32, 1:1/big-signed-unit:8>>;
 encode(bool, <<>>)  -> <<1:?int32, 0:1/big-signed-unit:8>>;
 encode(bool, true)  -> <<1:?int32, 1:1/big-signed-unit:8>>;

@@ -41,7 +41,7 @@
 			<li><a href="/admin/overview/" {% if page_overview %}class="current"{% endif %}>Pages</a></li>
 			<li><a href="{% url admin_media %}" {% if page_media %}class="current"{% endif %}>Media</a></li>
 			<li><a href="{% url admin_predicate %}" {% if page_predicate %}class="current"{% endif %}>Predicates</a></li>
-			{% all include "admin_menu_module.tpl" %}
+			{% all include "_admin_menu_module.tpl" %}
 			<li class="search-box">
 				<div class="quick-search-wrapper">
 					<form method="get" action="{% url admin_overview_rsc %}">

@@ -53,9 +53,11 @@ model_pgsql() ->
         CONSTRAINT config_pkey PRIMARY KEY (id),
         CONSTRAINT config_module_key_key UNIQUE (module, key)
     )",
+
     
     % Table module
     % Holds install state of all known modules
+
     "CREATE TABLE module
     (
         id serial NOT NULL,
@@ -68,9 +70,11 @@ model_pgsql() ->
         CONSTRAINT module_pkey PRIMARY KEY (id),
         CONSTRAINT module_name_key UNIQUE (name)
     )",
+
     
     % Table: rsc
     % Holds all resources (posts, persons etc.)
+    % @todo Split the pivot part when we want to support MySQL (no fulltext in InnoDB...)
 
     "CREATE TABLE rsc
     (
@@ -152,6 +156,7 @@ model_pgsql() ->
 
     % Table: predicate
     % Holds all predicates used in the edge table
+    % @todo Move this to the rsc table, add a category "predicate"
 
     "CREATE TABLE predicate
     (
@@ -167,6 +172,7 @@ model_pgsql() ->
     )",
 
     % Table: edge
+    % All relations between resources, forming a directed graph
 
     "CREATE TABLE edge
     (
@@ -204,6 +210,7 @@ model_pgsql() ->
 
     % Table: grouptype
     % The possible types of a group, with multilingual titles
+    % @todo Move this into the category system (or remove it for now)
 
     "CREATE TABLE grouptype
     (
@@ -217,6 +224,7 @@ model_pgsql() ->
     % Table: group
     % A group is the form in which people work together on content. 
     % Every resource is part of exactly one group (one and only one).
+    % @todo Connect "group" to a resource, make the resource part of the group.
 
     "CREATE TABLE \"group\"
     (
@@ -270,17 +278,15 @@ model_pgsql() ->
     "CREATE INDEX fki_rsc_group_rsc_id ON rsc_group (rsc_id)",
     "CREATE INDEX fki_rsc_group_group_id ON rsc_group (group_id)",
 
-    % Table media
-    % Holds all references to files, used in the context of resources
 
-    "CREATE TABLE media
+    % Table medium
+    % Holds all references to media, used in the context of resources
+    % Every medium is a resource
+
+    "CREATE TABLE medium
     (
       id serial NOT NULL,
-      name character varying(80),
-      visible_for integer NOT NULL DEFAULT 1, -- 0 = public, 1 = community, 2 = group
-      group_id int NOT NULL,
-      created timestamp with time zone NOT NULL DEFAULT now(),
-      creator_id int,
+      rsc_id int NOT NULL,
       filename character varying(400) NOT NULL,
       rootname character varying(100) NOT NULL,
       mime character varying(64) NOT NULL DEFAULT 'application/octet-stream'::character varying,
@@ -289,113 +295,17 @@ model_pgsql() ->
       orientation int NOT NULL DEFAULT 1,
       size int NOT NULL DEFAULT 0,
       props bytea,
-      CONSTRAINT media_pkey PRIMARY KEY (id),
-      CONSTRAINT media_filename_key UNIQUE (filename),
-      CONSTRAINT media_name_key UNIQUE (name),
-      CONSTRAINT fk_media_group_id FOREIGN KEY (group_id)
-        REFERENCES \"group\" (id)
-        ON UPDATE CASCADE ON DELETE CASCADE,
-      CONSTRAINT fk_media_creator_id FOREIGN KEY (creator_id)
+      created timestamp with time zone NOT NULL DEFAULT now(),
+
+      CONSTRAINT medium_pkey PRIMARY KEY (id),
+      CONSTRAINT medium_rsc_id_key UNIQUE (rsc_id),
+      CONSTRAINT medium_filename_key UNIQUE (filename),
+      CONSTRAINT fk_medium_rsc_id FOREIGN KEY (rsc_id)
         REFERENCES rsc (id)
-        ON UPDATE CASCADE ON DELETE SET NULL
-    )",
-
-    "CREATE INDEX fki_media_group_id ON media (group_id)",
-    "CREATE INDEX fki_media_creator_id ON media (creator_id)",
-    "CREATE INDEX fki_media_rootname ON media (rootname)",
-
-
-    % Table rsc_media
-    % All media used by a resource
-
-    "CREATE TABLE rsc_media
-    (
-      id serial NOT NULL,
-      rsc_id int NOT NULL,
-      media_id int NOT NULL,
-      seq int NOT NULL DEFAULT 1000000,
-
-      CONSTRAINT rsc_media_pkey PRIMARY KEY (id),
-      CONSTRAINT fk_rsc_media_rsc_id FOREIGN KEY (rsc_id)
-        REFERENCES rsc (id)
-        ON UPDATE CASCADE ON DELETE CASCADE,
-      CONSTRAINT fk_rsc_media_media_id FOREIGN KEY (media_id)
-        REFERENCES media (id)
         ON UPDATE CASCADE ON DELETE CASCADE
     )",
 
-    "CREATE INDEX rsc_media_rsc_id_media_id_key ON rsc_media (rsc_id, media_id)",
-    "CREATE INDEX fki_rsc_media_rsc_id ON rsc_media (rsc_id)",
-    "CREATE INDEX fki_rsc_media_media_id ON rsc_media (media_id)",
-    "CREATE INDEX rsc_media_seq_key ON rsc_media(rsc_id, seq)",
-
-    % Table prop_group
-    % Defines a group of features
-
-    "CREATE TABLE feature_group
-    (
-        id serial NOT NULL,
-        props bytea,
-        CONSTRAINT feature_group_pkey PRIMARY KEY (id)
-    )",
-
-    % Table feature
-    % Defines the name(s) of a feature.
-
-    "CREATE TABLE feature
-    (
-      id serial NOT NULL,
-      feature_group_id int NOT NULL,
-      props bytea,
-      CONSTRAINT feature_pkey PRIMARY KEY (id),
-      CONSTRAINT fk_feature_feature_group_id FOREIGN KEY (feature_group_id)
-        REFERENCES feature_group(id)
-        ON UPDATE CASCADE ON DELETE CASCADE
-    )",
-
-    "CREATE INDEX fki_feature_feature_group_id ON feature(feature_group_id)",
-
-    % Table feature_value
-    % Holds the different values a feature can have.
-
-    "CREATE TABLE feature_value
-    (
-      id serial NOT NULL,
-      feature_id int NOT NULL,
-      props bytea,
-      CONSTRAINT feature_value_pkey PRIMARY KEY (id),
-      CONSTRAINT fk_feature_value_feature_id FOREIGN KEY (feature_id)
-        REFERENCES feature(id)
-        ON UPDATE CASCADE ON DELETE CASCADE
-    )",
-
-    "CREATE INDEX fki_feature_value_prop_id ON feature_value(feature_id)",
-
-    % Table rsc_feature
-    % Holds a feature (w/ value) of a resource
-
-    "CREATE TABLE rsc_feature
-    (
-      rsc_id int NOT NULL,
-      feature_id int NOT NULL,
-      feature_value_id int,
-      props bytea,
-
-      CONSTRAINT rsc_feature_pkey PRIMARY KEY (rsc_id, feature_id),
-      CONSTRAINT fk_rsc_feature_rsc_id FOREIGN KEY (rsc_id)
-        REFERENCES rsc (id)
-        ON UPDATE CASCADE ON DELETE CASCADE,
-      CONSTRAINT fk_rsc_feature_feature_id FOREIGN KEY (feature_id)
-        REFERENCES feature (id)
-        ON UPDATE CASCADE ON DELETE CASCADE,
-      CONSTRAINT fk_rsc_feature_feature_value_id FOREIGN KEY (feature_value_id)
-        REFERENCES feature_value (id)
-        ON UPDATE CASCADE ON DELETE CASCADE
-    )",
-
-    "CREATE INDEX fki_rsc_feature_rsc_id ON rsc_feature (rsc_id)",
-    "CREATE INDEX fki_rsc_feature_feature_id ON rsc_feature (feature_id)",
-    "CREATE INDEX fki_rsc_feature_feature_value_id ON rsc_feature (feature_value_id)",
+    "CREATE INDEX medium_rootname_key ON medium (rootname)",
 
 
     % Table comment
@@ -431,13 +341,16 @@ model_pgsql() ->
 
     % Table category
     % nr, left and right are filled using a topological sort of the category tree
+    % @todo Attach the categories to a rsc (remove name, props and medium_id; add rsc_id)
+    % @todo Add a name field for naming different categorisation systems
+    % A category hierarchy is derived from a resource with the category "category hierarchy"
 
     "CREATE TABLE category
     (
       id serial NOT NULL,
       parent_id int,
       name character varying(80),
-      media_id int,
+      medium_id int,
       seq int NOT NULL DEFAULT 1000000,
       nr int NOT NULL DEFAULT 0,
       lvl int NOT NULL DEFAULT 0,
@@ -446,8 +359,8 @@ model_pgsql() ->
       props bytea,
       CONSTRAINT category_pkey PRIMARY KEY (id),
       CONSTRAINT category_name_key UNIQUE (name),
-      CONSTRAINT fk_category_media_id FOREIGN KEY (media_id)
-        REFERENCES media(id)
+      CONSTRAINT fk_category_medium_id FOREIGN KEY (medium_id)
+        REFERENCES medium(id)
         ON UPDATE CASCADE ON DELETE SET NULL
     )",
 
@@ -455,11 +368,12 @@ model_pgsql() ->
       REFERENCES category (id)
       ON UPDATE CASCADE ON DELETE SET NULL",
     "CREATE INDEX fki_category_parent_id ON category(parent_id)",
-    "CREATE INDEX fki_category_media_id ON category(media_id)",
+    "CREATE INDEX fki_category_medium_id ON category(medium_id)",
     "CREATE INDEX category_nr_key ON category (nr)",
 
     % Table: predicate_category
     % Defines which categories are valid for a predicate as subject or object
+    % @todo Attach this to rscs which are predicates
 
     "CREATE TABLE predicate_category
     (
@@ -615,7 +529,7 @@ model_pgsql() ->
     "CREATE INDEX fki_rsc_pivot_queue_due ON rsc_pivot_queue (is_update, due)",
 
     % Update/insert trigger on rsc to fill the update queue
-    % The text indexing is deleted until the updates are stable
+    % The text indexing is delayed until the updates are stable
     "
     CREATE FUNCTION rsc_pivot_update() RETURNS trigger AS $$
     declare 
@@ -658,7 +572,36 @@ model_pgsql() ->
     "
     CREATE TRIGGER rsc_update_queue_trigger AFTER INSERT OR UPDATE
     ON rsc FOR EACH ROW EXECUTE PROCEDURE rsc_pivot_update()
+    ",
+
+    % Queue for deleted medium files, periodically checked for deleting files that are not referenced anymore
+    "CREATE TABLE medium_deleted
+    (
+        id int NOT NULL,
+        filename character varying (400) NOT NULL,
+        deleted timestamp NOT NULL,
+        
+        CONSTRAINT medium_deleted_pkey PRIMARY KEY (id)
+    )",
+
+    "CREATE INDEX medium_deleted_deleted_key ON medium_deleted (deleted)",
+
+    % Update/insert trigger on medium to fill the deleted files queue
     "
+    CREATE FUNCTION medium_delete() RETURNS trigger AS $$
+    begin
+        if (tg_op = 'DELETE' and old.filename <> '') then
+            insert into medium_deleted (filename) values (old.filename);
+        end if;
+        return null;
+    end;
+    $$ LANGUAGE plpgsql
+    ",
+    "
+    CREATE TRIGGER medium_deleted_trigger AFTER DELETE
+    ON medium FOR EACH ROW EXECUTE PROCEDURE medium_delete()
+    "
+
     ].
 
 

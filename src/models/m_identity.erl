@@ -33,8 +33,10 @@ m_find_value(is_user, #m{value=RscId}, Context) ->
     is_user(RscId, Context);
 m_find_value(username, #m{value=RscId}, Context) ->
     get_username(RscId, Context);
-m_find_value(_Key, #m{}, _Context) ->
-    undefined.
+m_find_value(all, #m{value=RscId}, Context) ->
+    get_rsc(RscId, Context);
+m_find_value(Type, #m{value=RscId}, Context) ->
+    get_rsc(RscId, Type, Context).
 
 %% @doc Transform a m_config value to a list, used for template loops
 %% @spec m_to_list(Source, Context) -> List
@@ -105,6 +107,16 @@ check_username_pw(Username, Password, Context) ->
                     {error, password}
             end
     end.
+
+
+
+%% @doc Fetch all credentials belonging to the user "id"
+%% @spec get_credentials(integer(), context()) -> list()
+get_rsc(Id, Context) ->
+    zp_db:assoc("select * from identity where rsc_id = $1", [Id], Context).
+
+get_rsc(Id, Type, Context) ->
+    zp_db:assoc_row("select * from identity where rsc_id = $1 and type = '$2'", [Id, Type], Context).
 
 
 %% @doc Hash a password, using sha1 and a salt

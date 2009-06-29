@@ -17,7 +17,7 @@
 				<li class="zp-50 {% ifequal forloop.counter "1" %}first{% endifequal %} {% ifequal forloop.counter "3" %}first{% endifequal %} {% ifequal forloop.counter "5" %}first{% endifequal %} {% ifequal forloop.counter "7" %}first{% endifequal %} {% ifequal forloop.counter "9" %}first{% endifequal %}">
 					<div class="block clearfix">
 						<a href="{% url product id=id slug=m.rsc[id].slug %}">
-							{% image m.rsc[id].media[1].filename width=120 height=120 crop alt=m.rsc[id].title class="left" %}
+							{% image m.rsc[id].depiction.filename width=120 height=120 crop alt=m.rsc[id].title class="left" %}
 						</a>
 						<h3>
 							<a href="{% url product id=id slug=m.rsc[id].slug %}">{{ m.rsc[id].title }}</a>

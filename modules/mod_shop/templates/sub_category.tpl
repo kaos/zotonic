@@ -23,7 +23,7 @@
 				<li class="zp-50 {% cycle "first" "last" %}">
 					<div class="block clearfix">
 						<a href="{% url product id=id slug=m.rsc[id].slug %}">
-							{% image m.rsc[id].media[1].filename width=140 height=80 crop alt=m.rsc[id].title class="left" %}
+							{% image m.rsc[id].depiction.filename width=140 height=80 crop alt=m.rsc[id].title class="left" %}
 						</a>
 						<h3>
 							<a href="{% url product id=id slug=m.rsc[id].slug %}">{{ m.rsc[id].title }}</a>

@@ -21,7 +21,7 @@
 -include_lib("zophrenic.hrl").
 
 
-%% @doc Insert a new resource
+%% @doc Insert a new resource. Crashes when insertion is not allowed.
 %% @spec insert(Props, Context) -> {ok, Id}
 insert(Props, Context) ->
     {category_id, CategoryId} = proplists:lookup(category_id, Props),

@@ -200,7 +200,6 @@ is_me(Id, Context) ->
 %% @todo Perform access control checks, return 'undefined' on an error or permission denial
 
 % List of special properties to be redirected to functions
-p(Id, media, Context) -> media(Id, Context);
 p(Id, o, Context)  -> o(Id, Context);
 p(Id, s, Context)  -> s(Id, Context);
 p(Id, m, Context)  -> m(Id, Context);
@@ -220,6 +219,9 @@ p(Id, group, Context) ->
     end;
 p(Id, category, Context) -> 
     m_category:get(p(Id, category_id, Context), Context);
+p(Id, media, Context) -> media(Id, Context);
+p(Id, medium, Context) -> m_media:get(Id, Context);
+p(Id, depiction, Context) -> m_media:depiction(Id, Context);
     
 % Check if the requested predicate is a readily available property or an edge
 p(#rsc{id=Id} = Rsc, Predicate, Context) -> 
@@ -331,7 +333,7 @@ s(Id, Predicate, N, Context) ->
 
 %% Return the list of all media attached to the resource
 media(#rsc{id=Id}, Context) -> 
-    m_media:get_rsc(Id, Context);
+    m_edge:objects(Id, depiction, Context) ++ m_edge:objects(Id, media, Context);
 media(undefined, _Context) -> 
 	[];
 media(Id, Context) -> 

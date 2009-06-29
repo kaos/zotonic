@@ -161,8 +161,6 @@ concat_where([W|Rest], Acc) ->
 %% @spec add_acl_check({Table, Alias}, Args, Context) -> {Where, NewArgs}
 add_acl_check({rsc, Alias}, Args, Context) ->
     add_acl_check1(rsc, Alias, Args, Context);
-add_acl_check({media, Alias}, Args, Context) ->
-    add_acl_check1(media, Alias, Args, Context);
 add_acl_check(_, Args, _Context) ->
     {[], Args}.
 

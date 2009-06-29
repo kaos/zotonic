@@ -17,8 +17,7 @@
 				%}
 			</div>
 			
-
-			{% with m.search.paged[{media page=q.page}] as result %}
+			{% with m.search.paged[{fulltext cat="media" text=q.qs page=q.page}] as result %}
 
 				{% pager result=result dispatch="admin_media" qargs %}
 				<h3 class="above-list">Media overview</h3>
@@ -34,26 +33,25 @@
 						<span class="zp-10">Actions</span>
 					</li>
 
-				{% for media in result %}
-					{% with media.id as id %}
+				{% for id, rank in result %}
+					{% with m.rsc[id] as r %}
+						{% with r.medium as medium %}
 						<li id="{{ #li.id }}">
-							<a href="{% url admin_media_edit id=id %}" class="clearfix">
-								<span class="zp-10">{% image media.filename width=80 height=60 crop %}</span>
-								<span class="zp-20">{{ media.title|default:"&nbsp;" }}</span>
-								<span class="zp-10">{{ media.mime|default:"&nbsp;" }}</span>
-								<span class="zp-30">{{ media.filename }}</span>
-								<span class="zp-10">{{ media.width }} x {{ media.height }}</span>
-								<span class="zp-10">{{ media.created|date:"M d, H:i" }}</span>
+							<a href="{% url admin_edit_rsc id=id %}" class="clearfix">
+								<span class="zp-10">{% image medium.filename width=80 height=60 crop %}</span>
+								<span class="zp-20">{{ r.title|default:"&nbsp;" }}</span>
+								<span class="zp-10">{{ medium.mime|default:"&nbsp;" }}</span>
+								<span class="zp-30">{{ medium.filename }}</span>
+								<span class="zp-10">{{ medium.width }} x {{ medium.height }}</span>
+								<span class="zp-10">{{ medium.created|date:"M d, H:i"|default:"&nbsp;" }}</span>
 								<span class="zp-10">
-									{#
-									{% button text="delete" action={dialog_media_delete id=id on_success={slide_fade_out target=#li.id}} %}
-									#}
 									{% button text="delete" 
-											action={dialog_delete_media id=id on_success={slide_fade_out target=#li.id}} %}
-									{% button text="edit" action={redirect dispatch="admin_media_edit" id=id} %}
+											action={dialog_delete_rsc id=id on_success={slide_fade_out target=#li.id}} %}
+									{% button text="edit" action={redirect dispatch="admin_edit" id=id} %}
 								</span>
 							</a>
 						</li>
+						{% endwith %}
 					{% endwith %}
 				{% empty %}
 					<li>

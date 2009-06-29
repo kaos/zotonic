@@ -1,7 +1,7 @@
 
 <p>Upload a file from your computer.  You have to specify a description of the file to make it easier to find and share.  You also have to specify with which group you want to share the uploaded file.</p>
 
-{% wire id=#form type="submit" postback={media_upload actions=actions} delegate=delegate %}
+{% wire id=#form type="submit" postback={media_upload predicate=predicate actions=actions} delegate=delegate %}
 <form id="{{ #form }}" method="POST" action="postback">
 
 	<input type="hidden" name="rsc_id" value="{{ rsc_id }}" />

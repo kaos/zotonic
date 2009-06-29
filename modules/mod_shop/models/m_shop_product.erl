@@ -201,7 +201,7 @@ get_variants_as_proplist(Id, Context) ->
 allocate_sku_price(Id, Variant, N, Context) ->
     {Skus, BoSku} = allocate_sku(Id, Variant, N, Context),
     case BoSku of
-        #sku_alloc{sku_id=undefined, n=N, media_id=MediaId} ->
+        #sku_alloc{sku_id=undefined, n=N, medium_id=MediaId} ->
             {
                 Id,
                 Variant,
@@ -212,7 +212,7 @@ allocate_sku_price(Id, Variant, N, Context) ->
                 undefined,
                 MediaId
             };
-        #sku_alloc{n=BoN, media_id=MediaId} ->
+        #sku_alloc{n=BoN, medium_id=MediaId} ->
             {SumPrice, SumOldPrice} = lists:foldl(
                     fun(#sku_alloc{n=SN, price_incl=SP, old_price_incl=SOP}, {Tot, OldTot}) ->
                         {Tot + SN*SP, OldTot + SN*SOP}
@@ -241,7 +241,7 @@ allocate_sku(Id, Variant, N, Context) ->
     Skus = zp_db:q("
             select id, article_nr, stock_avail, price_incl, price_excl, 
                     special_price_incl, special_price_excl, special_start, special_end,
-                    media_id
+                    medium_id
             from shop_sku
             where rsc_id = $1
               and variant = $2
@@ -256,15 +256,15 @@ allocate_sku(Id, Variant, N, Context) ->
     select_price({Id, Nr, Stock, PriceIncl, PriceExcl, SpecialPriceIncl, SpecialPriceExcl, Start, End, MediaId}, Date) 
         when SpecialPriceIncl > 0 andalso Start =< Date andalso End >= Date ->
             #sku_alloc{ sku_id=Id, sku_nr=Nr, price_incl=SpecialPriceIncl, price_excl=SpecialPriceExcl, 
-                        old_price_incl=PriceIncl, old_price_excl=PriceExcl, n=Stock, media_id=MediaId};
+                        old_price_incl=PriceIncl, old_price_excl=PriceExcl, n=Stock, medium_id=MediaId};
     select_price({Id, Nr, Stock, PriceIncl, PriceExcl, _SpecialPriceIncl, _SpecialPriceExcl, _Start, _End, MediaId}, _Date) ->
             #sku_alloc{sku_id=Id, sku_nr=Nr, price_incl=PriceIncl, price_excl=PriceExcl, 
-                        old_price_incl=PriceIncl, old_price_excl=PriceExcl, n=Stock, media_id=MediaId}.
+                        old_price_incl=PriceIncl, old_price_excl=PriceExcl, n=Stock, medium_id=MediaId}.
     
     allocate_sku1([], N, {Alloc, LastSku}) ->
         {Alloc, LastSku#sku_alloc{n=N, backorder=true}};
-    allocate_sku1([#sku_alloc{n=Stock, media_id=MediaId}=Sku|_], N, {Alloc, _LastSku}) when Stock >= N ->
-        {[Sku#sku_alloc{n=N} | Alloc], #sku_alloc{backorder=true, n=0, media_id=MediaId}};
+    allocate_sku1([#sku_alloc{n=Stock, medium_id=MediaId}=Sku|_], N, {Alloc, _LastSku}) when Stock >= N ->
+        {[Sku#sku_alloc{n=N} | Alloc], #sku_alloc{backorder=true, n=0, medium_id=MediaId}};
     allocate_sku1([#sku_alloc{n=Stock} = Sku|Rest], N, {Alloc, _LastSku}) when Stock =< 0 ->
         allocate_sku1(Rest, N, {Alloc, Sku});
     allocate_sku1([#sku_alloc{n=Stock} = Sku|Rest], N, {Alloc, _LastSku}) ->

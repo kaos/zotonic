@@ -16,8 +16,6 @@
     rsc_visible/2,
     rsc_editable/2,
     rsc_ingroup/2,
-    media_visible/2,
-    media_editable/2,
     group_editable/2,
     sudo/2,
     logon/2,
@@ -75,18 +73,6 @@ rsc_ingroup(Id, Context) ->
     Gs = groups_member(Context),
     Props = m_rsc:get_acl_props(Id, Context),
     lists:member(Props#acl_props.group_id, Gs).
-
-
-%% @doc Check if the media record is visible for the current user
-media_visible(Id, Context) ->
-    acl_visible(m_media:get_acl_props(Id, Context), Context).
-
-%% @doc Check if the media record is editable by the current user
-media_editable(_Id, #context{user_id=undefined}) ->
-    % Anonymous visitors can't edit anything
-    false;
-media_editable(Id, Context) ->
-    acl_editable(m_media:get_acl_props(Id, Context), Context).
 
 
 %% @doc Check if the user is allowed to edit content in the group

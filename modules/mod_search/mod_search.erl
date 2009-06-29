@@ -217,7 +217,7 @@ search({fulltext, [{cat,Cat},{text,QueryText}]}, _OffsetLimit, Context) ->
                         from="rsc r, category rc, category ic",
                         where=" r.category_id = rc.id and rc.nr >= ic.lft and rc.nr <= ic.rght and ic.id = $1",
                         order="r.modified desc",
-                        args=[CatId, zp_pivot_rsc:pg_lang(Context#context.language)],
+                        args=[CatId],
                         tables=[{rsc,"r"}]
                     };
                 _ ->
@@ -248,11 +248,23 @@ search({media_category_image, [{cat,Cat}]}, _OffsetLimit, Context) ->
     CatId = m_category:name_to_id_check(Cat, Context),
     #search_sql{
         select="m.filename",
-        from="rsc r, category rc, category ic, rsc_media rm, media m",
+        from="rsc r, category rc, category ic, medium m",
         where="r.category_id = rc.id and rc.nr >= ic.lft and rc.nr <= ic.rght and ic.id = $1
-                and rm.rsc_id = r.id and rm.media_id = m.id",
-        tables=[{rsc,"r"}, {media, "m"}],
+                and m.rsc_id = r.id",
+        tables=[{rsc,"r"}, {medium, "m"}],
         args=[CatId]
+    };
+
+search({media_category_depiction, [{cat,Cat}]}, _OffsetLimit, Context) ->
+    CatId = m_category:name_to_id_check(Cat, Context),
+    PredDepictionId = m_predicate:name_to_id_check(depiction, Context),
+    #search_sql{
+        select="m.filename",
+        from="rsc r, rsc ro, category rc, category ic, medium m, edge e",
+        where="r.category_id = rc.id and rc.nr >= ic.lft and rc.nr <= ic.rght and ic.id = $1
+                and ro.id = e.object_id and e.subject_id = r.id and e.predicate_id = $2 and ro.id = m.rsc_id",
+        tables=[{rsc,"r"}, {rsc, "ro"}, {medium, "m"}],
+        args=[CatId, PredDepictionId]
     };
 
 
@@ -260,7 +272,7 @@ search({media, []}, _OffsetLimit, _Context) ->
     #search_sql{
         select="m.*",
         from="media m",
-        tables=[{media, "m"}],
+        tables=[{medium, "m"}],
         order="m.created desc",
         args=[],
         assoc=true

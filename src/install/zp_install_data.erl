@@ -99,7 +99,8 @@ install_category(C) ->
         {6, 4,         1, article,     [{title, {trans, [{en, "Article"},        {nl, "Artikel"}]}}] },
         {7, 3,         3, product,     [{title, {trans, [{en, "Product"},        {nl, "Product"}]}}] },
         {8, 3,         2, event,       [{title, {trans, [{en, "Event"},          {nl, "Evenement"}]}}] },
-        {9, 6,         1, news,        [{title, {trans, [{en, "News"},           {nl, "Nieuws"}]}}] }
+        {9, 6,         1, news,        [{title, {trans, [{en, "News"},           {nl, "Nieuws"}]}}] },
+        {10,1,         1, media,       [{title, {trans, [{en, "Media"},          {nl, "Media"}]}}] }
     ],
     [ {ok,1} = pgsql:equery(C, "
             insert into category (id, parent_id, seq, name, props)
@@ -154,9 +155,12 @@ install_identity(C) ->
 install_predicate(C) ->
     Preds = [
         % id  name      uri                                                  rvrsd  props
-        [ 1, "about",   "http://www.w3.org/1999/02/22-rdf-syntax-ns#about",  false, [{title, {trans, [{en,"About"},   {nl,"Over"}]}}]],
-        [ 2, "author",  "http://purl.org/dc/elements/1.1/creator",           true,  [{title, {trans, [{en,"Author"},  {nl,"Auteur"}]}}]],
-        [ 3, "review",  "http://purl.org/stuff/rev#Review",                  true,  [{title, {trans, [{en,"Reviews"}, {nl,"Beoordeelt"}]}}]]
+        [ 1, "about",   "http://www.w3.org/1999/02/22-rdf-syntax-ns#about",  false, [{title, {trans, [{en,"About"},    {nl,"Over"}]}}]],
+        [ 2, "author",  "http://purl.org/dc/elements/1.1/creator",           true,  [{title, {trans, [{en,"Author"},   {nl,"Auteur"}]}}]],
+        [ 3, "review",  "http://purl.org/stuff/rev#Review",                  true,  [{title, {trans, [{en,"Reviews"},  {nl,"Beoordeelt"}]}}]],
+        [ 4, "relation","http://purl.org/dc/elements/1.1/relation",          false, [{title, {trans, [{en,"Relation"}, {nl,"Relatie"}]}}]],
+        [ 5, "media",   "http://zophrenic.com/predicate/media",              false, [{title, {trans, [{en,"Media"},    {nl,"Media"}]}}]],
+        [ 6, "depiction","http://xmlns.com/foaf/0.1/depiction",              false, [{title, {trans, [{en,"Depiction"},{nl,"Afbeelding"}]}}]]
     ],
 
     [ {ok,1} = pgsql:equery(C, "
@@ -165,7 +169,6 @@ install_predicate(C) ->
             ", R) || R <- Preds],
     pgsql:reset_id(C, "predicate"),
     ok.
-
 
 
 %% @doc Install example edges between the predefined content

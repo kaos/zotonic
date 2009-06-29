@@ -56,7 +56,7 @@
 -define(DBC(Context), Context#context.dbc).
 
 %% ACL fields for an acl check. Fields are initialized for the visible resource.
-%% This is used for fetching the acl fields from a resource or media record.
+%% This is used for fetching the acl fields from a resource record.
 -record(acl_props, {
     is_published=true,
     group_id=1,

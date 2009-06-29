@@ -50,7 +50,7 @@ tables_sql() ->
 
       -- The product and the properties distinguishing this sku within the product
       rsc_id integer,
-      media_id integer,
+      medium_id integer,
       variant character varying(100) not null default '',
       props bytea,
       stock_avail integer not null default 0,       -- Imported stock, minus sold and reserved items
@@ -96,13 +96,13 @@ tables_sql() ->
       CONSTRAINT fk_shop_sku_rsc_id FOREIGN KEY (rsc_id)
         REFERENCES rsc(id)
         ON UPDATE CASCADE ON DELETE SET NULL,
-      CONSTRAINT fk_shop_sku_media_id FOREIGN KEY (media_id)
-        REFERENCES media(id)
+      CONSTRAINT fk_shop_sku_medium_id FOREIGN KEY (medium_id)
+        REFERENCES medium(id)
         ON UPDATE CASCADE ON DELETE SET NULL
     )",
 
     "CREATE INDEX fki_shop_sku_rsc_id ON shop_sku (rsc_id)",
-    "CREATE INDEX fki_shop_sku_media_id ON shop_sku (media_id)",
+    "CREATE INDEX fki_shop_sku_medium_id ON shop_sku (medium_id)",
     "CREATE INDEX shop_sku_rsc_id_variant ON shop_sku (rsc_id, variant)",
     "CREATE INDEX shop_sku_imported ON shop_sku (imported)",
 
@@ -438,7 +438,8 @@ install_rsc(Context) ->
             undefined -> ok;
             ProdNr ->
                 File = "priv/files/archive/" ++ integer_to_list(ProdNr) ++ ".jpg",
-                m_media:insert_file_rsc(File, Id, [{visible_for, 0}], Context)
+                {ok, FileRscId} = m_media:insert_file(File, [{visible_for, 0}, {group_id, 1}, {creator_id, 1}], Context),
+                m_edge:insert(Id, depiction, FileRscId, Context)
         end
     end,
     [ M(IR) || IR <- IdRsc],

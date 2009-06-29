@@ -18,7 +18,7 @@
 		{% for rsc_id, cid, bid, rank in result %}
 		<h3 class="block">{{ m.rsc[rsc_id].title }}</h3>
 		<div class="block clearfix">
-			<a href="{{ m.rsc[rsc_id].page_url }}">{% image m.rsc[rsc_id].media[1].filename width=180 height=140 crop alt=m.rsc[rsc_id].title class="left" %}</a>
+			<a href="{{ m.rsc[rsc_id].page_url }}">{% image m.rsc[rsc_id].depiction.filename width=180 height=140 crop alt=m.rsc[rsc_id].title class="left" %}</a>
 			<div class="zp-70">
 				<h4>Beschrijving</h4>
 				<p>{{ m.rsc[rsc_id].intro }}</p>
@@ -60,7 +60,7 @@
 			{% for id in m.search[{featured cat="product"}] %}
 				<li class="zp-33 {% ifequal forloop.counter "1" %}first{% endifequal %} {% ifequal forloop.counter "4" %}first{% endifequal %}">
 					<div class="block">
-						<a href="{{ m.rsc[id].page_url }}">{% image m.rsc[id].media[1].filename width=216 height=130 crop alt=m.rsc[id].title %}</a>
+						<a href="{{ m.rsc[id].page_url }}">{% image m.rsc[id].depiction.filename width=216 height=130 crop alt=m.rsc[id].title %}</a>
 						<h3><a href="{{ m.rsc[id].page_url }}">{{ m.rsc[id].title }}</a></h3>
 						<div class="product-price clearfix">
 							<h3>&euro;{% include "_price.tpl" %}</h3>

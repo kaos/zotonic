@@ -63,7 +63,7 @@
 			<ul class="related-articles">
 				{% for id in featured %}
 					<li class="block clearfix">
-						<a href="{% url product id=id slug=m.rsc[id].slug %}" title="{{ m.rsc[id].title }}">{% image m.rsc[id].media[1].filename width=60 height=40 crop alt="trapper" %}</a>
+						<a href="{% url product id=id slug=m.rsc[id].slug %}" title="{{ m.rsc[id].title }}">{% image m.rsc[id].depiction.filename width=60 height=40 crop alt="trapper" %}</a>
 						<h3><a href="{% url product id=id %}">{{ m.rsc[id].title }}</a></h3>
 						<span class="price">&euro; {% include "_price.tpl" %}</span>
 					</li>

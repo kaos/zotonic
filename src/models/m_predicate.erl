@@ -202,5 +202,4 @@ update_predicate_category(Id, IsSubject, CatIds, Context) ->
     || NewId <- CatIds, not lists:member(NewId, OldIds)
     ],
     ok.
-    
 

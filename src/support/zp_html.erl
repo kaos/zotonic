@@ -88,6 +88,8 @@ escape(B) when is_binary(B) ->
 
 %% @doc Strip all html elements from the text. Simple parsing is applied to find the elements. Does not escape the end result.
 %% @spec strip(iolist()) -> iolist()
+strip(undefined) ->
+    [];
 strip(<<>>) ->
     <<>>;
 strip([]) ->
