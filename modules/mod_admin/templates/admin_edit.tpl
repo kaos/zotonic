@@ -104,7 +104,12 @@
 											action={dialog_media_upload rsc_id=id group_id=r.group_id action={postback postback={reload_media rsc_id=id div_id=#media} delegate="resource_admin_edit"}}
 									%}
 
-									{% button text="add existing media item" action={link_dialog subject_id=id predicate="depiction" action={postback postback={reload_media rsc_id=id div_id=#media} delegate="resource_admin_edit"}} %}
+									{% button text="add existing media item" 
+										action={link_dialog subject_id=id predicate="depiction" 
+											action={postback
+														postback={reload_media rsc_id=id div_id=#media}
+														delegate="resource_admin_edit"}
+										} %}
 								</div>
 							</div>
 						</div>
@@ -258,7 +263,7 @@
 								<span class="arrow">make smaller</span>
 							</h3>
 							<div class="item clearfix">
-								<div id="unlink-message">
+								<div id="undo-message">
 								<p>
 									This page is able to connect to others. For example you can connect it to an actor or a brand. 
 									<a href="javascript:void(0)" class="do_dialog {title: 'Help about page connections.', text: 'This page is able to connect to others. For example you can connect it to an actor or a brand.', width: '450px'}">Need more help?</a>
