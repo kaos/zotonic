@@ -139,12 +139,7 @@ reload_dispatch_list(Context, State) ->
 
 %% @doc Collect all dispatch lists.  Checks priv/dispatch for all dispatch list definitions.
 collect_dispatch_lists(Context) ->
-    Files1     = filelib:wildcard(filename:join([code:lib_dir(zophrenic, default), "dispatch", "*"])),
-    Files2     = filelib:wildcard(filename:join([code:lib_dir(zophrenic, priv), "dispatch", "*"])),
-    Resources1 = filelib:wildcard(filename:join([code:lib_dir(zophrenic, rsc), "resources", "resource_*.erl"])),
-    Resources2 = filelib:wildcard(filename:join([code:lib_dir(zophrenic, priv), "resources", "resource_*.erl"])),
-    RscModules = [list_to_atom(filename:basename(X, ".erl")) || X <- Resources1 ++ Resources2],
-    
+    Files      = filelib:wildcard(filename:join([code:lib_dir(zophrenic, priv), "sites", "default", "dispatch", "*"])),
     Modules    = zp_module_sup:active(Context),
     ModuleDirs = zp_module_sup:scan(Context),
     ModDisp    = lists:concat(
@@ -152,8 +147,7 @@ collect_dispatch_lists(Context) ->
     ),
 
     Dispatch   = [
-                    lists:map(fun get_module_dispatch/1, RscModules),
-                    lists:map(fun get_file_dispatch/1, Files2++ModDisp++Files1)
+                    lists:map(fun get_file_dispatch/1, ModDisp++Files)
                  ],
     lists:flatten(Dispatch).
     

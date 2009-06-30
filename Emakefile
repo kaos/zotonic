@@ -7,12 +7,9 @@
 	"modules/*",
 	"modules/*/*",
 	"modules/*/*/*",
-	"priv/modules/*",
-	"priv/modules/*/*",
-	"priv/modules/*/*/*",
-	"priv/resources/*",
-	"priv/models/*",
-	"priv/scomps/*"
+	"priv/sites/*/*",
+	"priv/sites/*/*/*",
+	"priv/sites/*/*/*/*"
  ], 
  [	{i, "include"},
 	{i, "src/dbdrivers/postgresql/include"},

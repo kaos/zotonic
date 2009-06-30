@@ -9,7 +9,7 @@
 -export([
     new/2,
     new/0,
-    new_for_db/1,
+    new_for_host/1,
 
     prune_for_template/1,
     prune_for_database/1,
@@ -82,9 +82,9 @@ new() ->
     Context#context{language=zp_trans:default_language(Context)}.
 
 %% @doc Return an almost empty context for the database connection only, nothing else is initialised
-new_for_db(Database) ->
+new_for_host(Host) ->
     Context = new(),
-    Context#context{db=Database}.
+    Context#context{host=Host}.
 
 
 %% @doc Cleanup a context for the output stream
@@ -105,7 +105,7 @@ prune_for_template(Output) -> Output.
 
 %% @doc Cleanup a context so that it can be used exclusively for database connections
 prune_for_database(Context) ->
-    #context{db=Context#context.db, dbc=Context#context.dbc}.
+    #context{host=Context#context.host, dbc=Context#context.dbc}.
 
 
 %% @doc Cleanup a context for cacheable scomp handling.  Resets most of the accumulators to prevent duplicating
@@ -129,12 +129,12 @@ prune_for_scomp(VisibleFor, Context) ->
 %% @todo pickle/depickle the visitor id (when any)
 %% @spec pickle(Context) -> tuple()
 pickle(Context) ->
-    {pickled_context, Context#context.db, Context#context.user_id, Context#context.language, undefined}.
+    {pickled_context, Context#context.host, Context#context.user_id, Context#context.language, undefined}.
 
 %% @doc Depickle a context for restoring from a database
 %% @todo pickle/depickle the visitor id (when any)
-depickle({pickled_context, Db, UserId, Language, _VisitorId}) ->
-    Context = #context{db=Db, language=Language},
+depickle({pickled_context, Host, UserId, Language, _VisitorId}) ->
+    Context = #context{host=Host, language=Language},
     case UserId of
         undefined -> Context;
         _ -> zp_acl:logon(UserId, Context)

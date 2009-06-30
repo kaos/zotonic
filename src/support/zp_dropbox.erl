@@ -53,9 +53,10 @@ scan() ->
 %%                     {stop, Reason}
 %% @doc Initiates the server.  Options are: dropbox_dir, processing_dir, unhandled_dir, interval, max_age and min_age
 init(Args) ->
-    DropBox  = string:strip(proplists:get_value(dropbox_dir,    Args, "priv/files/dropbox"),    right, $/), 
-    ProcDir  = string:strip(proplists:get_value(processing_dir, Args, "priv/files/processing"), right, $/), 
-    UnDir    = string:strip(proplists:get_value(unhandled_dir,  Args, "priv/files/unhandled"),  right, $/), 
+    FilesDir = filename:join([code:lib_dir(zophrenic, priv), "sites", "default", "files"]),
+    DropBox  = string:strip(proplists:get_value(dropbox_dir,    Args, filename:join([FilesDir, "dropbox"])),    right, $/), 
+    ProcDir  = string:strip(proplists:get_value(processing_dir, Args, filename:join([FilesDir, "processing"])), right, $/), 
+    UnDir    = string:strip(proplists:get_value(unhandled_dir,  Args, filename:join([FilesDir, "unhandled"])),  right, $/), 
     Interval = proplists:get_value(interval, Args, 10000),
     MinAge   = proplists:get_value(min_age, Args, 10),
     MaxAge   = proplists:get_value(max_age, Args, 3600),
@@ -215,8 +216,8 @@ rel_file(BaseDir, File) ->
     end.
 
 test() ->
-    DropBox = "priv/files/dropbox",
-    _ProcDir = "priv/files/processing",
+    DropBox = filename:join([code:lib_dir(zophrenic, priv), "sites", "default", "dropbox"]),
+    _ProcDir = filename:join([code:lib_dir(zophrenic, priv), "sites", "default", "processing"]),
     Files = scan_directory(DropBox),
     Files.
 %    lists:map(fun(F) -> move_file(DropBox, F, ProcDir) end, Files).

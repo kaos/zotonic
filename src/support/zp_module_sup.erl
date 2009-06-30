@@ -142,11 +142,11 @@ all(Context) ->
    [ zp_convert:to_atom(M) || {M} <- Modules ].
 
 
-%% @doc Scan for a list of modules present in the priv/modules and src/modules directories. A module is always a directory,
+%% @doc Scan for a list of modules present in the site's module directories. A module is always a directory,
 %% the name of the directory is the same as the name of the module.
 %% @spec scan(context()) -> [ {atom(), dirname()} ]
-scan(_Context) ->
-    Priv  = filename:join([code:lib_dir(zophrenic, priv), "modules", "mod_*"]),
+scan(#context{host=Host}) ->
+    Priv  = filename:join([code:lib_dir(zophrenic, priv), "sites", Host, "modules", "mod_*"]),
     Src   = filename:join([code:lib_dir(zophrenic, modules), "mod_*"]),
     Files = filelib:wildcard(Priv) ++ filelib:wildcard(Src),
     [ {zp_convert:to_atom(filename:basename(F)), F} ||  F <- Files ].

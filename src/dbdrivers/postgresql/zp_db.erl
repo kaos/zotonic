@@ -44,8 +44,8 @@
 %% @doc Perform a function inside a transaction, do a rollback on exceptions
 %% @spec transaction(Function, Context) -> FunctionResult | {error, Reason}
 transaction(Function, #context{dbc=undefined} = Context) ->
-    Db       = Context#context.db,
-    {ok, C}  = pgsql_pool:get_connection(Db),
+    Host     = Context#context.host,
+    {ok, C}  = pgsql_pool:get_connection(Host),
     Context1 = Context#context{dbc=C},
     Result = try
                 {ok, [], []} = pgsql:squery(C, "BEGIN"),
@@ -57,7 +57,7 @@ transaction(Function, #context{dbc=undefined} = Context) ->
                     pgsql:squery(C, "ROLLBACK"),
                     {rollback, {Why, erlang:get_stacktrace()}}
              end,
-    pgsql_pool:return_connection(Db, C),
+    pgsql_pool:return_connection(Host, C),
     Result;
 transaction(Function, Context) ->
     % Nested transaction, only keep the outermost transaction
@@ -72,15 +72,15 @@ get(Key, Props) ->
 
 
 %% @doc Transaction handler safe function for fetching a db connection
-get_connection(#context{dbc=undefined, db=Db}) ->
-    {ok, C} = pgsql_pool:get_connection(Db),
+get_connection(#context{dbc=undefined, host=Host}) ->
+    {ok, C} = pgsql_pool:get_connection(Host),
     C;
 get_connection(Context) ->
     Context#context.dbc.
 
 %% @doc Transaction handler safe function for releasing a db connection
-return_connection(C, #context{dbc=undefined, db=Db}) ->
-    pgsql_pool:return_connection(Db, C);
+return_connection(C, #context{dbc=undefined, host=Host}) ->
+    pgsql_pool:return_connection(Host, C);
 return_connection(_C, _Context) -> 
     ok.
 
@@ -340,7 +340,7 @@ split_props(Props, Cols) ->
 columns(Table, Context) when is_atom(Table) ->
     columns(atom_to_list(Table), Context);
 columns(Table, Context) ->
-    Db = Context#context.db,
+    Db = Context#context.host,
     case zp_depcache:get({columns, Db, Table}) of
         {ok, Cols} -> 
             Cols;

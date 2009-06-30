@@ -20,8 +20,8 @@
         page_pid=undefined,     % multiple pages per session
         page_id=undefined,
 
-        %% The database to be used (derived from the Host)
-        db=dbdefault,
+        %% The host (also the id of the database used) 
+        host=default,
         %% The database connection used for (nested) transactions, see zp_db
         dbc=undefined,
 
@@ -52,7 +52,7 @@
 -define(WM_REQ(ReqData, Context), zp_context:set_reqdata(ReqData, Context)).
 -define(WM_REPLY(Reply, Context), {Reply, Context#context.wm_reqdata, Context#context{wm_reqdata=undefined}}).
 
--define(DB(Context), Context#context.db).
+-define(HOST(Context), Context#context.host).
 -define(DBC(Context), Context#context.dbc).
 
 %% ACL fields for an acl check. Fields are initialized for the visible resource.

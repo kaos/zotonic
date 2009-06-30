@@ -145,7 +145,7 @@ make_unique(Archive, Rootname, Extension, Nr) ->
 %% @doc Return the path to the media archive directory
 path_archive(_Context) ->
     Priv = code:lib_dir(zophrenic, priv),
-    filename:join([Priv, "files", "archive"]).
+    filename:join([Priv, "sites", "default", "files", "archive"]).
 
 %% @doc Check if the file is archived (ie. in the archive directory)
 is_archived(Filename, Context) ->

@@ -43,7 +43,7 @@ install_check(Name, PoolOpts) ->
                         Database
                         ]),
             zp_install:install(Name),
-            shop_install_data:install(#context{db=Name});
+            shop_install_data:install(#context{host=Name});
         1 -> 
             ok
     end.

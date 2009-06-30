@@ -54,7 +54,7 @@
     }).
 
 -define(MAX_AGE, 315360000).
--define(MEDIA_PATH,   "priv/files/archive/").
+-define(MEDIA_PATH,   filename:join([code:lib_dir(zophrenic, priv), "sites", "default", "files", "archive"])).
 
 
 init(ConfigProps) ->

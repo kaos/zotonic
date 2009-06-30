@@ -64,7 +64,7 @@ init([]) ->
 	            permanent, 5000, worker, dynamic},
 
     DbPoolConfig = [
-        {dbdefault, 10, [{host, DbHost}, {port, DbPort}, {user, DbUser}, {password, DbPassword}, {database, DbDatabase}]}
+        {default, 10, [{host, DbHost}, {port, DbPort}, {user, DbUser}, {password, DbPassword}, {database, DbDatabase}]}
     ],
 
     Ids     = {zp_ids,

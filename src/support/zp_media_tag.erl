@@ -57,7 +57,7 @@ tag(Filename, Options) ->
 %% @doc Give the filepath for the filename being served
 %% @todo Ensure the file is really in the given directory (ie. no ..'s)
 filename_to_filepath(Filename) ->
-    filename:join("priv/files/archive/", Filename).
+    filename:join([code:lib_dir(zophrenic, priv), "sites", "default", "files", "archive", Filename]).
 
 
 %% @doc Give the base url for the filename being served

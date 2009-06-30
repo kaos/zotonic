@@ -43,15 +43,15 @@ poll() ->
 %% @doc Poll the pivot queue for the database in the context
 %% @spec poll(Context) -> void()
 poll(Context) ->
-    DB = ?DB(Context),
-    gen_server:cast(?MODULE, {poll, DB}).
+    Host = ?HOST(Context),
+    gen_server:cast(?MODULE, {poll, Host}).
 
 
 %% @doc An immediate pivot request for a resource
 %% @spec pivot(Id, Context) -> void()
 pivot(Id, Context) ->
-    DB = ?DB(Context),
-    gen_server:cast(?MODULE, {pivot, Id, DB}).
+    Host = ?HOST(Context),
+    gen_server:cast(?MODULE, {pivot, Id, Host}).
 
 
 %%====================================================================
@@ -94,18 +94,18 @@ handle_call(Message, _From, State) ->
 %%                                  {stop, Reason, State}
 %% Poll the queue for all databases
 handle_cast({poll}, State) ->
-    do_poll(dbdefault),
+    do_poll(default),
     {noreply, State};
 
 %% Poll the queue for a particular database
-handle_cast({poll, DB}, State) ->
-    do_poll(DB),
+handle_cast({poll, Host}, State) ->
+    do_poll(Host),
     {noreply, State};
 
 
 %% Poll the queue for a particular database
-handle_cast({pivot, Id, DB}, State) ->
-    do_pivot(Id, DB),
+handle_cast({pivot, Id, Host}, State) ->
+    do_pivot(Id, Host),
     {noreply, State};
 
 
@@ -143,8 +143,8 @@ code_change(_OldVsn, State, _Extra) ->
 %%====================================================================
 
 %% @doc Poll a database for any queued updates.
-do_poll(DB) ->
-    Context = zp_context:new_for_db(DB),
+do_poll(Host) ->
+    Context = zp_context:new_for_host(Host),
     Qs = fetch_queue(Context),
     F = fun(Ctx) ->
         [ pivot_resource(Id, Ctx) || {Id,_Serial} <- Qs]
@@ -153,8 +153,8 @@ do_poll(DB) ->
     delete_queue(Qs, Context).
 
 %% @doc Pivot a specific id, delete its queue record if present
-do_pivot(Id, DB) ->
-    Context = zp_context:new_for_db(DB),
+do_pivot(Id, Host) ->
+    Context = zp_context:new_for_host(Host),
     Serial = fetch_queue_id(Id, Context),
     pivot_resource(Id, Context),
     delete_queue(Id, Serial, Context).

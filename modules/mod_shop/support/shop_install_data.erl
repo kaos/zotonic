@@ -431,14 +431,16 @@ install_rsc(Context) ->
         {"product_1636", "tacx"}
     ],
     
-    Rets = [ zp_db:insert(rsc, [{is_published, true}, {visible_for, 0}, {group_id, 1}, {modifier_id, 1}, {creator_id, 1} | R], Context) || R <- Rsc ],
+    GroupId = zp_db:q1("select id from rsc where name = 'admins'", Context),
+    
+    Rets = [ zp_db:insert(rsc, [{is_published, true}, {visible_for, 0}, {group_id, GroupId}, {modifier_id, 1}, {creator_id, 1} | R], Context) || R <- Rsc ],
     IdRsc = lists:zip(Rets, Rsc),
     M = fun({{ok,Id}, R}) ->
         case proplists:get_value(product_nr, R) of
             undefined -> ok;
             ProdNr ->
-                File = "priv/files/archive/" ++ integer_to_list(ProdNr) ++ ".jpg",
-                {ok, FileRscId} = m_media:insert_file(File, [{visible_for, 0}, {group_id, 1}, {creator_id, 1}], Context),
+                File = filename:join([code:lib_dir(zophrenic, priv), "sites", "default", "files", "archive",  integer_to_list(ProdNr) ++ ".jpg"]),
+                {ok, FileRscId} = m_media:insert_file(File, [{visible_for, 0}, {group_id, GroupId}, {creator_id, 1}], Context),
                 m_edge:insert(Id, depiction, FileRscId, Context)
         end
     end,
