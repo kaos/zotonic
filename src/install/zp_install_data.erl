@@ -175,8 +175,7 @@ install_predicate(C) ->
         [ 2, "author",  "http://purl.org/dc/elements/1.1/creator",           true,  [{title, {trans, [{en,"Author"},   {nl,"Auteur"}]}}]],
         [ 3, "review",  "http://purl.org/stuff/rev#Review",                  true,  [{title, {trans, [{en,"Reviews"},  {nl,"Beoordeelt"}]}}]],
         [ 4, "relation","http://purl.org/dc/elements/1.1/relation",          false, [{title, {trans, [{en,"Relation"}, {nl,"Relatie"}]}}]],
-        [ 5, "media",   "http://zophrenic.com/predicate/media",              false, [{title, {trans, [{en,"Media"},    {nl,"Media"}]}}]],
-        [ 6, "depiction","http://xmlns.com/foaf/0.1/depiction",              false, [{title, {trans, [{en,"Depiction"},{nl,"Afbeelding"}]}}]]
+        [ 5, "depiction","http://xmlns.com/foaf/0.1/depiction",              false, [{title, {trans, [{en,"Depiction"},{nl,"Afbeelding"}]}}]]
     ],
 
     [ {ok,1} = pgsql:equery(C, "

@@ -333,7 +333,7 @@ s(Id, Predicate, N, Context) ->
 
 %% Return the list of all media attached to the resource
 media(#rsc{id=Id}, Context) -> 
-    m_edge:objects(Id, depiction, Context) ++ m_edge:objects(Id, media, Context);
+    m_edge:objects(Id, depiction, Context);
 media(undefined, _Context) -> 
 	[];
 media(Id, Context) -> 
