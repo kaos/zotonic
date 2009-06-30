@@ -218,5 +218,9 @@ wire(TriggerId, undefined, Actions, Context) ->
 wire(_TriggerId, _TargetId, [], Context) ->
     Context;
 wire(TriggerId, TargetId, Actions, Context) ->
-    Context#context{actions=[{TriggerId, TargetId, Actions}|Context#context.actions]}.
+    Context#context{actions=[{TriggerId, TargetId, flatten_list(Actions)}|Context#context.actions]}.
 
+    flatten_list(L) when is_list(L) ->
+        lists:flatten(L);
+    flatten_list(Other) ->
+        Other.

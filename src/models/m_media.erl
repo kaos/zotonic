@@ -79,7 +79,7 @@ exists([C|_] = Name, Context) when is_integer(C) ->
 exists(Id, Context) when is_binary(Id) ->
     exists(binary_to_list(Id), Context);
 exists(Id, Context) -> 
-    case zp_db:q1("select rsc_id from medium where rsc_id = $1", [Id], Context) of
+    case zp_db:q1("select id from medium where id = $1", [Id], Context) of
         undefined -> false;
         _ -> true
     end.
@@ -88,7 +88,7 @@ exists(Id, Context) ->
 %% @doc Get the medium record with the id
 %% @spec get(RscId, Context) -> PropList
 get(Id, Context) ->
-    F = fun() -> zp_db:assoc_props_row("select * from medium where rsc_id = $1", [Id], Context) end,
+    F = fun() -> zp_db:assoc_props_row("select * from medium where id = $1", [Id], Context) end,
     zp_depcache:memo(F, {medium, Id}, ?WEEK).
 
 
@@ -172,7 +172,7 @@ replace_file(File, RscId, Props, Context) ->
                 SafeFilename = SafeRootName ++ zp_media_identify:extension(proplists:get_value(mime, PropsMedia)),
                 ArchiveFile = zp_media_archive:archive_copy_opt(File, SafeFilename, Ctx),
                 RootName = filename:rootname(filename:basename(ArchiveFile)),
-                case zp_db:insert(medium, [{rsc_id, RscId}, {filename, ArchiveFile}, {rootname, RootName}|PropsMedia], Ctx) of
+                case zp_db:insert(medium, [{id, RscId}, {filename, ArchiveFile}, {rootname, RootName}|PropsMedia], Ctx) of
                     {ok, _MediaId} ->
                         {ok, RscId};
                     Error ->

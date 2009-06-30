@@ -8,4 +8,4 @@
 	<ul id="{{#suggestions}}" class="suggestions-list"></ul>
 </div>
 
-{% wire id=#input type="keyup" action={typeselect target=#suggestions subject_id=subject_id predicate=predicate} %}
+{% wire id=#input type="keyup" action={typeselect target=#suggestions subject_id=subject_id predicate=predicate action=action} %}

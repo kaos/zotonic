@@ -43,7 +43,10 @@
 %% @doc Fetch the value for the key from a model source
 %% @spec m_find_value(Key, Source, Context) -> term()
 m_find_value(Id, #m{value=undefined} = M, Context) ->
-    M#m{value = rid(Id, Context)};
+    case rid(Id, Context) of
+        undefined -> undefined;
+        RId -> M#m{value=RId}
+    end;
 m_find_value(Key, #m{value=#rsc{}} = M, Context) ->
     p(M#m.value, Key, Context).
 

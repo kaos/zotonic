@@ -41,8 +41,10 @@ insert(Props, Context) ->
 delete(Id, Context) when is_integer(Id) ->
     case zp_acl:rsc_editable(Id, Context) of
         true ->
+            Referrers = m_edge:subjects(Id, Context),
             zp_db:delete(rsc, Id, Context),
             zp_depcache:flush(#rsc{id=Id}),
+            [ zp_depcache:flush(#rsc{id=SubjectId}) || SubjectId <- Referrers ],
             ok;
         false ->
             {error, eacces}

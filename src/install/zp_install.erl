@@ -265,8 +265,7 @@ model_pgsql() ->
 
     "CREATE TABLE medium
     (
-      id serial NOT NULL,
-      rsc_id int NOT NULL,
+      id int NOT NULL,
       filename character varying(400) NOT NULL,
       rootname character varying(100) NOT NULL,
       mime character varying(64) NOT NULL DEFAULT 'application/octet-stream'::character varying,
@@ -278,9 +277,8 @@ model_pgsql() ->
       created timestamp with time zone NOT NULL DEFAULT now(),
 
       CONSTRAINT medium_pkey PRIMARY KEY (id),
-      CONSTRAINT medium_rsc_id_key UNIQUE (rsc_id),
       CONSTRAINT medium_filename_key UNIQUE (filename),
-      CONSTRAINT fk_medium_rsc_id FOREIGN KEY (rsc_id)
+      CONSTRAINT fk_medium_rsc_id FOREIGN KEY (id)
         REFERENCES rsc (id)
         ON UPDATE CASCADE ON DELETE CASCADE
     )",

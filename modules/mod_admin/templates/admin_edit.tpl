@@ -18,7 +18,7 @@
 			<h2>You are not allowed to edit <span>{{ r.title|striptags }}</span></h2>
 		{% else %}
 			<p class="admin-chapeau">editing:</p>
-			<h2>{{ r.title|striptags }}</h2>
+			<h2>{{ r.title|striptags|default:"<em>untitled</em>" }}</h2>
 		{% endif %}	
 
 			{% wire id="rscform" type="submit" postback="rscform" %}
@@ -92,7 +92,7 @@
 						{% endwith %}
 
 						<div class="item-wrapper">
-							<h3 class="above-item">Media</h3>
+							<h3 class="above-item">{{ m.predicate["depiction"].title|default:"Media" }}</h3>
 							<div class="item clearfix">
 								<div id="{{ #media }}">
 									{% include "_edit_media.tpl" media=media %}
@@ -103,6 +103,8 @@
 											text="add a new media item" 
 											action={dialog_media_upload rsc_id=id group_id=r.group_id action={postback postback={reload_media rsc_id=id div_id=#media} delegate="resource_admin_edit"}}
 									%}
+
+									{% button text="add existing media item" action={link_dialog subject_id=id predicate="depiction" action={postback postback={reload_media rsc_id=id div_id=#media} delegate="resource_admin_edit"}} %}
 								</div>
 							</div>
 						</div>
@@ -264,20 +266,21 @@
 								</div>
 								
 								{% for name, p in m.predicate %}
-									<h4>{{ p.title }}</h4>
-									<div class="unlink-wrapper clearfix">
-										<div id="links-{{id}}-{{name}}" class="clearfix">
-										{% for o_id in r.o[name] %}
-											{% include "_rsc_edge.tpl" subject_id=id predicate=name object_id=o_id %}
-										{% endfor %}
+									{% ifnotequal name "depiction" %}
+										<h4>{{ p.title }}</h4>
+										<div class="unlink-wrapper clearfix">
+											<div id="links-{{id}}-{{name}}" class="clearfix">
+											{% for o_id in r.o[name] %}
+												{% include "_rsc_edge.tpl" subject_id=id predicate=name object_id=o_id %}
+											{% endfor %}
+											</div>
+											{% link_add subject_id=id predicate=name %}
 										</div>
-										{% link_add subject_id=id predicate=name %}
-									</div>
-									<hr />
+										<hr />
+									{% endifnotequal %}
 								{% endfor %}
 								
 								<div class="clearfix">
-									{# todo: add a "submit" action #}
 									<p>{% button action={redirect dispatch="admin_referrers" id=id} text="View all referrers"%}</p>
 								</div>
 							</div>
