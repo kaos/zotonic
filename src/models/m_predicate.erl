@@ -64,7 +64,7 @@ is_predicate(Pred, Context) ->
 %% @spec id_to_name(Id, Context) -> {ok, atom()} | {error, Reason}
 id_to_name(Id, Context) when is_integer(Id) ->
     F = fun() ->
-        case zp_db:q1("select name from predicate where id = $1", [Id], Context) of
+        case zp_db:q1("select name from rsc where id = $1 and category_id = $2", [Id, cat_id(Context)], Context) of
             undefined -> {error, {enoent, predicate, Id}};
             Name -> {ok, zp_convert:to_atom(Name)}
         end
@@ -74,25 +74,11 @@ id_to_name(Id, Context) when is_integer(Id) ->
     
 %% @doc Return the id of the predicate
 %% @spec name_to_id(Pred, Context) -> {ok, int()} | {error, Reason}
-name_to_id(Pred, Context) when is_atom(Pred) ->
-    F = fun() ->
-        case zp_db:q1("select id from predicate where name = $1", [Pred], Context) of
-            undefined -> {error, {enoent, predicate, Pred}};
-            Id -> {ok, Id}
-        end
-    end,
-    zp_depcache:memo(F, {predicate_id, Pred}, ?DAY, [predicate]);
-name_to_id(Pred, _Context) when is_integer(Pred) ->
-    {ok, Pred};
-name_to_id(Pred, Context) ->
-    name_to_id(zp_convert:to_atom(Pred), Context).
+name_to_id(Name, Context) ->
+    m_rsc:name_to_id_cat(Name, predicate, Context).
 
-
-%% @doc Return the id of the predicate, crash when it can't be found
-%% @spec name_to_id_check(Pred, Context) -> int()
 name_to_id_check(Name, Context) ->
-    {ok, Id} = name_to_id(Name, Context),
-    Id.
+    m_rsc:name_to_id_cat_check(Name, predicate, Context).
 
 
 %% @doc Return the definition of the predicate
@@ -132,7 +118,7 @@ all(Context) ->
         {ok, Preds} -> 
             Preds;
         undefined ->
-            Preds = zp_db:assoc_props("select * from predicate order by name", Context),
+            Preds = zp_db:assoc_props("select * from rsc where category_id = $1 order by name", [cat_id(Context)], Context),
             FSetPred = fun(Pred) ->
                 Id = proplists:get_value(id, Pred),
                 Atom = list_to_atom(binary_to_list(proplists:get_value(name, Pred))),
@@ -147,17 +133,17 @@ all(Context) ->
 %% @spec insert(Props, Context) -> {ok, Id}
 insert(Props, Context) ->
     true = zp_acl:has_role(admin, Context),
-    Props1 = lists:filter(fun valid_prop/1, Props),
-    Props2 = [ {zp_convert:to_atom(N), V} || {N,V} <- Props1 ],
-    {ok, Id} = zp_db:insert(predicate, Props2, Context),
+    Props1 = zp_utils:prop_replace(category, predicate, Props),
+    Props2 = zp_utils:prop_replace(is_published, true, Props1),
+    Props3 = zp_utils:prop_replace(group, admins, Props2),
+    {ok, Id} = m_rsc:insert(Props3, Context),
     zp_depcache:flush(predicate),
     {ok, Id}.
 
 %% @doc Delete a predicate, crashes when the predicate is in use
 %% @spec delete(Props, Context) -> void()
 delete(Id, Context) ->
-    true = zp_acl:has_role(admin, Context),
-    zp_db:delete(predicate, Id, Context),
+    m_rsc:delete(Id, Context),
     zp_depcache:flush(predicate).
 
 
@@ -169,27 +155,14 @@ update(Id, Props, Context) ->
     Objects = proplists:get_all_values("object", Props),
     SubjectIds = [ list_to_integer(N) || N <- Subjects, N /= [] ],
     ObjectIds = [ list_to_integer(N) || N <- Objects, N /= [] ],
-    Props1 = lists:filter(fun valid_prop/1, Props),
-    Props2 = [ {zp_convert:to_atom(N), V} || {N,V} <- Props1 ],
     F = fun(Ctx) ->
-        zp_db:update(predicate, Id, Props2, Ctx),
+        m_rsc:update(Id, Props, Ctx),
         update_predicate_category(Id, true, SubjectIds, Ctx),
         update_predicate_category(Id, false, ObjectIds, Ctx),
         ok
     end,
     ok = zp_db:transaction(F, Context),
     zp_depcache:flush(predicate).
-
-
-valid_prop({Name, _Value}) when is_atom(Name) -> true;
-valid_prop({"title", _Value}) -> true;
-valid_prop({"descr", _Value}) -> true;
-valid_prop({"name", _Value}) -> true;
-valid_prop({"uri", _Value}) -> true;
-valid_prop({"reversed", _Value}) -> true;
-valid_prop(_) -> false.
-
-
 
 update_predicate_category(Id, IsSubject, CatIds, Context) ->
     OldIdsR = zp_db:q("select category_id from predicate_category where predicate_id = $1 and is_subject = $2", [Id, IsSubject], Context),
@@ -203,3 +176,9 @@ update_predicate_category(Id, IsSubject, CatIds, Context) ->
     ],
     ok.
 
+
+%% @doc Return the id of the predicate category
+%% @spec cat_id(Context) -> integer()
+cat_id(Context) ->
+    m_category:name_to_id_check(predicate, Context).
+        

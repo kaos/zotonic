@@ -15,6 +15,8 @@
     
     name_to_id/2,
     name_to_id_check/2,
+    name_to_id_cat/3,
+    name_to_id_cat_check/3,
     
     get/2,
     get_acl_props/2,
@@ -32,7 +34,7 @@
 	p/3, 
 	op/2, o/2, o/3, o/4,
 	sp/2, s/2, s/3, s/4,
-	media/2, media/3,
+	media/2,
 	page_url/2,
 	rid/2
 ]).
@@ -76,6 +78,28 @@ name_to_id_check(Name, Context) ->
     {ok, Id} = name_to_id(Name, Context),
     Id.
 
+name_to_id_cat(Name, Cat, Context) when is_integer(Name) ->
+    F = fun() ->
+        CatId = m_category:name_to_id_check(Cat, Context),
+        case zp_db:q1("select id from rsc where id = $1 and category_id = $2", [Name, CatId], Context) of
+            undefined -> {error, {enoent, Cat, Name}};
+            Id -> {ok, Id}
+        end
+    end,
+    zp_depcache:memo(F, {rsc_name, Name, Cat}, ?DAY, [Cat]);
+name_to_id_cat(Name, Cat, Context) ->
+    F = fun() ->
+        CatId = m_category:name_to_id_check(Cat, Context),
+        case zp_db:q1("select id from rsc where Name = $1 and category_id = $2", [Name, CatId], Context) of
+            undefined -> {error, {enoent, Cat, Name}};
+            Id -> {ok, Id}
+        end
+    end,
+    zp_depcache:memo(F, {rsc_name, Name, Cat}, ?DAY, [Cat]).
+
+name_to_id_cat_check(Name, Cat, Context) ->
+    {ok, Id} = name_to_id_cat(Name, Cat, Context),
+    Id.
 
 %% @doc Read a whole resource
 %% @spec get(Id, Context) -> 
@@ -117,7 +141,7 @@ get_acl_props(Id, Context) when is_integer(Id) ->
 
 
 %% @doc Insert a new resource
-%% @spec insert(Props, Context) -> {ok, Id}
+%% @spec insert(Props, Context) -> {ok, Id} | {error, Reason}
 insert(Props, Context) ->
     m_rsc_update:insert(Props, Context).
 
@@ -127,8 +151,8 @@ delete(Id, Context) when is_integer(Id) ->
     m_rsc_update:delete(Id, Context).
 
 
-%% @doc Update a predicate
-%% @spec update(Props, Props, Context) -> void()
+%% @doc Update a resource
+%% @spec update(Props, Props, Context) -> {ok, Id} | {error, Reason}
 update(Id, Props, Context) when is_integer(Id) ->
     m_rsc_update:update(Id, Props, Context).
 
@@ -342,14 +366,6 @@ media(undefined, _Context) ->
 media(Id, Context) -> 
 	media(rid(Id, Context), Context).
 
-
-media(#rsc{id=Id}, N, Context) ->
-    m_media:get_rsc(Id, N, Context);
-media(undefined, _N, _Context) ->
-	undefined;
-media(Id, N, Context) ->
-    media(rid(Id, Context), N, Context).
-	
 	
 %% @doc Fetch a #rsc{} from any input
 rid(#rsc{} = Rsc, _Context) ->

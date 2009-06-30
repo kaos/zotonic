@@ -22,18 +22,9 @@
 
 
 %% @doc Insert a new resource. Crashes when insertion is not allowed.
-%% @spec insert(Props, Context) -> {ok, Id}
+%% @spec insert(Props, Context) -> {ok, Id} | {error, Reason}
 insert(Props, Context) ->
-    {category_id, CategoryId} = proplists:lookup(category_id, Props),
-    {group_id, GroupId} = proplists:lookup(group_id, Props),
-    true = zp_acl:group_editable(GroupId, Context),
-    F = fun(Ctx) ->
-        {ok, Id} = zp_db:insert(rsc, [{category_id, CategoryId}, {group_id, GroupId}, {visible_for, 2}], Ctx),
-        ok = update(Id, Props, Ctx),
-        {ok, Id}
-    end,
-    zp_db:transaction(F, Context).
-    
+    update(insert_rsc, Props, Context).
 
 
 %% @doc Delete a resource
@@ -52,9 +43,9 @@ delete(Id, Context) when is_integer(Id) ->
     
 
 %% @doc Update a resource
-%% @spec update(Props, Props, Context) -> ok | {error, Reason}
-update(Id, Props, Context) when is_integer(Id) ->
-    case zp_acl:rsc_editable(Id, Context) of
+%% @spec update(Id, Props, Context) -> {ok, Id} | {error, Reason}
+update(Id, Props, Context) when is_integer(Id) orelse Id == insert_rsc ->
+    case Id == insert_rsc orelse zp_acl:rsc_editable(Id, Context) of
         true ->
             TextProps = recombine_dates(Props),
             AtomProps = [ {zp_convert:to_atom(P), V} || {P, V} <- TextProps ],
@@ -64,20 +55,30 @@ update(Id, Props, Context) when is_integer(Id) ->
             SafeProps = zp_html:escape_props(FilledProps),
             case preflight_check(Id, SafeProps, Context) of
                 ok ->
+                    RscId = case Id of
+                        insert_rsc ->
+                            CategoryId = proplists:get_value(category_id, SafeProps),
+                            GroupId = proplists:get_value(group_id, SafeProps),
+                            {ok, InsId} = zp_db:insert(rsc, [{category_id, CategoryId}, {group_id, GroupId}, {visible_for, 2}, {version, 0}], Context),
+                            InsId;
+                        _ ->
+                            Id
+                    end,
+                    
                     UpdateProps = [
-                        {version, zp_db:q1("select version+1 from rsc where id = $1", [Id], Context)},
+                        {version, zp_db:q1("select version+1 from rsc where id = $1", [RscId], Context)},
                         {modifier_id, zp_acl:user(Context)},
                         {modified, erlang:universaltime()}
                         | SafeProps
                     ],
-                    zp_db:update(rsc, Id, UpdateProps, Context),
-                    zp_depcache:flush(#rsc{id=Id}),
+                    zp_db:update(rsc, RscId, UpdateProps, Context),
+                    zp_depcache:flush(#rsc{id=RscId}),
 
                     case proplists:get_value(name, UpdateProps) of
                         undefined -> nop;
                         Name -> zp_depcache:flush({rsc_name, zp_convert:to_list(Name)})
                     end,
-                    ok;
+                    {ok, RscId};
                 {error, Reason} ->
                     {error, Reason}
             end;
@@ -88,6 +89,8 @@ update(Id, Props, Context) when is_integer(Id) ->
 
 %% @doc Check if all props are acceptable. Examples are unique name, uri etc.
 %% @spec preflight_check(Id, Props, Context) -> ok | {error, Reason}
+preflight_check(insert_rsc, Props, Context) ->
+    preflight_check(-1, Props, Context);
 preflight_check(_Id, [], _Context) ->
     ok;
 preflight_check(Id, [{name, Name}|T], Context) ->
@@ -151,6 +154,10 @@ props_filter([{group_id, GId}|T], Acc, Context) ->
                     props_filter(T, [{group_id, GroupId}|Acc], Context)
             end
     end;
+props_filter([{group, GroupName}|T], Acc, Context) ->
+    props_filter([{group_id, m_group:name_to_id_check(GroupName, Context)} | T], Acc, Context);
+props_filter([{category, CatName}|T], Acc, Context) ->
+    props_filter([{category_id, m_category:name_to_id_check(CatName, Context)} | T], Acc, Context);
 props_filter([{_Prop, _V}=H|T], Acc, Context) ->
     props_filter(T, [H|Acc], Context).
 

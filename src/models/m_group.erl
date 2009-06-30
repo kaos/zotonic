@@ -15,6 +15,9 @@
     m_to_list/2,
     m_value/2,
 
+    name_to_id/2,
+    name_to_id_check/2,
+    
     get/2,
     insert/2,
     add_member/3,
@@ -63,6 +66,13 @@ get(Id, Context) ->
     end,
     zp_depcache:memo(F, {group, Id}, ?WEEK, [#rsc{id=Id}]).
 
+
+name_to_id(Name, Context) ->
+    m_rsc:name_to_id_cat(Name, usergroup, Context).
+
+name_to_id_check(Name, Context) ->
+    m_rsc:name_to_id_cat_check(Name, usergroup, Context).
+    
 
 %% @doc Insert a new group, make sure that the roles are only set by the admin
 %% @spec insert(PropList, Context) -> {ok, int()}

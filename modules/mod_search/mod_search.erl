@@ -250,7 +250,7 @@ search({media_category_image, [{cat,Cat}]}, _OffsetLimit, Context) ->
         select="m.filename",
         from="rsc r, category rc, category ic, medium m",
         where="r.category_id = rc.id and rc.nr >= ic.lft and rc.nr <= ic.rght and ic.id = $1
-                and m.rsc_id = r.id",
+                and m.id = r.id",
         tables=[{rsc,"r"}, {medium, "m"}],
         args=[CatId]
     };
@@ -262,7 +262,7 @@ search({media_category_depiction, [{cat,Cat}]}, _OffsetLimit, Context) ->
         select="m.filename",
         from="rsc r, rsc ro, category rc, category ic, medium m, edge e",
         where="r.category_id = rc.id and rc.nr >= ic.lft and rc.nr <= ic.rght and ic.id = $1
-                and ro.id = e.object_id and e.subject_id = r.id and e.predicate_id = $2 and ro.id = m.rsc_id",
+                and ro.id = e.object_id and e.subject_id = r.id and e.predicate_id = $2 and ro.id = m.id",
         tables=[{rsc,"r"}, {rsc, "ro"}, {medium, "m"}],
         args=[CatId, PredDepictionId]
     };

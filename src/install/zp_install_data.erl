@@ -132,7 +132,7 @@ install_rsc(C) ->
         [ 8,  0,    8,   18,  "content", [{title,"Content"}] ],
 
         [ 1,  0,    4,   2,   "admin",  [{title,"Site Administrator"}] ],
-        [ 2,  0,    4,   6,   "about",  [{title,"About Zophrenic"}, {body, "<p>Some nice text in the body.</p>"}] ],
+        [ 2,  0,    4,   6,   "about_zophrenic",  [{title,"About Zophrenic"}, {body, "<p>Some nice text in the body.</p>"}] ],
         [ 3,  0,    4,   9,   undefined,[{title,"Some News"}, {body, "<p>And the text of the news should be typed here.</p>"}] ]
     ],
     
@@ -170,19 +170,22 @@ install_identity(C) ->
 %% @todo Extend and check this list.  Add allowed from/to categories.
 install_predicate(C) ->
     Preds = [
-        % id  name      uri                                                  rvrsd  props
-        [ 1, "about",   "http://www.w3.org/1999/02/22-rdf-syntax-ns#about",  false, [{title, {trans, [{en,"About"},    {nl,"Over"}]}}]],
-        [ 2, "author",  "http://purl.org/dc/elements/1.1/creator",           true,  [{title, {trans, [{en,"Author"},   {nl,"Auteur"}]}}]],
-        [ 3, "review",  "http://purl.org/stuff/rev#Review",                  true,  [{title, {trans, [{en,"Reviews"},  {nl,"Beoordeelt"}]}}]],
-        [ 4, "relation","http://purl.org/dc/elements/1.1/relation",          false, [{title, {trans, [{en,"Relation"}, {nl,"Relatie"}]}}]],
-        [ 5, "depiction","http://xmlns.com/foaf/0.1/depiction",              false, [{title, {trans, [{en,"Depiction"},{nl,"Afbeelding"}]}}]]
+        % name      uri                                                   rvrsd  props
+        [ "about",   "http://www.w3.org/1999/02/22-rdf-syntax-ns#about",  [{reversed, false},{title, {trans, [{en,"About"},    {nl,"Over"}]}}]],
+        [ "author",  "http://purl.org/dc/elements/1.1/creator",           [{reversed, true}, {title, {trans, [{en,"Author"},   {nl,"Auteur"}]}}]],
+        [ "review",  "http://purl.org/stuff/rev#Review",                  [{reversed, true}, {title, {trans, [{en,"Reviews"},  {nl,"Beoordeelt"}]}}]],
+        [ "relation","http://purl.org/dc/elements/1.1/relation",          [{reversed, false},{title, {trans, [{en,"Relation"}, {nl,"Relatie"}]}}]],
+        [ "depiction","http://xmlns.com/foaf/0.1/depiction",              [{reversed, false},{title, {trans, [{en,"Depiction"},{nl,"Afbeelding"}]}}]]
     ],
 
+    {ok, CatId}   = pgsql:squery1(C, "select id from category where name = 'predicate'"),
+    {ok, GroupId} = pgsql:squery1(C, "select id from rsc where name = 'admins'"),
+    
     [ {ok,1} = pgsql:equery(C, "
-            insert into predicate (id, name, uri, reversed, props)
-            values ($1, $2, $3, $4, $5)
-            ", R) || R <- Preds],
-    pgsql:reset_id(C, "predicate"),
+            insert into rsc (name, uri, props, group_id, category_id, is_published, creator_id, modifier_id)
+            values ($1, $2, $3, $4, $5, true, 1, 1)
+            ", R ++ [GroupId,CatId]) || R <- Preds],
+    pgsql:reset_id(C, "rsc"),
     ok.
 
 

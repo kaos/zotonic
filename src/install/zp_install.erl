@@ -90,7 +90,7 @@ model_pgsql() ->
         creator_id int,
         modifier_id int,
         version int NOT NULL DEFAULT 1,
-        category_id int NOT NULL DEFAULT 1,
+        category_id int NOT NULL,
         visible_for int NOT NULL DEFAULT 1, -- 0 = public, 1 = community, 2 = group
         comment_by int NOT NULL DEFAULT 3, -- 0 = public, 1 = community, 2 = group, 3 = nobody
         comments int NOT NULL default 0,
@@ -154,23 +154,6 @@ model_pgsql() ->
     "CREATE INDEX rsc_pivot_postcode_key ON rsc (pivot_postcode)",
     "CREATE INDEX rsc_pivot_geocode_key ON rsc (pivot_geocode)",
 
-    % Table: predicate
-    % Holds all predicates used in the edge table
-    % @todo Move this to the rsc table, add a category "predicate"
-
-    "CREATE TABLE predicate
-    (
-      id serial NOT NULL,
-      name character varying(20) NOT NULL,
-      uri character varying(250) NOT NULL DEFAULT ''::character varying,
-      reversed boolean NOT NULL default false,
-      props bytea,
-
-      CONSTRAINT predicate_pkey PRIMARY KEY (id),
-      CONSTRAINT predicate_uri_key UNIQUE (uri),
-      CONSTRAINT predicate_name_key UNIQUE (name)
-    )",
-
     % Table: edge
     % All relations between resources, forming a directed graph
 
@@ -194,7 +177,7 @@ model_pgsql() ->
         REFERENCES rsc (id)
         ON UPDATE CASCADE ON DELETE CASCADE,
       CONSTRAINT fk_edge_predicate_id FOREIGN KEY (predicate_id)
-        REFERENCES predicate (id)
+        REFERENCES rsc (id)
         ON UPDATE CASCADE ON DELETE CASCADE,
       CONSTRAINT fk_edge_creator_id FOREIGN KEY (creator_id)
         REFERENCES rsc (id)
@@ -351,7 +334,6 @@ model_pgsql() ->
 
     % Table: predicate_category
     % Defines which categories are valid for a predicate as subject or object
-    % @todo Attach this to rscs which are predicates
 
     "CREATE TABLE predicate_category
     (
@@ -363,7 +345,7 @@ model_pgsql() ->
       CONSTRAINT predicate_category_pkey PRIMARY KEY (id),
       CONSTRAINT predicate_category_key UNIQUE (predicate_id, is_subject, category_id),
       CONSTRAINT fk_predicate_category_predicate_id FOREIGN KEY (predicate_id)
-        REFERENCES predicate(id)
+        REFERENCES rsc(id)
         ON UPDATE CASCADE
         ON DELETE CASCADE,
       CONSTRAINT fk_predicate_category_category_id FOREIGN KEY (category_id)

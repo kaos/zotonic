@@ -36,7 +36,7 @@ event({postback, {shop_select_variant, Id}, _TriggerId, _TargetId}, Context) ->
         V -> proplists:get_value(media_id, V)
     end,
     Props = case MediaId of
-        undefined -> m_media:get_rsc(Id, 1, Context);
+        undefined -> m_media:depiction(Id, Context);
         _ -> m_media:get(MediaId, Context)
     end,
     case Props of
