@@ -21,7 +21,7 @@ render_action(TriggerId, TargetId, Args, Context) ->
     Hide = proplists:get_value(hide, Args),
     Action = proplists:get_all_values(action, Args),
     UndoAction = proplists:get_all_values(undo_action, Args),
-    UndoMessageId = proplists:get_value(undo_message_id, Args, "unlink-message"),
+    UndoMessageId = proplists:get_value(undo_message_id, Args, "unlink-undo-message"),
     
     Postback = {unlink, SubjectId, Predicate, ObjectId, Hide, UndoMessageId, Action, UndoAction},
 	{PostbackMsgJS, _PickledPostback} = zp_render:make_postback(Postback, click, TriggerId, TargetId, ?MODULE, Context),
