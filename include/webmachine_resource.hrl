@@ -1,4 +1,5 @@
--behaviour(webmachine_resource).
+% Basic webmachine resource, copied from webmachine.
+
 -export([start_link/1]).
 -export([ping/2]).
 

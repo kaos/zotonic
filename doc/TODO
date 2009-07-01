@@ -178,7 +178,7 @@ Change depend parameter of scomps to 'vary' - done.
 
 == Google chart ==
 
-Check code, adapt calling interface to something that will work with our template system.
+Check code, adapt calling interface to something that will work with our template system - done.
 
 == LOG ==
 
@@ -187,11 +187,6 @@ Add rotating logger to the webmachine logger
 == Webmachine / MochiWeb ==
 
 Integrate webmachine and mochiweb in our source tree, check makefiles.
-
-== Add application generation script ==
-
-Like mochiweb and webmachine.  For this we will need to change the lookup paths for tpls etc.
-This will implement the appliction specific parts and the uri dispatch rules in a more simple way.
 
 == Translations and filter applications ==
 
@@ -231,7 +226,7 @@ TODO:
 	- Add the {{ _ en="english text" }} construct - done
 	- Delay zp_trans:trans application for parameters of filters - nice to have - not done yet
 	- Modify erlydtl filters so that optional {trans} parameter (and argument) are translated - done
-	- Move language to #context{}
+	- Move language to #context{} - done.
 	- Add all gettext functionality (get .po files, use them, refetch them)
 	- Add scanning of different strings in the templates and erlang code (to .pot file)
 
@@ -250,6 +245,8 @@ TODO:
 	
 
 == Handling of resources in Erlang code and templates ==
+
+(All below is done, some small variations in the real implementation vs. the notes below.)
 
 We want to have something like the anyMeta $thing in our templates and Erlang code.
 Possible actions on this 'thing' (resource or m_rsc)
@@ -378,7 +375,6 @@ The m_rsc:p() function returns the predicate of the first #rsc{} in a #rsc list.
 	p(undefined, _Predicate) -> undefined;
 
 
-
 == (Product) Properties ==
 
 triplet:
@@ -413,32 +409,32 @@ Modules:
 
 	module_indexer:
 	- listen to {scomp/ template/ action/ validator/ model} notifications, maps them to the ones
-	  found in the module folders
+	  found in the module folders - done.
 	- listen to {module_activate/ module_deactivate} notifications, rescan the list of scomps (etc)
-	  after receiving, also instructs the dispatcher to reload the dispatch rules
+	  after receiving, also instructs the dispatcher to reload the dispatch rules - done.
 	- listen to {module_rescan} message, as send from the dev module to force a rescan when in
-	  development mode.
+	  development mode - done.
 
 	module_admin
-	- for overview of modules, activate/deactivate modules in the admin
+	- for overview of modules, activate/deactivate modules in the admin - done.
 
 	admin
-	- basic admin controllers
+	- basic admin controllers - done.
 	
 	shop
-	- the webshop site
+	- the webshop site - done.
 
 	google_chart
-	- The google chart scomp, and also chart_pie and chart_pie3d
+	- The google chart scomp, and also chart_pie and chart_pie3d - now still in mod_base
 
 	base
-	- all normal buttons, drag/drop, validators etc.
+	- all normal buttons, drag/drop, validators etc. - done.
 
 	dropbox
-	- handle new images in the upload folder, move & publish them
+	- handle new images in the upload folder, move & publish them - still a gen_server in src/support
 
 	pivot
-	- handles extraction of texts for indexing rsc entries
+	- handles extraction of texts for indexing rsc entries - still a gen_server in src/support
 
 	
 When looking up an item:
@@ -450,6 +446,7 @@ When looking up an item:
 	The module manager will receive this notification and check against the known list of items.
 	Other modules can also hook into the notification manager to intercept the message and return
 	an alternative.  This can be on the basis of the arguments or the supplied context.
+	- done.
 	
 Get a list of all admin menu items:
 
@@ -457,6 +454,8 @@ Get a list of all admin menu items:
 
 	This sends a notification {admin_menu} to all modules.
 	The resulting list is filtered from empty results and returned.
+	
+	- not done yet - will be implemented when needed.
 
 Call a scomp in a module:
 
@@ -468,6 +467,8 @@ Call a scomp in a module:
 
 	It uses the -module_priority() attribute of the module or the scomp to sort the scomps, enabling
 	a scomp to be overruled by another module.
+
+	- above is done.
 
 	LATER:
 	
@@ -483,7 +484,7 @@ Call a scomp in a module:
 Call all scomps by all modules:
 
 	{% all scompname arg=value %}
-
+	- done.
 
 Include a template from a module:
 
@@ -494,10 +495,12 @@ Include a template from a module:
 
 	It uses the -module_priority() attribute to sort the templates, enabling a template to be overruled
 	by another module.
+	- done.
 	
 Include all templates by all modules:
 
 	{% all include "templatename.tpl" %}
+	- done.
 	
 Refer to an action in a module:
 
@@ -506,14 +509,20 @@ Refer to an action in a module:
 
 	It uses the -module_priority() attribute of the module or the action to sort the actions, enabling
 	an action to be overruled by another module.
-
+	- done.
+	
 Refer to a validator in a module:
 
 	The module manager scans the validators directory of the every module, so it can do a mapping
 	from the name of the validators.   validator_<modulename>_<validator>.erl
-
+	- done.
+	
 Refer to a model in a module:
 
 	The module manager scans the model directory of every module. It maps the names found to the
 	names requested.  m_<modulename>_<modelname>.erl
+	
+	- Will not do this for now, you should specify unique names for all models and address them in that way.
+	Reason: not needed at this moment and extra messaging overhead to find the correct model.
+
 

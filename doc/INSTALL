@@ -1,0 +1,65 @@
+Zophrenic installation
+======================
+
+You will need:
+
+1. Install Erlang R12B (13B has not been tested yet).
+2. Install ImageMagick 'convert' and 'identify' tools (also install libjpeg, -tiff, -png and other required libraries).
+   Make sure that the convert and identify tools are in your path so that zophrenic can find them.
+3. Install PostgreSQL (preferably 8.3 or newer).
+4. A copy of the Zophrenic source code.
+
+
+Steps:
+
+1. Create an user and database in PostgreSQL:
+
+    CREATE USER zophrenic WITH PASSWORD 'yourdbpassword';
+    CREATE DATABASE zophrenic WITH OWNER = zophrenic ENCODING = 'UTF8';
+    GRANT ALL ON DATABASE zophrenic TO zophrenic;
+    \c zophrenic
+    CREATE LANGUAGE "plpgsql";
+
+2. Copy the file "doc/zophrenic.sh" to a place that is handy for you.
+
+3. Edit the "zophrenic.sh" script, edit and uncomment at least the following keys:
+
+   The place of zophrenic and the zophrenic.sh script:
+
+    BASE
+    ME
+
+   Passwords and secret signing keys:
+	
+    ZP_DBPASSWORD
+    ZP_ADMINPASSWORD
+    ZOPHRENIC_SIGN_KEY_SIMPLE
+    ZOPHRENIC_SIGN_KEY
+
+4. Make sure that the directory "priv/sites/default/files" and all its subdirectories are readable 
+   and writeable for the current user. (Which is the user zophrenic will run under.)
+
+5. Start zophrenic in debug mode:
+
+    zophrenic.sh debug
+
+6. You see zophrenic starting up, lots of messages pass by, and zophrenic will install the initial database.
+   When something goes wrong here, then it is almost always a problem with the database connection. Check your 
+   database configuration in the zophrenic.sh file.
+
+7. Point your browser to 
+	
+    http://127.0.0.1:8000/
+	
+   or logon as admin (with the password you gave at ZP_ADMINPASSWORD) at: 
+
+    http://127.0.0.1:8000/admin/
+
+8. When all done, then you can stop the erlang shell with:
+
+    q().
+  
+   Next time you can start with:
+
+    zophrenic.sh start
+
