@@ -1,0 +1,30 @@
+Welcome to Zophrenic
+
+Here we give you some starting points for your journey with Zophrenic.
+
+
+INSTALLING
+
+When you want to install Zophrenic, please read the file "doc/INSTALL".
+When you want to proxy Zophrenic using nginx, then check also the file "doc/INSTALL.nginx" for an example site definition.
+
+
+FOR ERLANG HACKERS
+
+When you want to read the source, then start with "src/zophrenic.sh" and work your way down using the servers defined in there.  After you have an idea what is what.
+
+
+FOR TEMPLATE WIZARDS
+
+Start to scan the modules to see how templates, actions, resources and css/javascript are defined.  Especially the module "mod_base" if of interest as it defines all basic functionality which other modules build upon.
+
+
+FOR SQL MAGICIANS
+
+Another useful source of information is the module "src/install/zp_install.erl", this resource defines the complete SQL datamodel.
+Check also "src/install/zp_install_data.erl" as it defines the basic set of predicates, categories and whatnot.
+
+
+Thank you and have fun with Zophrenic.
+
+- Tim Benniks
