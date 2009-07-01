@@ -83,20 +83,20 @@ init([]) ->
                 {zp_installer, start_link, [DbPoolConfig]},
                 permanent, 1, worker, dynamic},
 
-    Notifier = {zp_notifier,
-	            {zp_notifier, start_link, []}, 
-	            permanent, 5000, worker, dynamic},
-
-    Dispatcher = {zp_dispatcher,
-	            {zp_dispatcher, start_link, []}, 
-	            permanent, 5000, worker, dynamic},
-
     Session = {zp_session_manager,
 	            {zp_session_manager, start_link, []}, 
 	            permanent, 5000, worker, dynamic},
 
     Visitor = {zp_visitor_manager,
 	            {zp_visitor_manager, start_link, []}, 
+	            permanent, 5000, worker, dynamic},
+
+    Notifier = {zp_notifier,
+	            {zp_notifier, start_link, []}, 
+	            permanent, 5000, worker, dynamic},
+
+    Dispatcher = {zp_dispatcher,
+	            {zp_dispatcher, start_link, []}, 
 	            permanent, 5000, worker, dynamic},
 
     Template = {zp_template,
