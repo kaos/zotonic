@@ -3,14 +3,7 @@
 
 %% @doc Session for zophrenic, holds all information for the current session at an user agent.
 %%      An agent can have multiple pages open and an user_session can have multiple sessions.
-%%      The user agent session also starts up and monitors the page sessions.
-%%
-%%      The page session for interaction with the page displayed on the user agent. Support for comet polls.
-%%      The page session is the switchboard for getting data pushed to the user agent.  The page session
-%%      also caches the page dictionary.  Whenever the new page session is loaded it will check the page
-%%      dictionary checksum with the one stored.  When they differ then the page will queue a request
-%%      for fetching the data from the page in the user agent.  All queued requests can be sent via 
-%%      the current request being handled or via a comet poll.
+%%      The user agent session also starts and monitors the page sessions.
 
 
 -module(zp_session).

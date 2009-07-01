@@ -2,7 +2,7 @@
 %% @copyright 2009 Marc Worrell
 %% @date 2009-04-10
 %%
-%% @doc Media archiving utilities
+%% @doc Media archiving utilities.  Manages the files/archive directory of sites.
 
 -module(zp_media_archive).
 -author("Marc Worrell <marc@worrell.nl").

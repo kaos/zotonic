@@ -1,6 +1,6 @@
 %% @author Rusty Klophaus
 %% @copyright Copyright (c) 2008-2009 Rusty Klophaus
-%% @doc Conversion functions for HTML generation
+%% @doc Conversion functions to list, atom, binary, integer and booleans
 
 -module(zp_convert).
 -author("Rusty Klophaus").
@@ -11,8 +11,7 @@
 	to_atom/1, 
 	to_binary/1, 
 	to_integer/1,
-	to_bool/1,
-	html_encode/1, html_encode/2
+	to_bool/1
 ]).
 
 
@@ -69,20 +68,3 @@ to_bool(<<"FALSE">>) -> false;
 to_bool(<<"n">>) -> false;
 to_bool(<<"N">>) -> false;
 to_bool(_) -> true.
-
-%%% HTML ENCODE %%%
-
-html_encode(L, false) -> to_list(lists:flatten([L]));
-html_encode(L, true) -> html_encode(to_list(lists:flatten([L]))).
-
-html_encode([]) -> [];
-html_encode([H|T]) ->
-	case H of
-		$< -> "&lt;" ++ html_encode(T);
-		$> -> "&gt;" ++ html_encode(T);
-		$" -> "&quot;" ++ html_encode(T);
-		$& -> "&amp;" ++ html_encode(T);
-		$\n -> "<br>" ++ html_encode(T);
-		_ -> [H|html_encode(T)]
-	end.
-

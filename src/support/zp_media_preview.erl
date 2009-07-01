@@ -330,4 +330,6 @@ test() ->
     Filters = [{crop,center}, {width,80}, {height,80}],
     {_W,_H,Args} = cmd_args(Props, Filters),
     CmdArgs = lists:flatten(zp_utils:combine(32, Args)),
-    "  -gravity Center -extent 122x80 -thumbnail 122x80\\! -gravity NorthWest -crop 80x80+21+0 +repage   -unsharp 0.3x0.7  -quality 100" = CmdArgs.
+    "  -gravity Center -extent 122x80 -thumbnail 122x80\\! -gravity NorthWest -crop 80x80+21+0 +repage   -unsharp 0.3x0.7  -quality 100" = CmdArgs,
+    ok.
+

@@ -2,11 +2,8 @@
 %% @copyright 2009 Marc Worrell
 
 %% @doc Page session for interaction with the page displayed on the user agent. Support for comet polls.
-%%      The page session is the switchboard for getting data pushed to the user agent.  The page session
-%%      also caches the page dictionary.  Whenever the new page session is loaded it will check the page
-%%      dictionary serial nr with the one stored.  When they differ then the page session will queue a request
-%%      for fetching the data from the page in the user agent.  All queued requests can be sent via 
-%%      the current request being handled or via a comet poll.
+%%      The page session is the switchboard for getting data pushed to the user agent.  All queued requests 
+%%      can be sent via the current request being handled or via a comet poll.
 
 
 -module(zp_session_page).

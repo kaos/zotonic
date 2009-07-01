@@ -112,8 +112,8 @@ handle_call({check_modified, File}, _From, State) ->
     {reply, Result, State};
 
 
-%% @doc Compile the template, creates a beam file in the ebin directory.  Make sure that we only compile
-%%      one template at a time to prevent overwriting the beam file with two processes.
+%% @doc Compile the template, loads the compiled template in memory.  Make sure that we only compile 
+%% one template at a time to prevent overloading the server on restarts.
 handle_call({compile, File, Context}, _From, State) ->
     FinderFun  = fun(FinderFile, All) ->
         ?MODULE:find_template(FinderFile, All, Context)

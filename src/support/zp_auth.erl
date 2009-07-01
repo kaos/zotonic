@@ -116,7 +116,7 @@ wm_is_authorized(NeedAuth, What, ArgName, ReqData, Context) ->
 
 
 %% @doc Render the logon screen to the reqdata of the context.
-%% @spec render_logon(Context) -> LogonContext
+%% @spec output_logon(Context) -> LogonContext
 output_logon(Context) ->
     Html = zp_template:render("admin_logon.tpl", [], Context),
     {Data, ContextOut} = zp_context:output(Html, Context),
