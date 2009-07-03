@@ -68,23 +68,22 @@ get(Id, Context) ->
 
 
 name_to_id(Name, Context) ->
-    m_rsc:name_to_id_cat(Name, usergroup, Context).
+    m_rsc:name_to_id_cat(Name, group, Context).
 
 name_to_id_check(Name, Context) ->
-    m_rsc:name_to_id_cat_check(Name, usergroup, Context).
+    m_rsc:name_to_id_cat_check(Name, group, Context).
     
 
 %% @doc Insert a new group, make sure that the roles are only set by the admin
 %% @spec insert(PropList, Context) -> {ok, int()}
 insert(Props, Context) ->
-    case zp_acl:has_role(admin, Context) of
-        true -> 
-            {ok, Id} = zp_db:insert(group, Props, Context),
-            zp_depcache:flush(group),
-            {ok, Id};
-        false ->
-            {error, eacces}
-    end.
+    true = zp_acl:has_role(admin, Context),
+    Props1 = zp_utils:prop_replace(category, group, Props),
+    Props2 = zp_utils:prop_replace(is_published, true, Props1),
+    Props3 = zp_utils:prop_replace(group, admins, Props2),
+    {ok, Id} = m_rsc:insert(Props3, Context),
+    zp_depcache:flush(predicate),
+    {ok, Id}.
 
 add_member(Id, RscId, Context) ->
     F = fun(Ctx) ->

@@ -8,6 +8,7 @@
 -export([squery/2, equery/3]).
 -export([parse/4, bind/4, execute/4, describe/3]).
 -export([close/3, sync/1]).
+-export([database/1]).
 
 -export([init/1, handle_event/3, handle_sync_event/4]).
 -export([handle_info/3, terminate/3, code_change/4]).
@@ -23,6 +24,7 @@
           reader,
           sock,
           parameters = [],
+          database,
           reply,
           reply_to,
           backend,
@@ -69,6 +71,9 @@ close(C, Type, Name) ->
 
 sync(C) ->
     gen_fsm:sync_send_event(C, sync).
+    
+database(C) ->
+    gen_fsm:sync_send_event(C, {database}).
 
 %% -- gen_fsm implementation --
 
@@ -129,7 +134,8 @@ startup({connect, Host, Username, Password, Opts}, From, State) ->
             put(password, Password),
             State2 = State#state{reader   = Reader,
                                  sock     = Sock,
-                                 reply_to = From},
+                                 reply_to = From,
+                                 database = proplists:get_value(database, Opts, undefined)},
             send(State2, [<<196608:32>>, Opts3, 0]),
 
             {next_state, auth, State2};
@@ -225,6 +231,9 @@ ready({get_parameter, Name}, _From, State) ->
         false                  -> Value = undefined
     end,
     {reply, {ok, Value}, ready, State};
+
+ready({database}, _From, State) ->
+    {reply, {ok, State#state.database}, ready, State};
 
 ready({parse, Name, Sql, Types}, From, State) ->
     Bin = encode_types(Types),

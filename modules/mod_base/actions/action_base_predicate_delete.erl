@@ -28,7 +28,7 @@ render_action(TriggerId, TargetId, Args, Context) ->
 event({postback, {predicate_delete, Id, OnSuccess}, _TriggerId, _TargetId}, Context) ->
     case zp_acl:has_role(admin, Context) of
         true ->
-            ok = m_predicate:delete(Id, Context),
+            ok = m_rsc:delete(Id, Context),
             lists:foldl(
                 fun (Act, Ctx) ->
                     zp_render:wire(Act, Ctx)

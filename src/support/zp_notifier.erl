@@ -86,8 +86,9 @@ get_observers(Event, _Context) ->
 %% @doc Cast the event to all observers. The prototype of the observer is: f(Msg, Context) -> void
 notify(Msg, Context) ->
     Observers = get_observers(Msg, Context),
+    AsyncContext = zp_context:prune_for_async(Context),
     F = fun() ->
-        lists:foreach(fun(Obs) -> notify_observer(Msg, Obs, false, Context) end, Observers)
+        lists:foreach(fun(Obs) -> notify_observer(Msg, Obs, false, AsyncContext) end, Observers)
     end,
     spawn(F),
     ok.
@@ -95,9 +96,10 @@ notify(Msg, Context) ->
 %% @doc Cast the event to the first observer. The prototype of the observer is: f(Msg, Context) -> void
 notify1(Msg, Context) ->
     Observers = get_observers(Msg, Context),
+    AsyncContext = zp_context:prune_for_async(Context),
     case Observers of
         [Obs|_] -> 
-            F = fun() -> notify_observer(Msg, Obs, false, Context) end,
+            F = fun() -> notify_observer(Msg, Obs, false, AsyncContext) end,
             spawn(F);
         [] -> ok
     end.

@@ -20,18 +20,21 @@ install(Context) ->
 
 install1(Context) ->
     F = fun(Ctx) ->
-        shop_adyen:install(Ctx),
+        case m_predicate:name_to_id(brand, Ctx) of
+            {ok, _Id} -> ok;
+            _ ->  {ok, _Id} = m_predicate:insert("Brand", Ctx)
+        end,
         ok = install_tables(Ctx),
         ok = install_order_status(Ctx),
         ok = install_cat(Ctx),
-        ok = install_pred(Ctx),
         ok = install_rsc(Ctx),
-        ok = install_sku(Ctx)
+        ok = install_sku(Ctx),
+        shop_adyen:install(Ctx)
     end,
+
     ok = zp_db:transaction(F, Context),
     zp_depcache:flush(),
     ok.
-
 
 
 install_tables(Context) ->
@@ -315,14 +318,6 @@ install_cat(Context) ->
     ok.
 
 
-install_pred(Context) ->
-    Preds = [
-        [ {name, brand}, {title, "Brand"}, {uri, "http://zophrenic.com/predicate/brand"} ]
-    ],
-    
-    [ {ok, _} = m_predicate:insert(P, Context) || P <- Preds ],
-    ok.
-
 
 install_rsc(Context) ->
     Rsc = [
@@ -430,23 +425,21 @@ install_rsc(Context) ->
         {"product_1591", "cateye"},
         {"product_1636", "tacx"}
     ],
-    
-    GroupId = zp_db:q1("select id from rsc where name = 'admins'", Context),
-    
-    Rets = [ zp_db:insert(rsc, [{is_published, true}, {visible_for, 0}, {group_id, GroupId}, {modifier_id, 1}, {creator_id, 1} | R], Context) || R <- Rsc ],
+
+    Rets = [ m_rsc:insert([{is_published, true}, {visible_for, 0}, {group, admins} | R], Context) || R <- Rsc ],
     IdRsc = lists:zip(Rets, Rsc),
     M = fun({{ok,Id}, R}) ->
         case proplists:get_value(product_nr, R) of
             undefined -> ok;
             ProdNr ->
                 File = filename:join([code:lib_dir(zophrenic, priv), "sites", "default", "files", "archive",  integer_to_list(ProdNr) ++ ".jpg"]),
-                {ok, FileRscId} = m_media:insert_file(File, [{visible_for, 0}, {group_id, GroupId}, {creator_id, 1}], Context),
+                {ok, FileRscId} = m_media:insert_file(File, [{visible_for, 0}, {group, admins}, {creator_id, 1}], Context),
                 m_edge:insert(Id, depiction, FileRscId, Context)
         end
     end,
     [ M(IR) || IR <- IdRsc],
 
-    BrandPred = m_predicate:name_to_id_check("brand", Context),
+    BrandPred = zp_db:q1("select id from rsc where name = 'brand'", Context),
     [ m_edge:insert(m_rsc:name_to_id_check(S, Context), 
                     BrandPred, 
                     m_rsc:name_to_id_check(O, Context), 

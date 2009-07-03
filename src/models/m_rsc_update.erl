@@ -28,15 +28,25 @@ insert(Props, Context) ->
 
 
 %% @doc Delete a resource
-%% @spec delete(Props, Context) -> void()
+%% @spec delete(Props, Context) -> ok | {error, Reason}
 delete(Id, Context) when is_integer(Id) ->
     case zp_acl:rsc_editable(Id, Context) of
         true ->
             Referrers = m_edge:subjects(Id, Context),
-            zp_db:delete(rsc, Id, Context),
-            zp_depcache:flush(#rsc{id=Id}),
-            [ zp_depcache:flush(#rsc{id=SubjectId}) || SubjectId <- Referrers ],
-            ok;
+            F = fun(Ctx) ->
+                zp_notifier:notify({rsc_delete, Id}, Ctx),
+                zp_db:delete(rsc, Id, Ctx)
+            end,
+            
+            case zp_db:transaction(F, Context) of
+                ok ->
+                    zp_depcache:flush(#rsc{id=Id}),
+                    [ zp_depcache:flush(#rsc{id=SubjectId}) || SubjectId <- Referrers ],
+                    zp_notifier:notify({rsc_delete_done, Id}, Context),
+                    ok;
+                {error, Reason} ->
+                    {error, Reason}
+            end;
         false ->
             {error, eacces}
     end.
@@ -55,30 +65,68 @@ update(Id, Props, Context) when is_integer(Id) orelse Id == insert_rsc ->
             SafeProps = zp_html:escape_props(FilledProps),
             case preflight_check(Id, SafeProps, Context) of
                 ok ->
-                    RscId = case Id of
-                        insert_rsc ->
-                            CategoryId = proplists:get_value(category_id, SafeProps),
-                            GroupId = proplists:get_value(group_id, SafeProps),
-                            {ok, InsId} = zp_db:insert(rsc, [{category_id, CategoryId}, {group_id, GroupId}, {visible_for, 2}, {version, 0}], Context),
-                            InsId;
-                        _ ->
-                            Id
+                    F = fun(Ctx) ->
+                        {RscId, UpdateProps, BeforeProps} = case Id of
+                            insert_rsc ->
+                                CategoryId = proplists:get_value(category_id, SafeProps),
+                                GroupId = proplists:get_value(group_id, SafeProps),
+                                InsProps = [{category_id, CategoryId}, {group_id, GroupId}, {visible_for, 2}, {version, 0}],
+                                
+                                % Allow the insertion props to be modified.
+                                InsPropsN = zp_notifier:foldr({rsc_insert}, InsProps, Ctx),
+                                
+                                % Check if the user is allowed to add to the group of the new rsc, if so proceed
+                                GroupIdN = proplists:get_value(group_id, InsPropsN),
+                                case zp_acl:group_editable(GroupIdN, Ctx) of
+                                    true ->
+                                        {ok, InsId} = zp_db:insert(rsc, InsPropsN, Ctx),
+                                        SafePropsN = lists:foldl(
+                                                                fun
+                                                                    ({version, _}, Acc) -> Acc;
+                                                                    ({P,V}, Acc) -> zp_utils:prop_replace(P, V, Acc) 
+                                                                end,
+                                                                SafeProps, 
+                                                                InsPropsN),
+                                        {InsId, SafePropsN, InsPropsN};
+                                    false ->
+                                        throw({error, eacces})
+                                end;
+                            _ ->
+                                {Id, SafeProps, m_rsc:get(Id, Ctx)}
+                        end,
+                    
+                        UpdateProps1 = [
+                            {version, zp_db:q1("select version+1 from rsc where id = $1", [RscId], Ctx)},
+                            {modifier_id, zp_acl:user(Ctx)},
+                            {modified, erlang:universaltime()}
+                            | UpdateProps
+                        ],
+                        
+                        % Allow the update props to be modified.
+                        UpdatePropsN = zp_notifier:foldr({rsc_update, RscId, BeforeProps}, UpdateProps1, Ctx),
+                        case zp_db:update(rsc, RscId, UpdatePropsN, Ctx) of
+                            {ok, _RowsModified} -> {ok, RscId, UpdatePropsN};
+                            {error, Reason} -> {error, Reason}
+                        end
                     end,
                     
-                    UpdateProps = [
-                        {version, zp_db:q1("select version+1 from rsc where id = $1", [RscId], Context)},
-                        {modifier_id, zp_acl:user(Context)},
-                        {modified, erlang:universaltime()}
-                        | SafeProps
-                    ],
-                    zp_db:update(rsc, RscId, UpdateProps, Context),
-                    zp_depcache:flush(#rsc{id=RscId}),
+                    case zp_db:transaction(F, Context) of
+                        {ok, NewId, NewProps} ->    
+                            zp_depcache:flush(#rsc{id=NewId}),
+                            case proplists:get_value(name, NewProps) of
+                                undefined -> nop;
+                                Name -> zp_depcache:flush({rsc_name, zp_convert:to_list(Name)})
+                            end,
 
-                    case proplists:get_value(name, UpdateProps) of
-                        undefined -> nop;
-                        Name -> zp_depcache:flush({rsc_name, zp_convert:to_list(Name)})
-                    end,
-                    {ok, RscId};
+                            % Notify that a new resource has been inserted, or that an existing one is updated
+                            case Id of
+                                insert_rsc -> zp_notifier:notify({rsc_insert_done, NewId}, Context);
+                                _ ->          zp_notifier:notify({rsc_update_done, NewId}, Context)
+                            end,
+                            {ok, NewId};
+                        {error, Reason} ->
+                            {error, Reason}
+                    end;
                 {error, Reason} ->
                     {error, Reason}
             end;
@@ -150,8 +198,10 @@ props_filter([{group_id, GId}|T], Acc, Context) ->
                     props_filter(T, [{group_id, GroupId}|Acc], Context);
                 false ->
                     Gs = zp_acl:groups_member(Context),
-                    true = lists:member(GroupId, Gs),
-                    props_filter(T, [{group_id, GroupId}|Acc], Context)
+                    case lists:member(GroupId, Gs) of
+                        true -> props_filter(T, [{group_id, GroupId}|Acc], Context);
+                        false -> throw({error, eacces})
+                    end
             end
     end;
 props_filter([{group, GroupName}|T], Acc, Context) ->

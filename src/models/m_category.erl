@@ -137,7 +137,8 @@ name_to_id(Name, Context) ->
             Id -> {ok, Id}
         end
     end,
-    zp_depcache:memo(F, {category_name_to_id, Name}, ?WEEK, [category]).
+    F().
+%    zp_depcache:memo(F, {category_name_to_id, Name}, ?WEEK, [category]).
 
 name_to_id_check(Name, Context) ->
     {ok, Id} = name_to_id(Name, Context),

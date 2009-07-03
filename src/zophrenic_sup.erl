@@ -79,6 +79,10 @@ init([]) ->
                 {zp_depcache, start_link, []}, 
                 permanent, 5000, worker, dynamic},
 
+    Notifier = {zp_notifier,
+	            {zp_notifier, start_link, []}, 
+	            permanent, 5000, worker, dynamic},
+
     Installer = {zp_installer,
                 {zp_installer, start_link, [DbPoolConfig]},
                 permanent, 1, worker, dynamic},
@@ -89,10 +93,6 @@ init([]) ->
 
     Visitor = {zp_visitor_manager,
 	            {zp_visitor_manager, start_link, []}, 
-	            permanent, 5000, worker, dynamic},
-
-    Notifier = {zp_notifier,
-	            {zp_notifier, start_link, []}, 
 	            permanent, 5000, worker, dynamic},
 
     Dispatcher = {zp_dispatcher,
@@ -124,8 +124,8 @@ init([]) ->
                 permanent, 5000, worker, dynamic},
 
     Processes = [
-            MochiWeb, Ids, Postgres, Depcache, Installer, Session, Visitor, 
-            Notifier, Dispatcher, Template, Scomp, DropBox, Pivot,
+            MochiWeb, Ids, Postgres, Depcache, Notifier, Installer, Session, Visitor, 
+            Dispatcher, Template, Scomp, DropBox, Pivot,
             ModuleIndexer, Modules
     ],
     {ok, {{one_for_one, 1000, 10}, Processes}}.

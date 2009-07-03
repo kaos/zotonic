@@ -18,13 +18,18 @@
 			<h2>You are not allowed to edit <span>{{ r.title|striptags }}</span></h2>
 		{% else %}
 			<p class="admin-chapeau">editing:</p>
-			<h2>{{ r.title|striptags|default:"<em>untitled</em>" }}</h2>
+			{% if r.is_a.meta %}
+				<h2><em>{{ m.category[r.category_id].name }}</em> {{ r.title|striptags|default:"<em>untitled</em>" }}</h2>
+			{% else %}
+				<h2>{{ r.title|striptags|default:"<em>untitled</em>" }}</h2>
+			{% endif %}
 		{% endif %}	
 
 			{% wire id="rscform" type="submit" postback="rscform" %}
 			<form id="rscform" method="post" action="postback">
 				<div class="zp-67" id="poststuff">
 					<div class="padding">
+
 						<div class="item-wrapper">
 							<h3 class="above-item">Basic content</h3>
 							<div class="item">
@@ -40,6 +45,11 @@
 										<label for="field-name">Unique name</label>
 										<input type="text" id="field-name" name="name" value="{{ r.name }}" />
 									</div>
+
+									<div class="form-item clearfix">
+										<label for="field-name">Unique uri</label>
+										<input type="text" id="field-name" name="uri" value="{{ r.uri }}" />
+									</div>
 									{% endif %}
 
 									<div class="form-item clearfix">
@@ -51,10 +61,8 @@
 										<label for="field-content">Body</label>
 										<textarea rows="10" cols="10" id="field-content" name="body" class="body">{{ r.body|escape }}</textarea>
 									</div>
-									<div class="form-item clearfix">
-										{% button class="save-resource right" text="save this page" title="test" %}
-										{% button class="discard-resource right" text="cancel" action={redirect back} %}
-									</div>
+									
+									{% include "_admin_save_buttons.tpl" %}
 								</fieldset>
 							</div>
 						</div>
@@ -142,10 +150,8 @@
 										<label for="seo_desc">Page description</label>
 										<textarea rows="2" cols="10" id="seo_desc" name="seo_desc" class="seo-desc zp-100">{{ r.seo_desc }}</textarea>
 									</div>
-									<div class="form-item clearfix">
-										{% button class="save-resource right" text="save this page" %}
-										{% button class="discard-resource right" text="cancel" action={redirect back} %}
-									</div>
+
+									{% include "_admin_save_buttons.tpl" %}
 								</fieldset>
 							</div>
 						</div>
@@ -180,6 +186,7 @@
 										{% button class="discard-resource right" text="cancel" action={redirect back} %}
 										{% button class="discard-resource right" text="delete" action={dialog_delete_rsc id=r.id on_success={redirect back}} %}
 									</div>
+
 									{#<hr />
 									<div class="zp-100">
 										<fieldset>
@@ -193,6 +200,7 @@
 											</div>
 										</fieldset>
 									</div>#}
+
 								</div>
 							</div>
 						</div>
@@ -236,6 +244,8 @@
 
 						{% all include "_admin_edit_sidebar.tpl" %}
 
+						{# meta categories (predicate, category and group) can't be changed #}
+						{% if not r.is_a.meta %}
 						<div class="item-wrapper" id="sort-category">
 							<h3 class="above-item clearfix do_blockminifier">
 								<span class="title">Category</span>
@@ -256,6 +266,21 @@
 								</p>
 							</div>
 						</div>
+						{% else %}
+						<div class="item-wrapper" id="sort-category">
+							<h3 class="above-item clearfix do_blockminifier">
+								<span class="title">Category</span>
+								<span class="arrow">make smaller</span>
+							</h3>
+							<div class="item clearfix admin-form">
+								<label>This page is a</label>
+								<h4>{{ m.category[r.category_id].name }}</h4>
+								<hr/>
+								<p>Predicates, groups and categories can't be changed into another category.</p>
+							</div>
+						</div>
+						
+						{% endif %}
 					
 						<div class="item-wrapper" id="sort-connections">
 							<h3 class="above-item clearfix do_blockminifier">
@@ -291,6 +316,7 @@
 							</div>
 						</div>
 					
+						{% if not r.is_a.meta %}
 						<div class="item-wrapper" id="sort-date">
 							<h3 class="above-item clearfix do_blockminifier">
 								<span class="title">Date range</span>
@@ -315,6 +341,7 @@
 								</div>
 							</div>
 						</div>
+						{% endif %}
 					
 					</div>
 				</div>

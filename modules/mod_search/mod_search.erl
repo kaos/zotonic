@@ -54,7 +54,7 @@ init(Args) ->
     process_flag(trap_exit, true),
     {context, Context} = proplists:lookup(context, Args),
     zp_notifier:observe(search_query, {?MODULE, observe}, Context),
-    {ok, #state{context=zp_context:prune_for_database(Context)}}.
+    {ok, #state{context=zp_context:new_for_host(Context)}}.
 
 %% @spec handle_call(Request, From, State) -> {reply, Reply, State} |
 %%                                      {reply, Reply, State, Timeout} |

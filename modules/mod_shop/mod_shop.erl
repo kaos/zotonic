@@ -123,11 +123,12 @@ category_rsc_count(Cat, Context) ->
 init(Args) ->
     process_flag(trap_exit, true),
     {context, Context} = proplists:lookup(context, Args),
+    install_check(Context),
     zp_notifier:observe(search_query, {?MODULE, observe}, Context),
 
     % Every 10 minutes a periodic check of Adyen logs and old orders
     timer:send_interval(60 * 1000 * 10, periodic),
-    {ok, #state{context=zp_context:prune_for_database(Context)}}.
+    {ok, #state{context=zp_context:new_for_host(Context)}}.
 
 %% @spec handle_call(Request, From, State) -> {reply, Reply, State} |
 %%                                      {reply, Reply, State, Timeout} |
@@ -194,4 +195,14 @@ expire_orders(Context) ->
         [ shop_order:set_status(Id, canceled, Ctx) || {Id} <- Ids ]
     end,
     zp_db:transaction(F, Context).
-    
+
+
+%% @doc Check is the shop module has been installed.  If not then install all db tables and rscs.
+install_check(Context) ->
+    case zp_db:table_exists("shop_order", Context) of
+        true -> 
+            ok;
+        false ->
+            shop_install_data:install(Context)
+    end.
+

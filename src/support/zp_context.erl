@@ -11,6 +11,7 @@
     new/0,
     new_for_host/1,
 
+    prune_for_async/1,
     prune_for_template/1,
     prune_for_database/1,
     prune_for_scomp/2,
@@ -82,9 +83,16 @@ new() ->
     Context#context{language=zp_trans:default_language(Context)}.
 
 %% @doc Return an almost empty context for the database connection only, nothing else is initialised
+new_for_host(#context{host=Host}) ->
+    Context = new(),
+    Context#context{host=Host};
 new_for_host(Host) ->
     Context = new(),
     Context#context{host=Host}.
+
+%% @doc Make the context safe to use in a async message
+prune_for_async(#context{wm_reqdata=ReqData, host=Host, acl=Acl, dict=Dict}) ->
+    #context{wm_reqdata=ReqData, host=Host, acl=Acl, dict=Dict}.
 
 
 %% @doc Cleanup a context for the output stream
@@ -106,7 +114,6 @@ prune_for_template(Output) -> Output.
 %% @doc Cleanup a context so that it can be used exclusively for database connections
 prune_for_database(Context) ->
     #context{host=Context#context.host, dbc=Context#context.dbc}.
-
 
 %% @doc Cleanup a context for cacheable scomp handling.  Resets most of the accumulators to prevent duplicating
 %% between different (cached) renderings.

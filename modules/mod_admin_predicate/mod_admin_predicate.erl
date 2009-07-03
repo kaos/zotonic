@@ -1,16 +1,17 @@
 %% @author Marc Worrell <marc@worrell.nl>
 %% @copyright 2009 Marc Worrell
-%% @date 2009-06-13
+%% @date 2009-07-02
 %%
-%% @doc User administration.  Adds overview of users to the admin and enables to add passwords on the edit page.
+%% @doc Support for editing predicates in the admin module.  Also hooks into the rsc update function to
+%% save the specific fields for predicates
 
--module(mod_admin_users).
+-module(mod_admin_predicate).
 -author("Marc Worrell <marc@worrell.nl>").
 -behaviour(gen_server).
 
--mod_title("Zophrenic User Administration").
--mod_description("Adds an user overview and possibility to edit passwords.").
-
+-mod_title("Zophrenic Predicate Administration").
+-mod_description("Adds support for editing predicates to the admin.").
+-mod_prio(600).
 
 %% gen_server exports
 -export([init/1, handle_call/3, handle_cast/2, handle_info/2, terminate/2, code_change/3]).
@@ -18,15 +19,39 @@
 
 %% interface functions
 -export([
-    observe/2
+    rsc_update/3,
+    predicate_flush/2
 ]).
 
--include("zophrenic.hrl").
+-include_lib("zophrenic.hrl").
 
 -record(state, {context}).
 
-observe({search_query, Req, OffsetLimit}, Context) ->
-    search(Req, OffsetLimit, Context).
+
+%% @doc Check if the update contains information for a predicate.  If so then update
+%% the predicate information in the db and remove it from the update props.
+%% @spec rsc_update({rsc_update, ResourceId, OldResourceProps}, UpdateProps, Context) -> NewUpdateProps
+rsc_update({rsc_update, Id, _OldProps}, Props, Context) ->
+    case       proplists:is_defined(predicate_subject, Props) 
+        orelse proplists:is_defined(predicate_object, Props) of
+
+        true ->
+            Subjects = proplists:get_all_values(predicate_subject, Props),
+            Objects  = proplists:get_all_values(predicate_object, Props),
+            m_predicate:update_noflush(Id, Subjects, Objects, Context),
+
+            proplists:delete(predicate_subject, 
+                proplists:delete(predicate_object, Props));
+        false ->
+            Props
+    end.
+
+%% @doc Whenever a predicate has been updated we have to flush the predicate cache.
+predicate_flush({_Event, Id}, Context) ->
+    case m_rsc:is_a(Id, predicate, Context) of
+        true -> m_predicate:flush(Context);
+        false -> ok
+    end.
 
 
 %%====================================================================
@@ -38,7 +63,6 @@ start_link() ->
     start_link([]).
 start_link(Args) when is_list(Args) ->
     gen_server:start_link({local, ?MODULE}, ?MODULE, Args, []).
-
 
 %%====================================================================
 %% gen_server callbacks
@@ -52,8 +76,12 @@ start_link(Args) when is_list(Args) ->
 init(Args) ->
     process_flag(trap_exit, true),
     {context, Context} = proplists:lookup(context, Args),
-    zp_notifier:observe(search_query, {?MODULE, observe}, Context),
+    zp_notifier:observe(rsc_update,      {?MODULE, rsc_update},      Context),
+    zp_notifier:observe(rsc_update_done, {?MODULE, predicate_flush}, Context),
+    zp_notifier:observe(rsc_insert_done, {?MODULE, predicate_flush}, Context),
+    zp_notifier:observe(rsc_delete_done, {?MODULE, predicate_flush}, Context),
     {ok, #state{context=zp_context:new_for_host(Context)}}.
+
 
 %% @spec handle_call(Request, From, State) -> {reply, Reply, State} |
 %%                                      {reply, Reply, State, Timeout} |
@@ -89,7 +117,10 @@ handle_info(_Info, State) ->
 %% cleaning up. When it returns, the gen_server terminates with Reason.
 %% The return value is ignored.
 terminate(_Reason, State) ->
-    zp_notifier:detach(search_query, {?MODULE, observe}, State#state.context),
+    zp_notifier:detach(rsc_update,      {?MODULE, rsc_update},      State#state.context),
+    zp_notifier:detach(rsc_update_done, {?MODULE, rsc_update_done}, State#state.context),
+    zp_notifier:detach(rsc_insert_done, {?MODULE, rsc_update_done}, State#state.context),
+    zp_notifier:detach(rsc_delete_done, {?MODULE, rsc_update_done}, State#state.context),
     ok.
 
 %% @spec code_change(OldVsn, State, Extra) -> {ok, NewState}
@@ -103,27 +134,3 @@ code_change(_OldVsn, State, _Extra) ->
 %% support functions
 %%====================================================================
 
-
-search({users, [{text,QueryText}]}, _OffsetLimit, Context) ->
-    case QueryText of
-        A when A == undefined orelse A == "" orelse A == <<>> ->
-            #search_sql{
-                select="r.id, max(r.modified) AS rank",
-                from="rsc r join identity i on r.id = i.rsc_id",
-                order="rank desc",
-                group_by="r.id",
-                tables=[{rsc,"r"}]
-            };
-        _ ->
-            #search_sql{
-                select="r.id, max(ts_rank_cd(pivot_tsv, query, 32)) AS rank",
-                from="rsc r join identity i on r.id = i.rsc_id, plainto_tsquery($2, $1) query",
-                where=" query @@ pivot_tsv",
-                order="rank desc",
-                group_by="r.id",
-                args=[QueryText, zp_pivot_rsc:pg_lang(Context#context.language)],
-                tables=[{rsc,"r"}]
-            }
-    end;
-search(_, _, _) ->
-    undefined.

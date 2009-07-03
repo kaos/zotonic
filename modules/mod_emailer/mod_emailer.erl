@@ -103,7 +103,7 @@ init(Args) ->
         ehlo     = m_config:get_value(?MODULE, ehlo, ?EMAILER_EHLO, Context),
         username = m_config:get_value(?MODULE, username, Context),
         password = m_config:get_value(?MODULE, password, Context),
-        context  = zp_context:prune_for_database(Context)
+        context  = zp_context:new_for_host(Context)
     }}.
 
 

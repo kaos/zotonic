@@ -24,8 +24,8 @@
     all/1,
     get/2,
     insert/2,
-    delete/2,
-    update/3
+    flush/1,
+    update_noflush/4
 ]).
 
 -include_lib("zophrenic.hrl").
@@ -53,6 +53,14 @@ m_value(#m{}, Context) ->
 
 %% @doc Test if the property is the name of a predicate
 %% @spec is_predicate(Pred, Context) -> bool()
+is_predicate(Id, Context) when is_integer(Id) ->
+    F = fun() ->
+        case zp_db:q1("select id from rsc where id = $1 and category_id = $2", [Id, cat_id(Context)], Context) of
+            undefined -> false;
+            _ -> true
+        end
+    end,
+    zp_depcache:memo(F, {is_predicate, Id}, ?DAY, [predicate]);
 is_predicate(Pred, Context) ->
     case name_to_id(Pred, Context) of
         {ok, _Id} -> true;
@@ -114,55 +122,61 @@ subjects(Id, Context) ->
 %% @doc Return the list of all predicates
 %% @spec all(Context) -> PropList
 all(Context) ->
-    case zp_depcache:get(predicate) of
-        {ok, Preds} -> 
-            Preds;
-        undefined ->
-            Preds = zp_db:assoc_props("select * from rsc where category_id = $1 order by name", [cat_id(Context)], Context),
-            FSetPred = fun(Pred) ->
-                Id = proplists:get_value(id, Pred),
-                Atom = list_to_atom(binary_to_list(proplists:get_value(name, Pred))),
-                {Atom, [{pred, Atom},{subject,subjects(Id,Context)},{object,objects(Id,Context)}|Pred]}
+    F = fun() ->
+        Preds = zp_db:assoc_props("select * from rsc where category_id = $1 order by name", [cat_id(Context)], Context),
+        FSetPred = fun(Pred) ->
+            Id = proplists:get_value(id, Pred),
+            Atom = case proplists:get_value(name, Pred) of
+                undefined -> undefined;
+                B -> list_to_atom(binary_to_list(B))
             end,
-            Preds1 = [ FSetPred(Pred) || Pred <- Preds],
-            zp_depcache:set(predicate, Preds1, ?DAY, [predicate]),
-            Preds1
+            {Atom, [{pred, Atom},{subject,subjects(Id,Context)},{object,objects(Id,Context)}|Pred]}
+        end,
+        [ FSetPred(Pred) || Pred <- Preds]
+    end,
+    zp_depcache:memo(F, predicate, ?DAY).
+
+
+%% @doc Insert a new predicate, sets some defaults.
+%% @spec insert(Title, Context) -> {ok, Id} | {error, Reason}
+insert(Title, Context) ->
+    Name = zp_string:to_name(Title),
+    Uri  = "http://zotonic.net/predicate/" ++ Name,
+    Props = [
+        {title, Title},
+        {name, Name},
+        {uri, Uri},
+        {category, predicate},
+        {group, admins},
+        {is_published, true},
+        {visible_for, 0}
+    ],
+    case m_rsc:insert(Props, Context) of
+        {ok, Id} -> 
+            flush(Context),
+            {ok, Id};
+        {error, Reason} ->
+            {error, Reason}
     end.
 
-%% @doc Insert a new predicate
-%% @spec insert(Props, Context) -> {ok, Id}
-insert(Props, Context) ->
-    true = zp_acl:has_role(admin, Context),
-    Props1 = zp_utils:prop_replace(category, predicate, Props),
-    Props2 = zp_utils:prop_replace(is_published, true, Props1),
-    Props3 = zp_utils:prop_replace(group, admins, Props2),
-    {ok, Id} = m_rsc:insert(Props3, Context),
-    zp_depcache:flush(predicate),
-    {ok, Id}.
 
-%% @doc Delete a predicate, crashes when the predicate is in use
-%% @spec delete(Props, Context) -> void()
-delete(Id, Context) ->
-    m_rsc:delete(Id, Context),
+%% @doc Flush all cached data about predicates.
+flush(_Context) ->
     zp_depcache:flush(predicate).
 
 
-%% @doc Update a predicate
-%% @spec update(Props, Props, Context) -> void()
-update(Id, Props, Context) ->
-    true = zp_acl:has_role(admin, Context),
-    Subjects = proplists:get_all_values("subject", Props),
-    Objects = proplists:get_all_values("object", Props),
-    SubjectIds = [ list_to_integer(N) || N <- Subjects, N /= [] ],
-    ObjectIds = [ list_to_integer(N) || N <- Objects, N /= [] ],
+%% @doc Update a predicate, save the reversed flag, reset the list of valid subjects and objects.
+%% @spec update(Id, Subjects, Objects, Context) -> void()
+update_noflush(Id, Subjects, Objects, Context) ->
+    SubjectIds = [ zp_convert:to_integer(N) || N <- Subjects, N /= [], N /= <<>> ],
+    ObjectIds = [ zp_convert:to_integer(N) || N <- Objects, N /= [], N /= <<>> ],
     F = fun(Ctx) ->
-        m_rsc:update(Id, Props, Ctx),
         update_predicate_category(Id, true, SubjectIds, Ctx),
         update_predicate_category(Id, false, ObjectIds, Ctx),
         ok
     end,
-    ok = zp_db:transaction(F, Context),
-    zp_depcache:flush(predicate).
+    ok = zp_db:transaction(F, Context).
+
 
 update_predicate_category(Id, IsSubject, CatIds, Context) ->
     OldIdsR = zp_db:q("select category_id from predicate_category where predicate_id = $1 and is_subject = $2", [Id, IsSubject], Context),

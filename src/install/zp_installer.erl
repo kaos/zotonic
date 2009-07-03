@@ -37,13 +37,12 @@ install_check(Name, PoolOpts) ->
     case HasConfig of
         0 ->
             ?LOG("Installing database ~p@~p:~p ~p", [
-                        proplists:get_value(username, PoolOpts),
+                        proplists:get_value(user, PoolOpts),
                         proplists:get_value(host, PoolOpts),
                         proplists:get_value(port, PoolOpts),
                         Database
                         ]),
-            zp_install:install(Name),
-            shop_install_data:install(#context{host=Name});
+            zp_install:install(Name);
         1 -> 
             ok
     end.

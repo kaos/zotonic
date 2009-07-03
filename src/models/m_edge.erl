@@ -55,18 +55,26 @@ get_edges(SubjectId, Context) ->
     end.
 
 %% Insert a new edge
+insert(SubjectId, PredId, ObjectId, Context) when is_integer(PredId) ->
+    case m_predicate:is_predicate(PredId, Context) of
+        true -> insert1(SubjectId, PredId, ObjectId, Context);
+        false -> throw({error, {enoent, predicate, PredId}})
+    end;
 insert(SubjectId, Pred, ObjectId, Context) ->
     PredId = m_predicate:name_to_id_check(Pred, Context),
-    case zp_db:q1("select id from edge where subject_id = $1 and object_id = $2 and predicate_id = $3", [SubjectId, ObjectId, PredId], Context) of
-        undefined ->
-            {ok, EdgeId} = zp_db:insert(edge, [{subject_id, SubjectId}, {object_id, ObjectId}, {predicate_id, PredId}], Context),
-            zp_depcache:flush(#rsc{id=SubjectId}),
-            zp_depcache:flush(#rsc{id=ObjectId}),
-            {ok, EdgeId};
-        EdgeId ->
-            % Edge exists - skip
-            {ok, EdgeId}
-    end.
+    insert1(SubjectId, PredId, ObjectId, Context).
+    
+    insert1(SubjectId, PredId, ObjectId, Context) ->
+        case zp_db:q1("select id from edge where subject_id = $1 and object_id = $2 and predicate_id = $3", [SubjectId, ObjectId, PredId], Context) of
+            undefined ->
+                {ok, EdgeId} = zp_db:insert(edge, [{subject_id, SubjectId}, {object_id, ObjectId}, {predicate_id, PredId}], Context),
+                zp_depcache:flush(#rsc{id=SubjectId}),
+                zp_depcache:flush(#rsc{id=ObjectId}),
+                {ok, EdgeId};
+            EdgeId ->
+                % Edge exists - skip
+                {ok, EdgeId}
+        end.
 
 
 %% @doc Delete an edge by Id
@@ -110,6 +118,8 @@ subject(Id, Pred, N, Context) ->
 
 %% @doc Return all object ids of an id with a certain predicate.  The order of the ids is deterministic.
 %% @spec objects(Id, Pred, Context) -> List
+objects(_Id, undefined, _Context) ->
+    [];
 objects(Id, Pred, Context) when is_atom(Pred) ->
     objects(Id, m_predicate:name_to_id_check(Pred,Context), Context);
 objects(Id, Pred, Context) ->
@@ -126,6 +136,8 @@ objects(Id, Pred, Context) ->
 
 %% @doc Return all subject ids of an object id with a certain predicate.   The order of the ids is deterministic.
 %% @spec subjects(Id, Pred, Context) -> List
+subjects(_Id, undefined, _Context) ->
+    [];
 subjects(Id, Pred, Context) when is_atom(Pred) ->
     subjects(Id, m_predicate:name_to_id_check(Pred,Context), Context);
 subjects(Id, Pred, Context) ->

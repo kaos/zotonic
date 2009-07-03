@@ -50,6 +50,7 @@ install_modules(C) ->
         "mod_admin",
         "mod_admin_modules",
         "mod_admin_users",
+        "mod_admin_predicate",
         "mod_emailer",
         "mod_shop"
     ],
@@ -110,7 +111,7 @@ install_category(C) ->
         {15,undefined, 1, meta,        [{title, {trans, [{en, "Meta"},          {nl, "Meta"}]}}] },
         {16,15,        1, category,    [{title, {trans, [{en, "Category"},      {nl, "Categorie"}]}}] },
         {17,15,        1, predicate,   [{title, {trans, [{en, "Predicate"},     {nl, "Predikaat"}]}}] },
-        {18,15,        1, usergroup,   [{title, {trans, [{en, "User Group"},    {nl, "Gebruikersgroep"}]}}] }
+        {18,15,        1, group,       [{title, {trans, [{en, "User Group"},    {nl, "Gebruikersgroep"}]}}] }
     ],
     [ {ok,1} = pgsql:equery(C, "
             insert into category (id, parent_id, seq, name, props)
@@ -171,7 +172,7 @@ install_identity(C) ->
 %% @todo Extend and check this list.  Add allowed from/to categories.
 install_predicate(C) ->
     Preds = [
-        % name      uri                                                   rvrsd  props
+        % name      uri                                                   props
         [ "about",   "http://www.w3.org/1999/02/22-rdf-syntax-ns#about",  [{reversed, false},{title, {trans, [{en,"About"},    {nl,"Over"}]}}]],
         [ "author",  "http://purl.org/dc/elements/1.1/creator",           [{reversed, true}, {title, {trans, [{en,"Author"},   {nl,"Auteur"}]}}]],
         [ "review",  "http://purl.org/stuff/rev#Review",                  [{reversed, true}, {title, {trans, [{en,"Reviews"},  {nl,"Beoordeelt"}]}}]],

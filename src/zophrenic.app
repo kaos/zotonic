@@ -5,10 +5,7 @@
     zophrenic,
     zophrenic_app,
     zophrenic_sup,
-    zophrenic_deps,
-
-	zp_dispatcher,
-	zp_depcache
+    zophrenic_deps
   ]},
   {registered, []},
   {mod, {zophrenic_app, []}},

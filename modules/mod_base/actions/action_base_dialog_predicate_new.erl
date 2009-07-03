@@ -38,14 +38,9 @@ event({postback, {predicate_new_dialog, Title, Redirect}, _TriggerId, _TargetId}
 
 
 event({submit, predicate_new, _TriggerId, _TargetId}, Context) ->
-    Title   = zp_context:get_q("new_predicate_title", Context),
+    Title    = zp_context:get_q("new_predicate_title", Context),
     Redirect = zp_context:get_q("redirect", Context),
-
-    Props = [
-        {title, Title},
-        {name, zp_string:to_name(Title)}
-    ],
-    {ok, Id} = m_predicate:insert(Props, Context),
+    {ok, Id} = m_predicate:insert(Title, Context),
 
     % Close the dialog and optionally redirect to the edit page of the new resource
     Context2 = zp_render:wire({dialog_close, []}, Context),
@@ -53,7 +48,7 @@ event({submit, predicate_new, _TriggerId, _TargetId}, Context) ->
         false ->
             Context2;
         true ->
-            Location = zp_dispatcher:url_for(admin_predicate_edit, [{id, Id}], Context2),
+            Location = zp_dispatcher:url_for(admin_edit_rsc, [{id, Id}], Context2),
             zp_render:wire({redirect, [{location, Location}]}, Context2)
     end.
 

@@ -33,6 +33,7 @@
     select/3,
     columns/2,
     update_sequence/3,
+    table_exists/2,
     
     assert_table_name/1,
     prepare_cols/2
@@ -367,6 +368,20 @@ update_sequence(Table, Ids, Context) ->
             end,
     ok = transaction(Updater, Context).
 
+
+%% @doc Check the information schema if a certain table exists in the context database.
+%% @spec table_exists(TableName, Context) -> bool()
+table_exists(Table, Context) ->
+    {ok, Db} = pgsql_pool:get_database(?HOST(Context)),
+    case q1("   select count(*) 
+                from information_schema.tables 
+                where table_catalog = $1 
+                  and table_name = $2 
+                  and table_type = 'BASE TABLE'", [Db, Table], Context) of
+        1 -> true;
+        0 -> false
+    end.
+    
 
 %% @doc Check if a name is a valid SQL table name. Crashes when invalid
 %% @spec check_table_name(String) -> true
