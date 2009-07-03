@@ -46,8 +46,18 @@ event({submit, rscform, _FormId, _TargetId}, Context) ->
     Title = proplists:get_value("title", Props),
     Id = proplists:get_value("id", Props),
     Props1 = proplists:delete("id", Props),
-    m_rsc:update(zp_convert:to_integer(Id), Props1, Context),
-    zp_render:wire({growl, [{text,[["Saved ",zp_html:strip(Title)]]}]}, Context);
+    case m_rsc:update(zp_convert:to_integer(Id), Props1, Context) of
+        {ok, _} -> 
+            zp_render:wire({growl, [{text,["Saved ",zp_html:strip(Title),"."]}]}, Context);
+        {error, duplicate_uri} ->
+            zp_render:wire({growl, [{text,"Error, duplicate uri. Please change the uri.",zp_html:strip(Title)}, {type, "error"}]}, Context);
+        {error, duplicate_name} ->
+            zp_render:wire({growl, [{text,"Error, duplicate name. Please change the name."}, {type, "error"}]}, Context);
+        {error, eacces} ->
+            zp_render:wire({growl, [{text,"You don't have permission to edit this page."}, {type, "error"}]}, Context);
+        {error, _Reason} ->
+            zp_render:wire({growl, [{text,"Something went wrong. Sorry."}, {type, "error"}]}, Context)
+    end;
 
 event({postback, {reload_media, Opts}, _TriggerId, _TargetId}, Context) ->
     RscId = proplists:get_value(rsc_id, Opts),
