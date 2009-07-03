@@ -159,6 +159,10 @@ preflight_check(Id, [_H|T], Context) ->
 %% @spec props_filter(Props1, Acc, Context) -> Props2
 props_filter([], Acc, _Context) ->
     Acc;
+props_filter([{uri, <<>>}|T], Acc, Context) ->
+    props_filter(T, [{uri, undefined} | Acc], Context);
+props_filter([{uri, ""}|T], Acc, Context) ->
+    props_filter(T, [{uri, undefined} | Acc], Context);
 props_filter([{name, <<>>}|T], Acc, Context) ->
     props_filter(T, [{name, undefined} | Acc], Context);
 props_filter([{name, ""}|T], Acc, Context) ->
