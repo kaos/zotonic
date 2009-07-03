@@ -188,20 +188,20 @@ image(Id, Context) ->
     end.
 
     
-%% @doc Return the path from a root to the category
+%% @doc Return the path from a root to the category (excluding the category itself)
 %% @spec path(Id, Context) -> [CatId]
 get_path(Id, Context) ->
     Cat = get(Id, Context),
     case proplists:get_value(path, Cat) of
-        <<>> -> [];
-        Path -> Path
+        {ok, Path} -> Path;
+        _ -> []
     end.
 
 
 %% @doc Return a flattened representation of the complete catgory tree.  Can be used for overviews or select boxes.
 all_flat(Context) ->
     F = fun() ->
-        CatTuples = zp_db:q("select id, lvl, name, props from category order by nr", Context)
+        zp_db:q("select id, lvl, name, props from category order by nr", Context)
     end,
     All = zp_depcache:memo(F, {category_flat}, ?WEEK, [category]),
     [
@@ -288,7 +288,7 @@ build_tree({Id, Parent, Lvl, Name, Props}, Acc, Rest) ->
         <<>> -> [];
         _ -> Props
     end,
-    {[{id,Id}, {parent,Parent}, {level,Lvl}, {children,lists:reverse(Acc)}, {name, Name} | Props1], Rest}.
+    {[{id,Id}, {parent,Parent}, {level,Lvl}, {children, {ok, lists:reverse(Acc)}}, {name, Name} | Props1], Rest}.
 
 
 
@@ -308,7 +308,7 @@ renumber_transaction(Context) ->
             {lvl, Level},
             {lft, Left},
             {rght, Right},
-            {path, Path}
+            {path, {ok, Path}}
         ], Context)
         || {CatId, Nr, Level, Left, Right, Path} <- Enums
     ],
