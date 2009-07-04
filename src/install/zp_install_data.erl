@@ -51,6 +51,7 @@ install_modules(C) ->
         "mod_admin_modules",
         "mod_admin_users",
         "mod_admin_predicate",
+        "mod_admin_group",
         "mod_emailer",
         "mod_shop"
     ],
@@ -126,15 +127,15 @@ install_category(C) ->
 install_rsc(C) ->
     Rsc = [
         % id  vsfr  grp  cat  name,     props
-        [ 4,  0,    4,   18,  "admins", [{title,"Admins"}] ],
-        [ 5,  0,    5,   18,  "editors", [{title,"Site Administrators"}] ],
-        [ 6,  0,    6,   18,  "communityeditors", [{title,"Community Editors"}] ],
-        [ 7,  0,    7,   18,  "supervisors", [{title,"Supervisors"}] ],
-        [ 8,  0,    8,   18,  "content", [{title,"Content"}] ],
+        [ 4,  0,    4,   18,  "admins", [{title,<<"Administrators">>}] ],
+        [ 5,  0,    5,   18,  "editors", [{title,<<"Site Editors">>}] ],
+        [ 6,  0,    6,   18,  "communityeditors", [{title,<<"Community Editors">>}] ],
+        [ 7,  0,    7,   18,  "supervisors", [{title,<<"Supervisors">>}] ],
+        [ 8,  0,    8,   18,  "content", [{title,<<"Content">>}] ],
 
-        [ 1,  0,    4,   2,   "admin",  [{title,"Site Administrator"}] ],
-        [ 2,  0,    4,   6,   "about_zophrenic",  [{title,"About Zophrenic"}, {body, "<p>Some nice text in the body.</p>"}] ],
-        [ 3,  0,    4,   9,   undefined,[{title,"Some News"}, {body, "<p>And the text of the news should be typed here.</p>"}] ]
+        [ 1,  0,    4,   2,   "admin",  [{title,<<"Site Administrator">>}] ],
+        [ 2,  0,    4,   6,   "about_zophrenic",  [{title,<<"About Zophrenic">>}, {body, "<p>Some nice text in the body.</p>"}] ],
+        [ 3,  0,    4,   9,   undefined,[{title,<<"Some News">>}, {body, "<p>And the text of the news should be typed here.</p>"}] ]
     ],
     
     [ {ok,1} = pgsql:equery(C, "

@@ -20,6 +20,7 @@
     
     get/2,
     insert/2,
+    update_noflush/3,
     add_member/3,
     add_observer/3,
     add_leader/3,
@@ -44,6 +45,10 @@
 %% @spec m_find_value(Key, Source, Context) -> term()
 m_find_value(member, #m{value=undefined}, Context) ->
     groups_member(Context);
+m_find_value(leader, #m{value=undefined}, Context) ->
+    groups_leader(Context);
+m_find_value(observer, #m{value=undefined}, Context) ->
+    groups_observer(Context);
 m_find_value(Key, #m{value=undefined}, Context) when is_integer(Key) ->
     get(Key, Context).
 
@@ -74,16 +79,43 @@ name_to_id_check(Name, Context) ->
     m_rsc:name_to_id_cat_check(Name, group, Context).
     
 
-%% @doc Insert a new group, make sure that the roles are only set by the admin
-%% @spec insert(PropList, Context) -> {ok, int()}
-insert(Props, Context) ->
-    true = zp_acl:has_role(admin, Context),
-    Props1 = zp_utils:prop_replace(category, group, Props),
-    Props2 = zp_utils:prop_replace(is_published, true, Props1),
-    Props3 = zp_utils:prop_replace(group, admins, Props2),
-    {ok, Id} = m_rsc:insert(Props3, Context),
-    zp_depcache:flush(predicate),
-    {ok, Id}.
+%% @doc Insert a new group.
+%% @spec insert(Title, Context) -> {ok, int()} | {error, Reason}
+insert(Title, Context) ->
+    case zp_acl:has_role(admin, Context) of
+        true ->
+            Props = [
+                {title, Title},
+                {category, group},
+                {group, admins},
+                {is_published, true},
+                {visible_for, 1}
+            ],
+            m_rsc:insert(Props, Context);
+        false ->
+            {error, eacces}
+    end.
+
+
+update_noflush(Id, Props, Context) ->
+    case zp_acl:has_role(admin, Context) of
+        true ->
+            GroupProps = [
+                {is_admin, proplists:get_value(group_is_admin, Props, false)},
+                {is_supervisor, proplists:get_value(group_is_supervisor, Props, false)},
+                {is_community_publisher, proplists:get_value(group_is_community_publisher, Props, false)},
+                {is_public_publisher, proplists:get_value(group_is_public_publisher, Props, false)}
+            ],
+            case zp_db:update(group, Id, GroupProps, Context) of
+                {ok, 1} ->
+                    {ok, Id};
+                {ok, 0} ->
+                    zp_db:insert(group, [ {id, Id} | GroupProps ], Context)
+            end;
+        false ->
+            {error, eacces}
+    end.
+    
 
 add_member(Id, RscId, Context) ->
     F = fun(Ctx) ->
