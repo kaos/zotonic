@@ -11,7 +11,7 @@
 
 -mod_title("Zophrenic Module Administration").
 -mod_description("Manages modules. Adds an admin interface to activate and deactivate modules.").
-
+-mod_prio(700).
 
 %% gen_server exports
 -export([init/1, handle_call/3, handle_cast/2, handle_info/2, terminate/2, code_change/3]).

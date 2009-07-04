@@ -8,6 +8,14 @@
 
 		<h2>Zophrenic Modules</h2>
 
+		<p>
+			Rescanning will rebuild the index of all modules, actions, templates etc.  It will also reload all dispatch rules.
+		</p>
+
+		{% button text="Rescan modules" action={module_rescan} %}
+		
+		<div class="clear">&nbsp;</div>
+
 		<h3 class="above-list ">Modules overview</h3>
 		<ul class="short-list">
 			<li class="headers clearfix">
