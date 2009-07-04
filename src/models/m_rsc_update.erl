@@ -43,7 +43,7 @@ delete(Id, Context) when is_integer(Id) ->
                 {ok, _RowsDeleted} ->
                     zp_depcache:flush(#rsc{id=Id}),
                     [ zp_depcache:flush(#rsc{id=SubjectId}) || SubjectId <- Referrers ],
-                    zp_notifier:notify({rsc_delete_done, Id, CatList}, Context),
+                    zp_notifier:notify({rsc_update_done, delete, Id, CatList, []}, Context),
                     ok;
                 {error, Reason} ->
                     {error, Reason}
@@ -67,7 +67,7 @@ update(Id, Props, Context) when is_integer(Id) orelse Id == insert_rsc ->
             case preflight_check(Id, SafeProps, Context) of
                 ok ->
                     F = fun(Ctx) ->
-                        {RscId, UpdateProps, BeforeProps} = case Id of
+                        {RscId, UpdateProps, BeforeProps, BeforeCatList} = case Id of
                             insert_rsc ->
                                 CategoryId = proplists:get_value(category_id, SafeProps),
                                 GroupId = proplists:get_value(group_id, SafeProps),
@@ -88,12 +88,12 @@ update(Id, Props, Context) when is_integer(Id) orelse Id == insert_rsc ->
                                                                 end,
                                                                 SafeProps, 
                                                                 InsPropsN),
-                                        {InsId, SafePropsN, InsPropsN};
+                                        {InsId, SafePropsN, InsPropsN, []};
                                     false ->
                                         throw({error, eacces})
                                 end;
                             _ ->
-                                {Id, SafeProps, m_rsc:get(Id, Ctx)}
+                                {Id, SafeProps, m_rsc:get(Id, Ctx), m_rsc:is_a_list(Id, Context) }
                         end,
                     
                         UpdateProps1 = [
@@ -106,13 +106,13 @@ update(Id, Props, Context) when is_integer(Id) orelse Id == insert_rsc ->
                         % Allow the update props to be modified.
                         UpdatePropsN = zp_notifier:foldr({rsc_update, RscId, BeforeProps}, UpdateProps1, Ctx),
                         case zp_db:update(rsc, RscId, UpdatePropsN, Ctx) of
-                            {ok, _RowsModified} -> {ok, RscId, UpdatePropsN};
+                            {ok, _RowsModified} -> {ok, RscId, UpdatePropsN, BeforeCatList};
                             {error, Reason} -> {error, Reason}
                         end
                     end,
                     
                     case zp_db:transaction(F, Context) of
-                        {ok, NewId, NewProps} ->    
+                        {ok, NewId, NewProps, OldCatList} ->    
                             zp_depcache:flush(#rsc{id=NewId}),
                             case proplists:get_value(name, NewProps) of
                                 undefined -> nop;
@@ -120,10 +120,12 @@ update(Id, Props, Context) when is_integer(Id) orelse Id == insert_rsc ->
                             end,
 
                             % Notify that a new resource has been inserted, or that an existing one is updated
-                            CatList = m_rsc:is_a_list(NewId, Context),
+                            NewCatList = m_rsc:is_a_list(NewId, Context),
+                            AllCatList = lists:usort(NewCatList ++ OldCatList),
+                            [ zp_depcache:flush(Cat) || Cat <- AllCatList ],
                             case Id of
-                                insert_rsc -> zp_notifier:notify({rsc_insert_done, NewId, CatList}, Context);
-                                _ ->          zp_notifier:notify({rsc_update_done, NewId, CatList}, Context)
+                                insert_rsc -> zp_notifier:notify({rsc_update_done, update, NewId, OldCatList, NewCatList}, Context);
+                                _ ->          zp_notifier:notify({rsc_update_done, insert, NewId, OldCatList, NewCatList}, Context)
                             end,
                             {ok, NewId};
                         {error, Reason} ->

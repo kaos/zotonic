@@ -47,8 +47,8 @@ rsc_update({rsc_update, Id, _OldProps}, Props, Context) ->
     end.
 
 %% @doc Whenever a predicate has been updated we have to flush the predicate cache.
-predicate_flush({_Event, _Id, CatList}, Context) ->
-    case lists:member(predicate, CatList) of
+predicate_flush({rsc_update_done, _UpdateAction, _Id, BeforeCatList, CatList}, Context) ->
+    case lists:member(predicate, CatList) orelse lists:member(predicate, BeforeCatList) of
         true -> m_predicate:flush(Context);
         false -> ok
     end.
@@ -78,8 +78,6 @@ init(Args) ->
     {context, Context} = proplists:lookup(context, Args),
     zp_notifier:observe(rsc_update,      {?MODULE, rsc_update},      Context),
     zp_notifier:observe(rsc_update_done, {?MODULE, predicate_flush}, Context),
-    zp_notifier:observe(rsc_insert_done, {?MODULE, predicate_flush}, Context),
-    zp_notifier:observe(rsc_delete_done, {?MODULE, predicate_flush}, Context),
     {ok, #state{context=zp_context:new_for_host(Context)}}.
 
 
