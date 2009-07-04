@@ -4,7 +4,7 @@
 %%
 %% @doc Open a dialog that asks confirmation to delete a media.
 
--module(action_base_dialog_delete_media).
+-module(action_admin_dialog_delete_media).
 -author("Marc Worrell <marc@worrell.nl").
 
 %% interface functions

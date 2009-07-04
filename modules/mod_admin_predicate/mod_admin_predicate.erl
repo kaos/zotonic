@@ -47,8 +47,8 @@ rsc_update({rsc_update, Id, _OldProps}, Props, Context) ->
     end.
 
 %% @doc Whenever a predicate has been updated we have to flush the predicate cache.
-predicate_flush({_Event, Id}, Context) ->
-    case m_rsc:is_a(Id, predicate, Context) of
+predicate_flush({_Event, _Id, CatList}, Context) ->
+    case lists:member(predicate, CatList) of
         true -> m_predicate:flush(Context);
         false -> ok
     end.

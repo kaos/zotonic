@@ -33,16 +33,17 @@ delete(Id, Context) when is_integer(Id) ->
     case zp_acl:rsc_editable(Id, Context) of
         true ->
             Referrers = m_edge:subjects(Id, Context),
+            CatList = m_rsc:is_a_list(Id, Context),
             F = fun(Ctx) ->
                 zp_notifier:notify({rsc_delete, Id}, Ctx),
                 zp_db:delete(rsc, Id, Ctx)
             end,
             
             case zp_db:transaction(F, Context) of
-                ok ->
+                {ok, _RowsDeleted} ->
                     zp_depcache:flush(#rsc{id=Id}),
                     [ zp_depcache:flush(#rsc{id=SubjectId}) || SubjectId <- Referrers ],
-                    zp_notifier:notify({rsc_delete_done, Id}, Context),
+                    zp_notifier:notify({rsc_delete_done, Id, CatList}, Context),
                     ok;
                 {error, Reason} ->
                     {error, Reason}
@@ -119,9 +120,10 @@ update(Id, Props, Context) when is_integer(Id) orelse Id == insert_rsc ->
                             end,
 
                             % Notify that a new resource has been inserted, or that an existing one is updated
+                            CatList = m_rsc:is_a_list(NewId, Context),
                             case Id of
-                                insert_rsc -> zp_notifier:notify({rsc_insert_done, NewId}, Context);
-                                _ ->          zp_notifier:notify({rsc_update_done, NewId}, Context)
+                                insert_rsc -> zp_notifier:notify({rsc_insert_done, NewId, CatList}, Context);
+                                _ ->          zp_notifier:notify({rsc_update_done, NewId, CatList}, Context)
                             end,
                             {ok, NewId};
                         {error, Reason} ->

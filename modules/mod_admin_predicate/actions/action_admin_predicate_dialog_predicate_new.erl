@@ -4,7 +4,7 @@
 %%
 %% @doc Open a dialog with some fields to make a new predicate.
 
--module(action_base_dialog_predicate_new).
+-module(action_admin_predicate_dialog_predicate_new).
 -author("Marc Worrell <marc@worrell.nl").
 
 %% interface functions

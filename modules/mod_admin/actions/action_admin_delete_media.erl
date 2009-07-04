@@ -4,7 +4,7 @@
 %%
 %% @doc Delete a media file from a resource, no confirmation.
 
--module(action_base_delete_media).
+-module(action_admin_delete_media).
 -author("Marc Worrell <marc@worrell.nl").
 
 %% interface functions

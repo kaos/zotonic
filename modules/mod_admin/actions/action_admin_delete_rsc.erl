@@ -4,7 +4,7 @@
 %%
 %% @doc Delete a resource, no confirmation.
 
--module(action_base_delete_rsc).
+-module(action_admin_delete_rsc).
 -author("Marc Worrell <marc@worrell.nl").
 
 %% interface functions

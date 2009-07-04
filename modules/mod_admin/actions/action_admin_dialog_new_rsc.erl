@@ -4,7 +4,7 @@
 %%
 %% @doc Open a dialog with some fields to make a new page/resource.
 
--module(action_base_dialog_new_rsc).
+-module(action_admin_dialog_new_rsc).
 -author("Marc Worrell <marc@worrell.nl").
 
 %% interface functions

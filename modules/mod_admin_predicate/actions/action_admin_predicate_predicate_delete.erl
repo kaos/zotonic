@@ -4,7 +4,7 @@
 %%
 %% @doc Delete a predicate, no confirmation.
 
--module(action_base_predicate_delete).
+-module(action_admin_predicate_predicate_delete).
 -author("Marc Worrell <marc@worrell.nl").
 
 %% interface functions

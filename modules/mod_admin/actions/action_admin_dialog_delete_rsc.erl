@@ -4,7 +4,7 @@
 %%
 %% @doc Open a dialog that asks confirmation to delete a resource.
 
--module(action_base_dialog_delete_rsc).
+-module(action_admin_dialog_delete_rsc).
 -author("Marc Worrell <marc@worrell.nl").
 
 %% interface functions

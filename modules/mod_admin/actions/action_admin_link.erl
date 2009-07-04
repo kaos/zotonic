@@ -4,7 +4,7 @@
 %%
 %% @doc Add an edge between two resources
 
--module(action_base_link).
+-module(action_admin_link).
 -author("Marc Worrell <marc@worrell.nl").
 -include("zophrenic.hrl").
 

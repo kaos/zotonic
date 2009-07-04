@@ -4,7 +4,7 @@
 %%
 %% @doc Remove an edge between two resources
 
--module(action_base_unlink).
+-module(action_admin_unlink).
 -author("Marc Worrell <marc@worrell.nl").
 -include("zophrenic.hrl").
 

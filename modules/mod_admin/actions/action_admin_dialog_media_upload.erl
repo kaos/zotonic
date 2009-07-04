@@ -4,7 +4,7 @@
 %%
 %% @doc Open a dialog with some fields to upload a new media.
 
--module(action_base_dialog_media_upload).
+-module(action_admin_dialog_media_upload).
 -author("Marc Worrell <marc@worrell.nl").
 
 %% interface functions

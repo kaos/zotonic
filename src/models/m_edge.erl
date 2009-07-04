@@ -121,7 +121,10 @@ subject(Id, Pred, N, Context) ->
 objects(_Id, undefined, _Context) ->
     [];
 objects(Id, Pred, Context) when is_atom(Pred) ->
-    objects(Id, m_predicate:name_to_id_check(Pred,Context), Context);
+    case m_predicate:name_to_id(Pred, Context) of
+        {error,{enoent,predicate,_}} -> [];
+        {ok, PredId} -> objects(Id, PredId, Context)
+    end;
 objects(Id, Pred, Context) ->
     case zp_depcache:get({objects, Pred, Id}) of
         {ok, Objects} ->
@@ -139,7 +142,10 @@ objects(Id, Pred, Context) ->
 subjects(_Id, undefined, _Context) ->
     [];
 subjects(Id, Pred, Context) when is_atom(Pred) ->
-    subjects(Id, m_predicate:name_to_id_check(Pred,Context), Context);
+    case m_predicate:name_to_id(Pred, Context) of
+        {error,{enoent,predicate,_}} -> [];
+        {ok, PredId} -> subjects(Id, PredId, Context)
+    end;
 subjects(Id, Pred, Context) ->
     case zp_depcache:get({subjects, Pred, Id}) of
         {ok, Objects} ->

@@ -4,7 +4,7 @@
 %%
 %% @doc Open a dialog where the user can select an object
 
--module(action_base_link_dialog).
+-module(action_admin_link_dialog).
 -author("Marc Worrell <marc@worrell.nl").
 -include("zophrenic.hrl").
 

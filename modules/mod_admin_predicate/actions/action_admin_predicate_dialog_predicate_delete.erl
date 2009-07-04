@@ -4,7 +4,7 @@
 %%
 %% @doc Open a dialog that asks confirmation to delete a predicate.
 
--module(action_base_dialog_predicate_delete).
+-module(action_admin_predicate_dialog_predicate_delete).
 -author("Marc Worrell <marc@worrell.nl").
 
 %% interface functions
