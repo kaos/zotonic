@@ -157,7 +157,10 @@ scan(#context{host=Host}) ->
 prio(Module) ->
     try
         Info = erlang:get_module_info(Module, attributes),
-        proplists:get_value(mod_prio, Info, ?MOD_PRIO)
+        case proplists:get_value(mod_prio, Info) of
+            [Prio] -> Prio;
+            _ -> ?MOD_PRIO
+        end
     catch
         _M:_E -> ?MOD_PRIO
     end.

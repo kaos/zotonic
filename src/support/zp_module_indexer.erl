@@ -211,16 +211,18 @@ scan1(What, Context) ->
 %% @doc Scan the whole subdir hierarchy for files, used for templates and lib folders.
 scan_subdir_files(Subdir, Context) ->
     Modules = zp_module_sup:active_dir(Context),
-    Scan1 = fun({_Module, Dir}, Acc) ->
+    Scan1 = fun({Module, Dir}, Acc) ->
         case zp_utils:list_dir_recursive(filename:join(Dir, Subdir)) of
             [] -> 
                 Acc;
             Files -> 
                 AbsFiles = [ {F, filename:join([Dir, Subdir, F])} || F <- Files ],
-                AbsFiles ++ Acc
+                [{zp_module_sup:prio(Module), Module, AbsFiles} | Acc]
         end
     end,
-    lists:foldl(Scan1, [], Modules).
+    Files = lists:foldl(Scan1, [], Modules),
+    Sorted = lists:sort(Files),
+    lists:flatten([ Fs || {_Module, _Prio, Fs} <- Sorted ]).
     
 
 %% @doc Scan all module directories for templates/scomps/etc.  Example: scan("scomps", "scomp_", ".erl", Context)
