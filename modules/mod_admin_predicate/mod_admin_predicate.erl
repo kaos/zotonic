@@ -117,8 +117,6 @@ handle_info(_Info, State) ->
 terminate(_Reason, State) ->
     zp_notifier:detach(rsc_update,      {?MODULE, rsc_update},      State#state.context),
     zp_notifier:detach(rsc_update_done, {?MODULE, rsc_update_done}, State#state.context),
-    zp_notifier:detach(rsc_insert_done, {?MODULE, rsc_update_done}, State#state.context),
-    zp_notifier:detach(rsc_delete_done, {?MODULE, rsc_update_done}, State#state.context),
     ok.
 
 %% @spec code_change(OldVsn, State, Extra) -> {ok, NewState}

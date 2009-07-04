@@ -1,5 +1,5 @@
 {# Used by the action dialog_predicate_delete #}
-<p>Are you sure you want to delete the predicate “{{ m.predicate[id].title }}”?</p>
+<p>Are you sure you want to delete the predicate “{{ m.rsc[id].title }}”?</p>
 
 <p>This can't be undone. The predicate will be lost forever.</p>
 

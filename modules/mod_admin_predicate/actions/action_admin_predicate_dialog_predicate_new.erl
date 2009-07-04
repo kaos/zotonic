@@ -26,7 +26,7 @@ render_action(TriggerId, TargetId, Args, Context) ->
 %% @doc Fill the dialog with the new page form. The form will be posted back to this module.
 %% @spec event(Event, Context1) -> Context2
 event({postback, {predicate_new_dialog, Title, Redirect}, _TriggerId, _TargetId}, Context) ->
-    DTitle = "Make a new page",
+    DTitle = "Make a new predicate",
     Vars = [
         {delegate, atom_to_list(?MODULE)},
         {redirect, Redirect },
