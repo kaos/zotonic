@@ -1,0 +1,4 @@
+%% Dispatch rule for a group list page
+[
+    {admin_group,       ["admin", "group"],                 resource_admin_group,[]}
+].

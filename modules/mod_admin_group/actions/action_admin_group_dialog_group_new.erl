@@ -1,0 +1,54 @@
+%% @author Marc Worrell <marc@worrell.nl>
+%% @copyright 2009 Marc Worrell
+%% @date 2009-07-04
+%%
+%% @doc Open a dialog with some fields to make a new group.
+
+-module(action_admin_group_dialog_group_new).
+-author("Marc Worrell <marc@worrell.nl").
+
+%% interface functions
+-export([
+    render_action/4,
+    event/2
+]).
+
+-include("zophrenic.hrl").
+
+render_action(TriggerId, TargetId, Args, Context) ->
+    Title = proplists:get_value(title, Args),
+    Redirect = proplists:get_value(redirect, Args, true),
+    Postback = {group_new_dialog, Title, Redirect},
+	{PostbackMsgJS, _PickledPostback} = zp_render:make_postback(Postback, click, TriggerId, TargetId, ?MODULE, Context),
+	{PostbackMsgJS, Context}.
+
+
+%% @doc Fill the dialog with the new group form. The form will be posted back to this module.
+%% @spec event(Event, Context1) -> Context2
+event({postback, {group_new_dialog, Title, Redirect}, _TriggerId, _TargetId}, Context) ->
+    DTitle = "Make a new group",
+    Vars = [
+        {delegate, atom_to_list(?MODULE)},
+        {redirect, Redirect },
+        {title, Title}
+    ],
+    Html = zp_template:render("_action_dialog_group_new.tpl", Vars, Context),
+    {Html1, Context1} = zp_render:render_to_string(Html, Context),
+    zp_render:wire({dialog, [{title, DTitle}, {text, Html1}]}, Context1);
+
+
+event({submit, group_new, _TriggerId, _TargetId}, Context) ->
+    Title    = zp_context:get_q("new_group_title", Context),
+    Redirect = zp_context:get_q("redirect", Context),
+    {ok, Id} = m_group:insert(Title, Context),
+
+    % Close the dialog and optionally redirect to the edit page of the new resource
+    Context2 = zp_render:wire({dialog_close, []}, Context),
+    case zp_convert:to_bool(Redirect) of
+        false ->
+            Context2;
+        true ->
+            Location = zp_dispatcher:url_for(admin_edit_rsc, [{id, Id}], Context2),
+            zp_render:wire({redirect, [{location, Location}]}, Context2)
+    end.
+
