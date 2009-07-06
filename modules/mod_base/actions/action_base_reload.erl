@@ -8,4 +8,4 @@
 -export([render_action/4]).
 
 render_action(_TriggerId, _TargetId, _Args, Context) ->
-	{"window.location.reload(true)", Context}.
+	{"window.location.reload(true);", Context}.
