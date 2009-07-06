@@ -12,7 +12,9 @@ You will need:
 
 Steps:
 
-1. Create an user and database in PostgreSQL:
+1. Type "make" in the root of zophrenic (there where the Makefile is located).
+
+2. Create an user and database in PostgreSQL:
 
     CREATE USER zophrenic WITH PASSWORD 'yourdbpassword';
     CREATE DATABASE zophrenic WITH OWNER = zophrenic ENCODING = 'UTF8';
@@ -20,9 +22,9 @@ Steps:
     \c zophrenic
     CREATE LANGUAGE "plpgsql";
 
-2. Copy the file "doc/zophrenic.sh" to a place that is handy for you.
+3. Copy the file "doc/zophrenic.sh" to a place that is handy for you.
 
-3. Edit the "zophrenic.sh" script, edit and uncomment at least the following keys:
+4. Edit the "zophrenic.sh" script, edit and uncomment at least the following keys:
 
    The place of zophrenic and the zophrenic.sh script:
 
@@ -36,18 +38,18 @@ Steps:
     ZOPHRENIC_SIGN_KEY_SIMPLE
     ZOPHRENIC_SIGN_KEY
 
-4. Make sure that the directory "priv/sites/default/files" and all its subdirectories are readable 
+5. Make sure that the directory "priv/sites/default/files" and all its subdirectories are readable 
    and writeable for the current user. (Which is the user zophrenic will run under.)
 
-5. Start zophrenic in debug mode:
+6. Start zophrenic in debug mode:
 
     zophrenic.sh debug
 
-6. You see zophrenic starting up, lots of messages pass by, and zophrenic will install the initial database.
+7. You see zophrenic starting up, lots of messages pass by, and zophrenic will install the initial database.
    When something goes wrong here, then it is almost always a problem with the database connection. Check your 
    database configuration in the zophrenic.sh file.
 
-7. Point your browser to 
+8. Point your browser to 
 	
     http://127.0.0.1:8000/
 	
@@ -55,7 +57,7 @@ Steps:
 
     http://127.0.0.1:8000/admin/
 
-8. When all done, then you can stop the erlang shell with:
+9. When all done, then you can stop the erlang shell with:
 
     q().
   
