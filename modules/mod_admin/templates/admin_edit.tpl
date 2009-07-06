@@ -231,7 +231,7 @@
 										<label for="group_id">Belongs to the group</label>
 										<select id="group_id" name="group_id">
 											<option value="{{ r.group_id }}">{{ m.rsc[r.group_id].title }}</option>
-										{% for group_id in m.group.member %}
+										{% for group_id in m.acl.member %}
 											{% ifnotequal r.group_id group_id %}
 											<option value="{{ group_id }}">{{ m.rsc[group_id].title }}</option>
 											{% endifnotequal %}

@@ -29,7 +29,7 @@
 		<p>
 			<label for="{{ #group_id }}">Group</label>
 			<select id="{{ #group_id }}" name="group_id">
-			{% for group_id in m.group.member %}
+			{% for group_id in m.acl.member %}
 				<option value="{{ group_id }}">{{ m.rsc[group_id].title }}</option>
 			{% endfor %}
 			</select>

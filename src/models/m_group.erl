@@ -24,6 +24,9 @@
     add_member/3,
     add_observer/3,
     add_leader/3,
+    get_members/2,
+    get_leaders/2,
+    get_observers/2,
     delete_member/2,
     delete_member/3,
     groups_member/1,
@@ -43,14 +46,25 @@
 
 %% @doc Fetch the value for the key from a model source
 %% @spec m_find_value(Key, Source, Context) -> term()
-m_find_value(member, #m{value=undefined}, Context) ->
-    groups_member(Context);
-m_find_value(leader, #m{value=undefined}, Context) ->
-    groups_leader(Context);
-m_find_value(observer, #m{value=undefined}, Context) ->
-    groups_observer(Context);
-m_find_value(Key, #m{value=undefined}, Context) when is_integer(Key) ->
-    get(Key, Context).
+m_find_value(members, #m{value=undefined} = M, _Context) ->
+    M#m{value=members};
+m_find_value(leaders, #m{value=undefined} = M, _Context) ->
+    M#m{value=leaders};
+m_find_value(observers, #m{value=undefined} = M, _Context) ->
+    M#m{value=observers};
+m_find_value(roles, #m{value=undefined} = M, _Context) ->
+    M#m{value=roles};
+m_find_value(Id, #m{value=members}, Context) when is_integer(Id) ->
+    get_members(Id, Context);
+m_find_value(Id, #m{value=leaders}, Context) when is_integer(Id) ->
+    get_leaders(Id, Context);
+m_find_value(Id, #m{value=observers}, Context) when is_integer(Id) ->
+    get_observers(Id, Context);
+m_find_value(Id, #m{value=roles}, Context) when is_integer(Id) ->
+    roles(Id, Context);
+m_find_value(Id, #m{value=undefined}, Context) when is_integer(Id) ->
+    get(Id, Context).
+
 
 %% @doc Transform a m_config value to a list, used for template loops
 %% @spec m_to_list(Source, Context)
@@ -59,7 +73,7 @@ m_to_list(_, _Context) ->
 
 %% @doc Transform a model value so that it can be formatted or piped through filters
 %% @spec m_value(Source, Context) -> term()
-m_value(#m{value=undefined}, _Context) ->
+m_value(#m{value=_}, _Context) ->
     undefined.
 
 
@@ -121,23 +135,24 @@ add_member(Id, RscId, Context) ->
     F = fun(Ctx) ->
         case zp_db:q1("select id from rsc_group where group_id = $1 and rsc_id = $2", [Id, RscId], Ctx) of
             undefined ->
-                {ok, Id} = zp_db:insert(rsc_group, [{group_id, Id},{rsc_id, RscId}], Ctx),
-                Id;
+                {ok, RowId} = zp_db:insert(rsc_group, [{group_id, Id},{rsc_id, RscId}], Ctx),
+                RowId;
             RscGroupId ->
                 zp_db:q("update rsc_group set is_observer = false, is_leader = false where id = $1", [RscGroupId], Ctx),
                 RscGroupId
         end
     end,
-    zp_db:transaction(F, Context),
-    zp_depcache:flush({groups, RscId}).
+    Result = zp_db:transaction(F, Context),
+    zp_depcache:flush({groups, RscId}),
+    Result.
 
 
 add_observer(Id, RscId, Context) ->
     F = fun(Ctx) ->
         case zp_db:q1("select id from rsc_group where group_id = $1 and rsc_id = $2", [Id, RscId], Ctx) of
             undefined ->
-                {ok, Id} = zp_db:insert(rsc_group, [{group_id, Id},{rsc_id, RscId},{is_observer, true}], Ctx),
-                Id;
+                {ok, RowId} = zp_db:insert(rsc_group, [{group_id, Id},{rsc_id, RscId},{is_observer, true}], Ctx),
+                RowId;
             RscGroupId ->
                 zp_db:q("update rsc_group set is_observer = true, is_leader = false where id = $1", [RscGroupId], Ctx),
                 RscGroupId
@@ -152,8 +167,8 @@ add_leader(Id, RscId, Context) ->
     F = fun(Ctx) ->
         case zp_db:q1("select id from rsc_group where group_id = $1 and rsc_id = $2", [Id, RscId], Ctx) of
             undefined ->
-                {ok, Id} = zp_db:insert(rsc_group, [{group_id, Id},{rsc_id, RscId},{is_leader, true}], Ctx),
-                Id;
+                {ok, RowId} = zp_db:insert(rsc_group, [{group_id, Id},{rsc_id, RscId},{is_leader, true}], Ctx),
+                RowId;
             RscGroupId ->
                 zp_db:q("update rsc_group set is_observer = false, is_leader = true where id = $1", [RscGroupId], Ctx),
                 RscGroupId
@@ -162,6 +177,15 @@ add_leader(Id, RscId, Context) ->
     Result = zp_db:transaction(F, Context),
     zp_depcache:flush({groups, RscId}),
     Result.
+
+get_members(Id, Context) ->
+    [ RscId || {RscId} <- zp_db:q("select rsc_id from rsc_group where group_id = $1 and is_observer = false and is_leader = false", [Id], Context) ].
+
+get_leaders(Id, Context) ->
+    [ RscId || {RscId} <- zp_db:q("select rsc_id from rsc_group where group_id = $1 and is_leader = true", [Id], Context) ].
+
+get_observers(Id, Context) ->
+    [ RscId || {RscId} <- zp_db:q("select rsc_id from rsc_group where group_id = $1 and is_observer = true", [Id], Context) ].
 
 
 delete_member(RscGroupId, Context) ->

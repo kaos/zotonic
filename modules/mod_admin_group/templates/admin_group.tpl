@@ -21,17 +21,17 @@
 			</div>
 			{% endif %}
 
-		{% with m.group.observer as observer %}
-		{% with m.group.leader as leader %}
-		{% with m.group.member as member %}
+		{% with m.acl.observer as observer %}
+		{% with m.acl.leader as leader %}
+		{% with m.acl.member as member %}
 			
 			<h3 class="above-list">Groups overview</h3>
 			<ul class="short-list">
 				<li class="headers clearfix">
 					<span class="zp-20">Title</span>
-					<span class="zp-10">Member</span>
-					<span class="zp-10">Leader</span>
-					<span class="zp-10">Observer</span>
+					<span class="zp-5">Member</span>
+					<span class="zp-5">Leader</span>
+					<span class="zp-5">Observer</span>
 					<span class="zp-10">Administrator</span>
 					<span class="zp-10">Supervisor</span>
 					<span class="zp-10">Community Publisher</span>
@@ -45,13 +45,13 @@
 						<span class="zp-20">{{ title|default:"<em>untitled</em>" }}</span>
 
 						{# Show if the current user is member/admin/supervisor of this group #}
-						<span class="zp-10">
+						<span class="zp-5">
 							{% if id|member:member or id|member:leader %}√{% else %}&middot;{% endif %}
 						</span>
-						<span class="zp-10">
+						<span class="zp-5">
 							{% if id|member:leader %}√{% else %}&middot;{% endif %}
 						</span>
-						<span class="zp-10">
+						<span class="zp-5">
 							{% if id|member:observer %}√{% else %}&middot;{% endif %}
 						</span>
 
@@ -71,11 +71,11 @@
 							</span>
 						{% endwith %}
 
-						<span class="zp-10">
+						<span class="zp-20">
+							{% button text="members" action={redirect dispatch="admin_group_members" id=id} %}
 							{% if editable %}
 							{% button text="delete" action={dialog_group_delete id=id on_success={slide_fade_out target=#li.id}} %}
 							{% endif %}
-
 							{% button text="edit" action={redirect dispatch="admin_edit_rsc" id=id} %}
 						</span>
 					</a>

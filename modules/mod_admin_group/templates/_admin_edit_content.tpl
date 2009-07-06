@@ -4,7 +4,7 @@
 					<h3 class="above-item">Additional site wide rights</h3>
 					<div class="item">
 						<fieldset class="admin-form">
-							<p>Additional rights members of this group have for the whole site. <a href="javascript:void(0)" class="do_dialog {title: 'Help about predicates.', text: '<strong>Administrators</strong> can do anything, be careful with this setting.<br/><strong>Supervisors</strong> can see everything.<br/><strong>Community publishers</strong> can publish content visible for logged on users.<br/><strong>Public publishers</strong> can publish content visible for the whole world.', width: '450px'}">Need more help?</a></p>
+							<p>Additional rights members of this group have for the whole site. <a href="javascript:void(0)" class="do_dialog {title: 'Help about extra site rights.', text: '<strong>Administrators</strong> can do anything, be careful with this setting.<br/><strong>Supervisors</strong> can see everything.<br/><strong>Community publishers</strong> can publish content visible for logged on users.<br/><strong>Public publishers</strong> can publish content visible for the whole world.', width: '450px'}">Need more help?</a></p>
 
 							{% if m.acl.is_admin %}
 								<div class="form-item clearfix">

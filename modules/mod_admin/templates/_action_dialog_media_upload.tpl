@@ -16,7 +16,7 @@
 		<p>
 			<label for="{{ #group_id }}">Group</label>
 			<select id="{{ #group_id }}" name="group_id">
-			{% for id in m.group.member %}
+			{% for id in m.acl.member %}
 				<option value="{{ id }}" {% ifequal group_id id %}selected="selected"{% endifequal %}>{{ m.rsc[id].title }}</option>
 			{% endfor %}
 			</select>
