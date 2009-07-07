@@ -77,6 +77,15 @@ le(Input, Number) ->
         _:_ -> undefined
     end.
 
+eq(undefined, _Number) ->
+    undefined;
+eq(Input, Number) ->
+    try
+        zp_convert:to_integer(Input) == zp_convert:to_integer(Number)
+    catch
+        _:_ -> undefined
+    end.
+
 
 capfirst(undefined) ->
     undefined;
