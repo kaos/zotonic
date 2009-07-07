@@ -204,7 +204,10 @@ has_group_role(leader, GroupId, Context) ->
         false -> lists:member(GroupId, groups_leader(Context))
     end;
 has_group_role(observer, GroupId, Context) ->
-    lists:member(GroupId, groups_observer(Context));
+    case has_role(supervisor, Context) of
+        true -> true;
+        false -> lists:member(GroupId, groups_observer(Context))
+    end;
 has_group_role(member, GroupId, Context) ->
     lists:member(GroupId, groups_member(Context)).
 
