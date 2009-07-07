@@ -19,7 +19,6 @@ render_action(TriggerId, TargetId, Args, Context) ->
     Id = zp_convert:to_integer(proplists:get_value(id, Args)),
     MemberId = zp_convert:to_integer(proplists:get_value(member_id, Args)),
     OnSuccess = proplists:get_all_values(on_success, Args),
-    ?DEBUG(OnSuccess),
     Postback = {group_member_delete, Id, MemberId, OnSuccess},
 	{PostbackMsgJS, _PickledPostback} = zp_render:make_postback(Postback, click, TriggerId, TargetId, ?MODULE, Context),
 	{PostbackMsgJS, Context}.

@@ -16,7 +16,6 @@
 -include("zophrenic.hrl").
 
 render_action(TriggerId, TargetId, Args, Context) ->
-    ?DEBUG(Args),
     Id = zp_convert:to_integer(proplists:get_value(id, Args)),
     MemberId = zp_convert:to_integer(proplists:get_value(member_id, Args)),
     OnSuccess = proplists:get_all_values(on_success, Args),
