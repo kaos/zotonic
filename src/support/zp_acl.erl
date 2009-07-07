@@ -26,6 +26,7 @@
     groups_observer/1,
     groups_leader/1,
     has_role/2,
+    has_group_role/3,
     publish_level/1,
     publish_level/2,
     user/1,
@@ -108,6 +109,7 @@ sudo(F, Context) when is_function(F, 1) ->
 
 
 %% @doc Log the user with the id on, fill the acl field of the context
+%% @spec logon(int(), #context) -> #context
 logon(Id, Context) ->
     Roles = m_group:roles(Id, Context),
     Acl = #acl{
@@ -120,6 +122,7 @@ logon(Id, Context) ->
 
 
 %% @doc Log off, reset the acl field of the context
+%% @spec logoff(#context) -> #context
 logoff(Context) ->
     Context#context{user_id=undefined, acl=#acl{}}.
 
@@ -167,6 +170,8 @@ groups_leader(#context{user_id=UserId} = Context) ->
     m_group:groups_leader(UserId, Context).
     
 
+%% @doc Check if the current user has a specific system wide permission
+%% @spec has_role(Role, #context) -> bool()
 has_role(admin, Context) ->
     case Context#context.acl of
         undefined -> false;
@@ -187,6 +192,21 @@ has_role(public_publisher, Context) ->
         undefined -> false;
         Acl -> Acl#acl.is_public_publisher orelse Acl#acl.is_admin
     end.
+
+
+%% @doc Check if the current user has a specific role wrt a group
+%% @spec has_group_role(Role, GroupId, #context) -> bool()
+has_group_role(_Role, _GroupId, #context{user_id=undefined}) ->
+    false;
+has_group_role(leader, GroupId, Context) ->
+    case has_role(admin, Context) of
+        true -> true;
+        false -> lists:member(GroupId, groups_leader(Context))
+    end;
+has_group_role(observer, GroupId, Context) ->
+    lists:member(GroupId, groups_observer(Context));
+has_group_role(member, GroupId, Context) ->
+    lists:member(GroupId, groups_member(Context)).
 
 
 %% @doc Maximum publish level that an user can give to his edited resources

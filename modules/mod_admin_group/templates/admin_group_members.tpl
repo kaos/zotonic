@@ -31,8 +31,8 @@
 						<span class="zp-20">{{ m.rsc[mid].title|striptags|default:"<em>untitled</em>" }}</span>
 						<span class="zp-10">{{ m.rsc[mid].category.name }}</span>
 						<span class="zp-30">
-							{% button text="remove membership" action={dialog_group_member_remove id=mid on_success={slide_fade_out target=#li.mid}} %}
-							{% button text="change membership" action={dialog_group_member_edit id=mid on_success={slide_fade_out target=#li.mid}} %}
+							{% button text="remove membership" action={dialog_group_member_delete id=id member_id=mid on_success={slide_fade_out target=#li.mid}} %}
+							{% button text="change membership" action={dialog_group_member_edit id=id member_id=mid on_success={reload}} %}
 							{% button text="edit" action={redirect dispatch="admin_edit_rsc" id=mid} %}
 						</span>
 					</a>
@@ -52,13 +52,13 @@
 					<span class="zp-10">Actions</span>
 				</li>
 				{% for mid in m.group.observers[id] %}
-				<li>
+				<li id="{{ #li.mid }}">
 					<a href="{% url admin_edit_rsc id=mid %}" class="clearfix">
 						<span class="zp-20">{{ m.rsc[mid].title|striptags|default:"<em>untitled</em>" }}</span>
 						<span class="zp-10">{{ m.rsc[mid].category.name }}</span>
 						<span class="zp-30">
-							{% button text="remove membership" action={dialog_group_member_remove id=mid on_success={slide_fade_out target=#li.mid}} %}
-							{% button text="change membership" action={dialog_group_member_edit id=mid on_success={slide_fade_out target=#li.mid}} %}
+							{% button text="remove membership" action={dialog_group_member_delete id=id member_id=mid on_success={slide_fade_out target=#li.mid}} %}
+							{% button text="change membership" action={dialog_group_member_edit id=id member_id=mid on_success={reload}} %}
 							{% button text="edit" action={redirect dispatch="admin_edit_rsc" id=mid} %}
 						</span>
 					</a>
@@ -78,13 +78,13 @@
 					<span class="zp-10">Actions</span>
 				</li>
 				{% for mid in m.group.members[id] %}
-					<li>
+					<li id="{{ #li.mid }}">
 					<a href="{% url admin_edit_rsc id=mid %}" class="clearfix">
 						<span class="zp-20">{{ m.rsc[mid].title|striptags|default:"<em>untitled</em>" }}</span>
 						<span class="zp-10">{{ m.rsc[mid].category.name }}</span>
 						<span class="zp-30">
-							{% button text="remove membership" action={dialog_group_member_remove id=mid on_success={slide_fade_out target=#li.mid}} %}
-							{% button text="change membership" action={dialog_group_member_edit id=mid on_success={slide_fade_out target=#li.mid}} %}
+							{% button text="remove membership" action={dialog_group_member_delete id=id member_id=mid on_success={slide_fade_out target=#li.mid}} %}
+							{% button text="change membership" action={dialog_group_member_edit id=id member_id=mid on_success={reload}} %}
 							{% button text="edit" action={redirect dispatch="admin_edit_rsc" id=mid} %}
 						</span>
 					</a>
