@@ -53,5 +53,5 @@ event({submit, group_member_add, _TriggerId, _TargetId}, Context) ->
                     {reload, []}], Context);
 
         false ->
-            zp_render:wire({growl, [{text, "Only administrators can delete groups."}, {type, "error"}]})
+            zp_render:wire({growl, [{text, "Only administrators can delete groups."}, {type, "error"}]}, Context)
     end.
