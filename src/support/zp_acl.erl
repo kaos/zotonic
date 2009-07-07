@@ -172,6 +172,8 @@ groups_leader(#context{user_id=UserId} = Context) ->
 
 %% @doc Check if the current user has a specific system wide permission
 %% @spec has_role(Role, #context) -> bool()
+has_role(_Role, #context{user_id=1}) ->
+    true;
 has_role(admin, Context) ->
     case Context#context.acl of
         undefined -> false;
@@ -196,8 +198,6 @@ has_role(public_publisher, Context) ->
 
 %% @doc Check if the current user has a specific role wrt a group
 %% @spec has_group_role(Role, GroupId, #context) -> bool()
-has_group_role(_Role, _GroupId, #context{user_id=undefined}) ->
-    false;
 has_group_role(leader, GroupId, Context) ->
     case has_role(admin, Context) of
         true -> true;
