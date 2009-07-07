@@ -2,13 +2,13 @@
 %% @copyright 2009 Marc Worrell
 %% @date 2009-06-13
 %%
-%% @doc User administration.  Adds overview of users to the admin and enables to add passwords on the edit page.
+%% @doc Identity administration.  Adds overview of users to the admin and enables to add passwords on the edit page.
 
--module(mod_admin_users).
+-module(mod_admin_identity).
 -author("Marc Worrell <marc@worrell.nl>").
 -behaviour(gen_server).
 
--mod_title("Zophrenic User Administration").
+-mod_title("Zophrenic Identity Administration").
 -mod_description("Adds an user overview and possibility to edit passwords.").
 
 

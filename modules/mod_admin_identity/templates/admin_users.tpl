@@ -17,7 +17,7 @@
 			<div class="quick-search-wrapper right">
 				<form method="get" action="{% url admin_user %}">
 					<input type="text" name="qs" value="{{ q.qs|escape }}" class="left" />
-					<button>Search user</button>
+					<button type="submit">Search user</button>
 				</form>
 			</div>
 		</div>

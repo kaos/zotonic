@@ -126,7 +126,7 @@
 						{% validate id="email" type={presence} type={email} %}
 						
 						<div class="clear"></div>
-						<button>Submit</button>
+						<button type="submit">Submit</button>
 						<div class="clear"></div>
 
 					</form>

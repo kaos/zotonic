@@ -45,7 +45,7 @@
 				<div class="quick-search-wrapper">
 					<form method="get" action="{% url admin_overview_rsc %}">
 						<input type="text" name="qs" value="{{ q.qs|escape }}" class="left" />
-						<button>Search</button>
+						<button type="submit">Search</button>
 					</form>
 				</div>
 			</li>

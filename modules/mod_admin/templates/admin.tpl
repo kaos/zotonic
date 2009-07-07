@@ -30,7 +30,7 @@
 							<fieldset>
 								<div class="form-element">
 									<input type="text" name="qs" value="{{ q.qs|escape }}" class="left" />
-									<button>Search</button>
+									<button type="submit">Search</button>
 								</div>
 							</fieldset>
 						</form>

@@ -18,7 +18,7 @@
 						<fieldset>
 							<div class="form-element">
 								<input type="text" name="id" value="{{ q.id|escape }}" class="left" />
-								<button>Show</button>
+								<button type="submit">Show</button>
 							</div>
 						</fieldset>
 					</form>
@@ -36,7 +36,7 @@
 						<fieldset>
 							<div class="form-element">
 								<input type="text" name="id" value="{{ q.id|escape }}" class="left" />
-								<button>Show</button>
+								<button type="submit">Show</button>
 							</div>
 						</fieldset>
 					</form>

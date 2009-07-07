@@ -49,7 +49,7 @@ install_modules(C) ->
         "mod_search",
         "mod_admin",
         "mod_admin_modules",
-        "mod_admin_users",
+        "mod_admin_identity",
         "mod_admin_predicate",
         "mod_admin_group",
         "mod_emailer",

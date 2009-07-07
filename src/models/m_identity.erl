@@ -16,6 +16,8 @@
     
     is_user/2,
     get_username/2,
+    delete_username/2,
+    set_username/3,
     set_username_pw/4,
     check_username_pw/3,
     hash/1,
@@ -63,6 +65,31 @@ is_user(Id, Context) ->
 %% @spec get_username(ResourceId, Context) -> Username | undefined
 get_username(Id, Context) ->
     zp_db:q1("select key from identity where rsc_id = $1 and type = 'username_pw'", [Id], Context).
+
+
+%% @doc Delete an username from a resource.
+%% @spec delete_username(ResourceId, Context) -> void
+delete_username(Id, Context) ->
+    zp_db:q("delete from identity where rsc_id = $1 and type = 'username_pw'", [Id], Context).
+
+
+%% @doc Change the username of the resource id, only possible if there is already an username/password set
+%% @spec set_username(ResourceId, Username, Context) -> ok | {error, Reason}
+set_username(Id, Username, Context) ->
+    F = fun(Ctx) ->
+        UniqueTest = zp_db:q1("select count(*) from identity where type = 'username_pw' and rsc_id <> $1 and key = $2", [Id, Username], Ctx),
+        case UniqueTest of
+            0 ->
+                case zp_db:q("update identity set key = $2 where rsc_id = $1 and type = 'username_pw'", [Id, Username], Ctx) of
+                    1 -> ok;
+                    0 -> {error, enoent};
+                    {error, _} -> {error, eexist} % assume duplicate key error?
+                end;
+            _Other ->
+                {error, eexist}
+        end
+    end,
+    zp_db:transaction(F, Context).
 
 
 %% @doc Set the username/password of a resource.  Replaces any existing username/password.
