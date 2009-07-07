@@ -9,11 +9,6 @@
 	<div class="new-predicate-wrapper">
 
 		<div class="form-item clearfix">
-			<input id="{{ #member }}" type="radio" class="xdo_fieldreplace" name="member" value="member"  checked="checked" />
-			<label for="{{ #member }}">Member</label>
-		</div>
-
-		<div class="form-item clearfix">
 			<input id="{{ #leader }}" type="radio" class="xdo_fieldreplace" name="member" value="leader"  />
 			<label for="{{ #leader }}">Leader</label>
 		</div>
@@ -21,6 +16,11 @@
 		<div class="form-item clearfix">
 			<input id="{{ #observer }}" type="radio" class="xdo_fieldreplace" name="member" value="observer"  />
 			<label for="{{ #observer }}">Observer</label>
+		</div>
+
+		<div class="form-item clearfix">
+			<input id="{{ #member }}" type="radio" class="xdo_fieldreplace" name="member" value="member"  checked="checked" />
+			<label for="{{ #member }}">Member</label>
 		</div>
 
 		<p>Type text to search on and click on the member you want to add:</p>

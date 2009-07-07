@@ -23,7 +23,7 @@ render_action(TriggerId, TargetId, Args, Context) ->
 	{PostbackMsgJS, Context}.
 
 
-%% @doc Delete a predicate.
+%% @doc Delete a group.
 %% @spec event(Event, Context1) -> Context2
 event({postback, {group_delete, Id, OnSuccess}, _TriggerId, _TargetId}, Context) ->
     case zp_acl:has_role(admin, Context) of
