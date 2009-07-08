@@ -304,4 +304,4 @@ roles(PersonId, Context) ->
           [] -> {0, 0, 0, 0, 0}
     end,
     P = lists:zip([admin, supervisor, community_publisher, public_publisher], tuple_to_list(Roles)),
-    [ R || {R,M} <- P, M =/= 0 ].
+    [ R || {R,M} <- P, is_integer(M), M > 0 ].
