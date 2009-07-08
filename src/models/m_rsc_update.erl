@@ -29,7 +29,7 @@ insert(Props, Context) ->
 
 %% @doc Delete a resource
 %% @spec delete(Props, Context) -> ok | {error, Reason}
-delete(Id, Context) when is_integer(Id) ->
+delete(Id, Context) when is_integer(Id), Id /= 1 ->
     case zp_acl:rsc_editable(Id, Context) of
         true ->
             Referrers = m_edge:subjects(Id, Context),

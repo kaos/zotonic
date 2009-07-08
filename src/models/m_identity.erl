@@ -69,51 +69,64 @@ get_username(Id, Context) ->
 
 %% @doc Delete an username from a resource.
 %% @spec delete_username(ResourceId, Context) -> void
-delete_username(Id, Context) ->
-    zp_db:q("delete from identity where rsc_id = $1 and type = 'username_pw'", [Id], Context).
+delete_username(Id, Context) when is_integer(Id), Id /= 1 ->
+    case zp_acl:has_role(admin, Context) orelse zp_acl:user(Context) == Id of
+        true ->  zp_db:q("delete from identity where rsc_id = $1 and type = 'username_pw'", [Id], Context);
+        false -> {error, eacces}
+    end.
 
 
 %% @doc Change the username of the resource id, only possible if there is already an username/password set
 %% @spec set_username(ResourceId, Username, Context) -> ok | {error, Reason}
 set_username(Id, Username, Context) ->
-    F = fun(Ctx) ->
-        UniqueTest = zp_db:q1("select count(*) from identity where type = 'username_pw' and rsc_id <> $1 and key = $2", [Id, Username], Ctx),
-        case UniqueTest of
-            0 ->
-                case zp_db:q("update identity set key = $2 where rsc_id = $1 and type = 'username_pw'", [Id, Username], Ctx) of
-                    1 -> ok;
-                    0 -> {error, enoent};
-                    {error, _} -> {error, eexist} % assume duplicate key error?
-                end;
-            _Other ->
-                {error, eexist}
-        end
-    end,
-    zp_db:transaction(F, Context).
+    case zp_acl:has_role(admin, Context) orelse zp_acl:user(Context) == Id of
+        true ->
+            F = fun(Ctx) ->
+                UniqueTest = zp_db:q1("select count(*) from identity where type = 'username_pw' and rsc_id <> $1 and key = $2", [Id, Username], Ctx),
+                case UniqueTest of
+                    0 ->
+                        case zp_db:q("update identity set key = $2 where rsc_id = $1 and type = 'username_pw'", [Id, Username], Ctx) of
+                            1 -> ok;
+                            0 -> {error, enoent};
+                            {error, _} -> {error, eexist} % assume duplicate key error?
+                        end;
+                    _Other ->
+                        {error, eexist}
+                end
+            end,
+            zp_db:transaction(F, Context);
+        false ->
+            {error, eacces}
+    end.
 
 
 %% @doc Set the username/password of a resource.  Replaces any existing username/password.
 %% @spec set_username_pw(RscId, Username, Password) -> ok | {error, Reason}
 set_username_pw(Id, Username, Password, Context) ->
-    Username1 = string:to_lower(Username),
-    Hash = hash(Password),
-    F = fun(Ctx) ->
-        Rupd = zp_db:q("
-                    update identity 
-                    set key = $2,
-                        propb = $3,
-                        modified = now()
-                    where type = 'username_pw' and rsc_id = $1", [Id, Username1, Hash], Ctx),
-        case Rupd of
-            0 ->
-                zp_db:q("insert into identity (rsc_id, is_unique, type, key, propb) values ($1, true, 'username_pw', $2, $3)", [Id, Username1, Hash], Ctx);
-            1 -> 
-                1
-        end
-    end,
-    case zp_db:transaction(F, Context) of
-        1 -> ok;
-        R -> R
+    case zp_acl:has_role(admin, Context) orelse zp_acl:user(Context) == Id of
+        true ->
+            Username1 = string:to_lower(Username),
+            Hash = hash(Password),
+            F = fun(Ctx) ->
+                Rupd = zp_db:q("
+                            update identity 
+                            set key = $2,
+                                propb = $3,
+                                modified = now()
+                            where type = 'username_pw' and rsc_id = $1", [Id, Username1, Hash], Ctx),
+                case Rupd of
+                    0 ->
+                        zp_db:q("insert into identity (rsc_id, is_unique, type, key, propb) values ($1, true, 'username_pw', $2, $3)", [Id, Username1, Hash], Ctx);
+                    1 -> 
+                        1
+                end
+            end,
+            case zp_db:transaction(F, Context) of
+                1 -> ok;
+                R -> R
+            end;
+        false ->
+            {error, eacces}
     end.
 
 
