@@ -56,7 +56,8 @@ init([]) ->
 		 {port, WebPort},
 		 {error_handler, zp_webmachine_error_handler},
          {log_dir, "priv/log"},
-		 {dispatch, []}
+		 {dispatch, []},
+		 {backlog, 500}
 	],
 
     MochiWeb = {webmachine_mochiweb,
