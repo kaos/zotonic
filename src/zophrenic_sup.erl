@@ -55,7 +55,7 @@ init([]) ->
 		 {ip, WebIp},
 		 {port, WebPort},
 		 {error_handler, zp_webmachine_error_handler},
-         {log_dir, "priv/log"},
+         {log_dir, filename:join([code:lib_dir(zophrenic, priv), "log"])},
 		 {dispatch, []},
 		 {backlog, 500}
 	],
