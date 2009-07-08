@@ -27,6 +27,6 @@ html(Context) ->
 	Vars = [
         {id, Id}
 	],
-    Html = zp_template:render("product.tpl", Vars, Context),
+    Html = zp_template:render("page.tpl", Vars, Context),
 	zp_context:output(Html, Context).
 
