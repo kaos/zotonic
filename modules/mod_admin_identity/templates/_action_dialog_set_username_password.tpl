@@ -29,7 +29,7 @@
 		{% button action={dialog_close} text="Cancel" %}
 		
 		{% if username and not id|eq:1 %}
-			{% button action={dialog_delete_username id=id} text="delete" %}
+			{% button action={dialog_delete_username id=id on_success=on_delete} text="delete" %}
 		{% endif %}
 	</div>
 </form>

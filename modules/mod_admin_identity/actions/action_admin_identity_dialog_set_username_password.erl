@@ -19,14 +19,15 @@
 
 render_action(TriggerId, TargetId, Args, Context) ->
     Id = zp_convert:to_integer(proplists:get_value(id, Args)),
-    Postback = {set_username_password, Id},
+    OnDelete = proplists:get_all_values(on_delete, Args),
+    Postback = {set_username_password, Id, OnDelete},
 	{PostbackMsgJS, _PickledPostback} = zp_render:make_postback(Postback, click, TriggerId, TargetId, ?MODULE, Context),
 	{PostbackMsgJS, Context}.
 
 
 %% @doc Fill the dialog with the new page form. The form will be posted back to this module.
 %% @spec event(Event, Context1) -> Context2
-event({postback, {set_username_password, Id}, _TriggerId, _TargetId}, Context) ->
+event({postback, {set_username_password, Id, OnDelete}, _TriggerId, _TargetId}, Context) ->
     DTitle = "Set username/ password",
     {Username, Password} = case m_identity:get_username(Id, Context) of
                                 undefined -> {[], []};
@@ -36,7 +37,8 @@ event({postback, {set_username_password, Id}, _TriggerId, _TargetId}, Context) -
         {delegate, atom_to_list(?MODULE)},
         {id, Id},
         {username, Username},
-        {password, Password}
+        {password, Password},
+        {on_delete, OnDelete}
     ],
     Html = zp_template:render("_action_dialog_set_username_password.tpl", Vars, Context),
     {Html1, Context1} = zp_render:render_to_string(Html, Context),
