@@ -1,34 +1,29 @@
 /* Basic form styles
 ----------------------------------------------------------
 
-@package:	zophrenic 2009	
+@package:	atatonic CSS framework 2009	
 @Author: 	Tim Benniks <tim@timbenniks.com>
 @Created: 	05-02-2009
+@Changed:	21-05-2009
 
 ---------------------------------------------------------- */
 
 fieldset { 
-	margin: 0; 
-	padding: 0;
-	border: none; 
+	margin: 0 0 18px 0; 
+	padding: 9px;
+	border: 1px solid #ccc; 
 }
 
-	.notification fieldset {
-		margin: 0;
-	}
-
 legend { 
-	color: #000;
-	font-size: 12px;
+	color: #333;
+	font-size: 18px;
 	line-height: 18px;
 	padding: 0;
-	font-weight: bold;
-	margin: 0 0 9px 0;
 }
 
 label { 
 	float: left; 
-	width: 60px; 
+	width: 100px; 
 	display: block; 
 	margin: 0 12px 0 0; 
 	text-align: left;  
@@ -40,72 +35,57 @@ label {
 	margin: 0 0 11px 0;
 }
 
-	.form-item button,
-	.form-item button.buy-me {
-		margin: 0;
-	}
-
 textarea,
-input[type="text"],
-input[type="password"] { 
-	padding: 3px 3px 2px;
-	border: solid #ccc;
-	border-width: 1px;
-	-moz-border-radius: 2px;
-	-webkit-border-radius: 2px;
+input { 
+	padding: 4px;
+	border: solid #ddd;
+	border-width: 1px 1px 2px 1px;
 }
 
 textarea {
 	font-family: "Lucida Sans",Helvetica,sans-serif;
 	font-size: 11px;
-	height: 100px
 }
 
 textarea:focus,
-input[type="text"]:focus,
-input[type="password"]:focus { 
+input:focus { 
 	background: #f9f9f9;
-	border: solid #888;
-	border-width: 1px;
+	border: solid #ddd;
+	border-width: 1px 1px 2px 1px;
 }
 
-input[type="text"].form-field-error,
-textarea.form-field-error,
-select.form-field-error {
+input.form-field-error,
+textarea.form-field-error {
 	border-style: solid;
 	border-color: #FBC2C4 #FBC2C4 #ee9b9e #FBC2C4;
-	border-width: 1px;
+	border-width: 1px 1px 2px 1px;
 	background: #FBE3E4;
 	color: #8A1F11;
 }
 
-input[type="text"].form-field-notice,
-textarea.form-field-notice,
-select.form-field-notice {
+input.form-field-notice,
+textarea.form-field-notice {
 	border-style: solid;
 	border-color: #FFD324 #FFD324 #e3bb1b #FFD324;
-	border-width: 1px;
+	border-width: 1px 1px 2px 1px;
 	background: #FFF6BF;
 	color: #514721;
 }
 
 select {  
-	padding: 3px 3px 2px;
-	border: solid #ccc;
-	border-width: 1px;
-	-moz-border-radius: 2px;
-	-webkit-border-radius: 2px;
-	width: 159px;
+	border: 1px solid #ccc;
+	background: #f9f9f9; 
+	color: #333; 
 }
 
 input[type="checkbox"],
 input[type="radio"] { 
 	margin: 3px 4px 0 0;
+	vertical-align: text-bottom;
 }
 
 input[type="checkbox"] { 
-	color: #000;
-	vertical-align: text-bottom;
+	color: #000; 
 }
 
 input[type="radio"] {  
