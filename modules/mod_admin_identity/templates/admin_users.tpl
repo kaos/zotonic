@@ -21,6 +21,8 @@
 				</form>
 			</div>
 		</div>
+	
+	{% with m.acl.user as me %}
 
 		{% with m.search.paged[{users text=q.qs page=q.page}] as result %}
 
@@ -44,7 +46,7 @@
 				<li id="{{ #li.id }}">
 					<a href="{% url admin_edit_rsc id=id %}" class="clearfix">
 						<span class="zp-20">{{ m.rsc[id].title|striptags }}</span>
-						<span class="zp-15">{{ m.identity[id].username }}</span>
+						<span class="zp-15">{{ m.identity[id].username }}{% if id|eq:me %}  <strong>(that's you)</strong>{% endif %}</span>
 						<span class="zp-10">{{ m.rsc[id].modified|date:"F d, H:i" }}</span>
 						<span class="zp-10">{{ m.rsc[id].created|date:"F d, H:i" }}</span>
 						<span class="zp-30">
@@ -66,6 +68,8 @@
 			{% pager result=result dispatch="admin_overview_rsc" qargs %}
 
 		{% endwith %}
+
+	{% endwith %}
 
 			{#<form method="get" autocomplete="off">
 				<input type="text" value="" name="q" id="q" class="do_listfilter {list: '#posts'}" />
