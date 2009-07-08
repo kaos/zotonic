@@ -87,6 +87,16 @@ eq(Input, Number) ->
     end.
 
 
+ne(undefined, _Number) ->
+    undefined;
+ne(Input, Number) ->
+    try
+        zp_convert:to_integer(Input) /= zp_convert:to_integer(Number)
+    catch
+        _:_ -> undefined
+    end.
+
+
 capfirst(undefined) ->
     undefined;
 capfirst([H|T]) when H >= $a andalso H =< $z ->
