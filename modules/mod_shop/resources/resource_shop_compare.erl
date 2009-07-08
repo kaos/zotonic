@@ -2,7 +2,7 @@
 %% @copyright 2009 Tim Benniks.
 %% @doc Home Page webmachine_resource.
 
--module(resource_compare).
+-module(resource_shop_compare).
 -author("Tim Benniks <tim@timbenniks.com>").
 -include_lib("resource_html.hrl").
 

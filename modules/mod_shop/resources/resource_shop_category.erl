@@ -4,7 +4,7 @@
 %% @copyright 2009 Marc Worrell <marc@worrell.nl>
 %% @doc Show
 
--module(resource_category).
+-module(resource_shop_category).
 
 -author("Tim Benniks <tim@timbenniks.com>").
 -author("Marc Worrell <marc@worrell.nl>").

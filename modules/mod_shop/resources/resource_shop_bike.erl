@@ -2,7 +2,7 @@
 %% @copyright 2009 Tim Benniks.
 %% @doc Home Page webmachine_resource.
 
--module(resource_bike).
+-module(resource_shop_bike).
 -author("Tim Benniks <tim@timbenniks.com>").
 -include_lib("resource_html.hrl").
 

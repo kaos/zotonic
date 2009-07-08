@@ -2,7 +2,7 @@
 %% @copyright 2009 Tim Benniks.
 %% @doc Home Page webmachine_resource.
 
--module(resource_checkout).
+-module(resource_shop_checkout).
 -author("Tim Benniks <tim@timbenniks.com>").
 
 -export([
