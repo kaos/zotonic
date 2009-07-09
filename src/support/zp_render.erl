@@ -22,6 +22,7 @@
 	update/3,
 	insert_top/3,
 	insert_bottom/3,
+	set_value/3,
 	
 	make_postback/6,
 	make_postback_info/6,
@@ -156,20 +157,44 @@ render_validator(TriggerId, TargetId, Args, Context) ->
 
 
 %%% AJAX UPDATES %%%
-	
-update(TargetId, Terms, Context) -> 
+
+%% @doc Set the contents of an element to the the html fragment	
+update(TargetId, undefined, Context) -> 
     Script = "$('#~s').html(\"~s\");",
-    add_update(TargetId, Terms, Script, Context).
-insert_top(TargetId, Terms, Context) -> 
+    add_update(TargetId, "", Script, Context);
+update(TargetId, Html, Context) -> 
+    Script = "$('#~s').html(\"~s\");",
+    add_update(TargetId, Html, Script, Context).
+    
+%% @doc Insert a html fragment at the top of the contents of an element
+insert_top(TargetId, undefined, Context) -> 
+    Context;
+insert_top(TargetId, Html, Context) -> 
     Script = "$('#~s').prepend(\"~s\");",
-    add_update(TargetId, Terms, Script, Context).
-insert_bottom(TargetId, Terms, Context) -> 
+    add_update(TargetId, Html, Script, Context).
+
+%% @doc Append a html fragment at the bottom of the contents of an element
+insert_bottom(TargetId, undefined, Context) -> 
+    Context;
+insert_bottom(TargetId, Html, Context) -> 
     Script = "$('#~s').append(\"~s\");",
-    add_update(TargetId, Terms, Script, Context).
+    add_update(TargetId, Html, Script, Context).
 
-add_update(TargetId, Terms, JSFormatString, Context) ->
-	Context#context{updates=[{TargetId, Terms, JSFormatString}|Context#context.updates]}.
+%% @doc Set the value of an input element.
+set_value(TargetId, undefined, Context) ->
+    Script = "$('#~s').val(\"~s\");",
+    add_update(TargetId, "", Script, Context);
+set_value(TargetId, Value, Context) ->
+    Value1 = zp_html:escape(Value),
+    Script = "$('#~s').val(\"~s\");",
+    add_update(TargetId, Value1, Script, Context).
 
+
+%% @doc Internal function to add updates to the update queue for rendering
+add_update(TargetId, Html, JSFormatString, Context) ->
+	Context#context{updates=[{TargetId, Html, JSFormatString}|Context#context.updates]}.
+
+    
 
 %%% POSTBACK ENCODING %%%
 
