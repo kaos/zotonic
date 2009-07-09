@@ -43,12 +43,15 @@ html(Context) ->
 event({submit, rscform, _FormId, _TargetId}, Context) ->
     Post = zp_context:get_q_all(Context),
     Props = filter_props(Post),
-    Title = proplists:get_value("title", Props),
+    Title = ?TR(proplists:get_value("title", Props), Context),
     Id = proplists:get_value("id", Props),
     Props1 = proplists:delete("id", Props),
     case m_rsc:update(zp_convert:to_integer(Id), Props1, Context) of
         {ok, _} -> 
-            zp_render:wire({growl, [{text,["Saved ",zp_html:strip(Title),"."]}]}, Context);
+            Context1 = zp_render:set_value("field-name", m_rsc:p(Id, name, Context), Context),
+            Context2 = zp_render:set_value("field-uri",  m_rsc:p(Id, uri, Context1), Context1),
+            Context3 = zp_render:set_value("slug",  m_rsc:p(Id, slug, Context2), Context2),
+            zp_render:wire({growl, [{text,["Saved ",zp_html:strip(Title),"."]}]}, Context3);
         {error, duplicate_uri} ->
             zp_render:wire({growl, [{text,"Error, duplicate uri. Please change the uri.",zp_html:strip(Title)}, {type, "error"}]}, Context);
         {error, duplicate_name} ->
