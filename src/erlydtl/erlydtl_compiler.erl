@@ -287,7 +287,7 @@ body_ast([{extends, {string_literal, _Pos, String}} | ThisParseTree], Context, T
             end;
         {error, Reason} ->
             ?ERROR("body_ast: could not find template ~p (~p)", [Extends, Reason]),
-            throw({error, "Could not find the template \" ++ Extends ++ \""}),
+            throw({error, "Could not find the template for extends: '" ++ Extends ++ "'"}),
             {{erl_syntax:string(""), #ast_info{}}, TreeWalker}
     end;
 
