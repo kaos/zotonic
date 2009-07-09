@@ -167,14 +167,14 @@ update(TargetId, Html, Context) ->
     add_update(TargetId, Html, Script, Context).
     
 %% @doc Insert a html fragment at the top of the contents of an element
-insert_top(TargetId, undefined, Context) -> 
+insert_top(_TargetId, undefined, Context) -> 
     Context;
 insert_top(TargetId, Html, Context) -> 
     Script = "$('#~s').prepend(\"~s\");",
     add_update(TargetId, Html, Script, Context).
 
 %% @doc Append a html fragment at the bottom of the contents of an element
-insert_bottom(TargetId, undefined, Context) -> 
+insert_bottom(_TargetId, undefined, Context) -> 
     Context;
 insert_bottom(TargetId, Html, Context) -> 
     Script = "$('#~s').append(\"~s\");",
