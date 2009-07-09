@@ -1,7 +1,7 @@
 # Varnish configuration for a Zotonic site
 #
-# It is a very simple configuration in which static content is cached and all 
-# page requests are handled by the Zotonic server (which does its own caching).
+# It is a very simple configuration in which static content and the home page is cached
+# and all page requests are handled by the Zotonic server (which does its own caching).
 #
 # On *nix:
 #    sudo varnishd -a :80 -T localhost:6082 -f varnish.zotonic.vcl -s malloc -u nobody
@@ -34,7 +34,15 @@ sub vcl_recv {
 
   # We only deal with GET and HEAD by default
   if (req.request != "GET" && req.request != "HEAD") {
-      return (pass);
+    return (pass);
+  }
+
+  # Cache the home page for a short period (ttl = 1 second, see vcl_fetch)
+  if (req.url ~ "^/$") {
+    unset req.http.Cookie;
+    unset req.http.Authenticate;
+    set req.grace = 10s;
+    return (lookup);
   }
 
   # Cache served css and media files
@@ -68,6 +76,12 @@ sub vcl_pass {
 
 
 sub vcl_fetch {
+  if (req.url ~ "^/$") {
+    unset obj.http.Set-Cookie;
+	set obj.grace = 10s;
+	set obj.ttl = 1s;
+	return (deliver);
+  }
   if (req.url ~ "^/(lib|image|media|favicon.ico)/") {
     unset obj.http.Set-Cookie;
     set obj.grace = 20m;
