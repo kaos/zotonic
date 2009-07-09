@@ -121,9 +121,9 @@ model_pgsql() ->
         pivot_country character varying(80),
         pivot_geocode character varying(20),
 
-        CONSTRAINT resource_pkey PRIMARY KEY (id),
+        CONSTRAINT rsc_pkey PRIMARY KEY (id),
         CONSTRAINT rsc_uri_key UNIQUE (uri),
-        CONSTRAINT name UNIQUE (name)
+        CONSTRAINT rsc_name_key UNIQUE (name)
     )",
     "COMMENT ON COLUMN rsc.visible_for IS '0 = public, 1 = community, 2 = group'",
 
@@ -302,34 +302,30 @@ model_pgsql() ->
 
     % Table category
     % nr, left and right are filled using a topological sort of the category tree
-    % @todo Attach the categories to a rsc (remove name, props and medium_id; add rsc_id)
-    % @todo Add a name field for naming different categorisation systems
-    % A category hierarchy is derived from a resource with the category "category hierarchy"
+    % A category hierarchy is derived from the resources with the category "category"
 
     "CREATE TABLE category
     (
-      id serial NOT NULL,
+      id int NOT NULL,
       parent_id int,
-      name character varying(80),
-      medium_id int,
       seq int NOT NULL DEFAULT 1000000,
       nr int NOT NULL DEFAULT 0,
       lvl int NOT NULL DEFAULT 0,
       lft int NOT NULL DEFAULT 0,
       rght int NOT NULL DEFAULT 0,
       props bytea,
+
       CONSTRAINT category_pkey PRIMARY KEY (id),
-      CONSTRAINT category_name_key UNIQUE (name),
-      CONSTRAINT fk_category_medium_id FOREIGN KEY (medium_id)
-        REFERENCES medium(id)
-        ON UPDATE CASCADE ON DELETE SET NULL
+      CONSTRAINT fk_category_id FOREIGN KEY (id)
+        REFERENCES rsc(id)
+        ON UPDATE CASCADE ON DELETE CASCADE
+        DEFERRABLE INITIALLY DEFERRED
     )",
 
     "ALTER TABLE category ADD CONSTRAINT fk_category_parent_id FOREIGN KEY (parent_id)
       REFERENCES category (id)
       ON UPDATE CASCADE ON DELETE SET NULL",
     "CREATE INDEX fki_category_parent_id ON category(parent_id)",
-    "CREATE INDEX fki_category_medium_id ON category(medium_id)",
     "CREATE INDEX category_nr_key ON category (nr)",
 
     % Table: predicate_category
@@ -349,7 +345,7 @@ model_pgsql() ->
         ON UPDATE CASCADE
         ON DELETE CASCADE,
       CONSTRAINT fk_predicate_category_category_id FOREIGN KEY (category_id)
-        REFERENCES category(id)
+        REFERENCES rsc(id)
         ON UPDATE CASCADE
         ON DELETE CASCADE
     )",
@@ -435,7 +431,7 @@ model_pgsql() ->
       prop1 character varying(200) NOT NULL DEFAULT ''::character varying,
       prop2 character varying(200) NOT NULL DEFAULT ''::character varying,
       prop3 character varying(200) NOT NULL DEFAULT ''::character varying,
-      verified boolean NOT NULL DEFAULT false,
+      is_verified boolean NOT NULL DEFAULT false,
       created timestamp with time zone NOT NULL DEFAULT now(),
       modified timestamp with time zone NOT NULL DEFAULT now(),
       visited timestamp with time zone,

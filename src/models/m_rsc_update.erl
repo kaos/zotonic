@@ -41,8 +41,18 @@ delete(Id, Context) when is_integer(Id), Id /= 1 ->
             
             case zp_db:transaction(F, Context) of
                 {ok, _RowsDeleted} ->
+                    % After inserting a category we need to renumber the categories
+                    case lists:member(category, CatList) of
+                        true ->  m_category:renumber(Context);
+                        false -> nop
+                    end,
+                    
+                    % Flush all cached entries depending on this entry, one of its subjects or its categories.
                     zp_depcache:flush(#rsc{id=Id}),
                     [ zp_depcache:flush(#rsc{id=SubjectId}) || SubjectId <- Referrers ],
+                    [ zp_depcache:flush(Cat) || Cat <- CatList ],
+                    
+                    % Notify all modules that the rsc has been deleted
                     zp_notifier:notify({rsc_update_done, delete, Id, CatList, []}, Context),
                     ok;
                 {error, Reason} ->
@@ -66,13 +76,14 @@ update(Id, Props, Context) when is_integer(Id) orelse Id == insert_rsc ->
             SafeProps = zp_html:escape_props(FilledProps),
             case preflight_check(Id, SafeProps, Context) of
                 ok ->
-                    F = fun(Ctx) ->
-                        {RscId, UpdateProps, BeforeProps, BeforeCatList} = case Id of
+                    % This function will be executed in a transaction
+                    TransactionF = fun(Ctx) ->
+                        {RscId, UpdateProps, BeforeProps, BeforeCatList, RenumberCats} = case Id of
                             insert_rsc ->
                                 CategoryId = proplists:get_value(category_id, SafeProps),
                                 GroupId = proplists:get_value(group_id, SafeProps),
                                 InsProps = [{category_id, CategoryId}, {group_id, GroupId}, {visible_for, 2}, {version, 0}],
-                                
+
                                 % Allow the insertion props to be modified.
                                 InsPropsN = zp_notifier:foldr({rsc_insert}, InsProps, Ctx),
                                 
@@ -81,6 +92,19 @@ update(Id, Props, Context) when is_integer(Id) orelse Id == insert_rsc ->
                                 case zp_acl:group_editable(GroupIdN, Ctx) of
                                     true ->
                                         {ok, InsId} = zp_db:insert(rsc, InsPropsN, Ctx),
+
+                                        % Insert a category record for categories. Categories are so low level that we want
+                                        % to make sure that all categories always have a category record attached.
+                                        InsertCatList = [ CategoryId | m_category:get_path(CategoryId, Ctx) ],
+                                        IsACat = case lists:member(m_category:name_to_id_check(category, Ctx), InsertCatList) of
+                                            true ->
+                                                1 = zp_db:q("insert into category (id, seq) values ($1, 1)", [InsId], Ctx),
+                                                true;
+                                            false ->
+                                                false
+                                        end,
+
+                                        % Place the inserted properties over the update properties, replacing duplicates.
                                         SafePropsN = lists:foldl(
                                                                 fun
                                                                     ({version, _}, Acc) -> Acc;
@@ -88,12 +112,12 @@ update(Id, Props, Context) when is_integer(Id) orelse Id == insert_rsc ->
                                                                 end,
                                                                 SafeProps, 
                                                                 InsPropsN),
-                                        {InsId, SafePropsN, InsPropsN, []};
+                                        {InsId, SafePropsN, InsPropsN, [], IsACat};
                                     false ->
                                         throw({error, eacces})
                                 end;
                             _ ->
-                                {Id, SafeProps, m_rsc:get(Id, Ctx), m_rsc:is_a_list(Id, Context) }
+                                {Id, SafeProps, m_rsc:get(Id, Ctx), m_rsc:is_a_list(Id, Context), false}
                         end,
                     
                         UpdateProps1 = [
@@ -106,27 +130,39 @@ update(Id, Props, Context) when is_integer(Id) orelse Id == insert_rsc ->
                         % Allow the update props to be modified.
                         UpdatePropsN = zp_notifier:foldr({rsc_update, RscId, BeforeProps}, UpdateProps1, Ctx),
                         case zp_db:update(rsc, RscId, UpdatePropsN, Ctx) of
-                            {ok, _RowsModified} -> {ok, RscId, UpdatePropsN, BeforeCatList};
+                            {ok, _RowsModified} -> {ok, RscId, UpdatePropsN, BeforeCatList, RenumberCats};
                             {error, Reason} -> {error, Reason}
                         end
                     end,
+                    % End of transaction function
                     
-                    case zp_db:transaction(F, Context) of
-                        {ok, NewId, NewProps, OldCatList} ->    
+                    case zp_db:transaction(TransactionF, Context) of
+                        {ok, NewId, NewProps, OldCatList, RenumberCats} ->    
                             zp_depcache:flush(#rsc{id=NewId}),
                             case proplists:get_value(name, NewProps) of
                                 undefined -> nop;
                                 Name -> zp_depcache:flush({rsc_name, zp_convert:to_list(Name)})
                             end,
 
-                            % Notify that a new resource has been inserted, or that an existing one is updated
                             NewCatList = m_rsc:is_a_list(NewId, Context),
                             AllCatList = lists:usort(NewCatList ++ OldCatList),
+                            
+                            % After inserting a category we need to renumber the categories
+                            case RenumberCats of
+                                true ->  m_category:renumber(Context);
+                                false -> nop
+                            end,
+                            
+                            % Flush all cached content that is depending on one of the updated categories
                             [ zp_depcache:flush(Cat) || Cat <- AllCatList ],
+
+                            % Notify that a new resource has been inserted, or that an existing one is updated
                             case Id of
                                 insert_rsc -> zp_notifier:notify({rsc_update_done, update, NewId, OldCatList, NewCatList}, Context);
                                 _ ->          zp_notifier:notify({rsc_update_done, insert, NewId, OldCatList, NewCatList}, Context)
                             end,
+                            
+                            % Return the updated or inserted id
                             {ok, NewId};
                         {error, Reason} ->
                             {error, Reason}
@@ -416,12 +452,17 @@ to_int(A) ->
 
 
 test() ->
-    recombine_dates([
-        {"dt:Y:0:publication_start", ""},
-        {"dt:M:0:publication_start", ""},
-        {"dt:D:0:publication_start", ""},
-        {"dt:Y:1:publication_end", ""},
-        {"dt:M:1:publication_end", ""},
-        {"dt:D:1:publication_end", ""},
+    [{"publication_start",{{2009,7,9},{0,0,0}}},
+          {"publication_end",{{9999,6,1},{0,0,0}}},
+          {"plop","hello"}]
+     = recombine_dates([
+        {"dt:y:0:publication_start", "2009"},
+        {"dt:m:0:publication_start", "7"},
+        {"dt:d:0:publication_start", "9"},
+        {"dt:y:1:publication_end", ""},
+        {"dt:m:1:publication_end", ""},
+        {"dt:d:1:publication_end", ""},
         {"plop", "hello"}
-    ]).
+    ]),
+    ok.
+

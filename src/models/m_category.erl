@@ -88,31 +88,47 @@ m_value(#m{value=#m{value={cat, Id}}}, Context) ->
 
 get(Id, Context) ->
     F = fun() ->
-        zp_db:assoc_props_row("select * from category where id = $1", [Id], Context)
+        zp_db:assoc_props_row("
+                select c.*, r.name
+                from category c join rsc r on r.id = c.id
+                where c.id = $1", [Id], Context)
     end,
     zp_depcache:memo(F, {category, Id}, ?WEEK, [category]).
 
 get_by_name(Name, Context) ->
     F = fun() ->
-        zp_db:assoc_props_row("select * from category where name = $1", [Name], Context)
+        zp_db:assoc_props_row("
+                select c.*, r.name 
+                from category c join rsc r on r.id = c.id
+                where r.name = $1", [Name], Context)
     end,
     zp_depcache:memo(F, {category_by_name, Name}, ?WEEK, [category]).
 
 get_root(Context) ->
     F = fun() ->
-        zp_db:assoc_props("select * from category where parent_id is null order by nr", Context)
+        zp_db:assoc_props("
+                select c.*, r.name 
+                from category c join rsc r on c.id = r.id 
+                where c.parent_id is null
+                order by c.nr", Context)
     end,
     zp_depcache:memo(F, {category_root}, ?WEEK, [category]).
 
 get_by_parent(Id, Context) ->
     F = fun() ->
-        zp_db:assoc_props("select * from category where parent_id = $1 order by nr", [Id], Context)
+        zp_db:assoc_props("
+            select c.*, r.name 
+            from category c join rsc r on r.id = c.id
+            where c.parent_id = $1 order by c.nr", [Id], Context)
     end,
     zp_depcache:memo(F, {category_parent, Id}, ?WEEK, [category]).
 
 get_range(Id, Context) ->
     F = fun() ->
-        case zp_db:q("select lft, rght from category where id = $1", [Id], Context) of
+        case zp_db:q("
+                select lft, rght 
+                from category 
+                where id = $1", [Id], Context) of
             [Row] -> Row;
             _ -> {1, 0} % empty range
         end
@@ -121,7 +137,10 @@ get_range(Id, Context) ->
 
 get_range_by_name(Name, Context) ->
     F = fun() ->
-        case zp_db:q("select lft, rght from category where name = $1", [Name], Context) of
+        case zp_db:q("
+                select c.lft, c.rght
+                from category c join rsc r on r.id = c.id
+                where r.name = $1", [Name], Context) of
             [Row] -> Row;
             _ -> {1, 0} % empty range
         end
@@ -132,7 +151,10 @@ name_to_id(Name, _Context) when is_integer(Name) ->
     {ok, Name};
 name_to_id(Name, Context) ->
     F = fun() ->
-        case zp_db:q1("select id from category where name = $1", [Name], Context) of
+        case zp_db:q1("
+                select r.id 
+                from rsc r join category c on r.id = c.id 
+                where r.name = $1", [Name], Context) of
             undefined -> {error, {enoent, category, Name}};
             Id -> {ok, Id}
         end
@@ -146,7 +168,7 @@ name_to_id_check(Name, Context) ->
 
 id_to_name(Id, Context) ->
     F = fun() ->
-        zp_db:q1("select name from category where id = $1", [Id], Context)
+        zp_db:q1("select r.name from rsc r join category c on r.id = c.id where r.id = $1", [Id], Context)
     end,
     zp_depcache:memo(F, {category_id_to_name, Id}, ?WEEK, [category]).
 
@@ -198,10 +220,10 @@ get_path(Id, Context) ->
     end.
 
 
-%% @doc Return a flattened representation of the complete catgory tree.  Can be used for overviews or select boxes.
+%% @doc Return a flattened representation of the complete category tree.  Can be used for overviews or select boxes.
 all_flat(Context) ->
     F = fun() ->
-        zp_db:q("select id, lvl, name, props from category order by nr", Context)
+        zp_db:q("select c.id, c.lvl, r.name, c.props from category c join rsc r on r.id = c.id order by c.nr", Context)
     end,
     All = zp_depcache:memo(F, {category_flat}, ?WEEK, [category]),
     [
@@ -220,7 +242,10 @@ all_flat(Context) ->
 %% @spec tree(Context) -> Tree
 tree(Context) ->
     F = fun() ->
-        CatTuples = zp_db:q("select id, parent_id, lvl, name, props from category order by nr", Context),
+        CatTuples = zp_db:q("
+                select c.id, c.parent_id, c.lvl, r.name, c.props 
+                from category c join rsc r on r.id = c.id  
+                order by c.nr", Context),
         build_tree(CatTuples, [])
     end,
     zp_depcache:memo(F, {category_tree}, ?WEEK, [category]).
@@ -229,7 +254,11 @@ tree(Context) ->
 %% @spec tree_depth(Depth, Context) -> Tree
 tree_depth(Depth, Context) ->
     F = fun() ->
-        CatTuples = zp_db:q("select id, parent_id, lvl, name, props from category where lvl <= $1 order by nr", [Depth], Context),
+        CatTuples = zp_db:q("
+                select c.id, c.parent_id, c.lvl, r.name, c.props 
+                from category c join rsc r on r.id = c.id 
+                where c.lvl <= $1 
+                order by c.nr", [Depth], Context),
         build_tree(CatTuples, [])
     end,
     zp_depcache:memo(F, {category_tree_depth, Depth}, ?WEEK, [category]).
@@ -240,11 +269,11 @@ tree_depth(Depth, Context) ->
 tree(CatId, Context) ->
     F = fun() ->
         CatTuples = zp_db:q("
-            select a.id, a.parent_id, a.lvl, a.name, a.props 
-            from category a, category r
-            where r.id = $1
-              and a.nr <= r.rght
-              and a.nr >= r.lft
+            select a.id, a.parent_id, a.lvl, r.name, a.props 
+            from category a join rsc r on a.id = r.id, category p
+            where p.id = $1
+              and a.nr <= p.rght
+              and a.nr >= p.lft
             order by a.nr", [CatId], Context),
         case build_tree(CatTuples, []) of 
             [TreeNode] -> TreeNode;
@@ -258,12 +287,12 @@ tree(CatId, Context) ->
 tree_depth(CatId, Depth, Context) ->
     F = fun() ->
         CatTuples = zp_db:q("
-            select a.id, a.parent_id, a.lvl, a.name, a.props 
-            from category a, category r
-            where r.id = $1
-              and a.nr <= r.rght
-              and a.nr >= r.lft
-              and a.lvl <= r.lvl + $2
+            select a.id, a.parent_id, a.lvl, r.name, a.props 
+            from category a join rsc r on a.id = r.id, category p
+            where p.id = $1
+              and a.nr <= p.rght
+              and a.nr >= p.lft
+              and a.lvl <= p.lvl + $2
             order by a.nr", [CatId, Depth], Context),
         case build_tree(CatTuples, []) of 
             [TreeNode] -> TreeNode;
