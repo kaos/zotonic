@@ -24,6 +24,10 @@
 	insert_bottom/3,
 	set_value/3,
 	
+	dialog/4,
+	growl/2,
+	growl_error/2,
+	
 	make_postback/6,
 	make_postback_info/6,
 	make_validation_postback/1,
@@ -194,7 +198,19 @@ set_value(TargetId, Value, Context) ->
 add_update(TargetId, Html, JSFormatString, Context) ->
 	Context#context{updates=[{TargetId, Html, JSFormatString}|Context#context.updates]}.
 
-    
+
+%%% SIMPLE FUNCTION TO SHOW DIALOG OR GROWL (uses the dialog and growl actions) %%%
+
+dialog(Title, Template, Vars, Context) ->
+    {Html, Context1} = zp_template:render_to_iolist(Template, Vars, Context),
+    zp_render:wire({dialog, [{title, Title}, {text, Html}]}, Context1).
+
+growl(Text, Context) ->
+    zp_render:wire({growl, [{text, Text}]}, Context).
+
+growl_error(Text, Context) ->
+    zp_render:wire({growl, [{text, Text}, {type, "error"}]}, Context).
+
 
 %%% POSTBACK ENCODING %%%
 
