@@ -18,9 +18,9 @@
 		<p>
 			<label for="{{ #category }}">Category</label>
 			<select id="{{ #category }}" name="category_id">
-			{% for cat_id, level, indent, title in m.category.all_flat %}
+			{% for cat_id, level, indent, name in m.category.all_flat %}
 				<option value="{{cat_id}}">
-					{{ indent }}{{ title }}
+					{{ indent }}{{ m.rsc[cat_id].title|default:name }}
 				</option>
 			{% endfor %}
 			</select>

@@ -19,7 +19,7 @@
 		{% else %}
 			<p class="admin-chapeau">editing:</p>
 			{% if r.is_a.meta %}
-				<h2><em>{{ m.category[r.category_id].name }}</em> {{ r.title|striptags|default:"<em>untitled</em>" }}</h2>
+				<h2><em>{{ m.rsc[r.category_id].title }}</em> {{ r.title|striptags|default:"<em>untitled</em>" }}</h2>
 			{% else %}
 				<h2>{{ r.title|striptags|default:"<em>untitled</em>" }}</h2>
 			{% endif %}
@@ -256,9 +256,9 @@
 								<p>
 									{% with r.category_id as r_cat %}
 										<select id="category_id" name="category_id">
-										{% for cat_id, level, indent, title in m.category.all_flat %}
+										{% for cat_id, level, indent, name in m.category.all_flat %}
 											<option value="{{cat_id}}" {% ifequal r_cat cat_id %}selected="selected"{% endifequal %}>
-												{{ indent }}{{ title }}
+												{{ indent }}{{ m.rsc[cat_id].title|default:name }}
 											</option>
 										{% endfor %}
 										</select>
@@ -274,7 +274,7 @@
 							</h3>
 							<div class="item clearfix admin-form">
 								<label>This page is a</label>
-								<h4>{{ m.category[r.category_id].name }}</h4>
+								<h4>{{ m.rsc[r.category_id].title }}</h4>
 								<hr/>
 								<p>Predicates, groups and categories can't be changed into another category.</p>
 							</div>

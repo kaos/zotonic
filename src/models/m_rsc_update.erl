@@ -13,6 +13,7 @@
     delete/2,
     update/3,
     
+    delete_nocheck/2,
     props_filter/3,
     
     test/0
@@ -32,34 +33,46 @@ insert(Props, Context) ->
 delete(Id, Context) when is_integer(Id), Id /= 1 ->
     case zp_acl:rsc_editable(Id, Context) of
         true ->
-            Referrers = m_edge:subjects(Id, Context),
-            CatList = m_rsc:is_a_list(Id, Context),
-            F = fun(Ctx) ->
-                zp_notifier:notify({rsc_delete, Id}, Ctx),
-                zp_db:delete(rsc, Id, Ctx)
-            end,
-            
-            case zp_db:transaction(F, Context) of
-                {ok, _RowsDeleted} ->
-                    % After inserting a category we need to renumber the categories
-                    case lists:member(category, CatList) of
-                        true ->  m_category:renumber(Context);
-                        false -> nop
-                    end,
-                    
-                    % Flush all cached entries depending on this entry, one of its subjects or its categories.
-                    zp_depcache:flush(#rsc{id=Id}),
-                    [ zp_depcache:flush(#rsc{id=SubjectId}) || SubjectId <- Referrers ],
-                    [ zp_depcache:flush(Cat) || Cat <- CatList ],
-                    
-                    % Notify all modules that the rsc has been deleted
-                    zp_notifier:notify({rsc_update_done, delete, Id, CatList, []}, Context),
-                    ok;
-                {error, Reason} ->
-                    {error, Reason}
+            case m_rsc:is_a(Id, category, Context) of
+                true ->
+                    m_category:delete(Id, undefined, Context);
+                false ->
+                    delete_nocheck(Id, Context)
             end;
         false ->
             {error, eacces}
+    end.
+
+
+%% @doc Delete a resource, no check on rights etc is made. This is called by m_category:delete/3
+%% @spec delete_nocheck(Id, Context) -> ok | {error, Reason}
+delete_nocheck(Id, Context) ->
+    Referrers = m_edge:subjects(Id, Context),
+    CatList = m_rsc:is_a_list(Id, Context),
+
+    F = fun(Ctx) ->
+        zp_notifier:notify({rsc_delete, Id}, Ctx),
+        zp_db:delete(rsc, Id, Ctx)
+    end,
+
+    case zp_db:transaction(F, Context) of
+        {ok, _RowsDeleted} ->
+            % After inserting a category we need to renumber the categories
+            case lists:member(category, CatList) of
+                true ->  m_category:renumber(Context);
+                false -> nop
+            end,
+    
+            % Flush all cached entries depending on this entry, one of its subjects or its categories.
+            zp_depcache:flush(#rsc{id=Id}),
+            [ zp_depcache:flush(#rsc{id=SubjectId}) || SubjectId <- Referrers ],
+            [ zp_depcache:flush(Cat) || Cat <- CatList ],
+    
+            % Notify all modules that the rsc has been deleted
+            zp_notifier:notify({rsc_update_done, delete, Id, CatList, []}, Context),
+            ok;
+        {error, Reason} ->
+            {error, Reason}
     end.
     
 

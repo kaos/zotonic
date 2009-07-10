@@ -21,7 +21,8 @@
     get_range/2,
     get_range_by_name/2,
     get_path/2,
-    insert/2,
+    get_page_count/2,
+    delete/3,
     name_to_id/2,
     name_to_id_check/2,
     id_to_name/2,
@@ -149,6 +150,9 @@ get_range_by_name(Name, Context) ->
     end,
     zp_depcache:memo(F, {category_range_name, Name}, ?WEEK, [category]).
 
+get_page_count(Id, Context) ->
+    zp_db:q1("select count(*) from rsc where category_id = $1", [Id], Context).
+    
 name_to_id(Name, _Context) when is_integer(Name) ->
     {ok, Name};
 name_to_id(Name, Context) ->
@@ -256,10 +260,46 @@ update_sequence(Ids, Context) ->
     end.
 
 
-insert(Props, Context) ->
-    {ok, Id} = zp_db:insert(category, Props, Context),
-    zp_depcache:flush(category),
-    {ok, Id}.
+%% @doc Delete the category, move referring pages to another category. Fails when the transfer id is not a category.
+%% @spec delete(Id:int(), TransferId::int(), Context) -> ok | {error, Reason}
+delete(Id, TransferId, Context) ->
+    % fail when deleting 'other' or 'category'
+    case zp_db:q("select name from rsc where id = $1", [Id], Context) of
+        N when N == <<"other">>; N == <<"category">> -> {error, is_system_category};
+        _ ->
+            case zp_acl:has_role(admin, Context) of
+                true ->
+                    F = fun(Ctx) ->
+                        ToId = case TransferId of
+                            undefined ->
+                                case zp_db:q1("select parent_id from category where id = $1", [Id], Ctx) of
+                                    undefined ->
+                                        case zp_db:q1("
+                                                select c.id 
+                                                from rsc r join category c on c.id = r.id
+                                                where r.name = 'other'", Context) of
+                                            N when is_integer(N) -> N
+                                        end;
+                                    N ->
+                                        N
+                                end;
+                            N when is_integer(N) ->
+                                N = zp_db:q1("select id from category where id = $1", [TransferId], Ctx)
+                        end,
+                
+                        _RscRows = zp_db:q("update rsc set category_id = $1 where category_id = $2", [ToId, Id], Ctx),
+                        _CatRows = zp_db:q("update category set parent_id = $1 where parent_id = $2", [ToId, Id], Ctx),
+                        ok = m_rsc_update:delete_nocheck(Id, Ctx),
+                        ok = renumber(Ctx)
+                    end,
+                    case zp_db:transaction(F, Context) of
+                        ok ->  zp_depcache:flush();
+                        {error, Reason} -> {error, Reason}
+                    end;
+                false ->
+                    {error, eacces}
+            end
+    end.
 
 
 image(Id, Context) ->
