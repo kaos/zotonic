@@ -128,7 +128,7 @@ install_category(C) ->
         {109,106,        1, news,        undefined,                                   [{title, {trans, [{en, <<"News">>}, {nl, <<"Nieuws">>}]}}] },
 
         {110,undefined,  1, media,       "http://purl.org/dc/dcmitype/Image",         [{title, {trans, [{en, <<"Media">>}, {nl, <<"Media">>}]}}] }, 
-        {111,110,        1, image,       "http://purl.org/dc/dcmitype/StillImage",    [{title, {trans, [{en, <<"Image">>}, {nl, <<"Media">>}]}}] },
+        {111,110,        1, image,       "http://purl.org/dc/dcmitype/StillImage",    [{title, {trans, [{en, <<"Image">>}, {nl, <<"Afbeelding">>}]}}] },
         {112,110,        2, video,       "http://purl.org/dc/dcmitype/MovingImage",   [{title, {trans, [{en, <<"Video">>}, {nl, <<"Video">>}]}}] },
         {113,110,        3, sound,       "http://purl.org/dc/dcmitype/Sound",         [{title, {trans, [{en, <<"Sound">>}, {nl, <<"Sound">>}]}}] },
         {114,undefined,  1, collection,  "http://purl.org/dc/dcmitype/Collection",    [{title, {trans, [{en, <<"Collection">>}, {nl, <<"Collectie">>}]}}] }
