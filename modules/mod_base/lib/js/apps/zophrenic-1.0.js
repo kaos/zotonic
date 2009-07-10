@@ -89,12 +89,11 @@ function zp_opt_cancel(obj)
 
 function zp_queue_postback(triggerID, postback, extraParams) 
 {
-    var triggerValue;
+    var triggerValue = '';
 
-    if (triggerID != '')
-	    triggerValue = $('#'+triggerID).val() || '';
-	else
-	    triggerValue = '';
+    // The following code crashes on firefox 3.5, till it is fixed we can't support this feature.
+    // if (triggerID != '')
+	//    triggerValue = $('#'+triggerID).val() || '';
 	
 	extraParams = extraParams || new Array(); 
 	extraParams.push({name: 'triggervalue', value: triggerValue})
