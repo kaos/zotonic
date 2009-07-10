@@ -35,9 +35,8 @@ event({postback, {group_member_delete_dialog, Id, MemberId, OnSuccess}, _Trigger
                 {id, Id},
                 {member_id, MemberId}
             ],
-            Html = zp_template:render("_action_dialog_group_member_delete.tpl", Vars, Context),
-            {Html1, Context1} = zp_render:render_to_string(Html, Context),
-            zp_render:wire({dialog, [{title, DTitle}, {text, Html1}]}, Context1);
+            {Html, Context1} = zp_template:render_to_iolist("_action_dialog_group_member_delete.tpl", Vars, Context),
+            zp_render:wire({dialog, [{title, DTitle}, {text, Html}]}, Context1);
         false ->
             zp_render:wire({growl, [{text, "Only administrators or group leaders can remove members from groups."}, {type, "error"}]}, Context)
     end.

@@ -40,7 +40,7 @@ get_script(Context) ->
 
 	% Translate updates to content scripts
 	Update2Script = fun({TargetId, Terms, JSFormatString}, C) ->
-            		    {Html,C1} = zp_render:render_to_string(Terms, C),
+            		    {Html,C1} = zp_render:render_to_iolist(Terms, C),
             		    Script    = io_lib:format(JSFormatString, [TargetId, zp_utils:js_escape(Html)]),
             		    add_content_script(Script, C1)
             	    end,

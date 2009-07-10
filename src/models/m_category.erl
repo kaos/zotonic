@@ -25,7 +25,9 @@
     name_to_id/2,
     name_to_id_check/2,
     id_to_name/2,
-    update_parent/3,
+    move_below/3,
+    move_end/2,
+    move_before/3,
     update_sequence/2,
     all_flat/1,
     tree/1,
@@ -173,22 +175,85 @@ id_to_name(Id, Context) ->
     zp_depcache:memo(F, {category_id_to_name, Id}, ?WEEK, [category]).
 
 
-update_parent(Id, ParentId, Context) ->
-    F = fun(Ctx) ->
-        zp_db:q("update category set parent_id = $1 where id = $2", [ParentId, Id], Context),
-        renumber(Ctx)
-    end,
-    zp_db:transaction(F, Context),
-    zp_depcache:flush(category).
+%% @doc Move the category below another category, placing it at the end of the children of that category.
+%% @spec move_end(CatId::int(), NewParentId::int(), Context) -> ok | {error, Reason}
+move_below(Id, ParentId, Context) ->
+    case zp_acl:has_role(admin, Context) of
+        true ->
+            PathParentId = [ParentId | get_path(ParentId, Context)],
+            case lists:member(Id, PathParentId) of
+                false ->
+                    F = fun(Ctx) ->
+                        zp_db:q("update category set parent_id = $1, seq = 10000 where id = $2", [ParentId, Id], Context),
+                        renumber(Ctx)
+                    end,
+                    zp_db:transaction(F, Context),
+                    zp_depcache:flush(category);
+                true ->
+                    {error, cycle}
+            end;
+        false ->
+            {error, eacces}
+    end.
+
+%% @doc Move the category to the end of all categories, making it a top category in the process
+%% @spec move_end(CatId::int(), Context) -> ok | {error, Reason}
+move_end(Id, Context) ->
+    case zp_acl:has_role(admin, Context) of
+        true ->
+            F = fun(Ctx) ->
+                zp_db:q("update category set parent_id = null, seq = 10000 where id = $1", [Id], Context),
+                renumber(Ctx)
+            end,
+            zp_db:transaction(F, Context),
+            zp_depcache:flush(category);
+        false ->
+            {error, eacces}
+    end.
+
+%% @doc Move a category in front of another category, resetting the parent of the moved category to
+%% the parent of the other category.
+%% @spec move_before(CatId::int(), BeforeCatId::int(), Context) -> ok | {error, Reason}
+move_before(Id, BeforeId, Context) ->
+    case zp_acl:has_role(admin, Context) of
+        true ->
+            F = fun(Ctx) ->
+                    {ParentId, Seq} = zp_db:q_row("select parent_id, seq from category where id = $1", [BeforeId], Context),
+                    PathParentId = [ParentId | get_path(ParentId, Context)],
+                    case lists:member(Id, PathParentId) of
+                        false ->
+                            zp_db:q("update category set seq = seq+1 where parent_id = $1 and seq >= $2", [ParentId, Seq], Context),
+                            zp_db:q("update category set parent_id = $1, seq = $2 where id = $3", [ParentId, Seq, Id], Context),
+                            renumber(Ctx);
+                        true -> 
+                            {error, cycle}
+                    end
+            end,
+
+            case zp_db:transaction(F, Context) of
+                ok ->
+                    zp_depcache:flush(category), 
+                    ok;
+                {error, Reason} ->
+                    {error, Reason}
+            end;
+        false ->
+            {error, eacces}
+    end.
 
 
 update_sequence(Ids, Context) ->
-    F = fun(Ctx) ->
-        zp_db:update_sequence(category, Ids, Ctx),
-        renumber(Ctx)
-    end,
-    zp_db:transaction(F, Context),
-    zp_depcache:flush(category).
+    case zp_acl:has_role(admin, Context) of
+        true ->
+            F = fun(Ctx) ->
+                zp_db:update_sequence(category, Ids, Ctx),
+                renumber(Ctx)
+            end,
+            zp_db:transaction(F, Context),
+            zp_depcache:flush(category);
+        false ->
+            {error, eacces}
+    end.
 
 
 insert(Props, Context) ->
@@ -212,6 +277,8 @@ image(Id, Context) ->
     
 %% @doc Return the path from a root to the category (excluding the category itself)
 %% @spec path(Id, Context) -> [CatId]
+get_path(undefined, _Context) ->
+    [];
 get_path(Id, Context) ->
     Cat = get(Id, Context),
     case proplists:get_value(path, Cat) of

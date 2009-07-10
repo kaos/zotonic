@@ -732,9 +732,10 @@ resolve_variable_ast({apply_filter, Variable, Filter}, Context, TreeWalker, Find
     {{VarValue, Info2}, TreeWalker3} = filter_ast1(Filter, ValueAst, Context, TreeWalker2),
     {{VarValue, VarName, merge_info(Info, Info2)}, TreeWalker3};
 
-resolve_variable_ast(What, _Context, TreeWalker, _FinderFunction) ->
-   error_logger:error_msg("~p:resolve_variable_ast unhandled: ~p~n", [?MODULE, What]),
-   {{erl_syntax:atom(undefined), "$error", #ast_info{}}, TreeWalker}.
+resolve_variable_ast(ValueToken, Context, TreeWalker, _FinderFunction) ->
+    {{Ast, Info}, TreeWalker1} = value_ast(ValueToken, false, Context, TreeWalker),
+    {{Ast, "$value", Info}, TreeWalker1}.
+
 
 resolve_scoped_variable_ast(VarName, Context) ->
     lists:foldl(fun(Scope, Value) ->

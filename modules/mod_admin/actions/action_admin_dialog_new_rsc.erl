@@ -36,9 +36,8 @@ event({postback, {new_rsc_dialog, Title, Redirect, SubjectId, Predicate}, _Trigg
         {predicate, Predicate},
         {title, Title}
     ],
-    Html = zp_template:render("_action_dialog_new_rsc.tpl", Vars, Context),
-    {Html1, Context1} = zp_render:render_to_string(Html, Context),
-    zp_render:wire({dialog, [{title, DTitle}, {text, Html1}]}, Context1);
+    {Html, Context1} = zp_template:render_to_iolist("_action_dialog_new_rsc.tpl", Vars, Context),
+    zp_render:wire({dialog, [{title, DTitle}, {text, Html}]}, Context1);
 
 
 event({submit, new_page, _TriggerId, _TargetId}, Context) ->

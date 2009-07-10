@@ -31,9 +31,8 @@ event({postback, {group_member_edit_dialog, Id, MemberId}, _TriggerId, _TargetId
         {id, Id},
         {member_id, MemberId}
     ],
-    Html = zp_template:render("_action_dialog_group_member_edit.tpl", Vars, Context),
-    {Html1, Context1} = zp_render:render_to_string(Html, Context),
-    zp_render:wire({dialog, [{title, DTitle}, {text, Html1}]}, Context1);
+    {Html, Context1} = zp_template:render_to_iolist("_action_dialog_group_member_edit.tpl", Vars, Context),
+    zp_render:wire({dialog, [{title, DTitle}, {text, Html}]}, Context1);
 
 
 %% @doc Add a member to a group.  The roles are in the request (they come from a form)

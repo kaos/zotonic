@@ -38,9 +38,8 @@ event({postback, {dialog_delete_username, Id, OnSuccess}, _TriggerId, _TargetId}
                         {id, Id},
                         {username, Username}
                     ],
-                    Html = zp_template:render("_action_dialog_delete_username.tpl", Vars, Context),
-                    {Html1, Context1} = zp_render:render_to_string(Html, Context),
-                    zp_render:wire({dialog, [{title, DTitle}, {text, Html1}]}, Context1)
+                    {Html, Context1} = zp_template:render_to_iolist("_action_dialog_delete_username.tpl", Vars, Context),
+                    zp_render:wire({dialog, [{title, DTitle}, {text, Html}]}, Context1)
             end;
         false ->
             zp_render:wire({growl, [{text, "Only an administrator can delete usernames."}, {type, "error"}]}, Context)

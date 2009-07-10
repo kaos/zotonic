@@ -14,7 +14,7 @@
 -export ([
 	render/2,
 	render_actions/4,
-	render_to_string/2,
+	render_to_iolist/2,
 	
 	validator/4,
 	render_validator/4,
@@ -63,7 +63,7 @@ render([H|T], Context) ->
 
 %% @doc Render adds output to the render field of the context state. Do update the context for
 %%      possible changes in scripts etc.
-render_to_string(Ts, Context) ->
+render_to_iolist(Ts, Context) ->
     Context1 = Context#context{render=[]},
     Context2 = render(Ts, Context1),
     {Context2#context.render, Context2#context{render=Context#context.render}}.

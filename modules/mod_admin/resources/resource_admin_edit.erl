@@ -65,9 +65,8 @@ event({submit, rscform, _FormId, _TargetId}, Context) ->
 event({postback, {reload_media, Opts}, _TriggerId, _TargetId}, Context) ->
     RscId = proplists:get_value(rsc_id, Opts),
     DivId = proplists:get_value(div_id, Opts),
-    Html = zp_template:render("_edit_media.tpl", [{id,RscId}], Context),
-    {Html1, Context1} = zp_render:render_to_string(Html, Context),
-    zp_render:update(DivId, Html1, Context1).
+    {Html, Context1} = zp_template:render_to_iolist("_edit_media.tpl", [{id,RscId}], Context),
+    zp_render:update(DivId, Html, Context1).
 
 
 

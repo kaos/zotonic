@@ -101,13 +101,11 @@ do_order(TotalAmount, Parms, Context) ->
                 {details, Parms},
                 {total_amount, NewTotal}
             ],
-            Html = zp_template:render("_checkout_dialog_amount_changed.tpl", Vars, Context1),
-            {Html1, Context2} = zp_render:render_to_string(Html, Context1),
-            zp_render:wire({dialog, [{title, DTitle}, {text, Html1}]}, Context2);
+            {Html, Context2} = zp_template:render_to_iolist("_checkout_dialog_amount_changed.tpl", Vars, Context1),
+            zp_render:wire({dialog, [{title, DTitle}, {text, Html}]}, Context2);
 
         {error, _Reason, Context1} ->
             %% Something went wrong, tell the user and redirect back to the cart page
-            Html = zp_template:render("_checkout_dialog_error.tpl", [], Context1),
-            {Html1, Context2} = zp_render:render_to_string(Html, Context1),
-            zp_render:wire({dialog, [{title, "Kon order niet plaatsen"}, {text, Html1}]}, Context2)
+            {Html, Context2} = zp_template:render_to_iolist("_checkout_dialog_error.tpl", [], Context1),
+            zp_render:wire({dialog, [{title, "Kon order niet plaatsen"}, {text, Html}]}, Context2)
     end.

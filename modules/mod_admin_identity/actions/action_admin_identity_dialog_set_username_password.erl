@@ -40,9 +40,8 @@ event({postback, {set_username_password, Id, OnDelete}, _TriggerId, _TargetId}, 
         {password, Password},
         {on_delete, OnDelete}
     ],
-    Html = zp_template:render("_action_dialog_set_username_password.tpl", Vars, Context),
-    {Html1, Context1} = zp_render:render_to_string(Html, Context),
-    zp_render:wire({dialog, [{title, DTitle}, {text, Html1}]}, Context1);
+    {Html, Context1} = zp_template:render_to_iolist("_action_dialog_set_username_password.tpl", Vars, Context),
+    zp_render:wire({dialog, [{title, DTitle}, {text, Html}]}, Context1);
 
 event({submit, set_username_password, _TriggerId, _TargetId}, Context) ->
     Id = zp_convert:to_integer(zp_context:get_q("id", Context)),

@@ -16,7 +16,14 @@
 -include_lib("zophrenic.hrl").
 
 %% External exports
--export([compile/2, render/3, find_template/2, find_template/3, reset/1]).
+-export([
+    compile/2,
+    render/3,
+    render_to_iolist/3,
+    find_template/2,
+    find_template/3,
+    reset/1
+]).
 
 -record(state, {reset_counter}).
 
@@ -57,6 +64,12 @@ render(File, Variables, Context) ->
             <<>>
     end.
             
+%% @doc Render a template to an iolist().  This removes all scomp state etc from the rendered html and appends the
+%% information in the scomp states to the context for later rendering.
+%% @spec render_to_iolist(File, Vars, Context) -> {iolist(), Context}
+render_to_iolist(File, Vars, Context) ->
+    Html = render(File, Vars, Context),
+    zp_render:render_to_iolist(Html, Context).
 
 
 %% @spec compile(File, Context) -> {ok, atom()} | {error, Reason}
