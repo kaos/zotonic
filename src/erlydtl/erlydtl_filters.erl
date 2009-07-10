@@ -59,6 +59,19 @@ add(Input, Number) when is_list(Input) ->
 add(Input, Number) when is_integer(Input) ->
     Input + zp_convert:to_integer(Number).
 
+
+append(Input, undefined) ->
+    Input;
+append(undefined, Append) ->
+    Append;
+append(Input, Append) ->
+    zp_convert:to_list(Input) ++ zp_convert:to_list(Append).
+
+
+insert(Input, Insert) ->
+    append(Insert, Input).
+
+
 lt(undefined, _Number) ->
     undefined;
 lt(Input, Number) ->
@@ -110,6 +123,7 @@ center(Input, Number) when is_binary(Input) ->
     list_to_binary(center(binary_to_list(Input), Number));
 center(Input, Number) when is_list(Input) ->
     string:centre(Input, zp_convert:to_integer(Number)).
+
 
 date(undefined, _FormatStr) ->
     undefined;
