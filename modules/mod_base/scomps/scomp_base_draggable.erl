@@ -23,8 +23,9 @@ terminate(_Reason) -> ok.
 render(Params, _Vars, Context, _State) ->
     Id      = proplists:get_value(id, Params),
     Tag     = proplists:get_value(tag, Params),
-    Clone   = proplists:get_value(clone, Params, true),
-    Revert  = proplists:get_value(revert, Params, "true"),
+    Clone   = proplists:get_value(clone, Params, false),
+    Revert  = proplists:get_value(revert, Params, "invalid"),
+    Axis    = proplists:get_value(axis, Params),
     Handle  = proplists:get_value(handle, Params),
     Groups  = proplists:get_all_values(group, Params),
     Opacity = proplists:get_value(opacity, Params, "0.8"),
@@ -48,7 +49,7 @@ render(Params, _Vars, Context, _State) ->
             		    false -> "'original'"
             	    end,
 	
-	Revert       =  case zp_convert:to_list(Revert) of
+	RevertText   =  case zp_convert:to_list(Revert) of
                 		"true"    -> "true";
                 		"false"   -> "false";
                 		"valid"   -> "'valid'";
@@ -62,13 +63,22 @@ render(Params, _Vars, Context, _State) ->
                         _ -> [$',zp_utils:js_escape(Handle),$']
                     end,
 
+    AxisText   = case Axis of
+                        "x" -> "'x'";
+                        <<"x">> -> "'x'";
+                        "y" -> "'y'";
+                        <<"y">> -> "'y'";
+                        _ -> "null"
+                    end,
+                    
 	% Write out the script to make this element draggable...
-	Script = io_lib:format("zp_draggable($('#~s'), { handle: ~s, helper: ~s, revert: ~s, opacity: ~s, scroll: true, cursor: 'pointer' }, '~s');", [
+	Script = io_lib:format("zp_draggable($('#~s'), { handle: ~s, helper: ~s, revert: ~s, opacity: ~s, scroll: true, cursor: 'hand', axis: ~s }, '~s');", [
             		Id, 
             		HandleText, 
             		Helper, 
-            		Revert,
+            		RevertText,
             		Opacity,
+            		AxisText,
             		PickledTag
             	]),
 
