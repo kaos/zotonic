@@ -17,7 +17,7 @@ is_authorized(ReqData, Context) ->
 
 
 html(Context) ->
-	Html = zp_template:render("admin_category_sorter.tpl", [{page_admin_category_sorter, true}, {delegate, ?MODULE}], Context),
+	Html = zp_template:render("admin_category_sorter.tpl", [{page_admin_category_sorter, true}], Context),
 	zp_context:output(Html, Context).
 
 %% @doc Handle the drop of a dragged category. The category can be dropped on another category (making it a sub-category) or on
@@ -34,7 +34,7 @@ event({drop, {dragdrop, DragTag, _DragDelegate, _DragId}, {dragdrop, DropTag, _D
     end,
     case Result of
        ok ->
-           {Html, Context1} = zp_template:render_to_iolist("_admin_category_sorter.tpl", [{delegate, ?MODULE}], Context),
+           {Html, Context1} = zp_template:render_to_iolist("_admin_category_sorter.tpl", [], Context),
            zp_render:update("category-sorter", Html, Context1);
        {error, cycle} ->
            zp_render:wire({growl, [{text, "Can not make a category a sub category of itself."}, {type, "error"}]}, Context);
