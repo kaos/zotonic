@@ -66,7 +66,7 @@ function zp_postback_loop()
     	var o = zp_postbacks.shift();
     	zp_do_postback(o.triggerID, o.postback, o.extraParams);
 
-    	setTimeout("zp_postback_loop()", 1);
+    	setTimeout("zp_postback_loop()", 10);
 	}
 	else
 	{
@@ -229,12 +229,13 @@ function zp_draggable(dragObj, dragOptions, dragTag)
 
 function zp_droppable(dropObj, dropOptions, dropPostbackInfo) 
 {
+	dropOptions.greedy = true;
 	dropOptions.drop = function(ev, ui) 
-	{
-		var dragTag = $(ui.draggable[0]).data("zp_drag_tag");
-		var dragItem = new Array({name: 'drag_item', value: dragTag});
-		zp_queue_postback(this.id, dropPostbackInfo, dragItem);
-	}
+    {
+    	var dragTag = $(ui.draggable[0]).data("zp_drag_tag");
+    	var dragItem = new Array({name: 'drag_item', value: dragTag});
+    	zp_queue_postback(this.id, dropPostbackInfo, dragItem);
+    };
 
 	$(dropObj).droppable(dropOptions);
 }
