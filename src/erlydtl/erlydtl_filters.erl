@@ -94,7 +94,7 @@ eq(undefined, _Number) ->
     undefined;
 eq(Input, Number) ->
     try
-        zp_convert:to_integer(Input) == zp_convert:to_integer(Number)
+        zp_convert:to_list(Input) == zp_convert:to_list(Number)
     catch
         _:_ -> undefined
     end.
@@ -104,7 +104,7 @@ ne(undefined, _Number) ->
     undefined;
 ne(Input, Number) ->
     try
-        zp_convert:to_integer(Input) /= zp_convert:to_integer(Number)
+        zp_convert:to_list(Input) /= zp_convert:to_list(Number)
     catch
         _:_ -> undefined
     end.
