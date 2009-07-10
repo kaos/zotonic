@@ -16,7 +16,7 @@ Category Hierarchy
 		</p>
 
 		<div id="category-sorter">
-			{% include "_admin_category_sorter.tpl" %}
+			{% include "_admin_category_sorter.tpl" delegate=delegate %}
 		</div>
 	</div>
 </div>

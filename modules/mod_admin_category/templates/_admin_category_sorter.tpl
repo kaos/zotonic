@@ -32,9 +32,9 @@
 		<h3 class="above-list">Category overview</h3>
 		<ul class="short-list">
 			{% for id, depth, nbsp, name in m.category.all_flat %}
-				{% droppable id=#before.id tag="b-"|append:id %}
-				{% droppable id=#cat.id tag="t-"|append:id %}
-				{% draggable id=#cat.id tag="t-"|append:id %}
+				{% droppable id=#before.id tag="b-"|append:id delegate=delegate %}
+				{% droppable id=#cat.id tag="t-"|append:id delegate=delegate %}
+				{% draggable id=#cat.id tag="t-"|append:id delegate=delegate %}
 
 				<li id="{{ #before.id }}" class="line depth-{{ depth }}"></li>
 				<li id="{{ #cat.id }}" class="depth-{{ depth }}">
