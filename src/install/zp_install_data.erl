@@ -243,7 +243,7 @@ install_edge(C) ->
 %% @type enumerate_categories(Connection) -> ok
 enumerate_categories(C) ->
     ?DEBUG("Sorting the category hierarchy"),
-    {ok, _, CatTuples} = pgsql:equery(C, "select id, parent_id, seq from category"),
+    {ok, _, CatTuples} = pgsql:equery(C, "select id, parent_id, seq from category order by seq, id"),
     Enums = m_category:enumerate(CatTuples),
     [
         {ok, _} = pgsql:equery(C, "update category set nr = $2, lvl = $3, lft = $4, rght = $5, props = $6 where id = $1", [CatId, Nr, Level, Left, Right, [{path,Path}]])
