@@ -55,11 +55,10 @@
 
 		{% block content %}{% endblock %}
 	</div>
-</div>
 
-<div id="footer" class="footer">
-	<div class="footer-content"></div>
-</div>
+	<div id="footer" class="footer">
+		<div class="footer-content"></div>
+	</div>
 
 	{% include "_admin_js_include.tpl" %}
 	{% block tinymce %}{% endblock %}
