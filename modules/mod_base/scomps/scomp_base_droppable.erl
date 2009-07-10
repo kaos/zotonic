@@ -69,6 +69,7 @@ event({postback, {DropTag,DropDelegate}, TriggerId, _TargetId}, Context) ->
 
     catch
         _M2:E ->
+            ?ERROR("Error in drop routing: ~p~n~p", [E, erlang:get_stacktrace()]),
             Error = io_lib:format("Error in routing drop to module \"~s\"; error: \"~p\"", [DropDelegate,E]),
             zp_render:wire({growl, [{text,Error}, {stay,1}]}, Context)
     end.
