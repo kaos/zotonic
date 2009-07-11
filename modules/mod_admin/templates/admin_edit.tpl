@@ -57,12 +57,7 @@
 										<textarea rows="2" cols="10" id="field-intro" name="intro" class="intro">{{ r.intro }}</textarea>
 									</div>
 
-									<div class="form-item clearfix">
-										<label for="field-content">Body</label>
-										<textarea rows="10" cols="10" id="field-content" name="body" class="body">{{ r.body|escape }}</textarea>
-									</div>
-									
-									{% include "_admin_save_buttons.tpl" %}
+									{# {% include "_admin_save_buttons.tpl" %} #}
 								</fieldset>
 							</div>
 						</div>
@@ -98,6 +93,20 @@
 							</div>
 							{% endif %}
 						{% endwith %}
+
+						<div class="item-wrapper">
+							<h3 class="above-item">Body text</h3>
+							<div class="item">
+								<fieldset class="admin-form">
+									<div class="form-item clearfix">
+										<label for="field-content">Body</label>
+										<textarea rows="10" cols="10" id="field-content" name="body" class="body">{{ r.body|escape }}</textarea>
+									</div>
+
+									{% include "_admin_save_buttons.tpl" %}
+								</fieldset>
+							</div>
+						</div>
 
 						<div class="item-wrapper">
 							<h3 class="above-item">{{ m.predicate["depiction"].title|default:"Media" }}</h3>
