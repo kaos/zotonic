@@ -25,13 +25,16 @@ add_script(Script, Context) ->
 get_page_startup_script(Context) ->
     case Context#context.page_id of
         undefined ->
-            [   <<"\n// No page id, so no comet loop started and generated random page id for postback loop\n">>,
+            %% No page id, so no comet loop started and generated random page id for postback loop
+            [   
                 ?SESSION_PAGE_Q, $=, $", zp_ids:id(), $", $;, 
                 <<"\nzp_postback_loop();\n">>
             ];
         PageId ->
+            %% When the browsers start to support enough connections then we can also start the comet loop here.
+            %% To start the comet loop, call: zp_comet_start().
             [   ?SESSION_PAGE_Q, $=, $", PageId, $", $;, 
-                <<"\nzp_postback_loop();\nzp_comet_start();\n">>
+                <<"\nzp_postback_loop();\n">>
             ]
     end.
 

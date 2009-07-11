@@ -66,7 +66,7 @@ function zp_postback_loop()
     	var o = zp_postbacks.shift();
     	zp_do_postback(o.triggerID, o.postback, o.extraParams);
 
-    	setTimeout("zp_postback_loop()", 10);
+    	setTimeout("zp_postback_loop()", 2);
 	}
 	else
 	{
@@ -87,13 +87,12 @@ function zp_opt_cancel(obj)
 	}
 }
 
-function zp_queue_postback(triggerID, postback, extraParams) 
+function zp_queue_postback(triggerID, postback, extraParams, noTriggerValue) 
 {
     var triggerValue = '';
 
-    // The following code crashes on firefox 3.5, till it is fixed we can't support this feature.
-    // if (triggerID != '')
-	//    triggerValue = $('#'+triggerID).val() || '';
+    if (triggerID != '' && !noTriggerValue)
+	    triggerValue = $('#'+triggerID).val() || '';
 	
 	extraParams = extraParams || new Array(); 
 	extraParams.push({name: 'triggervalue', value: triggerValue})
@@ -168,30 +167,30 @@ function zp_comet_start()
 
 function zp_comet() 
 {
-	//$.ajax({ 
-	//	url: '/comet',
-	//	type:'post',
-	//	data: "zp_pageid=" + urlencode(zp_pageid),
-	//	dataType: 'text',
-	//	success:
-	//	    function(data, textStatus) 
-	//	    {
-    //			try {
-    //				//alert("SUCCESS: " + data);
-    //				eval(data);
-    //                zp_init_postback_forms();
-    //			} catch (E) {
-    //				alert("Error evaluating Comet return value: " + data);
-    //				alert(E);
-    //			}
-    //			setTimeout("zp_comet();", 10);
-    //		},
-	//	error: 
-	//	    function(xmlHttpRequest, textStatus, errorThrown) 
-	//	    {
-	//		    setTimeout("zp_comet();", 1000);
-	//	    }
-	//});
+	$.ajax({ 
+		url: '/comet',
+		type:'post',
+		data: "zp_pageid=" + urlencode(zp_pageid),
+		dataType: 'text',
+		success:
+		    function(data, textStatus) 
+		    {
+    			try {
+    				//alert("SUCCESS: " + data);
+    				eval(data);
+                    zp_init_postback_forms();
+    			} catch (E) {
+    				alert("Error evaluating Comet return value: " + data);
+    				alert(E);
+    			}
+    			setTimeout("zp_comet();", 10);
+    		},
+		error: 
+		    function(xmlHttpRequest, textStatus, errorThrown) 
+		    {
+			    setTimeout("zp_comet();", 1000);
+		    }
+	});
 	return;
 }
 
@@ -234,7 +233,7 @@ function zp_droppable(dropObj, dropOptions, dropPostbackInfo)
     {
     	var dragTag = $(ui.draggable[0]).data("zp_drag_tag");
     	var dragItem = new Array({name: 'drag_item', value: dragTag});
-    	zp_queue_postback(this.id, dropPostbackInfo, dragItem);
+    	zp_queue_postback(this.id, dropPostbackInfo, dragItem, true);
     };
 
 	$(dropObj).droppable(dropOptions);
@@ -268,7 +267,7 @@ function zp_sorter(sortBlock, sortOptions, sortPostbackInfo)
 		
 		var sortItem = new Array({name: 'sort_items', value: sortItems});
 		
-		zp_queue_postback(this.id, sortPostbackInfo, sortItem);
+		zp_queue_postback(this.id, sortPostbackInfo, sortItem, true);
 	};
 	
 	$(sortBlock).sortable(sortOptions);
