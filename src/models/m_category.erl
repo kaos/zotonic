@@ -119,10 +119,15 @@ get_root(Context) ->
 
 get_by_parent(Id, Context) ->
     F = fun() ->
-        zp_db:assoc_props("
-            select c.*, r.name 
-            from category c join rsc r on r.id = c.id
-            where c.parent_id = $1 order by c.nr", [Id], Context)
+        case Id of
+            undefined ->
+                get_root(Context);
+            _ ->
+                zp_db:assoc_props("
+                    select c.*, r.name 
+                    from category c join rsc r on r.id = c.id
+                    where c.parent_id = $1 order by c.nr", [Id], Context)
+        end
     end,
     zp_depcache:memo(F, {category_parent, Id}, ?WEEK, [category]).
 
@@ -226,7 +231,12 @@ move_before(Id, BeforeId, Context) ->
                     PathParentId = [ParentId | get_path(ParentId, Context)],
                     case lists:member(Id, PathParentId) of
                         false ->
-                            zp_db:q("update category set seq = seq+1 where parent_id = $1 and seq >= $2", [ParentId, Seq], Context),
+                            case ParentId of
+                                undefined ->
+                                    zp_db:q("update category set seq = seq+1 where parent_id is null and seq >= $1", [Seq], Context);
+                                _ -> 
+                                    zp_db:q("update category set seq = seq+1 where parent_id = $2 and seq >= $1", [Seq, ParentId], Context)
+                            end,
                             zp_db:q("update category set parent_id = $1, seq = $2 where id = $3", [ParentId, Seq, Id], Context),
                             renumber(Ctx);
                         true -> 
@@ -274,6 +284,7 @@ delete(Id, TransferId, Context) ->
                             undefined ->
                                 case zp_db:q1("select parent_id from category where id = $1", [Id], Ctx) of
                                     undefined ->
+                                        %% The removed category is a top-category, move all content to 'other'
                                         case zp_db:q1("
                                                 select c.id 
                                                 from rsc r join category c on c.id = r.id
@@ -288,7 +299,12 @@ delete(Id, TransferId, Context) ->
                         end,
                 
                         _RscRows = zp_db:q("update rsc set category_id = $1 where category_id = $2", [ToId, Id], Ctx),
-                        _CatRows = zp_db:q("update category set parent_id = $1 where parent_id = $2", [ToId, Id], Ctx),
+                        case Id of
+                            undefined ->
+                                zp_db:q("update category set parent_id = $1 where parent_id is null", [ToId], Ctx);
+                            _ ->
+                                zp_db:q("update category set parent_id = $1 where parent_id = $2", [ToId, Id], Ctx)
+                        end,
                         ok = m_rsc_update:delete_nocheck(Id, Ctx),
                         ok = renumber(Ctx)
                     end,
@@ -438,9 +454,11 @@ renumber(Context) ->
 renumber_transaction(Context) ->
     CatTuples = zp_db:q("select id, parent_id, seq from category order by seq,id", Context),
     Enums = enumerate(CatTuples),
+    ?DEBUG(Enums),
     [
         zp_db:update(category, CatId, [
             {nr, Nr},
+            {seq, Nr},
             {lvl, Level},
             {lft, Left},
             {rght, Right},

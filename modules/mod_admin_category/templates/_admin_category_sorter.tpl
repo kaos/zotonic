@@ -1,7 +1,7 @@
 		
 		<style>
 			.hover a, .hover {
-				background: #ddf;
+				background: #aac;
 				color: black !important;
 			}
 			
@@ -14,7 +14,7 @@
 			}
 
 			.short-list .line {
-				height: 4px;
+				height: 5px;
 			}
 			
 			.short-list li.depth-1 { margin-left: 0px; }
