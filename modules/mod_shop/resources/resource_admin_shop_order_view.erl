@@ -31,5 +31,5 @@ html(Context) ->
 
 %% @doc Resend the order to VMSII
 event({postback, email_admin, _FormId, _TargetId}, Context) ->
-    zp_render:wire({growl, [{text,"Sent email (todo)."}]}, Context).
+    zp_render:growl("Sent email (todo).", Context).
 

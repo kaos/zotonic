@@ -26,14 +26,12 @@ render_action(TriggerId, TargetId, Args, Context) ->
 %% @doc Fill the dialog with the new group form. The form will be posted back to this module.
 %% @spec event(Event, Context1) -> Context2
 event({postback, {group_new_dialog, Title, Redirect}, _TriggerId, _TargetId}, Context) ->
-    DTitle = "Make a new group",
     Vars = [
         {delegate, atom_to_list(?MODULE)},
         {redirect, Redirect },
         {title, Title}
     ],
-    {Html, Context1} = zp_template:render_to_iolist("_action_dialog_group_new.tpl", Vars, Context),
-    zp_render:wire({dialog, [{title, DTitle}, {text, Html}]}, Context1);
+    zp_render:dialog("Make a new group", "_action_dialog_group_new.tpl", Vars, Context);
 
 
 event({submit, group_new, _TriggerId, _TargetId}, Context) ->

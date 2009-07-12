@@ -96,16 +96,13 @@ do_order(TotalAmount, Parms, Context) ->
 
         {new_total, NewTotal, Context1} ->
             %% Show dialog that the amount is changed, ask permission to go ahead
-            DTitle = "Ander totaalbedrag",
             Vars = [
                 {details, Parms},
                 {total_amount, NewTotal}
             ],
-            {Html, Context2} = zp_template:render_to_iolist("_checkout_dialog_amount_changed.tpl", Vars, Context1),
-            zp_render:wire({dialog, [{title, DTitle}, {text, Html}]}, Context2);
+            zp_render:dialog("Ander totaalbedrag", "_checkout_dialog_amount_changed.tpl", Vars, Context1);
 
         {error, _Reason, Context1} ->
             %% Something went wrong, tell the user and redirect back to the cart page
-            {Html, Context2} = zp_template:render_to_iolist("_checkout_dialog_error.tpl", [], Context1),
-            zp_render:wire({dialog, [{title, "Kon order niet plaatsen"}, {text, Html}]}, Context2)
+            zp_render:dialog("Kon order niet plaatsen", "_checkout_dialog_error.tpl", [], Context1)
     end.

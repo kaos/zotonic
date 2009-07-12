@@ -29,13 +29,11 @@ render_action(TriggerId, TargetId, Args, Context) ->
 event({postback, {delete_predicate_dialog, Id, OnSuccess}, _TriggerId, _TargetId}, Context) ->
     case zp_acl:has_role(admin, Context) of
         true ->
-            DTitle = "Confirm delete",
             Vars = [
                 {on_success, OnSuccess},
                 {id, Id}
             ],
-            {Html, Context1} = zp_template:render_to_iolist("_action_dialog_predicate_delete.tpl", Vars, Context),
-            zp_render:wire({dialog, [{title, DTitle}, {text, Html}]}, Context1);
+            zp_render:dialog("Confirm delete", "_action_dialog_predicate_delete.tpl", Vars, Context);
         false ->
-            zp_render:wire({growl, [{text, "You are not allowed to delete predicates."}, {type, "error"}]}, Context)
+            zp_render:growl_error("You are not allowed to delete predicates.", Context)
     end.

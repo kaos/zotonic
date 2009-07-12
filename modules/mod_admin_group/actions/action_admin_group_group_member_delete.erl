@@ -32,5 +32,5 @@ event({postback, {group_member_delete, Id, MemberId, OnSuccess}, _TriggerId, _Ta
             ok = m_group:delete_member(Id, MemberId, Context),
             zp_render:wire(OnSuccess, Context);
         false ->
-            zp_render:wire({growl, [{text, "Only administrators or group leaders can remove members from groups."}, {type, "error"}]})
+            zp_render:growl_error("Only administrators or group leaders can remove members from groups.", Context)
     end.

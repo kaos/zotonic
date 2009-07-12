@@ -29,13 +29,8 @@ render_action(TriggerId, TargetId, Args, Context) ->
 event({postback, {delete_group_dialog, Id, OnSuccess}, _TriggerId, _TargetId}, Context) ->
     case zp_acl:has_role(admin, Context) of
         true ->
-            DTitle = "Confirm delete",
-            Vars = [
-                {on_success, OnSuccess},
-                {id, Id}
-            ],
-            {Html, Context1} = zp_template:render_to_iolist("_action_dialog_group_delete.tpl", Vars, Context),
-            zp_render:wire({dialog, [{title, DTitle}, {text, Html}]}, Context1);
+            Vars = [ {on_success, OnSuccess}, {id, Id} ],
+            zp_render:dialog("Confirm delete", "_action_dialog_group_delete.tpl", Vars, Context);
         false ->
-            zp_render:wire({growl, [{text, "Only administrators can delete groups."}, {type, "error"}]}, Context)
+            zp_render:growl_error("Only administrators can delete groups.", Context)
     end.

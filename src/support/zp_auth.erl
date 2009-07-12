@@ -137,6 +137,6 @@ event({submit, logon, _TriggerId, _TargetId}, Context) ->
         {true, ContextLogon} -> 
             zp_render:wire({reload, []}, ContextLogon);
         {_, ContextLogon} ->
-            zp_render:wire({growl, [{text, "Unknown username or password. Please try again."}]}, ContextLogon)
+            zp_render:growl("Unknown username or password. Please try again.", ContextLogon)
     end.
     

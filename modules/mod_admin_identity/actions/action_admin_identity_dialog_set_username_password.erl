@@ -28,7 +28,6 @@ render_action(TriggerId, TargetId, Args, Context) ->
 %% @doc Fill the dialog with the new page form. The form will be posted back to this module.
 %% @spec event(Event, Context1) -> Context2
 event({postback, {set_username_password, Id, OnDelete}, _TriggerId, _TargetId}, Context) ->
-    DTitle = "Set username/ password",
     {Username, Password} = case m_identity:get_username(Id, Context) of
                                 undefined -> {[], []};
                                 Name -> {Name, ?PASSWORD_DOTS}
@@ -40,8 +39,7 @@ event({postback, {set_username_password, Id, OnDelete}, _TriggerId, _TargetId}, 
         {password, Password},
         {on_delete, OnDelete}
     ],
-    {Html, Context1} = zp_template:render_to_iolist("_action_dialog_set_username_password.tpl", Vars, Context),
-    zp_render:wire({dialog, [{title, DTitle}, {text, Html}]}, Context1);
+    zp_render:dialog("Set username/ password", "_action_dialog_set_username_password.tpl", Vars, Context);
 
 event({submit, set_username_password, _TriggerId, _TargetId}, Context) ->
     Id = zp_convert:to_integer(zp_context:get_q("id", Context)),
@@ -67,9 +65,7 @@ event({submit, set_username_password, _TriggerId, _TargetId}, Context) ->
                     case m_identity:set_username_pw(Id, Username, Password, Context) of
                         {error, _} ->
                             %% Assume duplicate key violation, user needs to pick another username.
-                            zp_render:wire([
-                                {growl, [{text, "The username is in use, please supply an unique username."}, {type, "error"}]}
-                                ], Context);
+                            zp_render:growl_error("The username is in use, please supply an unique username.", Context);
                         ok ->
                             zp_render:wire([
                                 {dialog_close, []},
@@ -78,5 +74,5 @@ event({submit, set_username_password, _TriggerId, _TargetId}, Context) ->
                     end
             end;
         false ->
-            zp_render:wire({growl, [{text, "Only an administrator or the user him/herself can set a password."}, {type, "error"}]})
+            zp_render:growl_error("Only an administrator or the user him/herself can set a password.", Context)
     end.

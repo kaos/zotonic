@@ -51,6 +51,6 @@ do_link(SubjectId, Predicate, ObjectId, Action, Context) ->
             Context1 = zp_render:insert_bottom(ElementId, Html, Context),
             zp_render:wire([{growl, [{text, "Added the connection to “"++zp_convert:to_list(Title)++"”."}]} | Action], Context1);
         false ->
-            zp_render:wire({growl, [{text, "Sorry, you have no permission to add the connection."},{type, "error"}]}, Context)
+            zp_render:growl_error("Sorry, you have no permission to add the connection.", Context)
     end.
     

@@ -36,5 +36,5 @@ event({postback, {predicate_delete, Id, OnSuccess}, _TriggerId, _TargetId}, Cont
                 Context,
                 lists:flatten(OnSuccess));
         false ->
-            zp_render:wire({growl, [{text, "Only administrators can delete predicates."}, {type, "error"}]})
+            zp_render:growl_error("Only administrators can delete predicates.", Context)
     end.

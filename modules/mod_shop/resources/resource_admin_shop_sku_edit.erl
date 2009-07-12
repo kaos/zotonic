@@ -55,5 +55,5 @@ event({submit, skuform, _FormId, _TargetId}, Context) ->
         {variant, zp_context:get_q("variant", Context)}
     ],
     m_shop_product:update_sku(zp_convert:to_integer(Id), Props, Context),
-    zp_render:wire({growl, [{text,"Saved Sku."}]}, Context).
+    zp_render:growl("Saved Sku.", Context).
 

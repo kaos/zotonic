@@ -32,15 +32,14 @@ event({drop, {dragdrop, DragTag, _DragDelegate, _DragId}, {dragdrop, DropTag, _D
         "b-"++B -> m_category:move_before(DragId, list_to_integer(B), Context);
         "end" ->   m_category:move_end(DragId, Context)
     end,
-    case Result of
-       ok ->
-           {Html, Context1} = zp_template:render_to_iolist("_admin_category_sorter.tpl", [], Context),
-           zp_render:update("category-sorter", Html, Context1);
-       {error, cycle} ->
-           zp_render:wire({growl, [{text, "Can not make a category a sub category of itself."}, {type, "error"}]}, Context);
-       {error, eacces} ->
-           zp_render:wire({growl, [{text, "You are not allowed to change categories."}, {type, "error"}]}, Context)
-    end;
+    Context1 = case Result of
+       ok -> Context;
+       {error, cycle} ->   zp_render:growl_error("Can not make a category a sub category of itself.", Context);
+       {error, eacces} ->  zp_render:growl_error("You are not allowed to change categories.", Context)
+    end,
+    {Html, Context2} = zp_template:render_to_iolist("_admin_category_sorter.tpl", [], Context1),
+    zp_render:update("category-sorter", Html, Context2);
+
         
 event(_Event, Context) ->
     Context.

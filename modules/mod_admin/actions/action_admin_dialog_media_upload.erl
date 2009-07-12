@@ -29,7 +29,6 @@ render_action(TriggerId, TargetId, Args, Context) ->
 %% @doc Fill the dialog with the new page form. The form will be posted back to this module.
 %% @spec event(Event, Context1) -> Context2
 event({postback, {media_upload_dialog, Title, RscId, GroupId, Predicate, Actions}, _TriggerId, _TargetId}, Context) ->
-    DTitle = "Add a new media file",
     Vars = [
         {delegate, atom_to_list(?MODULE)},
         {rsc_id, RscId },
@@ -38,8 +37,7 @@ event({postback, {media_upload_dialog, Title, RscId, GroupId, Predicate, Actions
         {actions, Actions},
         {predicate, Predicate}
     ],
-    {Html, Context1} = zp_template:render_to_iolist("_action_dialog_media_upload.tpl", Vars, Context),
-    zp_render:wire({dialog, [{title, DTitle}, {text, Html}]}, Context1);
+    zp_render:dialog("Add a new media file", "_action_dialog_media_upload.tpl", Vars, Context);
 
 
 event({submit, {media_upload, EventProps}, _TriggerId, _TargetId}, Context) ->
@@ -76,10 +74,10 @@ event({submit, {media_upload, EventProps}, _TriggerId, _TargetId}, Context) ->
                     end,
                     zp_render:wire([{growl, [{text, "Uploaded the file."}]} | Actions], ContextRedirect);
                 {error, _Error} ->
-                    zp_render:wire({growl, [{text, "Error uploading the file."}, {type, "error"}]}, Context)
+                    zp_render:growl_error("Error uploading the file.", Context)
             end;
         _ ->
-            zp_render:wire({growl, [{text, "No file specified."}]}, Context)
+            zp_render:growl("No file specified.", Context)
     end,
 
     % Close the dialog and optionally perform the post upload actions

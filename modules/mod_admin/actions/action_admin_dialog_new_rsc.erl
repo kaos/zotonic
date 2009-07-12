@@ -28,7 +28,6 @@ render_action(TriggerId, TargetId, Args, Context) ->
 %% @doc Fill the dialog with the new page form. The form will be posted back to this module.
 %% @spec event(Event, Context1) -> Context2
 event({postback, {new_rsc_dialog, Title, Redirect, SubjectId, Predicate}, _TriggerId, _TargetId}, Context) ->
-    DTitle = "Make a new page",
     Vars = [
         {delegate, atom_to_list(?MODULE)},
         {redirect, Redirect },
@@ -36,8 +35,7 @@ event({postback, {new_rsc_dialog, Title, Redirect, SubjectId, Predicate}, _Trigg
         {predicate, Predicate},
         {title, Title}
     ],
-    {Html, Context1} = zp_template:render_to_iolist("_action_dialog_new_rsc.tpl", Vars, Context),
-    zp_render:wire({dialog, [{title, DTitle}, {text, Html}]}, Context1);
+    zp_render:dialog("Make a new page", "_action_dialog_new_rsc.tpl", Vars, Context);
 
 
 event({submit, new_page, _TriggerId, _TargetId}, Context) ->

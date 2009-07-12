@@ -51,7 +51,7 @@ event({submit, predform, _FormId, _TargetId}, Context) ->
     Id = proplists:get_value("id", Props),
     Props1 = proplists:delete("id", Props),
     m_predicate:update(zp_convert:to_integer(Id), Props1, Context),
-    zp_render:wire({growl, [{text,[["Saved ",zp_html:strip(?TR(Title, Context))]]}]}, Context).
+    zp_render:growl(["Saved ",zp_html:strip(?TR(Title, Context))], Context).
 
 
 %% @doc Remove some properties that are part of the postback

@@ -29,14 +29,12 @@ render_action(TriggerId, TargetId, Args, Context) ->
 event({postback, {group_member_delete_dialog, Id, MemberId, OnSuccess}, _TriggerId, _TargetId}, Context) ->
     case zp_acl:has_group_role(leader, Id, Context) of
         true ->
-            DTitle = "Confirm removal of member",
             Vars = [
                 {on_success, OnSuccess},
                 {id, Id},
                 {member_id, MemberId}
             ],
-            {Html, Context1} = zp_template:render_to_iolist("_action_dialog_group_member_delete.tpl", Vars, Context),
-            zp_render:wire({dialog, [{title, DTitle}, {text, Html}]}, Context1);
+            zp_render:dialog("Confirm removal of member", "_action_dialog_group_member_delete.tpl", Vars, Context);
         false ->
-            zp_render:wire({growl, [{text, "Only administrators or group leaders can remove members from groups."}, {type, "error"}]}, Context)
+            zp_render:growl_error("Only administrators or group leaders can remove members from groups.", Context)
     end.

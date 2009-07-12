@@ -47,6 +47,6 @@ event({postback, {unlink, SubjectId, Predicate, ObjectId, Hide, UndoMessageId, A
                 _ -> zp_render:wire([{fade_out, [{target, Hide}]} | Action], Context1)
             end;
         false ->
-            zp_render:wire({growl, [{text, "Sorry, you have no permission to edit this page."},{type, "error"}]}, Context)
+            zp_render:growl_error("Sorry, you have no permission to edit this page.", Context)
     end.
     

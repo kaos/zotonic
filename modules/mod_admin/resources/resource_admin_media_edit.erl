@@ -72,7 +72,7 @@ event({submit, mediaform, _FormId, _TargetId}, Context) ->
     Id = proplists:get_value("id", Props),
     Props1 = proplists:delete("id", Props),
     m_media:update(zp_convert:to_integer(Id), Props1, Context),
-    zp_render:wire({growl, [{text,[["Saved ",zp_html:strip(Title)]]}]}, Context).
+    zp_render:growl(["Saved ",zp_html:strip(Title)], Context).
 
 
 

@@ -30,17 +30,15 @@ event({postback, {dialog_delete_username, Id, OnSuccess}, _TriggerId, _TargetId}
         true ->
             case m_identity:get_username(Id, Context) of
                 undefined ->
-                    zp_render:wire({growl, [{text, "There is no username coupled to this person."}]}, Context);
+                    zp_render:growl("There is no username coupled to this person.", Context);
                 Username ->
-                    DTitle = "Confirm delete",
                     Vars = [
                         {on_success, OnSuccess},
                         {id, Id},
                         {username, Username}
                     ],
-                    {Html, Context1} = zp_template:render_to_iolist("_action_dialog_delete_username.tpl", Vars, Context),
-                    zp_render:wire({dialog, [{title, DTitle}, {text, Html}]}, Context1)
+                    zp_render:dialog("Confirm delete", "_action_dialog_delete_username.tpl", Vars, Context)
             end;
         false ->
-            zp_render:wire({growl, [{text, "Only an administrator can delete usernames."}, {type, "error"}]}, Context)
+            zp_render:growl_error("Only an administrator can delete usernames.", Context)
     end.

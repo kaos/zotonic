@@ -27,5 +27,5 @@ render_action(TriggerId, TargetId, Args, Context) ->
 event({postback, {module_rescan, Actions}, _TriggerId, _TargetId}, Context) ->
     zp_notifier:notify({module_ready}, Context),
     zp_dispatcher:reload(Context),
-    Context1 = zp_render:wire({growl, [{text, "Module rescan is in progress."}]}, Context),
+    Context1 = zp_render:growl("Module rescan is in progress.", Context),
     zp_render:wire(Actions, Context1).

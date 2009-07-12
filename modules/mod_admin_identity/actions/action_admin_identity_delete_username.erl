@@ -31,5 +31,5 @@ event({postback, {delete_username, Id, OnSuccess}, _TriggerId, _TargetId}, Conte
             m_identity:delete_username(Id, Context),
             zp_render:wire([{growl, [{text, "Username has been deleted."}]} | OnSuccess], Context);
         false ->
-            zp_render:wire({growl, [{text, "Only administrators can delete usernames."}, {type, "error"}]})
+            zp_render:growl_error("Only administrators can delete usernames.", Context)
     end.

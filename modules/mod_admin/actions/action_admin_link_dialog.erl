@@ -33,5 +33,4 @@ event({postback, {link_dialog, SubjectId, Predicate, Actions}, _TriggerId, _Targ
         {predicate, Predicate},
         {action, Actions}
     ],
-    {Html, Context1} = zp_template:render_to_iolist("_action_link_dialog.tpl", Vars, Context),
-    zp_render:wire({dialog, [{title, Title}, {text, Html}]}, Context1).
+    zp_render:dialog(Title, "_action_link_dialog.tpl", Vars, Context).

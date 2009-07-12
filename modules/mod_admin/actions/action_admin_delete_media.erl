@@ -36,5 +36,5 @@ event({postback, {delete_media, Id, OnSuccess}, _TriggerId, _TargetId}, Context)
                 Context,
                 lists:flatten(OnSuccess));
         false ->
-            zp_render:wire({growl, [{text, "You are not allowed to delete this media."}, {type, "error"}]}, Context)
+            zp_render:growl_error("You are not allowed to delete this media.", Context)
     end.

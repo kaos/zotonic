@@ -28,13 +28,11 @@ render_action(TriggerId, TargetId, Args, Context) ->
 event({postback, {delete_media_dialog, Id, OnSuccess}, _TriggerId, _TargetId}, Context) ->
     case zp_acl:media_editable(Id, Context) of
         true ->
-            DTitle = "Confirm delete",
             Vars = [
                 {on_success, OnSuccess},
                 {id, Id}
             ],
-            {Html, Context1} = zp_template:render_to_iolist("_action_dialog_delete_media.tpl", Vars, Context),
-            zp_render:wire({dialog, [{title, DTitle}, {text, Html}]}, Context1);
+            zp_render:dialog("Confirm delete", "_action_dialog_delete_media.tpl", Vars, Context);
         false ->
-            zp_render:wire({growl, [{text, "You are not allowed to delete this media."}, {type, "error"}]}, Context)
+            zp_render:growl_error("You are not allowed to delete this media.", Context)
     end.

@@ -51,15 +51,15 @@ event({submit, rscform, _FormId, _TargetId}, Context) ->
             Context1 = zp_render:set_value("field-name", m_rsc:p(Id, name, Context), Context),
             Context2 = zp_render:set_value("field-uri",  m_rsc:p(Id, uri, Context1), Context1),
             Context3 = zp_render:set_value("slug",  m_rsc:p(Id, slug, Context2), Context2),
-            zp_render:wire({growl, [{text,["Saved ",zp_html:strip(Title),"."]}]}, Context3);
+            zp_render:growl(["Saved ",zp_html:strip(Title),"."], Context3);
         {error, duplicate_uri} ->
-            zp_render:wire({growl, [{text,"Error, duplicate uri. Please change the uri.",zp_html:strip(Title)}, {type, "error"}]}, Context);
+            zp_render:growl_error("Error, duplicate uri. Please change the uri.", Context);
         {error, duplicate_name} ->
-            zp_render:wire({growl, [{text,"Error, duplicate name. Please change the name."}, {type, "error"}]}, Context);
+            zp_render:growl_error("Error, duplicate name. Please change the name.", Context);
         {error, eacces} ->
-            zp_render:wire({growl, [{text,"You don't have permission to edit this page."}, {type, "error"}]}, Context);
+            zp_render:growl_error("You don't have permission to edit this page.", Context);
         {error, _Reason} ->
-            zp_render:wire({growl, [{text,"Something went wrong. Sorry."}, {type, "error"}]}, Context)
+            zp_render:growl_error("Something went wrong. Sorry.", Context)
     end;
 
 event({postback, {reload_media, Opts}, _TriggerId, _TargetId}, Context) ->

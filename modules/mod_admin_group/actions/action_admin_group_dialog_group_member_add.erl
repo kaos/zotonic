@@ -25,12 +25,10 @@ render_action(TriggerId, TargetId, Args, Context) ->
 %% @doc Fill the dialog with the new group form. The form will be posted back to this module.
 %% @spec event(Event, Context1) -> Context2
 event({postback, {group_member_add_dialog, Id}, _TriggerId, _TargetId}, Context) ->
-    DTitle = "Add member to group",
     Vars = [
         {id, Id}
     ],
-    {Html, Context1} = zp_template:render_to_iolist("_action_dialog_group_member_add.tpl", Vars, Context),
-    zp_render:wire({dialog, [{title, DTitle}, {text, Html}]}, Context1);
+    zp_render:dialog("Add member to group", "_action_dialog_group_member_add.tpl", Vars, Context);
 
 
 %% @doc Add a member to a group.  The roles are in the request (they come from a form)
@@ -52,5 +50,5 @@ event({submit, group_member_add, _TriggerId, _TargetId}, Context) ->
                     {reload, []}], Context);
 
         false ->
-            zp_render:wire({growl, [{text, "Only administrators can delete groups."}, {type, "error"}]}, Context)
+            zp_render:growl_error("Only administrators can delete groups.", Context)
     end.

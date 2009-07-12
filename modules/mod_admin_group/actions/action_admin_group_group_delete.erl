@@ -36,5 +36,5 @@ event({postback, {group_delete, Id, OnSuccess}, _TriggerId, _TargetId}, Context)
                 Context,
                 lists:flatten(OnSuccess));
         false ->
-            zp_render:wire({growl, [{text, "Only administrators can delete groups."}, {type, "error"}]})
+            zp_render:growl_error("Only administrators can delete groups.", Context)
     end.

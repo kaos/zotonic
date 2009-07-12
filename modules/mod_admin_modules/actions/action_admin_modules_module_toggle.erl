@@ -32,12 +32,12 @@ event({postback, {module_toggle, Module}, TriggerId, _TargetId}, Context) ->
                 true ->
                     zp_module_sup:deactivate(Module, Context),
                     Context1 = zp_render:update(TriggerId, "Activate", Context),
-                    zp_render:wire({growl, [{text, "Deactivated "++atom_to_list(Module)++"."}]}, Context1);
+                    zp_render:growl(["Deactivated ", atom_to_list(Module), "."], Context1);
                 false ->
                     zp_module_sup:activate(Module, Context),
                     Context1 = zp_render:update(TriggerId, "Deactivate", Context),
-                    zp_render:wire({growl, [{text, "Activated "++atom_to_list(Module)++"."}]}, Context1)
+                    zp_render:growl(["Activated ", atom_to_list(Module), "."], Context1)
             end;
         false ->
-            zp_render:wire({growl, [{text, "You are not allowed to activate or deactivate modules."}, {type, "error"}]}, Context)
+            zp_render:growl_error("You are not allowed to activate or deactivate modules.", Context)
     end.
