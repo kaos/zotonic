@@ -6,8 +6,8 @@
 	
 	{% for m_id, sub in menu %}
 		{% with forloop.counter as m_nr %}
-			<li id="{{ #menu.m_nr }}" class="header">
-				<a href="#">{{ m.rsc[m_id].title }}</a>
+			<li class="header">
+				<a id="{{ #menu.m_nr }}" href="#">{{ m.rsc[m_id].title }}</a>
 				{% button text="x" style="float:right" action={postback postback={delete item=[m_nr] id=#menu.m_nr}} %}
 				<ul>
 					{% for s_id in sub %}
