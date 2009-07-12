@@ -74,12 +74,12 @@
 
 %% @doc Create a new context record for the current request.
 new(ReqData, Module) ->
-    Context = #context{wm_reqdata=ReqData, dict=dict:new(), resource_module=Module},
+    Context = #context{wm_reqdata=ReqData, resource_module=Module},
     Context#context{language=zp_trans:default_language(Context)}.
 
 %% @doc Return a new empty context
 new() -> 
-    Context = #context{dict=dict:new()},
+    Context = #context{},
     Context#context{language=zp_trans:default_language(Context)}.
 
 %% @doc Return an almost empty context for the database connection only, nothing else is initialised
@@ -91,15 +91,15 @@ new_for_host(Host) ->
     Context#context{host=Host}.
 
 %% @doc Make the context safe to use in a async message
-prune_for_async(#context{wm_reqdata=ReqData, host=Host, acl=Acl, dict=Dict}) ->
-    #context{wm_reqdata=ReqData, host=Host, acl=Acl, dict=Dict}.
+prune_for_async(#context{wm_reqdata=ReqData, host=Host, acl=Acl, props=Props}) ->
+    #context{wm_reqdata=ReqData, host=Host, acl=Acl, props=Props}.
 
 
 %% @doc Cleanup a context for the output stream
 prune_for_template(#context{}=Context) ->
     #context{
         wm_reqdata=undefined,
-        dict=undefined,
+        props=undefined,
         updates=Context#context.updates,
         actions=Context#context.actions,
         content_scripts=Context#context.content_scripts,
@@ -121,7 +121,7 @@ prune_for_scomp(VisibleFor, Context) ->
     zp_acl:set_visible_for(VisibleFor, Context#context{
         dbc=undefined,
 	    wm_reqdata=undefined,
-        dict=undefined,
+        props=undefined,
 		updates=[],
 		actions=[],
 		content_scripts=[],
@@ -243,10 +243,10 @@ ensure_page_session(Context) ->
     
 %% @doc Ensure that we have parsed the query string, fetch body if necessary
 ensure_qs(Context) ->
-    case dict:find('q', Context#context.dict) of
-        {ok, _Qs} ->
+    case proplists:lookup('q', Context#context.props) of
+        {'q', _Qs} ->
             Context;
-        error ->
+        none ->
             ReqData  = Context#context.wm_reqdata,
             PathDict = wrq:path_info(ReqData),
             PathArgs = lists:map(
@@ -255,8 +255,8 @@ ensure_qs(Context) ->
             {Body, ContextParsed} = parse_form_urlencoded(Context),
             Query    = wrq:req_qs(ReqData),
             Combined = PathArgs ++ Body ++ Query,
-            Dict2    = dict:store('q', Combined, ContextParsed#context.dict),
-            ContextParsed#context{dict=Dict2}
+            QProps = zp_utils:prop_replace('q', Combined, ContextParsed#context.props),
+            ContextParsed#context{props=QProps}
     end.
 
 
@@ -286,9 +286,9 @@ set_resource_module(Module, Context) ->
 %%       Key -> string()
 %% @doc Get a request parameter, either from the query string or the post body.  Post body has precedence over the query string.
 get_q(Key, Context) ->
-    case dict:find('q', Context#context.dict) of
-        {ok, Qs} -> proplists:get_value(Key, Qs);
-        error -> undefined
+    case proplists:lookup('q', Context#context.props) of
+        {'q', Qs} -> proplists:get_value(zp_convert:to_list(Key), Qs);
+        none -> undefined
     end.
 
 
@@ -297,9 +297,9 @@ get_q(Key, Context) ->
 %%       Key -> string()
 %% @doc Get a request parameter, either from the query string or the post body.  Post body has precedence over the query string.
 get_q(Key, Context, Default) ->
-    case dict:find('q', Context#context.dict) of
-        {ok, Qs} -> proplists:get_value(Key, Qs, Default);
-        error -> undefined
+    case proplists:lookup('q', Context#context.props) of
+        {'q', Qs} -> proplists:get_value(zp_convert:to_list(Key), Qs, Default);
+        none -> undefined
     end.
 
 
@@ -308,7 +308,7 @@ get_q(Key, Context, Default) ->
 %%        Values -> list()
 %% @doc Get all parameters.
 get_q_all(Context) ->
-    {ok, Qs} = dict:find('q', Context#context.dict),
+    {'q', Qs} = proplists:lookup('q', Context#context.props),
     Qs.
 
 
@@ -317,19 +317,19 @@ get_q_all(Context) ->
 %%        Values -> list()
 %% @doc Get the all the parameters with the same name, returns the empty list when non found.
 get_q_all(Key, Context) ->
-    {ok, Qs} = dict:find('q', Context#context.dict),
-    proplists:get_all_values(Key, Qs).
+    {'q', Qs} = proplists:lookup('q', Context#context.props),
+    proplists:get_all_values(zp_convert:to_list(Key), Qs).
     
 
 %% @spec get_q_validated(Key, Context) -> Value
 %% @doc Fetch a query parameter and perform the validation connected to the parameter. An exception {not_validated, Key}
 %%      is thrown when there was no validator, when the validator is invalid or when the validation failed.
 get_q_validated(Key, Context) ->
-    case dict:find('q_validated', Context#context.dict) of
-        {ok, Qs} ->
-            case dict:find(Key, Qs) of
-                {ok, Value} -> Value;
-                error -> throw({not_validated, Key})
+    case proplists:lookup('q_validated', Context#context.props) of
+        {'q', Qs} ->
+            case proplists:lookup(zp_convert:to_list(Key), Qs) of
+                {'q', Value} -> Value;
+                none -> throw({not_validated, Key})
             end
     end.
 
@@ -374,7 +374,7 @@ ensure_visitor_id(Context) ->
 
 
 %% ------------------------------------------------------------------------------------
-%% Set/get/modify state dicts
+%% Set/get/modify state properties
 %% ------------------------------------------------------------------------------------
 
 
@@ -453,36 +453,41 @@ incr_page(Key, Value, Context) ->
 %% @spec set(Key, Value, Context) -> Context
 %% @doc Set the value of the context variable Key to Value
 set(Key, Value, Context) ->
-    Dict = dict:store(Key, Value, Context#context.dict),
-    Context#context{dict = Dict}.
+    Props = zp_utils:prop_replace(Key, Value, Context#context.props),
+    Context#context{props = Props}.
 
 
 %% @spec set(PropList, Context) -> Context
 %% @doc Set the value of the context variables to all {Key, Value} properties.
 set(PropList, Context) when is_list(PropList) ->
-    NewDict = lists:foldl(fun ({Key,Value}, Dict) -> dict:store(Key, Value, Dict) end, Context#context.dict, PropList),
-    Context#context{dict = NewDict}.
+    NewProps = lists:foldl(
+        fun ({Key,Value}, Props) -> 
+            zp_utils:prop_replace(Key, Value, Props)
+        end, Context#context.props, PropList),
+    Context#context{props = NewProps}.
 
 
 %% @spec get(Key, Context) -> Value
 %% @doc Fetch the value of the context variable Key
-get(Key, Context) when Context#context.dict =/= undefined ->
-    case dict:find(Key, Context#context.dict) of
-        {ok, Value} ->
-                Value;
-        error ->
-                undefined
-    end;
-get(_Key, _Context) ->
-	undefined.
+get(Key, Context) ->
+    case proplists:lookup(Key, Context#context.props) of
+        {Key, Value} -> Value;
+        none -> undefined
+    end.
 
 
 %% @spec incr_session(Key, Increment, Context) -> {NewValue,NewContext}
 %% @doc Increment the context variable Key
 incr(Key, Value, Context) ->
-    Dict = dict:update_counter(Key, Value, Context#context.dict),
-    Context1 = Context#context{dict = Dict},
-    get(Key, Context1).
+    case zp_convert:to_integer(get(Key, Context)) of
+        undefined ->
+            set(Key, Value, Context),
+            Value;
+        N ->
+            R = N+Value, 
+            set(Key, R, Context),
+            R
+    end.
 
 
 %% @doc Return the selected language of the Context

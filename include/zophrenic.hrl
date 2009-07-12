@@ -45,8 +45,8 @@
         %% iolist with the accumulated html, xml or whatever output
         render=[],
 
-        %% dictionary with metadata, initialised by the controller
-        dict
+        %% Property list with context specific metadata
+        props=[]
     }).
     
 -define(WM_REQ(ReqData, Context), zp_context:set_reqdata(ReqData, Context)).
