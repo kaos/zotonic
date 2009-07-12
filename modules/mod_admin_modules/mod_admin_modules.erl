@@ -29,7 +29,7 @@
 all(Context) ->
     Active  = zp_module_sup:active(Context),
     Modules = zp_module_sup:scan(Context),
-    Descrs  = [ {M, [{active, lists:member(M, Active)}, {path, Path} | descr(M)]} || {M, Path} <- Modules ],
+    Descrs  = [ {zp_module_sup:prio(M), M, [{active, lists:member(M, Active)}, {path, Path} | descr(M)]} || {M, Path} <- Modules ],
     lists:sort(Descrs).
 
 
