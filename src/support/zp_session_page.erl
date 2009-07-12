@@ -26,8 +26,7 @@
     set/3, 
     get/2, 
     incr/3, 
-    append/3, 
-    append_list/3, 
+    append/3,
     
     add_script/2,
     get_scripts/1,
@@ -41,12 +40,12 @@
 ]).
 
 -record(page_state, {
-    vars,
     last_detach,
     session_pid,
     linked=[],
     comet_pid=undefined,
-    comet_queue=[]
+    comet_queue=[],
+    vars=[]
 }).
 
 %%====================================================================
@@ -91,9 +90,6 @@ incr(Key, Value, Pid) ->
 append(Key, Value, Pid) ->
     gen_server:cast(Pid, {append, Key, Value}).
 
-append_list(Key, List, Pid) ->
-    gen_server:cast(Pid, {append_list, Key, List}).
-
 %% @doc Attach the comet request process to the page session, enabling sending scripts to the user agent
 comet_attach(CometPid, Pid) ->
     gen_server:cast(Pid, {comet_attach, CometPid}).
@@ -133,7 +129,7 @@ init(Args) ->
     SessionPid   = proplists:get_value(session_pid, Args),
     IntervalMsec = (?SESSION_PAGE_TIMEOUT div 2) * 1000,
     timer:apply_interval(IntervalMsec, ?MODULE, check_timeout, [self()]),
-    State = #page_state{vars=dict:new(), session_pid=SessionPid, last_detach=zp_utils:now()},
+    State = #page_state{session_pid=SessionPid, last_detach=zp_utils:now()},
     {ok, State}.
 
 
@@ -144,13 +140,15 @@ init(Args) ->
 handle_cast(stop, State) ->
     {stop, normal, State};
 handle_cast({set, Key, Value}, State) ->
-    State1 = State#page_state{vars = dict:store(Key, Value, State#page_state.vars)},
+    State1 = State#page_state{vars = zp_utils:prop_replace(Key, Value, State#page_state.vars)},
     {noreply, State1};
 handle_cast({append, Key, Value}, State) ->
-    State1 = State#page_state{vars = dict:append(Key, Value, State#page_state.vars)},
-    {noreply, State1};
-handle_cast({append_list, Key, List}, State) ->
-    State1 = State#page_state{vars = dict:append_list(Key, List, State#page_state.vars)},
+    NewValue = case zp_utils:lookup(Key, State#page_state.vars) of
+        {Key, L} -> L ++ [Value];
+        none -> [Value]
+    end, 
+    
+    State1 = State#page_state{vars = zp_utils:replace(Key, NewValue, State#page_state.vars)},
     {noreply, State1};
 
 handle_cast({comet_attach, CometPid}, State) ->
@@ -214,18 +212,16 @@ handle_call(get_scripts, _From, State) ->
     {reply, Scripts, State1};
 
 handle_call({get, Key}, _From, State) ->
-    Value = case dict:find(Key, State#page_state.vars) of
-                {ok, V} -> V;
-                error -> false
-            end,
+    Value = proplists:get_value(Key, State#page_state.vars),
     {reply, Value, State};
 
 handle_call({incr, Key, Delta}, _From, State) ->
-    State1 = State#page_state{
-                vars = dict:update_counter(Key, Delta, State#page_state.vars)
-            },
-    {ok, Value}  = dict:find(Key, State1#page_state.vars),
-    {reply, Value, State1};
+    NV = case proplists:lookup(Key, State#page_state.vars) of
+        {Key, V} -> zp_convert:to_integer(V) + Delta;
+        none -> Delta
+    end,
+    State1 = State#page_state{ vars = zp_utils:prop_replace(Key, NV, State#page_state.vars) },
+    {reply, NV, State1};
 
 handle_call(get_attach_state, _From, State) ->
     case State#page_state.comet_pid of
