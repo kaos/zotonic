@@ -35,11 +35,11 @@
 
 %% The session state
 -record(session, {
-            vars,
             expire,
             timer_ref,
             pages,
-            linked
+            linked,
+            props=[]
             }).
 
 %% The state per page
@@ -177,8 +177,7 @@ handle_cast({add_script, Script}, Session) ->
 
 %% @doc Set the session variable, replaces any old value
 handle_cast({set, Key, Value}, Session) ->
-    Session1 = Session#session{vars = dict:store(Key, Value, Session#session.vars)},
-    {noreply, Session1};
+    {noreply, Session#session{ props = zp_utils:prop_replace(Key, Value, Session#session.props) }};
 
 handle_cast(dump, Session) ->
     io:format("~p~n", [Session]),
@@ -197,16 +196,14 @@ handle_cast(Msg, Session) ->
 %% Description: Handling call messages
 
 handle_call({get, Key}, _From, Session) ->
-    Value = case dict:find(Key, Session#session.vars) of
-                {ok, V} -> V;
-                error -> undefined
-            end,
-    {reply, Value, Session};
+    {reply, proplists:get_value(Key, Session#session.props), Session};
 
 handle_call({incr, Key, Delta}, _From, Session) ->
-    Session1 = Session#session{vars = dict:update_counter(Key, Delta, Session#session.vars)},
-    {ok, Value}  = dict:find(Key, Session1#session.vars),
-    {reply, Value, Session1};
+    NV = case proplists:lookup(Key, Session#session.props) of
+        {Key, V} -> zp_convert:to_integer(V) + Delta;
+        none -> Delta
+    end,
+    {reply, NV, Session#session{props = proplists:replace(Key, NV, Session#session.props)}};
 
 handle_call({spawn_link, Module, Func, Args, Context}, _From, Session) ->
     Pid    = spawn_link(Module, Func, [Args, Context]),
@@ -275,11 +272,11 @@ code_change(_OldVsn, Session, _Extra) ->
 new_session(_Args) ->
     Now = zp_utils:now(),
     #session{
-            vars=dict:new(),
             expire=Now + ?SESSION_EXPIRE_1,
             timer_ref=undefined,
             pages=[],
-            linked=[]
+            linked=[],
+            props=[]
             }.
 
 %% @doc Return a new page record, monitor the started page process because we want to know about normal exits
