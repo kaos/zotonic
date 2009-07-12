@@ -8,6 +8,7 @@
 -export([render_action/4]).
 
 render_action(_TriggerId, TargetId, Args, Context) ->
+    Id      = proplists:get_value(id, Args, TargetId),
 	Type    = proplists:get_value(type, Args),
 	Effect  = proplists:get_value(effect, Args),
 	Speed   = proplists:get_value(speed, Args, 250),
@@ -25,6 +26,7 @@ render_action(_TriggerId, TargetId, Args, Context) ->
 		'toggle'        -> <<"toggle();">>;
 		'add_class'     -> io_lib:format("addClass('~s');", [Class]);
 		'remove_class'  -> io_lib:format("removeClass('~s');", [Class]);
+		'toggle_class'  -> io_lib:format("toggleClass('~s');", [Class]);
 		'fade_in'       -> io_lib:format("fadeIn(~p);", [Speed]);
 		'fade_out'      -> io_lib:format("fadeOut(~p);", [Speed]);
 		'slide_down'    -> io_lib:format("slideDown(~p);", [Speed]);
@@ -37,7 +39,7 @@ render_action(_TriggerId, TargetId, Args, Context) ->
 		'animate'       -> io_lib:format("animate(~s, ~p, '~s');", [Options, Speed, Easing])
 	end,
 
-	Script2 = [<<"$('#">>,TargetId,<<"').">>,Script],
+	Script2 = [<<"$('#">>,Id,<<"').">>,Script],
 	
 	{Script2, Context}.
 
