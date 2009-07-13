@@ -32,7 +32,7 @@ validate_query_args(Context) ->
                        end,
 
             {Errors,Values} = lists:partition(IsError, Validated),
-            QsValidated     = dict:from_list(lists:map(GetValue, Values)),
+            QsValidated     = lists:map(GetValue, Values),
 
             Context1 = zp_context:set(q_validated, QsValidated, Context),
             Context2 = report_errors(Errors, Context1),
@@ -60,9 +60,9 @@ report_errors([{_Id, {error, ErrId, Error}}|T], Context) ->
 
 %% @doc Perform all validations
 validate(Val, Context) ->
-    [Id,Pickled]      = string:tokens(Val, ":"),
-    {Id,Validations}  = zp_utils:depickle(Pickled),
-    Value             = zp_context:get_q(Id, Context),
+    [Name,Pickled]          = string:tokens(Val, ":"),
+    {Id,Name,Validations} = zp_utils:depickle(Pickled),
+    Value                 = zp_context:get_q(Name, Context),
 
     %% Fold all validations, propagate errors
     ValidateF = fun
@@ -74,4 +74,4 @@ validate(Val, Context) ->
                         end
                 end,
     Validated = lists:foldl(ValidateF, {ok,Value}, Validations),
-    {Id, Validated}.
+    {Name, Validated}.

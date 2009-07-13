@@ -119,6 +119,7 @@ render_validator(TriggerId, TargetId, Args, Context) ->
     Validations = proplists:get_all_values(type, Args),
     Trigger     = proplists:get_value(trigger, Args, TriggerId),
     Target      = proplists:get_value(target,  Args, TargetId),
+    Name        = proplists:get_value(name,  Args, Target),
 
     % The validator object, can have parameters for failureMessage.
     VldOptions  = zp_utils:js_object(Args, [type,trigger,id,target]),
@@ -153,7 +154,7 @@ render_validator(TriggerId, TargetId, Args, Context) ->
         [] ->
             {[VldScript|Append], Context1};
         _ ->
-            Pickled  = zp_utils:pickle({Trigger,Postback}),
+            Pickled  = zp_utils:pickle({Trigger,Name,Postback}),
             PbScript = [<<"zp_set_validator_postback('">>,Trigger,<<"', '">>, Pickled, <<"');\n">>],
             {[PbScript,VldScript|Append], Context1}
     end.

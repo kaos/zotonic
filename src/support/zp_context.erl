@@ -326,9 +326,9 @@ get_q_all(Key, Context) ->
 %%      is thrown when there was no validator, when the validator is invalid or when the validation failed.
 get_q_validated(Key, Context) ->
     case proplists:lookup('q_validated', Context#context.props) of
-        {'q', Qs} ->
+        {'q_validated', Qs} ->
             case proplists:lookup(zp_convert:to_list(Key), Qs) of
-                {'q', Value} -> Value;
+                {_Key, Value} -> Value;
                 none -> throw({not_validated, Key})
             end
     end.
