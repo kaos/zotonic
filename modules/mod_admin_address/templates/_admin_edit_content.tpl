@@ -6,6 +6,31 @@
 		<fieldset class="admin-form">
 
 			<h4>Electronic address</h4>
+
+			<div class="zp-30">
+				<label for="phone">Telephone</label>
+				<input id="phone" type="text" name="phone" value="{{ r.phone }}" style="width: 90%" />
+			</div>
+
+			<div class="zp-5">
+				&nbsp;
+			</div>
+
+			<div class="zp-30">
+				<label for="phone_alt">Alternative telephone</label>
+				<input id="phone_alt" type="text" name="phone_alt" value="{{ r.phone_alt }}" style="width: 90%" />
+			</div>
+
+			<div class="zp-5">
+				&nbsp;
+			</div>
+
+			<div class="zp-30">
+				<label for="phone_emergency">Emergency telephone</label>
+				<input id="phone_emergency" type="text" name="phone_emergency" value="{{ r.phone_emergency }}" style="width: 90%" />
+			</div>
+			
+			<div class="clearfix">&nbsp;</div>
 			
 			<div class="form-item clearfix">
 				<label for="email">E-mail address</label>
@@ -17,6 +42,7 @@
 				<label for="website">Website</label>
 				<input id="website" type="text" name="website" value="{{ r.website }}" />
 			</div>
+
 
 {#
 	-- Inherited:   street1 character varying(80) NOT NULL DEFAULT ''::character varying,
