@@ -40,7 +40,7 @@ event({submit, {delete_category, _Props}, _TriggerId, _TargetId}, Context) ->
     case zp_acl:has_role(admin, Context) of
         true ->
             Id = list_to_integer(zp_context:get_q("id", Context)),
-            TransferId = case zp_context:get_q("transfer_id") of
+            TransferId = case zp_context:get_q("transfer_id", Context) of
                 [] -> undefined;
                 undefined -> undefined;
                 T -> list_to_integer(T)
