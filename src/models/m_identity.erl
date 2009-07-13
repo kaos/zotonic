@@ -116,7 +116,13 @@ set_username_pw(Id, Username, Password, Context) ->
                             where type = 'username_pw' and rsc_id = $1", [Id, Username1, Hash], Ctx),
                 case Rupd of
                     0 ->
-                        zp_db:q("insert into identity (rsc_id, is_unique, type, key, propb) values ($1, true, 'username_pw', $2, $3)", [Id, Username1, Hash], Ctx);
+                        UniqueTest = zp_db:q1("select count(*) from identity where type = 'username_pw' and key = $1", [Username], Ctx),
+                        case UniqueTest of
+                            0 ->
+                                zp_db:q("insert into identity (rsc_id, is_unique, type, key, propb) values ($1, true, 'username_pw', $2, $3)", [Id, Username1, Hash], Ctx);
+                            _Other ->
+                                throw({error, eexist})
+                        end;
                     1 -> 
                         1
                 end
