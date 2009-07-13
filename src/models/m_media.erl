@@ -132,9 +132,9 @@ insert_file(File, Context) ->
     insert_file(File, [], Context).
 
 insert_file(File, Props, Context) ->
-    Props1 = case proplists:get_value(category_id, Props) of
+    Props1 = case proplists:get_value(category_id, Props, proplists:get_value(category, Props)) of
         undefined ->
-            [{category_id, m_category:name_to_id_check(media, Context)} | Props];
+            [{category, media} | Props];
         _ ->
             Props
     end,
@@ -152,10 +152,18 @@ insert_file(File, Props, Context) ->
                 Error
         end
     end, 
-    zp_db:transaction(InsertFun, Context).
+    case zp_db:transaction(InsertFun, Context) of
+        {ok, Id} ->
+            CatList = m_rsc:is_a_list(Id, Context),
+            [ zp_depcache:flush(Cat) || Cat <- CatList ],
+            {ok, Id};
+        {error, Reason} -> 
+            {error, Reason}
+    end.
 
 
 %% @doc Replaces a medium file, when the file is not in archive then a copy is made in the archive.
+%% When the resource is in the media category, then the category is adapted depending on the mime type of the uploaded file.
 %% @spec insert_file(File, Context) -> {ok, Id} | {error, Reason}
 replace_file(File, RscId, Context) ->
     replace_file(File, RscId, [], Context).
@@ -174,11 +182,24 @@ replace_file(File, RscId, Props, Context) ->
                 RootName = filename:rootname(filename:basename(ArchiveFile)),
                 case zp_db:insert(medium, [{id, RscId}, {filename, ArchiveFile}, {rootname, RootName}|PropsMedia], Ctx) of
                     {ok, _MediaId} ->
+                        % When the resource is in the media category, then move it to the correct sub-category depending
+                        % on the mime type of the uploaded file.
+                        case rsc_is_media_cat(RscId, Context) of
+                            true ->
+                                case proplists:get_value(mime, PropsMedia) of
+                                    "image/" ++ _ -> m_rsc:update(RscId, [{category, image}], Ctx);
+                                    "video/" ++ _ -> m_rsc:update(RscId, [{category, video}], Ctx);
+                                    "sound/" ++ _ -> m_rsc:update(RscId, [{category, sound}], Ctx);
+                                    _ -> nop
+                                end;
+                            false -> nop
+                        end,
                         {ok, RscId};
                     Error ->
                         Error
                 end
             end,
+            
             {ok, Id} = zp_db:transaction(F, Context),
             [ zp_depcache:flush(#rsc{id=DepictId}) || DepictId <- Depicts ],
             zp_depcache:flush(#rsc{id=Id}),
@@ -186,6 +207,17 @@ replace_file(File, RscId, Props, Context) ->
         false ->
             {error, eacces}
     end.
+
+
+    rsc_is_media_cat(Id, Context) ->
+        case zp_db:q1("select c.name from rsc c join rsc r on r.category_id = c.id where r.id = $1", [Id], Context) of
+            <<"media">> -> true;
+            <<"image">> -> true;
+            <<"audio">> -> true;
+            <<"video">> -> true;
+            _ -> false
+        end.
+
 
 
 %% @doc Fetch the medium information of the file, if they are not set in the Props
