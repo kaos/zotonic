@@ -71,7 +71,7 @@
 				});
 				
 				$('body').append(dialogWrapper);
-				$('.dialog input').eq(1).focus();
+				$('.dialog input').eq(0).focus();
 			}
 		},
 		
