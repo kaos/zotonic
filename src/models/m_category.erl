@@ -344,13 +344,15 @@ get_path(Id, Context) ->
 
 
 %% @doc Return a flattened representation of the complete category tree.  Can be used for overviews or select boxes.
+%% The "meta" categories of predicate, category and group are suppressed.
 all_flat(Context) ->
     F = fun() ->
         zp_db:q("select c.id, c.lvl, r.name, c.props from category c join rsc r on r.id = c.id order by c.nr", Context)
     end,
     All = zp_depcache:memo(F, {category_flat}, ?WEEK, [category]),
     [
-        {Id, Lvl, string:copies("&nbsp;&nbsp;&nbsp;&nbsp;", Lvl-1), flat_title(Name, Props)} || {Id, Lvl, Name, Props} <- All
+        {Id, Lvl, string:copies("&nbsp;&nbsp;&nbsp;&nbsp;", Lvl-1), flat_title(Name, Props)} 
+        || {Id, Lvl, Name, Props} <- All, Name /= <<"meta">>, Name /= <<"predicate">>, Name /= <<"category">>, Name /= <<"group">>
     ].
     
     flat_title(Name, Props) ->
@@ -454,7 +456,6 @@ renumber(Context) ->
 renumber_transaction(Context) ->
     CatTuples = zp_db:q("select id, parent_id, seq from category order by seq,id", Context),
     Enums = enumerate(CatTuples),
-    ?DEBUG(Enums),
     [
         zp_db:update(category, CatId, [
             {nr, Nr},
