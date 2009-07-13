@@ -188,6 +188,6 @@ h5.dialog-title {
 		border-color: #111;
 	}
 	
-.dialog label {
+.dialog label, .dialog h3, .dialog h4, .dialog h5 {
 	color: #eee;
 }
