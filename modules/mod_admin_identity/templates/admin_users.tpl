@@ -12,7 +12,7 @@
 			that the former has logon credentials attached to its page record.</p>
 	
 		<div class="clearfix">
-			{% button class="" text="Make a new page" action={dialog_new_rsc title=""} %}
+			{% button text="New User" action={dialog_user_add on_success={reload}} %}
 
 			<div class="quick-search-wrapper right">
 				<form method="get" action="{% url admin_user %}">
@@ -71,26 +71,6 @@
 
 	{% endwith %}
 
-			{#<form method="get" autocomplete="off">
-				<input type="text" value="" name="q" id="q" class="do_listfilter {list: '#posts'}" />
-			</form>
-
-			<ul id="posts">
-				<li><span class="title">The Well-Designed Web</span></li>
-				<li><span class="title">Welcome John Nunemaker</span></li> 
-				<li><span class="title">Sidebar Creative: The Next Steps</span></li> 
-				<li><span class="title">The Web/Desktop Divide</span></li> 
-				<li><span class="title">2007 in Review</span></li> 
-				<li><span class="title">Don't Complicate the Solution</span></li> 
-				<li><span class="title">Blog to Business</span></li> 
-				<li><span class="title">Single Line CSS</span></li> 
-				<li><span class="title">Comments Work Again</span></li> 
-				<li><span class="title">The iPhone Effect</span></li> 
-				<li><span class="title">Greek Blogger Camp</span></li> 
-				<li><span class="title">FeedBurner FeedSmith</span></li> 
-				<li><span class="title">Download Counter Update 1.3</span></li> 
-				<li><span class="title">Branding Reworked</span></li>
-			</ul>#}
 		</div>
 		<div class="push"></div>
 	</div>
