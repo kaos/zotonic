@@ -1,16 +1,16 @@
 %% @author Marc Worrell <marc@worrell.nl>
 %% @copyright 2009 Marc Worrell
-%% @date 2009-06-13
+%% @date 2009-07-13
 %%
-%% @doc Identity administration.  Adds overview of users to the admin and enables to add passwords on the edit page.
+%% @doc Support for editing and displaying addresses of people and locations.
 
--module(mod_admin_identity).
+-module(mod_admin_address).
 -author("Marc Worrell <marc@worrell.nl>").
 -behaviour(gen_server).
 
--mod_title("Admin identity/user supports").
--mod_description("Adds an user overview and possibility to edit passwords.").
-
+-mod_title("Admin address support").
+-mod_description("Adds an edit form for addresses to the admin.").
+-mod_prio(650).
 
 %% gen_server exports
 -export([init/1, handle_call/3, handle_cast/2, handle_info/2, terminate/2, code_change/3]).
@@ -18,15 +18,11 @@
 
 %% interface functions
 -export([
-    observe/2
 ]).
 
--include("zophrenic.hrl").
+-include_lib("zophrenic.hrl").
 
 -record(state, {context}).
-
-observe({search_query, Req, OffsetLimit}, Context) ->
-    search(Req, OffsetLimit, Context).
 
 
 %%====================================================================
@@ -38,7 +34,6 @@ start_link() ->
     start_link([]).
 start_link(Args) when is_list(Args) ->
     gen_server:start_link({local, ?MODULE}, ?MODULE, Args, []).
-
 
 %%====================================================================
 %% gen_server callbacks
@@ -52,8 +47,8 @@ start_link(Args) when is_list(Args) ->
 init(Args) ->
     process_flag(trap_exit, true),
     {context, Context} = proplists:lookup(context, Args),
-    zp_notifier:observe(search_query, {?MODULE, observe}, Context),
     {ok, #state{context=zp_context:new_for_host(Context)}}.
+
 
 %% @spec handle_call(Request, From, State) -> {reply, Reply, State} |
 %%                                      {reply, Reply, State, Timeout} |
@@ -88,8 +83,7 @@ handle_info(_Info, State) ->
 %% terminate. It should be the opposite of Module:init/1 and do any necessary
 %% cleaning up. When it returns, the gen_server terminates with Reason.
 %% The return value is ignored.
-terminate(_Reason, State) ->
-    zp_notifier:detach(search_query, {?MODULE, observe}, State#state.context),
+terminate(_Reason, _State) ->
     ok.
 
 %% @spec code_change(OldVsn, State, Extra) -> {ok, NewState}
@@ -103,27 +97,3 @@ code_change(_OldVsn, State, _Extra) ->
 %% support functions
 %%====================================================================
 
-
-search({users, [{text,QueryText}]}, _OffsetLimit, Context) ->
-    case QueryText of
-        A when A == undefined orelse A == "" orelse A == <<>> ->
-            #search_sql{
-                select="r.id, max(r.modified) AS rank",
-                from="rsc r join identity i on r.id = i.rsc_id",
-                order="rank desc",
-                group_by="r.id",
-                tables=[{rsc,"r"}]
-            };
-        _ ->
-            #search_sql{
-                select="r.id, max(ts_rank_cd(pivot_tsv, query, 32)) AS rank",
-                from="rsc r join identity i on r.id = i.rsc_id, plainto_tsquery($2, $1) query",
-                where=" query @@ pivot_tsv",
-                order="rank desc",
-                group_by="r.id",
-                args=[QueryText, zp_pivot_rsc:pg_lang(Context#context.language)],
-                tables=[{rsc,"r"}]
-            }
-    end;
-search(_, _, _) ->
-    undefined.

@@ -9,7 +9,7 @@
 -author("Marc Worrell <marc@worrell.nl>").
 -behaviour(gen_server).
 
--mod_title("Zophrenic Predicate Administration").
+-mod_title("Admin predicate support").
 -mod_description("Adds support for editing predicates to the admin.").
 -mod_prio(600).
 

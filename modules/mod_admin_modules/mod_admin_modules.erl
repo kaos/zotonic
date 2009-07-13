@@ -9,7 +9,7 @@
 -author("Marc Worrell <marc@worrell.nl>").
 -behaviour(gen_server).
 
--mod_title("Zophrenic Module Administration").
+-mod_title("Admin module support").
 -mod_description("Manages modules. Adds an admin interface to activate and deactivate modules.").
 -mod_prio(700).
 

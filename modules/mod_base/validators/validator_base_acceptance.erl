@@ -12,7 +12,7 @@ render_validator(acceptance, TriggerId, _TargetId, Args, Context)  ->
 	Script     = [<<"zp_add_validator(\"">>,TriggerId,<<"\", \"acceptance\", ">>, JsObject, <<");\n">>],
 	{[], Script, Context}.
 
-%% @spec validate(Type, TriggerId, Values, Args, Context) -> {ok,AcceptableValues} | {error,Id,Error}
+%% @spec validate(Type, Name, Values, Args, Context) -> {ok,AcceptableValues} | {error,Id,Error}
 %%          Error -> invalid | novalue | {script, Script}
 validate(acceptance, Id, Value, _Args, _Context) ->
     case zp_utils:is_true(Value) of

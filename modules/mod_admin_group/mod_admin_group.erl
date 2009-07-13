@@ -9,7 +9,7 @@
 -author("Marc Worrell <marc@worrell.nl>").
 -behaviour(gen_server).
 
--mod_title("Zophrenic Group Administration").
+-mod_title("Admin group support").
 -mod_description("Adds support for editing groups and group membership to the admin.").
 -mod_prio(600).
 

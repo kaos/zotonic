@@ -8,7 +8,7 @@
 -author("Marc Worrell <marc@worrell.nl>").
 -behaviour(gen_server).
 
--mod_title("Zophrenic Category Administration").
+-mod_title("Admin category support").
 -mod_description("Support editing and changing the category hierarchy.").
 -mod_prio(600).
 

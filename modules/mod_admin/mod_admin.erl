@@ -8,7 +8,7 @@
 -author("Marc Worrell <marc@worrell.nl>").
 -behaviour(gen_server).
 
--mod_title("Zophrenic Admin").
+-mod_title("Admin module").
 -mod_description("Provides administrative interface for editing pages, media, users etc.").
 
 %% gen_server exports
