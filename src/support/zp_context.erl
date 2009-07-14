@@ -62,7 +62,9 @@
     set/3,
     set/2,
     get/2,
+    get/3,
     incr/3,
+    get_all/1,
     
     language/1,
     
@@ -467,13 +469,27 @@ set(PropList, Context) when is_list(PropList) ->
     Context#context{props = NewProps}.
 
 
-%% @spec get(Key, Context) -> Value
-%% @doc Fetch the value of the context variable Key
+%% @spec get(Key, Context) -> Value | undefined
+%% @doc Fetch the value of the context variable Key, return undefined when Key is not found.
 get(Key, Context) ->
     case proplists:lookup(Key, Context#context.props) of
         {Key, Value} -> Value;
         none -> undefined
     end.
+
+%% @spec get(Key, Context, Default) -> Value | Default
+%% @doc Fetch the value of the context variable Key, return Default when Key is not found.
+get(Key, Context, Default) ->
+    case proplists:lookup(Key, Context#context.props) of
+        {Key, Value} -> Value;
+        none -> Default
+    end.
+
+
+%% @spec get_all(Context) -> PropList
+%% @doc Return a proplist with all context variables.
+get_all(Context) ->
+    Context#context.props.
 
 
 %% @spec incr_session(Key, Increment, Context) -> {NewValue,NewContext}
