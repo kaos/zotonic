@@ -1,5 +1,6 @@
 %% Dispatch rules for mod_site_simple.
 
 [
-	{home,	[],	resource_template,	[{template, "home.tpl"}]}
+%	{home,	[],	resource_template,	[ {template, "home.tpl"} ]}
+%	{news,	[],	resource_page,	[ {template, "news.tpl"} ]}
 ].

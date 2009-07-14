@@ -16,11 +16,12 @@
 -include_lib("webmachine_resource.hrl").
 -include_lib("include/zophrenic.hrl").
 
-init([]) -> {ok, []}.
+init(DispatchArgs) -> {ok, DispatchArgs}.
 
-service_available(ReqData, _Context) ->
-    Context = zp_context:new(ReqData, ?MODULE),
-    ?WM_REPLY(true, Context).
+service_available(ReqData, DispatchArgs) when is_list(DispatchArgs) ->
+    Context  = zp_context:new(ReqData, ?MODULE),
+    Context1 = zp_context:set(DispatchArgs, Context),
+    ?WM_REPLY(true, Context1).
 
 charsets_provided(ReqData, Context) ->
     {[{"utf-8", fun(X) -> X end}], ReqData, Context}.

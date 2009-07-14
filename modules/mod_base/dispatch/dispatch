@@ -1,12 +1,12 @@
 %% Default dispatch rules for zophrenic
 [
-	{home,     [],            resource_home, []},
+	{home,     [],            resource_template, [ {template, "home.tpl"} ]},
 	{comet,    ["comet"],     resource_comet, []},
 	{postback, ["postback"],  resource_postback, []},
 	{close_connection, ["close-connection"],  resource_close_connection, []},
 
-	{page,    ["page", id],       resource_page, []},
-	{page,    ["page", id, slug], resource_page, []},
+	{page,    ["page", id],       resource_page, [ {template, "page.tpl"} ]},
+	{page,    ["page", id, slug], resource_page, [ {template, "page.tpl"} ]},
 
 	{id,	   ["id", id],	  resource_id, []},
 
