@@ -73,9 +73,7 @@
 
 						<span class="zp-20">
 							{% button text="members" action={redirect dispatch="admin_group_members" id=id} %}
-							{% if editable %}
-							{% button text="delete" action={dialog_group_delete id=id on_success={slide_fade_out target=#li.id}} %}
-							{% endif %}
+							{% button text="delete" disabled=m.rsc[id].is_protected action={dialog_group_delete id=id on_success={slide_fade_out target=#li.id}} %}
 							{% button text="edit" action={redirect dispatch="admin_edit_rsc" id=id} %}
 						</span>
 					</a>

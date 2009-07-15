@@ -126,7 +126,7 @@ button {
 	white-space: nowrap;
 	vertical-align: baseline;
 }
-			
+
 button {
 	width: auto;
 	overflow: visible;
@@ -150,6 +150,15 @@ button:hover {
 	text-decoration: none;
 }
 
+button.disabled {
+	color: #999;
+    border-color: #aaa;
+}
+
+button.disabled:hover {
+    border: 1px solid #ccc;
+    border-color: #aaa;
+}
 
 /* notices
 -------------------------------------------------------------- */

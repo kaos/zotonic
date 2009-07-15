@@ -51,7 +51,11 @@ event({submit, rscform, _FormId, _TargetId}, Context) ->
             Context1 = zp_render:set_value("field-name", m_rsc:p(Id, name, Context), Context),
             Context2 = zp_render:set_value("field-uri",  m_rsc:p(Id, uri, Context1), Context1),
             Context3 = zp_render:set_value("slug",  m_rsc:p(Id, slug, Context2), Context2),
-            zp_render:growl(["Saved ",zp_html:strip(Title),"."], Context3);
+            Context4 = case zp_convert:to_bool(m_rsc:p(Id, is_protected, Context3)) of
+                true ->  zp_render:wire("delete-button", {disable, []}, Context3);
+                false -> zp_render:wire("delete-button", {enable, []}, Context3)
+            end,
+            zp_render:growl(["Saved ",zp_html:strip(Title),"."], Context4);
         {error, duplicate_uri} ->
             zp_render:growl_error("Error, duplicate uri. Please change the uri.", Context);
         {error, duplicate_name} ->

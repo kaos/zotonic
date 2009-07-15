@@ -33,6 +33,8 @@ render_action(_TriggerId, TargetId, Args, Context) ->
 		'slide_up'      -> io_lib:format("slideUp(~p);", [Speed]);
 		'slide_fade_out'-> io_lib:format("animate({opacity: 'hide', height: 'hide'}, ~p);", [Speed]);
 		'slide_fade_in' -> io_lib:format("animate({opacity: 'show', height: 'show'}, ~p);", [Speed]);
+        'disable'       -> "attr('disabled', true).addClass('disabled');";
+        'enable'        -> "attr('disabled', false).removeClass('disabled');";
 
         %% @todo check these, i think that with jQuery 1.3 they should be 'animate' with a js_object/2 output
 		'effect'        -> io_lib:format("effect('~s', ~s, ~p);", [Effect, Options, Speed]);

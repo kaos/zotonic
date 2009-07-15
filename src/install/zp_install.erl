@@ -84,6 +84,7 @@ model_pgsql() ->
         is_authoritative boolean NOT NULL DEFAULT true,
         is_published boolean NOT NULL DEFAULT false,
         is_featured boolean NOT NULL DEFAULT false,
+        is_protected boolean NOT NULL DEFAULT false,
         publication_start timestamp with time zone NOT NULL DEFAULT now(),
         publication_end timestamp with time zone NOT NULL DEFAULT '9999-06-01 00:00:00'::timestamp with time zone,
         group_id int NOT NULL,
@@ -153,6 +154,19 @@ model_pgsql() ->
     "CREATE INDEX rsc_pivot_country_key ON rsc (pivot_country)",
     "CREATE INDEX rsc_pivot_postcode_key ON rsc (pivot_postcode)",
     "CREATE INDEX rsc_pivot_geocode_key ON rsc (pivot_geocode)",
+
+    % Table: protect
+    % By making an entry in this table we protect a rsc from being deleted.
+    % This table is maintained by the update/insert trigger.
+
+    "CREATE TABLE protect (
+        id int NOT NULL,
+        
+        CONSTRAINT protect_id PRIMARY KEY (id),
+        CONSTRAINT fk_protect_id FOREIGN KEY (id)
+          REFERENCES rsc(id)
+          ON UPDATE CASCADE ON DELETE RESTRICT
+    )",
 
     % Table: edge
     % All relations between resources, forming a directed graph
@@ -486,6 +500,7 @@ model_pgsql() ->
 
     % Update/insert trigger on rsc to fill the update queue
     % The text indexing is delayed until the updates are stable
+    % Also checks if the rsc is set to protected, if so makes an entry in the 'protect' table.
     "
     CREATE FUNCTION rsc_pivot_update() RETURNS trigger AS $$
     declare 
@@ -493,10 +508,10 @@ model_pgsql() ->
         do_queue boolean;
     begin
         if (tg_op = 'INSERT') then
-            duetime := now() - interval '10 minute';
+            duetime := now() - interval '2 minute';
             do_queue := true;
         elseif (new.version <> old.version or new.modified <> old.modified) then
-            duetime := now() + interval '10 minute';
+            duetime := now() + interval '2 minute';
             do_queue := true;
         else
             do_queue := false;
@@ -520,6 +535,17 @@ model_pgsql() ->
                         -- do nothing
                 end;
             end loop insert_update_queue;
+        end if;
+            
+        if (new.is_protected) then
+            begin
+                insert into protect (id) values (new.id);
+            exception
+                when unique_violation then
+                    -- do nothing
+            end;
+        else
+            delete from protect where id = new.id;
         end if;
         return null;
     end;

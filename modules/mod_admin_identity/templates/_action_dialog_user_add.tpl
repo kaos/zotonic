@@ -35,7 +35,7 @@
 
 		<h3>Username and password</h3>
 		<p>
-			Please give an unique username and a password. Usernames and passwords are case sensitive, so please be careful when entering them.
+			Give an unique username and a password. Usernames and passwords are case sensitive, so be careful when entering them.
 		</p>
 
 		

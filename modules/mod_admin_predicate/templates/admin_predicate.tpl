@@ -36,11 +36,8 @@
 						<span class="zp-40">{{ p.uri|default:"&nbsp;" }}</span>
 						<span class="zp-10">{{ p.reversed|yesno:"reversed,&nbsp;" }}</span>
 						<span class="zp-10">
-							{% if editable %}
-							{% button text="delete" action={dialog_predicate_delete id=p.id on_success={slide_fade_out target=#li.name}} %}
-							{% endif %}
-
-							{% button text="edit" action={redirect dispatch="admin_edit_rsc" id=p.id} %}
+							{% button disabled=p.is_protected text="delete" action={dialog_predicate_delete id=p.id on_success={slide_fade_out target=#li.name}} %}
+							{% button text="edit &raquo;" action={redirect dispatch="admin_edit_rsc" id=p.id} %}
 						</span>
 					</a>
 				</li>

@@ -31,6 +31,7 @@
     move_before/3,
     update_sequence/2,
     all_flat/1,
+    all_flat_meta/1,
     tree/1,
     tree/2,
     tree_depth/2,
@@ -53,6 +54,8 @@ m_find_value(tree2, #m{value=undefined}, Context) ->
     tree_depth(2, Context);
 m_find_value(all_flat, #m{value=undefined}, Context) ->
     all_flat(Context);
+m_find_value(all_flat_meta, #m{value=undefined}, Context) ->
+    all_flat_meta(Context);
 
 m_find_value(Index, #m{value=undefined} = M, Context) ->
     case name_to_id(Index, Context) of
@@ -346,21 +349,30 @@ get_path(Id, Context) ->
 %% @doc Return a flattened representation of the complete category tree.  Can be used for overviews or select boxes.
 %% The "meta" categories of predicate, category and group are suppressed.
 all_flat(Context) ->
+    all_flat1(Context, false).
+
+all_flat_meta(Context) ->
+    all_flat1(Context, true).
+    
+all_flat1(Context, ShowMeta) ->
     F = fun() ->
         zp_db:q("select c.id, c.lvl, r.name, c.props from category c join rsc r on r.id = c.id order by c.nr", Context)
     end,
     All = zp_depcache:memo(F, {category_flat}, ?WEEK, [category]),
-    [
-        {Id, Lvl, string:copies("&nbsp;&nbsp;&nbsp;&nbsp;", Lvl-1), flat_title(Name, Props)} 
-        || {Id, Lvl, Name, Props} <- All, Name /= <<"meta">>, Name /= <<"predicate">>, Name /= <<"category">>, Name /= <<"group">>
-    ].
+    All1 = case ShowMeta of
+        true -> All;
+        false -> lists:filter(fun is_not_meta/1, All)
+    end,
+    [ {Id, Lvl, string:copies("&nbsp;&nbsp;&nbsp;&nbsp;", Lvl-1), flat_title(Name, Props)} || {Id, Lvl, Name, Props} <- All1 ].
     
     flat_title(Name, Props) ->
         case proplists:get_value(title, Props) of
             undefined -> Name;
             Title -> Title
         end.
-    
+
+    is_not_meta({_Id, _Lvl, Name, _Props}) ->
+        Name /= <<"meta">> andalso Name /= <<"predicate">> andalso Name /= <<"category">> andalso Name /= <<"group">>.
     
 
 %% @doc Return the tree of all categories

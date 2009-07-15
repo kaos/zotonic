@@ -67,4 +67,8 @@ to_bool(<<"false">>) -> false;
 to_bool(<<"FALSE">>) -> false;
 to_bool(<<"n">>) -> false;
 to_bool(<<"N">>) -> false;
+to_bool("disabled") -> false;
+to_bool(<<"disabled">>) -> false;
+to_bool("DISABLED") -> false;
+to_bool(<<"DISABLED">>) -> false;
 to_bool(_) -> true.

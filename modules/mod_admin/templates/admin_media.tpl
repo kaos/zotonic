@@ -45,8 +45,7 @@
 								<span class="zp-10">{{ medium.width }} x {{ medium.height }}</span>
 								<span class="zp-10">{{ medium.created|date:"M d, H:i"|default:"&nbsp;" }}</span>
 								<span class="zp-10">
-									{% button text="delete" 
-											action={dialog_delete_rsc id=id on_success={slide_fade_out target=#li.id}} %}
+									{% button text="delete" disabled=r.is_protected action={dialog_delete_rsc id=id on_success={slide_fade_out target=#li.id}} %}
 									{% button text="edit" action={redirect dispatch="admin_edit" id=id} %}
 								</span>
 							</a>

@@ -186,16 +186,21 @@
 								<div class="admin-form ">
 									<div class="form-item clearfix">
 										{% button class="save-resource do_tooltip" text="save" title="Save this page and all the connections it has." %}
+										{% button class="discard-resource right" text="cancel" action={redirect back} %}
+										{% button class="discard-resource right" disabled=r.is_protected id="delete-button" text="delete" action={dialog_delete_rsc id=r.id on_success={redirect back}} %}
+									</div>
+									
+									<div class="form-item clearfix">
 										<input type="checkbox" class="do_fieldreplace" id="is_published" name="is_published" value="1" {% if r.is_published %}checked="checked"{% endif %}/> 
 										<label for="is_published" class="left">Published</label>
 										
 										<input type="checkbox" class="do_fieldreplace" id="is_featured" name="is_featured" value="1" {% if r.is_featured %}checked="checked"{% endif %}/> 
 										<label for="is_featured" class="left">Featured</label>
-										
-										{% button class="discard-resource right" text="cancel" action={redirect back} %}
-										{% button class="discard-resource right" text="delete" action={dialog_delete_rsc id=r.id on_success={redirect back}} %}
-									</div>
 
+										<input type="checkbox" class="do_fieldreplace" id="is_protected" name="is_protected" value="1" {% if r.is_protected %}checked="checked"{% endif %}/> 
+										<label for="is_protected" class="left">Protected</label>
+									</div>
+									
 									{#<hr />
 									<div class="zp-100">
 										<fieldset>

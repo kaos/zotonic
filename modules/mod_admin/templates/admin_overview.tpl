@@ -38,8 +38,8 @@
 						<span class="zp-15">{{ m.rsc[m.rsc[id].modifier_id].title|default:"-" }}</span>
 						<span class="zp-15">{{ m.rsc[id].created|date:"F d, H:i" }}</span>
 						<span class="zp-10">
-							{% button text="delete" 
-									action={dialog_delete_rsc id=id on_success={slide_fade_out target=#li.id}} %}
+							{% button text="delete" disabled=m.rsc[id].is_protected action={dialog_delete_rsc id=id on_success={slide_fade_out target=#li.id}} %}
+
 							{% button text="edit &raquo;" action={redirect dispatch="admin_edit_rsc" id=id} %}
 						</span>
 					</a>
