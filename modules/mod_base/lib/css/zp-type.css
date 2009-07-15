@@ -115,7 +115,7 @@ button {
 	border-color: #999 #858585 #666 #858585;
 	-moz-border-radius: 2px;
 	-webkit-border-radius: 2px;
-	background: #ccc url(/image/button.png) left top repeat-x;
+	background: #ccc url(/lib/images/button.png) left top repeat-x;
 	font-family: "Lucida Grande", Tahoma, Arial, Verdana, sans-serif;
 	font-size: 11px;
 	line-height: 16px;
