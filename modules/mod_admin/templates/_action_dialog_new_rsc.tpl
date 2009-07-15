@@ -9,13 +9,13 @@
 	<input type="hidden" name="redirect" value="{{ redirect }}" />
 
 	<div class="new-rsc-wrapper">
-		<p>
+		<div class="form-item clearfix">
 			<label for="new_rsc_title" style="color:white">Page title</label>
 			<input type="text" id="new_rsc_title" name="new_rsc_title" value="{{ title|escape }}" />
 			{% validate id="new_rsc_title" type={presence} %}
-		</p>
+		</div>
 		
-		<p>
+		<div class="form-item clearfix">
 			<label for="{{ #category }}">Category</label>
 			<select id="{{ #category }}" name="category_id">
 			{% for cat_id, level, indent, name in m.category.all_flat %}
@@ -24,16 +24,16 @@
 				</option>
 			{% endfor %}
 			</select>
-		</p>
+		</div>
 		
-		<p>
+		<div class="form-item clearfix">
 			<label for="{{ #group_id }}">Group</label>
 			<select id="{{ #group_id }}" name="group_id">
 			{% for group_id in m.acl.member %}
 				<option value="{{ group_id }}">{{ m.rsc[group_id].title }}</option>
 			{% endfor %}
 			</select>
-		</p>
+		</div>
 		
 		<button type="submit">Make page</button>
 		

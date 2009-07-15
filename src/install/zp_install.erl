@@ -17,11 +17,13 @@
 ]).
 
 %% @doc Install the database on the database connection supplied
-%% @spec install(Database) -> ok
-install(Database) ->
-    {ok, C} = pgsql_pool:get_connection(Database),
+%% @spec install(Host) -> ok
+install(Host) ->
+    {ok, C} = pgsql_pool:get_connection(Host),
     ok = pgsql:with_transaction(C, fun install_all/1),
-    pgsql_pool:return_connection(Database, C),
+    pgsql_pool:return_connection(Host, C),
+    Context = zp_context:new_for_host(Host),
+    m_category:renumber(Context),
     ok.
 
 
@@ -263,8 +265,8 @@ model_pgsql() ->
     "CREATE TABLE medium
     (
       id int NOT NULL,
-      filename character varying(400) NOT NULL,
-      rootname character varying(100) NOT NULL,
+      filename character varying(400),
+      rootname character varying(100),
       mime character varying(64) NOT NULL DEFAULT 'application/octet-stream'::character varying,
       width int NOT NULL DEFAULT 0,
       height int NOT NULL DEFAULT 0,

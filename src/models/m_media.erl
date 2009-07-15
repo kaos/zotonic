@@ -20,6 +20,7 @@
     depiction/2,
     depicts/2,
     delete/2,
+    replace/3,
     insert_file/2,
     insert_file/3,
     replace_file/3,
@@ -125,6 +126,26 @@ delete(Id, Context) ->
         false ->
             {error, eacces}
     end.
+
+
+%% @doc Replace or insert a medium record for the page.  This is useful for non-file related media.
+%% Resets all non mentioned attributes.
+%% @spec insert(Id, Props, Context) -> ok | {error, Reason}
+replace(Id, Props, Context) ->
+    Depicts = depicts(Id, Context),
+    F = fun(Ctx) ->
+        {ok, _}  = zp_db:delete(medium, Id, Context),
+        {ok, Id} = zp_db:insert(medium, [{id, Id} | Props], Ctx)
+    end,
+    
+    case zp_db:transaction(F, Context) of
+        {ok, _} -> 
+            [ zp_depcache:flush(#rsc{id=DepictId}) || DepictId <- Depicts ],
+            zp_depcache:flush(#rsc{id=Id});
+        {rollback, {Error, _Trace}} ->
+             {error, Error}
+    end.
+
 
 %% @doc Make a new resource for the file, when the file is not in the archive dir then a copy is made in the archive dir
 %% @spec insert_file(File, Context) -> {ok, Id} | {error, Reason}

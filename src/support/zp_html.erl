@@ -11,6 +11,7 @@
 -export([
     escape_props/1,
     escape/1,
+    unescape/1,
     strip/1
 ]).
 
@@ -84,6 +85,37 @@ escape(B) when is_binary(B) ->
         escape(T, <<Acc/binary, "&#39;">>);
     escape(<<C, T/binary>>, Acc) ->
         escape(T, <<Acc/binary, C>>).
+
+
+%% @doc Unescape - reverses the effect of escape.
+%% @spec escape(iolist()) -> iolist()
+unescape(undefined) -> 
+    undefined;
+unescape(<<>>) -> 
+    <<>>;
+unescape([]) ->
+    [];
+unescape(L) when is_list(L) ->
+    unescape(list_to_binary(L));
+unescape(B) when is_binary(B) ->
+    unescape(B, <<>>).
+
+    unescape(<<>>, Acc) -> 
+        Acc;
+    unescape(<<"&amp;", T/binary>>, Acc) ->
+        unescape(T, <<Acc/binary, "&">>);
+    unescape(<<"&quot;", T/binary>>, Acc) ->
+        unescape(T, <<Acc/binary, "\"">>);
+    unescape(<<"&#39;", T/binary>>, Acc) ->
+        unescape(T, <<Acc/binary, "'">>);
+    unescape(<<"&lt;", T/binary>>, Acc) ->
+        unescape(T, <<Acc/binary, "<">>);
+    unescape(<<"&gt;", T/binary>>, Acc) ->
+        unescape(T, <<Acc/binary, ">">>);
+    unescape(<<"&euro;", T/binary>>, Acc) ->
+        unescape(T, <<Acc/binary, "€">>);
+    unescape(<<C, T/binary>>, Acc) ->
+        unescape(T, <<Acc/binary, C>>).
 
 
 %% @doc Strip all html elements from the text. Simple parsing is applied to find the elements. Does not escape the end result.

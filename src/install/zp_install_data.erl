@@ -48,14 +48,19 @@ install_modules(C) ->
     Modules = [
         "mod_test",
         "mod_base",
-        "mod_search",
-        "mod_admin",
-        "mod_admin_modules",
-        "mod_admin_identity",
-        "mod_admin_category",
-        "mod_admin_predicate",
-        "mod_admin_group",
         "mod_emailer",
+        "mod_menu",
+        "mod_search",
+        "mod_video_embed",
+
+        "mod_admin",
+        "mod_admin_address",
+        "mod_admin_category",
+        "mod_admin_group",
+        "mod_admin_identity",
+        "mod_admin_modules",
+        "mod_admin_person",
+        "mod_admin_predicate",
 
         % The example site
         "mod_site_simple"
