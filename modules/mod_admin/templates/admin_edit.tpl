@@ -53,8 +53,8 @@
 									{% endif %}
 
 									<div class="form-item clearfix">
-										<label for="field-intro">Intro</label>
-										<textarea rows="2" cols="10" id="field-intro" name="intro" class="intro">{{ r.intro }}</textarea>
+										<label for="field-summary">Summary</label>
+										<textarea rows="2" cols="10" id="field-summary" name="summary" class="intro">{{ r.summary }}</textarea>
 									</div>
 
 									{# {% include "_admin_save_buttons.tpl" %} #}

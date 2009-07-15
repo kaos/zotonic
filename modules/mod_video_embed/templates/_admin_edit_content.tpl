@@ -16,7 +16,7 @@
 				
 				<div class="form-item clearfix">
 					<label for="video_embed_code">Embed code</label>
-					<textarea style="height: 24px; width: 600px" id="video_embed_code" name="video_embed_code">{{ medium.video_embed_code|escape }}</textarea>
+					<textarea class="intro" id="video_embed_code" name="video_embed_code">{{ medium.video_embed_code|escape }}</textarea>
 				</div>
 			{% endwith %}
 			</fieldset>
