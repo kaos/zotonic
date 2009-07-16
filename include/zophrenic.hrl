@@ -72,9 +72,6 @@
 %% Model value interface for templates
 -record(m, {model, value}).
 
-%% Used for specifying resource ids, see src/models/m_rsc.erl
--record(rsc, {id}).
-
 %% Used for specifying resource id lists, as returned by object/subject lookup
 -record(rsc_list, {list}).
 

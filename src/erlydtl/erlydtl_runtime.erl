@@ -53,9 +53,9 @@ find_value(Key, #rsc_list{list=[H|_T]}, Context) ->
 find_value(_Key, #rsc_list{list=[]}, _Context) ->
 	undefined;
 
-%% Property of a resource
-find_value(Key, #rsc{} = Rsc, Context) ->
-	m_rsc:p(Rsc, Key, Context);
+%% Property of a resource, just dereference any integer
+find_value(Key, Id, Context) when is_integer(Id) ->
+	m_rsc:p(Id, Key, Context);
 
 % Index of tuple with an integer like "a[2]"
 find_value(Key, T, _Context) when is_integer(Key) andalso is_tuple(T) ->

@@ -50,7 +50,7 @@ get_edges(SubjectId, Context) ->
                 where e.subject_id = $1 
                 order by e.predicate_id, e.seq, e.id", [SubjectId], Context),
             Edges1 = zp_utils:group_proplists(name, Edges),
-            zp_depcache:set({edges, SubjectId}, Edges1, ?DAY, [#rsc{id=SubjectId}]),
+            zp_depcache:set({edges, SubjectId}, Edges1, ?DAY, [SubjectId]),
             Edges1
     end.
 
@@ -68,8 +68,8 @@ insert(SubjectId, Pred, ObjectId, Context) ->
         case zp_db:q1("select id from edge where subject_id = $1 and object_id = $2 and predicate_id = $3", [SubjectId, ObjectId, PredId], Context) of
             undefined ->
                 {ok, EdgeId} = zp_db:insert(edge, [{subject_id, SubjectId}, {object_id, ObjectId}, {predicate_id, PredId}], Context),
-                zp_depcache:flush(#rsc{id=SubjectId}),
-                zp_depcache:flush(#rsc{id=ObjectId}),
+                zp_depcache:flush(SubjectId),
+                zp_depcache:flush(ObjectId),
                 {ok, EdgeId};
             EdgeId ->
                 % Edge exists - skip
@@ -82,8 +82,8 @@ delete(Id, Context) ->
     case zp_db:q("select subject_id, object_id from edge where id = $1", [Id], Context) of
         [{SubjectId,ObjectId}] ->
             zp_db:delete(edge, Id, Context),
-            zp_depcache:flush(#rsc{id=SubjectId}),
-            zp_depcache:flush(#rsc{id=ObjectId}),
+            zp_depcache:flush(SubjectId),
+            zp_depcache:flush(ObjectId),
             ok;
         [] -> 
             ok
@@ -93,8 +93,8 @@ delete(Id, Context) ->
 delete(SubjectId, Pred, ObjectId, Context) ->
     PredId = m_predicate:name_to_id_check(Pred, Context),
     zp_db:q("delete from edge where subject_id = $1 and object_id = $2 and predicate_id = $3",  [SubjectId, ObjectId, PredId], Context),
-    zp_depcache:flush(#rsc{id=SubjectId}),
-    zp_depcache:flush(#rsc{id=ObjectId}),
+    zp_depcache:flush(SubjectId),
+    zp_depcache:flush(ObjectId),
     ok.
     
 
@@ -132,7 +132,7 @@ objects(Id, Pred, Context) ->
         undefined ->
             Ids = zp_db:q("select object_id from edge where subject_id = $1 and predicate_id = $2 order by seq,id", [Id, Pred], Context),
             Objects = [ ObjId || {ObjId} <- Ids ],
-            zp_depcache:set({objects, Pred, Id}, Objects, ?DAY, [#rsc{id=Id}]),
+            zp_depcache:set({objects, Pred, Id}, Objects, ?DAY, [Id]),
             Objects
     end.
 
@@ -153,7 +153,7 @@ subjects(Id, Pred, Context) ->
         undefined ->
             Ids = zp_db:q("select subject_id from edge where object_id = $1 and predicate_id = $2 order by id", [Id, Pred], Context),
             Subjects = [ SubjId || {SubjId} <- Ids ],
-            zp_depcache:set({subjects, Pred, Id}, Subjects, ?HOUR, [#rsc{id=Id}]),
+            zp_depcache:set({subjects, Pred, Id}, Subjects, ?HOUR, [Id]),
             Subjects
     end.
 
@@ -165,7 +165,7 @@ objects(Id, Context) ->
         Ids = zp_db:q("select object_id from edge where subject_id = $1 order by predicate_id, seq, id", [Id], Context),
         [ ObjId || {ObjId} <- Ids]
     end,
-    zp_depcache:memo(F, {objects, Id}, ?DAY, [#rsc{id=Id}]).
+    zp_depcache:memo(F, {objects, Id}, ?DAY, [Id]).
 
 %% @doc Return all subject ids of the resource
 %% @spec subjects(Id, Context) -> list()
@@ -174,7 +174,7 @@ subjects(Id, Context) ->
         Ids = zp_db:q("select subject_id from edge where object_id = $1 order by predicate_id, id", [Id], Context),
         [ SubjId || {SubjId} <- Ids]
     end,
-    zp_depcache:memo(F, {subjects, Id}, ?HOUR, [#rsc{id=Id}]).
+    zp_depcache:memo(F, {subjects, Id}, ?HOUR, [Id]).
 
 
 %% @doc Return the list of predicates in use by edges to objects from the id

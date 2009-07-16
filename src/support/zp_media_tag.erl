@@ -34,8 +34,6 @@ viewer(undefined, _Options, _Context) ->
     {ok, []};
 viewer([], _Options, _Context) ->
     {ok, []};
-viewer(#rsc{id=Id}, Options, Context) when is_integer(Id) ->
-    viewer(m_media:get(Id, Context), Options, Context);
 viewer(Id, Options, Context) when is_integer(Id) ->
     viewer(m_media:get(Id, Context), Options, Context);
 viewer([{_Prop, _Value}|_] = Props, Options, Context) ->
@@ -76,8 +74,6 @@ tag(undefined, _Options, _Context) ->
     {ok, []};
 tag([], _Options, _Context) ->
     {ok, []};
-tag(#rsc{id=Id}, Options, Context) when is_integer(Id) ->
-    tag(m_media:get(Id, Context), Options, Context);
 tag(Id, Options, Context) when is_integer(Id) ->
     tag(m_media:get(Id, Context), Options, Context);
 tag([{_Prop, _Value}|_] = Props, Options, Context) ->

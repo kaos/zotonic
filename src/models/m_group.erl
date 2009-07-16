@@ -83,7 +83,7 @@ get(Id, Context) ->
     F = fun() ->
         zp_db:assoc_row("select * from \"group\" where id = $1", [Id], Context)
     end,
-    zp_depcache:memo(F, {group, Id}, ?WEEK, [#rsc{id=Id}]).
+    zp_depcache:memo(F, {group, Id}, ?WEEK, [Id]).
 
 
 name_to_id(Name, Context) ->

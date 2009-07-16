@@ -94,7 +94,7 @@ exists(Id, Context) ->
 %% @spec get(RscId, Context) -> PropList
 get(Id, Context) ->
     F = fun() -> zp_db:assoc_props_row("select * from medium where id = $1", [Id], Context) end,
-    zp_depcache:memo(F, {medium, Id}, ?WEEK, [#rsc{id=Id}]).
+    zp_depcache:memo(F, {medium, Id}, ?WEEK, [Id]).
 
 
 %% @doc Get the medium record that depicts the resource id. "depiction" Predicates are preferred, when 
@@ -105,7 +105,7 @@ depiction(Id, Context) when is_integer(Id) ->
     F = fun() ->
         find_previewable(m_edge:objects(Id, depiction, Context) ++ [Id], Context)
     end,
-    zp_depcache:memo(F, {depiction, Id}, ?WEEK, [#rsc{id=Id}]).
+    zp_depcache:memo(F, {depiction, Id}, ?WEEK, [Id]).
 
     %% @doc Find the first image in the the list of depictions that can be used to generate a preview.
     find_previewable([], _Context) ->
@@ -135,8 +135,8 @@ delete(Id, Context) ->
         true ->
             Depicts = depicts(Id, Context),
             zp_db:delete(medium, Id, Context),
-            [ zp_depcache:flush(#rsc{id=DepictId}) || DepictId <- Depicts ],
-            zp_depcache:flush(#rsc{id=Id}),
+            [ zp_depcache:flush(DepictId) || DepictId <- Depicts ],
+            zp_depcache:flush(Id),
             ok;
         false ->
             {error, eacces}
@@ -155,8 +155,8 @@ replace(Id, Props, Context) ->
     
     case zp_db:transaction(F, Context) of
         {ok, _} -> 
-            [ zp_depcache:flush(#rsc{id=DepictId}) || DepictId <- Depicts ],
-            zp_depcache:flush(#rsc{id=Id}),
+            [ zp_depcache:flush(DepictId) || DepictId <- Depicts ],
+            zp_depcache:flush(Id),
             ok;
         {rollback, {Error, _Trace}} ->
              {error, Error}
@@ -246,8 +246,8 @@ replace_file(File, RscId, Props, Context) ->
             
             Depicts = depicts(RscId, Context),
             {ok, Id} = zp_db:transaction(F, Context),
-            [ zp_depcache:flush(#rsc{id=DepictId}) || DepictId <- Depicts ],
-            zp_depcache:flush(#rsc{id=Id}),
+            [ zp_depcache:flush(DepictId) || DepictId <- Depicts ],
+            zp_depcache:flush(Id),
             {ok, Id};
         false ->
             {error, eacces}

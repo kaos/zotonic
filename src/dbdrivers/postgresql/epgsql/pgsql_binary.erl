@@ -13,7 +13,6 @@
 
 encode(_Any, null)  -> <<-1:?int32>>;
 encode(_Any, undefined)  -> <<-1:?int32>>;
-encode(Type, #rsc{id=Id}) -> encode(Type, Id);
 encode(bool, <<1>>) -> <<1:?int32, 1:1/big-signed-unit:8>>;
 encode(bool, <<>>)  -> <<1:?int32, 0:1/big-signed-unit:8>>;
 encode(bool, true)  -> <<1:?int32, 1:1/big-signed-unit:8>>;

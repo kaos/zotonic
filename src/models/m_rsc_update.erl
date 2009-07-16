@@ -64,8 +64,8 @@ delete_nocheck(Id, Context) ->
             end,
     
             % Flush all cached entries depending on this entry, one of its subjects or its categories.
-            zp_depcache:flush(#rsc{id=Id}),
-            [ zp_depcache:flush(#rsc{id=SubjectId}) || SubjectId <- Referrers ],
+            zp_depcache:flush(Id),
+            [ zp_depcache:flush(SubjectId) || SubjectId <- Referrers ],
             [ zp_depcache:flush(Cat) || Cat <- CatList ],
     
             % Notify all modules that the rsc has been deleted
@@ -151,7 +151,7 @@ update(Id, Props, Context) when is_integer(Id) orelse Id == insert_rsc ->
                     
                     case zp_db:transaction(TransactionF, Context) of
                         {ok, NewId, NewProps, OldCatList, RenumberCats} ->    
-                            zp_depcache:flush(#rsc{id=NewId}),
+                            zp_depcache:flush(NewId),
                             case proplists:get_value(name, NewProps) of
                                 undefined -> nop;
                                 Name -> zp_depcache:flush({rsc_name, zp_convert:to_list(Name)})

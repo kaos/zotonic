@@ -24,8 +24,6 @@
     delete/2,
     update/3,
         
-	rsc/0,
-	rsc/2,
 	exists/2, 
 	
 	is_visible/2, is_editable/2, is_ingroup/2, is_me/2, 
@@ -49,8 +47,8 @@ m_find_value(Id, #m{value=undefined} = M, Context) ->
         undefined -> undefined;
         RId -> M#m{value=RId}
     end;
-m_find_value(Key, #m{value=#rsc{}} = M, Context) ->
-    p(M#m.value, Key, Context).
+m_find_value(Key, #m{value=Id}, Context) when is_integer(Id) ->
+    p(Id, Key, Context).
 
 %% @doc Transform a m_config value to a list, used for template loops
 %% @spec m_to_list(Source, Context) -> List
@@ -70,7 +68,7 @@ m_value(#m{value=V}, _Context) ->
 % @spec name_to_id(NameString, Context) -> int() | undefined
 name_to_id(Name, Context) ->
     case rid_name(Name, Context) of
-        #rsc{id=Id} -> {ok, Id};
+        Id when is_integer(Id) -> {ok, Id};
         _ -> {error, {enoent, rsc, Name}}
     end.
 
@@ -105,17 +103,17 @@ name_to_id_cat_check(Name, Cat, Context) ->
 %% @spec get(Id, Context) -> 
 get(Id, Context) ->
     case rid(Id, Context) of
-        #rsc{id=Rid} = Rsc ->
-            case zp_depcache:get(Rsc) of
+        Rid when is_integer(Rid) ->
+            case zp_depcache:get(Rid) of
                 {ok, Resource} -> 
                     Resource;
                 undefined ->
                     case zp_db:select(rsc, Rid, Context) of
                         {ok, Record} ->
-                            zp_depcache:set(Rsc, Record, ?WEEK, [Rsc]),
+                            zp_depcache:set(Rid, Record, ?WEEK),
                             Record;
                         _ ->
-                            zp_depcache:set(Rsc, undefined, ?WEEK, [Rsc]),
+                            zp_depcache:set(Rid, undefined, ?WEEK),
                             undefined
                     end
             end
@@ -137,7 +135,7 @@ get_acl_props(Id, Context) when is_integer(Id) ->
                 #acl_props{is_published=false, visible_for=3, group_id=0}
         end
     end,
-    zp_depcache:memo(F, {rsc_acl_fields, Id}, ?DAY, [#rsc{id=Id}]).
+    zp_depcache:memo(F, {rsc_acl_fields, Id}, ?DAY, [Id]).
 
 
 %% @doc Insert a new resource
@@ -157,10 +155,6 @@ update(Id, Props, Context) when is_integer(Id) ->
     m_rsc_update:update(Id, Props, Context).
 
 
-%% Function used in template contexts to return a #rsc{id=Id} --> not used anymore???
-rsc() -> fun(Id, _Context) -> #rsc{id=Id} end.
-rsc(Id, _Context) -> #rsc{id=Id}.
-
 exists([C|_] = Name, Context) when is_list(Name) and is_integer(C) ->
     case rid_name(Name, Context) of
         undefined -> 
@@ -177,7 +171,7 @@ exists(Name, Context) when is_binary(Name) ->
     end;
 exists(Id, Context) -> 
     case rid(Id, Context) of
-        #rsc{id=Rid} = Rsc ->
+        Rid when is_integer(Rid) ->
             case zp_depcache:get({exists, Rid}) of
                 {ok, Exists} ->
                     Exists;
@@ -186,7 +180,7 @@ exists(Id, Context) ->
                         undefined -> false;
                         _ -> true
                     end,
-                    zp_depcache:set({exists, Rid}, Exists, ?DAY, [Rsc]),
+                    zp_depcache:set({exists, Rid}, Exists, ?DAY, [Rid]),
                     Exists
             end;
         undefined -> false
@@ -194,7 +188,7 @@ exists(Id, Context) ->
     
 is_visible(Id, Context) ->
     case rid(Id, Context) of
-        #rsc{id=RscId} ->
+        RscId when is_integer(RscId) ->
             zp_acl:rsc_visible(RscId, Context);
         _ ->
             false
@@ -202,7 +196,7 @@ is_visible(Id, Context) ->
 
 is_editable(Id, Context) -> 
     case rid(Id, Context) of
-        #rsc{id=RscId} ->
+        RscId when is_integer(RscId) ->
             zp_acl:rsc_editable(RscId, Context);
         _ ->
             false
@@ -210,7 +204,7 @@ is_editable(Id, Context) ->
     
 is_ingroup(Id, Context) -> 
     case rid(Id, Context) of
-        #rsc{id=RscId} ->
+        RscId when is_integer(RscId) ->
             zp_acl:rsc_ingroup(RscId, Context);
         _ ->
             false
@@ -218,7 +212,7 @@ is_ingroup(Id, Context) ->
 
 is_me(Id, Context) -> 
     case rid(Id, Context) of
-        #rsc{id=RscId} ->
+        RscId when is_integer(RscId) ->
             zp_acl:user(Context) == RscId;
         _ ->
             false
@@ -229,7 +223,6 @@ is_me(Id, Context) ->
 % List of special properties to be redirected to functions
 p(Id, o, Context)  -> o(Id, Context);
 p(Id, s, Context)  -> s(Id, Context);
-p(Id, m, Context)  -> m(Id, Context);
 p(Id, op, Context) -> op(Id, Context);
 p(Id, sp, Context) -> sp(Id, Context);
 p(Id, is_me, Context) -> is_me(Id, Context);
@@ -251,17 +244,17 @@ p(Id, medium, Context) -> m_media:get(Id, Context);
 p(Id, depiction, Context) -> m_media:depiction(Id, Context);
     
 % Check if the requested predicate is a readily available property or an edge
-p(#rsc{id=Id} = Rsc, Predicate, Context) -> 
-    Value = case zp_depcache:get(Rsc, Predicate) of
+p(Id, Predicate, Context) when is_integer(Id) -> 
+    Value = case zp_depcache:get(Id, Predicate) of
         {ok, V} -> 
             V;
         undefined ->
             case zp_db:select(rsc, Id, Context) of
                 {ok, Record} ->
-                    zp_depcache:set(Rsc, Record, ?WEEK, [Rsc]),
+                    zp_depcache:set(Id, Record, ?WEEK, [Id]),
                     proplists:get_value(Predicate, Record);
                 _ ->
-                    zp_depcache:set(Rsc, undefined, ?WEEK, [Rsc]),
+                    zp_depcache:set(Id, undefined, ?WEEK, [Id]),
                     undefined
             end
     end,
@@ -269,7 +262,7 @@ p(#rsc{id=Id} = Rsc, Predicate, Context) ->
         undefined ->
             % Unknown properties will be checked against the predicates, returns o(Predicate).
             case m_predicate:is_predicate(Predicate, Context) of
-                true -> o(Rsc, Predicate, Context);
+                true -> o(Id, Predicate, Context);
                 false -> undefined
             end;
         _ ->
@@ -281,20 +274,8 @@ p(Id, Predicate, Context) ->
     p(rid(Id, Context), Predicate, Context).
 
 
-%% Fetch some predicate from a module.
-m(Id, _Context) ->
-    fun(Predicate, Context) -> m(Id, Predicate, Context) end.
-
-m(#rsc{id=Id}, Predicate, Context) ->
-    undefined;
-m(undefined, _Predicate, _Context) ->
-    undefined;
-m(Id, Predicate, Context) ->
-    m(rid(Id, Context), Predicate, Context).
-
-
 %% Return a list of all edge predicates of this resource
-op(#rsc{id=Id}, Context) ->
+op(Id, Context) when is_integer(Id) ->
     m_edge:object_predicates(Id, Context);
 op(undefined, _Context) -> 
     [];
@@ -306,7 +287,7 @@ o(Id, _Context) ->
 	fun(P, Context) -> o(Id, P, Context) end.
 
 %% Return the list of objects with a certain predicate
-o(#rsc{id=Id}, Predicate, Context) ->
+o(Id, Predicate, Context) when is_integer(Id) ->
 	#rsc_list{list=m_edge:objects(Id, Predicate, Context)};
 o(undefined, _Predicate, _Context) ->
     #rsc_list{list=[]};
@@ -315,10 +296,10 @@ o(Id, Predicate, Context) ->
 
 
 %% Return the nth object in the predicate list
-o(#rsc{id=Id}, Predicate, N, Context) ->
+o(Id, Predicate, N, Context) when is_integer(Id) ->
     case m_edge:object(Id, Predicate, N, Context) of
         undefined -> undefined;
-        ObjectId -> #rsc{id=ObjectId}
+        ObjectId -> ObjectId
     end;
 o(undefined, _Predicate, _N, _Context) ->
     undefined;
@@ -327,7 +308,7 @@ o(Id, Predicate, N, Context) ->
 
 	
 %% Return a list of all edge predicates to this resource
-sp(#rsc{id=Id}, Context) ->
+sp(Id, Context) when is_integer(Id) ->
     m_edge:subject_predicates(Id, Context);
 sp(undefined, _Context) -> 
     [];
@@ -339,7 +320,7 @@ s(Id, _Context) ->
 	fun(P, Context) -> s(Id, P, Context) end.
 
 %% Return the list of subjects with a certain predicate
-s(#rsc{id=Id}, Predicate, Context) ->
+s(Id, Predicate, Context) when is_integer(Id) ->
 	#rsc_list{list=m_edge:subjects(Id, Predicate, Context)};
 s(undefined, _Predicate, _Context) ->
     #rsc_list{list=[]};
@@ -347,10 +328,10 @@ s(Id, Predicate, Context) ->
     s(rid(Id, Context), Predicate, Context).
 
 %% Return the nth object in the predicate list
-s(#rsc{id=Id}, Predicate, N, Context) ->
+s(Id, Predicate, N, Context) when is_integer(Id) ->
     case m_edge:subject(Id, Predicate, N, Context) of
         undefined -> undefined;
-        SubjectId -> #rsc{id=SubjectId}
+        SubjectId -> SubjectId
     end;
 s(undefined, _Predicate, _N, _Context) ->
     undefined;
@@ -359,7 +340,7 @@ s(Id, Predicate, N, Context) ->
 
 
 %% Return the list of all media attached to the resource
-media(#rsc{id=Id}, Context) -> 
+media(Id, Context) when is_integer(Id) -> 
     m_edge:objects(Id, depiction, Context);
 media(undefined, _Context) -> 
 	[];
@@ -367,18 +348,16 @@ media(Id, Context) ->
 	media(rid(Id, Context), Context).
 
 	
-%% @doc Fetch a #rsc{} from any input
-rid(#rsc{} = Rsc, _Context) ->
-    Rsc;
+%% @doc Fetch a resource id from any input
 rid(Id, _Context) when is_integer(Id) ->
-	#rsc{id=Id};
+	Id;
 rid(#rsc_list{list=[R|_]}, _Context) ->
 	R;
 rid(#rsc_list{list=[]}, _Context) ->
 	undefined;
 rid([C|_] = UniqueName, Context) when is_list(UniqueName) andalso is_integer(C) ->
     case zp_utils:only_digits(UniqueName) of
-        true -> #rsc{id=list_to_integer(UniqueName)};
+        true -> list_to_integer(UniqueName);
         false -> rid_name(UniqueName, Context)
     end;
 rid(UniqueName, Context) when is_binary(UniqueName) ->
@@ -392,7 +371,7 @@ rid(<<>>, _Context) ->
 
 
 %% @doc Return the id of the resource with a certain unique name.
-%% rid_name(Name, Context) -> #rsc{} | undefined
+%% rid_name(Name, Context) -> int() | undefined
 rid_name(Name, Context) ->
     Lower = zp_string:to_name(Name),
     case zp_depcache:get({rsc_name, Lower}) of
@@ -403,7 +382,7 @@ rid_name(Name, Context) ->
         undefined ->
             Id = case zp_db:q1("select id from rsc where name = $1", [Lower], Context) of
                 undefined -> undefined;
-                Value -> #rsc{id=Value}
+                Value -> Value
             end,
             zp_depcache:set({rsc_name, Lower}, Id, ?DAY, [Id, {rsc_name, Lower}]),
             Id
@@ -433,9 +412,9 @@ is_a_list(Id, Context) ->
 
 page_url(Id, Context) ->
     case rid(Id, Context) of
-        #rsc{id=RscId} ->
+        RscId when is_integer(RscId) ->
             CatId = p(Id, category_id, Context),
-            Args = [{id,RscId},{slug, p(Id, slug, Context)}],
+            Args = [{id,RscId}, {slug, p(RscId, slug, Context)}],
             case CatId of
                 undefined ->
                     page_url_path([], Args, Context);
