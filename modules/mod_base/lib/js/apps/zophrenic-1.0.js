@@ -325,8 +325,10 @@ function zp_init_postback_forms()
     })
 	.submit(function(event)
 	{
-        if (tinyMCE)
+        if ($('#field-content', this).length > 0 && tinyMCE)
+        {
             tinyMCE.triggerSave(true,true);
+        }
 
 		var arguments	= $(this).formToArray();
 
