@@ -44,9 +44,9 @@ event({submit, rscform, _FormId, _TargetId}, Context) ->
     Post = zp_context:get_q_all(Context),
     Props = filter_props(Post),
     Title = ?TR(proplists:get_value("title", Props), Context),
-    Id = proplists:get_value("id", Props),
+    Id = zp_convert:to_integer(proplists:get_value("id", Props)),
     Props1 = proplists:delete("id", Props),
-    case m_rsc:update(zp_convert:to_integer(Id), Props1, Context) of
+    case m_rsc:update(Id, Props1, Context) of
         {ok, _} -> 
             Context1 = zp_render:set_value("field-name", m_rsc:p(Id, name, Context), Context),
             Context2 = zp_render:set_value("field-uri",  m_rsc:p(Id, uri, Context1), Context1),
@@ -55,7 +55,13 @@ event({submit, rscform, _FormId, _TargetId}, Context) ->
                 true ->  zp_render:wire("delete-button", {disable, []}, Context3);
                 false -> zp_render:wire("delete-button", {enable, []}, Context3)
             end,
-            zp_render:growl(["Saved ",zp_html:strip(Title),"."], Context4);
+            case proplists:is_defined("save_view", Post) of
+                true ->
+                    PageUrl = m_rsc:p(Id, page_url, Context),
+                    zp_render:wire({redirect, [{location, PageUrl}]}, Context);
+                false ->
+                    zp_render:growl(["Saved ",zp_html:strip(Title),"."], Context4)
+            end;
         {error, duplicate_uri} ->
             zp_render:growl_error("Error, duplicate uri. Please change the uri.", Context);
         {error, duplicate_name} ->
@@ -81,7 +87,9 @@ filter_props(Fs) ->
         "postback",
         "zp_trigger_id",
         "zp_pageid",
-        "trigger_value"
+        "trigger_value",
+        "save_view",
+        "save_stay"
     ],
     lists:foldl(fun(P, Acc) -> proplists:delete(P, Acc) end, Fs, Remove).
     %[ {list_to_existing_atom(K), list_to_binary(V)} || {K,V} <- Props ].

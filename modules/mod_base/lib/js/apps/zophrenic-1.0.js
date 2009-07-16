@@ -302,14 +302,38 @@ function zp_typeselect(ElementId, postbackInfo)
 // This function can be run multiple times.
 function zp_init_postback_forms()
 {
-	$("form[action*='postback']").submit(function(event)
+	$("form[action*='postback']")
+	.each(function() {
+            // store options in hash
+            $(":submit,input:image", this).bind('click.form-plugin',function(e) {
+                var form = this.form;
+                form.clk = this;
+                if (this.type == 'image') {
+                    if (e.offsetX != undefined) {
+                        form.clk_x = e.offsetX;
+                        form.clk_y = e.offsetY;
+                    } else if (typeof $.fn.offset == 'function') { // try to use dimensions plugin
+                        var offset = $(this).offset();
+                        form.clk_x = e.pageX - offset.left;
+                        form.clk_y = e.pageY - offset.top;
+                    } else {
+                        form.clk_x = e.pageX - this.offsetLeft;
+                        form.clk_y = e.pageY - this.offsetTop;
+                    }
+                }
+            });
+    })
+	.submit(function(event)
 	{
 		var arguments	= $(this).formToArray();
+
+        this.clk = this.clk_x = this.clk_y = null;
+
 		var postback	= $(this).data("zp_submit_postback");
 		var action		= $(this).data("zp_submit_action");
 		var form_id		= $(this).attr('id');
 		var validations = $(this).formValidationPostback();
-
+        
 		if(!postback)
 		{
 			postback = zp_default_form_postback;
@@ -695,6 +719,16 @@ $.fn.formToArray = function(semantic) {
         else if (v !== null && typeof v != 'undefined')
             a.push({name: n, value: v});
     }
+
+    // add submitting element to data if we know it
+    var sub = form.clk;
+    if (sub) {
+        var n = sub.name;
+        if (n && !sub.disabled) {
+            a.push({name: n, value: ''});
+        }
+    }
+
 
     return a;
 };

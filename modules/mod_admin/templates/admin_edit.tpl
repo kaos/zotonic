@@ -185,7 +185,8 @@
 							<div class="item clearfix">
 								<div class="admin-form ">
 									<div class="form-item clearfix">
-										{% button class="save-resource do_tooltip" text="save" title="Save this page and all the connections it has." %}
+										{% button type="submit" id="save_stay" class="save-resource do_tooltip" text="save" title="Save this page and all the connections it has." %}
+										{% button type="submit" id="save_view" class="save-resource do_tooltip" text="save &amp; view" title="Save and view the page." %}
 										{% button class="discard-resource right" text="cancel" action={redirect back} %}
 										{% button class="discard-resource right" disabled=r.is_protected id="delete-button" text="delete" action={dialog_delete_rsc id=r.id on_success={redirect back}} %}
 									</div>
