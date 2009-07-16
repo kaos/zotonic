@@ -253,7 +253,21 @@ has_user(#context{user_id=UserId}) when is_integer(UserId) ->
 
 %% @doc Return the default group for resource creation by the current user
 default(group, Context) -> 
-    1;
+    case groups_leader(Context) of
+        [] ->
+            case groups_member(Context) of
+                [] ->
+                    %% Check for the special case of the admin user without any groups
+                    case has_role(admin, Context) of
+                        true -> m_group:name_to_id(admins, Context);
+                        false -> throw({error, e_user_without_group})
+                    end;
+                [H|_] ->
+                    H
+            end;
+        [H|_] -> 
+            H
+    end;
 default(visible_for, Context) ->
     publish_level(Context).
 
