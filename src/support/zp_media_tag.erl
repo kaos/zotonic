@@ -39,8 +39,8 @@ viewer(#rsc{id=Id}, Options, Context) when is_integer(Id) ->
 viewer(Id, Options, Context) when is_integer(Id) ->
     viewer(m_media:get(Id, Context), Options, Context);
 viewer([{_Prop, _Value}|_] = Props, Options, Context) ->
-    case proplists:get_value(filename, Props) of
-        Empty when Empty == []; Empty == <<>>; Empty == undefined ->
+    case zp_convert:to_list(proplists:get_value(filename, Props)) of
+        Empty when Empty == []; Empty == undefined ->
             viewer1(Props, undefined, Options, Context);
         Filename ->
             FilePath = filename_to_filepath(Filename, Context),
@@ -48,7 +48,7 @@ viewer([{_Prop, _Value}|_] = Props, Options, Context) ->
     end;
 viewer(Filename, Options, Context) when is_binary(Filename) ->
     viewer(binary_to_list(Filename), Options, Context);
-viewer(Filename, Options, Context) ->
+viewer(Filename, Options, Context) when is_list(Filename) ->
     FilePath = filename_to_filepath(Filename, Context),
     case zp_media_identify:identify(FilePath) of
         {ok, Props} ->
@@ -81,13 +81,13 @@ tag(#rsc{id=Id}, Options, Context) when is_integer(Id) ->
 tag(Id, Options, Context) when is_integer(Id) ->
     tag(m_media:get(Id, Context), Options, Context);
 tag([{_Prop, _Value}|_] = Props, Options, Context) ->
-    case proplists:get_value(filename, Props) of
+    case zp_convert:to_list(proplists:get_value(filename, Props)) of
         undefined -> {ok, []};
         Filename -> tag1(Props, Filename, Options, Context)
     end;
 tag(Filename, Options, Context) when is_binary(Filename) ->
     tag(binary_to_list(Filename), Options, Context);
-tag(Filename, Options, Context) ->
+tag(Filename, Options, Context) when is_list(Filename) ->
     FilePath = filename_to_filepath(Filename, Context),
     tag1(FilePath, Filename, Options, Context).
     
@@ -136,7 +136,7 @@ filename_to_urlpath(Filename) ->
 url(Id, Options, Context) when is_integer(Id) ->
     url(m_media:get(Id, Context), Options, Context);
 url([{_Prop, _Value}|_] = Props, Options, _Context) ->
-    case proplists:get_value(filename, Props) of
+    case zp_convert:to_list(proplists:get_value(filename, Props)) of
         undefined ->
             {error, no_filename};
         Filename -> 
