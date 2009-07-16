@@ -61,7 +61,6 @@ event({submit, set_username_password, _TriggerId, _TargetId}, Context) ->
                             zp_render:wire({growl, [{text, "The username is already in use, please try another."},{type, "error"}]}, Context)
                     end;
                 _Password ->
-                    ?DEBUG({Id, Username, Password}),
                     case m_identity:set_username_pw(Id, Username, Password, Context) of
                         {error, _} ->
                             %% Assume duplicate key violation, user needs to pick another username.

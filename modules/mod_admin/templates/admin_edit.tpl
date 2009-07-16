@@ -65,36 +65,21 @@
 
 						{% all include "_admin_edit_content.tpl" %}
 
-						{% with r.medium as medium %}
-							{% if r.medium or r.is_a.media %}
-								<div class="item-wrapper">
-									<h3 class="above-item">File/ media</h3>
-									<div class="item clearfix">
-										{% if medium.filename %}
-											<p>
-												{{ medium.mime }} 
-												&mdash; {{ medium.width }} x {{ medium.height }} pixels
-												&mdash; {{ medium.filename }}
-												&mdash; uploaded on {{ medium.created|date:"Y-m-d H:i:s" }}
-											</p>
-											<div class="edit_media">
-											{% if medium.width|lt:725  %}
-												{% media medium %}
-											{% else %}
-												{% media medium width=725 height=725 %}
-											{% endif %}
-											</div>
-											<div>
-												{% button text="download" action={redirect dispatch="media_attachment" star=medium.filename} %}
-											</div>
-										{% endif %}
+						<div class="item-wrapper">
+							<h3 class="above-item">File/ media content</h3>
+							<div class="item clearfix">
+								{% with r.medium as medium %}
+									{% if medium or r.is_a.media %}
 
-										{% all include "_admin_edit_media.tpl" medium=medium %}
-										{% button text="Replace this media item" action={dialog_media_upload id=id} %}
-									</div>
-								</div>
-							{% endif %}
-						{% endwith %}
+										<div id="media-edit-view">
+											{% include "_admin_edit_media_view.tpl" id=id %}
+										</div>
+										
+										{% button text="Replace this media item" action={dialog_media_upload id=id action={update update="media-edit-view" template="_admin_edit_media_view.tpl" id=id}} %}
+									{% endif %}
+								{% endwith %}
+							</div>
+						</div>
 
 						<div class="item-wrapper">
 							<h3 class="above-item">Body text</h3>

@@ -68,8 +68,9 @@
     
     language/1,
     
-    merge_scripts/2
-    ]).
+    merge_scripts/2,
+    copy_scripts/2
+]).
 
 -include_lib("zophrenic.hrl").
 
@@ -123,7 +124,6 @@ prune_for_scomp(VisibleFor, Context) ->
     zp_acl:set_visible_for(VisibleFor, Context#context{
         dbc=undefined,
 	    wm_reqdata=undefined,
-        props=undefined,
 		updates=[],
 		actions=[],
 		content_scripts=[],
@@ -189,7 +189,7 @@ combine_results(C1, C2) ->
     }.
 
 %% @spec merge_scripts(Context, ContextAcc) -> Context
-%% @doc Merge the scripts in context C into the context accumulator, used when collecting all scripts in an output stream
+%% @doc Merge the scripts from context C into the context accumulator, used when collecting all scripts in an output stream
 merge_scripts(C, Acc) ->
     Acc#context{
         updates=combine(Acc#context.updates, C#context.updates),
@@ -204,6 +204,18 @@ combine([],X) -> X;
 combine(X,[]) -> X;
 combine(X,Y) -> [X++Y].
 
+
+%% @doc Overwrite the scripts in Context with the scripts in From
+%% @spec set_scripts(From, Context) -> Context
+copy_scripts(From, Context) ->
+    Context#context{
+        updates=From#context.updates,
+        actions=From#context.actions,
+        content_scripts=From#context.content_scripts,
+        scripts=From#context.scripts,
+        wire=From#context.wire,
+        validators=From#context.validators
+    }.
 
 %% @doc Ensure session and page session and fetch&parse the query string
 ensure_all(Context) ->

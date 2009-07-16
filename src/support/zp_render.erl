@@ -67,6 +67,7 @@ render([H|T], Context) ->
 
 %% @doc Render adds output to the render field of the context state. Do update the context for
 %%      possible changes in scripts etc.
+%% @spec render_to_iolist(TemplateOutput, Context1) -> {iolist(), Context2}
 render_to_iolist(Ts, Context) ->
     Context1 = Context#context{render=[]},
     Context2 = render(Ts, Context1),
@@ -266,3 +267,4 @@ wire(TriggerId, TargetId, Actions, Context) ->
         lists:flatten(L);
     flatten_list(Other) ->
         Other.
+

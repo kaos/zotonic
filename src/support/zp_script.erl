@@ -48,7 +48,7 @@ get_script(Context) ->
             		    add_content_script(Script, C1)
             	    end,
 
-    Context2 = lists:foldl(Update2Script, Context1, lists:flatten(Context1#context.updates)),
+    Context2 = lists:foldl(Update2Script, Context1#context{updates=[]}, lists:flatten(Context1#context.updates)),
 
 	% Translate actions to scripts
 	Action2Script = fun({TriggerID, TargetID, Actions}, C) ->
@@ -56,21 +56,23 @@ get_script(Context) ->
 		                add_script(Script, C1)
 	                end,
 
-    Context3 = lists:foldl(Action2Script, Context2, lists:flatten(Context2#context.actions)),
-
+    Context3 = lists:foldl(Action2Script, Context2#context{actions=[]}, lists:flatten(Context2#context.actions)),
+    
 	% Translate validators to scripts
     Validator2Script = fun({TriggerId, TargetId, Validator}, C) ->
                             {Script,C1} = zp_render:render_validator(TriggerId, TargetId, Validator, C),
                             add_script(Script, C1)
                        end,
 
-    
     Context4 = lists:foldl(Validator2Script, Context3, lists:flatten(Context3#context.validators)),
+    
+    % Finally fetch any updates that resulted from the actions or validators
+    Context5 = lists:foldl(Update2Script, Context4, lists:flatten(Context4#context.updates)),
     
     [   
         lists:reverse(Context#context.content_scripts),
         lists:reverse(Context#context.scripts),
-        lists:reverse(Context4#context.content_scripts),
-        lists:reverse(Context4#context.scripts)
+        lists:reverse(Context5#context.content_scripts),
+        lists:reverse(Context5#context.scripts)
     ].
 

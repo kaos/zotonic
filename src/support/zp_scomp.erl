@@ -79,15 +79,10 @@ scomp_ready(Key, Result, MaxAge, Varies) ->
 render_scomp_module(ModuleName, Args, Vars, ScompContext, Context) ->
     case gen_server:call(?MODULE, {render, ModuleName, Args, ScompContext}) of
         {renderer, M, F, ScompState} ->
-            erlang:apply(M, F, [Args, Vars, Context, ScompState]);
+            ScompContextWM = ScompContext#context{wm_reqdata=Context#context.wm_reqdata},
+            erlang:apply(M, F, [Args, Vars, ScompContextWM, ScompState]);
         Result -> 
-			%% Cached result, merge possible context result
-			case Result of
-				{ok, #context{} = ResContext} ->
-					{ok, zp_context:combine_results(Context, ResContext)};
-				_ ->
-					Result
-			end
+            Result
 	end.
 
 

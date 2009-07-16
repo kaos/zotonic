@@ -84,7 +84,6 @@ media_viewer({media_viewer, Props, _Filename, _Options}, _Context) ->
 %% @doc Handle the form submit from the "new media" dialog.  The form is defined in templates/_media_upload_panel.tpl.
 %% @spec event(Event, Context1) -> Context2
 event({submit, {add_video_embed, EventProps}, _TriggerId, _TargetId}, Context) ->
-    ?DEBUG(Context),
     Actions = proplists:get_value(actions, EventProps, []),
     Id = proplists:get_value(id, EventProps),
     EmbedService = zp_context:get_q("video_embed_service", Context),
