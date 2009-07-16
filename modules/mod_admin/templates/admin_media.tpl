@@ -26,8 +26,8 @@
 					<li class="headers clearfix">
 						<span class="zp-10">Preview</span>
 						<span class="zp-20">Title</span>
-						<span class="zp-10">Type</span>
-						<span class="zp-30">Filename</span>
+						<span class="zp-15">Type</span>
+						<span class="zp-25">Filename</span>
 						<span class="zp-10">Dimensions</span>
 						<span class="zp-10">Uploaded</span>
 						<span class="zp-10">Actions</span>
@@ -38,15 +38,15 @@
 						{% with r.medium as medium %}
 						<li id="{{ #li.id }}">
 							<a href="{% url admin_edit_rsc id=id %}" class="clearfix">
-								<span class="zp-10">{% image medium.filename width=80 height=60 crop %}</span>
+								<span class="zp-10">{% image medium.filename width=80 height=60 crop %}&nbsp;</span>
 								<span class="zp-20">{{ r.title|striptags|default:"<em>untitled</em>" }}</span>
-								<span class="zp-10">{{ medium.mime|default:"&nbsp;" }}</span>
-								<span class="zp-30">{{ medium.filename }}</span>
+								<span class="zp-15">{{ medium.mime|default:"&nbsp;" }}</span>
+								<span class="zp-25">{{ medium.filename|default:"-" }}</span>
 								<span class="zp-10">{{ medium.width }} x {{ medium.height }}</span>
 								<span class="zp-10">{{ medium.created|date:"M d, H:i"|default:"&nbsp;" }}</span>
 								<span class="zp-10">
 									{% button text="delete" disabled=r.is_protected action={dialog_delete_rsc id=id on_success={slide_fade_out target=#li.id}} %}
-									{% button text="edit" action={redirect dispatch="admin_edit" id=id} %}
+									{% button text="edit &raquo;" action={redirect dispatch="admin_edit_rsc" id=id} %}
 								</span>
 							</a>
 						</li>

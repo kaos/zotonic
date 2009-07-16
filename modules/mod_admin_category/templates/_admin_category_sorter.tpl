@@ -17,7 +17,7 @@
 
 						<span class="buttons">
 							{% button text="delete" disabled=m.rsc[id].is_protected action={dialog_category_delete id=id on_success={slide_fade_out target=#cat.id}} %}
-							{% button text="edit" action={redirect dispatch="admin_edit_rsc" id=id}%}
+							{% button text="edit &raquo;" action={redirect dispatch="admin_edit_rsc" id=id}%}
 						</span>
 					</a>
 				</li>
