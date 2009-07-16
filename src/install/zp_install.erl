@@ -274,7 +274,7 @@ model_pgsql() ->
       orientation int NOT NULL DEFAULT 1,
       sha1 character varying(40),
       size int NOT NULL DEFAULT 0,
-      preview_filename varying(400),
+      preview_filename character varying(400),
       preview_width int NOT NULL DEFAULT 0,
       preview_height int NOT NULL DEFAULT 0,
       is_deletable_file boolean NOT NULL DEFAULT false, 
