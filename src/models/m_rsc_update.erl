@@ -25,7 +25,8 @@
 %% @doc Insert a new resource. Crashes when insertion is not allowed.
 %% @spec insert(Props, Context) -> {ok, Id} | {error, Reason}
 insert(Props, Context) ->
-    update(insert_rsc, Props, Context).
+    PropsDefaults = zp_acl:add_defaults(Props, Context),
+    update(insert_rsc, PropsDefaults, Context).
 
 
 %% @doc Delete a resource
@@ -95,7 +96,7 @@ update(Id, Props, Context) when is_integer(Id) orelse Id == insert_rsc ->
                             insert_rsc ->
                                 CategoryId = proplists:get_value(category_id, SafeProps),
                                 GroupId = proplists:get_value(group_id, SafeProps),
-                                InsProps = [{category_id, CategoryId}, {group_id, GroupId}, {visible_for, 2}, {version, 0}],
+                                InsProps = [{category_id, CategoryId}, {group_id, GroupId}, {version, 0}],
 
                                 % Allow the insertion props to be modified.
                                 InsPropsN = zp_notifier:foldr({rsc_insert}, InsProps, Ctx),
