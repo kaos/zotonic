@@ -217,7 +217,7 @@ replace_file(File, RscId, Props, Context) ->
                 {id, RscId}, 
                 {filename, ArchiveFile}, 
                 {rootname, RootName}, 
-                {is_deletable_file, zp_media_archive:is_archived(ArchiveFile, Context)}
+                {is_deletable_file, not zp_media_archive:is_archived(File, Context)}
                 | PropsMedia
             ],
 
