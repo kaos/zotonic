@@ -1,14 +1,18 @@
-<ul class="short-list">
+<h3 class="above-list">Current menu</h3>
+<ul class="short-list navigation-manager">
 	<li id="top" class="header">
-		<h3>Menu</h3>
-		<p>Drag pages on top of this menu or its menu items.</p>
+		Drag pages on top of this menu or its menu items.
 	</li>
 	
 	{% for m_id, sub in menu %}
 		{% with forloop.counter as m_nr %}
 			<li class="header">
-				<a id="{{ #menu.m_nr }}" href="#">{{ m.rsc[m_id].title }}</a>
-				{% button text="x" style="float:right" action={postback postback={delete item=[m_nr] id=#menu.m_nr}} %}
+				
+				<a id="{{ #menu.m_nr }}" href="#" class="clearfix">
+					<span class="grippy"><img src="/lib/images/grippy.png" alt="Drag me" /></span>
+					<span>{{ m.rsc[m_id].title }}</span>
+					{% button text="x" style="float:right" action={postback postback={delete item=[m_nr] id=#menu.m_nr}} %}
+				</a>
 				<ul>
 					{% for s_id in sub %}
 						{% with forloop.counter as s_nr %}

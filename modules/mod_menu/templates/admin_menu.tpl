@@ -13,48 +13,38 @@
 			A menu is at most two levels deep.
 		</p>
 
-		<div class="zp-30">
-			<style>
-				.hover {
-					background-color: #aac;
-					color: black !important;
-				}
-				
-				ul ul {
-					margin-left: 50px;
-				}
-				
-				.line {
-					height: 5px;
-				}
-
-				.ui-draggable-dragging button {
-					display: none;
-				}
-			</style>
-
+		<div class="zp-33">
+			<div class="padding">
 			<div id="menu-editor">
 				{% include "_admin_menu_menu_view.tpl" %}
 			</div>
-		</div>
-		
-		<div class="zp-20">
-			&nbsp;
-		</div>
-		
-		<div class="zp-30">
-			<h3>Pages</h3>
-			<p>Type your search terms to find pages.</p>
-
-			<div class="form-item autocomplete-wrapper clear">
-				<input id="{{#input}}" class="autocompleter" type="text" value="" />
-				<ul id="{{#suggestions}}" class="short-list"></ul>
 			</div>
+		</div>
+		
+		<div class="item-wrapper search-nav-items zp-33">
+			<div class="padding">
+				<h3 class="above-item">Search for a page</h3>
+				<div class="item">
+					<p>Type your search terms to find pages. Then drag them on t the panel on your left.</p>
 
-			{% wire id=#input
-				type="keyup" 
-				action={typeselect target=#suggestions template="_admin_menu_typeselect_result.tpl"}
-			%}
+					<div class="form-item autocomplete-wrapper clear">
+						<input id="{{#input}}" class="autocompleter" type="text" value="" />
+						<ul id="{{#suggestions}}" class="short-list"></ul>
+					</div>
+
+					{% wire id=#input
+						type="keyup" 
+						action={typeselect target=#suggestions template="_admin_menu_typeselect_result.tpl"}
+					%}
+				</div>
+			</div>
+		</div>
+		
+		<div class="item-wrapper zp-33">
+			<h3 class="above-item">How does this work?</h3>
+			<div class="item">
+				<p>Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.</p>
+			</div>
 		</div>
 	</div>
 </div>

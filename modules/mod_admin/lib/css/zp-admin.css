@@ -633,7 +633,40 @@ a.button {
 }
 
 
-/* Modules - catrgory sorter
+/* modules - navigation builder
+---------------------------------------------------------- */
+
+ul.navigation-manager {
+	padding: 8px 6px;
+}
+
+ul.navigation-manager li a {
+	padding: 1px 0 0;
+	border: 1px solid #e0e0e0;
+	background: #fff;
+	display: block;
+}
+
+	ul.navigation-manager li .grippy img {
+		position: absolute;
+		top: 4px;
+		left: 6px;
+	}
+
+	ul.navigation-manager li#top {
+		padding: 1px 0 0 7px;
+	}
+
+.search-nav-items input.autocompleter {
+	width: 339px;
+}
+
+ul ul {
+	margin: 0 0 0 20px;
+	
+}
+
+/* Modules - catagory sorter
 ---------------------------------------------------------- */
 
 li.hover, li.hover a {
@@ -648,13 +681,12 @@ li.hover, li.hover a {
 
 .short-list .line {
 	height: 15px;
-	border: 1px dotted #ccc;
+	border: 1px dotted #ccc !important;
 	background: none;
 	margin: 6px 0;
 }
 
-ul.categories li span.button-wrapper {
-}
+
 
 ul.categories {
 	padding: 8px 6px 0;
@@ -683,10 +715,11 @@ ul.categories li a {
 }
 
 .ui-draggable-dragging {
-	width: 600px !important;
+	width: 339px !important;
 }
 
-.ui-draggable-dragging .button-wrapper {
+.ui-draggable-dragging .button-wrapper,
+.ui-draggable-dragging button {
 	display: none;
 }
 
