@@ -207,16 +207,23 @@ replace_file(File, RscId, Context) ->
 replace_file(File, RscId, Props, Context) ->
     case zp_acl:rsc_editable(RscId, Context) of
         true ->
-            Depicts = depicts(RscId, Context),
+            OriginalFilename = proplists:get_value(original_filename, Props, File),
+            PropsMedia = add_medium_info(File, [{original_filename, OriginalFilename}], Context),
+            SafeRootName = zp_string:to_rootname(OriginalFilename),
+            SafeFilename = SafeRootName ++ zp_media_identify:extension(proplists:get_value(mime, PropsMedia)),
+            ArchiveFile = zp_media_archive:archive_copy_opt(File, SafeFilename, Context),
+            RootName = filename:rootname(filename:basename(ArchiveFile)),
+            MediumRowProps = [
+                {id, RscId}, 
+                {filename, ArchiveFile}, 
+                {rootname, RootName}, 
+                {is_deletable_file, zp_media_archive:is_archived(ArchiveFile, Context)}
+                | PropsMedia
+            ],
+
             F = fun(Ctx) ->
                 zp_db:delete(medium, RscId, Context),
-                OriginalFilename = proplists:get_value(original_filename, Props, File),
-                PropsMedia = add_medium_info(File, [{original_filename, OriginalFilename}]),
-                SafeRootName = zp_string:to_rootname(OriginalFilename),
-                SafeFilename = SafeRootName ++ zp_media_identify:extension(proplists:get_value(mime, PropsMedia)),
-                ArchiveFile = zp_media_archive:archive_copy_opt(File, SafeFilename, Ctx),
-                RootName = filename:rootname(filename:basename(ArchiveFile)),
-                case zp_db:insert(medium, [{id, RscId}, {filename, ArchiveFile}, {rootname, RootName}|PropsMedia], Ctx) of
+                case zp_db:insert(medium, MediumRowProps, Ctx) of
                     {ok, _MediaId} ->
                         % When the resource is in the media category, then move it to the correct sub-category depending
                         % on the mime type of the uploaded file.
@@ -236,6 +243,7 @@ replace_file(File, RscId, Props, Context) ->
                 end
             end,
             
+            Depicts = depicts(RscId, Context),
             {ok, Id} = zp_db:transaction(F, Context),
             [ zp_depcache:flush(#rsc{id=DepictId}) || DepictId <- Depicts ],
             zp_depcache:flush(#rsc{id=Id}),
@@ -257,7 +265,7 @@ replace_file(File, RscId, Props, Context) ->
 
 
 %% @doc Fetch the medium information of the file, if they are not set in the Props
-add_medium_info(File, Props) ->
+add_medium_info(File, Props, Context) ->
     PropsSize = case proplists:get_value(size, Props) of
         undefined ->
             [{size, filelib:file_size(File)}|Props];
@@ -266,7 +274,7 @@ add_medium_info(File, Props) ->
     end,
     PropsMime = case proplists:get_value(mime, PropsSize) of
         undefined ->
-            case zp_media_identify:identify(File) of
+            case zp_media_identify:identify(File, Context) of
                 {ok, MediaInfo} -> MediaInfo ++ PropsSize;
                 {error, _Reason} -> PropsSize
             end;
