@@ -257,8 +257,9 @@ ensure_preview(ReqData, Path, State) ->
                     % Media file exists, perform the resize
                     % @todo make use of a resize server, so that we do not resize too many files at the same time.
                     [Root|_] = State#state.root,
+                    Context = zp_context:new(ReqData, ?MODULE),
                     PreviewFile = filename:join(Root, Path),
-                    case zp_media_preview:convert(MediaFile, PreviewFile, PreviewPropList) of
+                    case zp_media_preview:convert(MediaFile, PreviewFile, PreviewPropList, Context) of
                         ok -> resource_exists(ReqData, State);
                         {error, Reason} -> throw(Reason)
                     end;

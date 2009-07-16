@@ -49,24 +49,28 @@ m_value(#m{}, _Context) ->
     undefined.
 
 
-%% @doc Return the identification of a medium. Compatible with zp_media_identify:identify()
+%% @doc Return the identification of a medium. Used by zp_media_identify:identify()
 %% @spec identify(ImageFilePath, Context) -> {ok, PropList} | {error, Reason}
+identify(Id, Context) when is_integer(Id) ->
+    case zp_db:assoc_row("select id, mime, width, height, orientation from medium where id = $1", [Id], Context) of
+        undefined ->
+            {error, enoent};
+        Props ->
+            {ok, Props}
+    end;
 identify(ImageFile, Context) ->
-    F = fun() ->
-        case zp_media_archive:is_archived(ImageFile, Context) of
-            true ->
-                RelFile = zp_media_archive:rel_archive(ImageFile, Context),
-                case zp_db:q_assoc("select id, mime, width, height, orientation from medium where filename = $1", [RelFile], Context) of
-                    undefined ->
-                        {error, enoent};
-                    Props ->
-                        {ok, Props}
-                end;
-            false ->
-                {error, enoent}
-        end
-    end,
-    zp_depcache:memo(F, {medium_identify, ImageFile}, ?DAY).
+    case zp_media_archive:is_archived(ImageFile, Context) of
+        true ->
+            RelFile = zp_media_archive:rel_archive(ImageFile, Context),
+            case zp_db:assoc_row("select id, mime, width, height, orientation from medium where filename = $1", [RelFile], Context) of
+                undefined ->
+                    {error, enoent};
+                Props ->
+                    {ok, Props}
+            end;
+        false ->
+            {error, enoent}
+    end.
 
 
 %% @doc Check if a medium record exists
@@ -94,18 +98,29 @@ get(Id, Context) ->
 
 
 %% @doc Get the medium record that depicts the resource id. "depiction" Predicates are preferred, when 
-%% missing then the attached medium record itself is returned.
+%% they are missing then the attached medium record itself is returned.  We must be able to generate a preview
+%% from the medium.
 %% @spec depiction(RscId, Context) -> PropList | undefined
-depiction(Id, Context) ->
+depiction(Id, Context) when is_integer(Id) ->
     F = fun() ->
-        RscId = case m_edge:objects(Id, depiction, Context) of
-            [DepictId|_Rest] -> DepictId;
-            [] -> Id
-        end,
-        get(RscId, Context)
+        find_previewable(m_edge:objects(Id, depiction, Context) ++ [Id], Context)
     end,
     zp_depcache:memo(F, {depiction, Id}, ?WEEK, [#rsc{id=Id}]).
 
+    %% @doc Find the first image in the the list of depictions that can be used to generate a preview.
+    find_previewable([], _Context) ->
+        undefined;
+    find_previewable([Id|Rest], Context) ->
+        case get(Id, Context) of
+            {ok, Props} ->
+                case zp_media_preview:can_generate_preview(proplists:get_value(mime, Props)) of
+                    true -> Props;
+                    false -> find_previewable(Rest, Context)
+                end;
+            {error, _} ->
+                find_previewable(Rest, Context)
+        end.
+    
 
 %% @doc Return the list of resources that is depicted by the medium (excluding the rsc itself)
 %% @spec depicts(RscId, Context) -> [Id]

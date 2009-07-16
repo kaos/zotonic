@@ -2,7 +2,7 @@
 %% @copyright 2009 Marc Worrell
 %% @date 2009-03-03
 %%
-%% @doc Generate media urls and tags, based on the filename, size and optional filters.
+%% @doc Generate media urls and html for viewing media, based on the filename, size and optional filters.
 %% Does not generate media previews itself, this is done when fetching the image.
 %%
 %% Typical urls are like: 
@@ -16,8 +16,9 @@
 
 %% interface functions
 -export([
-    tag/2,
-    url/2,
+    viewer/3,
+    tag/3,
+    url/3,
     props2url/1,
     url2props/1,
     test/0
@@ -25,54 +26,126 @@
 
 -include_lib("zophrenic.hrl").
 
-%% @spec tag(Filename, Options) -> {tag, TagString} | {error, Reason}
-%% @doc Generate a HTML image tag for the image with the filename and options
-tag(undefined, _Options) ->
-    {tag, []};
-tag([], _Options) ->
-    {tag, []};
-tag(Filename, Options) when is_binary(Filename) ->
-    tag(binary_to_list(Filename), Options);
-tag(Filename, Options) ->
-    case url1(Filename, Options) of
-        {url, Url, TagOpts, ImageOpts} -> 
-            % Calculate the real size of the image using the options
-            TagOpts1 = case zp_media_preview:size(filename_to_filepath(Filename),ImageOpts) of
-                            {size, Width, Height, _Mime} ->
-                                [{width,Width},{height,Height}|TagOpts];
-                            _ ->
-                                TagOpts
-                        end,
-            % Make sure the required alt tag is present
-            TagOpts2 =  case proplists:get_value(alt, TagOpts1) of
-                            undefined -> [{alt,""}|TagOpts1];
-                            _ -> TagOpts1
-                        end,
-            {tag, zp_tags:render_tag("img", [{src,Url}|TagOpts2])};
-        {error, Reason} -> 
-            {error, Reason}
+
+%% @spec media_viewer(MediaReference, Options, Context) -> {ok, HtmlFragMent} | {error, Reason}
+%%   MediaReference = Filename | RscId | MediaPropList
+%% @doc Generate a html fragment for displaying a medium.  This can generate audio or video player html.
+viewer(undefined, _Options, _Context) ->
+    {ok, []};
+viewer([], _Options, _Context) ->
+    {ok, []};
+viewer(#rsc{id=Id}, Options, Context) when is_integer(Id) ->
+    viewer(m_media:get(Id, Context), Options, Context);
+viewer(Id, Options, Context) when is_integer(Id) ->
+    viewer(m_media:get(Id, Context), Options, Context);
+viewer([{_Prop, _Value}|_] = Props, Options, Context) ->
+    case proplists:get_value(filename, Props) of
+        Empty when Empty == []; Empty == <<>>; Empty == undefined ->
+            viewer1(Props, undefined, Options, Context);
+        Filename ->
+            FilePath = filename_to_filepath(Filename, Context),
+            viewer1(Props, FilePath, Options, Context)
+    end;
+viewer(Filename, Options, Context) when is_binary(Filename) ->
+    viewer(binary_to_list(Filename), Options, Context);
+viewer(Filename, Options, Context) ->
+    FilePath = filename_to_filepath(Filename, Context),
+    case zp_media_identify:identify(FilePath) of
+        {ok, Props} ->
+            viewer1(Props, FilePath, Options, Context);
+        {error, _} -> 
+            % Unknown content type, we just can't display it.
+            {ok, []}
+    end.
+
+    
+    %% @doc Try to generate Html for the media reference.  First check if a module can do this, then 
+    %% check the normal image tag.
+    viewer1(Props, FilePath, Options, Context) ->
+        case zp_notifier:first({media_viewer, Props, FilePath, Options}, Context) of
+            {ok, Html} -> {ok, Html};
+            undefined -> tag(Props, Options, Context)
+        end.
+
+
+%% @spec tag(MediaReference, Options, Context) -> {ok, TagString} | {error, Reason}
+%%   MediaReference = Filename | RscId | MediaPropList
+%% @doc Generate a HTML image tag for the image with the filename and options. The medium _must_ be in
+%% a format for which we can generate a preview.  Note that this will never generate video or audio.
+tag(undefined, _Options, _Context) ->
+    {ok, []};
+tag([], _Options, _Context) ->
+    {ok, []};
+tag(#rsc{id=Id}, Options, Context) when is_integer(Id) ->
+    tag(m_media:get(Id, Context), Options, Context);
+tag(Id, Options, Context) when is_integer(Id) ->
+    tag(m_media:get(Id, Context), Options, Context);
+tag([{_Prop, _Value}|_] = Props, Options, Context) ->
+    case proplists:get_value(filename, Props) of
+        undefined -> {ok, []};
+        Filename -> tag1(Props, Filename, Options, Context)
+    end;
+tag(Filename, Options, Context) when is_binary(Filename) ->
+    tag(binary_to_list(Filename), Options, Context);
+tag(Filename, Options, Context) ->
+    FilePath = filename_to_filepath(Filename, Context),
+    tag1(FilePath, Filename, Options, Context).
+    
+
+    tag1(MediaRef, Filename, Options, Context) ->
+        {url, Url, TagOpts, ImageOpts} = url1(Filename, Options),
+        % Calculate the real size of the image using the options
+        TagOpts1 = case zp_media_preview:size(MediaRef, ImageOpts, Context) of
+                        {size, Width, Height, _Mime} ->
+                            [{width,Width},{height,Height}|TagOpts];
+                        _ ->
+                            TagOpts
+                    end,
+        % Make sure the required alt tag is present
+        TagOpts2 =  case proplists:get_value(alt, TagOpts1) of
+                        undefined -> [{alt,""}|TagOpts1];
+                        _ -> TagOpts1
+                    end,
+        {ok, zp_tags:render_tag("img", [{src,Url}|TagOpts2])}.
+
+
+%% @doc Give the filepath for the filename being served.
+%% @todo Ensure the file is really in the given directory (ie. no ..'s)
+filename_to_filepath(Filename, #context{host=Host} = Context) ->
+    case Filename of
+        "/" ++ _ ->
+            Filename;
+        "lib/" ++ _ -> 
+            case zp_module_indexer:find(lib, Filename, Context) of
+                {ok, Libfile} -> Libfile;
+                _ -> Filename
+            end;
+        _ ->
+            filename:join([code:lib_dir(zophrenic, priv), "sites", Host, "files", "archive", Filename])
     end.
 
 
-%% @doc Give the filepath for the filename being served
-%% @todo Ensure the file is really in the given directory (ie. no ..'s)
-filename_to_filepath(Filename) ->
-    filename:join([code:lib_dir(zophrenic, priv), "sites", "default", "files", "archive", Filename]).
-
-
 %% @doc Give the base url for the filename being served
-%% @todo Use the dispatch rules to find the correct image path
+%% @todo Use the dispatch rules to find the correct image path (when we want that...)
 filename_to_urlpath(Filename) ->
     filename:join("/image/", Filename).
 
 
-%% @spec url(Filename, Options) -> {url, Url} | {error, Reason}
+%% @spec url(MediaRef, Options, Context) -> {ok, Url} | {error, Reason}
 %% @doc Generate the url for the image with the filename and options
-url(Filename, Options) ->
-    case url1(Filename, Options) of
-        {url, Url, _TagOptions, _ImageOptions} -> {url, Url};
-        {error, Error} -> {error, Error}
-    end.
+url(Id, Options, Context) when is_integer(Id) ->
+    url(m_media:get(Id, Context), Options, Context);
+url([{_Prop, _Value}|_] = Props, Options, _Context) ->
+    case proplists:get_value(filename, Props) of
+        undefined ->
+            {error, no_filename};
+        Filename -> 
+            {url, Url, _TagOptions, _ImageOptions} = url1(Filename, Options),
+            {ok, Url}
+    end;
+url(Filename, Options, _Context) ->
+    {url, Url, _TagOptions, _ImageOptions} = url1(Filename, Options),
+    {ok, Url}.
 
 
 %% @spec url1(Filename, Options) -> {url, Url, TagOptions, ImageOpts} | {error, Reason}
@@ -159,6 +232,7 @@ url2props1([P|Rest], Acc) ->
 
 
 test() ->
+    Context = zp_context:new(),
     {   "koe.jpg", [{width,400},{crop,east},{blur},{grey}], 
         "61DADDE06035A4CD4862D99688EC0FFF","(400x)(crop-east)(blur)(grey)"} 
     = url2props("koe.jpg(400x)(crop-east)(blur)(grey)(61DADDE06035A4CD4862D99688EC0FFF).jpg"),
@@ -166,7 +240,7 @@ test() ->
     "(300x300)(crop-center)" 
     = props2url([{width,300},{height,300},{crop,center}]),
     
-    {tag,[60,"img",
+    {ok,[60,"img",
           [ [32,<<"src">>,61,39,
              <<"/image/koe.jpg(300x300)(crop-center)(0F96A52C1BD7F22E5833316DC9483913).jpg">>,39],
             [],
@@ -174,5 +248,5 @@ test() ->
             [32,<<"height">>,61,39,<<"300">>,39],
             [32,<<"class">>,61,39,"some-class",39]],
           47,62]} = 
-    tag(<<"koe.jpg">>, [{width,300},{height,300},{crop,center},{class,"some-class"}]),
+    tag(<<"koe.jpg">>, [{width,300},{height,300},{crop,center},{class,"some-class"}], Context),
     ok.

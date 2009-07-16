@@ -43,7 +43,7 @@ event({postback, {shop_select_variant, Id}, _TriggerId, _TargetId}, Context) ->
         undefined -> Context1;
         _ ->
             Filename = proplists:get_value(filename, Props),
-            {tag, Tag} = zp_media_tag:tag(Filename, [{alt,""}, {crop,true}, {width,300}]),
+            {ok, Tag} = zp_media_tag:tag(Filename, [{alt,""}, {crop,true}, {width,300}]),
             zp_render:update("variant-image", Tag, Context1)
     end.
 

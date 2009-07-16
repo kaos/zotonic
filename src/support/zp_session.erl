@@ -203,7 +203,7 @@ handle_call({incr, Key, Delta}, _From, Session) ->
         {Key, V} -> zp_convert:to_integer(V) + Delta;
         none -> Delta
     end,
-    {reply, NV, Session#session{props = proplists:replace(Key, NV, Session#session.props)}};
+    {reply, NV, Session#session{props = zp_utils:prop_replace(Key, NV, Session#session.props)}};
 
 handle_call({spawn_link, Module, Func, Args, Context}, _From, Session) ->
     Pid    = spawn_link(Module, Func, [Args, Context]),

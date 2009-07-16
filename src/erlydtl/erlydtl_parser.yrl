@@ -110,6 +110,7 @@ Nonterminals
 	PrintTag
 	ImageTag
 	ImageUrlTag
+	MediaTag
 	TransTag
 	TransExtTag
 	ValueList
@@ -151,6 +152,7 @@ Terminals
     in_keyword
     include_keyword
     load_keyword
+	media_keyword
     not_keyword
     now_keyword
     number_literal
@@ -204,6 +206,7 @@ Elements -> Elements UrlTag : '$1' ++ ['$2'].
 Elements -> Elements PrintTag : '$1' ++ ['$2'].
 Elements -> Elements ImageTag : '$1' ++ ['$2'].
 Elements -> Elements ImageUrlTag : '$1' ++ ['$2'].
+Elements -> Elements MediaTag : '$1' ++ ['$2'].
 Elements -> Elements TransExtTag : '$1' ++ ['$2'].
 Elements -> Elements WithBlock : '$1' ++ ['$2'].
 
@@ -305,6 +308,8 @@ CallWithTag -> open_tag call_keyword identifier with_keyword Value close_tag : {
 
 ImageTag -> open_tag image_keyword Value Args close_tag : {image, '$3', '$4' }.
 ImageUrlTag -> open_tag image_url_keyword Value Args close_tag : {image_url, '$3', '$4' }.
+
+MediaTag -> open_tag media_keyword Value Args close_tag : {media, '$3', '$4' }.
 
 UrlTag -> open_tag url_keyword identifier Args close_tag : {url, '$3', '$4'}.
 

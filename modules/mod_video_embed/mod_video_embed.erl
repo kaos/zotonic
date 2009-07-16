@@ -21,6 +21,7 @@
 %% interface functions
 -export([
     rsc_update/3,
+    media_viewer/2,
     event/2
 ]).
 
@@ -29,25 +30,54 @@
 -record(state, {context}).
 
 %% @doc Fantasy mime type to distinguish embeddable html fragments.
--define(EMBED_MIME, "text/html-video-embed").
+-define(EMBED_MIME, <<"text/html-video-embed">>).
 
 %% @doc Check if the update contains video embed information.  If so then update the attached medium item.
 %% @spec rsc_update({rsc_update, ResourceId, OldResourceProps}, UpdateProps, Context) -> NewUpdateProps
 rsc_update({rsc_update, Id, _OldProps}, Props, Context) ->
     case proplists:is_defined(video_embed_code, Props) of
         true -> 
-            EmbedCode = zp_html:unescape(proplists:get_value(video_embed_code, Props)),
-            EmbedService = proplists:get_value(video_embed_service, Props, ""),
-            MediaProps = [
-                {mime, ?EMBED_MIME},
-                {video_embed_code, EmbedCode},
-                {video_embed_service, EmbedService}
-            ],
-            ok = m_media:replace(Id, MediaProps, Context),
+            case proplists:get_value(video_embed_code, Props) of
+                Empty when Empty == undefined; Empty == <<>>; Empty == [] ->
+                    % Delete the media record iff the media mime type is our mime type
+                    case m_media:identify(Id, Context) of
+                        {ok, Props} ->
+                            case proplists:get_value(mime, Props) of
+                                ?EMBED_MIME -> m_media:delete(Id, Context);
+                                _ -> nop
+                            end;
+                        _ ->
+                            nop
+                    end;
+                EmbedCode ->
+                    EmbedCodeRaw = zp_html:unescape(EmbedCode),
+                    EmbedService = proplists:get_value(video_embed_service, Props, ""),
+                    MediaProps = [
+                        {mime, ?EMBED_MIME},
+                        {video_embed_code, EmbedCodeRaw},
+                        {video_embed_service, EmbedService}
+                    ],
+                    ok = m_media:replace(Id, MediaProps, Context)
+            end,
+
             proplists:delete(video_embed_code, 
                 proplists:delete(video_embed_service, Props));
         false ->
             Props
+    end.
+
+
+%% @doc Return the media viewer for the embedded video (that is, when it is an embedded media).
+%% @spec media_viewer(Notification, Context) -> undefined | {ok, Html}
+media_viewer({media_viewer, Props, _Filename, _Options}, _Context) ->
+    case proplists:get_value(mime, Props) of
+        ?EMBED_MIME ->
+            case proplists:get_value(video_embed_code, Props) of
+                undefined -> undefined;
+                EmbedCode -> {ok, EmbedCode}
+            end;
+        _ ->
+            undefined
     end.
 
 
@@ -119,6 +149,7 @@ init(Args) ->
     process_flag(trap_exit, true),
     {context, Context} = proplists:lookup(context, Args),
     zp_notifier:observe(rsc_update, {?MODULE, rsc_update}, Context),
+    zp_notifier:observe(media_viewer, {?MODULE, media_viewer}, Context),
     {ok, #state{context=zp_context:new_for_host(Context)}}.
 
 
@@ -157,6 +188,7 @@ handle_info(_Info, State) ->
 %% The return value is ignored.
 terminate(_Reason, State) ->
     zp_notifier:detach(rsc_update, {?MODULE, rsc_update}, State#state.context),
+    zp_notifier:detach(media_viewer, {?MODULE, media_viewer}, State#state.context),
     ok.
 
 %% @spec code_change(OldVsn, State, Extra) -> {ok, NewState}

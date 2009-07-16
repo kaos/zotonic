@@ -10,26 +10,38 @@
 
 %% interface functions
 -export([
-    identify_cached/1,
-    identify/1,
+    identify/2,
     extension/1
 ]).
 
 -include_lib("zophrenic.hrl").
 
 
-%% @spec identify_cached(ImageFile) -> {ok, Meta} | {error, Error}
+%% @spec identifyImageFile) -> {ok, Meta} | {error, Error}
 %% @doc Caching version of identify/1. Fetches information about an image, returns width, height, type, etc.
-identify_cached(ImageFile) ->
+identify(ImageFile, Context) ->
     F = fun() ->
-        identify(ImageFile)
+            case m_media:identify(ImageFile, Context) of
+                {ok, _Props} = Result -> Result;
+                {error, _Reason} -> identify_file(ImageFile, Context)
+            end
     end,
-    zp_depcache:memo(F, {identify, ImageFile}, ?YEAR, [media_identify]).
+    zp_depcache:memo(F, {media_identify, ImageFile}, ?DAY, [media_identify]).
     
-    
-%% @spec identify(ImageFile) -> PropList
+
+
+%% @spec identify(ImageFile) -> {ok, PropList} | {error, Reason}
 %% @doc Fetch information about an image, returns width, height, type, etc.
-identify(ImageFile) ->
+identify_file(ImageFile, Context) ->
+    case zp_notifier:first({media_identify_file, ImageFile}, Context) of
+        {ok, Props} -> {ok, Props};
+        undefined -> identify_file_imagemagick(ImageFile)
+    end.
+    
+
+%% @spec identify(ImageFile) -> {ok, PropList} | {error, Reason}
+%% @doc Try to identify the file using image magick
+identify_file_imagemagick(ImageFile) ->
     CleanedImageFile = zp_utils:os_escape(ImageFile),
     Result    = os:cmd("identify -quiet \"" ++ CleanedImageFile ++ "[0]\""),
     % ["test/a.jpg","JPEG","3440x2285","3440x2285+0+0","8-bit","DirectClass","2.899mb"]
@@ -81,6 +93,7 @@ mime(Type) -> "image/" ++ string:to_lower(Type).
 
 %% @doc Return the extension for a known mime type.
 %% @todo Include extra mime types when we can identify them.
+extension(B) when is_binary(B) -> extension(binary_to_list(B));
 extension("image/jpeg") -> ".jpg";
 extension("image/gif") -> ".gif";
 extension("image/tiff") -> ".tiff";

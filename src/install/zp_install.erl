@@ -260,7 +260,8 @@ model_pgsql() ->
 
     % Table medium
     % Holds all references to media (files), used in the context of resources
-    % Every medium is a resource
+    % Every medium is a resource.
+    % The preview might have been generated from the original file and is always a jpeg.
 
     "CREATE TABLE medium
     (
@@ -271,7 +272,13 @@ model_pgsql() ->
       width int NOT NULL DEFAULT 0,
       height int NOT NULL DEFAULT 0,
       orientation int NOT NULL DEFAULT 1,
+      sha1 character varying(40),
       size int NOT NULL DEFAULT 0,
+      preview_filename varying(400),
+      preview_width int NOT NULL DEFAULT 0,
+      preview_height int NOT NULL DEFAULT 0,
+      is_deletable_file boolean NOT NULL DEFAULT false, 
+      is_deletable_preview boolean NOT NULL DEFAULT false, 
       props bytea,
       created timestamp with time zone NOT NULL DEFAULT now(),
 
@@ -574,8 +581,13 @@ model_pgsql() ->
     "
     CREATE FUNCTION medium_delete() RETURNS trigger AS $$
     begin
-        if (tg_op = 'DELETE' and old.filename <> '') then
-            insert into medium_deleted (filename) values (old.filename);
+        if (tg_op = 'DELETE') then
+            if (old.filename <> '' and old.filename is not null and old.is_deletable_file) then
+                insert into medium_deleted (filename) values (old.filename);
+            end if;
+            if (old.preview_filename <> '' and old.preview_filename is not null and old.is_deletable_preview) then
+                insert into medium_deleted (filename) values (old.preview_filename);
+            end if;
         end if;
         return null;
     end;

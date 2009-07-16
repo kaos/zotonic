@@ -376,6 +376,8 @@ body_ast(DjangoParseTree, Context, TreeWalker) ->
                 cycle_ast(Names, Context, TreeWalkerAcc);
             ({'cycle_compat', Names}, TreeWalkerAcc) ->
                 cycle_compat_ast(Names, Context, TreeWalkerAcc);
+            ({'media', Variable, Args}, TreeWalkerAcc) ->
+                media_ast(Variable, Args, Context, TreeWalkerAcc);
             ({'image', Variable, Args}, TreeWalkerAcc) ->
                 image_ast(Variable, Args, Context, TreeWalkerAcc);
             ({'image_url', Variable, Args}, TreeWalkerAcc) ->
@@ -1058,7 +1060,9 @@ call_ast(Module, Variable, AstInfo, TreeWalker) ->
      AppAst = erl_syntax:application(
 		erl_syntax:atom(Module),
 		erl_syntax:atom(render),
-		[Variable]),
+		[   Variable,
+		    erl_syntax:variable("ZpContext")
+		]),
     RenderedAst = erl_syntax:variable("Rendered"),
     OkAst = erl_syntax:clause(
 	      [erl_syntax:tuple([erl_syntax:atom(ok), RenderedAst])], 
@@ -1079,6 +1083,39 @@ call_ast(Module, Variable, AstInfo, TreeWalker) ->
 
 
 %% @author Marc Worrell
+%% @doc Generate html to show the media tag.  This is different in that the image tag can only
+%% display images using the <img /> tag.  This can also generate complete media viewers.
+%% @todo Optimization for the situation where all parameters are constants
+media_ast(FilenameValue, Args, Context, TreeWalker) ->
+    FilenameAst = resolve_value_ast(FilenameValue, Context, TreeWalker),
+    {ArgsAst, TreeWalker1} = scomp_ast_list_args(Args, Context, TreeWalker),
+    AppAst = erl_syntax:application(
+                        erl_syntax:atom(zp_media_tag),
+                        erl_syntax:atom(viewer),
+                        [   FilenameAst,
+                            ArgsAst,
+                            erl_syntax:variable("ZpContext")
+                        ]
+                    ),
+    RenderedAst = erl_syntax:variable("Rendered"),
+    OkAst = erl_syntax:clause(
+                      [erl_syntax:tuple([erl_syntax:atom(ok), RenderedAst])], 
+                      none,
+                      [RenderedAst]),
+    ReasonAst = erl_syntax:variable("Reason"),
+    ErrStrAst = erl_syntax:application(
+                	  erl_syntax:atom(io_lib),
+                	  erl_syntax:atom(format),
+                	  [erl_syntax:string("error: ~p"), erl_syntax:list([ReasonAst])]),
+    ErrorAst = erl_syntax:clause(
+                	 [erl_syntax:tuple([erl_syntax:atom(error), ReasonAst])], 
+                	 none,
+                	 [ErrStrAst]),
+    CallAst = erl_syntax:case_expr(AppAst, [OkAst, ErrorAst]),
+    {{CallAst, #ast_info{}}, TreeWalker1}.
+
+
+%% @author Marc Worrell
 %% @doc Generate an image tag based on the image name and the arguments
 %% @todo Optimization for the situation where all parameters are constants
 image_ast(FilenameValue, Args, Context, TreeWalker) ->
@@ -1088,12 +1125,13 @@ image_ast(FilenameValue, Args, Context, TreeWalker) ->
                         erl_syntax:atom(zp_media_tag),
                         erl_syntax:atom(tag),
                         [   FilenameAst,
-                            ArgsAst
+                            ArgsAst,
+                            erl_syntax:variable("ZpContext")
                         ]
                     ),
     RenderedAst = erl_syntax:variable("Rendered"),
     OkAst = erl_syntax:clause(
-                      [erl_syntax:tuple([erl_syntax:atom(tag), RenderedAst])], 
+                      [erl_syntax:tuple([erl_syntax:atom(ok), RenderedAst])], 
                       none,
                       [RenderedAst]),
     ReasonAst = erl_syntax:variable("Reason"),
@@ -1119,12 +1157,13 @@ image_url_ast(FilenameValue, Args, Context, TreeWalker) ->
                         erl_syntax:atom(zp_media_tag),
                         erl_syntax:atom(url),
                         [   FilenameAst,
-                            ArgsAst
+                            ArgsAst,
+                            erl_syntax:variable("ZpContext")
                         ]
                     ),
     RenderedAst = erl_syntax:variable("Rendered"),
     OkAst = erl_syntax:clause(
-                      [erl_syntax:tuple([erl_syntax:atom(url), RenderedAst])], 
+                      [erl_syntax:tuple([erl_syntax:atom(ok), RenderedAst])], 
                       none,
                       [RenderedAst]),
     ReasonAst = erl_syntax:variable("Reason"),
