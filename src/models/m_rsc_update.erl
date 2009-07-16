@@ -130,7 +130,7 @@ update(Id, Props, Context) when is_integer(Id) orelse Id == insert_rsc ->
                                         throw({error, eacces})
                                 end;
                             _ ->
-                                {Id, SafeProps, m_rsc:get(Id, Ctx), m_rsc:is_a_list(Id, Context), false}
+                                {Id, SafeProps, m_rsc:get(Id, Ctx), m_rsc:is_a_list(Id, Ctx), false}
                         end,
                     
                         UpdateProps1 = [

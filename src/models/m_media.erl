@@ -94,7 +94,7 @@ exists(Id, Context) ->
 %% @spec get(RscId, Context) -> PropList
 get(Id, Context) ->
     F = fun() -> zp_db:assoc_props_row("select * from medium where id = $1", [Id], Context) end,
-    zp_depcache:memo(F, {medium, Id}, ?WEEK).
+    zp_depcache:memo(F, {medium, Id}, ?WEEK, [#rsc{id=Id}]).
 
 
 %% @doc Get the medium record that depicts the resource id. "depiction" Predicates are preferred, when 
@@ -149,14 +149,15 @@ delete(Id, Context) ->
 replace(Id, Props, Context) ->
     Depicts = depicts(Id, Context),
     F = fun(Ctx) ->
-        {ok, _}  = zp_db:delete(medium, Id, Context),
+        {ok, _}  = zp_db:delete(medium, Id, Ctx),
         {ok, Id} = zp_db:insert(medium, [{id, Id} | Props], Ctx)
     end,
     
     case zp_db:transaction(F, Context) of
         {ok, _} -> 
             [ zp_depcache:flush(#rsc{id=DepictId}) || DepictId <- Depicts ],
-            zp_depcache:flush(#rsc{id=Id});
+            zp_depcache:flush(#rsc{id=Id}),
+            ok;
         {rollback, {Error, _Trace}} ->
              {error, Error}
     end.

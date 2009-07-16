@@ -67,7 +67,7 @@
 						{% with r.medium as medium %}
 							{% if r.medium or r.is_a.media %}
 								<div class="item-wrapper">
-									<h3 class="above-item">File</h3>
+									<h3 class="above-item">File/ media</h3>
 									<div class="item clearfix">
 										{% if medium.filename %}
 											<p>
@@ -86,9 +86,14 @@
 											<div>
 												{% button text="download" action={redirect dispatch="media_attachment" star=medium.filename} %}
 											</div>
-										{% else %}
-											(todo) Upload file button...
 										{% endif %}
+										
+										{% all include "_admin_edit_media.tpl" medium=medium %}
+
+										<hr class="clear" />
+
+										<p>Replace with a file, embed code or something else. <strong>Warning</strong> this replaces the current media content.</p>
+										{% button text="Replace..." action={dialog_media_upload id=id} %}
 									</div>
 								</div>
 							{% endif %}

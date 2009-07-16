@@ -84,46 +84,68 @@ media_viewer({media_viewer, Props, _Filename, _Options}, _Context) ->
 %% @doc Handle the form submit from the "new media" dialog.  The form is defined in templates/_media_upload_panel.tpl.
 %% @spec event(Event, Context1) -> Context2
 event({submit, {add_video_embed, EventProps}, _TriggerId, _TargetId}, Context) ->
+    ?DEBUG(Context),
     Actions = proplists:get_value(actions, EventProps, []),
-    Predicate = proplists:get_value(predicate, EventProps, depiction),
-    Title   = zp_context:get_q_validated("title", Context),
-    GroupId = list_to_integer(zp_context:get_q("group_id", Context)),
-    RscId   = zp_convert:to_integer(zp_context:get_q("rsc_id", Context)),
+    Id = proplists:get_value(id, EventProps),
     EmbedService = zp_context:get_q("video_embed_service", Context),
-    EmbedCode = zp_context:get_q("video_embed_code", Context),
+    EmbedCode = zp_context:get_q_validated("video_embed_code", Context),
 
-    Props = [
-        {title, Title},
-        {category, video},
-        {group_id, GroupId},
-        {video_embed_service, EmbedService},
-        {video_embed_code, EmbedCode}
-    ],
-    
-    F = fun(Ctx) ->
-        case m_rsc:insert(Props, Context) of
-            {ok, MediaRscId} ->
-                case RscId of
-                    undefined -> nop;
-                    _ -> m_edge:insert(RscId, Predicate, MediaRscId, Ctx)
-                end,
-                {ok, MediaRscId};
-            {error, Error} ->
-                throw({error, Error})
-        end 
-    end,
-    
-    case zp_db:transaction(F, Context) of
-        {ok, MediaId} ->
-            ContextRedirect = case RscId of
-                undefined -> zp_render:wire({redirect, [{dispatch, "admin_edit_rsc"}, {id, MediaId}]}, Context);
-                _ -> Context
+    case Id of
+        %% Create a new page
+        undefined ->
+            RscId = proplists:get_value(rsc_id, EventProps),
+            Predicate = proplists:get_value(predicate, EventProps, depiction),
+            Title   = zp_context:get_q_validated("title", Context),
+            GroupId = list_to_integer(zp_context:get_q("group_id", Context)),
+
+            Props = [
+                {title, Title},
+                {category, video},
+                {group_id, GroupId},
+                {video_embed_service, EmbedService},
+                {video_embed_code, EmbedCode}
+            ],
+
+            F = fun(Ctx) ->
+                case m_rsc:insert(Props, Context) of
+                    {ok, MediaRscId} ->
+                        case RscId of
+                            undefined -> nop;
+                            _ -> m_edge:insert(RscId, Predicate, MediaRscId, Ctx)
+                        end,
+                        {ok, MediaRscId};
+                    {error, Error} ->
+                        throw({error, Error})
+                end 
             end,
-            zp_render:wire([{growl, [{text, "Made the media page."}]} | Actions], ContextRedirect);
-        {rollback, {_Error, _Trace}} ->
-            ?ERROR("~p~n~p", [_Error, _Trace]),
-            zp_render:growl_error("Could not create the media page.", Context)
+    
+            case zp_db:transaction(F, Context) of
+                {ok, MediaId} ->
+                    ContextRedirect = case RscId of
+                        undefined -> zp_render:wire({redirect, [{dispatch, "admin_edit_rsc"}, {id, MediaId}]}, Context);
+                        _ -> Context
+                    end,
+                    zp_render:wire([{growl, [{text, "Made the media page."}]} | Actions], ContextRedirect);
+                {rollback, {_Error, _Trace}} ->
+                    ?ERROR("~p~n~p", [_Error, _Trace]),
+                    zp_render:growl_error("Could not create the media page.", Context)
+            end;
+        
+        %% Update the current page
+        N when is_integer(N) ->
+            Props = [
+                {category, video},
+                {video_embed_service, EmbedService},
+                {video_embed_code, EmbedCode}
+            ],
+            case m_rsc:update(Id, Props, Context) of
+                {ok, _} ->
+                    zp_render:wire([{dialog_close, []} | Actions], Context);
+                {error, _} ->
+                    zp_render:growl_error("Could not update the page with the new embed code.", Context)
+            end
     end.
+    
 
 
 %%====================================================================

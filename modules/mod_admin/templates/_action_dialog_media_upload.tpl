@@ -7,29 +7,33 @@
 	</ul>
 	
 	<div id="{{ #tab }}-upload">
-		<p>Upload a file from your computer.  You have to specify a description of the file to make it easier to find and share.  You also have to specify with which group you want to share the uploaded file.</p>
+		<p>
+			Upload a file from your computer.
+			{% if not id %}
+				You have to specify a description of the file to make it easier to find and share.  You also have to specify with which group you want to share the uploaded file.
+			{% endif %}
+		</p>
 
-		{% wire id=#form type="submit" postback={media_upload predicate=predicate actions=actions} delegate=delegate %}
+		{% wire id=#form type="submit" postback={media_upload predicate=predicate actions=actions id=id rsc_id=rsc_id} delegate=delegate %}
 		<form id="{{ #form }}" method="POST" action="postback">
-
-			<input type="hidden" name="rsc_id" value="{{ rsc_id }}" />
-
 			<div class="new-media-wrapper">
-				<div class="form-item clearfix">
-					<label for="new_media_title" style="color:white">Media title</label>
-					<input type="text" id="new_media_title" name="new_media_title" value="{{ title|escape }}" />
-					{% validate id="new_media_title" type={presence} %}
-				</div>
+				{% if not id %}
+					<div class="form-item clearfix">
+						<label for="new_media_title" style="color:white">Media title</label>
+						<input type="text" id="new_media_title" name="new_media_title" value="{{ title|escape }}" />
+						{% validate id="new_media_title" type={presence} %}
+					</div>
 		
-				<div class="form-item clearfix">
-					<label for="{{ #group_id }}">Group</label>
-					<select id="{{ #group_id }}" name="group_id">
-					{% for id in m.acl.member %}
-						<option value="{{ id }}" {% ifequal group_id id %}selected="selected"{% endifequal %}>{{ m.rsc[id].title }}</option>
-					{% endfor %}
-					</select>
-				</div>
-		
+					<div class="form-item clearfix">
+						<label for="{{ #group_id }}">Group</label>
+						<select id="{{ #group_id }}" name="group_id">
+						{% for id in m.acl.member %}
+							<option value="{{ id }}" {% ifequal group_id id %}selected="selected"{% endifequal %}>{{ m.rsc[id].title }}</option>
+						{% endfor %}
+						</select>
+					</div>
+				{% endif %}
+				
 				<div class="form-item clearfix">
 					<label for="upload_file">Media file</label>
 					<input type="file" id="upload_file" name="upload_file" />
