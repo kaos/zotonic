@@ -8,7 +8,6 @@
 
 ---------------------------------------------------------- */
 
-
 body {
 	background: #f1f1f1 url(../images/admin_bg.jpg) repeat-x top;
 	font: 11px/18px "Lucida Grande", Helvetica, sans-serif;
@@ -632,3 +631,85 @@ a.button {
 .loaded-bigImage {
 	border: 3px solid #ccc;
 }
+
+
+/* Modules - catrgory sorter
+---------------------------------------------------------- */
+
+li.hover, li.hover a {
+	background: #0c8db2 !important;
+	color: #fff !important;
+	border-color: #fff;
+}
+
+.ui-draggable-dragging .buttons {
+	display: none;
+}
+
+.short-list .line {
+	height: 15px;
+	border: 1px dotted #ccc;
+	background: none;
+	margin: 6px 0;
+}
+
+ul.categories li span.button-wrapper {
+}
+
+ul.categories {
+	padding: 8px 6px 0;
+}
+
+ul.categories li {
+	margin: 0;
+	padding: 0;
+	border: none;
+}
+
+ul.categories li.active {
+	background: #f1f1f1;	
+}
+
+	ul.categories li.ui-draggable {
+		width: auto;
+		display: block;
+	}
+
+ul.categories li a {
+	padding: 1px 0 0 15px;
+	border: 1px solid #e0e0e0;
+	background: #fff;
+	cursor: pointer;
+}
+
+.ui-draggable-dragging {
+	width: 600px !important;
+}
+
+.ui-draggable-dragging .button-wrapper {
+	display: none;
+}
+
+.grippy {
+	width: 18px;
+	height: 29px;
+	position: relative;
+	cursor: move;
+}
+
+	.grippy img {
+		position: absolute;
+		top: 4px;
+		left: 6px;
+	}
+
+.short-list li.depth-1 { margin-left: 0; }
+.short-list li.depth-2 { margin-left: 30px; }
+.short-list li.depth-3 { margin-left: 60px; }
+.short-list li.depth-4 { margin-left: 90px; }
+.short-list li.depth-5 { margin-left: 120px; }
+.short-list li.depth-7 { margin-left: 150px; }
+.short-list li.depth-8 { margin-left: 180px; }
+.short-list li.depth-9 { margin-left: 210px; }
+.short-list li.depth-10 { margin-left: 240px; }
+.short-list li.depth-11 { margin-left: 270px; }
