@@ -517,10 +517,8 @@ model_pgsql() ->
         do_queue boolean;
     begin
         if (tg_op = 'INSERT') then
-            duetime := now() - interval '2 minute';
             do_queue := true;
         elseif (new.version <> old.version or new.modified <> old.modified) then
-            duetime := now() + interval '2 minute';
             do_queue := true;
         else
             do_queue := false;
@@ -530,14 +528,14 @@ model_pgsql() ->
             <<insert_update_queue>>
             loop
                 update rsc_pivot_queue 
-                set due = (case when duetime < due then duetime else due end),
+                set due = (case when now() < due then now() else due end),
                     serial = serial + 1
                 where rsc_id = new.id;
             
                 exit insert_update_queue when found;
             
                 begin
-                    insert into rsc_pivot_queue (rsc_id, due, is_update) values (new.id, duetime, tg_op = 'UPDATE');
+                    insert into rsc_pivot_queue (rsc_id, due, is_update) values (new.id, now(), tg_op = 'UPDATE');
                     exit insert_update_queue;
                 exception
                     when unique_violation then
