@@ -55,7 +55,7 @@ render(Params, _Vars, Context, _State) ->
 
     Attrs = [
         {<<"id">>,    Id},
-        {<<"name">>,  Id},
+        {<<"name">>,  case proplists:is_defined(id, Params) of true -> Id; false -> "" end},
         {<<"style">>, Style},
         {<<"title">>, Title}
     ],
