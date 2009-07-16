@@ -38,7 +38,7 @@ viewer(Id, Options, Context) when is_integer(Id) ->
     viewer(m_media:get(Id, Context), Options, Context);
 viewer([{_Prop, _Value}|_] = Props, Options, Context) ->
     case zp_convert:to_list(proplists:get_value(filename, Props)) of
-        Empty when Empty == []; Empty == undefined ->
+        None when None == []; None == undefined ->
             viewer1(Props, undefined, Options, Context);
         Filename ->
             FilePath = filename_to_filepath(Filename, Context),
@@ -78,8 +78,10 @@ tag(Id, Options, Context) when is_integer(Id) ->
     tag(m_media:get(Id, Context), Options, Context);
 tag([{_Prop, _Value}|_] = Props, Options, Context) ->
     case zp_convert:to_list(proplists:get_value(filename, Props)) of
-        undefined -> {ok, []};
-        Filename -> tag1(Props, Filename, Options, Context)
+        None when None == undefined; None == [] -> 
+            {ok, []};
+        Filename -> 
+            tag1(Props, Filename, Options, Context)
     end;
 tag(Filename, Options, Context) when is_binary(Filename) ->
     tag(binary_to_list(Filename), Options, Context);
