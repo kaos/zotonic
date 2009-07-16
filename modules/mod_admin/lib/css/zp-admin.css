@@ -8,9 +8,6 @@
 
 ---------------------------------------------------------- */
 
-html, body {
-	height: 100%;
-}
 
 body {
 	background: #f1f1f1 url(../images/admin_bg.jpg) repeat-x top;
@@ -31,9 +28,7 @@ hr {
 }
 
 .zp-wrapper {
-	margin: 0 auto -81px;
-	height: auto !important;
-	min-height: 100%;
+	margin: 0 auto;
 }
 
 .block {
@@ -335,23 +330,6 @@ a:focus {
 		#navigation li.search-box .quick-search-wrapper button {
 			margin: 0;
 		}
-/* footer
----------------------------------------------------------- */
-		
-.footer, .push {
-	height: 81px;
-}
-	
-.footer {
-	width: 100%;
-	background: url(../images/admin_footer_bg.jpg) repeat-x right top;
-}
-
-	.footer-content {
-		margin: 0;
-		background: url(../images/admin_footer_img.jpg);
-		height: 81px;
-	}
 
 	
 /* forms
@@ -359,6 +337,8 @@ a:focus {
 
 fieldset {
 	margin: 0 0 18px 0;
+	padding: 0;
+	border: none;
 }
 
 button, 

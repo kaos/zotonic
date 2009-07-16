@@ -49,7 +49,6 @@
 			</ul>
 
 		</div>
-		<div class="push"></div>
 	</div>
 {% endwith %}
 {% endblock %}

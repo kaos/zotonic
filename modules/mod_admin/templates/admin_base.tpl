@@ -6,14 +6,14 @@
 
 	<meta name="author" content="Tim Benniks" />
 	
-	<link href="/lib/css/zp-base.css" type="text/css" media="screen" rel="stylesheet" />
-	<link href="/lib/css/zp-type.css" type="text/css" media="screen" rel="stylesheet" />
-	<link href="/lib/css/zp-forms.css" type="text/css" media="screen" rel="stylesheet" />
-	<link href="/lib/css/zp-wysiwyg.css" type="text/css" media="screen" rel="stylesheet" />
+	<link href="/lib/css/zp-compressed.css" type="text/css" media="screen" rel="stylesheet" />
 	<link href="/lib/css/zp-admin.css" type="text/css" media="screen" rel="stylesheet" />
+
+	<link href="/lib/css/zp-wysiwyg.css" type="text/css" media="screen" rel="stylesheet" />
 	<link href="/lib/css/zp-dialog.css" type="text/css" media="screen" rel="stylesheet" />
 	<link href="/lib/css/zp-formreplace.css" type="text/css" media="screen" rel="stylesheet" />
 	<link href="/lib/css/zp-finder.css" type="text/css" media="screen" rel="stylesheet" />
+	<link href="/lib/css/zp-growl.css" type="text/css" media="screen" rel="stylesheet" />
 	
 	<!--[if IE]><link href="/lib/css/zp-ie.css" type="text/css" media="screen" rel="stylesheet" /><![endif]-->
 </head>
@@ -54,10 +54,6 @@
 		{% endblock %}
 
 		{% block content %}{% endblock %}
-	</div>
-
-	<div id="footer" class="footer">
-		<div class="footer-content"></div>
 	</div>
 
 	{% include "_admin_js_include.tpl" %}

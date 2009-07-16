@@ -16,7 +16,6 @@
 			</div>
 			<div class="zp-33">&nbsp;</div>
 		</div>
-		<div class="push"></div>
 	</div>
 {% endblock %}
 

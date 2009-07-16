@@ -14,19 +14,20 @@
 	<div id="content" class="zp-100">
 		<div class="block clearfix">
 
-		{% if not r.is_editable %}
-			<h2>You are not allowed to edit <span>{{ r.title|striptags }}</span></h2>
-		{% else %}
-			<p class="admin-chapeau">editing:</p>
-			{% if r.is_a.meta %}
-				<h2><em>{{ m.rsc[r.category_id].title }}</em> {{ r.title|striptags|default:"<em>untitled</em>" }}</h2>
+			{% if not r.is_editable %}
+				<h2>You are not allowed to edit <span>{{ r.title|striptags }}</span></h2>
 			{% else %}
-				<h2>{{ r.title|striptags|default:"<em>untitled</em>" }}</h2>
-			{% endif %}
-		{% endif %}	
+				<p class="admin-chapeau">editing:</p>
+				{% if r.is_a.meta %}
+					<h2><em>{{ m.rsc[r.category_id].title }}</em> {{ r.title|striptags|default:"<em>untitled</em>" }}</h2>
+				{% else %}
+					<h2>{{ r.title|striptags|default:"<em>untitled</em>" }}</h2>
+				{% endif %}
+			{% endif %}	
 
 			{% wire id="rscform" type="submit" postback="rscform" %}
 			<form id="rscform" method="post" action="postback">
+				
 				<div class="zp-67" id="poststuff">
 					<div class="padding">
 
@@ -169,6 +170,7 @@
 								</fieldset>
 							</div>
 						</div>
+					
 					</div>
 				</div>
 			
@@ -367,6 +369,6 @@
 				</div>
 			</form>
 		</div>
-		<div class="push"></div>
+	</div>	
 {% endwith %}
 {% endblock %}

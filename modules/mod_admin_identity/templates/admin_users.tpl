@@ -72,6 +72,5 @@
 	{% endwith %}
 
 		</div>
-		<div class="push"></div>
 	</div>
 {% endblock %}
