@@ -325,6 +325,9 @@ function zp_init_postback_forms()
     })
 	.submit(function(event)
 	{
+        if (tinyMCE)
+            tinyMCE.triggerSave(true,true);
+
 		var arguments	= $(this).formToArray();
 
         this.clk = this.clk_x = this.clk_y = null;
