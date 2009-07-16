@@ -55,7 +55,8 @@
 						<h3 class="above-list">Latest modified media items</h3>
 						<ul class="short-list">
 							<li class="headers clearfix">
-								<span class="zp-35">Title</span>
+								<span class="zp-10">Preview</span>
+								<span class="zp-25">Title</span>
 								<span class="zp-25">Category</span>
 								<span class="zp-20">Publish date</span>
 								<span class="zp-20">Options</span>
@@ -64,7 +65,9 @@
 							{% for id in m.search[{latest cat="media"}] %}
 							<li>
 								<a href="{% url admin_edit_rsc id=id %}" class="clearfix">
-									<span class="zp-35">{{ m.rsc[id].title|striptags|default:"<em>untitled</em>" }}</span>
+									<span class="zp-10">{% image id width=40 height=18 crop %}</span>
+									
+									<span class="zp-25">{{ m.rsc[id].title|striptags|default:"<em>untitled</em>" }}</span>
 									<span class="zp-25">{{ m.rsc[id].category.name }}</span>
 									<span class="zp-20">{{ m.rsc[id].modified|date:"F d, H:i" }}</span>
 									<span class="zp-20">
@@ -75,7 +78,7 @@
 							</li>
 							{% empty %}
 							<li>
-								No media modified
+								No media found.
 							</li>
 							{% endfor %}
 						</ul>

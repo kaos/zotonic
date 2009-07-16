@@ -88,13 +88,9 @@
 												{% button text="download" action={redirect dispatch="media_attachment" star=medium.filename} %}
 											</div>
 										{% endif %}
-										
+
 										{% all include "_admin_edit_media.tpl" medium=medium %}
-
-										<hr class="clear" />
-
-										<p>Replace with a file, embed code or something else. <strong>Warning</strong> this replaces the current media content.</p>
-										{% button text="Replace..." action={dialog_media_upload id=id} %}
+										{% button text="Replace this media item" action={dialog_media_upload id=id} %}
 									</div>
 								</div>
 							{% endif %}
@@ -121,7 +117,6 @@
 									{% include "_edit_media.tpl" media=media %}
 								</div>
 								<div class="clear">
-									<hr/>
 									{% button
 											text="add a new media item" 
 											action={dialog_media_upload rsc_id=id group_id=r.group_id action={postback postback={reload_media rsc_id=id div_id=#media} delegate="resource_admin_edit"}}
@@ -177,13 +172,6 @@
 				<div class="zp-33" id="sidebar">
 					<div class="padding" id="sort">
 					
-						{% sorter id="sort" handle="h3" axis="y" containment="" opacity="0.9" placeholder="sortable-placeholder" %}
-						{% sortable id="sort-publish" %}
-						{% sortable id="sort-category" %}
-						{% sortable id="sort-connections" %}
-						{% sortable id="sort-date" %}
-						{% sortable id="sort-access" %}
-					
 						<div class="item-wrapper" id="sort-publish">
 							<h3 class="above-item clearfix do_blockminifier">
 								<span class="title">Publish this page</span>
@@ -208,21 +196,6 @@
 										<input type="checkbox" class="do_fieldreplace" id="is_protected" name="is_protected" value="1" {% if r.is_protected %}checked="checked"{% endif %}/> 
 										<label for="is_protected" class="left">Protected</label>
 									</div>
-									
-									{#<hr />
-									<div class="zp-100">
-										<fieldset>
-											<div class="form-item">
-												<label>From</label> 
-												{% include "_edit_date.tpl" date=r.publication_start name="publication_start" is_end=0 %}
-											</div>
-											<div class="form-item">
-												<label>Till</label>
-												{% include "_edit_date.tpl" date=r.publication_end name="publication_end" is_end=1 %}
-											</div>
-										</fieldset>
-									</div>#}
-
 								</div>
 							</div>
 						</div>

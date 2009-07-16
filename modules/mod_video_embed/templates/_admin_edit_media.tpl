@@ -1,8 +1,5 @@
 {% if medium.video_embed_service %}
-<fieldset class="admin-form">
+	<p class="clear">
 	{% media medium %}
-
-	<p>From <strong>{{ medium.video_embed_service }}</strong></p>
-
-</fieldset>
+	</p>
 {% endif %}

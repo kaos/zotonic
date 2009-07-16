@@ -1,6 +1,6 @@
 {# Panel for defining the embed code #}
 <div id="{{ tab }}-embed">
-	<p>Embed a video or other media.  Here you can paste embed code from YouTube, Vimeo or other services.</p>
+	<p>Embed a video or other media. Here you can paste embed code from YouTube, Vimeo or other services.</p>
 
 	{% wire id=#form type="submit" postback={add_video_embed predicate=predicate actions=actions id=id rsc_id=rsc_id} delegate="mod_video_embed" %}
 
