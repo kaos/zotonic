@@ -78,9 +78,9 @@
 											</p>
 											<div class="edit_media">
 											{% if medium.width|lt:725  %}
-												{% image medium.filename class="do_quickview" %}
+												{% media medium %}
 											{% else %}
-												{% image medium.filename width=725 height=725 class="do_quickview" %}
+												{% media medium width=725 height=725 %}
 											{% endif %}
 											</div>
 											<div>
@@ -114,7 +114,7 @@
 						</div>
 
 						<div class="item-wrapper">
-							<h3 class="above-item">{{ m.predicate["depiction"].title|default:"Media" }}</h3>
+							<h3 class="above-item">Attached media</h3>
 							<div class="item clearfix">
 								<div id="{{ #media }}">
 									{% include "_edit_media.tpl" media=media %}
