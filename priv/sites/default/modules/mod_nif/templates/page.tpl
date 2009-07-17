@@ -36,23 +36,16 @@
 	<div id="content-wrapper" class="clearfix">
 		<div id="content" class="zp-65">
 			<div class="padding">
-				<h1>Welcome at this great festival this is the header one</h1>
-				<p class="intro">Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat.</p>
-					
-				<h2>In the subtitle we can add a lot of extra nice stuff (header 2)</h2>
-				<p>
-					Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.
-				</p>
+				
+				<h1>{{ m.rsc[id].title }}</h1>
 
-				<h3>This is the third header for another piece of this website (header 3)</h3>
-				<p>
-					<img src="./lib/images/logo.jpg" width="168" alt="" />
-					Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.
-				</p>
+				{% if m.rsc[id].summary %}
+					<p class="intro">{{ m.rsc[id].summary }}</p>
+				{% endif %}
 
-				<p>
-					Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.
-				</p>
+				{% if m.rsc[id].body %}
+					{{ m.rsc[id].body }}
+				{% endif %}
 			</div>
 		</div>
 
