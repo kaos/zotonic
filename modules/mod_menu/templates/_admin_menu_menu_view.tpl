@@ -1,7 +1,7 @@
 <h3 class="above-list">Current menu</h3>
 <ul class="short-list navigation-manager">
 	<li id="top" class="header">
-		Drag pages on top of this menu or its menu items.
+		Drop pages here or drop them on one of the menu items.
 	</li>
 	
 	{% for m_id, sub in menu %}

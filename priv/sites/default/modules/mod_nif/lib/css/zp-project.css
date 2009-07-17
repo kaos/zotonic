@@ -1,0 +1,246 @@
+/* basic type and background settings
+------------------------------------------------------*/
+
+body {
+	background: #57b8e6 url(/lib/images/bg.gif) top left no-repeat;
+	font-family: Arial, sans-serif;
+	font-size: 13px;
+	color: #111;
+}
+
+
+/* grid 
+------------------------------------------------------*/
+
+.zp-wrapper {
+	margin: 14px 0 0 56px;
+}
+
+	.home .zp-wrapper {
+		margin: 56px 0 0 56px;
+	}
+
+#content {
+	margin:  0 18px 0 0;
+}
+
+#content .padding {
+	padding: 18px 18px 0;
+}
+
+#sidebar .padding {
+	padding: 18px 18px 0;
+}
+
+#content,
+#sidebar {
+	background: #fff;
+}
+
+
+/* navigation
+------------------------------------------------------*/
+
+	/* essential navigation styles 
+	--------------------------------------------------------------- */
+	
+	.at-menu ul {
+		position: absolute;
+		top: -999em;
+		width: 10em; /* left offset of submenus need to match (see below) */
+	}
+	
+	.at-menu ul li {
+		width: 100%;
+	}
+	
+	.at-menu li:hover {
+		visibility: inherit; /* fixes IE7 'sticky bug' */
+	}
+	
+	.at-menu li {
+		float: left;
+		position: relative;
+	}
+	
+	.at-menu a {
+		display: block;
+		position: relative;
+	}
+	
+	.at-menu li:hover ul,
+	.at-menu li.at-hover ul {
+		left: 0;
+		top: 2.5em; /* match top ul list item height */
+		z-index: 99;
+	}
+	
+	ul.at-menu li:hover li ul,
+	ul.at-menu li.at-hover li ul {
+		top: -999em;
+	}
+	
+	ul.at-menu li li:hover ul,
+	ul.at-menu li li.at-hover ul {
+		left: 10em; /* match ul width */
+		top: 0;
+	}
+	
+	ul.at-menu li li:hover li ul,
+	ul.at-menu li li.at-hover li ul {
+		top: -999em;
+	}
+	
+	ul.at-menu li li li:hover ul,
+	ul.at-menu li li li.at-hover ul {
+		left: 10em; /* match ul width */
+		top: 0;
+	}
+
+
+	/* project menu styles 
+	--------------------------------------------------------------- */
+	
+	.at-menu a {
+		color: #000;
+		font-size: 15px;
+		font-weight: bold;
+		height: 36px;
+		line-height: 36px;
+		padding: 0 18px;
+		text-decoration: none;
+	}
+	
+	.at-menu a, 
+	.at-menu a:visited  { /* visited pseudo selector so IE6 applies text colour*/
+		color: #000;
+	}
+	
+	.at-menu li {
+		margin: 0;
+	}
+	
+	.at-menu li li {
+		background: #fff;
+	}
+	
+		.at-menu li li a:hover {
+			background: #57b8e6;
+			color: #000;
+		}
+	
+	.at-menu li:hover, 
+	.at-menu li.at-hover,
+	.at-menu a:focus, 
+	.at-menu a:hover, 
+	.at-menu a:active,
+	.at-menu a.current {
+		background:	#fff;
+		outline: 0;
+	}
+	
+
+/* Links
+------------------------------------------------------*/
+
+a, 
+a:focus {
+	color: #4192b9;
+}
+
+a:hover {
+	color: #000;
+}
+
+
+/* typography 
+------------------------------------------------------*/
+
+h1#header {
+	width: 972px;
+	height: 210px;
+	background: transparent url(/lib/images/header.gif) top left no-repeat;
+	text-indent: -9999px;
+	margin: 0 0 0 -54px;
+}
+
+h1 {
+	font-family:Arial,sans-serif;
+	font-size: 23px;
+	font-weight: bold;
+	line-height: 27px;
+	margin: 0 0 9px 0;
+}
+
+h2 {
+	color: #222;
+	font-size: 19px;
+	font-weight: normal;
+	line-height: 18px;
+	margin: 0 0 3px;
+}
+
+h3 {
+	line-height: 18px;
+	font-size: 14px;
+}
+
+p.intro {
+	color: #111;
+	font-weight: bold;
+}
+
+li p.intro {
+	color: #111;
+	font-weight: normal;
+	margin: 0;
+}
+
+
+/* lists
+------------------------------------------------------*/
+
+ul.items-list li {
+	margin: 0 0 27px 0;
+	font-size: 12px;
+}
+
+
+/* pages - home
+------------------------------------------------------*/
+
+h1#home-header {
+	display: block;
+	left: -9999px;	
+	position: absolute;
+	visibility: hidden;
+}
+
+#home-background {
+	background: transparent url(/lib/images/bg_home.gif) top left no-repeat;
+	height: 575px;
+	margin: 0;
+	width: 892px;
+}
+
+
+#home-content {
+	padding: 100px 0 0 0;
+	width: inherit;
+}
+
+	#home-content p {
+		color: #fff;
+		padding: 0 0 0 578px;
+	}
+	
+#media-viewer {
+	margin: 0 0 18px 307px;
+	display: block;
+	height: 290px !important;
+	width: 582px !important;
+}
+
+	#media-viewer img {
+		display: block;
+	}

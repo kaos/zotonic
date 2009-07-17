@@ -3,7 +3,7 @@
 <plist version="1.0">
 <dict>
 	<key>currentDocument</key>
-	<string>doc/TODO</string>
+	<string>modules/mod_site_simple/templates/home.tpl</string>
 	<key>documents</key>
 	<array>
 		<dict>
@@ -53,8 +53,6 @@
 			<string>priv</string>
 		</dict>
 		<dict>
-			<key>expanded</key>
-			<true/>
 			<key>name</key>
 			<string>src</string>
 			<key>regexFolderFilter</key>
@@ -153,20 +151,6 @@
 			<key>firstVisibleLine</key>
 			<integer>100</integer>
 		</dict>
-		<key>doc/TODO</key>
-		<dict>
-			<key>caret</key>
-			<dict>
-				<key>column</key>
-				<integer>0</integer>
-				<key>line</key>
-				<integer>459</integer>
-			</dict>
-			<key>firstVisibleColumn</key>
-			<integer>0</integer>
-			<key>firstVisibleLine</key>
-			<integer>0</integer>
-		</dict>
 		<key>modules/mod_admin/templates/admin.tpl</key>
 		<dict>
 			<key>caret</key>
@@ -209,47 +193,33 @@
 			<key>firstVisibleLine</key>
 			<integer>162</integer>
 		</dict>
-		<key>modules/mod_admin_users/templates/_admin_edit_sidebar.tpl</key>
+		<key>modules/mod_site_simple/lib/css/zp-project.css</key>
 		<dict>
 			<key>caret</key>
 			<dict>
 				<key>column</key>
 				<integer>0</integer>
 				<key>line</key>
-				<integer>14</integer>
+				<integer>0</integer>
 			</dict>
 			<key>firstVisibleColumn</key>
 			<integer>0</integer>
 			<key>firstVisibleLine</key>
 			<integer>0</integer>
 		</dict>
-		<key>modules/mod_admin_users/templates/admin_users.tpl</key>
+		<key>modules/mod_site_simple/templates/home.tpl</key>
 		<dict>
 			<key>caret</key>
 			<dict>
 				<key>column</key>
-				<integer>4</integer>
+				<integer>0</integer>
 				<key>line</key>
-				<integer>18</integer>
+				<integer>121</integer>
 			</dict>
 			<key>firstVisibleColumn</key>
 			<integer>0</integer>
 			<key>firstVisibleLine</key>
-			<integer>0</integer>
-		</dict>
-		<key>src/install/zp_install.erl</key>
-		<dict>
-			<key>caret</key>
-			<dict>
-				<key>column</key>
-				<integer>26</integer>
-				<key>line</key>
-				<integer>21</integer>
-			</dict>
-			<key>firstVisibleColumn</key>
-			<integer>0</integer>
-			<key>firstVisibleLine</key>
-			<integer>530</integer>
+			<integer>85</integer>
 		</dict>
 		<key>src/install/zp_install_data.erl</key>
 		<dict>
@@ -259,20 +229,6 @@
 				<integer>24</integer>
 				<key>line</key>
 				<integer>51</integer>
-			</dict>
-			<key>firstVisibleColumn</key>
-			<integer>0</integer>
-			<key>firstVisibleLine</key>
-			<integer>0</integer>
-		</dict>
-		<key>src/models/m_identity.erl</key>
-		<dict>
-			<key>caret</key>
-			<dict>
-				<key>column</key>
-				<integer>34</integer>
-				<key>line</key>
-				<integer>38</integer>
 			</dict>
 			<key>firstVisibleColumn</key>
 			<integer>0</integer>
@@ -312,15 +268,8 @@
 	</dict>
 	<key>openDocuments</key>
 	<array>
-		<string>src/install/zp_install_data.erl</string>
-		<string>modules/mod_admin/templates/admin_edit.tpl</string>
-		<string>modules/mod_admin/templates/admin.tpl</string>
-		<string>modules/mod_admin/templates/admin_base.tpl</string>
-		<string>modules/mod_admin_users/templates/_admin_edit_sidebar.tpl</string>
-		<string>src/models/m_identity.erl</string>
-		<string>doc/TODO</string>
-		<string>src/install/zp_install.erl</string>
-		<string>modules/mod_admin_users/templates/admin_users.tpl</string>
+		<string>modules/mod_site_simple/lib/css/zp-project.css</string>
+		<string>modules/mod_site_simple/templates/home.tpl</string>
 	</array>
 	<key>showFileHierarchyDrawer</key>
 	<false/>
@@ -348,14 +297,7 @@
 			<true/>
 			<key>subItems</key>
 			<dict>
-				<key>mod_admin</key>
-				<dict>
-					<key>isExpanded</key>
-					<true/>
-					<key>subItems</key>
-					<dict/>
-				</dict>
-				<key>mod_admin_users</key>
+				<key>mod_base</key>
 				<dict>
 					<key>isExpanded</key>
 					<true/>
@@ -368,12 +310,50 @@
 							<key>subItems</key>
 							<dict/>
 						</dict>
-						<key>resources</key>
+						<key>lib</key>
+						<dict>
+							<key>isExpanded</key>
+							<true/>
+							<key>subItems</key>
+							<dict>
+								<key>css</key>
+								<dict>
+									<key>isExpanded</key>
+									<true/>
+									<key>subItems</key>
+									<dict/>
+								</dict>
+							</dict>
+						</dict>
+					</dict>
+				</dict>
+				<key>mod_site_simple</key>
+				<dict>
+					<key>isExpanded</key>
+					<true/>
+					<key>subItems</key>
+					<dict>
+						<key>dispatch</key>
 						<dict>
 							<key>isExpanded</key>
 							<true/>
 							<key>subItems</key>
 							<dict/>
+						</dict>
+						<key>lib</key>
+						<dict>
+							<key>isExpanded</key>
+							<true/>
+							<key>subItems</key>
+							<dict>
+								<key>css</key>
+								<dict>
+									<key>isExpanded</key>
+									<true/>
+									<key>subItems</key>
+									<dict/>
+								</dict>
+							</dict>
 						</dict>
 						<key>templates</key>
 						<dict>
@@ -384,39 +364,10 @@
 						</dict>
 					</dict>
 				</dict>
-				<key>mod_emailer</key>
-				<dict>
-					<key>isExpanded</key>
-					<true/>
-					<key>subItems</key>
-					<dict/>
-				</dict>
-			</dict>
-		</dict>
-		<key>src</key>
-		<dict>
-			<key>isExpanded</key>
-			<true/>
-			<key>subItems</key>
-			<dict>
-				<key>install</key>
-				<dict>
-					<key>isExpanded</key>
-					<true/>
-					<key>subItems</key>
-					<dict/>
-				</dict>
-				<key>models</key>
-				<dict>
-					<key>isExpanded</key>
-					<true/>
-					<key>subItems</key>
-					<dict/>
-				</dict>
 			</dict>
 		</dict>
 	</dict>
 	<key>windowFrame</key>
-	<string>{{127, 25}, {1371, 1003}}</string>
+	<string>{{144, 118}, {1371, 1003}}</string>
 </dict>
 </plist>
