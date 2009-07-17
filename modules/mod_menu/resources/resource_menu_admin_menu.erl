@@ -37,9 +37,9 @@ event({postback, {delete, Props}, _TriggerId, _TargetId}, Context) ->
             SubMenu1 = remove_nth(SubNr, SubMenu),
             set_nth(Nr, {MenuId, SubMenu1}, Menu)
     end,
-    save_menu(Menu1, Context),
-    Html = zp_template:render("_admin_menu_menu_view.tpl", [{menu, Menu1}], Context),
-    zp_render:update("menu-editor", Html, Context);
+    Context1 = save_menu(Menu1, Context),
+    Html = zp_template:render("_admin_menu_menu_view.tpl", [{menu, Menu1}], Context1),
+    zp_render:update("menu-editor", Html, Context1);
 
 event(Event, Context) ->
     ?DEBUG(Event),
@@ -56,7 +56,13 @@ get_menu(Context) ->
 %% @doc Save the menu to the site configuration.
 %% @spec save_menu(list(), Context) -> ok
 save_menu(Menu, Context) ->
-    m_config:set_prop(menu, menu_default, menu, Menu, Context).
+    case zp_acl:has_role(public_publisher, Context) of
+        true ->
+            m_config:set_prop(menu, menu_default, menu, Menu, Context), 
+            Context;
+        false ->
+            zp_render:growl_error("Sorry, you need to be public publisher to edit the menu.", Context)
+    end.
 
 
 %% @doc Handle the drop of an id on top of a menu item.
