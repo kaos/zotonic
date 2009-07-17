@@ -301,10 +301,10 @@ to_tsquery(Text, Context) ->
         [] -> 
             [];
         TsQ ->
-            TsQ1 = re:replace(TsQ, "'xcvvcx", ""),
+            TsQ1 = re:replace(TsQ, "&? *'xcvvcx", ""),
             TsQ2 = case Version < <<"PostgreSQL 8.4">> of
                 true ->
-                    re:replace(TsQ1, "xcvvcx", "");
+                    re:replace(TsQ1, "&? *xcvvcx", "");
                 false ->
                     re:replace(TsQ1, "xcvvcx'", ":*'")
             end,
