@@ -19,11 +19,13 @@
 -export([executing/2, closing/2, synchronizing/2]).
 
 -include("pgsql.hrl").
+-include("zophrenic.hrl").
 
 -record(state, {
           reader,
           sock,
           parameters = [],
+          integer_datetimes = false,
           database,
           reply,
           reply_to,
@@ -86,8 +88,13 @@ handle_event({notice, Notice}, State_Name, State) ->
     {next_state, State_Name, State};
 
 handle_event({parameter_status, Name, Value}, State_Name, State) ->
-    Parameters2 = lists:keystore(Name, 1, State#state.parameters, {Name, Value}),
-    {next_state, State_Name, State#state{parameters = Parameters2}};
+    State1 = case {Name, Value} of
+        {<<"integer_datetimes">>, <<"on">>} -> State#state{integer_datetimes=true};
+        {<<"integer_datetimes">>, <<"off">>} -> State#state{integer_datetimes=false};
+        _ -> State
+    end,
+    Parameters2 = lists:keystore(Name, 1, State1#state.parameters, {Name, Value}),
+    {next_state, State_Name, State1#state{parameters = Parameters2}};
 
 handle_event(stop, _State_Name, State) ->
     {stop, normal, State};
@@ -216,7 +223,7 @@ ready({squery, Sql}, From, State) ->
 %% execute extended query
 ready({equery, Statement, Parameters}, From, State) ->
     #statement{name = StatementName, columns = Columns} = Statement,
-    Bin1 = encode_parameters(Parameters),
+    Bin1 = encode_parameters(Parameters, State#state.integer_datetimes),
     Bin2 = encode_formats(Columns),
     send(State, $B, ["", 0, StatementName, 0, Bin1, Bin2]),
     send(State, $E, ["", 0, <<0:?int32>>]),
@@ -246,7 +253,7 @@ ready({parse, Name, Sql, Types}, From, State) ->
 ready({bind, Statement, PortalName, Parameters}, From, State) ->
     #statement{name = StatementName, columns = Columns, types = Types} = Statement,
     Typed_Parameters = lists:zip(Types, Parameters),
-    Bin1 = encode_parameters(Typed_Parameters),
+    Bin1 = encode_parameters(Typed_Parameters, State#state.integer_datetimes),
     Bin2 = encode_formats(Columns),
     send(State, $B, [PortalName, 0, StatementName, 0, Bin1, Bin2]),
     send(State, $H, []),
@@ -299,7 +306,7 @@ querying({$T, <<Count:?int16, Bin/binary>>}, State) ->
 %% DataRow
 querying({$D, <<_Count:?int16, Bin/binary>>}, State) ->
     #state{statement = #statement{columns = Columns}} = State,
-    Data = decode_data(Columns, Bin),
+    Data = decode_data(Columns, Bin, State#state.integer_datetimes),
     notify(State, {data, Data}),
     {next_state, querying, State};
 
@@ -393,7 +400,7 @@ describing({$Z, <<Status:8>>}, State) ->
 %% DataRow
 executing({$D, <<_Count:?int16, Bin/binary>>}, State) ->
     #state{statement = #statement{columns = Columns}} = State,
-    Data = decode_data(Columns, Bin),
+    Data = decode_data(Columns, Bin, State#state.integer_datetimes),
     notify(State, {data, Data}),
     {next_state, executing, State};
 
@@ -471,19 +478,19 @@ decode_fields(<<Type:8, Rest/binary>>, Acc) ->
     decode_fields(Rest2, [{Type, Str} | Acc]).
 
 %% decode data
-decode_data(Columns, Bin) ->
-    decode_data(Columns, Bin, []).
+decode_data(Columns, Bin, IntegerDatetime) ->
+    decode_data(Columns, Bin, IntegerDatetime, []).
 
-decode_data([], _Bin, Acc) ->
+decode_data([], _Bin, _IntegerDatetime, Acc) ->
     list_to_tuple(lists:reverse(Acc));
-decode_data([_C | T], <<-1:?int32, Rest/binary>>, Acc) ->
-    decode_data(T, Rest, [undefined | Acc]);
-decode_data([C | T], <<Len:?int32, Value:Len/binary, Rest/binary>>, Acc) ->
+decode_data([_C | T], <<-1:?int32, Rest/binary>>, IntegerDatetime, Acc) ->
+    decode_data(T, Rest, IntegerDatetime, [undefined | Acc]);
+decode_data([C | T], <<Len:?int32, Value:Len/binary, Rest/binary>>, IntegerDatetime, Acc) ->
     case C of
-        #column{type = Type, format = 1}   -> Value2 = pgsql_binary:decode(Type, Value);
+        #column{type = Type, format = 1}   -> Value2 = pgsql_binary:decode(Type, Value, IntegerDatetime);
         #column{}                          -> Value2 = Value
     end,
-    decode_data(T, Rest, [Value2 | Acc]).
+    decode_data(T, Rest, IntegerDatetime, [Value2 | Acc]).
 
 %% decode column information
 decode_columns(Count, Bin) ->
@@ -571,30 +578,30 @@ format(Type) ->
     end.
 
 %% encode parameters
-encode_parameters(Parameters) ->
-    encode_parameters(Parameters, 0, <<>>, <<>>).
+encode_parameters(Parameters, IntegerDatetime) ->
+    encode_parameters(Parameters, 0, <<>>, <<>>, IntegerDatetime).
 
-encode_parameters([], Count, Formats, Values) ->
+encode_parameters([], Count, Formats, Values, _IntegerDatetime) ->
     <<Count:?int16, Formats/binary, Count:?int16, Values/binary>>;
 
-encode_parameters([P | T], Count, Formats, Values) ->
-    {Format, Value} = encode_parameter(P),
+encode_parameters([P | T], Count, Formats, Values, IntegerDatetime) ->
+    {Format, Value} = encode_parameter(P, IntegerDatetime),
     Formats2 = <<Formats/binary, Format:?int16>>,
     Values2 = <<Values/binary, Value/binary>>,
-    encode_parameters(T, Count + 1, Formats2, Values2).
+    encode_parameters(T, Count + 1, Formats2, Values2, IntegerDatetime).
 
 %% encode parameter
 
-encode_parameter({Type, Value}) ->
-    case pgsql_binary:encode(Type, Value) of
+encode_parameter({Type, Value}, IntegerDatetime) ->
+    case pgsql_binary:encode(Type, Value, IntegerDatetime) of
         Bin when is_binary(Bin) -> {1, Bin};
-        {error, unsupported}    -> encode_parameter(Value)
+        {error, unsupported}    -> encode_parameter(Value, IntegerDatetime)
     end;
-encode_parameter(A) when is_atom(A)    -> {0, encode_list(atom_to_list(A))};
-encode_parameter(B) when is_binary(B)  -> {0, <<(byte_size(B)):?int32, B/binary>>};
-encode_parameter(I) when is_integer(I) -> {0, encode_list(integer_to_list(I))};
-encode_parameter(F) when is_float(F)   -> {0, encode_list(float_to_list(F))};
-encode_parameter(L) when is_list(L)    -> {0, encode_list(L)}.
+encode_parameter(A, _IntegerDatetime) when is_atom(A)    -> {0, encode_list(atom_to_list(A))};
+encode_parameter(B, _IntegerDatetime) when is_binary(B)  -> {0, <<(byte_size(B)):?int32, B/binary>>};
+encode_parameter(I, _IntegerDatetime) when is_integer(I) -> {0, encode_list(integer_to_list(I))};
+encode_parameter(F, _IntegerDatetime) when is_float(F)   -> {0, encode_list(float_to_list(F))};
+encode_parameter(L, _IntegerDatetime) when is_list(L)    -> {0, encode_list(L)}.
 
 encode_list(L) ->
     Bin = list_to_binary(L),

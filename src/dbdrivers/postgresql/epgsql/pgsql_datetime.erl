@@ -2,7 +2,9 @@
 
 -module(pgsql_datetime).
 
--export([decode/2, encode/2]).
+-include_lib("zophrenic.hrl").
+
+-export([decode/3, encode/3]).
 
 -define(int16, 1/big-signed-unit:16).
 -define(int32, 1/big-signed-unit:32).
@@ -14,19 +16,44 @@
 -define(secs_per_hour, 3600.0).
 -define(secs_per_minute, 60.0).
 
-decode(date, <<J:1/big-signed-unit:32>>)             -> j2date(?postgres_epoc_jdate + J);
-decode(time, <<N:1/big-float-unit:64>>)              -> f2time(N);
-decode(timetz, <<N:1/big-float-unit:64, TZ:?int32>>) -> {f2time(N), TZ};
-decode(timestamp, <<N:1/big-float-unit:64>>)         -> f2timestamp(N);
-decode(timestamptz, <<N:1/big-float-unit:64>>)       -> f2timestamp(N);
-decode(interval, <<N:1/big-float-unit:64, D:?int32, M:?int32>>) -> {f2time(N), D, M}.
+-define(imins_per_hour, 60).
+-define(isecs_per_day, 86400).
+-define(isecs_per_hour, 3600).
+-define(isecs_per_minute, 60).
 
-encode(date, D)         -> <<4:?int32, (date2j(D) - ?postgres_epoc_jdate):1/big-signed-unit:32>>;
-encode(time, T)         -> <<8:?int32, (time2f(T)):1/big-float-unit:64>>;
-encode(timetz, {T, TZ}) -> <<12:?int32, (time2f(T)):1/big-float-unit:64, TZ:?int32>>;
-encode(timestamp, TS)   -> <<8:?int32, (timestamp2f(TS)):1/big-float-unit:64>>;
-encode(timestamptz, TS) -> <<8:?int32, (timestamp2f(TS)):1/big-float-unit:64>>;
-encode(interval, {T, D, M}) -> <<16:?int32, (time2f(T)):1/big-float-unit:64, D:?int32, M:?int32>>.
+-define(iusecs_per_day, 86400000000).
+-define(iusecs_per_hour, 3600000000).
+-define(iusecs_per_minute, 60000000).
+-define(iusecs_per_sec, 1000000).
+
+
+decode(date, <<J:1/big-signed-unit:32>>, _IntegerDatetime)               -> j2date(?postgres_epoc_jdate + J);
+decode(time, <<N:1/big-float-unit:64>>, false)                           -> f2time(N);
+decode(timetz, <<N:1/big-float-unit:64, TZ:?int32>>, false)              -> {f2time(N), TZ};
+decode(timestamp, <<N:1/big-float-unit:64>>, false)                      -> f2timestamp(N);
+decode(timestamptz, <<N:1/big-float-unit:64>>, false)                    -> f2timestamp(N);
+decode(interval, <<N:1/big-float-unit:64, D:?int32, M:?int32>>, false)   -> {f2time(N), D, M};
+
+decode(time, <<N:1/big-signed-unit:64>>, true)                           -> i2time(N);
+decode(timetz, <<N:1/big-signed-unit:64, TZ:?int32>>, true)              -> {i2time(N), TZ};
+decode(timestamp, <<N:1/big-signed-unit:64>>, true)                      -> i2timestamp(N);
+decode(timestamptz, <<N:1/big-signed-unit:64>>, true)                    -> i2timestamp(N);
+decode(interval, <<N:1/big-signed-unit:64, D:?int32, M:?int32>>, true)   -> {i2time(N), D, M}.
+
+
+encode(date, D, _IntegerDatetime)  -> <<4:?int32, (date2j(D) - ?postgres_epoc_jdate):1/big-signed-unit:32>>;
+encode(time, T, false)             -> <<8:?int32, (time2f(T)):1/big-float-unit:64>>;
+encode(timetz, {T, TZ}, false)     -> <<12:?int32, (time2f(T)):1/big-float-unit:64, TZ:?int32>>;
+encode(timestamp, TS, false)       -> <<8:?int32, (timestamp2f(TS)):1/big-float-unit:64>>;
+encode(timestamptz, TS, false)     -> <<8:?int32, (timestamp2f(TS)):1/big-float-unit:64>>;
+encode(interval, {T, D, M}, false) -> <<16:?int32, (time2f(T)):1/big-float-unit:64, D:?int32, M:?int32>>;
+
+encode(time, T, true)              -> <<8:?int32, (time2i(T)):1/big-float-unit:64>>;
+encode(timetz, {T, TZ}, true)      -> <<12:?int32, (time2i(T)):1/big-float-unit:64, TZ:?int32>>;
+encode(timestamp, TS, true)        -> <<8:?int32, (timestamp2i(TS)):1/big-float-unit:64>>;
+encode(timestamptz, TS, true)      -> <<8:?int32, (timestamp2i(TS)):1/big-float-unit:64>>;
+encode(interval, {T, D, M}, true)  -> <<16:?int32, (time2i(T)):1/big-float-unit:64, D:?int32, M:?int32>>.
+
 
 j2date(N) ->
     J = N + 32044,
@@ -59,6 +86,7 @@ date2j({Y, M, D}) ->
     J1 = Y2 * 365 - 32167,
     J2 = J1 + (Y2 div 4 - C + C div 4),
     J2 + 7834 * M2 div 256 + D.
+
 
 f2time(N) ->
     {R1, Hour} = tmodulo(N, ?secs_per_hour),
@@ -94,6 +122,36 @@ f2timestamp2(D, T) ->
 timestamp2f({Date, Time}) ->
     D = date2j(Date) - ?postgres_epoc_jdate,
     D * ?secs_per_day + time2f(Time).
+
+
+i2timestamp(N) ->
+    DDate = N div ?iusecs_per_day,
+    Time  = N rem ?iusecs_per_day,
+    {DDate1, Time1} = case Time < 0 of
+        true -> {DDate +1, Time + ?iusecs_per_day};
+        false -> {DDate, Time}
+    end,
+    DDateEpoc = DDate1 + ?postgres_epoc_jdate,
+    {Year, Month, Day} = j2date(DDateEpoc),
+    {Hour, Min, Sec} = i2time(Time1),
+    % TODO: timezone correction (see: src/interfaces/ecpg/pgtypeslib/timestamp.c:197)
+    {{Year, Month, Day}, {Hour, Min, Sec}}.
+
+i2time(N) ->
+    Hour = N  div ?iusecs_per_hour,
+    N1   = N  rem ?iusecs_per_hour,
+    Min  = N1 div ?iusecs_per_minute,
+    N2   = N1 rem ?iusecs_per_minute,
+    Sec  = N2 div ?iusecs_per_sec,
+    {Hour, Min, Sec}.
+
+
+timestamp2i({Date, Time}) ->
+    time2i(Time) + date2j(Date) * ?iusecs_per_day.
+
+time2i({H, M, S}) ->
+    H * ?iusecs_per_hour + M * ?iusecs_per_minute + S * ?iusecs_per_sec.
+
 
 tmodulo(T, U) ->
     case T < 0 of

@@ -12,6 +12,7 @@
     transaction/2,
     set/3,
     get/2,
+    get_parameter/2,
     assoc_row/2,
     assoc_row/3,
     assoc_props_row/2,
@@ -103,6 +104,13 @@ assoc_props_row(Sql, Parameters, Context) ->
         [Row|_] -> Row;
         [] -> undefined
     end.
+    
+
+get_parameter(Parameter, Context) ->
+    C = get_connection(Context),
+    {ok, Result} = pgsql:get_parameter(C, zp_convert:to_binary(Parameter)),
+    return_connection(C, Context),
+    Result.
     
 
 %% @doc Return property lists of the results of a query on the database in the Context
