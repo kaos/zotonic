@@ -46,6 +46,10 @@
 				{% if m.rsc[id].body %}
 					{{ m.rsc[id].body }}
 				{% endif %}
+				
+				{% for media_id in m.rsc.[id].media %}
+					{% image media_id width=300 height=300 crop %}
+				{% endfor %}
 			</div>
 		</div>
 
