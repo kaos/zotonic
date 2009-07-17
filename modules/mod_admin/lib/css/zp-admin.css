@@ -657,6 +657,10 @@ ul.navigation-manager li a {
 		padding: 1px 0 0 7px;
 	}
 
+		ul.navigation-manager li ul li {
+			border: none;
+		}
+
 .search-nav-items input.autocompleter {
 	width: 339px;
 }

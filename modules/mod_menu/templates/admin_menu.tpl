@@ -25,7 +25,7 @@
 			<div class="padding">
 				<h3 class="above-item">Search for a page</h3>
 				<div class="item">
-					<p>Type your search terms to find pages. Then drag them on t the panel on your left.</p>
+					<p>Type your search terms to find pages. Then drag them on to the panel on your left.</p>
 
 					<div class="form-item autocomplete-wrapper clear">
 						<input id="{{#input}}" class="autocompleter" type="text" value="" />

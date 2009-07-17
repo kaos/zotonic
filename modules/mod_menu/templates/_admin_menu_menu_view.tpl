@@ -19,8 +19,11 @@
 							{% with m_nr|append:"-"|append:s_nr as m_s_nr %}
 
 								<li id="{{ #sub.m_s_nr }}">
-									<em>{{ m.rsc[s_id].title }}</em>
-									{% button text="x" style="float:right" action={postback postback={delete item=[m_nr, s_nr] id=#sub.m_s_nr}} %}
+									<a id="{{ #menu.m_nr }}" href="#" class="clearfix">
+										<span class="grippy"><img src="/lib/images/grippy.png" alt="Drag me" /></span>
+										<span>{{ m.rsc[m_id].title }}</span>
+										{% button text="x" style="float:right" action={postback postback={delete item=[m_nr] id=#menu.m_nr}} %}
+									</a>
 								</li>
 
 								{% droppable id=#sub.m_s_nr tag=[m_nr, s_nr] %}
