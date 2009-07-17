@@ -442,7 +442,6 @@ page_url_path([CatId|Rest], Args, Context) ->
 %% This list is to show which predicates are editable for the subject rsc.
 %% @spec predicate_edit
 predicates_edit(Id, Context) ->
-    ?DEBUG(Id),
     ByCategory = m_predicate:for_subject(Id, Context),
     Present = m_edge:object_predicate_ids(Id, Context),
     ByCategory ++ Present.
