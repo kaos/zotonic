@@ -48,11 +48,11 @@ encode(timestamp, TS, false)       -> <<8:?int32, (timestamp2f(TS)):1/big-float-
 encode(timestamptz, TS, false)     -> <<8:?int32, (timestamp2f(TS)):1/big-float-unit:64>>;
 encode(interval, {T, D, M}, false) -> <<16:?int32, (time2f(T)):1/big-float-unit:64, D:?int32, M:?int32>>;
 
-encode(time, T, true)              -> <<8:?int32, (time2i(T)):1/big-float-unit:64>>;
-encode(timetz, {T, TZ}, true)      -> <<12:?int32, (time2i(T)):1/big-float-unit:64, TZ:?int32>>;
-encode(timestamp, TS, true)        -> <<8:?int32, (timestamp2i(TS)):1/big-float-unit:64>>;
-encode(timestamptz, TS, true)      -> <<8:?int32, (timestamp2i(TS)):1/big-float-unit:64>>;
-encode(interval, {T, D, M}, true)  -> <<16:?int32, (time2i(T)):1/big-float-unit:64, D:?int32, M:?int32>>.
+encode(time, T, true)              -> <<8:?int32, (time2i(T)):1/big-signed-unit:64>>;
+encode(timetz, {T, TZ}, true)      -> <<12:?int32, (time2i(T)):1/big-signed-unit:64, TZ:?int32>>;
+encode(timestamp, TS, true)        -> <<8:?int32, (timestamp2i(TS)):1/big-signed-unit:64>>;
+encode(timestamptz, TS, true)      -> <<8:?int32, (timestamp2i(TS)):1/big-signed-unit:64>>;
+encode(interval, {T, D, M}, true)  -> <<16:?int32, (time2i(T)):1/big-signed-unit:64, D:?int32, M:?int32>>.
 
 
 j2date(N) ->
