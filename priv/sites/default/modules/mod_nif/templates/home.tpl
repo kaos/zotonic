@@ -17,7 +17,7 @@
 {% block content %}
 	<div id="home-background">
 		<div id="home-content">
-			<p>Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat.</p>
+			<p>{{ m.rsc.home.summary }}</p>
 
 			<div id="media-viewer" class="do_cycle {speed: 1500, timeout: 2500}">
 				{% if m.rsc.media_viewer.media %}
@@ -32,7 +32,7 @@
 				
 				{% endif %}
 			</div>
-			<p> Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.</p>
+			{{ m.rsc.home.body }}
 		</div>
 	</div>
 
