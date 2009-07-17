@@ -35,6 +35,14 @@
 %% @spec m_find_value(Key, Source, Context) -> term()
 m_find_value(all, #m{value=undefined}, Context) ->
     all(Context);
+m_find_value(object_category, #m{value=undefined} = M, _Context) ->
+    M#m{value=object_category};
+m_find_value(subject_category, #m{value=undefined} = M, _Context) ->
+    M#m{value=subject_category};
+m_find_value(Key, #m{value=object_category}, Context) ->
+    object_category(Key, Context);
+m_find_value(Key, #m{value=subject_category}, Context) ->
+    subject_category(Key, Context);
 m_find_value(Key, #m{value=undefined}, Context) ->
     get(Key, Context).
 
@@ -189,6 +197,40 @@ update_predicate_category(Id, IsSubject, CatIds, Context) ->
     || NewId <- CatIds, not lists:member(NewId, OldIds)
     ],
     ok.
+
+
+%% @doc Return all the valid categories for objects.  Return the empty list when there is no constraint.  Note that the resulting array
+%% is a bit strangely formatted [{id}, {id2}], this is compatible with the category name lookup and prevents mixups with strings (lists of integers).
+%% @spec object_category(Id, Context) -> List
+object_category(Id, Context) ->
+    ?DEBUG(Id),
+    F = fun() ->
+        case name_to_id(Id, Context) of
+            {ok, PredId} ->
+                ?DEBUG(PredId),
+                zp_db:q("select category_id from predicate_category where predicate_id = $1 and is_subject = false", [PredId], Context);
+            _ -> 
+                []
+        end
+    end,
+    zp_depcache:memo(F, {object_category, Id}, ?WEEK, [predicate]).
+
+
+%% @doc Return all the valid categories for subjects.  Return the empty list when there is no constraint.  Note that the resulting array
+%% is a bit strangely formatted [{id}, {id2}], this is compatible with the category name lookup and prevents mixups with strings (lists of integers).
+%% @spec object_category(Id, Context) -> List
+subject_category(Id, Context) ->
+    F = fun() ->
+        case name_to_id(Id, Context) of
+            {ok, PredId} ->
+                zp_db:q("select category_id from predicate_category where predicate_id = $1 and is_subject = true", [PredId], Context);
+            _ -> 
+                []
+        end
+    end,
+    zp_depcache:memo(F, {subject_category, Id}, ?WEEK, [predicate]).
+
+
 
 
 %% @doc Return the id of the predicate category

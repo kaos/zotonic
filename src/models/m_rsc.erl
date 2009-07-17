@@ -351,6 +351,8 @@ media(Id, Context) ->
 %% @doc Fetch a resource id from any input
 rid(Id, _Context) when is_integer(Id) ->
 	Id;
+rid({Id}, _Context) when is_integer(Id) ->
+    Id;
 rid(#rsc_list{list=[R|_]}, _Context) ->
 	R;
 rid(#rsc_list{list=[]}, _Context) ->

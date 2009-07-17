@@ -92,7 +92,7 @@ event({submit, {add_video_embed, EventProps}, _TriggerId, _TargetId}, Context) -
     case Id of
         %% Create a new page
         undefined ->
-            RscId = proplists:get_value(rsc_id, EventProps),
+            SubjectId = proplists:get_value(subject_id, EventProps),
             Predicate = proplists:get_value(predicate, EventProps, depiction),
             Title   = zp_context:get_q_validated("title", Context),
             GroupId = list_to_integer(zp_context:get_q("group_id", Context)),
@@ -108,9 +108,9 @@ event({submit, {add_video_embed, EventProps}, _TriggerId, _TargetId}, Context) -
             F = fun(Ctx) ->
                 case m_rsc:insert(Props, Context) of
                     {ok, MediaRscId} ->
-                        case RscId of
+                        case SubjectId of
                             undefined -> nop;
-                            _ -> m_edge:insert(RscId, Predicate, MediaRscId, Ctx)
+                            _ -> m_edge:insert(SubjectId, Predicate, MediaRscId, Ctx)
                         end,
                         {ok, MediaRscId};
                     {error, Error} ->
@@ -120,7 +120,7 @@ event({submit, {add_video_embed, EventProps}, _TriggerId, _TargetId}, Context) -
     
             case zp_db:transaction(F, Context) of
                 {ok, MediaId} ->
-                    ContextRedirect = case RscId of
+                    ContextRedirect = case SubjectId of
                         undefined -> zp_render:wire({redirect, [{dispatch, "admin_edit_rsc"}, {id, MediaId}]}, Context);
                         _ -> Context
                     end,

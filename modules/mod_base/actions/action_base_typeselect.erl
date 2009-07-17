@@ -17,8 +17,9 @@
 render_action(TriggerId, TargetId, Args, Context) ->
     Actions = proplists:get_all_values(action, Args),
     ActionsWithId = proplists:get_all_values(action_with_id, Args),
+    Cats = proplists:get_all_values(cat, Args),
     Template = proplists:get_value(template, Args, "_action_typeselect_result.tpl"),
-    Postback = {typeselect, Template, Actions, ActionsWithId},
+    Postback = {typeselect, Cats, Template, Actions, ActionsWithId},
 	{_PostbackMsgJS, PickledPostback} = zp_render:make_postback(Postback, key, TriggerId, TargetId, ?MODULE, Context),
 	JS = [
 	    <<"zp_typeselect(\"">>, TriggerId, $",$,,$", PickledPostback, <<"\");">>
@@ -28,9 +29,10 @@ render_action(TriggerId, TargetId, Args, Context) ->
 
 %% @doc Unlink the edge, on success show an undo message in the element with id "unlink-message"
 %% @spec event(Event, Context1) -> Context2
-event({postback, {typeselect, Template, Actions, ActionsWithId}, _TriggerId, TargetId}, Context) ->
+event({postback, {typeselect, Cats, Template, Actions, ActionsWithId}, _TriggerId, TargetId}, Context) ->
+?DEBUG(Cats),
     Text = zp_context:get_q("triggervalue", Context),
-    SearchResult = zp_search:search({autocomplete, [{text, Text}]}, {1,20}, Context),
+    SearchResult = zp_search:search({autocomplete, [{cat,Cats}, {text, Text}]}, {1,20}, Context),
     Vars = [
         {result, SearchResult#search_result.result},
         {action, Actions},

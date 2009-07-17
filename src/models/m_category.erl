@@ -161,21 +161,32 @@ get_range_by_name(Name, Context) ->
 
 get_page_count(Id, Context) ->
     zp_db:q1("select count(*) from rsc where category_id = $1", [Id], Context).
-    
-name_to_id(Name, _Context) when is_integer(Name) ->
-    {ok, Name};
+
+
+name_to_id({Id}, _Context) when is_integer(Id) ->
+    {ok, Id};
+name_to_id(Id, _Context) when is_integer(Id) ->
+    {ok, Id};
 name_to_id(Name, Context) ->
-    F = fun() ->
-        case zp_db:q1("
-                select r.id 
-                from rsc r join category c on r.id = c.id 
-                where r.name = $1", [Name], Context) of
-            undefined -> {error, {enoent, category, Name}};
-            Id -> {ok, Id}
-        end
-    end,
-    F().
-%    zp_depcache:memo(F, {category_name_to_id, Name}, ?WEEK, [category]).
+    case zp_depcache:get({category_name_to_id, Name}) of
+        {ok, Result} ->
+            Result;
+        undefined ->
+            Result = case zp_db:q1("
+                    select r.id 
+                    from rsc r join category c on r.id = c.id 
+                    where r.name = $1", [Name], Context) of
+                undefined -> {error, {enoent, category, Name}};
+                Id -> {ok, Id}
+            end,
+            case Result of
+                {ok, ResultId} ->
+                    zp_depcache:set({category_name_to_id, Name}, Result, ?WEEK, [category, ResultId]);
+                {error, _Error} ->
+                    zp_depcache:set({category_name_to_id, Name}, Result, ?WEEK, [category])
+            end,
+            Result
+    end.
 
 name_to_id_check(Name, Context) ->
     {ok, Id} = name_to_id(Name, Context),
@@ -368,7 +379,7 @@ ranges(CatList, Context) ->
     %% Flatten the list of cats, but do not flatten strings
     flatten_string([], Acc) ->
         Acc;
-    flatten_string([[A|_]=L|T], Acc) when is_list(A); is_atom(A); is_binary(A) ->
+    flatten_string([[A|_]=L|T], Acc) when is_list(A); is_atom(A); is_binary(A); is_tuple(A) ->
         Acc1 = flatten_string(L, Acc),
         flatten_string(T, Acc1);
     flatten_string([H|T], Acc) ->

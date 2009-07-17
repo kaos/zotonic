@@ -21,5 +21,6 @@
 				action_with_id={with_args action={link subject_id=subject_id predicate=predicate} arg={object_id select_id}}
 				action={dialog_close}
 				action=action
+				cat=m.predicate.object_category[predicate]
 			}
 %}
