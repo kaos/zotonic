@@ -751,3 +751,11 @@ ul.categories li a {
 .short-list li.depth-9 { margin-left: 210px; }
 .short-list li.depth-10 { margin-left: 240px; }
 .short-list li.depth-11 { margin-left: 270px; }
+
+/* Modules - Tabs
+--------------------------------------------------------- */
+
+.ui-tabs-hide {
+	display: none !important; 
+}
+
