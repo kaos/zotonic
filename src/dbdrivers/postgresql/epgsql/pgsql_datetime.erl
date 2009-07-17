@@ -4,7 +4,7 @@
 
 -include_lib("zophrenic.hrl").
 
--export([decode/3, encode/3]).
+-export([decode/3, encode/3, test/0]).
 
 -define(int16, 1/big-signed-unit:16).
 -define(int32, 1/big-signed-unit:32).
@@ -147,7 +147,7 @@ i2time(N) ->
 
 
 timestamp2i({Date, Time}) ->
-    time2i(Time) + date2j(Date) * ?iusecs_per_day.
+    time2i(Time) + (date2j(Date) - ?postgres_epoc_jdate) * ?iusecs_per_day.
 
 time2i({H, M, S}) ->
     H * ?iusecs_per_hour + M * ?iusecs_per_minute + S * ?iusecs_per_sec.
@@ -182,3 +182,10 @@ ceiling(X) ->
         N when N > 0 -> T + 1;
         _            -> T
     end.
+
+
+test() ->
+    T = {{2000,1,1}, {0,0,0}},
+    T = i2timestamp(timestamp2i(T)),
+    ok.
+
