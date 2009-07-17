@@ -72,7 +72,11 @@ search(Search, Context) ->
 %% @spec search({Name, SearchPropList}, {Offset, Limit}, Context) -> #search_result
 search({SearchName, Props} = Search, Limit, Context) ->
     % todo: fetch paging information from props
-    PropsSorted = lists:keysort(1, Props),
+    Props1 = case proplists:get_all_values(cat, Props) of
+        [] -> Props;
+        Cats -> [{cat, Cats} | proplists:delete(cat, Props)]
+    end,
+    PropsSorted = lists:keysort(1, Props1),
     case zp_notifier:first({search_query, {SearchName, PropsSorted}, Limit}, Context) of
         undefined -> 
             ?LOG("Unknown search query ~p", [Search]),
@@ -136,12 +140,22 @@ concat_sql_query(#search_sql{select=Select, from=From, where=Where, group_by=Gro
 
 %% @doc Inject the ACL checks in the SQL query.
 %% @spec reformat_sql_query(#search_sql, Context) -> #search_sql
-reformat_sql_query(#search_sql{where=Where, tables=Tables, args=Args} = Q, Context) ->
-    {ExtraWhere, Args1} = lists:foldl(fun(Table, {Acc,As}) ->
-            {W,As1} = add_acl_check(Table, As, Context),
-            {[W|Acc], As1}
-        end, {[], Args}, Tables),
-    Where1 = lists:flatten(concat_where(ExtraWhere, Where)),
+reformat_sql_query(#search_sql{where=Where, tables=Tables, args=Args, cats=TabCats} = Q, Context) ->
+    {ExtraWhere, Args1} = lists:foldl(
+                                fun(Table, {Acc,As}) ->
+                                    {W,As1} = add_acl_check(Table, As, Context),
+                                    {[W|Acc], As1}
+                                end, {[], Args}, Tables),
+
+    ExtraWhere1 = lists:foldl(
+                                fun({Alias, Cats}, Acc) ->
+                                    case add_cat_check(Alias, Cats, Context) of
+                                        [] -> Acc;
+                                        CatCheck -> [CatCheck | Acc]
+                                    end
+                                end, ExtraWhere, TabCats),
+
+    Where1 = lists:flatten(concat_where(ExtraWhere1, Where)),
     Q#search_sql{where=Where1, args=Args1}.
 
 
@@ -203,4 +217,20 @@ add_acl_check1(Table, Alias, Args, Context) ->
                     ++" or group_id in (select rg.group_id from rsc_group rg where rg.rsc_id = $"++integer_to_list(N+1)++"))",
             {Sql2, Args ++ [Context#context.user_id]}
     end.
-    
+
+
+%% @doc Create the 'where' conditions for the category check
+%% @spec add_cat_check(Alias, Cats, Context) -> Where
+add_cat_check(_Alias, [], _Context) ->
+    [];
+add_cat_check(Alias, Cats, Context) ->
+    Ranges = m_category:ranges(Cats, Context),
+    CatChecks = [ cat_check1(Alias, Range) || Range <- Ranges ],
+    string:join(CatChecks, " or ").
+
+
+    cat_check1(Alias, {From,From}) ->
+        Alias ++ ".pivot_category_nr = "++integer_to_list(From);
+    cat_check1(Alias, {From,To}) ->
+        Alias ++ ".pivot_category_nr >= " ++ integer_to_list(From)
+        ++ " and "++ Alias ++ ".pivot_category_nr <= " ++ integer_to_list(To).

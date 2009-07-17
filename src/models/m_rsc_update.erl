@@ -143,10 +143,18 @@ update(Id, Props, Context) when is_integer(Id) orelse Id == insert_rsc ->
                         
                         % Allow the update props to be modified.
                         UpdatePropsN = zp_notifier:foldr({rsc_update, RscId, BeforeProps}, UpdateProps1, Ctx),
-                        case zp_db:update(rsc, RscId, UpdatePropsN, Ctx) of
+                        UpdatePropsN1 = case proplists:get_value(category_id, UpdatePropsN) of
+                            undefined ->
+                                UpdatePropsN;
+                            CatId ->
+                                CatNr = zp_db:q1("select nr from category where id = $1", [CatId], Ctx),
+                                [ {pivot_category_nr, CatNr} | UpdatePropsN]
+                        end,
+                        
+                        case zp_db:update(rsc, RscId, UpdatePropsN1, Ctx) of
                             {ok, _RowsModified} -> {ok, RscId, UpdatePropsN, BeforeCatList, RenumberCats};
                             {error, Reason} -> {error, Reason}
-                        end
+                        end                        
                     end,
                     % End of transaction function
                     
@@ -305,6 +313,7 @@ protected(rating_count) -> true;
 protected(props) -> true;
 protected(pivot_tsv) -> true;
 protected(pivot_rtsv) -> true;
+protected(pivot_category_nr) -> true;
 protected(pivot_first_name) -> true;
 protected(pivot_surname) -> true;
 protected(pivot_gender) -> true;

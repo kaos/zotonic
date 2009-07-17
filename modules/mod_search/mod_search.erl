@@ -118,56 +118,51 @@ search({featured, []}, _OffsetLimit, _Context) ->
 
 %% @doc Return a list of resource ids inside a category, featured ones first
 %% @spec search(SearchSpec, Range, Context) -> IdList | {error, Reason}
-search({featured, [{cat, Cat}]}, _OffsetLimit, Context) ->
-    CatId = m_category:name_to_id_check(Cat, Context),
+search({featured, [{cat, Cat}]}, _OffsetLimit, _Context) ->
     #search_sql{
         select="r.id",
-        from="rsc r, category rc, category ic",
-        where="r.category_id = rc.id and rc.nr >= ic.lft and rc.nr <= ic.rght and ic.id = $1",
+        from="rsc r",
         order="r.is_featured desc, r.id desc",
-        args=[CatId],
+        cats=[{"r", Cat}],
         tables=[{rsc,"r"}]
     };
 
 %% @doc Return a list of featured resource ids inside a category having a object_id as predicate
 %% @spec search(SearchSpec, Range, Context) -> IdList | {error, Reason}
 search({featured, [{cat,Cat},{object,ObjectId},{predicate,Predicate}]}, _OffsetLimit, Context) ->
-    CatId = m_category:name_to_id_check(Cat, Context),
     PredId = m_predicate:name_to_id_check(Predicate, Context),
     #search_sql{
         select="r.id",
-        from="rsc r, category rc, category ic, edge e",
-        where="r.category_id = rc.id and rc.nr >= ic.lft and rc.nr <= ic.rght and ic.id = $1
-                and r.id = e.subject_id and e.predicate_id = $2 and e.object_id = $3",
+        from="rsc r, edge e",
+        where="r.id = e.subject_id and e.predicate_id = $1 and e.object_id = $2",
         order="r.is_featured desc, r.id desc",
-        args=[CatId, PredId, ObjectId],
+        args=[PredId, ObjectId],
+        cats=[{"r", Cat}],
         tables=[{rsc,"r"}]
     };
 
-search({latest, [{cat, Cat}]}, _OffsetLimit, Context) ->
-    CatId = m_category:name_to_id_check(Cat, Context),
+search({latest, [{cat, Cat}]}, _OffsetLimit, _Context) ->
     #search_sql{
         select="r.id",
-        from="rsc r, category rc, category ic",
-        where="r.category_id = rc.id and rc.nr >= ic.lft and rc.nr <= ic.rght and ic.id = $1",
+        from="rsc r",
         order="r.modified desc, r.id desc",
-        args=[CatId],
+        cats=[{"r", Cat}],
         tables=[{rsc,"r"}]
     };
 
-search({upcoming, [{cat, Cat}]}, _OffsetLimit, Context) ->
-    CatId = m_category:name_to_id_check(Cat, Context),
+search({upcoming, [{cat, Cat}]}, _OffsetLimit, _Context) ->
     #search_sql{
         select="r.id",
-        from="rsc r, category rc, category ic",
-        where="r.category_id = rc.id and rc.nr >= ic.lft and rc.nr <= ic.rght and ic.id = $1
-            and pivot_date_end >= current_date",
+        from="rsc r",
+        where="pivot_date_end >= current_date",
         order="r.pivot_date_start asc",
-        args=[CatId],
+        cats=[{"r", Cat}],
         tables=[{rsc,"r"}]
     };
 
-search({autocomplete, [{text,QueryText}]}, _OffsetLimit, Context) ->
+search({autocomplete, [{text,QueryText}]}, OffsetLimit, Context) ->
+    search({autocomplete, [{cat,[]}, {text,QueryText}]}, OffsetLimit, Context);
+search({autocomplete, [{cat,Cat}, {text,QueryText}]}, _OffsetLimit, Context) ->
     TsQuery = to_tsquery(QueryText, Context),
     case TsQuery of
         A when A == undefined orelse A == [] ->
@@ -179,6 +174,7 @@ search({autocomplete, [{text,QueryText}]}, _OffsetLimit, Context) ->
                 where=" query @@ pivot_tsv",
                 order="rank desc",
                 args=[TsQuery, zp_pivot_rsc:pg_lang(Context#context.language)],
+                cats=[{"r", Cat}],
                 tables=[{rsc,"r"}]
             }
     end;
@@ -208,30 +204,25 @@ search({fulltext, [{text,QueryText}]}, _OffsetLimit, Context) ->
     end;
 
 search({fulltext, [{cat,Cat},{text,QueryText}]}, _OffsetLimit, Context) ->
-    case m_category:name_to_id(Cat, Context) of
-        {ok, CatId} -> 
-            case QueryText of
-                A when A == undefined orelse A == "" orelse A == <<>> ->
-                    #search_sql{
-                        select="r.id, 1 AS rank",
-                        from="rsc r, category rc, category ic",
-                        where=" r.category_id = rc.id and rc.nr >= ic.lft and rc.nr <= ic.rght and ic.id = $1",
-                        order="r.modified desc",
-                        args=[CatId],
-                        tables=[{rsc,"r"}]
-                    };
-                _ ->
-                    #search_sql{
-                        select="r.id, ts_rank_cd(pivot_tsv, query, 32) AS rank",
-                        from="rsc r, category rc, category ic, plainto_tsquery($3, $2) query",
-                        where=" query @@ pivot_tsv  and r.category_id = rc.id and rc.nr >= ic.lft and rc.nr <= ic.rght and ic.id = $1",
-                        order="rank desc",
-                        args=[CatId, QueryText, zp_pivot_rsc:pg_lang(Context#context.language)],
-                        tables=[{rsc,"r"}]
-                    }
-            end;
+    case QueryText of
+        A when A == undefined orelse A == "" orelse A == <<>> ->
+            #search_sql{
+                select="r.id, 1 AS rank",
+                from="rsc r",
+                order="r.modified desc",
+                cats=[{"r", Cat}],
+                tables=[{rsc,"r"}]
+            };
         _ ->
-            #search_result{result=[]}
+            #search_sql{
+                select="r.id, ts_rank_cd(pivot_tsv, query, 32) AS rank",
+                from="rsc r, plainto_tsquery($2, $1) query",
+                where=" query @@ pivot_tsv",
+                order="rank desc",
+                args=[QueryText, zp_pivot_rsc:pg_lang(Context#context.language)],
+                cats=[{"r", Cat}],
+                tables=[{rsc,"r"}]
+            }
     end;
 
 search({referrers, [{id,Id}]}, _OffsetLimit, _Context) ->
@@ -244,27 +235,24 @@ search({referrers, [{id,Id}]}, _OffsetLimit, _Context) ->
         tables=[{rsc,"o"}]
     };
 
-search({media_category_image, [{cat,Cat}]}, _OffsetLimit, Context) ->
-    CatId = m_category:name_to_id_check(Cat, Context),
+search({media_category_image, [{cat,Cat}]}, _OffsetLimit, _Context) ->
     #search_sql{
         select="m.filename",
-        from="rsc r, category rc, category ic, medium m",
-        where="r.category_id = rc.id and rc.nr >= ic.lft and rc.nr <= ic.rght and ic.id = $1
-                and m.id = r.id",
-        tables=[{rsc,"r"}, {medium, "m"}],
-        args=[CatId]
+        from="rsc r, medium m",
+        where="m.id = r.id",
+        cats=[{"r", Cat}],
+        tables=[{rsc,"r"}, {medium, "m"}]
     };
 
 search({media_category_depiction, [{cat,Cat}]}, _OffsetLimit, Context) ->
-    CatId = m_category:name_to_id_check(Cat, Context),
     PredDepictionId = m_predicate:name_to_id_check(depiction, Context),
     #search_sql{
         select="m.filename",
-        from="rsc r, rsc ro, category rc, category ic, medium m, edge e",
-        where="r.category_id = rc.id and rc.nr >= ic.lft and rc.nr <= ic.rght and ic.id = $1
-                and ro.id = e.object_id and e.subject_id = r.id and e.predicate_id = $2 and ro.id = m.id",
+        from="rsc r, rsc ro, medium m, edge e",
+        where="ro.id = e.object_id and e.subject_id = r.id and e.predicate_id = $1 and ro.id = m.id",
         tables=[{rsc,"r"}, {rsc, "ro"}, {medium, "m"}],
-        args=[CatId, PredDepictionId]
+        args=[PredDepictionId],
+        cats=[{"r", Cat}]
     };
 
 

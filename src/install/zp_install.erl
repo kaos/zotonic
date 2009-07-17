@@ -105,6 +105,7 @@ model_pgsql() ->
         modified timestamp with time zone NOT NULL DEFAULT now(),
 
         -- pivot fields for searching
+        pivot_category_nr,
         pivot_tsv tsvector,       -- texts 
         pivot_rtsv tsvector,      -- related ids (cat, prop, rsc)
 
@@ -145,6 +146,7 @@ model_pgsql() ->
     "CREATE INDEX rsc_pivot_tsv_key ON rsc USING gin(pivot_tsv)",
     "CREATE INDEX rsc_pivot_rtsv_key ON rsc USING gin(pivot_rtsv)",
 
+    "CREATE INDEX rsc_pivot_category_nr ON rsc (pivot_category_nr)",
     "CREATE INDEX rsc_pivot_surname_key ON rsc (pivot_surname)",
     "CREATE INDEX rsc_pivot_first_name_key ON rsc (pivot_first_name)",
     "CREATE INDEX rsc_pivot_gender_key ON rsc (pivot_gender)",

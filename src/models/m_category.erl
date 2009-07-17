@@ -32,6 +32,7 @@
     update_sequence/2,
     all_flat/1,
     all_flat_meta/1,
+    ranges/2,
     tree/1,
     tree/2,
     tree_depth/2,
@@ -346,6 +347,45 @@ get_path(Id, Context) ->
     end.
 
 
+%% @doc Given a list of category ids, return the list of numeric ranges they cover.
+%% @spec ranges(CatList, Context) -> RangeList
+ranges(Cat, Context) when is_atom(Cat); is_integer(Cat); is_binary(Cat) ->
+    ranges([Cat], Context);
+ranges(CatList, Context) ->
+    F = fun(Nm, Acc) ->
+        case name_to_id(Nm, Context) of
+            {ok, CId} ->
+                case get(CId, Context) of
+                    undefined -> [{-100,-100} | Acc];
+                    Props -> [{proplists:get_value(lft, Props), proplists:get_value(rght, Props)} | Acc]
+                end;
+            _ -> Acc
+        end
+    end,
+    Ranges = lists:sort(lists:foldl(F, [], flatten_string(CatList, []))),
+    merge_ranges(Ranges, []).
+
+    %% Flatten the list of cats, but do not flatten strings
+    flatten_string([], Acc) ->
+        Acc;
+    flatten_string([[A|_]=L|T], Acc) when is_list(A); is_atom(A); is_binary(A) ->
+        Acc1 = flatten_string(L, Acc),
+        flatten_string(T, Acc1);
+    flatten_string([H|T], Acc) ->
+        flatten_string(T, [H|Acc]).
+
+
+    merge_ranges([], Acc) ->
+        Acc;
+    merge_ranges([{A,B},{C,D}|T], Acc) when C =< B+1 ->
+        merge_ranges([{A,max(B,D)}|T], Acc);
+    merge_ranges([H|T], Acc) ->
+        merge_ranges(T, [H|Acc]).
+
+    max(A,B) when A > B -> A;
+    max(_,B) -> B.
+
+
 %% @doc Return a flattened representation of the complete category tree.  Can be used for overviews or select boxes.
 %% The "meta" categories of predicate, category and group are suppressed.
 all_flat(Context) ->
@@ -464,6 +504,7 @@ renumber(Context) ->
     ok = zp_db:transaction(fun renumber_transaction/1, Context),
     zp_depcache:flush(category),
     ok.
+    
 
 renumber_transaction(Context) ->
     CatTuples = zp_db:q("select id, parent_id, seq from category order by seq,id", Context),
@@ -479,8 +520,15 @@ renumber_transaction(Context) ->
         ], Context)
         || {CatId, Nr, Level, Left, Right, Path} <- Enums
     ],
+    resync_pivot_nr(Context),
     ok.
 
+    resync_pivot_nr(Context) ->
+        zp_db:q("update rsc r
+                 set pivot_category_nr = c.nr from category c
+                 where c.id = r.category_id 
+                   and (r.pivot_category_nr is null or r.pivot_category_nr <> c.nr)", Context).
+        
 
 
 %% @doc Take a category list and make it into a tree, recalculating the left/right and lvl nrs
