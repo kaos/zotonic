@@ -295,20 +295,19 @@ to_tsquery(Text, Context) when is_binary(Text) ->
 to_tsquery(Text, Context) ->
     [{TsQuery, Version}] = zp_db:q("
         select plainto_tsquery($2, $1) , version()
-    ", [Text, zp_pivot_rsc:pg_lang(zp_context:language(Context))], Context),
+    ", [Text ++ "xcvvcx", zp_pivot_rsc:pg_lang(zp_context:language(Context))], Context),
     % Version is something like "PostgreSQL 8.3.5 on i386-apple-darwin8.11.1, compiled by ..."
-    case TsQuery of
+    case zp_convert:to_list(TsQuery) of
         [] -> 
             [];
-        _ ->
-            case Version < <<"PostgreSQL 8.4">> of
+        TsQ ->
+            TsQ1 = re:replace(TsQ, "'xcvvcx", ""),
+            TsQ2 = case Version < <<"PostgreSQL 8.4">> of
                 true ->
-                    TsQuery;
+                    re:replace(TsQ1, "xcvvcx", "");
                 false ->
-                    % Replace the last ' with :*' 
-                    N = length(TsQuery),
-                    {A, "'"} = lists:split(N-1, TsQuery),
-                    A ++ ":*'"
-            end
+                    re:replace(TsQ1, "xcvvcx'", ":*'")
+            end,
+            re:replace(TsQ2, "'", "", [global])
     end.
 
