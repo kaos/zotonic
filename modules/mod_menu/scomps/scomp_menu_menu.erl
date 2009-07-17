@@ -47,26 +47,53 @@ code_change(_OldVsn, State, _Extra) -> {ok, State}.
 terminate(_Reason) -> ok.
 
 render(Params, _Vars, Context, _State) ->
-    Id = proplists:get_value(id, Params),
     Menu = get_menu(Context),
-    ?DEBUG(Menu),
-    LIs = build_menu(Menu, Id, 1, [], Context),
-    UL = ["<ul id=\"navigation\">", LIs, "</ul>"],
-    {ok, list_to_binary(UL)}.
+    Id = proplists:get_value(id, Params),
+    CurrentId = find_id(Id, Menu),
+    case zp_depcache:get({menu, CurrentId, Context#context.language}) of
+        {ok, CachedMenu} ->
+            {ok, CachedMenu};
+        undefined ->
+            {IdAcc, LIs} = build_menu(Menu, CurrentId, 1, [], [], Context),
+            UL = ["<ul id=\"navigation\">", LIs, "</ul>"],
+            NewMenu = list_to_binary(UL),
+            zp_depcache:set({menu, CurrentId, Context#context.language}, NewMenu, ?DAY, [CurrentId, menu | IdAcc]),
+            {ok, NewMenu}
+    end.
 
 
-build_menu([], _Id, _Nr, Acc, _Context) ->
-    lists:reverse(Acc);
-build_menu([{N,[]} | T], Id, Nr, Acc, Context) ->
+build_menu([], _Id, _Nr, IdAcc, Acc, _Context) ->
+    {IdAcc, lists:reverse(Acc)};
+build_menu([{N,[]} | T], Id, Nr, IdAcc, Acc, Context) ->
     LI = menu_item(N, T, Id, Nr, Context),
-    build_menu(T, Id, Nr+1, [ [LI,"</li>"] | Acc ], Context);
-build_menu([{N,SubMenu} | T], Id, Nr, Acc, Context) ->
+    build_menu(T, Id, Nr+1, [N|IdAcc], [ [LI,"</li>"] | Acc ], Context);
+build_menu([{N,SubMenu} | T], Id, Nr, IdAcc, Acc, Context) ->
     LI = menu_item(N, T, Id, Nr, Context),
-    SubLIs = build_menu(SubMenu, Id, 1, [], Context),
-    build_menu(T, Id, Nr+1, [ [LI,"<ul>",SubLIs,"</ul></li>"] | Acc ], Context);
-build_menu([N | T], Id, Nr, Acc, Context) when is_integer(N) ->
+    {IdAcc1, SubLIs} = build_menu(SubMenu, Id, 1, IdAcc, [], Context),
+    build_menu(T, Id, Nr+1, [N|IdAcc1], [ [LI,"<ul>",SubLIs,"</ul></li>"] | Acc ], Context);
+build_menu([N | T], Id, Nr, IdAcc, Acc, Context) when is_integer(N) ->
     LI = menu_item(N, T, Id, Nr, Context),
-    build_menu(T, Id, Nr+1, [ [LI,"</li>"] | Acc ], Context).
+    build_menu(T, Id, Nr+1, IdAcc, [ [LI,"</li>"] | Acc ], Context).
+
+
+%% @doc Check if the id is in the menu. Return undefined when not found, otherwise the Id.
+find_id(undefined, _Menu) ->
+    undefined;
+find_id(_Id, []) ->
+    undefined;
+find_id(Id, [{Id,_}|_]) ->
+    Id;
+find_id(Id, [Id|_]) ->
+    Id;
+find_id(Id, [{_,S}|T]) ->
+    case find_id(Id, S) of
+        undefined ->
+            find_id(Id, T);
+        Id ->
+            Id
+    end;
+find_id(Id, [_|T]) ->
+    find_id(Id, T).
 
 
 menu_item(N, T, Id, Nr, Context) ->
