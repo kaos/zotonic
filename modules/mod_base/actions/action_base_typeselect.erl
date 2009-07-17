@@ -30,7 +30,6 @@ render_action(TriggerId, TargetId, Args, Context) ->
 %% @doc Unlink the edge, on success show an undo message in the element with id "unlink-message"
 %% @spec event(Event, Context1) -> Context2
 event({postback, {typeselect, Cats, Template, Actions, ActionsWithId}, _TriggerId, TargetId}, Context) ->
-?DEBUG(Cats),
     Text = zp_context:get_q("triggervalue", Context),
     SearchResult = zp_search:search({autocomplete, [{cat,Cats}, {text, Text}]}, {1,20}, Context),
     Vars = [

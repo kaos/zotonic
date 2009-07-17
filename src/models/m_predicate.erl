@@ -203,11 +203,9 @@ update_predicate_category(Id, IsSubject, CatIds, Context) ->
 %% is a bit strangely formatted [{id}, {id2}], this is compatible with the category name lookup and prevents mixups with strings (lists of integers).
 %% @spec object_category(Id, Context) -> List
 object_category(Id, Context) ->
-    ?DEBUG(Id),
     F = fun() ->
         case name_to_id(Id, Context) of
             {ok, PredId} ->
-                ?DEBUG(PredId),
                 zp_db:q("select category_id from predicate_category where predicate_id = $1 and is_subject = false", [PredId], Context);
             _ -> 
                 []
