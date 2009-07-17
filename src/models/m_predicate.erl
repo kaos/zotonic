@@ -25,7 +25,10 @@
     get/2,
     insert/2,
     flush/1,
-    update_noflush/4
+    update_noflush/4,
+    object_category/2,
+    subject_category/2,
+    for_subject/2
 ]).
 
 -include_lib("zophrenic.hrl").
@@ -229,6 +232,32 @@ subject_category(Id, Context) ->
     zp_depcache:memo(F, {subject_category, Id}, ?WEEK, [predicate]).
 
 
+%% @doc Return the list of predicates that are valid for the given resource id. Append all predicates that have no restrictions.
+for_subject(Id, Context) ->
+    ValidIds = zp_db:q("
+                select p.predicate_id 
+                from predicate_category p,
+                     category pc,
+                     rsc r,
+                     category rc
+                where p.category_id = pc.id
+                  and r.category_id = rc.id
+                  and rc.nr >= pc.lft
+                  and rc.nr <= pc.rght
+                  and r.id = $1 
+                  and is_subject = true
+                ", [Id], Context),
+    Valid = [ ValidId || {ValidId} <- ValidIds ],
+    NoRestrictionIds = zp_db:q("
+                    select r.id
+                    from rsc r left join predicate_category p on p.predicate_id = r.id and p.is_subject = true
+                    where p.predicate_id is null
+                      and r.category_id = $1
+                ", [cat_id(Context)], Context),
+    NoRestriction = [ NoRestrictionId || {NoRestrictionId} <- NoRestrictionIds ],
+    Valid ++ NoRestriction.
+                
+    
 
 
 %% @doc Return the id of the predicate category

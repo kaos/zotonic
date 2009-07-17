@@ -22,7 +22,9 @@
     objects/2,
     subjects/2,
     object_predicates/2,
-    subject_predicates/2
+    subject_predicates/2,
+    object_predicate_ids/2,
+    subject_predicate_ids/2
 ]).
 
 -include_lib("zophrenic.hrl").
@@ -180,11 +182,23 @@ subjects(Id, Context) ->
 %% @doc Return the list of predicates in use by edges to objects from the id
 %% @spec object_preds(Id, Context) -> List
 object_predicates(Id, Context) ->
-    Ps = zp_db:q("select distinct p.name from edge e join predicate p on e.predicate_id = p.id where e.subject_id = $1 order by name", [Id], Context),
+    Ps = zp_db:q("select distinct p.name from edge e join rsc p on e.predicate_id = p.id where e.subject_id = $1 order by name", [Id], Context),
     [ list_to_atom(binary_to_list(P)) || {P} <- Ps ].
 
 %% @doc Return the list of predicates is use by edges from subjects to the id
 %% @spec object_preds(Id, Context) -> List
 subject_predicates(Id, Context) ->
-    Ps = zp_db:q("select distinct p.name from edge e join predicate p on e.predicate_id = p.id where e.object_id = $1 order by name", [Id], Context),
+    Ps = zp_db:q("select distinct p.name from edge e join rsc p on e.predicate_id = p.id where e.object_id = $1 order by name", [Id], Context),
     [ list_to_atom(binary_to_list(P)) || {P} <- Ps ].
+
+%% @doc Return the list of predicate ids in use by edges to objects from the id
+%% @spec object_preds(Id, Context) -> List
+object_predicate_ids(Id, Context) ->
+    Ps = zp_db:q("select distinct predicate_id from edge where subject_id = $1", [Id], Context),
+    [ P || {P} <- Ps ].
+
+%% @doc Return the list of predicates is use by edges from subjects to the id
+%% @spec object_preds(Id, Context) -> List
+subject_predicate_ids(Id, Context) ->
+    Ps = zp_db:q("select distinct predicate_id from edge where object_id = $1", [Id], Context),
+    [ P || {P} <- Ps ].

@@ -14,7 +14,7 @@
 							<div class="zp-30">
 								<h4>From category</h4>
 								<p>
-									{% for cat_id, level, indent, title in m.category.all_flat %}
+									{% for cat_id, level, indent, title in m.category.all_flat_meta %}
 									<label for="{{ #subject.cat_id }}">
 										{{ indent }}<input type="checkbox" id="{{ #subject.cat_id }}" name="predicate_subject" {% if cat_id|member:p.subject %}checked="checked" {% endif %} value="{{ cat_id }}" />{{ title }}<br/>
 									</label>
@@ -29,7 +29,7 @@
 							<div class="zp-30">
 								<h4>To category</h4>
 								<p>
-									{% for cat_id, level, indent, title in m.category.all_flat %}
+									{% for cat_id, level, indent, title in m.category.all_flat_meta %}
 									<label for="{{ #object.cat_id }}">
 										{{ indent }}<input type="checkbox" id="{{ #object.cat_id }}" name="predicate_object"  {% if cat_id|member:p.object %}checked="checked" {% endif %} value="{{ cat_id }}" />{{ title }}<br/>
 									</label>

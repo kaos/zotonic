@@ -242,6 +242,7 @@ p(Id, category, Context) ->
 p(Id, media, Context) -> media(Id, Context);
 p(Id, medium, Context) -> m_media:get(Id, Context);
 p(Id, depiction, Context) -> m_media:depiction(Id, Context);
+p(Id, predicates_edit, Context) -> predicates_edit(Id, Context);
     
 % Check if the requested predicate is a readily available property or an edge
 p(Id, Predicate, Context) when is_integer(Id) -> 
@@ -436,3 +437,14 @@ page_url_path([CatId|Rest], Args, Context) ->
         undefined -> page_url_path(Rest, Args, Context);
         Url -> Url
     end.
+
+%% @doc Return the predicates that are valid combined with the predicates that are actually used by the subject.
+%% This list is to show which predicates are editable for the subject rsc.
+%% @spec predicate_edit
+predicates_edit(Id, Context) ->
+    ?DEBUG(Id),
+    ByCategory = m_predicate:for_subject(Id, Context),
+    Present = m_edge:object_predicate_ids(Id, Context),
+    ByCategory ++ Present.
+    
+    

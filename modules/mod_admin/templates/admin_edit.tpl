@@ -275,20 +275,24 @@
 								</p>
 								</div>
 								
-								{% for name, p in m.predicate %}
-									{% ifnotequal name "depiction" %}
-										<h4>{{ p.title }}</h4>
-										<div class="unlink-wrapper clearfix">
-											<div id="links-{{id}}-{{name}}" class="clearfix">
-											{% for o_id in r.o[name] %}
-												{% include "_rsc_edge.tpl" subject_id=id predicate=name object_id=o_id %}
-											{% endfor %}
-											</div>
-											{% link_add subject_id=id predicate=name %}
-										</div>
-										<hr />
-									{% endifnotequal %}
-								{% endfor %}
+								{% with r.predicates_edit as pred_shown %}
+									{% for name, p in m.predicate %}
+										{% if p.id|member:pred_shown %}
+											{% ifnotequal name "depiction" %}
+												<h4>{{ p.title }}</h4>
+												<div class="unlink-wrapper clearfix">
+													<div id="links-{{id}}-{{name}}" class="clearfix">
+													{% for o_id in r.o[name] %}
+														{% include "_rsc_edge.tpl" subject_id=id predicate=name object_id=o_id %}
+													{% endfor %}
+													</div>
+													{% link_add subject_id=id predicate=name %}
+												</div>
+												<hr />
+											{% endifnotequal %}
+										{% endif %}
+									{% endfor %}
+								{% endwith %}
 								
 								<div class="clearfix">
 									<p>{% button action={redirect dispatch="admin_referrers" id=id} text="View all referrers"%}</p>
