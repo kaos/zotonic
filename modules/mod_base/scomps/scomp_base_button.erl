@@ -12,7 +12,7 @@
 
 
 %%      init(Args) -> {ok, State} | {error, Error}
-%%      render(Params, Context, State) -> {ok, NewContext} | {error, Error}
+%%      render(Params, Context, State) -> {ok, NewContext} | {ok, iolist()} | {error, Error}
 %%      code_change(OldVsn, State, Extra) -> {ok, NewState}
 %%      terminate(Reason) -> ok
 %%      
