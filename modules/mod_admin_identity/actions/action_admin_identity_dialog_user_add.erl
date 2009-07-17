@@ -39,7 +39,7 @@ event({submit, {user_add, Props}, _TriggerId, _TargetId}, Context) ->
     case zp_acl:has_role(admin, Context) of
         true ->
             NameFirst = zp_context:get_q_validated("name_first", Context),
-            NamePrefix = zp_context:get_q("name_surname_prefix", Context),
+            NamePrefix = zp_context:get_q("surprefix", Context),
             NameSur = zp_context:get_q_validated("name_surname", Context),
             Title = case NamePrefix of
                 [] -> [ NameFirst, " ", NameSur ];

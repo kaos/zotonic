@@ -16,7 +16,8 @@
 
 		<div class="form-item">
 			<label for="{{ #name_surname_prefix }}" style="color:white">Sur. prefix</label>
-			<input type="text" id="{{ #name_surname_prefix }}" name="name_surname_prefix" value="" style="width: 50px"/>
+			{# below we do not use name_surename_prefix because it confuses the autofill of browsers #}
+			<input type="text" id="{{ #name_surname_prefix }}" name="surprefix" value="" style="width: 50px"/>
 		</div>
 
 		<div class="form-item">
