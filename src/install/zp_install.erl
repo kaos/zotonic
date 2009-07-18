@@ -105,7 +105,7 @@ model_pgsql() ->
         modified timestamp with time zone NOT NULL DEFAULT now(),
 
         -- pivot fields for searching
-        pivot_category_nr,
+        pivot_category_nr int,
         pivot_tsv tsvector,       -- texts 
         pivot_rtsv tsvector,      -- related ids (cat, prop, rsc)
 

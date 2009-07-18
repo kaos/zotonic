@@ -56,6 +56,7 @@ install_modules(C) ->
         "mod_admin",
         "mod_admin_address",
         "mod_admin_category",
+        "mod_admin_event",
         "mod_admin_group",
         "mod_admin_identity",
         "mod_admin_modules",
@@ -95,7 +96,7 @@ install_category(C) ->
 
     %% 1. Insert the category "category" and "meta"
     {ok, 1} = pgsql:equery(C, "insert into category (id, parent_id, seq) values (116, null, 1)"),
-    {ok, 1} = pgsql:equery(C, "insert into category (id, parent_id, seq) values (115, null, 1)"),
+    {ok, 1} = pgsql:equery(C, "insert into category (id, parent_id, seq) values (115, null, 99)"),
     {ok, 1} = pgsql:equery(C, "update category set parent_id = 115 where id = 116"),
 
     %% "http://purl.org/dc/terms/DCMIType" ?
@@ -116,27 +117,42 @@ install_category(C) ->
     %% Now that we have the category "category" we can insert all other categories.
     Cats = [
         % Meta categories for defining categories, predicates and groups.
-        {117,115,        1, predicate,   true,  undefined, [{title, {trans, [{en, <<"Predicate">>},     {nl, <<"Predikaat">>}]}}] },
-        {118,115,        1, group,       true,  undefined, [{title, {trans, [{en, <<"User Group">>},    {nl, <<"Gebruikersgroep">>}]}}] },
+            {117,115,    2, predicate,   true,  undefined,                                   [{title, {trans, [{en, <<"Predicate">>},     {nl, <<"Predikaat">>}]}}] },
+            {118,115,    3, group,       true,  undefined,                                   [{title, {trans, [{en, <<"User Group">>},    {nl, <<"Gebruikersgroep">>}]}}] },
 
         %% Other categories
-        {101,undefined,  1, other,       true,  undefined, [{title, {trans, [{en, <<"Uncategorized">>}, {nl, <<"Zonder categorie">>}]}}] },
-        {102,undefined,  1, person,      true,  undefined, [{title, {trans, [{en, <<"Person">>}, {nl, <<"Persoon">>}]}}] },
-        {103,undefined,  1, artifact,    false, "http://purl.org/dc/dcmitype/PhysicalObject",[{title, {trans, [{en, <<"Artifact">>}, {nl, <<"Artefact">>}]}}] },
-        {104,undefined,  1, text,        false, "http://purl.org/dc/dcmitype/Text",          [{title, {trans, [{en, <<"Text">>}, {nl, <<"Tekst">>}]}}] },
-        {105,104,        2, review,      false, undefined, [{title, {trans, [{en, <<"Review">>},  {nl, <<"Beoordeling">>}]}}] },
-        {106,104,        1, article,     false, undefined, [{title, {trans, [{en, <<"Article">>}, {nl, <<"Artikel">>}]}}] },
+        {101,undefined,  1, other,       true,  undefined,                                   [{title, {trans, [{en, <<"Uncategorized">>}, {nl, <<"Zonder categorie">>}]}}] },
 
-        {107,103,        3, product,     false, undefined, [{title, {trans, [{en, <<"Product">>}, {nl, <<"Product">>}]}}] },
-        {108, undefined, 1, event,       false, "http://purl.org/dc/dcmitype/Event",         [{title, {trans, [{en, <<"Event">>}, {nl, <<"Evenement">>}]}}] },
+        {102,undefined,  3, person,      true,  undefined,                                   [{title, {trans, [{en, <<"Person">>}, {nl, <<"Persoon">>}]}}] },
+            {121,102,    1, artist,      false, undefined,                                   [{title, {trans, [{en, <<"Artist">>}, {nl, <<"Artiest">>}]}}] },
 
-        {109,106,        1, news,        false, undefined,                                   [{title, {trans, [{en, <<"News">>}, {nl, <<"Nieuws">>}]}}] },
+        {104,undefined,  2, text,        false, "http://purl.org/dc/dcmitype/Text",          [{title, {trans, [{en, <<"Text">>}, {nl, <<"Tekst">>}]}}] },
+            {106,104,    1, article,     false, undefined,                                   [{title, {trans, [{en, <<"Article">>}, {nl, <<"Artikel">>}]}}] },
+                {109,106,1, news,        false, undefined,                                   [{title, {trans, [{en, <<"News">>}, {nl, <<"Nieuws">>}]}}] },
+            {105,104,    2, review,      false, undefined,                                   [{title, {trans, [{en, <<"Review">>},  {nl, <<"Beoordeling">>}]}}] },
 
-        {110,undefined,  1, media,       true,  "http://purl.org/dc/dcmitype/Image",         [{title, {trans, [{en, <<"Media">>}, {nl, <<"Media">>}]}}] }, 
-        {111,110,        1, image,       true,  "http://purl.org/dc/dcmitype/StillImage",    [{title, {trans, [{en, <<"Image">>}, {nl, <<"Afbeelding">>}]}}] },
-        {112,110,        2, video,       true,  "http://purl.org/dc/dcmitype/MovingImage",   [{title, {trans, [{en, <<"Video">>}, {nl, <<"Video">>}]}}] },
-        {113,110,        3, sound,       true,  "http://purl.org/dc/dcmitype/Sound",         [{title, {trans, [{en, <<"Sound">>}, {nl, <<"Sound">>}]}}] },
-        {114,undefined,  1, collection,  false, "http://purl.org/dc/dcmitype/Collection",    [{title, {trans, [{en, <<"Collection">>}, {nl, <<"Collectie">>}]}}] }
+        {119,undefined,  4, location,    false, undefined,                                   [{title, {trans, [{en, <<"Location">>}, {nl, <<"Locatie">>}]}}] },
+            {120,119,    1, venue,       false, undefined,                                   [{title, {trans, [{en, <<"Venue">>}, {nl, <<"Toneel">>}]}}] },
+
+        {108, undefined, 5, event,       false, "http://purl.org/dc/dcmitype/Event",         [{title, {trans, [{en, <<"Event">>}, {nl, <<"Evenement">>}]}}] },
+
+        {103,undefined,  6, artifact,    false, "http://purl.org/dc/dcmitype/PhysicalObject",[{title, {trans, [{en, <<"Artifact">>}, {nl, <<"Artefact">>}]}}] },
+            {107,103,    1, product,     false, undefined,                                   [{title, {trans, [{en, <<"Product">>}, {nl, <<"Product">>}]}}] },
+
+        {110,undefined,  7, media,       true,  "http://purl.org/dc/dcmitype/Image",         [{title, {trans, [{en, <<"Media">>}, {nl, <<"Media">>}]}}] }, 
+            {111,110,    1, image,       true,  "http://purl.org/dc/dcmitype/StillImage",    [{title, {trans, [{en, <<"Image">>}, {nl, <<"Afbeelding">>}]}}] },
+            {112,110,    2, video,       true,  "http://purl.org/dc/dcmitype/MovingImage",   [{title, {trans, [{en, <<"Video">>}, {nl, <<"Video">>}]}}] },
+            {113,110,    3, sound,       true,  "http://purl.org/dc/dcmitype/Sound",         [{title, {trans, [{en, <<"Sound">>}, {nl, <<"Sound">>}]}}] },
+
+        {114,undefined,  8, collection,  false, "http://purl.org/dc/dcmitype/Collection",    [{title, {trans, [{en, <<"Collection">>}, {nl, <<"Collectie">>}]}}] },
+
+        {122,undefined,  9, categorization,true,undefined,                                   [{title, {trans, [{en, <<"Categorization">>}, {nl, <<"Categorisatie">>}]}}] },
+            {123,122,    1, keyword,     true,  undefined,                                   [{title, {trans, [{en, <<"Keyword">>}, {nl, <<"Trefwoord">>}]}}] },
+            {124,122,    2, genre,       true,  undefined,                                   [{title, {trans, [{en, <<"Genre">>}, {nl, <<"Genre">>}]}}] }
+
+        % 115-118 meta -> @ position 99
+        
+        % Max: 124
     ],
 
     InsertCat = fun({Id, ParentId, Seq, Name, Protected, Uri, Props}) ->
@@ -212,9 +228,12 @@ install_predicate(C) ->
         % id   protect name       uri                                                  props
         [ 300, false,  "about",    "http://www.w3.org/1999/02/22-rdf-syntax-ns#about",  [{reversed, false},{title, {trans, [{en,"About"},    {nl,"Over"}]}}]],
         [ 301, false,  "author",   "http://purl.org/dc/terms/creator",                  [{reversed, false},{title, {trans, [{en,"Author"},   {nl,"Auteur"}]}}]],
-        [ 302, false,  "hasreview","http://purl.org/stuff/rev#hasReview",               [{reversed, false},{title, {trans, [{en,"Reviews"},  {nl,"Beoordeelt"}]}}]],
+        [ 302, false,  "hasreview","http://purl.org/stuff/rev#hasReview",               [{reversed, false},{title, {trans, [{en,"Review"},   {nl,"Beoordeling"}]}}]],
         [ 303, false,  "relation", "http://purl.org/dc/terms/relation",                 [{reversed, false},{title, {trans, [{en,"Relation"}, {nl,"Relatie"}]}}]],
-        [ 304, true,   "depiction","http://xmlns.com/foaf/0.1/depiction",               [{reversed, false},{title, {trans, [{en,"Depiction"},{nl,"Afbeelding"}]}}]]
+        [ 304, true,   "depiction","http://xmlns.com/foaf/0.1/depiction",               [{reversed, false},{title, {trans, [{en,"Depiction"},{nl,"Afbeelding"}]}}]],
+
+        [ 305, true,   "atvenue",  "http://zotonic.net/predicate/atvenue",              [{reversed, false},{title, "Venue"}]],
+        [ 306, true,   "performer","http://zotonic.net/predicate/performer",            [{reversed, false},{title, "Performer"}]]
     ],
 
     {ok, CatId}   = pgsql:squery1(C, "select id from rsc where name = 'predicate'"),
@@ -225,6 +244,20 @@ install_predicate(C) ->
             values ($1, $2, $3, $4, $5, $6, $7, true, 1, 1)
             ", R ++ [GroupId,CatId]) || R <- Preds],
     pgsql:reset_id(C, "rsc"),
+
+    ObjSubj = [
+        {300, true,  104}, %  text  -> about     -> _
+        {302, false, 105}, %  _     -> hasreview -> review
+        {304, false, 110}, %  _     -> depiction -> image
+        {305, true,  108}, %  Event -> atvenue   -> _
+        {305, false, 120}, %  _     -> atvenue   -> venue
+        {306, true,  108}, %  Event -> performer -> _
+        {306, false, 121}  %  _     -> performer -> artist
+    ],
+    
+    [ {ok, 1} = pgsql:equery(C, "
+            insert into predicate_category (predicate_id, is_subject, category_id) 
+            values ($1, $2, $3)", OS) || OS <- ObjSubj ],
     ok.
 
 
