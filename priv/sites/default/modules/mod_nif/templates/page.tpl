@@ -43,32 +43,25 @@
 		<div id="sidebar" class="zp-30">
 			<div class="padding">
 				<h1>Latest news items</h1>
+	
 				<ul class="items-list">
-					<li class="clearfix">
-						<h3>News item title</h3>
+					{% for id in m.search.paged[{latest cat="news"}] %}
+					<li>
+						<h3><a href="{{ m.rsc[id].page_url }}" title="{{ m.rsc[id].title }}">{{ m.rsc[id].title|striptags }}</a></h3>
+						{% if m.rsc[id].media %}
+							<div class="item-image left">{% image  m.rsc[id].media[1] width=65 height=65 crop %}</div>
+						{% endif %}
 						<p class="intro">
-							<em>August 9 2009</em> &mdash; 
-							Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqu&#0133;
-							<a href="#">Read&nbsp;more</a>
+							<em>{{ m.rsc[id].modified|date:"F d, H:i" }}</em> &mdash; 
+							{{ m.rsc[id].summary|ljust:80 }}&hellip;
+							<a href="{{ m.rsc[id].page_url }}" title="{{ m.rsc[id].title }}">Read&nbsp;more</a>
 						</p>
 					</li>
-					<li class="clearfix">
-						<h3>A new newsitem title for the news</h3>
-						<div class="item-image left"><img src="./lib/images/koe.jpg" width="65" height="65" alt="" /></div>
-						<p class="intro">
-							<em>August 9 2009</em> &mdash; 
-							Lorem ipsum dolor sit amet, consectetur sed do eiusmod.
-							<a href="#">Read&nbsp;more</a>
-						</p>
+					{% empty %}
+					<li>
+						No news to show.
 					</li>
-					<li class="clearfix">
-						<h3>News item title and this title hopefully wraps to two lines</h3>
-						<p class="intro">
-							<em>September 24 2009</em> &mdash; 
-							Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod tempor&#0133;
-							<a href="#">Read&nbsp;more</a>
-						</p>
-					</li>
+					{% endfor %}
 				</ul>
 			</div>
 		</div>
