@@ -49,7 +49,7 @@ delete(Id, Context) when is_integer(Id), Id /= 1 ->
 %% @spec delete_nocheck(Id, Context) -> ok | {error, Reason}
 delete_nocheck(Id, Context) ->
     Referrers = m_edge:subjects(Id, Context),
-    CatList = m_rsc:is_a_list(Id, Context),
+    CatList = m_rsc:is_a(Id, Context),
 
     F = fun(Ctx) ->
         zp_notifier:notify({rsc_delete, Id}, Ctx),
@@ -131,7 +131,7 @@ update(Id, Props, Context) when is_integer(Id) orelse Id == insert_rsc ->
                                         throw({error, eacces})
                                 end;
                             _ ->
-                                {Id, SafeProps, m_rsc:get(Id, Ctx), m_rsc:is_a_list(Id, Ctx), false}
+                                {Id, SafeProps, m_rsc:get(Id, Ctx), m_rsc:is_a(Id, Ctx), false}
                         end,
                     
                         UpdateProps1 = [
@@ -166,7 +166,7 @@ update(Id, Props, Context) when is_integer(Id) orelse Id == insert_rsc ->
                                 Name -> zp_depcache:flush({rsc_name, zp_convert:to_list(Name)})
                             end,
 
-                            NewCatList = m_rsc:is_a_list(NewId, Context),
+                            NewCatList = m_rsc:is_a(NewId, Context),
                             AllCatList = lists:usort(NewCatList ++ OldCatList),
                             
                             % After inserting a category we need to renumber the categories

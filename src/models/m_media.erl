@@ -191,7 +191,7 @@ insert_file(File, Props, Context) ->
     end, 
     case zp_db:transaction(InsertFun, Context) of
         {ok, Id} ->
-            CatList = m_rsc:is_a_list(Id, Context),
+            CatList = m_rsc:is_a(Id, Context),
             [ zp_depcache:flush(Cat) || Cat <- CatList ],
             {ok, Id};
         {error, Reason} -> 

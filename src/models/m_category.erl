@@ -21,6 +21,8 @@
     get_range/2,
     get_range_by_name/2,
     get_path/2,
+    is_a/2,
+    is_a/3,
     get_page_count/2,
     delete/3,
     name_to_id/2,
@@ -192,9 +194,16 @@ name_to_id_check(Name, Context) ->
     {ok, Id} = name_to_id(Name, Context),
     Id.
 
-id_to_name(Id, Context) ->
+id_to_name(Name, Context) when is_atom(Name); is_binary(Name); is_list(Name) ->
     F = fun() ->
-        zp_db:q1("select r.name from rsc r join category c on r.id = c.id where r.id = $1", [Id], Context)
+        Nm = zp_db:q1("select r.name from rsc r join category c on r.id = c.id where r.name = $1", [Name], Context),
+        zp_convert:to_atom(Nm)
+    end,
+    zp_depcache:memo(F, {category_id_to_name, Name}, ?WEEK, [category]);
+id_to_name(Id, Context) when is_integer(Id) ->
+    F = fun() ->
+        Nm = zp_db:q1("select r.name from rsc r join category c on r.id = c.id where r.id = $1", [Id], Context),
+        zp_convert:to_atom(Nm)
     end,
     zp_depcache:memo(F, {category_id_to_name, Id}, ?WEEK, [category]).
 
@@ -356,6 +365,28 @@ get_path(Id, Context) ->
         {ok, Path} -> Path;
         _ -> []
     end.
+
+
+%% @doc Return the list of categories (as atoms) that the category is part of
+%% @spec is_a(int(), Context) -> atomlist()
+is_a(Id, Context) ->
+    F = fun() ->
+        case m_category:name_to_id(Id, Context) of
+            {ok, CatId} ->
+                Path = m_category:get_path(CatId, Context),
+                [ zp_convert:to_atom(m_category:id_to_name(C, Context)) || C <- Path ++ [CatId]];
+            {error, _} ->
+                []
+        end
+    end,
+    zp_depcache:memo(F, {category_is_a, Id}, ?DAY, [category]).
+
+
+%% @doc Check if the id is within another category.
+%% @spec is_a(int(), Cat, Context) -> atomlist()
+is_a(Id, Cat, Context) ->
+    CatName = m_category:id_to_name(Cat, Context),
+    lists:member(CatName, is_a(Id, Context)).
 
 
 %% @doc Given a list of category ids, return the list of numeric ranges they cover.

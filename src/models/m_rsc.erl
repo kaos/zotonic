@@ -27,7 +27,9 @@
 	exists/2, 
 	
 	is_visible/2, is_editable/2, is_ingroup/2, is_me/2, 
-	is_a/3, is_a_list/2,
+	is_cat/3,
+	is_a/2,
+	is_a/3,
 	
 	p/3, 
 	op/2, o/2, o/3, o/4,
@@ -47,6 +49,10 @@ m_find_value(Id, #m{value=undefined} = M, Context) ->
         undefined -> undefined;
         RId -> M#m{value=RId}
     end;
+m_find_value(is_cat, #m{value=Id} = M, _Context) when is_integer(Id) -> 
+    M#m{value={is_cat, Id}};
+m_find_value(Key, #m{value={is_cat, Id}}, Context) -> 
+    is_cat(Id, Key, Context);
 m_find_value(Key, #m{value=Id}, Context) when is_integer(Id) ->
     p(Id, Key, Context).
 
@@ -229,7 +235,7 @@ p(Id, is_me, Context) -> is_me(Id, Context);
 p(Id, is_visible, Context) -> is_visible(Id, Context);
 p(Id, is_editable, Context) -> is_editable(Id, Context);
 p(Id, is_ingroup, Context) -> is_ingroup(Id, Context);
-p(Id, is_a, Context) -> [ {C,true} || C <- is_a_list(Id, Context) ];
+p(Id, is_a, Context) -> [ {C,true} || C <- is_a(Id, Context) ];
 p(Id, exists, Context) -> exists(Id, Context);
 p(Id, page_url, Context) -> page_url(Id, Context);
 p(Id, group, Context) -> 
@@ -391,8 +397,8 @@ rid_name(Name, Context) ->
             Id
     end.
 
-%% @doc Check if the resource is inside a category
-is_a(Id, Cat, Context) ->
+%% @doc Check if the resource is exactly the category
+is_cat(Id, Cat, Context) ->
     case m_category:name_to_id(Cat, Context) of
         {ok, CatId} ->
             RscCatId = p(Id, category_id, Context),
@@ -407,10 +413,17 @@ is_a(Id, Cat, Context) ->
             false
     end.
 
-is_a_list(Id, Context) ->
+%% @doc Return the categories and the inherited categories of the resource. Returns a list with category atoms
+%% @spec is_a(int(), Context) -> list()
+is_a(Id, Context) ->
     RscCatId = p(Id, category_id, Context),
-    Path = m_category:get_path(RscCatId, Context),
-    [ zp_convert:to_atom(m_category:id_to_name(C, Context)) || C <- Path ++ [RscCatId]].
+    m_category:is_a(RscCatId, Context).
+
+%% @doc Check if the resource is in a categorie.
+%% @spec is_a(int(), atom(), Context) -> bool()
+is_a(Id, Cat, Context) ->
+    RscCatId = p(Id, category_id, Context),
+    m_category:is_a(RscCatId, Cat, Context).
     
 
 page_url(Id, Context) ->
