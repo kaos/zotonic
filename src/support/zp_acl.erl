@@ -274,7 +274,7 @@ default(visible_for, Context) ->
 
 %% @doc Add default ACL settings to a resource or media definition.  Adds missing group_id and visible_for.
 add_defaults(PropList, Context) ->
-    PropGroup = case proplists:get_value(group_id, PropList) of
+    PropGroup = case proplists:get_value(group_id, PropList, proplists:get_value(group, PropList)) of
         undefined -> 
             [{group_id,default(group,Context)}|PropList];
         _ ->
