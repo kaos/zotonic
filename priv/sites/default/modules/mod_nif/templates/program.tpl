@@ -26,7 +26,7 @@
 				
 				<ul class="program-list clearfix">
 					<li class="clearfix">
-						<h2>Event whatever where they light fires</h2>
+						<h2>Event whatever where they light fires <span class="genres"><a href="#">Cabaret</a>, <a href="#">for kids</a>, <a href="#">english</a></span></h2>
 						<div class="item-image left">{% image 503 width=180 height=90 crop %}</div>
 						<div class="date-leaf">
 							<span class="day">21</span>
@@ -39,7 +39,46 @@
 							<span class="month">September</span>
 							<span class="time">15:53 AM</span>
 						</div>
-						
+
+						<p class="event-info">By <a href="#">Michael jackson</a> &mdash; <a href="#">Governors Island vanue</a>.</p>						
+						<p>Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua&hellip; <a href="#">Read more</a></p>
+					</li>
+					
+					<li class="clearfix">
+						<h2>Event whatever where they light fires <span class="genres"><a href="#">Cabaret</a>, <a href="#">for kids</a>, <a href="#">english</a></span></h2>
+						<div class="item-image left">{% image 503 width=180 height=90 crop %}</div>
+						<div class="date-leaf">
+							<span class="day">21</span>
+							<span class="month">September</span>
+							<span class="time">10:53 AM</span>
+						</div>
+
+						<div class="date-leaf">
+							<span class="day">22</span>
+							<span class="month">September</span>
+							<span class="time">15:53 AM</span>
+						</div>
+
+						<p class="event-info">By <a href="#">Michael jackson</a> &mdash; <a href="#">Governors Island vanue</a>.</p>						
+						<p>Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua&hellip; <a href="#">Read more</a></p>
+					</li>
+					
+					<li class="clearfix">
+						<h2>Event whatever where they light fires <span class="genres"><a href="#">Cabaret</a>, <a href="#">for kids</a>, <a href="#">english</a></span></h2>
+						<div class="item-image left">{% image 503 width=180 height=90 crop %}</div>
+						<div class="date-leaf">
+							<span class="day">21</span>
+							<span class="month">September</span>
+							<span class="time">10:53 AM</span>
+						</div>
+
+						<div class="date-leaf">
+							<span class="day">22</span>
+							<span class="month">September</span>
+							<span class="time">15:53 AM</span>
+						</div>
+
+						<p class="event-info">By <a href="#">Michael jackson</a> &mdash; <a href="#">Governors Island vanue</a>.</p>						
 						<p>Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua&hellip; <a href="#">Read more</a></p>
 					</li>
 				</ul>

@@ -174,7 +174,7 @@ h1 {
 
 h2 {
 	color: #222;
-	font-size: 19px;
+	font-size: 18px;
 	font-weight: normal;
 	line-height: 18px;
 	margin: 0 0 3px;
@@ -259,31 +259,62 @@ h1#home-header {
 --------------------------------------------------------*/
 
 ul.program-list li {
-	margin: 0 0 18px 0;
+	margin: 0 0 36px 0;
+	padding: 0 0 36px 0;
+	border-bottom: 1px dotted #888;
 }
 
-	.date-leaf {
-		float: left;
-		width: 66px;
-		height: 90px;
-		display: block;
-		background: #4192b9;
-		margin: 4px 6px 0 0;
-		text-align: center;
+	ul.program-list li p {
+		margin: 0;
 	}
 	
-	.date-leaf .day {
-		color: #fff;
-		display: block;
-		font-size: 36px;
-		font-weight: bold;
-		line-height: 36px;
-		margin: 7px 0 3px;
+ul.program-list li h2 span,
+ul.program-list li h2 span a {
+	text-decoration: none;
+	color: #888;
+	font-weight: normal;
+	font-size: 12px;
+	font-style: italic;
+}
+
+	ul.program-list li h2 span a:hover {
+		color: #000;
+	}
+
+.date-leaf {
+	float: left;
+	width: 66px;
+	height: 90px;
+	display: block;
+	background: #4192b9;
+	margin: 4px 6px 0 0;
+	text-align: center;
+}
+
+.date-leaf .day {
+	color: #fff;
+	display: block;
+	font-size: 36px;
+	font-weight: bold;
+	line-height: 36px;
+	margin: 7px 0 3px;
+}
+
+.date-leaf .month,
+.date-leaf .time {
+	color: #fff;
+	font-size: 11px;
+	display: block;
+}
+
+li p.event-info {
+	font-weight: bold;
+}
+
+	li p.event-info a {
+		color: #000;
 	}
 	
-	.date-leaf .month,
-	.date-leaf .time {
-		color: #fff;
-		font-size: 11px;
-		display: block;
+	li p.event-info a:hover {
+		color: #4192b9;
 	}
