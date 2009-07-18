@@ -43,6 +43,7 @@ event({submit, {category_add, Options}, _TriggerId, _TargetId}, Context) ->
             ParentId = zp_convert:to_integer(zp_context:get_q("category_id", Context, undefined)),
             
             Props = [
+                {is_published, true},
                 {group_id, GroupId},
                 {category, category},
                 {name, Name},
