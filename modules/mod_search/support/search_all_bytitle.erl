@@ -19,7 +19,8 @@
 search(Cat, Context) ->
     case m_category:name_to_id(Cat, Context) of
         {ok, CatId} ->
-            Ids = zp_db:q("select id from rsc where category_id = $1", [CatId], Context),
+            {Left,Right} = m_category:get_range(CatId, Context),
+            Ids = zp_db:q("select id from rsc where pivot_category_nr >= $1 and pivot_category_nr <= $2", [Left,Right], Context),
             IdTitles = [ {?TR(m_rsc:p(Id, title, Context), Context), Id} || {Id} <- Ids, m_rsc:is_visible(Id, Context) ],
             Sorted = lists:sort(IdTitles),
             #search_result{result=Sorted, all=Sorted, total=length(Sorted)};
