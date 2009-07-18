@@ -13,23 +13,7 @@
 {% endblock %}	
 
 {% block navigation %}
-	<ul id="navigation" class="list clearfix at-menu">
-		<li><a href="/page.html" class="current">About</a></li>
-
-		<li><a href="/page.html">Program</a></li>
-		<li><a href="/page.html">Artists</a></li>
-		<li>
-			<a href="/page.html">Info &amp; Tickets</a>
-			<ul>
-				<li><a href="#">Information</a></li>
-
-				<li><a href="#">Tickets</a></li>
-				<li><a href="#">Food</a></li>
-			</ul>
-		</li>
-		<li><a href="/page.html">Press</a></li>
-		<li><a href="/page.html">Links</a></li>
-	</ul>
+	{% menu id=id %}	
 {% endblock %}
 
 {% block content %}
@@ -47,9 +31,12 @@
 					{{ m.rsc[id].body }}
 				{% endif %}
 				
-				{% for media_id in m.rsc.[id].media %}
-					{% image media_id width=300 height=300 crop %}
-				{% endfor %}
+				{% if m.rsc[id].media %}				
+					{% for media_id in m.rsc[id].media %}
+						{% image media_id width=300 height=300 crop %}
+					{% endfor %}
+				{% endif %}
+
 			</div>
 		</div>
 

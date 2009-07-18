@@ -28,9 +28,9 @@
 
 % Menu structure is a bit like:
 %
-% <ul id="navigation">
-% 	<li id="nav-item-1" class="first current">
-% 		<a href="" class="home-page">home</a>
+% <ul id="navigation" class="at-menu">
+% 	<li id="nav-item-1" class="first">
+% 		<a href="" class="home-page current">home</a>
 % 	</li>
 % 	<li id="nav-item-2">
 % 		<a href="" class="about-page">about</a>
@@ -55,7 +55,7 @@ render(Params, _Vars, Context, _State) ->
             {ok, CachedMenu};
         undefined ->
             {IdAcc, LIs} = build_menu(Menu, CurrentId, 1, [], [], Context),
-            UL = ["<ul id=\"navigation\">", LIs, "</ul>"],
+            UL = ["<ul id=\"navigation\" class=\"clearfix at-menu\">", LIs, "</ul>"],
             NewMenu = list_to_binary(UL),
             zp_depcache:set({menu, CurrentId, Context#context.language}, NewMenu, ?DAY, [CurrentId, menu | IdAcc]),
             {ok, NewMenu}
@@ -101,8 +101,8 @@ menu_item(N, T, Id, Nr, Context) ->
     Last  = case T of [] -> " last "; _ -> [] end,
     Current = case N == Id of true -> " current "; _ -> [] end,
     [
-        "<li id=\"nav-item-", integer_to_list(Nr), "\" class=\"",First,Last,Current,"\">",
-            "<a href=\"", m_rsc:p(N, page_url, Context), "\" class=\"", m_rsc:p(N, slug, Current), "\">",
+        "<li id=\"nav-item-", integer_to_list(Nr), "\" class=\"",First,Last,"\">",
+            "<a href=\"", m_rsc:p(N, page_url, Context), "\" class=\"", Current, m_rsc:p(N, slug, Current), "\">",
                 ?TR(m_rsc:p(N, title, Context), Context),
         "</a>"
     ]. 
