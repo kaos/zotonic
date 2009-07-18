@@ -35,7 +35,7 @@ install_config(C) ->
     ?DEBUG("Inserting config keys"),
     {ok, 1} = pgsql:equery(C, 
         "insert into config (module, key, value, props, modified) values ($1, $2, $3, $4, now())", 
-        ["zophrenic", "version", ?ZOPHRENIC_VERSION, []]),
+        ["zotonic", "version", ?ZOPHRENIC_VERSION, []]),
     {ok, 1} = pgsql:equery(C, 
         "insert into config (module, key, value, props, modified) values ($1, $2, $3, $4, now())", 
         ["i18n", "language", "en", []]),
