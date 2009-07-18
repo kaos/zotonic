@@ -128,7 +128,7 @@ i2timestamp(N) ->
     DDate = N div ?iusecs_per_day,
     Time  = N rem ?iusecs_per_day,
     {DDate1, Time1} = case Time < 0 of
-        true -> {DDate +1, Time + ?iusecs_per_day};
+        true -> {DDate-1, Time + ?iusecs_per_day};
         false -> {DDate, Time}
     end,
     DDateEpoc = DDate1 + ?postgres_epoc_jdate,
