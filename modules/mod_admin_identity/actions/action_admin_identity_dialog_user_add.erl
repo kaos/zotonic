@@ -47,6 +47,7 @@ event({submit, {user_add, Props}, _TriggerId, _TargetId}, Context) ->
             end,
 
             PersonProps = [
+                {is_published, true},
                 {category, person},
                 {title, lists:flatten(Title)},
                 {name_first, NameFirst},
