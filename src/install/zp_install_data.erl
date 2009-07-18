@@ -247,6 +247,7 @@ install_predicate(C) ->
 
     ObjSubj = [
         {300, true,  104}, %  text  -> about     -> _
+        {301, true,  102}, %  _     -> author    -> person
         {302, false, 105}, %  _     -> hasreview -> review
         {304, false, 110}, %  _     -> depiction -> image
         {305, true,  108}, %  Event -> atvenue   -> _
