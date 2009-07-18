@@ -65,21 +65,20 @@
 
 						{% all include "_admin_edit_content.tpl" %}
 
+						{% if r.is_a.media %}
 						<div class="item-wrapper">
 							<h3 class="above-item">File/ media content</h3>
 							<div class="item clearfix">
 								{% with r.medium as medium %}
-									{% if medium or r.is_a.media %}
-
-										<div id="media-edit-view">
-											{% include "_admin_edit_media_view.tpl" id=id %}
-										</div>
-										
-										{% button text="Replace this media item" action={dialog_media_upload id=id action={update update="media-edit-view" template="_admin_edit_media_view.tpl" id=id}} %}
-									{% endif %}
+									<div id="media-edit-view">
+										{% include "_admin_edit_media_view.tpl" id=id %}
+									</div>
+									
+									{% button text="Replace this media item" action={dialog_media_upload id=id action={update update="media-edit-view" template="_admin_edit_media_view.tpl" id=id}} %}
 								{% endwith %}
 							</div>
 						</div>
+						{% endif %}
 
 						<div class="item-wrapper">
 							<h3 class="above-item">Body text</h3>
