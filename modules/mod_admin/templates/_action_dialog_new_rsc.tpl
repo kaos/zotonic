@@ -25,6 +25,11 @@
 			{% endfor %}
 			</select>
 		</div>
+
+		<div class="form-item clearfix">
+			<input type="checkbox" id="{{ #published }}" name="is_published" value="1" checked="checked" />
+			<label for="{{ #published }}">Published</label>
+		</div>
 		
 		<div class="form-item clearfix">
 			<label for="{{ #group_id }}">Group</label>

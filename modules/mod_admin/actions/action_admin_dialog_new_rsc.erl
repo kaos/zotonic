@@ -45,11 +45,13 @@ event({submit, new_page, _TriggerId, _TargetId}, Context) ->
     Redirect = zp_context:get_q("redirect", Context),
     SubjectId = zp_context:get_q("subject_id", Context),
     Predicate = zp_context:get_q("predicate", Context),
+    IsPublished = zp_context:get_q("is_published", Context),
 
     Props = [
         {category_id, CatId},
         {group_id, GroupId},
-        {title, Title}
+        {title, Title},
+        {is_published, IsPublished}
     ],
     {ok, Id} = m_rsc_update:insert(Props, Context),
 
