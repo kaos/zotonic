@@ -206,6 +206,8 @@ pivot_resource(Id, Context) ->
     TsvObj = [ [" zpo",integer_to_list(OId)] || OId <- ObjIds ],
     TsvCat = [ [" zpc",integer_to_list(CId)] || CId <- CatIds ],
     TsvIds = list_to_binary([TsvObj,TsvCat]),
+
+    {DateStart, DateEnd} = pivot_date(R),
     
     N = length(ArgsD),
     Sql = list_to_binary([
@@ -219,7 +221,9 @@ pivot_resource(Id, Context) ->
             ", pivot_first_name=$",integer_to_list(N+7),
             ", pivot_surname  = $",integer_to_list(N+8),
             ", pivot_gender   = $",integer_to_list(N+9),
-            " where id = $",integer_to_list(N+10)
+            ", pivot_date_start= $",integer_to_list(N+10),
+            ", pivot_date_end  = $",integer_to_list(N+11),
+            " where id = $",integer_to_list(N+12)
         ]),
     SqlArgs = ArgsD ++ [
         TsvIds,
@@ -231,6 +235,8 @@ pivot_resource(Id, Context) ->
         proplists:get_value(first_name, R),
         proplists:get_value(surname, R),
         proplists:get_value(gender, R),
+        DateStart,
+        DateEnd,
         Id
     ],
     zp_db:q(Sql, SqlArgs, Context).
@@ -253,6 +259,21 @@ pivot_resource(Id, Context) ->
     %        setweight(to_tsvector('pg_catalog.dutch', coalesce(new.desc_nl,'')),  'D') ||
     %        setweight(to_tsvector('pg_catalog.english', coalesce(new.title_en,'')), 'A') || 
     %        setweight(to_tsvector('pg_catalog.english', coalesce(new.desc_en,'')),  'D'); 
+
+%% @doc Fetch the date range from the record
+pivot_date(R) ->
+    DateStart = proplists:get_value(date_start, R),
+    DateEnd   = proplists:get_value(date_end, R),
+    pivot_date1(DateStart, DateEnd).
+
+    pivot_date1(S, E) when not is_tuple(S) andalso not is_tuple(E) ->
+        {undefined, undefined};
+    pivot_date1(S, E) when not is_tuple(S) andalso is_tuple(E) ->
+        { {{-4000,0,0},{0,0,0}}, zp_utils:to_utc(E)};
+    pivot_date1(S, E) when is_tuple(S) andalso not is_tuple(E) ->
+        {zp_utils:to_utc(S), {{9999,6,1},{0,0,0}} };
+    pivot_date1(S, E) when is_tuple(S) andalso is_tuple(E) ->
+        {zp_utils:to_utc(S), zp_utils:to_utc(E)}.
 
 
 %% @doc Split texts into different languages
@@ -335,6 +356,7 @@ fetch_texts({F, V}, {A,B} = Acc) ->
     end.
 
 % Suppress some fields that are only for supporting the pivoting
+do_pivot_field(pivot_category_nr) -> false; 
 do_pivot_field(pivot_tsv) -> false; 
 do_pivot_field(pivot_rtsv) -> false; 
 do_pivot_field(pivot_first_name) -> false; 

@@ -44,7 +44,8 @@
 	split/2,
 	replace1/3,
 	guess_mime/1,
-	list_dir_recursive/1
+	list_dir_recursive/1,
+	to_utc/1
 ]).
 
 %%% FORMAT %%%
@@ -467,4 +468,16 @@ list_dir_recursive(Dir) ->
                         list_dir_recursive(OtherFiles, BaseDir, Acc)
                 end
         end.
+
+
+%% @doc Convert a local time to utc
+to_utc(undefined) ->
+    undefined;
+to_utc(D) ->
+    case calendar:local_time_to_universal_time_dst(D) of
+        [] -> D;    % This time never existed in the local time, just take it as-is
+        [UTC] -> UTC;
+        [DstUTC, _UTC] -> DstUTC
+    end.
+
 
