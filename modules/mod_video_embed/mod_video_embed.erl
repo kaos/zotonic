@@ -86,6 +86,7 @@ media_viewer({media_viewer, Props, _Filename, _Options}, _Context) ->
 event({submit, {add_video_embed, EventProps}, _TriggerId, _TargetId}, Context) ->
     Actions = proplists:get_value(actions, EventProps, []),
     Id = proplists:get_value(id, EventProps),
+    Stay = zp_convert:to_bool(proplists:get_value(stay, EventProps, false)),
     EmbedService = zp_context:get_q("video_embed_service", Context),
     EmbedCode = zp_context:get_q_validated("video_embed_code", Context),
 
@@ -121,7 +122,11 @@ event({submit, {add_video_embed, EventProps}, _TriggerId, _TargetId}, Context) -
             case zp_db:transaction(F, Context) of
                 {ok, MediaId} ->
                     ContextRedirect = case SubjectId of
-                        undefined -> zp_render:wire({redirect, [{dispatch, "admin_edit_rsc"}, {id, MediaId}]}, Context);
+                        undefined ->
+                            case Stay of
+                                false -> zp_render:wire({redirect, [{dispatch, "admin_edit_rsc"}, {id, MediaId}]}, Context);
+                                true -> Context
+                            end;
                         _ -> Context
                     end,
                     zp_render:wire([{growl, [{text, "Made the media page."}]} | Actions], ContextRedirect);

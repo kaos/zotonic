@@ -22,14 +22,15 @@ render_action(TriggerId, TargetId, Args, Context) ->
     GroupId = proplists:get_value(group_id, Args),
     Predicate = proplists:get_value(predicate, Args, depiction),
     Actions = proplists:get_all_values(action, Args),
-    Postback = {media_upload_dialog, Title, Id, SubjectId, GroupId, Predicate, Actions},
+    Stay = proplists:get_value(stay, Args, false),
+    Postback = {media_upload_dialog, Title, Id, SubjectId, GroupId, Predicate, Stay, Actions},
 	{PostbackMsgJS, _PickledPostback} = zp_render:make_postback(Postback, click, TriggerId, TargetId, ?MODULE, Context),
 	{PostbackMsgJS, Context}.
 
 
 %% @doc Fill the dialog with the new page form. The form will be posted back to this module.
 %% @spec event(Event, Context1) -> Context2
-event({postback, {media_upload_dialog, Title, Id, SubjectId, GroupId, Predicate, Actions}, _TriggerId, _TargetId}, Context) ->
+event({postback, {media_upload_dialog, Title, Id, SubjectId, GroupId, Predicate, Stay, Actions}, _TriggerId, _TargetId}, Context) ->
     Vars = [
         {delegate, atom_to_list(?MODULE)},
         {id, Id },
@@ -37,7 +38,8 @@ event({postback, {media_upload_dialog, Title, Id, SubjectId, GroupId, Predicate,
         {group_id, GroupId},
         {title, Title},
         {actions, Actions},
-        {predicate, Predicate}
+        {predicate, Predicate},
+        {stay, Stay}
     ],
     DTitle = case Id of undefined -> "Add a new media file"; _ -> "Replace current medium." end,
     zp_render:dialog(DTitle, "_action_dialog_media_upload.tpl", Vars, Context);
@@ -46,6 +48,7 @@ event({postback, {media_upload_dialog, Title, Id, SubjectId, GroupId, Predicate,
 event({submit, {media_upload, EventProps}, _TriggerId, _TargetId}, Context) ->
     Actions = proplists:get_value(actions, EventProps, []),
     Id = proplists:get_value(id, EventProps),
+    Stay = zp_convert:to_bool(proplists:get_value(stay, EventProps, false)),
     File = zp_context:get_q_validated("upload_file", Context),
     ContextUpload = case File of
         #upload{filename=OriginalFilename, tmpfile=TmpFile} ->
@@ -77,7 +80,11 @@ event({submit, {media_upload, EventProps}, _TriggerId, _TargetId}, Context) ->
                     case Result of
                         {ok, MediaId} ->
                             ContextRedirect = case SubjectId of
-                                undefined -> zp_render:wire({redirect, [{dispatch, "admin_edit_rsc"}, {id, MediaId}]}, Context);
+                                undefined -> 
+                                    case Stay of
+                                        true -> Context;
+                                        false -> zp_render:wire({redirect, [{dispatch, "admin_edit_rsc"}, {id, MediaId}]}, Context)
+                                    end;
                                 _ -> Context
                             end,
                             zp_render:wire([{growl, [{text, "Uploaded the file."}]} | Actions], ContextRedirect);

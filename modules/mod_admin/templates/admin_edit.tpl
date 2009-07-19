@@ -103,11 +103,12 @@
 								<div class="clear">
 									{% button
 											text="add a new media item" 
-											action={dialog_media_upload rsc_id=id group_id=r.group_id action={postback postback={reload_media rsc_id=id div_id=#media} delegate="resource_admin_edit"}}
+											action={dialog_media_upload subject_id=id group_id=r.group_id stay
+												action={postback postback={reload_media rsc_id=id div_id=#media} delegate="resource_admin_edit"}}
 									%}
 
 									{% button text="add existing media item" 
-										action={link_dialog subject_id=id predicate="depiction" 
+										action={link_dialog subject_id=id predicate="depiction"
 											action={postback
 														postback={reload_media rsc_id=id div_id=#media}
 														delegate="resource_admin_edit"}
