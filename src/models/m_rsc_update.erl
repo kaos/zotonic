@@ -208,6 +208,11 @@ preflight_check(Id, [{name, Name}|T], Context) ->
         0 ->  preflight_check(Id, T, Context);
         _N -> {error, duplicate_name}
     end;
+preflight_check(Id, [{page_path, Path}|T], Context) ->
+    case zp_db:q1("select count(*) from rsc where page_path = $1 and id <> $2", [Path, Id], Context) of
+        0 ->  preflight_check(Id, T, Context);
+        _N -> {error, duplicate_page_path}
+    end;
 preflight_check(Id, [{uri, Uri}|T], Context) ->
     case zp_db:q1("select count(*) from rsc where uri = $1 and id <> $2", [Uri, Id], Context) of
         0 ->  preflight_check(Id, T, Context);
@@ -225,20 +230,36 @@ props_filter([{uri, <<>>}|T], Acc, Context) ->
     props_filter(T, [{uri, undefined} | Acc], Context);
 props_filter([{uri, ""}|T], Acc, Context) ->
     props_filter(T, [{uri, undefined} | Acc], Context);
+
 props_filter([{name, <<>>}|T], Acc, Context) ->
     props_filter(T, [{name, undefined} | Acc], Context);
 props_filter([{name, ""}|T], Acc, Context) ->
     props_filter(T, [{name, undefined} | Acc], Context);
 props_filter([{name, Name}|T], Acc, Context) ->
     props_filter(T, [{name, zp_string:to_name(Name)} | Acc], Context);
+
+props_filter([{page_path, <<>>}|T], Acc, Context) ->
+    props_filter(T, [{page_path, undefined} | Acc], Context);
+props_filter([{page_path, ""}|T], Acc, Context) ->
+    props_filter(T, [{page_path, undefined} | Acc], Context);
+props_filter([{page_path, Path}|T], Acc, Context) ->
+    Tokens = string:tokens(zp_utils:to_list(Path), "/"),
+    AsSlug = lists:map(fun(X) -> zp_string:to_slug(X) end, Tokens),
+    case string:strip(string:join(AsSlug, "/"), both, $/) of
+        [] -> props_filter(T, [{page_path, undefined} | Acc], Context);
+        P  -> props_filter(T, [{page_path, P} | Acc], Context)
+    end;
+
 props_filter([{slug, Slug}|T], Acc, Context) ->
     props_filter(T, [{slug, zp_string:to_slug(Slug)} | Acc], Context);
+
 props_filter([{is_published, P}|T], Acc, Context) ->
     props_filter(T, [{is_published, zp_convert:to_bool(P)} | Acc], Context);
 props_filter([{is_authoritative, P}|T], Acc, Context) ->
     props_filter(T, [{is_authoritative, zp_convert:to_bool(P)} | Acc], Context);
 props_filter([{is_featured, P}|T], Acc, Context) ->
     props_filter(T, [{is_featured, zp_convert:to_bool(P)} | Acc], Context);
+
 props_filter([{visible_for, Vis}|T], Acc, Context) ->
     VisibleFor = zp_convert:to_integer(Vis),
     case VisibleFor of
@@ -253,6 +274,7 @@ props_filter([{visible_for, Vis}|T], Acc, Context) ->
         _ ->
             props_filter(T, Acc, Context)
     end;
+
 props_filter([{group_id, GId}|T], Acc, Context) ->
     GroupId = zp_convert:to_integer(GId),
     case GroupId of
@@ -272,8 +294,10 @@ props_filter([{group_id, GId}|T], Acc, Context) ->
     end;
 props_filter([{group, GroupName}|T], Acc, Context) ->
     props_filter([{group_id, m_group:name_to_id_check(GroupName, Context)} | T], Acc, Context);
+
 props_filter([{category, CatName}|T], Acc, Context) ->
     props_filter([{category_id, m_category:name_to_id_check(CatName, Context)} | T], Acc, Context);
+
 props_filter([{_Prop, _V}=H|T], Acc, Context) ->
     props_filter(T, [H|Acc], Context).
 
@@ -338,7 +362,7 @@ recombine_dates(Props) ->
     {Dates2, DatesNull1} = collect_empty_dates(Dates1, [], DatesNull),
     Dates3 = [ {Name, date_from_default(Now, D)} || {Name, D} <- Dates2 ],
     DateGroups2 = [ {Name, dategroup_fill_parts(date_from_default(Now, S), E)} || {Name, {S,E}} <- DateGroups1 ],
-    Dates4 = lists:foldl(fun({Name, {S, E}}, Acc) -> [{Name++"_start", S}, {Name++"_end", E} | Acc] end, Dates3, DateGroups2),
+    Dates4 = lists:foldl(fun({Name, {S, E}}, Acc) -> [{Name++"_start", zp_utils:to_utc(S)}, {Name++"_end", zp_utils:to_utc(E)} | Acc] end, Dates3, DateGroups2),
     Dates4 ++ DatesNull1 ++ Props1.
 
 
