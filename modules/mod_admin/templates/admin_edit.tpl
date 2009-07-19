@@ -42,15 +42,17 @@
 									</div>
 
 									{% if m.acl.is_admin %}
-									<div class="form-item clearfix">
-										<label for="field-name">Unique name</label>
-										<input type="text" id="field-name" name="name" value="{{ r.name }}" />
-									</div>
+										<div class="form-item clearfix">
+											<label for="field-name">Unique name</label>
+											<input type="text" id="field-name" name="name" value="{{ r.name }}" />
+										</div>
 
-									<div class="form-item clearfix">
-										<label for="field-name">Unique uri</label>
-										<input type="text" id="field-name" name="uri" value="{{ r.uri }}" />
-									</div>
+										{% if r.is_a.meta or not r.is_authoritative %}
+											<div class="form-item clearfix">
+												<label for="field-name">Unique uri</label>
+												<input type="text" id="field-name" name="uri" value="{{ r.uri }}" />
+											</div>
+										{% endif %}
 									{% endif %}
 
 									<div class="form-item clearfix">
