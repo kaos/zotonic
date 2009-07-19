@@ -7,9 +7,6 @@
 
 -export([to_html/1]).
 
--include_lib("resource_html.hrl").
--include_lib("zophrenic.hrl").
-
 to_html(Context) ->
     {template, Template} = zp_context:lookup(template, Context),
     Rendered = zp_template:render(Template, zp_context:get_all(Context), Context),
