@@ -25,7 +25,8 @@
 %% @doc Insert a new resource. Crashes when insertion is not allowed.
 %% @spec insert(Props, Context) -> {ok, Id} | {error, Reason}
 insert(Props, Context) ->
-    PropsDefaults = zp_acl:add_defaults(Props, Context),
+    PropsAcl = zp_acl:add_defaults(Props, Context),
+    PropsDefaults = props_defaults(PropsAcl, Context),
     update(insert_rsc, PropsDefaults, Context).
 
 
@@ -86,8 +87,7 @@ update(Id, Props, Context) when is_integer(Id) orelse Id == insert_rsc ->
             AtomProps = [ {zp_convert:to_atom(P), V} || {P, V} <- TextProps ],
             FilteredProps = props_filter(AtomProps, [], Context),
             EditableProps = props_filter_protected(FilteredProps),
-            FilledProps = props_defaults(EditableProps, Context),
-            SafeProps = zp_html:escape_props(FilledProps),
+            SafeProps = zp_html:escape_props(EditableProps),
             case preflight_check(Id, SafeProps, Context) of
                 ok ->
                     % This function will be executed in a transaction
@@ -250,6 +250,12 @@ props_filter([{page_path, Path}|T], Acc, Context) ->
         P  -> props_filter(T, [{page_path, P} | Acc], Context)
     end;
 
+props_filter([{slug, undefined}|T], Acc, Context) ->
+    props_filter(T, [{slug, []} | Acc], Context);
+props_filter([{slug, <<>>}|T], Acc, Context) ->
+    props_filter(T, [{slug, []} | Acc], Context);
+props_filter([{slug, ""}|T], Acc, Context) ->
+    props_filter(T, [{slug, []} | Acc], Context);
 props_filter([{slug, Slug}|T], Acc, Context) ->
     props_filter(T, [{slug, zp_string:to_slug(Slug)} | Acc], Context);
 
@@ -306,7 +312,7 @@ props_filter([{_Prop, _V}=H|T], Acc, Context) ->
 %% @spec props_defaults(Props1, Context) -> Props2
 props_defaults(Props, _Context) ->
     case proplists:get_value(slug, Props) of
-        L when L == <<>>; L == [] ->
+        undefined ->
             case proplists:get_value(title, Props) of
                 undefined ->
                     Props;
