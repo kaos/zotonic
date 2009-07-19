@@ -4,5 +4,6 @@
 	{home,		[],						resource_template,	[ {template, "home.tpl"} ]},
 	{page,    	["page", id],       	resource_page,		[ {template, "page.tpl"} ]},
 	{page,    	["page", id, slug], 	resource_page,		[ {template, "page.tpl"} ]},
-	{program,   ["program"], 			resource_template,	[ {template, "program.tpl"} ]}
+	{program,   ["program", id],       	resource_page,		[ {template, "program.tpl"} ]},
+	{program,   ["program", id, slug], 	resource_page,		[ {template, "program.tpl"} ]}
 ].

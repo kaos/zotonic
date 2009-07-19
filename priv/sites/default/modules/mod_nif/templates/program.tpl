@@ -37,20 +37,25 @@
 									{% image  m.rsc[id].media[1] width=180 height=90 crop %}
 								</a>
 							</div>
-							<div class="date-leaf">
-								<span class="day">{{ m.rsc[id].date_start|date:"d" }}</span>
-								<span class="month">{{ m.rsc[id].date_start|date:"F" }}</span>
-								<span class="time">{{ m.rsc[id].date_start|date:"H:i A" }}</span>
-							</div>
+
+							{% with m.rsc[id].date_start as date_start %}
+								{% with m.rsc[id].date_end as date_end %}
+									<div class="date-leaf">
+										<span class="day">{{ date_start|date:"d" }}</span>
+										<span class="month">{{ date_start|date:"F" }}</span>
+										<span class="time">{{ date_start|date:"H:i A" }}</span>
+									</div>
 							
-							{% ifnotequal m.rsc[id].date_start|date:"d/m/Y H:i" m.rsc[id].date_end|date:"d/m/Y H:i" %}
-							<div class="date-leaf">
-								<span class="day">{{ m.rsc[id].date_end|date:"d" }}</span>
-								<span class="month">{{ m.rsc[id].date_end|date:"F" }}</span>
-								<span class="time">{{ m.rsc[id].date_end|date:"H:i A" }}</span>
-							</div>
-							{% endifnotequal %}
-	
+									{% ifnotequal date_start date_end %}
+										<div class="date-leaf">
+											<span class="day">{{ date_end|date:"d" }}</span>
+											<span class="month">{{ date_end|date:"F" }}</span>
+											<span class="time">{{ date_end|date:"H:i A" }}</span>
+										</div>
+									{% endifnotequal %}
+								{% endwith %}
+							{% endwith %}
+
 							<p class="event-info">By <a href="#">Michael jackson</a> &mdash; <a href="#">Governors Island vanue</a>.</p>						
 							<p>{{ m.rsc[id].summary|ljust:140 }}&hellip; <a href="#">Read more</a></p>
 						</li>	
