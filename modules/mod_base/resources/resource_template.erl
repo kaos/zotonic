@@ -5,11 +5,11 @@
 -module(resource_template).
 -author("Marc Worrell <marc@worrell.nl>").
 
--export([to_html/1]).
+-export([html/1]).
 
 -include_lib("resource_html.hrl").
 
-to_html(Context) ->
+html(Context) ->
     {template, Template} = zp_context:lookup(template, Context),
     Rendered = zp_template:render(Template, zp_context:get_all(Context), Context),
     zp_context:output(Rendered, Context).
