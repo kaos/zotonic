@@ -429,24 +429,17 @@ is_a(Id, Cat, Context) ->
 page_url(Id, Context) ->
     case rid(Id, Context) of
         RscId when is_integer(RscId) ->
-            CatId = p(Id, category_id, Context),
             Args = [{id,RscId}, {slug, p(RscId, slug, Context)}],
-            case CatId of
-                undefined ->
-                    page_url_path([], Args, Context);
-                _ ->
-                    CatPath = lists:reverse(m_category:get_path(CatId, Context) ++ [CatId]),
-                    page_url_path(CatPath, Args, Context)
-            end;
+            CatPath = lists:reverse(is_a(Id, Context)),
+            page_url_path(CatPath, Args, Context);
         _ ->
             undefined
     end.
 
 page_url_path([], Args, Context) ->
     zp_dispatcher:url_for(page, Args, Context);
-page_url_path([CatId|Rest], Args, Context) ->
-    Name = m_category:id_to_name(CatId, Context),
-    case zp_dispatcher:url_for(Name, Args, Context) of
+page_url_path([CatName|Rest], Args, Context) ->
+    case zp_dispatcher:url_for(CatName, Args, Context) of
         undefined -> page_url_path(Rest, Args, Context);
         Url -> Url
     end.
