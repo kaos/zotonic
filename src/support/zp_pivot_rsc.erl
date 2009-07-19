@@ -269,11 +269,11 @@ pivot_date(R) ->
     pivot_date1(S, E) when not is_tuple(S) andalso not is_tuple(E) ->
         {undefined, undefined};
     pivot_date1(S, E) when not is_tuple(S) andalso is_tuple(E) ->
-        { {{-4000,0,0},{0,0,0}}, zp_utils:to_utc(E)};
+        { {{-4000,0,0},{0,0,0}}, zp_convert:to_utc(E)};
     pivot_date1(S, E) when is_tuple(S) andalso not is_tuple(E) ->
-        {zp_utils:to_utc(S), {{9999,6,1},{0,0,0}} };
+        {zp_convert:to_utc(S), {{9999,6,1},{0,0,0}} };
     pivot_date1(S, E) when is_tuple(S) andalso is_tuple(E) ->
-        {zp_utils:to_utc(S), zp_utils:to_utc(E)}.
+        {zp_convert:to_utc(S), zp_convert:to_utc(E)}.
 
 
 %% @doc Split texts into different languages
@@ -303,22 +303,12 @@ related(Id, Context) ->
     {Ids, Texts}.
     
 
-%% @doc Fetch the texts of all categories in the category path
+%% @doc Fetch the names of all categories in the category path
+%% @spec category(int(), Context) -> { IdList, TextsList }
 category(CatId, Context) ->
-    Cat = m_category:get(CatId, Context),
-    case proplists:get_value(path, Cat) of
-        [_|_] = Path ->
-            {[CatId|Path], [cat_title(Cat) | [ cat_title(m_category:get(C, Context)) || C <- Path] ]};
-        _ ->
-            {[CatId], [cat_title(Cat)]}
-    end.
-
-
-cat_title(Cat) ->
-    case proplists:get_value(title, Cat) of
-        undefined -> proplists:get_value(name, Cat);
-        Title -> Title
-    end.
+    Names = [ zp_convert:to_list(Name) || Name <- m_category:is_a(CatId, Context) ],
+    Ids   = [ CatId |  m_category:get_path(CatId, Context) ],
+    {Ids, Names}.
 
 
 fetch_texts({title, Value}, {A,B}) ->

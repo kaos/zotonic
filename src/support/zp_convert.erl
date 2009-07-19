@@ -1,9 +1,13 @@
 %% @author Rusty Klophaus
 %% @copyright Copyright (c) 2008-2009 Rusty Klophaus
-%% @doc Conversion functions to list, atom, binary, integer and booleans
+%% @copyright Copyright (c) 2009 Marc Worrell
+%%
+%% @doc Conversion functions for all kinds of data types. 
+%% @doc Changes to Rusty's version: added to_utc(), undefined handling and more to_bool cases.
 
 -module(zp_convert).
 -author("Rusty Klophaus").
+-author("Marc Worrell <marc@worrell.nl>").
 
 -export ([
 	clean_lower/1,
@@ -11,7 +15,8 @@
 	to_atom/1, 
 	to_binary/1, 
 	to_integer/1,
-	to_bool/1
+	to_bool/1,
+	to_utc/1
 ]).
 
 
@@ -72,3 +77,16 @@ to_bool(<<"disabled">>) -> false;
 to_bool("DISABLED") -> false;
 to_bool(<<"DISABLED">>) -> false;
 to_bool(_) -> true.
+
+
+%% @doc Convert a local time to utc
+to_utc(undefined) ->
+    undefined;
+to_utc(D) ->
+    case calendar:local_time_to_universal_time_dst(D) of
+        [] -> D;    % This time never existed in the local time, just take it as-is
+        [UTC] -> UTC;
+        [DstUTC, _UTC] -> DstUTC
+    end.
+
+
