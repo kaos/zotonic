@@ -10,6 +10,6 @@
 -include_lib("resource_html.hrl").
 
 html(Context) ->
-    {template, Template} = zp_context:lookup(template, Context),
+    Template = zp_context:get(template, Context),
     Rendered = zp_template:render(Template, zp_context:get_all(Context), Context),
     zp_context:output(Rendered, Context).
