@@ -58,7 +58,7 @@ event({submit, new_page, _TriggerId, _TargetId}, Context) ->
         [] -> 
             Context;
         L when is_list(L) ->
-            action_link:do_link(zp_convert:to_integer(SubjectId), Predicate, Id, Context);
+            action_admin_link:do_link(zp_convert:to_integer(SubjectId), Predicate, Id, Context);
         _ ->
             Context
     end,
