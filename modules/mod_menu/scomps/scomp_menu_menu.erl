@@ -56,7 +56,7 @@ render(Params, _Vars, Context, _State) ->
         undefined ->
             {IdAcc, LIs} = build_menu(Menu, CurrentId, 1, [], [], Context),
             UL = ["<ul id=\"navigation\" class=\"clearfix at-menu\">", LIs, "</ul>"],
-            NewMenu = list_to_binary(UL),
+            NewMenu = iolist_to_binary(UL),
             zp_depcache:set({menu, CurrentId, Context#context.language}, NewMenu, ?DAY, [CurrentId, menu | IdAcc]),
             {ok, NewMenu}
     end.
@@ -73,7 +73,7 @@ build_menu([{N,SubMenu} | T], Id, Nr, IdAcc, Acc, Context) ->
     build_menu(T, Id, Nr+1, [N|IdAcc1], [ [LI,"<ul>",SubLIs,"</ul></li>"] | Acc ], Context);
 build_menu([N | T], Id, Nr, IdAcc, Acc, Context) when is_integer(N) ->
     LI = menu_item(N, T, Id, Nr, Context),
-    build_menu(T, Id, Nr+1, IdAcc, [ [LI,"</li>"] | Acc ], Context).
+    build_menu(T, Id, Nr+1, [N|IdAcc], [ [LI,"</li>"] | Acc ], Context).
 
 
 %% @doc Check if the id is in the menu. Return undefined when not found, otherwise the Id.
@@ -97,15 +97,20 @@ find_id(Id, [_|T]) ->
 
 
 menu_item(N, T, Id, Nr, Context) ->
-    First = case Nr of 1 -> " first "; _ -> [] end,
-    Last  = case T of [] -> " last "; _ -> [] end,
-    Current = case N == Id of true -> " current "; _ -> [] end,
-    [
-        "<li id=\"nav-item-", integer_to_list(Nr), "\" class=\"",First,Last,"\">",
-            "<a href=\"", m_rsc:p(N, page_url, Context), "\" class=\"", Current, m_rsc:p(N, slug, Current), "\">",
-                ?TR(m_rsc:p(N, title, Context), Context),
-        "</a>"
-    ]. 
+    case m_rsc:exists(Id, Context) of
+        true ->
+            First = case Nr of 1 -> " first "; _ -> [] end,
+            Last  = case T of [] -> " last "; _ -> [] end,
+            Current = case N == Id of true -> " current "; _ -> [] end,
+            [
+                "<li id=\"nav-item-", integer_to_list(Nr), "\" class=\"",First,Last,"\">",
+                    "<a href=\"", m_rsc:p(N, page_url, Context), "\" class=\"", Current, m_rsc:p(N, slug, Current), "\">",
+                        ?TR(m_rsc:p(N, title, Context), Context),
+                "</a>"
+            ];
+        false ->
+            []
+    end.
 
 
 %% @doc Fetch the menu from the site configuration.
