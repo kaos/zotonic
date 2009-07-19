@@ -185,11 +185,13 @@ h3 {
 	font-size: 14px;
 }
 
+	h2 a,
 	h3 a {
 		color: #000;
 		text-decoration: none;
 	}
 	
+	h2 a:hover,
 	h3 a:hover {
 		color: #4192b9;
 	}

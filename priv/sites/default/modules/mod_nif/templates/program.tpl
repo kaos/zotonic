@@ -23,86 +23,47 @@
 			<div class="padding">
 				<h1>{{ m.rsc.program.title }}</h1>
 				<p class="intro">{{ m.rsc.program.summary }}</p>
-				
-				<ul class="program-list clearfix">
-					<li class="clearfix">
-						<h2>Event whatever where they light fires <span class="genres"><a href="#">Cabaret</a>, <a href="#">for kids</a>, <a href="#">english</a></span></h2>
-						<div class="item-image left">{% image 503 width=180 height=90 crop %}</div>
-						<div class="date-leaf">
-							<span class="day">21</span>
-							<span class="month">September</span>
-							<span class="time">10:53 AM</span>
-						</div>
-
-						<div class="date-leaf">
-							<span class="day">22</span>
-							<span class="month">September</span>
-							<span class="time">15:53 AM</span>
-						</div>
-
-						<p class="event-info">By <a href="#">Michael jackson</a> &mdash; <a href="#">Governors Island vanue</a>.</p>						
-						<p>Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua&hellip; <a href="#">Read more</a></p>
-					</li>
-					
-					<li class="clearfix">
-						<h2>Event whatever where they light fires <span class="genres"><a href="#">Cabaret</a>, <a href="#">for kids</a>, <a href="#">english</a></span></h2>
-						<div class="item-image left">{% image 503 width=180 height=90 crop %}</div>
-						<div class="date-leaf">
-							<span class="day">21</span>
-							<span class="month">September</span>
-							<span class="time">10:53 AM</span>
-						</div>
-
-						<div class="date-leaf">
-							<span class="day">22</span>
-							<span class="month">September</span>
-							<span class="time">15:53 AM</span>
-						</div>
-
-						<p class="event-info">By <a href="#">Michael jackson</a> &mdash; <a href="#">Governors Island vanue</a>.</p>						
-						<p>Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua&hellip; <a href="#">Read more</a></p>
-					</li>
-					
-					<li class="clearfix">
-						<h2>Event whatever where they light fires <span class="genres"><a href="#">Cabaret</a>, <a href="#">for kids</a>, <a href="#">english</a></span></h2>
-						<div class="item-image left">{% image 503 width=180 height=90 crop %}</div>
-						<div class="date-leaf">
-							<span class="day">21</span>
-							<span class="month">September</span>
-							<span class="time">10:53 AM</span>
-						</div>
-
-						<div class="date-leaf">
-							<span class="day">22</span>
-							<span class="month">September</span>
-							<span class="time">15:53 AM</span>
-						</div>
-
-						<p class="event-info">By <a href="#">Michael jackson</a> &mdash; <a href="#">Governors Island vanue</a>.</p>						
-						<p>Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua&hellip; <a href="#">Read more</a></p>
-					</li>
-				</ul>
-				
-				{#
+							
 				{% with m.search[{latest cat="event"}] as result %}
-				
-					{% for id in result %}
-						<h3>{{ m.rsc[id].title }}</h3>
-						<p>
-							{{ m.rsc[id].date_start|date:"d/m/Y H:i" }}
-							{% ifnotequal m.rsc[id].date_start|date:"d/m/Y H:i" m.rsc[id].date_end|date:"d/m/Y H:i" %}
-							 &mdash; {{ m.rsc[id].date_end|date:"d/m/Y H:i" }}
-							{% endifnotequal %}
-							</p>
 
+					<ul class="program-list clearfix">
+
+					{% for id in result %}
+
+						<li class="clearfix">
+							<h2><a href="{{ m.rsc[id].page_url }}" title="{{ m.rsc[id].title }}">{{ m.rsc[id].title }}</a> <span class="genres"><a href="#">Cabaret</a>, <a href="#">for kids</a>, <a href="#">english</a></span></h2>
+							<div class="item-image left">
+								<a href="{{ m.rsc[id].page_url }}" title="{{ m.rsc[id].title }}">
+									{% image  m.rsc[id].media[1] width=180 height=90 crop %}
+								</a>
+							</div>
+							<div class="date-leaf">
+								<span class="day">{{ m.rsc[id].date_start|date:"d" }}</span>
+								<span class="month">{{ m.rsc[id].date_start|date:"F" }}</span>
+								<span class="time">{{ m.rsc[id].date_start|date:"H:i A" }}</span>
+							</div>
+							
+							{% ifnotequal m.rsc[id].date_start|date:"d/m/Y H:i" m.rsc[id].date_end|date:"d/m/Y H:i" %}
+							<div class="date-leaf">
+								<span class="day">{{ m.rsc[id].date_end|date:"d" }}</span>
+								<span class="month">{{ m.rsc[id].date_end|date:"F" }}</span>
+								<span class="time">{{ m.rsc[id].date_end|date:"H:i A" }}</span>
+							</div>
+							{% endifnotequal %}
+	
+							<p class="event-info">By <a href="#">Michael jackson</a> &mdash; <a href="#">Governors Island vanue</a>.</p>						
+							<p>{{ m.rsc[id].summary|ljust:140 }}&hellip; <a href="#">Read more</a></p>
+						</li>	
 					{% empty %}
-					
-						<p>Helaas zijn er in de komende periode geen evenementen.</p>
-					
+						<li>
+							<p>Helaas zijn er in de komende periode geen evenementen.</p>
+						</li>
 					{% endfor %}
 				
+					</ul>
+					
 				{% endwith %}
-				#}
+			
 			</div>
 		</div>
 	</div>
