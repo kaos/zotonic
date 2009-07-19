@@ -97,7 +97,7 @@ find_id(Id, [_|T]) ->
 
 
 menu_item(N, T, Id, Nr, Context) ->
-    case m_rsc:exists(Id, Context) of
+    case m_rsc:exists(N, Context) of
         true ->
             First = case Nr of 1 -> " first "; _ -> [] end,
             Last  = case T of [] -> " last "; _ -> [] end,
