@@ -83,6 +83,7 @@ model_pgsql() ->
         id serial NOT NULL,
         uri character varying(250),
         name character varying(80),
+        page_path character varying(80),
         is_authoritative boolean NOT NULL DEFAULT true,
         is_published boolean NOT NULL DEFAULT false,
         is_featured boolean NOT NULL DEFAULT false,
@@ -127,7 +128,8 @@ model_pgsql() ->
 
         CONSTRAINT rsc_pkey PRIMARY KEY (id),
         CONSTRAINT rsc_uri_key UNIQUE (uri),
-        CONSTRAINT rsc_name_key UNIQUE (name)
+        CONSTRAINT rsc_name_key UNIQUE (name),
+        CONSTRAINT rsc_page_path_key UNIQUE (page_path)
     )",
     "COMMENT ON COLUMN rsc.visible_for IS '0 = public, 1 = community, 2 = group'",
 
