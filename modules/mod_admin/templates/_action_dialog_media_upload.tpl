@@ -14,7 +14,7 @@
 			{% endif %}
 		</p>
 
-		{% wire id=#form type="submit" postback={media_upload predicate=predicate actions=actions id=id subject_id=subject_id} delegate=delegate %}
+		{% wire id=#form type="submit" postback={media_upload predicate=predicate actions=actions id=id subject_id=subject_id stay=stay} delegate=delegate %}
 		<form id="{{ #form }}" method="POST" action="postback">
 			<div class="new-media-wrapper">
 				{% if not id %}
