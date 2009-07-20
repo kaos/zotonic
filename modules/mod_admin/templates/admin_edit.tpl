@@ -11,18 +11,15 @@
 
 {% block content %}
 {% with m.rsc[id] as r %}
+  {% with r.is_editable as is_editable %}
 	<div id="content" class="zp-100">
 		<div class="block clearfix">
 
-			{% if not r.is_editable %}
-				<h2>You are not allowed to edit <span>{{ r.title|striptags }}</span></h2>
+			{% if not is_editable %}
+				<h2>You are not allowed to edit the {{ m.rsc[r.category_id].title|lower }} “{{ r.title|striptags }}”</h2>
 			{% else %}
 				<p class="admin-chapeau">editing:</p>
-				{% if r.is_a.meta %}
-					<h2><em>{{ m.rsc[r.category_id].title }}</em> {{ r.title|striptags|default:"<em>untitled</em>" }}</h2>
-				{% else %}
-					<h2>{{ r.title|striptags|default:"<em>untitled</em>" }}</h2>
-				{% endif %}
+				<h2>{{ r.title|striptags|default:"<em>untitled</em>" }} <span>{{ m.rsc[r.category_id].title|lower }} <a href="#category">change</a></span></h2>
 			{% endif %}	
 
 			{% wire id="rscform" type="submit" postback="rscform" %}
@@ -103,18 +100,22 @@
 									{% include "_edit_media.tpl" media=media %}
 								</div>
 								<div class="clear">
-									{% button
-											text="add a new media item" 
-											action={dialog_media_upload subject_id=id group_id=r.group_id stay
-												action={postback postback={reload_media rsc_id=id div_id=#media} delegate="resource_admin_edit"}}
-									%}
+									{% if editable %}
+										{% button
+												text="add a new media item" 
+												action={dialog_media_upload subject_id=id group_id=r.group_id stay
+													action={postback postback={reload_media rsc_id=id div_id=#media} delegate="resource_admin_edit"}}
+										%}
 
-									{% button text="add existing media item" 
-										action={link_dialog subject_id=id predicate="depiction"
-											action={postback
-														postback={reload_media rsc_id=id div_id=#media}
-														delegate="resource_admin_edit"}
-										} %}
+										{% button text="add existing media item" 
+											action={link_dialog subject_id=id predicate="depiction"
+												action={postback
+															postback={reload_media rsc_id=id div_id=#media}
+															delegate="resource_admin_edit"}
+											} %}
+									{% else %}
+										&nbsp;
+									{% endif %}
 								</div>
 							</div>
 						</div>
@@ -167,10 +168,15 @@
 							<div class="item clearfix">
 								<div class="admin-form ">
 									<div class="form-item clearfix">
-										{% button type="submit" id="save_stay" class="save-resource do_tooltip" text="save" title="Save this page and all the connections it has." %}
-										{% button type="submit" id="save_view" class="save-resource do_tooltip" text="save &amp; view" title="Save and view the page." %}
-										{% button class="discard-resource right" text="cancel" action={redirect back} %}
-										{% button class="discard-resource right" disabled=r.is_protected id="delete-button" text="delete" action={dialog_delete_rsc id=r.id on_success={redirect back}} %}
+										{% button type="submit" id="save_stay" class="save-resource do_tooltip" text="save" title="Save this page." disabled=r.is_editable|not %}
+										{% if is_editable %}
+											{% button type="submit" id="save_view" class="save-resource do_tooltip" text="save &amp; view" title="Save and view the page." %}
+										{% else %}
+											{% button id="save_view" class="save-resource do_tooltip" text="view" title="View this page." action={redirect id=id} %}
+										{% endif %}
+										
+										{% button class="discard-resource right do_tooltip" text="cancel" action={redirect back} title="Go back." %}
+										{% button class="discard-resource right do_tooltip" disabled=r.is_protected|ornot:is_editable id="delete-button" text="delete" action={dialog_delete_rsc id=r.id on_success={redirect back}} title="Delete this page." %}
 									</div>
 									
 									<div class="form-item clearfix">
@@ -181,7 +187,7 @@
 										<label for="is_featured" class="left">Featured</label>
 
 										<input type="checkbox" class="do_fieldreplace" id="is_protected" name="is_protected" value="1" {% if r.is_protected %}checked="checked"{% endif %}/> 
-										<label for="is_protected" class="left">Protected</label>
+										<label for="is_protected" class="left">Protect from deletion</label>
 									</div>
 								</div>
 							</div>
@@ -226,82 +232,6 @@
 
 						{% all include "_admin_edit_sidebar.tpl" %}
 
-						{# meta categories (predicate, category and group) can't be changed #}
-						{% if not r.is_a.meta %}
-						<div class="item-wrapper" id="sort-category">
-							<h3 class="above-item clearfix do_blockminifier">
-								<span class="title">Category</span>
-								<span class="arrow">make smaller</span>
-							</h3>
-							<div class="item clearfix admin-form">
-								<p>The category defines what the page represents. <a href="javascript:void(0)" class="do_dialog {title: 'Help about category.', text: 'Every page is categorized in exactly one category.  The category defines what the page represents. For example an event, a product or a person.  The categories are hierarchically defined. In that way you can have a vehicles category with subcategories car and bicycle.', width: '450px'}">Need more help?</a></p>
-								<p>
-									{% with r.category_id as r_cat %}
-										<select id="category_id" name="category_id">
-										{% for cat_id, level, indent, name in m.category.all_flat %}
-											<option value="{{cat_id}}" {% ifequal r_cat cat_id %}selected="selected"{% endifequal %}>
-												{{ indent }}{{ m.rsc[cat_id].title|default:name }}
-											</option>
-										{% endfor %}
-										</select>
-									{% endwith %}
-								</p>
-							</div>
-						</div>
-						{% else %}
-						<div class="item-wrapper" id="sort-category">
-							<h3 class="above-item clearfix do_blockminifier">
-								<span class="title">Category</span>
-								<span class="arrow">make smaller</span>
-							</h3>
-							<div class="item clearfix admin-form">
-								<label>This page is a</label>
-								<h4>{{ m.rsc[r.category_id].title }}</h4>
-								<hr/>
-								<p>Predicates, groups and categories can't be changed into another category.</p>
-							</div>
-						</div>
-						
-						{% endif %}
-					
-						<div class="item-wrapper" id="sort-connections">
-							<h3 class="above-item clearfix do_blockminifier">
-								<span class="title">Page connections</span>
-								<span class="arrow">make smaller</span>
-							</h3>
-							<div class="item clearfix">
-								<div id="unlink-undo-message">
-								<p>
-									This page is able to connect to others. For example you can connect it to an actor or a brand. 
-									<a href="javascript:void(0)" class="do_dialog {title: 'Help about page connections.', text: 'This page is able to connect to others. For example you can connect it to an actor or a brand.', width: '450px'}">Need more help?</a>
-								</p>
-								</div>
-								
-								{% with r.predicates_edit as pred_shown %}
-									{% for name, p in m.predicate %}
-										{% if p.id|member:pred_shown %}
-											{% ifnotequal name "depiction" %}
-												<h4>{{ p.title }}</h4>
-												<div class="unlink-wrapper clearfix">
-													<div id="links-{{id}}-{{name}}" class="clearfix">
-													{% for o_id in r.o[name] %}
-														{% include "_rsc_edge.tpl" subject_id=id predicate=name object_id=o_id %}
-													{% endfor %}
-													</div>
-													{% link_add subject_id=id predicate=name %}
-												</div>
-												<hr />
-											{% endifnotequal %}
-										{% endif %}
-									{% endfor %}
-								{% endwith %}
-								
-								<div class="clearfix">
-									<p>{% button action={redirect dispatch="admin_referrers" id=id} text="View all referrers"%}</p>
-								</div>
-							</div>
-						</div>
-					
 						{% if not r.is_a.meta %}
 						<div class="item-wrapper" id="sort-date">
 							<h3 class="above-item clearfix do_blockminifier">
@@ -328,11 +258,98 @@
 							</div>
 						</div>
 						{% endif %}
+
+						<div class="item-wrapper" id="sort-connections">
+							<h3 class="above-item clearfix do_blockminifier">
+								<span class="title">Page connections</span>
+								<span class="arrow">make smaller</span>
+							</h3>
+							<div class="item clearfix">
+								<div id="unlink-undo-message">
+								<p>
+									This page is able to connect to others. For example you can connect it to an actor or a brand. 
+									<a href="javascript:void(0)" class="do_dialog {title: 'Help about page connections.', text: 'This page is able to connect to others. For example you can connect it to an actor or a brand.', width: '450px'}">Need more help?</a>
+								</p>
+								</div>
+								
+								{% with r.predicates_edit as pred_shown %}
+									{% for name, p in m.predicate %}
+										{% if p.id|member:pred_shown %}
+											{% ifnotequal name "depiction" %}
+												<h4>{{ p.title }}</h4>
+												<div class="unlink-wrapper clearfix">
+													<div id="links-{{id}}-{{name}}" class="clearfix">
+													{% for o_id in r.o[name] %}
+														{% include "_rsc_edge.tpl" subject_id=id predicate=name object_id=o_id %}
+													{% endfor %}
+													</div>
+													
+													{% if editable %}
+														{% link_add subject_id=id predicate=name %}
+													{% endif %}
+												</div>
+												<hr />
+											{% endifnotequal %}
+										{% endif %}
+									{% endfor %}
+								{% endwith %}
+								
+								<div class="clearfix">
+									<p>{% button action={redirect dispatch="admin_referrers" id=id} text="View all referrers"%}</p>
+								</div>
+							</div>
+						</div>
+					
+						{# meta categories (predicate, category and group) can't be changed #}
+						{% if not r.is_a.meta %}
+						<div class="item-wrapper" id="sort-category">
+							<h3 class="above-item clearfix do_blockminifier">
+								<a name="category"></a>
+								<span class="title">Category</span>
+								<span class="arrow">make smaller</span>
+							</h3>
+							<div class="item clearfix admin-form">
+								<p>The category defines what the page represents. <a href="javascript:void(0)" class="do_dialog {title: 'Help about category.', text: 'Every page is categorized in exactly one category.  The category defines what the page represents. For example an event, a product or a person.  The categories are hierarchically defined. In that way you can have a vehicles category with subcategories car and bicycle.', width: '450px'}">Need more help?</a></p>
+								<p>
+									{% with r.category_id as r_cat %}
+										<select id="category_id" name="category_id">
+										{% for cat_id, level, indent, name in m.category.all_flat %}
+											<option value="{{cat_id}}" {% ifequal r_cat cat_id %}selected="selected"{% endifequal %}>
+												{{ indent }}{{ m.rsc[cat_id].title|default:name }}
+											</option>
+										{% endfor %}
+										</select>
+									{% endwith %}
+								</p>
+								
+								<div class="form-item clearfix">
+									<div class="form-item clearfix">
+										{% button type="submit" id="save_stay" class="save-resource do_tooltip" text="save this page" title="Save this page and change category." disabled=r.is_editable|not %}
+										{% button class="discard-resource" text="cancel" action={redirect back} %}
+									</div>
+								</div>
+							</div>
+						</div>
+						{% else %}
+						<div class="item-wrapper" id="sort-category">
+							<h3 class="above-item clearfix do_blockminifier">
+								<span class="title">Category</span>
+								<span class="arrow">make smaller</span>
+							</h3>
+							<div class="item clearfix admin-form">
+								<label>This page is a</label>
+								<h4>{{ m.rsc[r.category_id].title }}</h4>
+								<hr/>
+								<p>Predicates, groups and categories can't be changed into another category.</p>
+							</div>
+						</div>
+						{% endif %}
 					
 					</div>
 				</div>
 			</form>
 		</div>
 	</div>	
+  {% endwith %}
 {% endwith %}
 {% endblock %}
