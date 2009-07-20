@@ -14,6 +14,8 @@
 %% supervisor callbacks
 -export([init/1]).
 
+-include_lib("zotonic.hrl").
+
 %% @spec start_link() -> ServerRet
 %% @doc API for starting the supervisor.
 start_link() ->
@@ -65,8 +67,9 @@ init([]) ->
 	            permanent, 5000, worker, dynamic},
 
     DbPoolConfig = [
-        {default, 10, [{host, DbHost}, {port, DbPort}, {user, DbUser}, {password, DbPassword}, {database, DbDatabase}]}
+        {default, 10, [{host, DbHost}, {port, DbPort}, {username, DbUser}, {password, DbPassword}, {database, DbDatabase}]}
     ],
+    
 
     Ids     = {z_ids,
 	            {z_ids, start_link, []}, 
