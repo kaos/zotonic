@@ -2,8 +2,11 @@
 
 [
 	{home,		[],						resource_template,	[ {template, "home.tpl"} ]},
+	{news,		["news"],				resource_template,	[ {template, "news.tpl"} ]},
 	{page,    	["page", id],       	resource_page,		[ {template, "page.tpl"} ]},
 	{page,    	["page", id, slug], 	resource_page,		[ {template, "page.tpl"} ]},
 	{program,   ["program", id],       	resource_page,		[ {template, "program.tpl"} ]},
-	{program,   ["program", id, slug], 	resource_page,		[ {template, "program.tpl"} ]}
+	{program,   ["program", id, slug], 	resource_page,		[ {template, "program.tpl"} ]},
+	{artists,   ["artists", id], 		resource_page,		[ {template, "artists.tpl"} ]},
+	{artists,   ["artists", id, slug], 	resource_page,		[ {template, "artists.tpl"} ]}
 ].

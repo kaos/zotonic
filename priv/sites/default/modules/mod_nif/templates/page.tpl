@@ -63,6 +63,8 @@
 					</li>
 					{% endfor %}
 				</ul>
+				
+				<p><a href="{% url news %}" title="View all news">View all news items</a></p>
 			</div>
 		</div>
 	</div>
