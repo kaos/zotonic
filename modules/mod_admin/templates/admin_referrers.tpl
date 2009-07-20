@@ -34,7 +34,7 @@
 						<span class="zp-30">{{ m.rsc[id].title|striptags|default:"<em>untitled</em>" }}</span>
 						<span class="zp-15">{{ m.predicate[pred_id].title }}</span>
 						<span class="zp-15">{{ m.rsc[id].category.name }}</span>
-						<span class="zp-15">{{ m.rsc[id].modified|date:"F d, H:i" }}</span>
+						<span class="zp-15">{{ m.rsc[id].modified|date:"d M, H:i" }}</span>
 						<span class="zp-15">{{ m.rsc[m.rsc[id].modifier_id].title|default:"-" }}</span>
 						<span class="zp-10">
 							{% button text="delete" disabled=m.rsc[id].is_protected action={dialog_delete_rsc id=id on_success={slide_fade_out target=#li.id}} %}

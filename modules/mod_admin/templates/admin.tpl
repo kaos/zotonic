@@ -36,7 +36,7 @@
 								<a href="{% url admin_edit_rsc id=id %}" class="clearfix">
 									<span class="zp-35">{{ m.rsc[id].title|striptags|default:"<em>untitled</em>" }}</span>
 									<span class="zp-25">{{ m.rsc[id].category.name }}</span>
-									<span class="zp-20">{{ m.rsc[id].modified|date:"F d, H:i" }}</span>
+									<span class="zp-20">{{ m.rsc[id].modified|date:"d M, H:i" }}</span>
 									<span class="zp-20">
 										{% button text="view" action={redirect id=id} %}
 										{% button text="edit &raquo;" action={redirect dispatch="admin_edit_rsc" id=id} %}
@@ -71,7 +71,7 @@
 								<a href="{% url admin_edit_rsc id=id %}" class="clearfix">
 									<span class="zp-35">{{ m.rsc[id].title|striptags|default:"<em>untitled</em>" }}</span>
 									<span class="zp-25">{{ m.rsc[id].category.name }}</span>
-									<span class="zp-20">{{ m.rsc[id].modified|date:"F d, H:i" }}</span>
+									<span class="zp-20">{{ m.rsc[id].modified|date:"d M, H:i" }}</span>
 									<span class="zp-20">
 										{% button text="view" action={redirect id=id} %}
 										{% button text="edit &raquo;" action={redirect dispatch="admin_edit_rsc" id=id} %}
@@ -110,7 +110,7 @@
 								<a href="{% url admin_edit_rsc id=id %}" class="clearfix">
 									<span class="zp-35">{{ m.rsc[id].title|striptags|default:"<em>untitled</em>" }}</span>
 									<span class="zp-25">{{ m.rsc[id].category.name }}</span>
-									<span class="zp-20">{{ m.rsc[id].modified|date:"F d, H:i" }}</span>
+									<span class="zp-20">{{ m.rsc[id].modified|date:"d M, H:i" }}</span>
 									<span class="zp-20">
 										{% button text="view" action={redirect id=id} %}
 										{% button text="edit &raquo;" action={redirect dispatch="admin_edit_rsc" id=id} %}
@@ -144,8 +144,8 @@
 							<li>
 								<a href="{% url admin_edit_rsc id=id %}" class="clearfix">
 									<span class="zp-35">{{ m.rsc[id].title|striptags|default:"<em>untitled</em>" }}</span>
-									<span class="zp-25">{{ m.rsc[id].date_start|date:"Y-m-d H:i"|default:"-" }}</span>
-									<span class="zp-20">{{ m.rsc[id].modified|date:"F d, H:i" }}</span>
+									<span class="zp-25">{{ m.rsc[id].date_start|date:"d M Y, H:i"|default:"-" }}</span>
+									<span class="zp-20">{{ m.rsc[id].modified|date:"d M, H:i" }}</span>
 									<span class="zp-20">
 										{% button text="view" action={redirect id=id} %}
 										{% button text="edit &raquo;" action={redirect dispatch="admin_edit_rsc" id=id} %}
@@ -183,7 +183,7 @@
 									
 									<span class="zp-25">{{ m.rsc[id].title|striptags|default:"<em>untitled</em>" }}</span>
 									<span class="zp-25">{{ m.rsc[id].category.name }}</span>
-									<span class="zp-20">{{ m.rsc[id].modified|date:"F d, H:i" }}</span>
+									<span class="zp-20">{{ m.rsc[id].modified|date:"d M, H:i" }}</span>
 									<span class="zp-20">
 										{% button text="view" action={redirect id=id} %}
 										{% button text="edit &raquo;" action={redirect dispatch="admin_edit_rsc" id=id} %}
