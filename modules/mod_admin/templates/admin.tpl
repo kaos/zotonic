@@ -100,7 +100,7 @@
 							{% for id in m.search[{latest cat="media"}] %}
 							<li>
 								<a href="{% url admin_edit_rsc id=id %}" class="clearfix">
-									<span class="zp-10">{% image id width=40 height=18 crop %}</span>
+									<span class="zp-10">{% image id width=40 height=18 crop %}&nbsp;</span>
 									
 									<span class="zp-25">{{ m.rsc[id].title|striptags|default:"<em>untitled</em>" }}</span>
 									<span class="zp-25">{{ m.rsc[id].category.name }}</span>

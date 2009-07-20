@@ -14,9 +14,13 @@
     <body>
 		<div class="zp-wrapper"> 
 	        <h1>Hello, new world {{ helloworld_counter }}</h1>
-
+		
 			<div class="zp-50 content"> 
 				<div class="padding"> 
+
+					<h2>The menu should be below</h2>
+					
+					{% menu %}
 
 					<h2>Postbacks which give some content</h2>
 					<p>
