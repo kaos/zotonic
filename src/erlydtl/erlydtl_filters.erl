@@ -110,6 +110,38 @@ ne(Input, Number) ->
     end.
 
 
+b_not(Input) ->
+    not zp_convert:to_bool(Input).
+
+
+b_or(Input, Parm) ->
+    zp_convert:to_bool(Input) or zp_convert:to_bool(Parm).
+
+
+b_xor(Input, Parm) ->
+    zp_convert:to_bool(Input) xor zp_convert:to_bool(Parm).
+
+
+b_and(Input, Parm) ->
+    zp_convert:to_bool(Input) and zp_convert:to_bool(Parm).
+
+
+ornot(Input, Parm) ->
+    zp_convert:to_bool(Input) or not zp_convert:to_bool(Parm).
+
+
+andnot(Input, Parm) ->
+    zp_convert:to_bool(Input) and not zp_convert:to_bool(Parm).
+
+
+notor(Input, Parm) ->
+    not zp_convert:to_bool(Input) or zp_convert:to_bool(Parm).
+
+
+notand(Input, Parm) ->
+    not zp_convert:to_bool(Input) and zp_convert:to_bool(Parm).
+
+
 capfirst(undefined) ->
     undefined;
 capfirst([H|T]) when H >= $a andalso H =< $z ->

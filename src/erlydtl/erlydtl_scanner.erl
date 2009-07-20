@@ -53,7 +53,8 @@ scan(Template) ->
     scan(Template, [], {1, 1}, in_text).
 
 
-identifier_to_keyword({identifier, Pos, String}, {PrevTag, Acc}) when PrevTag == open_tag; PrevTag == all_keyword ->
+identifier_to_keyword({identifier, Pos, String}, {PrevToken, Acc}) when PrevToken == open_tag; PrevToken == all_keyword ->
+    %% At the start of a {% .... %} tag we accept all keywords
     RevString = lists:reverse(String),
     Keywords = ["for", "empty", "endfor", "in", "include", "block", "endblock",
         "extends", "autoescape", "endautoescape", "if", "else", "endif",
@@ -66,9 +67,19 @@ identifier_to_keyword({identifier, Pos, String}, {PrevTag, Acc}) when PrevTag ==
         _ ->    identifier
     end,
     {Type, [{Type, Pos, RevString}|Acc]};
-identifier_to_keyword({identifier, Pos, String}, {_PrevToken, Acc}) ->
+identifier_to_keyword({identifier, Pos, String}, {PrevToken, Acc}) when PrevToken == pipe ->
+    %% Accept any filter function, though translate 'not', 'and' and 'or' as they are special keywords
     RevString = lists:reverse(String),
-    Keywords = ["in", "not", "or", "and", "firstof", "now", "regroup", "templatetag", "with", "as"], 
+    ReservedErlang = ["not", "and", "or"], 
+    NewFilter = case lists:member(RevString, ReservedErlang) of
+        true -> "b_" ++ RevString;
+        _ ->    RevString
+    end,
+    {identifier, [{identifier, Pos, NewFilter}|Acc]};
+identifier_to_keyword({identifier, Pos, String}, {_PrevToken, Acc}) ->
+    %% After the first keyword of a tag we accept a limited set of keywords
+    RevString = lists:reverse(String),
+    Keywords = ["in", "not", "or", "and", "xor", "firstof", "now", "regroup", "templatetag", "with", "as"], 
     Type = case lists:member(RevString, Keywords) of
         true -> list_to_atom(RevString ++ "_keyword");
         _ ->    identifier
