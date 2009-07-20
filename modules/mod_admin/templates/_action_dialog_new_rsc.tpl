@@ -27,7 +27,7 @@
 		</div>
 
 		<div class="form-item clearfix">
-			<input type="checkbox" id="{{ #published }}" name="is_published" value="1" checked="checked" />
+			<input type="checkbox" id="{{ #published }}" name="is_published" value="1" {% if subject_id %}checked="checked"{% endif %} />
 			<label for="{{ #published }}">Published</label>
 		</div>
 		

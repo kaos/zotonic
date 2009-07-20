@@ -100,7 +100,7 @@
 									{% include "_edit_media.tpl" media=media %}
 								</div>
 								<div class="clear">
-									{% if editable %}
+									{% if is_editable %}
 										{% button
 												text="add a new media item" 
 												action={dialog_media_upload subject_id=id group_id=r.group_id stay
@@ -168,7 +168,7 @@
 							<div class="item clearfix">
 								<div class="admin-form ">
 									<div class="form-item clearfix">
-										{% button type="submit" id="save_stay" class="save-resource do_tooltip" text="save" title="Save this page." disabled=r.is_editable|not %}
+										{% button type="submit" id="save_stay" class="save-resource do_tooltip" text="save" title="Save this page." disabled=is_editable|not %}
 										{% if is_editable %}
 											{% button type="submit" id="save_view" class="save-resource do_tooltip" text="save &amp; view" title="Save and view the page." %}
 										{% else %}
@@ -284,7 +284,7 @@
 													{% endfor %}
 													</div>
 													
-													{% if editable %}
+													{% if is_editable %}
 														{% link_add subject_id=id predicate=name %}
 													{% endif %}
 												</div>
@@ -324,7 +324,7 @@
 								
 								<div class="form-item clearfix">
 									<div class="form-item clearfix">
-										{% button type="submit" id="save_stay" class="save-resource do_tooltip" text="save this page" title="Save this page and change category." disabled=r.is_editable|not %}
+										{% button type="submit" id="save_stay" class="save-resource do_tooltip" text="save this page" title="Save this page and change category." disabled=is_editable|not %}
 										{% button class="discard-resource" text="cancel" action={redirect back} %}
 									</div>
 								</div>
