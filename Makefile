@@ -1,7 +1,7 @@
 ERL          ?= erl
 ERLC          = erlc
 EBIN_DIRS    := $(wildcard deps/*/ebin)
-APP          := zophrenic
+APP          := zotonic
 PARSER        =src/erlydtl/erlydtl_parser
 
 all: mochiweb webmachine $(PARSER).erl erl ebin/$(APP).app 
