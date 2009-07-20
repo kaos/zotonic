@@ -28,7 +28,7 @@
 					{% if is_event %}
 						<span class="zp-20">Title</span>
 						<span class="zp-15">Performer</span>
-						<span class="zp-15">Date Start</span>
+						<span class="zp-15">Start date</span>
 						<span class="zp-10">Category</span>
 						<span class="zp-15">Modified on</span>
 						<span class="zp-15">Modified by</span>
