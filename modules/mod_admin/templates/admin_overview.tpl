@@ -47,7 +47,7 @@
 						{% if is_event %}
 							<span class="zp-20">{{ m.rsc[id].title|striptags|default:"<em>untitled</em>" }}</span>
 							<span class="zp-15">{{ m.rsc[id].o.performer.title|default:"-" }}</span>
-							<span class="zp-15">{{ m.rsc[id].date_start|date:"d M Y, H:i" }}</span>
+							<span class="zp-15">{{ m.rsc[id].date_start|date:"d M Y, H:i"|default:"-" }}</span>
 							<span class="zp-10">{{ m.rsc[id].category.name }}</span>
 							<span class="zp-15">{{ m.rsc[id].modified|date:"d M Y, H:i" }}</span>
 							<span class="zp-15">{{ m.rsc[m.rsc[id].modifier_id].title|default:"-" }}</span>
