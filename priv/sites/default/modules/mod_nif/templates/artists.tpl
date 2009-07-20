@@ -21,8 +21,7 @@
 	<div id="content-wrapper" class="clearfix">
 		<div id="content">
 			<div class="padding">
-				<h1>{{ m.rsc[id].title }}</h1>
-				<p class="intro">{{ m.rsc[id].summary }}</p>
+				{% include "_view.tpl" %}
 							
 				{% with m.search[{latest cat="artist"}] as result %}
 

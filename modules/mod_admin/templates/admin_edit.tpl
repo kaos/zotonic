@@ -300,7 +300,7 @@
 							</div>
 						</div>
 					
-						{# meta categories (predicate, category and group) can't be changed #}
+						{# meta categories (predicate, category and group) cannot be changed #}
 						{% if not r.is_a.meta %}
 						<div class="item-wrapper" id="sort-category">
 							<h3 class="above-item clearfix do_blockminifier">

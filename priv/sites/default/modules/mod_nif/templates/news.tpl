@@ -21,8 +21,7 @@
 	<div id="content-wrapper" class="clearfix">
 		<div id="content">
 			<div class="padding">
-				<h1>{{ m.rsc.news.title }}</h1>
-				<p class="intro">{{ m.rsc.news.summary }}</p>
+				{% include "_view.tpl" %}
 	
 				<ul class="news-list clearfix">
 					{% for id in m.search[{latest cat="news"}] %}

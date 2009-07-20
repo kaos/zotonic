@@ -8,5 +8,11 @@
 	{program,   ["program", id],       	resource_page,		[ {template, "program.tpl"} ]},
 	{program,   ["program", id, slug], 	resource_page,		[ {template, "program.tpl"} ]},
 	{artists,   ["artists", id], 		resource_page,		[ {template, "artists.tpl"} ]},
-	{artists,   ["artists", id, slug], 	resource_page,		[ {template, "artists.tpl"} ]}
+	{artists,   ["artists", id, slug], 	resource_page,		[ {template, "artists.tpl"} ]},
+	{artist,    ["artist", id, slug], 	resource_page,		[ {template, "artist.tpl"} ]},
+	{artist,    ["artist", id, slug], 	resource_page,		[ {template, "artist.tpl"} ]},
+	{event,     ["event", id, slug], 	resource_page,		[ {template, "event.tpl"} ]},
+	{event,     ["event", id, slug], 	resource_page,		[ {template, "event.tpl"} ]},
+	{venue,   	["venue", id, slug], 	resource_page,		[ {template, "venue.tpl"} ]},
+	{venue,     ["venue", id, slug], 	resource_page,		[ {template, "venue.tpl"} ]}
 ].

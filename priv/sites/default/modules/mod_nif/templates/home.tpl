@@ -13,7 +13,7 @@
 {% endblock %}
 
 {% block navigation %}
-	{% menu id=id %}
+	{% menu id=m.rsc.home.id %}
 {% endblock %}
 
 {% block content %}

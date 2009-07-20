@@ -31,8 +31,8 @@
 $.widget("ui.fieldreplace", 
 {
 	_init: function() 
-	{
-		if(!this.element.is(':checkbox, :radio')) return false;
+	{		
+		//if(!this.element.is(':checkbox, :radio')) return false;
 
 		var fieldWrapper, replacedField, self = this, obj = this.element;
 

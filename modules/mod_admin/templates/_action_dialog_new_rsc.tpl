@@ -1,4 +1,9 @@
-
+<script type="text/javascript">
+	$(function()
+	{
+		$('.do_fieldreplace').fieldreplace();
+	});
+</script>
 <p>Please fill in the title and the category of the new page.  You also have to select the group you will share the page with.</p>
 
 {% wire id=#form type="submit" postback="new_page" delegate=delegate %}
@@ -28,7 +33,7 @@
 
 		<div class="form-item clearfix">
 			<input type="checkbox" id="{{ #published }}" name="is_published" value="1" {% if subject_id %}checked="checked"{% endif %} />
-			<label for="{{ #published }}">Published</label>
+			<label for="{{ #published }}" class="left">Published</label>
 		</div>
 		
 		<div class="form-item clearfix">

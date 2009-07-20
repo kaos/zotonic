@@ -26,30 +26,42 @@
 
 		<div id="sidebar" class="zp-30">
 			<div class="padding">
-				<h1>Latest news items</h1>
+				<h1>Artists playing here</h1>
 	
 				<ul class="items-list">
-					{% for id in m.search[{latest cat="news"}] %}
+					{% for id in m.rsc[id].s.atvenue %}
 					<li>
-						<h3><a href="{{ m.rsc[id].page_url }}" title="{{ m.rsc[id].title }}">{{ m.rsc[id].title|striptags }}</a></h3>
-						{% if m.rsc[id].media[1] %}
-							<div class="item-image left">{% image m.rsc[id].media[1] width=65 height=65 crop %}</div>
+						<h3>
+							<a href="{{ m.rsc[id].page_url }}" title="{{ m.rsc[id].title }}">
+								{{ m.rsc[id].title }}
+							</a>
+						</h3>
+						{% if m.rsc[id].media %}
+							<div class="item-image left">
+								<a href="{{ m.rsc[id].page_url }}" title="{{ m.rsc[id].title }}">							
+									{% image m.rsc[id].media[1] width=65 height=65 crop %}
+								</a>
+							</div>
+						{% else %}
+							<div class="item-image left">
+								<a href="{{ m.rsc[id].page_url }}" title="{{ m.rsc[id].title }}">							
+									{% image m.rsc[id].o.performer.media[1] width=65 height=65 crop %}
+								</a>
+							</div>
 						{% endif %}
-						
 						<p class="intro">
-							<em>{{ m.rsc[id].modified|date:"d M, H:i" }}</em> &mdash; 
+							<am>{{ m.rsc[id].date_start|date:"M d, H:i" }} &mdash; {{ m.rsc[id].date_end|date:"M d, H:i" }}</em>
 							{{ m.rsc[id].summary|ljust:80 }}&hellip;
 							<a href="{{ m.rsc[id].page_url }}" title="{{ m.rsc[id].title }}">Read&nbsp;more</a>
 						</p>
 					</li>
+
 					{% empty %}
 					<li>
-						No news to show.
+						No artists found.
 					</li>
 					{% endfor %}
 				</ul>
-				
-				<p><a href="{% url news %}" title="View all news">View all news items</a></p>
 			</div>
 		</div>
 	</div>
