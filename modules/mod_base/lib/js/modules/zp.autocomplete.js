@@ -1,5 +1,5 @@
 /**
-*	zp.autocomplete()
+*	z.autocomplete()
 *	This function is used to autocomplete anything in the zotonic system
 *		
 *   Copyright (c) 2009 Tim Benniks
@@ -24,7 +24,7 @@
 *	
 *	@author 	Tim Benniks <tim@timbenniks.com>
 * 	@copyright  2009 timbenniks.com
-*	@version    $Id: zp.autocomplete.js 12 2009-04-15 12:24:18Z timbenniks $
+*	@version    $Id: z.autocomplete.js 12 2009-04-15 12:24:18Z timbenniks $
 **/
 $.widget("ui.autocomplete", 
 {

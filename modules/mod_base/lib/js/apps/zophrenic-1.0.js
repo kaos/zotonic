@@ -1,5 +1,5 @@
 /**
- * Zophrenic javascript library
+ * Zotonic javascript library
  *
  * (c) copyright 2009 Marc Worrell / Tim Benniks
  *

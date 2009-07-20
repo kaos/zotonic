@@ -6,7 +6,7 @@
 	<div id="content" class="zp-100">
 		<div class="block clearfix">
 
-		<h2>Zophrenic Modules</h2>
+		<h2>Zotonic Modules</h2>
 
 		<p>
 			Rescanning will rebuild the index of all modules, actions, templates etc.  It will also reload all dispatch rules.

@@ -2,7 +2,7 @@
 %% @copyright 2009 Marc Worrell
 %% @date 2009-06-09
 %%
-%% @doc Defines PostgreSQL queries for basic content searches in Zophrenic.
+%% @doc Defines PostgreSQL queries for basic content searches in Zotonic.
 %% This module needs to be split in specific PostgreSQL queries and standard SQL queries when you want to 
 %% support other databases (like MySQL).
 
@@ -11,7 +11,7 @@
 -behaviour(gen_server).
 
 -mod_title("Search Queries").
--mod_description("Defines PostgreSQL queries for basic content searches in Zophrenic.").
+-mod_description("Defines PostgreSQL queries for basic content searches in Zotonic.").
 -mod_prio(1000).
 
 %% gen_server exports

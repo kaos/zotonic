@@ -183,7 +183,7 @@ install_rsc(C) ->
         [ 208,  0,  208,   118,  false,  "content",    [{title,<<"Content">>}] ],
 
         [   1,  0,  204,   102,  true,    undefined,   [{title,<<"Site Administrator">>}] ],
-        [ 500,  0,  204,   106,  false,   undefined,   [{title,<<"About Zophrenic">>}, {body, "<p>Some nice text in the body.</p>"}] ],
+        [ 500,  0,  204,   106,  false,   undefined,   [{title,<<"About Zotonic">>}, {body, "<p>Some nice text in the body.</p>"}] ],
         [ 501,  0,  204,   109,  false,   undefined,   [{title,<<"Some News">>}, {body, "<p>And the text of the news should be typed here.</p>"}] ]
     ],
     

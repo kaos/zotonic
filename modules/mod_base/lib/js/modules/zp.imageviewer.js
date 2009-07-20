@@ -1,5 +1,5 @@
 /**
-*	zp.imageviewer()
+*	z.imageviewer()
 *	This function is used to view the big version of images in the zotonic CMS
 *
 *   Copyright (c) 2009 Tim Benniks
@@ -24,7 +24,7 @@
 *	
 *	@author 	Tim Benniks <tim@timbenniks.com>
 * 	@copyright  2009 timbenniks.com
-*	@version    $Id: zp.imageviewer.js 12 2009-04-15 16:14:18Z timbenniks $
+*	@version    $Id: z.imageviewer.js 12 2009-04-15 16:14:18Z timbenniks $
 **/
 $.widget("ui.imageviewer", 
 {

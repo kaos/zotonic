@@ -6,7 +6,7 @@
 	<div id="content" class="zp-100">
 		<div class="block clearfix">
 
-			<h2>Zophrenic Dashboard</h2>
+			<h2>Zotonic Dashboard</h2>
 
 			<div class="clearfix">
 				{% button class="" text="Make a new page" action={dialog_new_rsc title=""} %}

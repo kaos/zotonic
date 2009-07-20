@@ -7,10 +7,10 @@
 	<div id="content" class="zp-100">
 		<div class="block clearfix">
 
-			<h2>Zophrenic Predicates</h2>
+			<h2>Zotonic Predicates</h2>
 
 			<p>A predicate denotes traits or aspects of a page and expresses a relationship between two pages.
-			 The relation is always directed, from the subject to the object.<br/>Predicates are defined in ontologies like <a href="http://sioc-project.org/">SIOC</a>.  On this page you can define the predicates known to Zophrenic.</p>
+			 The relation is always directed, from the subject to the object.<br/>Predicates are defined in ontologies like <a href="http://sioc-project.org/">SIOC</a>.  On this page you can define the predicates known to Zotonic.</p>
 
 			{% if editable %}
 			<div class="clearfix">

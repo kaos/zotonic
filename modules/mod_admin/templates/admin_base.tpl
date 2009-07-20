@@ -2,7 +2,7 @@
 <html xmlns="http://www.w3.org/1999/xhtml" lang="en">
 <head>
 	<meta http-equiv="Content-type" content="text/html; charset=utf-8" />
-	<title>Zophrenic {% block title %}Admin{% endblock %}</title>
+	<title>Zotonic {% block title %}Admin{% endblock %}</title>
 
 	<meta name="author" content="Tim Benniks" />
 	
@@ -23,14 +23,14 @@
 	</div>
 	<div class="zp-wrapper">
 		<div id="header">
-			<h1 class="zotonic"><a href="/admin/">Zophrenic</a></h1>
+			<h1 class="zotonic"><a href="/admin/">Zotonic</a></h1>
 		</div>
 
 		<!--[if lte IE 6]>
 		<div id="ie6-upgrade" class="notification notice">
 			<h4>Warning</h4>
 			Your version of Internet Explorer is extremely <strong>out of date</strong> and has known <strong>security issues!</strong><br />
-			To have the best experience using the Zophrenic admin and to protect your computer correct this by installing <a href="http://www.opera.com">Opera</a>, <a href="http://mozilla.com">FireFox</a>, <a href="http://www.apple.com/safari/download/">Safari</a> or a higher version <a href="http://www.microsoft.com/windows/downloads/ie/getitnow.mspx">Internet Explorer</a>.
+			To have the best experience using the Zotonic admin and to protect your computer correct this by installing <a href="http://www.opera.com">Opera</a>, <a href="http://mozilla.com">FireFox</a>, <a href="http://www.apple.com/safari/download/">Safari</a> or a higher version <a href="http://www.microsoft.com/windows/downloads/ie/getitnow.mspx">Internet Explorer</a>.
 		</div>
 		<![endif]-->
 

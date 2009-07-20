@@ -6,7 +6,7 @@
 	<div id="content" class="zp-100">
 		<div class="block clearfix">
 
-			<h2>Zophrenic Media</h2>
+			<h2>Zotonic Media</h2>
 
 			<p>Media encompasses all uploaded images, movies and documents. Media can be attached to pages.</p>
 

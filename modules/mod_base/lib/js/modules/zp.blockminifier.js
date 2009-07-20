@@ -1,5 +1,5 @@
 /**
-*	zp.blockminifier()
+*	z.blockminifier()
 *	This function is used to unlink data that has been stored using triplets.
 *	e.g. object is connected to subject with a predicate.
 *	This function removes the predicate
@@ -26,7 +26,7 @@
 *	
 *	@author 	Tim Benniks <tim@timbenniks.com>
 * 	@copyright  2009 timbenniks.com
-*	@version    $Id: zp.blockminifier.js 12 2009-04-15 12:24:18Z timbenniks $
+*	@version    $Id: z.blockminifier.js 12 2009-04-15 12:24:18Z timbenniks $
 **/
 $.widget("ui.blockminifier", 
 {

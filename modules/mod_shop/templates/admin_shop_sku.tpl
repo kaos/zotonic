@@ -6,7 +6,7 @@
 	<div id="content" class="zp-100">
 		<div class="block clearfix">
 
-		<h2>Zophrenic stock keeping units overview</h2>
+		<h2>Zotonic stock keeping units overview</h2>
 
 		{% with m.search.paged[{shop_sku_list text=q.qs page=q.page}] as result %}
 

@@ -1,7 +1,7 @@
 %% @author Marc Worrell <marc@worrell.nl>
 %% @copyright 2009 Marc Worrell
 %%
-%% @package Zophrenic - i18n
+%% @package Zotonic - i18n
 %% @doc Translate english sentences into other languages
 %% @seealso GNU gettext
 

@@ -1,5 +1,5 @@
 /**
-*	zp.formreplace()
+*	z.formreplace()
 *	This function is used to unlink data that has been stored using triplets.
 *	e.g. object is connected to subject with a predicate.
 *	This function removes the predicate
@@ -26,7 +26,7 @@
 *	
 *	@author 	Tim Benniks <tim@timbenniks.com>
 * 	@copyright  2009 timbenniks.com
-*	@version    $Id: zp.formreplace.js 12 2009-06-01 22:57:18Z timbenniks $
+*	@version    $Id: z.formreplace.js 12 2009-06-01 22:57:18Z timbenniks $
 **/
 $.widget("ui.fieldreplace", 
 {

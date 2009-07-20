@@ -1,6 +1,6 @@
 {% extends "admin_base.tpl" %}
 
-{% block title %} admin categories manager {% endblock %}
+{% block title %} Categories Manager {% endblock %}
 {% block js_extra %}
 	<script type="text/javascript">
 		$(function()
@@ -41,7 +41,7 @@
 	<div id="content" class="zp-100">
 		<div class="block clearfix">
 
-		<h2>Zophrenic categories manager</h2>
+		<h2>Zotonic Categories Manager</h2>
 		
 		<div class="finder-wrapper clearfix">
 			<ul class="finder-columns">

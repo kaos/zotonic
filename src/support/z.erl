@@ -38,7 +38,7 @@ flush() ->
     z_dispatcher:reload(C),
     n({module_ready}, C).
 
-%% @doc Full restart of Zophrenic
+%% @doc Full restart of Zotonic
 restart() ->
     zotonic:stop(),
     zotonic:start().

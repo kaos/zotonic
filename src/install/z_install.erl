@@ -2,7 +2,7 @@
 %% @copyright 2009 Marc Worrell
 %% @date 2009-04-07
 %%
-%% @doc Install Zophrenic, loads the datamodel into the database
+%% @doc Install Zotonic, loads the datamodel into the database
 %% Assumes the database has already been created (which normally needs superuser permissions anyway)
 %%
 %% CREATE DATABASE zotonic WITH OWNER = zotonic ENCODING = 'UTF8';

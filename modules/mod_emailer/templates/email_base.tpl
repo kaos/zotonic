@@ -1,6 +1,6 @@
 <html>
 	<head>
-		<title>{% block title %}A mail message from Zophrenic{% endblock %}</title>
+		<title>{% block title %}A mail message from Zotonic{% endblock %}</title>
 	</head>
 
 	<body>
@@ -12,7 +12,7 @@
 			overrule the <em>body</em> block.
 		</p>
 		
-		<p>Kind Regards, Zophrenic.</p>
+		<p>Kind Regards, Zotonic.</p>
 		
 		{% endblock %}
 	</body>

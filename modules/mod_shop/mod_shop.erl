@@ -2,7 +2,7 @@
 %% @copyright 2009 Marc Worrell
 %% @date 2009-06-08
 %%
-%% @doc A complete shop in Zophrenic
+%% @doc A complete shop in Zotonic
 
 -module(mod_shop).
 -author("Marc Worrell <marc@worrell.nl>").

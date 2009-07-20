@@ -6,7 +6,7 @@
 	<div id="content" class="zp-100">
 		<div class="block clearfix">
 
-		<h2>Zophrenic User Overview</h2>
+		<h2>Zotonic User Overview</h2>
 		
 		<p>Every page/person can be made into an user on the edit page.  The difference between an user and a normal page is only
 			that the former has logon credentials attached to its page record.</p>

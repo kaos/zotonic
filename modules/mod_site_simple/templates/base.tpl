@@ -6,7 +6,7 @@
 	<meta http-equiv="Content-type" content="text/html; charset=utf-8" />
 	<meta name="keywords" content="{{ m.rsc[id].seo_keywords }}" />
 	<meta name="description" content="{{ m.rsc[id].seo_desc }}" />
-	<meta name="author" content="Zophrenic &copy; 2009" />
+	<meta name="author" content="Zotonic &copy; 2009" />
 	<meta name="robots" content="index,follow" />
 
 	<style type="text/css">

@@ -24,7 +24,7 @@
 *	
 *	@author 	Tim Benniks <tim@timbenniks.com>
 * 	@copyright  2009 timbenniks.com
-*	@version    $Id: zp.dialog.js 1 2009-01-24 12:24:18Z timbenniks $
+*	@version    $Id: z.dialog.js 1 2009-01-24 12:24:18Z timbenniks $
 **/
 (function(jQuery)
 {

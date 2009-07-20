@@ -1,7 +1,7 @@
 %% @author Marc Worrell <marc@worrell.nl>
 %% @copyright 2009 Marc Worrell
 
-%% @doc Start/stop functions for Zophrenic
+%% @doc Start/stop functions for Zotonic
 
 -module(zotonic).
 -author('Marc Worrell <marc@worrell.nl>').

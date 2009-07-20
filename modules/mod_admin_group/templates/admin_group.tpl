@@ -7,7 +7,7 @@
 	<div id="content" class="zp-100">
 		<div class="block clearfix">
 
-			<h2>Zophrenic Groups</h2>
+			<h2>Zotonic Groups</h2>
 
 			<p>
 				All pages belong to a group. Users that are member of a group can edit pages belonging to that group.

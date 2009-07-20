@@ -6,7 +6,7 @@
 	<div id="content" class="zp-100">
 		<div class="block clearfix">
 
-		<h2>Zophrenic Order Overview</h2>
+		<h2>Zotonic Order Overview</h2>
 
 		{% with m.search.paged[{shop_order_list page=q.page}] as result %}
 

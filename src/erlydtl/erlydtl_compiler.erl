@@ -32,7 +32,7 @@
 %%% @since 2007-12-16 by Roberto Saccon, Evan Miller
 %%%
 %%%-------------------------------------------------------------------
-%%% Adapted and expanded for Zophrenic by Marc Worrell <marc@worrell.nl>
+%%% Adapted and expanded for Zotonic by Marc Worrell <marc@worrell.nl>
 %%%-------------------------------------------------------------------
 
 -module(erlydtl_compiler).
