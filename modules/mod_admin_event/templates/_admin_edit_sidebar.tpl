@@ -15,7 +15,14 @@
 			{% for event_id in r.s.performer %}
 				<div class="rsc-edge">
 					<span class="clearfix">
-						<span class="unlink-item"><a href="{% url admin_edit_rsc id=event_id %}">{{ m.rsc[event_id].title|default:"untitled event" }}</a></span>
+						<span class="unlink-item">
+							<a href="{% url admin_edit_rsc id=event_id %}">
+								{{ m.rsc[event_id].title|default:"untitled event" }}
+								{% if m.rsc[event_id].date_start %}
+									/ {{ m.rsc[event_id].date_start|date:"b j, H:i" }}
+								{% endif %}
+							</a>
+						</span>
 					</span>
 				</div>
 			{% empty %}
