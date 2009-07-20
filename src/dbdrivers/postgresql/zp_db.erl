@@ -4,7 +4,7 @@
 %%
 %% @doc Interface to database, uses database definition from Context
 
--module(zp_db).
+-module(z_db).
 -author("Marc Worrell <marc@worrell.nl").
 
 %% interface functions
@@ -40,7 +40,7 @@
     prepare_cols/2
 ]).
 
--include_lib("zophrenic.hrl").
+-include_lib("zotonic.hrl").
 
 
 %% @doc Perform a function inside a transaction, do a rollback on exceptions
@@ -108,7 +108,7 @@ assoc_props_row(Sql, Parameters, Context) ->
 
 get_parameter(Parameter, Context) ->
     C = get_connection(Context),
-    {ok, Result} = pgsql:get_parameter(C, zp_convert:to_binary(Parameter)),
+    {ok, Result} = pgsql:get_parameter(C, z_convert:to_binary(Parameter)),
     return_connection(C, Context),
     Result.
     
@@ -305,7 +305,7 @@ cleanup_props(P) ->
 
     to_binary_string([]) -> [];
     to_binary_string(L) when is_list(L) ->
-        case zp_string:is_string(L) of
+        case z_string:is_string(L) of
             true -> list_to_binary(L);
             false -> L
         end;
@@ -339,7 +339,7 @@ split_props(Props, Cols) ->
     {CProps, PProps} = lists:partition(fun ({P,_V}) -> proplists:is_defined(P, Cols) end, Props),
     case PProps of
         [] -> ok;
-        _  -> zp_utils:assert(proplists:is_defined(props, Cols), {unknown_column, PProps})
+        _  -> z_utils:assert(proplists:is_defined(props, Cols), {unknown_column, PProps})
     end,
     {CProps, PProps}.
 
@@ -350,14 +350,14 @@ columns(Table, Context) when is_atom(Table) ->
     columns(atom_to_list(Table), Context);
 columns(Table, Context) ->
     Db = Context#context.host,
-    case zp_depcache:get({columns, Db, Table}) of
+    case z_depcache:get({columns, Db, Table}) of
         {ok, Cols} -> 
             Cols;
         _ ->
             C = get_connection(Context),
             Cols = pgsql:columns(C, Table),
             return_connection(C, Context),
-            zp_depcache:set({columns, Db, Table}, Cols, ?YEAR, [{database, Db}]),
+            z_depcache:set({columns, Db, Table}, Cols, ?YEAR, [{database, Db}]),
             Cols
     end.
 

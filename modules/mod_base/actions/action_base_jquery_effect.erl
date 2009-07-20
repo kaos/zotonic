@@ -4,7 +4,7 @@
 %% Original code copyright (c) 2008-2009 Rusty Klophaus
 
 -module(action_base_jquery_effect).
--include("zophrenic.hrl").
+-include("zotonic.hrl").
 -export([render_action/4]).
 
 render_action(_TriggerId, TargetId, Args, Context) ->
@@ -54,7 +54,7 @@ to_js(Options) ->
         	false ->
         		io_lib:format("~s: false", [Key]);
 			V ->
-				io_lib:format("~s: '~s'", [Key, zp_utils:js_escape(V)])
+				io_lib:format("~s: '~s'", [Key, z_utils:js_escape(V)])
 		end
 	end,
 	Options1 = [F(X) || X <- Options],

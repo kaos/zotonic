@@ -10,7 +10,7 @@
 -include_lib("resource_html.hrl").
 
 html(Context) ->
-    CatId = case zp_context:get_q("qcat", Context) of
+    CatId = case z_context:get_q("qcat", Context) of
         undefined -> undefined;
         Cat ->
             case m_category:name_to_id(Cat, Context) of
@@ -18,7 +18,7 @@ html(Context) ->
                 _ -> undefined
             end
     end,
-    BrandId = case zp_context:get_q("qbrand", Context) of
+    BrandId = case z_context:get_q("qbrand", Context) of
         undefined -> undefined;
         Brand ->
             case m_rsc:name_to_id(Brand, Context) of
@@ -26,9 +26,9 @@ html(Context) ->
                 _ -> undefined
             end
     end,
-	Qs       = zp_context:get_q("qs", Context),
-	Page     = try list_to_integer(zp_context:get_q("page", Context, "1")) catch _:_ -> 1 end,
-    AllProds = zp_search:search({fulltext_catbrand, [{cat,product},{text,Qs}]}, {1,1000}, Context),
+	Qs       = z_context:get_q("qs", Context),
+	Page     = try list_to_integer(z_context:get_q("page", Context, "1")) catch _:_ -> 1 end,
+    AllProds = z_search:search({fulltext_catbrand, [{cat,product},{text,Qs}]}, {1,1000}, Context),
     Total    = length(AllProds#search_result.result),
     
     {Cats, Brands} = count_all(AllProds#search_result.result),
@@ -37,9 +37,9 @@ html(Context) ->
 
     Result = case {CatId, BrandId} of
         {undefined, undefined} ->
-            zp_search:pager(AllProds, Page, Context);
+            z_search:pager(AllProds, Page, Context);
         _ ->
-            zp_search:search_pager({fulltext_catbrand_filter, [{brand,BrandId},{cat,CatId},{text,Qs}]}, Page, Context)
+            z_search:search_pager({fulltext_catbrand_filter, [{brand,BrandId},{cat,CatId},{text,Qs}]}, Page, Context)
     end,
     
     Vars   = [
@@ -52,8 +52,8 @@ html(Context) ->
         {brand_count, BrandList},
         {cat_count, CatCounts}
     ],
-    Html = zp_template:render("search.tpl", Vars, Context),
-	zp_context:output(Html, Context).
+    Html = z_template:render("search.tpl", Vars, Context),
+	z_context:output(Html, Context).
 	
 
 count_all(List) ->

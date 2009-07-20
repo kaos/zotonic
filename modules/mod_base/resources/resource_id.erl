@@ -3,7 +3,7 @@
 %% @date 2009-04-28
 %%
 %% @doc Redirect to resources depening on the content type requested.
-%% @todo Split the redirect function to zp_context and check for injection in the host header
+%% @todo Split the redirect function to z_context and check for injection in the host header
 
 -module(resource_id).
 
@@ -18,21 +18,21 @@
 ]).
 
 -include_lib("webmachine_resource.hrl").
--include_lib("zophrenic.hrl").
+-include_lib("zotonic.hrl").
 
 init([]) -> {ok, []}.
 
 resource_exists(ReqData, _Context) ->
-    Context = zp_context:new(ReqData, ?MODULE),
-    ContextQs = zp_context:ensure_qs(Context),
-    Id = zp_context:get_q("id", ContextQs),
+    Context = z_context:new(ReqData, ?MODULE),
+    ContextQs = z_context:ensure_qs(Context),
+    Id = z_context:get_q("id", ContextQs),
     ?WM_REPLY(m_rsc:exists(Id, ContextQs), ContextQs).
 
 content_types_provided(ReqData, Context) ->
    {[{"text/html", to_html}], ReqData, Context}.
  
 to_html(ReqData, Context) ->
-    Id       = zp_context:get_q("id", Context),
+    Id       = z_context:get_q("id", Context),
     Location = m_rsc:p(Id, page_url, Context),
     Url = "http://" ++ wrq:get_req_header("host", ReqData) ++ Location,
     ReqData1 = wrq:set_resp_header("Location", Url, ReqData),

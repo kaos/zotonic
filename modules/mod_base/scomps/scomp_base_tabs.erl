@@ -9,7 +9,7 @@
 
 -export([init/1, varies/2, code_change/3, terminate/1, render/4]).
 
--include("zophrenic.hrl").
+-include("zotonic.hrl").
 
 init(_Args) -> {ok, []}.
 varies(_Params, _Context) -> undefined.
@@ -18,6 +18,6 @@ terminate(_Reason) -> ok.
 
 render(Params, _Vars, Context, _State) ->
     Id = proplists:get_value(id, Params),
-    Script = [ "$('#", zp_convert:to_list(Id), "').tabs();" ],
-    {ok, zp_render:wire({script, [{script, Script}]}, Context)}.
+    Script = [ "$('#", z_convert:to_list(Id), "').tabs();" ],
+    {ok, z_render:wire({script, [{script, Script}]}, Context)}.
 

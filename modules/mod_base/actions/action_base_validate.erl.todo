@@ -4,7 +4,7 @@
 %% Original code copyright (c) 2008-2009 Rusty Klophaus
 
 -module(action_base_validate).
--include("zophrenic.hrl").
+-include("zotonic.hrl").
 -export([render_action/4]).
 
 render_action(TriggerId, TargetId, Args, Context) -> 
@@ -23,7 +23,7 @@ render_action(TriggerId, TargetId, Args, Context) ->
   	                    _        -> <<"false">>
   	                  end,
     
-	ValidMessage    = zp_utils:js_escape(SuccessText),
+	ValidMessage    = z_utils:js_escape(SuccessText),
 	InsertAfterNode = case AttachTo of
                     		undefined -> <<>>;
                     		Node      -> [<<", insertAfterWhatNode : obj(\"">>,Node,<<"\")">>]
@@ -31,13 +31,13 @@ render_action(TriggerId, TargetId, Args, Context) ->
     
     %% @todo Replace the 'me' with the target id? --> check the semantics of the validators
 	ConstructorJS   = io_lib:format("var v = obj('me').validator = new LiveValidation(obj('me'), { validMessage: \"~s\", onlyOnBlur: ~s, onlyOnSubmit: ~s ~s});", 
-	                                [zp_utils:js_escape(ValidMessage), OnlyOnBlur, OnlyOnSubmit, InsertAfterNode]),
+	                                [z_utils:js_escape(ValidMessage), OnlyOnBlur, OnlyOnSubmit, InsertAfterNode]),
 	TriggerJS       = [<<"v.trigger = $('#">>,TriggerId,<<"');">>],
 	
     %% @todo Replace this with our format of the validators
 	% Context the validation javascript...
 	F = fun(Validation, {Acc,R}) ->
-			Base        = zp_utils:get_validatorbase(Validation),
+			Base        = z_utils:get_validatorbase(Validation),
 			TypeModule  = Base#validatorbase.module,
 			{Script,R1} = TypeModule:render_validator(TriggerId, TargetId, Validation, R),
 			{[Script|Acc], R1}

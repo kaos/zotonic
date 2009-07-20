@@ -23,7 +23,7 @@
     observe/2, to_tsquery/2
 ]).
 
--include("zophrenic.hrl").
+-include("zotonic.hrl").
 
 -record(state, {context}).
 
@@ -53,8 +53,8 @@ start_link(Args) when is_list(Args) ->
 init(Args) ->
     process_flag(trap_exit, true),
     {context, Context} = proplists:lookup(context, Args),
-    zp_notifier:observe(search_query, {?MODULE, observe}, Context),
-    {ok, #state{context=zp_context:new_for_host(Context)}}.
+    z_notifier:observe(search_query, {?MODULE, observe}, Context),
+    {ok, #state{context=z_context:new_for_host(Context)}}.
 
 %% @spec handle_call(Request, From, State) -> {reply, Reply, State} |
 %%                                      {reply, Reply, State, Timeout} |
@@ -90,7 +90,7 @@ handle_info(_Info, State) ->
 %% cleaning up. When it returns, the gen_server terminates with Reason.
 %% The return value is ignored.
 terminate(_Reason, State) ->
-    zp_notifier:detach(search_query, {?MODULE, observe}, State#state.context),
+    z_notifier:detach(search_query, {?MODULE, observe}, State#state.context),
     ok.
 
 %% @spec code_change(OldVsn, State, Extra) -> {ok, NewState}
@@ -173,7 +173,7 @@ search({autocomplete, [{cat,Cat}, {text,QueryText}]}, _OffsetLimit, Context) ->
                 from="rsc r, to_tsquery($2, $1) query",
                 where=" query @@ pivot_tsv",
                 order="rank desc",
-                args=[TsQuery, zp_pivot_rsc:pg_lang(Context#context.language)],
+                args=[TsQuery, z_pivot_rsc:pg_lang(Context#context.language)],
                 cats=[{"r", Cat}],
                 tables=[{rsc,"r"}]
             }
@@ -198,7 +198,7 @@ search({fulltext, [{text,QueryText}]}, _OffsetLimit, Context) ->
                 from="rsc r, plainto_tsquery($2, $1) query",
                 where=" query @@ pivot_tsv",
                 order="rank desc",
-                args=[QueryText, zp_pivot_rsc:pg_lang(Context#context.language)],
+                args=[QueryText, z_pivot_rsc:pg_lang(Context#context.language)],
                 tables=[{rsc,"r"}]
             }
     end;
@@ -219,7 +219,7 @@ search({fulltext, [{cat,Cat},{text,QueryText}]}, _OffsetLimit, Context) ->
                 from="rsc r, plainto_tsquery($2, $1) query",
                 where=" query @@ pivot_tsv",
                 order="rank desc",
-                args=[QueryText, zp_pivot_rsc:pg_lang(Context#context.language)],
+                args=[QueryText, z_pivot_rsc:pg_lang(Context#context.language)],
                 cats=[{"r", Cat}],
                 tables=[{rsc,"r"}]
             }
@@ -281,11 +281,11 @@ to_tsquery(undefined, _Context) ->
 to_tsquery(Text, Context) when is_binary(Text) ->
     to_tsquery(binary_to_list(Text), Context);
 to_tsquery(Text, Context) ->
-    [{TsQuery, Version}] = zp_db:q("
+    [{TsQuery, Version}] = z_db:q("
         select plainto_tsquery($2, $1) , version()
-    ", [Text ++ "xcvvcx", zp_pivot_rsc:pg_lang(zp_context:language(Context))], Context),
+    ", [Text ++ "xcvvcx", z_pivot_rsc:pg_lang(z_context:language(Context))], Context),
     % Version is something like "PostgreSQL 8.3.5 on i386-apple-darwin8.11.1, compiled by ..."
-    case zp_convert:to_list(TsQuery) of
+    case z_convert:to_list(TsQuery) of
         [] -> 
             [];
         TsQ ->

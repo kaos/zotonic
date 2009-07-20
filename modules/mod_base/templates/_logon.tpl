@@ -1,4 +1,4 @@
-{% wire id=#logon type="submit" postback="logon" delegate="zp_auth" %}
+{% wire id=#logon type="submit" postback="logon" delegate="z_auth" %}
 <form id="{{ #logon }}" method="post" action="postback">
 	<fieldset>
 		<div class="form-item">

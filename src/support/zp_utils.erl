@@ -3,10 +3,10 @@
 %% 
 %% Based on wf_utils.erl which is Copyright (c) 2008-2009 Rusty Klophaus
 %%
-%% @doc Misc utility functions for zophrenic
+%% @doc Misc utility functions for zotonic
 
--module(zp_utils).
--include("zophrenic.hrl").
+-module(z_utils).
+-include("zotonic.hrl").
 
 -export ([
     now/0,
@@ -108,19 +108,19 @@ inner_decode(Data, Base) when is_list(Data) ->
 %%% CHECKSUM %%%
 
 checksum(Data) ->
-    Sign = zp_ids:sign_key_simple(),
-    zp_utils:hex_encode(erlang:md5([Sign,Data])).
+    Sign = z_ids:sign_key_simple(),
+    z_utils:hex_encode(erlang:md5([Sign,Data])).
 
 checksum_assert(Data, Checksum) ->
-    Sign = zp_ids:sign_key_simple(),
-    assert(list_to_binary(zp_utils:hex_decode(Checksum)) == erlang:md5([Sign,Data]), checksum_invalid).
+    Sign = z_ids:sign_key_simple(),
+    assert(list_to_binary(z_utils:hex_decode(Checksum)) == erlang:md5([Sign,Data]), checksum_invalid).
 
 %%% PICKLE / UNPICKLE %%%
 
 pickle(Data) ->
     BData = erlang:term_to_binary(Data),
-	Nonce = zp_ids:number(1 bsl 31),
-	Sign  = zp_ids:sign_key(),
+	Nonce = z_ids:number(1 bsl 31),
+	Sign  = z_ids:sign_key(),
 	SData = <<BData/binary, Nonce:32, Sign/binary>>,
 	<<C1:64,C2:64>> = erlang:md5(SData),
 	base64:encode(<<C1:64, C2:64, Nonce:32, BData/binary>>).
@@ -128,7 +128,7 @@ pickle(Data) ->
 depickle(Data) ->
     try
         <<C1:64, C2:64, Nonce:32, BData/binary>> = base64:decode(Data),
-    	Sign  = zp_ids:sign_key(),
+    	Sign  = z_ids:sign_key(),
     	SData = <<BData/binary, Nonce:32, Sign/binary>>,
     	<<C1:64, C2:64>> = erlang:md5(SData),
     	erlang:binary_to_term(BData)
@@ -363,13 +363,13 @@ group_proplists(_Prop, _PropValue, [], [], Result) ->
     lists:reverse(Result);
 group_proplists(Prop, PropValue, [], Acc, Result) ->
     lists:reverse(Acc),
-    group_proplists(Prop, PropValue, [], [], [{zp_convert:to_atom(PropValue),Acc}|Result]);
+    group_proplists(Prop, PropValue, [], [], [{z_convert:to_atom(PropValue),Acc}|Result]);
 group_proplists(Prop, PropValue, [C|Rest], Acc, Result) ->
     case proplists:get_value(Prop, C) of
         PropValue -> 
             group_proplists(Prop, PropValue, Rest, [C|Acc], Result);
         Other ->
-            group_proplists(Prop, Other, Rest, [C], [{zp_convert:to_atom(PropValue),Acc}|Result])
+            group_proplists(Prop, Other, Rest, [C], [{z_convert:to_atom(PropValue),Acc}|Result])
     end.
 
 
@@ -384,7 +384,7 @@ index_proplist(Prop, List) ->
 index_proplist(_Prop, [], Acc) ->
     lists:reverse(Acc);
 index_proplist(Prop, [L|Rest], Acc) ->
-    index_proplist(Prop, Rest, [{zp_convert:to_atom(proplists:get_value(Prop,L)),L}|Acc]).
+    index_proplist(Prop, Rest, [{z_convert:to_atom(proplists:get_value(Prop,L)),L}|Acc]).
 
 
 %% @doc Simple randomize of a list. Not good quality, but good enough for us

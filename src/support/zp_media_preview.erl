@@ -8,7 +8,7 @@
 %%
 %% @todo Select PNG for small resulting images with lossless source image
 
--module(zp_media_preview).
+-module(z_media_preview).
 -author("Marc Worrell <marc@worrell.nl").
 
 %% interface functions
@@ -26,7 +26,7 @@
 -define(PIX100, 1000).
 -define(PIX50,  250000).
 
--include_lib("zophrenic.hrl").
+-include_lib("zotonic.hrl").
 
 
 %% @spec convert(InFile, OutFile, Filters) -> ok | {error, Reason}
@@ -34,16 +34,16 @@
 %% @todo Check if the conversion has been done
 %% @todo Check if the target /= source
 convert(InFile, OutFile, Filters, Context) ->
-    case zp_media_identify:identify(InFile, Context) of
+    case z_media_identify:identify(InFile, Context) of
         {ok, FileProps} ->
             {mime, Mime} = proplists:lookup(mime, FileProps),
             case can_generate_preview(Mime) of
                 true ->
                     {EndWidth, EndHeight, CmdArgs} = cmd_args(FileProps, Filters),
-                    zp_utils:assert(EndWidth  < ?MAX_WIDTH, image_too_wide),
-                    zp_utils:assert(EndHeight < ?MAX_HEIGHT, image_too_high),
-                    Args1   = lists:flatten(zp_utils:combine(32, CmdArgs)),
-                    Cmd     = ["convert \"", zp_utils:os_escape(InFile), "[0]\" ", Args1, " \"", zp_utils:os_escape(OutFile), "\""],
+                    z_utils:assert(EndWidth  < ?MAX_WIDTH, image_too_wide),
+                    z_utils:assert(EndHeight < ?MAX_HEIGHT, image_too_high),
+                    Args1   = lists:flatten(z_utils:combine(32, CmdArgs)),
+                    Cmd     = ["convert \"", z_utils:os_escape(InFile), "[0]\" ", Args1, " \"", z_utils:os_escape(OutFile), "\""],
                     file:delete(OutFile),
                     ok = filelib:ensure_dir(OutFile),
                     Result  = os:cmd(lists:flatten(Cmd)),
@@ -68,7 +68,7 @@ convert(InFile, OutFile, Filters, Context) ->
 size([{_Prop, _Value}|_] = Props, Filters, _Context) ->
     size_props(Props, Filters);
 size(InFile, Filters, Context) ->
-    case zp_media_identify:identify(InFile, Context) of
+    case z_media_identify:identify(InFile, Context) of
         {ok, FileProps} ->
             size_props(FileProps, Filters);
         {error, Reason} ->
@@ -171,7 +171,7 @@ filter2arg({correct_orientation, Orientation}, Width, Height) ->
         _ -> {Width, Height, []}
     end;
 filter2arg({background, Color}, Width, Height) ->
-    {Width, Height, ["-background ", $", zp_utils:os_escape(Color), $"]};
+    {Width, Height, ["-background ", $", z_utils:os_escape(Color), $"]};
 filter2arg({width, _}, Width, Height) ->
     {Width, Height, []};
 filter2arg({height, _}, Width, Height) ->
@@ -337,7 +337,7 @@ test() ->
     Props = [{width,100}, {height,66}, {mime,"image/jpeg"}, {orientation,1}],
     Filters = [{crop,center}, {width,80}, {height,80}],
     {_W,_H,Args} = cmd_args(Props, Filters),
-    CmdArgs = lists:flatten(zp_utils:combine(32, Args)),
+    CmdArgs = lists:flatten(z_utils:combine(32, Args)),
     "  -gravity Center -extent 122x80 -thumbnail 122x80\\! -gravity NorthWest -crop 80x80+21+0 +repage   -unsharp 0.3x0.7  -quality 100" = CmdArgs,
     ok.
 

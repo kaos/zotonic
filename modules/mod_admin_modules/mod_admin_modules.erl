@@ -27,16 +27,16 @@
 %% @doc Fetch a list of all modules available, including their description as a propertylist. The module list is sorted
 %% on the name of the module.
 all(Context) ->
-    Active  = zp_module_sup:active(Context),
-    Modules = zp_module_sup:scan(Context),
-    Descrs  = [ {zp_module_sup:prio(M), M, [{active, lists:member(M, Active)}, {path, Path} | descr(M)]} || {M, Path} <- Modules ],
+    Active  = z_module_sup:active(Context),
+    Modules = z_module_sup:scan(Context),
+    Descrs  = [ {z_module_sup:prio(M), M, [{active, lists:member(M, Active)}, {path, Path} | descr(M)]} || {M, Path} <- Modules ],
     lists:sort(Descrs).
 
 
 %% @spec descr(ModuleName) -> proplist()
 %% @doc Return a property list with the title and other attributes of the module.
 descr(Module) ->
-    Descr = case zp_module_sup:module_exists(Module) of
+    Descr = case z_module_sup:module_exists(Module) of
         true ->
             try
                 erlang:get_module_info(Module, attributes)

@@ -6,7 +6,7 @@
 %% 1. An user uploads/moves a file to the dropbox
 %% 2. Dropbox handler sees the file, moves it so a safe place, and notifies the file handler of it existance.
 
--module(zp_dropbox).
+-module(z_dropbox).
 -author("Marc Worrell <marc@worrell.nl>").
 -behaviour(gen_server).
 
@@ -23,7 +23,7 @@
 %% internal
 -export([]).
 
--include_lib("zophrenic.hrl").
+-include_lib("zotonic.hrl").
 
 -record(state, {dropbox_dir, processing_dir, unhandled_dir, min_age, max_age}).
 
@@ -53,7 +53,7 @@ scan() ->
 %%                     {stop, Reason}
 %% @doc Initiates the server.  Options are: dropbox_dir, processing_dir, unhandled_dir, interval, max_age and min_age
 init(Args) ->
-    FilesDir = filename:join([code:lib_dir(zophrenic, priv), "sites", "default", "files"]),
+    FilesDir = filename:join([code:lib_dir(zotonic, priv), "sites", "default", "files"]),
     DropBox  = string:strip(proplists:get_value(dropbox_dir,    Args, filename:join([FilesDir, "dropbox"])),    right, $/), 
     ProcDir  = string:strip(proplists:get_value(processing_dir, Args, filename:join([FilesDir, "processing"])), right, $/), 
     UnDir    = string:strip(proplists:get_value(unhandled_dir,  Args, filename:join([FilesDir, "unhandled"])),  right, $/), 
@@ -141,7 +141,7 @@ do_scan(State) ->
                                 end,
                                 ToProcess,
                                 Moved),
-    lists:foreach(fun(F) -> zp_notifier:notify({dropbox_file, F}) end, ToProcess1).
+    lists:foreach(fun(F) -> z_notifier:notify({dropbox_file, F}) end, ToProcess1).
 
 
 %% @doc Scan a directory, return list of files not changed in the last 10 seconds.
@@ -216,8 +216,8 @@ rel_file(BaseDir, File) ->
     end.
 
 test() ->
-    DropBox = filename:join([code:lib_dir(zophrenic, priv), "sites", "default", "dropbox"]),
-    _ProcDir = filename:join([code:lib_dir(zophrenic, priv), "sites", "default", "processing"]),
+    DropBox = filename:join([code:lib_dir(zotonic, priv), "sites", "default", "dropbox"]),
+    _ProcDir = filename:join([code:lib_dir(zotonic, priv), "sites", "default", "processing"]),
     Files = scan_directory(DropBox),
     Files.
 %    lists:map(fun(F) -> move_file(DropBox, F, ProcDir) end, Files).

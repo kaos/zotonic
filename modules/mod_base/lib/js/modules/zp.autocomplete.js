@@ -1,6 +1,6 @@
 /**
 *	zp.autocomplete()
-*	This function is used to autocomplete anything in the zophrenic system
+*	This function is used to autocomplete anything in the zotonic system
 *		
 *   Copyright (c) 2009 Tim Benniks
 *
@@ -73,7 +73,7 @@ $.ui.autocomplete.defaults = {
 	afterChars: 3
 }
 
-var zp_autoCompleteAfterPostback = function(obj, suggestions, data)
+var z_autoCompleteAfterPostback = function(obj, suggestions, data)
 {
 	if(data)
 	{

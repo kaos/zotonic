@@ -13,12 +13,12 @@
     event/2
 ]).
 
--include("zophrenic.hrl").
+-include("zotonic.hrl").
 
 render_action(TriggerId, TargetId, Args, Context) ->
     Id = proplists:get_value(id, Args),
     Postback = {group_member_add_dialog, Id},
-	{PostbackMsgJS, _PickledPostback} = zp_render:make_postback(Postback, click, TriggerId, TargetId, ?MODULE, Context),
+	{PostbackMsgJS, _PickledPostback} = z_render:make_postback(Postback, click, TriggerId, TargetId, ?MODULE, Context),
 	{PostbackMsgJS, Context}.
 
 
@@ -28,27 +28,27 @@ event({postback, {group_member_add_dialog, Id}, _TriggerId, _TargetId}, Context)
     Vars = [
         {id, Id}
     ],
-    zp_render:dialog("Add member to group", "_action_dialog_group_member_add.tpl", Vars, Context);
+    z_render:dialog("Add member to group", "_action_dialog_group_member_add.tpl", Vars, Context);
 
 
 %% @doc Add a member to a group.  The roles are in the request (they come from a form)
 %% @spec event(Event, Context1) -> Context2
 event({submit, group_member_add, _TriggerId, _TargetId}, Context) ->
-    case zp_acl:has_role(admin, Context) of
+    case z_acl:has_role(admin, Context) of
         true ->
-            GroupId  = zp_convert:to_integer(zp_context:get_q("id", Context)),
-            MemberId = zp_convert:to_integer(zp_context:get_q("typeselect_id", Context)),
-            case zp_context:get_q("member", Context) of
+            GroupId  = z_convert:to_integer(z_context:get_q("id", Context)),
+            MemberId = z_convert:to_integer(z_context:get_q("typeselect_id", Context)),
+            case z_context:get_q("member", Context) of
                 "leader"   -> m_group:add_leader(GroupId, MemberId, Context);
                 "observer" -> m_group:add_observer(GroupId, MemberId, Context);
                 "member"   -> m_group:add_member(GroupId, MemberId, Context)
             end,
 
-            zp_render:wire([
+            z_render:wire([
                     {growl, [{text, ["Set member status of ",?TR(m_rsc:p(MemberId, title, Context), Context)]}]},
                     {dialog_close, []},
                     {reload, []}], Context);
 
         false ->
-            zp_render:growl_error("Only administrators can delete groups.", Context)
+            z_render:growl_error("Only administrators can delete groups.", Context)
     end.

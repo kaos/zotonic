@@ -4,15 +4,15 @@
 %% @doc Validator for checking if an input value matches a regular expression
 
 -module(validator_base_format).
--include("zophrenic.hrl").
+-include("zotonic.hrl").
 -export([render_validator/5, validate/5]).
 
 render_validator(format, TriggerId, _TargetId, Args, Context)  ->
     Pattern  = proplists:get_value(pattern, Args),
     Negate   = proplists:get_value(negate, Args, false),
-	JsObject = zp_utils:js_object(Args),
-	Script   = [<<"zp_add_validator(\"">>,TriggerId,<<"\", \"format\", ">>, JsObject, <<");\n">>],
-	{[zp_utils:is_true(Negate),Pattern], Script, Context}.
+	JsObject = z_utils:js_object(Args),
+	Script   = [<<"z_add_validator(\"">>,TriggerId,<<"\", \"format\", ">>, JsObject, <<");\n">>],
+	{[z_utils:is_true(Negate),Pattern], Script, Context}.
 
 
 %% @spec validate(Type, TriggerId, Value, Args, Context) -> {ok,AcceptableValues} | {error,Id,Error}

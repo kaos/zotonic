@@ -19,45 +19,45 @@ html(Context) ->
         {shop_cart_count, Count},
         {shop_cart_backorder, Backorder}
     ],
-    Html = zp_template:render("checkout.tpl", Vars, Context),
-    zp_context:output(Html, Context).
+    Html = z_template:render("checkout.tpl", Vars, Context),
+    z_context:output(Html, Context).
     
 
 %% @doc Handle the checkout event.  Start the payment processing.
 event({submit,{payment, [ {total,TotalAmount} ]}, _TriggerId, _TargetId}, Context) ->
     % Fetch all parameters, they are validated so we know they are present
 
-    DeliveryAttn     = zp_context:get_q("client-delivery-attn", Context),
-    DeliveryStreet   = zp_context:get_q_validated("client-delivery-address", Context),
-    DeliveryPostcode = zp_context:get_q_validated("client-delivery-postcode", Context),
-    DeliveryCity     = zp_context:get_q_validated("client-delivery-city", Context),
-    DeliveryCountry  = zp_context:get_q_validated("client-delivery-country", Context),
+    DeliveryAttn     = z_context:get_q("client-delivery-attn", Context),
+    DeliveryStreet   = z_context:get_q_validated("client-delivery-address", Context),
+    DeliveryPostcode = z_context:get_q_validated("client-delivery-postcode", Context),
+    DeliveryCity     = z_context:get_q_validated("client-delivery-city", Context),
+    DeliveryCountry  = z_context:get_q_validated("client-delivery-country", Context),
 
-    BillingAddress = string:strip(zp_context:get_q("client-billing-address", Context)),
+    BillingAddress = string:strip(z_context:get_q("client-billing-address", Context)),
     Attn = case BillingAddress of
         [] -> DeliveryAttn;
-        _ -> zp_context:get_q("client-billing-attn", Context)
+        _ -> z_context:get_q("client-billing-attn", Context)
     end,
 
-    Street = case zp_context:get_q("client-billing-address", Context) of
+    Street = case z_context:get_q("client-billing-address", Context) of
         [] -> DeliveryStreet;
         Str -> Str
     end,
 
-    {City, Country} = case zp_context:get_q("client-billing-city", Context) of
+    {City, Country} = case z_context:get_q("client-billing-city", Context) of
         [] -> {DeliveryCity, DeliveryCountry};
-        Cty -> {Cty, zp_context:get_q("client-billing-country", Context)}
+        Cty -> {Cty, z_context:get_q("client-billing-country", Context)}
     end,
 
-    Postcode = case zp_context:get_q("client-billing-postcode", Context) of
+    Postcode = case z_context:get_q("client-billing-postcode", Context) of
         [] -> DeliveryPostcode;
         Pcd -> Pcd
     end,
 
     Parms = [
-        {lastname,  zp_context:get_q_validated("client-name", Context)},
-        {phone,     zp_context:get_q_validated("client-phone", Context)},
-        {email,     zp_context:get_q_validated("client-email", Context)},
+        {lastname,  z_context:get_q_validated("client-name", Context)},
+        {phone,     z_context:get_q_validated("client-phone", Context)},
+        {email,     z_context:get_q_validated("client-email", Context)},
         
         {attn,      Attn},
         {street,    Street},
@@ -65,16 +65,16 @@ event({submit,{payment, [ {total,TotalAmount} ]}, _TriggerId, _TargetId}, Contex
         {city,      City},
         {country,   Country},
 
-        {delivery_attn,      zp_context:get_q("client-delivery-attn", Context)},
-        {delivery_street,    zp_context:get_q_validated("client-delivery-address", Context)},
-        {delivery_postcode,  zp_context:get_q_validated("client-delivery-postcode", Context)},
-        {delivery_city,      zp_context:get_q_validated("client-delivery-city", Context)},
-        {delivery_country,   zp_context:get_q_validated("client-delivery-country", Context)},
+        {delivery_attn,      z_context:get_q("client-delivery-attn", Context)},
+        {delivery_street,    z_context:get_q_validated("client-delivery-address", Context)},
+        {delivery_postcode,  z_context:get_q_validated("client-delivery-postcode", Context)},
+        {delivery_city,      z_context:get_q_validated("client-delivery-city", Context)},
+        {delivery_country,   z_context:get_q_validated("client-delivery-country", Context)},
         
         {payment_method, "card"}
     ],
 
-    Parms1 = [ {K, zp_html:escape(V)} || {K, V} <- Parms ],
+    Parms1 = [ {K, z_html:escape(V)} || {K, V} <- Parms ],
     do_order(TotalAmount, Parms1, Context);
 
 event({postback, {proceed, Props}, _TriggerId, _TargetId}, Context) ->
@@ -92,7 +92,7 @@ do_order(TotalAmount, Parms, Context) ->
         {ok, OrderId, Context1} ->
             %% OK, redirect to the payment service provider
             RedirectUri = shop_adyen:payment_start(OrderId, Context1),
-            zp_render:wire({redirect, [{location, RedirectUri}]}, Context1);
+            z_render:wire({redirect, [{location, RedirectUri}]}, Context1);
 
         {new_total, NewTotal, Context1} ->
             %% Show dialog that the amount is changed, ask permission to go ahead
@@ -100,9 +100,9 @@ do_order(TotalAmount, Parms, Context) ->
                 {details, Parms},
                 {total_amount, NewTotal}
             ],
-            zp_render:dialog("Ander totaalbedrag", "_checkout_dialog_amount_changed.tpl", Vars, Context1);
+            z_render:dialog("Ander totaalbedrag", "_checkout_dialog_amount_changed.tpl", Vars, Context1);
 
         {error, _Reason, Context1} ->
             %% Something went wrong, tell the user and redirect back to the cart page
-            zp_render:dialog("Kon order niet plaatsen", "_checkout_dialog_error.tpl", [], Context1)
+            z_render:dialog("Kon order niet plaatsen", "_checkout_dialog_error.tpl", [], Context1)
     end.

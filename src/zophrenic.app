@@ -1,13 +1,13 @@
-{application, zophrenic,
- [{description, "zophrenic"},
+{application, zotonic,
+ [{description, "zotonic"},
   {vsn, "0.18"},
   {modules, [
-    zophrenic,
-    zophrenic_app,
-    zophrenic_sup,
-    zophrenic_deps
+    zotonic,
+    zotonic_app,
+    zotonic_sup,
+    zotonic_deps
   ]},
   {registered, []},
-  {mod, {zophrenic_app, []}},
+  {mod, {zotonic_app, []}},
   {env, []},
   {applications, [kernel, stdlib, crypto]}]}.

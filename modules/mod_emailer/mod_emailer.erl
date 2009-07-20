@@ -24,7 +24,7 @@
     send_render/5
 ]).
 
--include_lib("zophrenic.hrl").
+-include_lib("zotonic.hrl").
 -include_lib("esmtp/include/esmtp_mime.hrl").
 
 -define(SMTP_PORT_TLS, 587).
@@ -57,7 +57,7 @@ observe({email_render, To, HtmlTemplate, TextTemplate, Vars}, Context) ->
 
 %% @doc Send a simple text message to an email address
 send(To, Subject, Message, Context) ->
-    Context1 = zp_context:prune_for_scomp(?ACL_VIS_USER, Context),
+    Context1 = z_context:prune_for_scomp(?ACL_VIS_USER, Context),
     gen_server:cast(?MODULE, {send, To, Subject, Message, Context1}).
 
 
@@ -67,7 +67,7 @@ send_render(To, HtmlTemplate, Vars, Context) ->
 
 %% @doc Send a html and text message to an email address, render the message using two templates.
 send_render(To, HtmlTemplate, TextTemplate, Vars, Context) ->
-    Context1 = zp_context:prune_for_scomp(?ACL_VIS_USER, Context),
+    Context1 = z_context:prune_for_scomp(?ACL_VIS_USER, Context),
     gen_server:cast(?MODULE, {send_render, To, HtmlTemplate, TextTemplate, Vars, Context1}).
 
 
@@ -92,18 +92,18 @@ start_link(Args) when is_list(Args) ->
 init(Args) ->
     process_flag(trap_exit, true),
     {context, Context} = proplists:lookup(context, Args),
-    zp_notifier:observe(email,       {?MODULE, observe}, Context),
-    zp_notifier:observe(emai_render, {?MODULE, observe}, Context),
+    z_notifier:observe(email,       {?MODULE, observe}, Context),
+    z_notifier:observe(emai_render, {?MODULE, observe}, Context),
     timer:send_interval(60000, poll),
     {ok, #state{
         from     = m_config:get_value(?MODULE, from, ?EMAILER_FROM, Context),
         host     = m_config:get_value(?MODULE, host, ?EMAILER_HOST, Context),
-        port     = zp_convert:to_integer(m_config:get_value(?MODULE, port, 25, Context)),
-        ssl      = zp_convert:to_bool(m_config:get_value(?MODULE, ssl, false, Context)),
+        port     = z_convert:to_integer(m_config:get_value(?MODULE, port, 25, Context)),
+        ssl      = z_convert:to_bool(m_config:get_value(?MODULE, ssl, false, Context)),
         ehlo     = m_config:get_value(?MODULE, ehlo, ?EMAILER_EHLO, Context),
         username = m_config:get_value(?MODULE, username, Context),
         password = m_config:get_value(?MODULE, password, Context),
-        context  = zp_context:new_for_host(Context)
+        context  = z_context:new_for_host(Context)
     }}.
 
 
@@ -128,10 +128,10 @@ handle_cast({send, To, Subject, Message, Context}, State) ->
         {render, false},
         {subject, Subject},
         {message, Message},
-        {context, zp_context:pickle(Context)},
+        {context, z_context:pickle(Context)},
         {retry, 0}
     ],
-    {ok, Id} = zp_db:insert(emailq, Cols, Context),
+    {ok, Id} = z_db:insert(emailq, Cols, Context),
     send_queued([{id, Id}|Cols], State),
     {noreply, State};
 
@@ -142,10 +142,10 @@ handle_cast({send_render, To, HtmlTemplate, TextTemplate, Vars, Context}, State)
         {html_tpl, HtmlTemplate},
         {text_tpl, TextTemplate},
         {vars, Vars},
-        {context, zp_context:pickle(Context)},
+        {context, z_context:pickle(Context)},
         {retry, 0}
     ],
-    {ok, Id} = zp_db:insert(emailq, Cols, Context),
+    {ok, Id} = z_db:insert(emailq, Cols, Context),
     send_queued([{id, Id}|Cols], State),
     {noreply, State};
 
@@ -174,8 +174,8 @@ handle_info(_Info, State) ->
 %% cleaning up. When it returns, the gen_server terminates with Reason.
 %% The return value is ignored.
 terminate(_Reason, State) ->
-    zp_notifier:detach(email,       {?MODULE, observe}, State#state.context),
-    zp_notifier:detach(emai_render, {?MODULE, observe}, State#state.context),
+    z_notifier:detach(email,       {?MODULE, observe}, State#state.context),
+    z_notifier:detach(emai_render, {?MODULE, observe}, State#state.context),
     ok.
 
 %% @spec code_change(OldVsn, State, Extra) -> {ok, NewState}
@@ -191,9 +191,9 @@ code_change(_OldVsn, State, _Extra) ->
 
 poll_queued(Context, State) ->
     % Set all messages with too high retry count to 'failed'
-    zp_db:q("update emailq set status = 'fail' where status = 'new' and retry > $1", [?MAX_RETRY], Context),
+    z_db:q("update emailq set status = 'fail' where status = 'new' and retry > $1", [?MAX_RETRY], Context),
     % Fetch a batch of message to be retried
-    Ms = zp_db:assoc_props("select * from emailq where status = 'new' and retry_on < now() order by retry_on asc limit 10", Context),
+    Ms = z_db:assoc_props("select * from emailq where status = 'new' and retry_on < now() order by retry_on asc limit 10", Context),
     [ send_queued(M, State) || M <- Ms ].
 
 
@@ -201,7 +201,7 @@ send_queued(Cols, State) ->
     {id, Id} = proplists:lookup(id, Cols),
     {recipient, To} = proplists:lookup(recipient, Cols),
     {context, PickledContext} = proplists:lookup(context, Cols),
-    Context = zp_context:depickle(PickledContext),
+    Context = z_context:depickle(PickledContext),
     {retry, Retry} = proplists:lookup(retry, Cols),
     case proplists:get_value(render, Cols) of
         true ->
@@ -221,10 +221,10 @@ spawn_send(Id, Retry, To, Subject, Msg, Context, State) ->
     F = fun() ->
         mark_retry(Id, Retry, Context),
         MimeMsg = esmtp_mime:msg(
-                            zp_convert:to_list(To), 
+                            z_convert:to_list(To), 
                             State#state.from, 
-                            zp_convert:to_list(Subject), 
-                            zp_convert:to_list(Msg)),
+                            z_convert:to_list(Subject), 
+                            z_convert:to_list(Msg)),
         sendemail(MimeMsg, State),
         mark_sent(Id, Context)
     end,
@@ -235,22 +235,22 @@ spawn_send_html(Id, Retry, To, HtmlTemplate, TextTemplate, Vars, Context, State)
     F = fun() ->
         mark_retry(Id, Retry, Context),
         
-        HtmlOutput = zp_template:render(zp_convert:to_list(HtmlTemplate), Vars, Context),
+        HtmlOutput = z_template:render(z_convert:to_list(HtmlTemplate), Vars, Context),
         Html = binary_to_list(list_to_binary(HtmlOutput)),
         Text = case TextTemplate of
             undefined -> 
                 undefined;
             _ ->
-                TextOutput = zp_template:render(zp_convert:to_list(TextTemplate), Vars, Context),
+                TextOutput = z_template:render(z_convert:to_list(TextTemplate), Vars, Context),
                 binary_to_list(list_to_binary(TextOutput))
         end,
 
         % Fetch the subject from the title of the HTML part
         {match, [_, {Start,Len}|_]} = re:run(Html, "<title>(.*)</title>", [dotall, caseless]),
-        Subject = string:strip(zp_string:line(lists:sublist(Html, Start+1, Len))),
+        Subject = string:strip(z_string:line(lists:sublist(Html, Start+1, Len))),
 
         % Build the message and send it
-        MimeMsg = esmtp_mime:msg(zp_convert:to_list(To), State#state.from, Subject),
+        MimeMsg = esmtp_mime:msg(z_convert:to_list(To), State#state.from, Subject),
         MimeMsg2 = case Text of
             undefined -> MimeMsg;
             _ -> esmtp_mime:add_text_part(MimeMsg, Text)
@@ -263,11 +263,11 @@ spawn_send_html(Id, Retry, To, HtmlTemplate, TextTemplate, Vars, Context, State)
 
 
 mark_sent(Id, Context) ->
-    zp_db:q("update emailq set status = 'sent', sent = now() where id = $1", [Id], Context).
+    z_db:q("update emailq set status = 'sent', sent = now() where id = $1", [Id], Context).
 
 mark_retry(Id, Retry, Context) ->
     Period = period(Retry),
-    zp_db:q("update emailq set retry = retry+1, retry_on = now() + interval '"++integer_to_list(Period)++" minutes' where id = $1", [Id], Context).
+    z_db:q("update emailq set retry = retry+1, retry_on = now() + interval '"++integer_to_list(Period)++" minutes' where id = $1", [Id], Context).
     
     period(0) -> 10;
     period(1) -> 60;
@@ -293,7 +293,7 @@ sendemail(Msg = #mime_msg{}, State) ->
     sendemail(MX, Ehlo, esmtp_mime:from(Msg), esmtp_mime:to(Msg), esmtp_mime:encode(Msg)).
     
 sendemail({Host,Port,SSL,Login}, Ehlo, From, To, Msg) ->
-    To1 = string:strip(zp_string:line(binary_to_list(zp_convert:to_binary(To)))),
+    To1 = string:strip(z_string:line(binary_to_list(z_convert:to_binary(To)))),
     {ok, Fsm} = esmtp_fsm:start_link(Host, Port, SSL),
     {ok, _} = esmtp_fsm:ehlo(Fsm, Ehlo),
     case Login of

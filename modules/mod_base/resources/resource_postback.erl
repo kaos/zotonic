@@ -15,14 +15,14 @@
     ]).
 
 -include_lib("webmachine_resource.hrl").
--include_lib("include/zophrenic.hrl").
+-include_lib("include/zotonic.hrl").
 
 init([]) -> {ok, []}.
 
 malformed_request(ReqData, _Context) ->
-    Context1 = zp_context:new(ReqData, ?MODULE),
-    Context2 = zp_context:ensure_qs(Context1),
-    case zp_context:get_q("postback", Context2) of
+    Context1 = z_context:new(ReqData, ?MODULE),
+    Context2 = z_context:ensure_qs(Context1),
+    case z_context:get_q("postback", Context2) of
         undefined ->
             ?WM_REPLY(true, Context2);
         _ ->
@@ -32,7 +32,7 @@ malformed_request(ReqData, _Context) ->
 forbidden(ReqData, Context) ->
     Context1 = ?WM_REQ(ReqData, Context),
     %% TODO: prevent that we make a new ua session or a new page session, fail when a new session is needed
-    Context2 = zp_context:ensure_all(Context1),
+    Context2 = z_context:ensure_all(Context1),
     ?WM_REPLY(false, Context2).
 
 allowed_methods(ReqData, Context) ->
@@ -44,18 +44,18 @@ content_types_provided(ReqData, Context) ->
 
 process_post(ReqData, Context) ->
     Context1 = ?WM_REQ(ReqData, Context),
-    Postback = zp_context:get_q("postback", Context1),
-    {EventType, TriggerId, TargetId, Tag, Module} = zp_utils:depickle(Postback),
+    Postback = z_context:get_q("postback", Context1),
+    {EventType, TriggerId, TargetId, Tag, Module} = z_utils:depickle(Postback),
 
     TriggerId1 = case TriggerId of
-        undefined -> zp_context:get_q("zp_trigger_id", Context1);
+        undefined -> z_context:get_q("z_trigger_id", Context1);
         _         -> TriggerId
     end,
 
-    ContextRsc   = zp_context:set_resource_module(Module, Context1),
+    ContextRsc   = z_context:set_resource_module(Module, Context1),
     EventContext = case EventType of
         "submit" -> 
-            case zp_validation:validate_query_args(ContextRsc) of
+            case z_validation:validate_query_args(ContextRsc) of
                 {ok, ContextEval} ->   
                     Module:event({submit, Tag, TriggerId1, TargetId}, ContextEval);
                 {error, ContextEval} ->
@@ -65,10 +65,10 @@ process_post(ReqData, Context) ->
             Module:event({postback, Tag, TriggerId1, TargetId}, ContextRsc)
     end,
 
-    Script      = zp_script:get_script(EventContext),
-    CometScript = zp_session_page:get_scripts(EventContext#context.page_pid),
+    Script      = z_script:get_script(EventContext),
+    CometScript = z_session_page:get_scripts(EventContext#context.page_pid),
 
-    RD  = zp_context:get_reqdata(EventContext),
+    RD  = z_context:get_reqdata(EventContext),
     RD1 = case wrq:get_req_header("content-type", ReqData) of
         "multipart/form-data" ++ _ ->
             RDct = wrq:set_resp_header("Content-Type", "text/html; charset=utf-8", RD),
@@ -76,5 +76,5 @@ process_post(ReqData, Context) ->
         _ ->
             wrq:append_to_resp_body([Script, CometScript], RD)
     end,
-    ReplyContext = zp_context:set_reqdata(RD1, EventContext),
+    ReplyContext = z_context:set_reqdata(RD1, EventContext),
     ?WM_REPLY(true, ReplyContext).

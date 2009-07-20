@@ -12,7 +12,7 @@
 -export([with_transaction/2]).
 
 -include("pgsql.hrl").
--include("zophrenic.hrl").
+-include("zotonic.hrl").
 
 -define(timeout, 5000).
 

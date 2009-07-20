@@ -17,11 +17,11 @@
 
 resource_exists(ReqData, Context) ->
     Context1 = ?WM_REQ(ReqData, Context),
-    ContextQs = zp_context:ensure_qs(Context1),
-    Cat    = zp_context:get_q("cat", ContextQs),
-    Subcat = zp_context:get_q("subcat", ContextQs),
-    Brand  = zp_context:get_q("brand",  ContextQs),
-    C1 = zp_context:set([{cat_name, Cat}, {subcat_name, Subcat}], ContextQs),
+    ContextQs = z_context:ensure_qs(Context1),
+    Cat    = z_context:get_q("cat", ContextQs),
+    Subcat = z_context:get_q("subcat", ContextQs),
+    Brand  = z_context:get_q("brand",  ContextQs),
+    C1 = z_context:set([{cat_name, Cat}, {subcat_name, Subcat}], ContextQs),
     {Cat1, Subcat1} = case Cat of
         undefined -> {product, undefined};
         _ -> {Cat, Subcat}
@@ -32,7 +32,7 @@ resource_exists(ReqData, Context) ->
         _ ->
             case m_rsc:name_to_id(Brand, C1) of
                 {ok, BrandId} ->
-                    {true, zp_context:set(brand_id, BrandId, C1)};
+                    {true, z_context:set(brand_id, BrandId, C1)};
                 {error, _} -> 
                     {false, C1}
             end
@@ -42,11 +42,11 @@ resource_exists(ReqData, Context) ->
         {ok, CatId} ->
             case Subcat1 of
                 undefined -> 
-                    {true, zp_context:set([{cat_id, CatId}, {is_subcat, false}], C2)};
+                    {true, z_context:set([{cat_id, CatId}, {is_subcat, false}], C2)};
                 _ ->
                     case m_category:name_to_id(Subcat1, C2) of
                         {ok, SubcatId} ->
-                            {true, zp_context:set([{cat_id, SubcatId}, {is_subcat, true}], C2)};
+                            {true, z_context:set([{cat_id, SubcatId}, {is_subcat, true}], C2)};
                         {error, _} -> 
                             {false, C2}
                     end
@@ -58,9 +58,9 @@ resource_exists(ReqData, Context) ->
 
 
 html(Context) ->
-	IsSubCat = zp_context:get(is_subcat, Context),
-	CatId    = zp_context:get(cat_id, Context),
-	BrandId  = zp_context:get(brand_id, Context),
+	IsSubCat = z_context:get(is_subcat, Context),
+	CatId    = z_context:get(cat_id, Context),
+	BrandId  = z_context:get(brand_id, Context),
 	CatBrand = mod_shop:category_brands(CatId, Context),
     RscCount = mod_shop:category_rsc_count(CatId, Context),
 
@@ -76,34 +76,34 @@ html(Context) ->
 	Html = case IsSubCat of
 		false ->
         	#search_result{result=Featured} = case BrandId of
-        	    undefined -> zp_depcache:memo(
-        	                        {zp_search, search, [{featured, [{cat,CatId}]}, Context]},
+        	    undefined -> z_depcache:memo(
+        	                        {z_search, search, [{featured, [{cat,CatId}]}, Context]},
         	                        ?HOUR, [shop_import]);
-        	    _ -> zp_depcache:memo(
-                                    {zp_search, search, [{featured, [{cat,CatId},{object,BrandId},{predicate,brand}]}, Context]}, 
+        	    _ -> z_depcache:memo(
+                                    {z_search, search, [{featured, [{cat,CatId},{object,BrandId},{predicate,brand}]}, Context]}, 
                                     ?HOUR, [shop_import])
         	end,
-            {FeatShown,_} = zp_utils:randomize(3, Featured),
+            {FeatShown,_} = z_utils:randomize(3, Featured),
             Vars1 = [
                 {featured, FeatShown},
-                {cat_name, zp_context:get(cat_name, Context)},
+                {cat_name, z_context:get(cat_name, Context)},
                 {subcats, mod_shop:category_subcat_bybrand(CatId, BrandId, Context)}
                 | Vars ],
-		    zp_template:render("category.tpl", Vars1, Context);
+		    z_template:render("category.tpl", Vars1, Context);
 		true ->
             #search_result{result=Products} = case BrandId of
-                undefined -> zp_depcache:memo(
-                                    {zp_search, search, [{featured, [{cat,CatId}]}, {1,1000}, Context]}, 
+                undefined -> z_depcache:memo(
+                                    {z_search, search, [{featured, [{cat,CatId}]}, {1,1000}, Context]}, 
                                     ?HOUR, [shop_import]);
-                _ -> zp_depcache:memo(
-                                    {zp_search, search, [{featured, [{cat,CatId},{object,BrandId},{predicate,brand}]}, {1,1000}, Context]}, 
+                _ -> z_depcache:memo(
+                                    {z_search, search, [{featured, [{cat,CatId},{object,BrandId},{predicate,brand}]}, {1,1000}, Context]}, 
                                     ?HOUR, [shop_import])
             end,
             Vars1 = [
                 {products, Products},
-                {cat_name, zp_context:get(cat_name, Context)},
-                {subcat_name, zp_context:get(subcat_name, Context)}
+                {cat_name, z_context:get(cat_name, Context)},
+                {subcat_name, z_context:get(subcat_name, Context)}
                 | Vars ],
-		    zp_template:render("sub_category.tpl", Vars1, Context)
+		    z_template:render("sub_category.tpl", Vars1, Context)
 	end,
-	zp_context:output(Html, Context).
+	z_context:output(Html, Context).

@@ -41,7 +41,7 @@
     roles/2
 ]).
 
--include_lib("zophrenic.hrl").
+-include_lib("zotonic.hrl").
 
 
 %% @doc Fetch the value for the key from a model source
@@ -81,9 +81,9 @@ m_value(#m{value=_}, _Context) ->
 %% @spec get(Id, Context) -> PropList
 get(Id, Context) ->
     F = fun() ->
-        zp_db:assoc_row("select * from \"group\" where id = $1", [Id], Context)
+        z_db:assoc_row("select * from \"group\" where id = $1", [Id], Context)
     end,
-    zp_depcache:memo(F, {group, Id}, ?WEEK, [Id]).
+    z_depcache:memo(F, {group, Id}, ?WEEK, [Id]).
 
 
 name_to_id(Name, Context) ->
@@ -96,7 +96,7 @@ name_to_id_check(Name, Context) ->
 %% @doc Insert a new group.
 %% @spec insert(Title, Context) -> {ok, int()} | {error, Reason}
 insert(Title, Context) ->
-    case zp_acl:has_role(admin, Context) of
+    case z_acl:has_role(admin, Context) of
         true ->
             Props = [
                 {title, Title},
@@ -112,7 +112,7 @@ insert(Title, Context) ->
 
 
 update_noflush(Id, Props, Context) ->
-    case zp_acl:has_role(admin, Context) of
+    case z_acl:has_role(admin, Context) of
         true ->
             GroupProps = [
                 {is_admin, proplists:get_value(group_is_admin, Props, false)},
@@ -120,11 +120,11 @@ update_noflush(Id, Props, Context) ->
                 {is_community_publisher, proplists:get_value(group_is_community_publisher, Props, false)},
                 {is_public_publisher, proplists:get_value(group_is_public_publisher, Props, false)}
             ],
-            case zp_db:update(group, Id, GroupProps, Context) of
+            case z_db:update(group, Id, GroupProps, Context) of
                 {ok, 1} ->
                     {ok, Id};
                 {ok, 0} ->
-                    zp_db:insert(group, [ {id, Id} | GroupProps ], Context)
+                    z_db:insert(group, [ {id, Id} | GroupProps ], Context)
             end;
         false ->
             {error, eacces}
@@ -132,81 +132,81 @@ update_noflush(Id, Props, Context) ->
     
 
 add_member(Id, RscId, Context) ->
-    case zp_acl:has_group_role(leader, Id, Context) of
+    case z_acl:has_group_role(leader, Id, Context) of
         true ->
             F = fun(Ctx) ->
-                case zp_db:q1("select id from rsc_group where group_id = $1 and rsc_id = $2", [Id, RscId], Ctx) of
+                case z_db:q1("select id from rsc_group where group_id = $1 and rsc_id = $2", [Id, RscId], Ctx) of
                     undefined ->
-                        zp_db:insert(rsc_group, [{group_id, Id},{rsc_id, RscId}], Ctx);
+                        z_db:insert(rsc_group, [{group_id, Id},{rsc_id, RscId}], Ctx);
                     RscGroupId ->
-                        zp_db:q("update rsc_group set is_observer = false, is_leader = false where id = $1", [RscGroupId], Ctx),
+                        z_db:q("update rsc_group set is_observer = false, is_leader = false where id = $1", [RscGroupId], Ctx),
                         {ok, RscGroupId}
                 end
             end,
-            Result = zp_db:transaction(F, Context),
-            zp_depcache:flush({groups, RscId}),
+            Result = z_db:transaction(F, Context),
+            z_depcache:flush({groups, RscId}),
             Result;
         false ->
             {error, eacces}
     end.
 
 add_observer(Id, RscId, Context) ->
-    case zp_acl:has_group_role(leader, Id, Context) of
+    case z_acl:has_group_role(leader, Id, Context) of
         true ->
             F = fun(Ctx) ->
-                case zp_db:q1("select id from rsc_group where group_id = $1 and rsc_id = $2", [Id, RscId], Ctx) of
+                case z_db:q1("select id from rsc_group where group_id = $1 and rsc_id = $2", [Id, RscId], Ctx) of
                     undefined ->
-                        zp_db:insert(rsc_group, [{group_id, Id},{rsc_id, RscId},{is_observer, true}], Ctx);
+                        z_db:insert(rsc_group, [{group_id, Id},{rsc_id, RscId},{is_observer, true}], Ctx);
                     RscGroupId ->
-                        zp_db:q("update rsc_group set is_observer = true, is_leader = false where id = $1", [RscGroupId], Ctx),
+                        z_db:q("update rsc_group set is_observer = true, is_leader = false where id = $1", [RscGroupId], Ctx),
                         {ok, RscGroupId}
                 end
             end,
-            Result = zp_db:transaction(F, Context),
-            zp_depcache:flush({groups, RscId}),
+            Result = z_db:transaction(F, Context),
+            z_depcache:flush({groups, RscId}),
             Result;
         false ->
             {error, eacces}
     end.
 
 add_leader(Id, RscId, Context) ->
-    case zp_acl:has_group_role(leader, Id, Context) of
+    case z_acl:has_group_role(leader, Id, Context) of
         true ->
             F = fun(Ctx) ->
-                case zp_db:q1("select id from rsc_group where group_id = $1 and rsc_id = $2", [Id, RscId], Ctx) of
+                case z_db:q1("select id from rsc_group where group_id = $1 and rsc_id = $2", [Id, RscId], Ctx) of
                     undefined ->
-                        zp_db:insert(rsc_group, [{group_id, Id},{rsc_id, RscId},{is_leader, true}], Ctx);
+                        z_db:insert(rsc_group, [{group_id, Id},{rsc_id, RscId},{is_leader, true}], Ctx);
                     RscGroupId ->
-                        zp_db:q("update rsc_group set is_observer = false, is_leader = true where id = $1", [RscGroupId], Ctx),
+                        z_db:q("update rsc_group set is_observer = false, is_leader = true where id = $1", [RscGroupId], Ctx),
                         {ok, RscGroupId}
                 end
             end,
-            Result = zp_db:transaction(F, Context),
-            zp_depcache:flush({groups, RscId}),
+            Result = z_db:transaction(F, Context),
+            z_depcache:flush({groups, RscId}),
             Result;
         false ->
             {error, eacces}
     end.
 
 get_members(Id, Context) ->
-    [ RscId || {RscId} <- zp_db:q("select rsc_id from rsc_group where group_id = $1 and is_observer = false and is_leader = false", [Id], Context) ].
+    [ RscId || {RscId} <- z_db:q("select rsc_id from rsc_group where group_id = $1 and is_observer = false and is_leader = false", [Id], Context) ].
 
 get_leaders(Id, Context) ->
-    [ RscId || {RscId} <- zp_db:q("select rsc_id from rsc_group where group_id = $1 and is_leader = true", [Id], Context) ].
+    [ RscId || {RscId} <- z_db:q("select rsc_id from rsc_group where group_id = $1 and is_leader = true", [Id], Context) ].
 
 get_observers(Id, Context) ->
-    [ RscId || {RscId} <- zp_db:q("select rsc_id from rsc_group where group_id = $1 and is_observer = true", [Id], Context) ].
+    [ RscId || {RscId} <- z_db:q("select rsc_id from rsc_group where group_id = $1 and is_observer = true", [Id], Context) ].
 
 
 delete_member(RscGroupId, Context) ->
-    case zp_db:q_row("select group_id, rsc_id from rsc_group where id = $1", [RscGroupId], Context) of
+    case z_db:q_row("select group_id, rsc_id from rsc_group where id = $1", [RscGroupId], Context) of
         undefined ->
             {error, enoent};
         {GroupId, RscId} ->
-            case zp_acl:has_group_role(leader, GroupId, Context) of
+            case z_acl:has_group_role(leader, GroupId, Context) of
                 true ->
-                    zp_db:delete(rsc_group, RscGroupId, Context),
-                    zp_depcache:flush({groups, RscId}),
+                    z_db:delete(rsc_group, RscGroupId, Context),
+                    z_depcache:flush({groups, RscId}),
                     ok;
                 false ->
                     {error, eacces}
@@ -214,10 +214,10 @@ delete_member(RscGroupId, Context) ->
     end.
 
 delete_member(Id, RscId, Context) ->
-    case zp_acl:has_group_role(leader, Id, Context) of
+    case z_acl:has_group_role(leader, Id, Context) of
         true ->
-            zp_db:q("delete from rsc_group where group_id = $1 and rsc_id = $2",[Id, RscId], Context),
-            zp_depcache:flush({groups, RscId}),
+            z_db:q("delete from rsc_group where group_id = $1 and rsc_id = $2",[Id, RscId], Context),
+            z_depcache:flush({groups, RscId}),
             ok;
         false ->
             {error, eacces}
@@ -227,74 +227,74 @@ delete_member(Id, RscId, Context) ->
 %% @doc Return the group ids the current person is member of
 %% @spec person_groups(Context) -> List
 groups_member(Context) ->
-    groups_member(zp_acl:user(Context), Context).
+    groups_member(z_acl:user(Context), Context).
 
 
 %% @doc Return the group ids the person is member or leader of
 %% @spec person_groups(PersonId, Context) -> List
 groups_member(PersonId, Context) ->
     F = fun() ->
-        Groups = zp_db:q("select group_id from rsc_group where rsc_id = $1 and is_observer = false", [PersonId], Context),
+        Groups = z_db:q("select group_id from rsc_group where rsc_id = $1 and is_observer = false", [PersonId], Context),
         [ G || {G} <- Groups ]
     end,
-    zp_depcache:memo(F, {groups_member, PersonId}, ?DAY, [{groups, PersonId}]).
+    z_depcache:memo(F, {groups_member, PersonId}, ?DAY, [{groups, PersonId}]).
 
 
 %% @doc Return the group ids the current person can only view
 %% @spec person_groups(Context) -> List
 groups_observer(Context) ->
-    groups_observer(zp_acl:user(Context), Context).
+    groups_observer(z_acl:user(Context), Context).
 
 
 %% @doc Return the group ids the person can only view
 %% @spec person_groups(PersonId, Context) -> List
 groups_observer(PersonId, Context) ->
     F = fun() ->
-        Groups = zp_db:q("select group_id from rsc_group where rsc_id = $1 and is_observer = true", [PersonId], Context),
+        Groups = z_db:q("select group_id from rsc_group where rsc_id = $1 and is_observer = true", [PersonId], Context),
         [ G || {G} <- Groups ]
     end,
-    zp_depcache:memo(F, {groups_observer, PersonId}, ?DAY, [{groups, PersonId}]).
+    z_depcache:memo(F, {groups_observer, PersonId}, ?DAY, [{groups, PersonId}]).
 
 
 %% @doc Return the group ids the current person can view
 %% @spec person_groups(Context) -> List
 groups_visible(Context) ->
-    groups_visible(zp_acl:user(Context), Context).
+    groups_visible(z_acl:user(Context), Context).
 
 %% @doc Return the group ids the person can view
 %% @spec person_groups(PersonId, Context) -> List
 groups_visible(PersonId, Context) ->
     F = fun() ->
-        Groups = zp_db:q("select group_id from rsc_group where rsc_id = $1", [PersonId], Context),
+        Groups = z_db:q("select group_id from rsc_group where rsc_id = $1", [PersonId], Context),
         [ G || {G} <- Groups ]
     end,
-    zp_depcache:memo(F, {groups_visible, PersonId}, ?DAY, [{groups, PersonId}]).
+    z_depcache:memo(F, {groups_visible, PersonId}, ?DAY, [{groups, PersonId}]).
 
 
 %% @doc Return the group ids the current person is leader of
 %% @spec person_groups(Context) -> List
 groups_leader(Context) ->
-    groups_leader(zp_acl:user(Context), Context).
+    groups_leader(z_acl:user(Context), Context).
 
 %% @doc Return the group ids the person leads
 %% @spec person_groups(PersonId, Context) -> List
 groups_leader(PersonId, Context) ->
     F = fun() ->
-        Groups = zp_db:q("select group_id from rsc_group where rsc_id = $1 and is_leader = true", [PersonId], Context),
+        Groups = z_db:q("select group_id from rsc_group where rsc_id = $1 and is_leader = true", [PersonId], Context),
         [ G || {G} <- Groups ]
     end,
-    zp_depcache:memo(F, {groups_leader, PersonId}, ?DAY, [{groups, PersonId}]).
+    z_depcache:memo(F, {groups_leader, PersonId}, ?DAY, [{groups, PersonId}]).
 
 
 %% @doc Return the roles the current person has
 %% @spec roles(Context) -> [atom(), ..]
 roles(Context) ->
-    roles(zp_acl:user(Context), Context).
+    roles(z_acl:user(Context), Context).
 
 %% @doc Return the roles the person has
 %% @spec roles(Context) -> [atom(), ..]
 roles(PersonId, Context) ->
-    Roles = case zp_db:q("
+    Roles = case z_db:q("
         select  max(g.is_admin::int), max(g.is_supervisor::int), 
                 max(g.is_community_publisher::int), max(g.is_public_publisher::int)
         from \"group\" g join rsc_group rg on rg.group_id = g.id

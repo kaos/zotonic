@@ -1,7 +1,7 @@
 -module(erlydtl_runtime).
 -compile(export_all).
 
--include_lib("zophrenic.hrl").
+-include_lib("zotonic.hrl").
 
 % Finde the value of a model value
 find_value(<<>>, #m{}, _Context) ->
@@ -29,9 +29,9 @@ find_value(Key, {GBSize, GBData}, _Context) when is_integer(GBSize) ->
 %% q and q_validated are indexed with strings, this because the indices are from
 %% the query string and post. Wrap them in a 'q' tuple to force a subsequent lookup.
 find_value(Key, {q}, Context) ->
-    zp_context:get_q(atom_to_list(Key), Context);
+    z_context:get_q(atom_to_list(Key), Context);
 find_value(Key, {q_validated}, Context) ->
-    zp_context:get_q_validated(atom_to_list(Key), Context);
+    z_context:get_q_validated(atom_to_list(Key), Context);
 find_value(q, _Vars, _Context) ->
     {q};
 find_value(q_validated, _Vars, _Context) ->
@@ -96,7 +96,7 @@ find_value(Key, Tuple, _Context) when is_tuple(Tuple) ->
     Module = element(1, Tuple),
     case Module of
         context ->
-            zp_context:get_value(Key, Tuple);
+            z_context:get_value(Key, Tuple);
         dict -> 
             case dict:find(Key, Tuple) of
                 {ok, Val} ->
@@ -129,7 +129,7 @@ find_value(_Key, undefined, _Context) ->
 find_value(_Key, <<>>, _Context) ->
 	undefined.
 
-%% This used to translate undefined into <<>>, this translation is now done by zp_render:render/2
+%% This used to translate undefined into <<>>, this translation is now done by z_render:render/2
 fetch_value(Key, Data, Context) ->
     find_value(Key, Data, Context).
 
@@ -187,7 +187,7 @@ init_counter_stats(List, Parent) ->
 to_list(#m{model=Model} = M, Context) -> Model:m_to_list(M, Context);
 to_list(#rsc_list{list=L}, _Context) -> L;
 to_list(#search_result{result=L}, _Context) -> L;
-to_list({q}, Context) -> zp_context:get_q_all(Context);
+to_list({q}, Context) -> z_context:get_q_all(Context);
 to_list({q_validated}, _Context) -> [];
 to_list(L, _Context) when is_list(L) -> L;
 to_list(T, _Context) when is_tuple(T) -> tuple_to_list(T);

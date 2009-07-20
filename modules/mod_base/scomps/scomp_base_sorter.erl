@@ -10,7 +10,7 @@
 
 -export([init/1, varies/2, code_change/3, terminate/1, render/4, event/2]).
 
--include("zophrenic.hrl").
+-include("zotonic.hrl").
 
 init(_Args) -> {ok, []}.
 varies(_Params, _Context) -> undefined.
@@ -39,11 +39,11 @@ render(Params, _Vars, Context, _State) ->
         _ ->
 
 			Delegate1	 = case Delegate of
-							undefined -> zp_context:get_resource_module(Context);
+							undefined -> z_context:get_resource_module(Context);
 							_ -> Delegate
 						   end,
 
-			PickledPostbackInfo = zp_render:make_postback_info({Tag,Delegate1}, sort, Id, Id, ?MODULE, Context),
+			PickledPostbackInfo = z_render:make_postback_info({Tag,Delegate1}, sort, Id, Id, ?MODULE, Context),
 			Handle1			  = case Handle of
 									undefined -> "null";
 									_		  -> [$', Handle, $']
@@ -73,24 +73,24 @@ render(Params, _Vars, Context, _State) ->
 
 		
         	% Emit the javascript...
-        	Script = io_lib:format( "zp_sorter($('#~s'), { handle: ~s, connectWith: [~s], axis: ~s, containment: ~s, opacity: ~s, placeholder: ~s }, '~s');", 
+        	Script = io_lib:format( "z_sorter($('#~s'), { handle: ~s, connectWith: [~s], axis: ~s, containment: ~s, opacity: ~s, placeholder: ~s }, '~s');", 
         	                        [Id, Handle1, ConnectWithGroups, Axis1, Containment1, Opacity1, Placeholder1, PickledPostbackInfo]),
 
             Actions = [
                         {script,    [{script, Script}]},
-                        {add_class, [{class, "sortblock " ++ GroupClasses ++ " " ++ zp_convert:to_list(Class)}]}
+                        {add_class, [{class, "sortblock " ++ GroupClasses ++ " " ++ z_convert:to_list(Class)}]}
                     ],
 	
-    	    {ok, zp_render:wire(Id, Actions, Context)}
+    	    {ok, z_render:wire(Id, Actions, Context)}
     end.
 
 
 %% @doc Handle the drop of a sortable in a sorter
 event({postback, {SortTag,SortDelegate}, TriggerId, _TargetId}, Context) ->
-	SortItems = zp_context:get_q("sort_items", Context),
+	SortItems = z_context:get_q("sort_items", Context),
 
     UnpickleF = fun(X) ->
-                    {DragTag,DragDelegate,DragId} = zp_utils:depickle(X),
+                    {DragTag,DragDelegate,DragId} = z_utils:depickle(X),
                     #dragdrop{tag=DragTag, delegate=DragDelegate, id=DragId}
                 end,
 
@@ -102,7 +102,7 @@ event({postback, {SortTag,SortDelegate}, TriggerId, _TargetId}, Context) ->
     catch
         _M:E ->
             Error = io_lib:format("Error in routing sort to \"~s:sort_event/3\"; error: \"~p\"", [SortDelegate,E]),
-            zp_render:wire({growl, [{text,Error}, {stay,1}, {type, error}]}, Context)
+            z_render:wire({growl, [{text,Error}, {stay,1}, {type, error}]}, Context)
     end.
 
 
@@ -122,5 +122,5 @@ groups_to_connect_with(["none"]) -> "";
 groups_to_connect_with([<<"none">>]) -> "";
 groups_to_connect_with(Groups) ->
 	Groups1 = lists:flatten(Groups),
-	Groups2 = ["'.drag_group_" ++ zp_convert:to_list(X) ++ "'" || X <- Groups1],
+	Groups2 = ["'.drag_group_" ++ z_convert:to_list(X) ++ "'" || X <- Groups1],
 	string:join(Groups2, ", ").

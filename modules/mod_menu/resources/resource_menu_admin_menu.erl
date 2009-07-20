@@ -13,19 +13,19 @@
 -include_lib("resource_html.hrl").
 
 is_authorized(ReqData, Context) ->
-    zp_auth:wm_is_authorized(ReqData, Context).
+    z_auth:wm_is_authorized(ReqData, Context).
 
 
 html(Context) ->
-	Html = zp_template:render("admin_menu.tpl", [{page_admin_menu, true}, {menu, get_menu(Context)}], Context),
-	zp_context:output(Html, Context).
+	Html = z_template:render("admin_menu.tpl", [{page_admin_menu, true}, {menu, get_menu(Context)}], Context),
+	z_context:output(Html, Context).
 
 event({drop, {dragdrop, DragTag, _, _DragEltId}, {dragdrop, DropTag, _, _DropEltId}}, Context) ->
     Menu  = get_menu(Context),
     Menu1 = handle_drop(Menu, DragTag, DropTag),
     save_menu(Menu1, Context),
-    Html = zp_template:render("_admin_menu_menu_view.tpl", [{menu, Menu1}], Context),
-    zp_render:update("menu-editor", Html, Context);
+    Html = z_template:render("_admin_menu_menu_view.tpl", [{menu, Menu1}], Context),
+    z_render:update("menu-editor", Html, Context);
 
 event({postback, {delete, Props}, _TriggerId, _TargetId}, Context) ->
     Menu = get_menu(Context),
@@ -38,8 +38,8 @@ event({postback, {delete, Props}, _TriggerId, _TargetId}, Context) ->
             set_nth(Nr, {MenuId, SubMenu1}, Menu)
     end,
     Context1 = save_menu(Menu1, Context),
-    Html = zp_template:render("_admin_menu_menu_view.tpl", [{menu, Menu1}], Context1),
-    zp_render:update("menu-editor", Html, Context1);
+    Html = z_template:render("_admin_menu_menu_view.tpl", [{menu, Menu1}], Context1),
+    z_render:update("menu-editor", Html, Context1);
 
 event(Event, Context) ->
     ?DEBUG(Event),
@@ -56,12 +56,12 @@ get_menu(Context) ->
 %% @doc Save the menu to the site configuration.
 %% @spec save_menu(list(), Context) -> ok
 save_menu(Menu, Context) ->
-    case zp_acl:has_role(public_publisher, Context) of
+    case z_acl:has_role(public_publisher, Context) of
         true ->
             m_config:set_prop(menu, menu_default, menu, Menu, Context), 
             Context;
         false ->
-            zp_render:growl_error("Sorry, you need to be public publisher to edit the menu.", Context)
+            z_render:growl_error("Sorry, you need to be public publisher to edit the menu.", Context)
     end.
 
 

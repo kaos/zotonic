@@ -5,7 +5,7 @@
 %% @doc Identify files, fetch metadata about an image
 %% @todo Recognize more files based on magic number, think of office files etc.
 
--module(zp_media_identify).
+-module(z_media_identify).
 -author("Marc Worrell <marc@worrell.nl").
 
 %% interface functions
@@ -14,7 +14,7 @@
     extension/1
 ]).
 
--include_lib("zophrenic.hrl").
+-include_lib("zotonic.hrl").
 
 
 %% @spec identifyImageFile) -> {ok, Meta} | {error, Error}
@@ -26,14 +26,14 @@ identify(ImageFile, Context) ->
                 {error, _Reason} -> identify_file(ImageFile, Context)
             end
     end,
-    zp_depcache:memo(F, {media_identify, ImageFile}, ?DAY, [media_identify]).
+    z_depcache:memo(F, {media_identify, ImageFile}, ?DAY, [media_identify]).
     
 
 
 %% @spec identify(ImageFile) -> {ok, PropList} | {error, Reason}
 %% @doc Fetch information about an image, returns width, height, type, etc.
 identify_file(ImageFile, Context) ->
-    case zp_notifier:first({media_identify_file, ImageFile}, Context) of
+    case z_notifier:first({media_identify_file, ImageFile}, Context) of
         {ok, Props} -> {ok, Props};
         undefined -> identify_file_imagemagick(ImageFile)
     end.
@@ -42,7 +42,7 @@ identify_file(ImageFile, Context) ->
 %% @spec identify(ImageFile) -> {ok, PropList} | {error, Reason}
 %% @doc Try to identify the file using image magick
 identify_file_imagemagick(ImageFile) ->
-    CleanedImageFile = zp_utils:os_escape(ImageFile),
+    CleanedImageFile = z_utils:os_escape(ImageFile),
     Result    = os:cmd("identify -quiet \"" ++ CleanedImageFile ++ "[0]\""),
     % ["test/a.jpg","JPEG","3440x2285","3440x2285+0+0","8-bit","DirectClass","2.899mb"]
     % sometimes:

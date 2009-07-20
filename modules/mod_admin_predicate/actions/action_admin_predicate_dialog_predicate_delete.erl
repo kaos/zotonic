@@ -13,13 +13,13 @@
     event/2
 ]).
 
--include("zophrenic.hrl").
+-include("zotonic.hrl").
 
 render_action(TriggerId, TargetId, Args, Context) ->
-    Id = zp_convert:to_integer(proplists:get_value(id, Args)),
+    Id = z_convert:to_integer(proplists:get_value(id, Args)),
     OnSuccess = proplists:get_all_values(on_success, Args),
     Postback = {delete_predicate_dialog, Id, OnSuccess},
-	{PostbackMsgJS, _PickledPostback} = zp_render:make_postback(Postback, click, TriggerId, TargetId, ?MODULE, Context),
+	{PostbackMsgJS, _PickledPostback} = z_render:make_postback(Postback, click, TriggerId, TargetId, ?MODULE, Context),
 	{PostbackMsgJS, Context}.
 
 
@@ -27,13 +27,13 @@ render_action(TriggerId, TargetId, Args, Context) ->
 %% @todo Check if the predicate is in use, if so show text that the predicate is in use and can't be deleted
 %% @spec event(Event, Context1) -> Context2
 event({postback, {delete_predicate_dialog, Id, OnSuccess}, _TriggerId, _TargetId}, Context) ->
-    case zp_acl:has_role(admin, Context) of
+    case z_acl:has_role(admin, Context) of
         true ->
             Vars = [
                 {on_success, OnSuccess},
                 {id, Id}
             ],
-            zp_render:dialog("Confirm delete", "_action_dialog_predicate_delete.tpl", Vars, Context);
+            z_render:dialog("Confirm delete", "_action_dialog_predicate_delete.tpl", Vars, Context);
         false ->
-            zp_render:growl_error("You are not allowed to delete predicates.", Context)
+            z_render:growl_error("You are not allowed to delete predicates.", Context)
     end.

@@ -1,9 +1,9 @@
 %% @author Marc Worrell <marc@worrell.nl>
 %% @copyright 2009 Marc Worrell
 
-%% @doc Callbacks for the zophrenic application.
+%% @doc Callbacks for the zotonic application.
 
--module(zophrenic_app).
+-module(zotonic_app).
 -author('Marc Worrell <marc@worrell.nl>').
 
 -behaviour(application).
@@ -18,14 +18,14 @@ ensure_started(App) ->
     end.
 
 %% @spec start(_Type, _StartArgs) -> ServerRet
-%% @doc application start callback for zophrenic.
+%% @doc application start callback for zotonic.
 start(_Type, _StartArgs) ->
     ensure_started(crypto),
     ensure_started(ssl),
-    zophrenic_deps:ensure(),
-    zophrenic_sup:start_link().
+    zotonic_deps:ensure(),
+    zotonic_sup:start_link().
 
 %% @spec stop(_State) -> ServerRet
-%% @doc application stop callback for zophrenic.
+%% @doc application stop callback for zotonic.
 stop(_State) ->
     ok.

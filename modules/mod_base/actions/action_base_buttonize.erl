@@ -4,7 +4,7 @@
 %% Original code copyright (c) 2008-2009 Rusty Klophaus
 
 -module(action_base_buttonize).
--include("zophrenic.hrl").
+-include("zotonic.hrl").
 -export([render_action/4]).
 
 render_action(TriggerId, TargetId, _Record, Context) -> 
@@ -26,4 +26,4 @@ render_action(TriggerId, TargetId, _Record, Context) ->
 		            {actions, {remove_class, [{class,clicked}]} }
 		        ]}
 	],
-	zp_render:render_actions(TriggerId, TargetId, Actions, Context).
+	z_render:render_actions(TriggerId, TargetId, Actions, Context).

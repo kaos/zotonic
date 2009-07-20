@@ -44,7 +44,7 @@
 ]).
 
 
--include_lib("zophrenic.hrl").
+-include_lib("zotonic.hrl").
 
 
 %% @doc Fetch the value for the key from a model source
@@ -97,31 +97,31 @@ m_value(#m{value=#m{value={cat, Id}}}, Context) ->
 
 get(Id, Context) ->
     F = fun() ->
-        zp_db:assoc_props_row("
+        z_db:assoc_props_row("
                 select c.*, r.name
                 from category c join rsc r on r.id = c.id
                 where c.id = $1", [Id], Context)
     end,
-    zp_depcache:memo(F, {category, Id}, ?WEEK, [category]).
+    z_depcache:memo(F, {category, Id}, ?WEEK, [category]).
 
 get_by_name(Name, Context) ->
     F = fun() ->
-        zp_db:assoc_props_row("
+        z_db:assoc_props_row("
                 select c.*, r.name 
                 from category c join rsc r on r.id = c.id
                 where r.name = $1", [Name], Context)
     end,
-    zp_depcache:memo(F, {category_by_name, Name}, ?WEEK, [category]).
+    z_depcache:memo(F, {category_by_name, Name}, ?WEEK, [category]).
 
 get_root(Context) ->
     F = fun() ->
-        zp_db:assoc_props("
+        z_db:assoc_props("
                 select c.*, r.name 
                 from category c join rsc r on c.id = r.id 
                 where c.parent_id is null
                 order by c.nr", Context)
     end,
-    zp_depcache:memo(F, {category_root}, ?WEEK, [category]).
+    z_depcache:memo(F, {category_root}, ?WEEK, [category]).
 
 get_by_parent(Id, Context) ->
     F = fun() ->
@@ -129,17 +129,17 @@ get_by_parent(Id, Context) ->
             undefined ->
                 get_root(Context);
             _ ->
-                zp_db:assoc_props("
+                z_db:assoc_props("
                     select c.*, r.name 
                     from category c join rsc r on r.id = c.id
                     where c.parent_id = $1 order by c.nr", [Id], Context)
         end
     end,
-    zp_depcache:memo(F, {category_parent, Id}, ?WEEK, [category]).
+    z_depcache:memo(F, {category_parent, Id}, ?WEEK, [category]).
 
 get_range(Id, Context) ->
     F = fun() ->
-        case zp_db:q("
+        case z_db:q("
                 select lft, rght 
                 from category 
                 where id = $1", [Id], Context) of
@@ -147,11 +147,11 @@ get_range(Id, Context) ->
             _ -> {1, 0} % empty range
         end
     end,
-    zp_depcache:memo(F, {category_range, Id}, ?WEEK, [category]).
+    z_depcache:memo(F, {category_range, Id}, ?WEEK, [category]).
 
 get_range_by_name(Name, Context) ->
     F = fun() ->
-        case zp_db:q("
+        case z_db:q("
                 select c.lft, c.rght
                 from category c join rsc r on r.id = c.id
                 where r.name = $1", [Name], Context) of
@@ -159,10 +159,10 @@ get_range_by_name(Name, Context) ->
             _ -> {1, 0} % empty range
         end
     end,
-    zp_depcache:memo(F, {category_range_name, Name}, ?WEEK, [category]).
+    z_depcache:memo(F, {category_range_name, Name}, ?WEEK, [category]).
 
 get_page_count(Id, Context) ->
-    zp_db:q1("select count(*) from rsc where category_id = $1", [Id], Context).
+    z_db:q1("select count(*) from rsc where category_id = $1", [Id], Context).
 
 
 name_to_id({Id}, _Context) when is_integer(Id) ->
@@ -170,11 +170,11 @@ name_to_id({Id}, _Context) when is_integer(Id) ->
 name_to_id(Id, _Context) when is_integer(Id) ->
     {ok, Id};
 name_to_id(Name, Context) ->
-    case zp_depcache:get({category_name_to_id, Name}) of
+    case z_depcache:get({category_name_to_id, Name}) of
         {ok, Result} ->
             Result;
         undefined ->
-            Result = case zp_db:q1("
+            Result = case z_db:q1("
                     select r.id 
                     from rsc r join category c on r.id = c.id 
                     where r.name = $1", [Name], Context) of
@@ -183,9 +183,9 @@ name_to_id(Name, Context) ->
             end,
             case Result of
                 {ok, ResultId} ->
-                    zp_depcache:set({category_name_to_id, Name}, Result, ?WEEK, [category, ResultId]);
+                    z_depcache:set({category_name_to_id, Name}, Result, ?WEEK, [category, ResultId]);
                 {error, _Error} ->
-                    zp_depcache:set({category_name_to_id, Name}, Result, ?WEEK, [category])
+                    z_depcache:set({category_name_to_id, Name}, Result, ?WEEK, [category])
             end,
             Result
     end.
@@ -196,32 +196,32 @@ name_to_id_check(Name, Context) ->
 
 id_to_name(Name, Context) when is_atom(Name); is_binary(Name); is_list(Name) ->
     F = fun() ->
-        Nm = zp_db:q1("select r.name from rsc r join category c on r.id = c.id where r.name = $1", [Name], Context),
-        zp_convert:to_atom(Nm)
+        Nm = z_db:q1("select r.name from rsc r join category c on r.id = c.id where r.name = $1", [Name], Context),
+        z_convert:to_atom(Nm)
     end,
-    zp_depcache:memo(F, {category_id_to_name, Name}, ?WEEK, [category]);
+    z_depcache:memo(F, {category_id_to_name, Name}, ?WEEK, [category]);
 id_to_name(Id, Context) when is_integer(Id) ->
     F = fun() ->
-        Nm = zp_db:q1("select r.name from rsc r join category c on r.id = c.id where r.id = $1", [Id], Context),
-        zp_convert:to_atom(Nm)
+        Nm = z_db:q1("select r.name from rsc r join category c on r.id = c.id where r.id = $1", [Id], Context),
+        z_convert:to_atom(Nm)
     end,
-    zp_depcache:memo(F, {category_id_to_name, Id}, ?WEEK, [category]).
+    z_depcache:memo(F, {category_id_to_name, Id}, ?WEEK, [category]).
 
 
 %% @doc Move the category below another category, placing it at the end of the children of that category.
 %% @spec move_end(CatId::int(), NewParentId::int(), Context) -> ok | {error, Reason}
 move_below(Id, ParentId, Context) ->
-    case zp_acl:has_role(admin, Context) of
+    case z_acl:has_role(admin, Context) of
         true ->
             PathParentId = [ParentId | get_path(ParentId, Context)],
             case lists:member(Id, PathParentId) of
                 false ->
                     F = fun(Ctx) ->
-                        zp_db:q("update category set parent_id = $1, seq = 10000 where id = $2", [ParentId, Id], Context),
+                        z_db:q("update category set parent_id = $1, seq = 10000 where id = $2", [ParentId, Id], Context),
                         renumber(Ctx)
                     end,
-                    zp_db:transaction(F, Context),
-                    zp_depcache:flush(category);
+                    z_db:transaction(F, Context),
+                    z_depcache:flush(category);
                 true ->
                     {error, cycle}
             end;
@@ -232,14 +232,14 @@ move_below(Id, ParentId, Context) ->
 %% @doc Move the category to the end of all categories, making it a top category in the process
 %% @spec move_end(CatId::int(), Context) -> ok | {error, Reason}
 move_end(Id, Context) ->
-    case zp_acl:has_role(admin, Context) of
+    case z_acl:has_role(admin, Context) of
         true ->
             F = fun(Ctx) ->
-                zp_db:q("update category set parent_id = null, seq = 10000 where id = $1", [Id], Context),
+                z_db:q("update category set parent_id = null, seq = 10000 where id = $1", [Id], Context),
                 renumber(Ctx)
             end,
-            zp_db:transaction(F, Context),
-            zp_depcache:flush(category);
+            z_db:transaction(F, Context),
+            z_depcache:flush(category);
         false ->
             {error, eacces}
     end.
@@ -248,29 +248,29 @@ move_end(Id, Context) ->
 %% the parent of the other category.
 %% @spec move_before(CatId::int(), BeforeCatId::int(), Context) -> ok | {error, Reason}
 move_before(Id, BeforeId, Context) ->
-    case zp_acl:has_role(admin, Context) of
+    case z_acl:has_role(admin, Context) of
         true ->
             F = fun(Ctx) ->
-                    {ParentId, Seq} = zp_db:q_row("select parent_id, seq from category where id = $1", [BeforeId], Context),
+                    {ParentId, Seq} = z_db:q_row("select parent_id, seq from category where id = $1", [BeforeId], Context),
                     PathParentId = [ParentId | get_path(ParentId, Context)],
                     case lists:member(Id, PathParentId) of
                         false ->
                             case ParentId of
                                 undefined ->
-                                    zp_db:q("update category set seq = seq+1 where parent_id is null and seq >= $1", [Seq], Context);
+                                    z_db:q("update category set seq = seq+1 where parent_id is null and seq >= $1", [Seq], Context);
                                 _ -> 
-                                    zp_db:q("update category set seq = seq+1 where parent_id = $2 and seq >= $1", [Seq, ParentId], Context)
+                                    z_db:q("update category set seq = seq+1 where parent_id = $2 and seq >= $1", [Seq, ParentId], Context)
                             end,
-                            zp_db:q("update category set parent_id = $1, seq = $2 where id = $3", [ParentId, Seq, Id], Context),
+                            z_db:q("update category set parent_id = $1, seq = $2 where id = $3", [ParentId, Seq, Id], Context),
                             renumber(Ctx);
                         true -> 
                             {error, cycle}
                     end
             end,
 
-            case zp_db:transaction(F, Context) of
+            case z_db:transaction(F, Context) of
                 ok ->
-                    zp_depcache:flush(category), 
+                    z_depcache:flush(category), 
                     ok;
                 {error, Reason} ->
                     {error, Reason}
@@ -281,14 +281,14 @@ move_before(Id, BeforeId, Context) ->
 
 
 update_sequence(Ids, Context) ->
-    case zp_acl:has_role(admin, Context) of
+    case z_acl:has_role(admin, Context) of
         true ->
             F = fun(Ctx) ->
-                zp_db:update_sequence(category, Ids, Ctx),
+                z_db:update_sequence(category, Ids, Ctx),
                 renumber(Ctx)
             end,
-            zp_db:transaction(F, Context),
-            zp_depcache:flush(category);
+            z_db:transaction(F, Context),
+            z_depcache:flush(category);
         false ->
             {error, eacces}
     end.
@@ -298,18 +298,18 @@ update_sequence(Ids, Context) ->
 %% @spec delete(Id:int(), TransferId::int(), Context) -> ok | {error, Reason}
 delete(Id, TransferId, Context) ->
     % fail when deleting 'other' or 'category'
-    case zp_db:q("select name from rsc where id = $1", [Id], Context) of
+    case z_db:q("select name from rsc where id = $1", [Id], Context) of
         N when N == <<"other">>; N == <<"category">> -> {error, is_system_category};
         _ ->
-            case zp_acl:has_role(admin, Context) of
+            case z_acl:has_role(admin, Context) of
                 true ->
                     F = fun(Ctx) ->
                         ToId = case TransferId of
                             undefined ->
-                                case zp_db:q1("select parent_id from category where id = $1", [Id], Ctx) of
+                                case z_db:q1("select parent_id from category where id = $1", [Id], Ctx) of
                                     undefined ->
                                         %% The removed category is a top-category, move all content to 'other'
-                                        case zp_db:q1("
+                                        case z_db:q1("
                                                 select c.id 
                                                 from rsc r join category c on c.id = r.id
                                                 where r.name = 'other'", Context) of
@@ -319,21 +319,21 @@ delete(Id, TransferId, Context) ->
                                         N
                                 end;
                             N when is_integer(N) ->
-                                N = zp_db:q1("select id from category where id = $1", [TransferId], Ctx)
+                                N = z_db:q1("select id from category where id = $1", [TransferId], Ctx)
                         end,
                 
-                        _RscRows = zp_db:q("update rsc set category_id = $1 where category_id = $2", [ToId, Id], Ctx),
+                        _RscRows = z_db:q("update rsc set category_id = $1 where category_id = $2", [ToId, Id], Ctx),
                         case Id of
                             undefined ->
-                                zp_db:q("update category set parent_id = $1 where parent_id is null", [ToId], Ctx);
+                                z_db:q("update category set parent_id = $1 where parent_id is null", [ToId], Ctx);
                             _ ->
-                                zp_db:q("update category set parent_id = $1 where parent_id = $2", [ToId, Id], Ctx)
+                                z_db:q("update category set parent_id = $1 where parent_id = $2", [ToId, Id], Ctx)
                         end,
                         ok = m_rsc_update:delete_nocheck(Id, Ctx),
                         ok = renumber(Ctx)
                     end,
-                    case zp_db:transaction(F, Context) of
-                        ok ->  zp_depcache:flush();
+                    case z_db:transaction(F, Context) of
+                        ok ->  z_depcache:flush();
                         {error, Reason} -> {error, Reason}
                     end;
                 false ->
@@ -344,14 +344,14 @@ delete(Id, TransferId, Context) ->
 
 image(Id, Context) ->
     F = fun() ->
-        #search_result{result=Result1} = zp_search:search({media_category_image, [{cat,Id}]}, Context),
-        #search_result{result=Result2} = zp_search:search({media_category_depiction, [{cat,Id}]}, Context),
+        #search_result{result=Result1} = z_search:search({media_category_image, [{cat,Id}]}, Context),
+        #search_result{result=Result2} = z_search:search({media_category_depiction, [{cat,Id}]}, Context),
         Result1 ++ Result2
     end,
-    Files = zp_depcache:memo(F, {category_image, Id}, ?DAY, [category]),
+    Files = z_depcache:memo(F, {category_image, Id}, ?DAY, [category]),
     case Files of
         [] -> undefined;
-        _ -> lists:nth(zp_ids:number(length(Files)), Files)
+        _ -> lists:nth(z_ids:number(length(Files)), Files)
     end.
 
     
@@ -374,12 +374,12 @@ is_a(Id, Context) ->
         case m_category:name_to_id(Id, Context) of
             {ok, CatId} ->
                 Path = m_category:get_path(CatId, Context),
-                [ zp_convert:to_atom(m_category:id_to_name(C, Context)) || C <- Path ++ [CatId]];
+                [ z_convert:to_atom(m_category:id_to_name(C, Context)) || C <- Path ++ [CatId]];
             {error, _} ->
                 []
         end
     end,
-    zp_depcache:memo(F, {category_is_a, Id}, ?DAY, [category]).
+    z_depcache:memo(F, {category_is_a, Id}, ?DAY, [category]).
 
 
 %% @doc Check if the id is within another category.
@@ -438,9 +438,9 @@ all_flat_meta(Context) ->
     
 all_flat1(Context, ShowMeta) ->
     F = fun() ->
-        zp_db:q("select c.id, c.lvl, r.name, c.props from category c join rsc r on r.id = c.id order by c.nr", Context)
+        z_db:q("select c.id, c.lvl, r.name, c.props from category c join rsc r on r.id = c.id order by c.nr", Context)
     end,
-    All = zp_depcache:memo(F, {category_flat}, ?WEEK, [category]),
+    All = z_depcache:memo(F, {category_flat}, ?WEEK, [category]),
     All1 = case ShowMeta of
         true -> All;
         false -> lists:filter(fun is_not_meta/1, All)
@@ -461,33 +461,33 @@ all_flat1(Context, ShowMeta) ->
 %% @spec tree(Context) -> Tree
 tree(Context) ->
     F = fun() ->
-        CatTuples = zp_db:q("
+        CatTuples = z_db:q("
                 select c.id, c.parent_id, c.lvl, r.name, c.props 
                 from category c join rsc r on r.id = c.id  
                 order by c.nr", Context),
         build_tree(CatTuples, [])
     end,
-    zp_depcache:memo(F, {category_tree}, ?WEEK, [category]).
+    z_depcache:memo(F, {category_tree}, ?WEEK, [category]).
 
 %% @doc Return the tree of all categories till a certain depth
 %% @spec tree_depth(Depth, Context) -> Tree
 tree_depth(Depth, Context) ->
     F = fun() ->
-        CatTuples = zp_db:q("
+        CatTuples = z_db:q("
                 select c.id, c.parent_id, c.lvl, r.name, c.props 
                 from category c join rsc r on r.id = c.id 
                 where c.lvl <= $1 
                 order by c.nr", [Depth], Context),
         build_tree(CatTuples, [])
     end,
-    zp_depcache:memo(F, {category_tree_depth, Depth}, ?WEEK, [category]).
+    z_depcache:memo(F, {category_tree_depth, Depth}, ?WEEK, [category]).
 
 
 %% @doc Return the tree of all categories below a category id
 %% @spec tree(CatId, Context) -> TreeNode
 tree(CatId, Context) ->
     F = fun() ->
-        CatTuples = zp_db:q("
+        CatTuples = z_db:q("
             select a.id, a.parent_id, a.lvl, r.name, a.props 
             from category a join rsc r on a.id = r.id, category p
             where p.id = $1
@@ -499,13 +499,13 @@ tree(CatId, Context) ->
             [] -> []
         end
     end,
-    zp_depcache:memo(F, {category_tree_cat, CatId}, ?WEEK, [category]).
+    z_depcache:memo(F, {category_tree_cat, CatId}, ?WEEK, [category]).
 
 %% @doc Return the tree of all categories below a category id till a certain depth
 %% @spec tree_depth(CatId, Depth, Context) -> TreeNode
 tree_depth(CatId, Depth, Context) ->
     F = fun() ->
-        CatTuples = zp_db:q("
+        CatTuples = z_db:q("
             select a.id, a.parent_id, a.lvl, r.name, a.props 
             from category a join rsc r on a.id = r.id, category p
             where p.id = $1
@@ -518,7 +518,7 @@ tree_depth(CatId, Depth, Context) ->
             [] -> []
         end
     end,
-    zp_depcache:memo(F, {category_tree_cat_depth, CatId, Depth}, ?WEEK, [category]).
+    z_depcache:memo(F, {category_tree_cat_depth, CatId, Depth}, ?WEEK, [category]).
 
 
 build_tree([], Acc) ->
@@ -543,16 +543,16 @@ build_tree({Id, Parent, Lvl, Name, Props}, Acc, Rest) ->
 %% @doc Renumber all categories so that the left/right and level indices are correct.
 %% @spec renumber(Context) -> ok
 renumber(Context) ->
-    ok = zp_db:transaction(fun renumber_transaction/1, Context),
-    zp_depcache:flush(category),
+    ok = z_db:transaction(fun renumber_transaction/1, Context),
+    z_depcache:flush(category),
     ok.
     
 
 renumber_transaction(Context) ->
-    CatTuples = zp_db:q("select id, parent_id, seq from category order by seq,id", Context),
+    CatTuples = z_db:q("select id, parent_id, seq from category order by seq,id", Context),
     Enums = enumerate(CatTuples),
     [
-        zp_db:update(category, CatId, [
+        z_db:update(category, CatId, [
             {nr, Nr},
             {seq, Nr},
             {lvl, Level},
@@ -566,7 +566,7 @@ renumber_transaction(Context) ->
     ok.
 
     resync_pivot_nr(Context) ->
-        zp_db:q("update rsc r
+        z_db:q("update rsc r
                  set pivot_category_nr = c.nr from category c
                  where c.id = r.category_id 
                    and (r.pivot_category_nr is null or r.pivot_category_nr <> c.nr)", Context).

@@ -3,7 +3,7 @@
 %%
 %% @doc Manage dispatch lists (aka definitions for url patterns). Constructs named urls from dispatch lists.
 
--module(zp_dispatcher).
+-module(z_dispatcher).
 -author("Marc Worrell <marc@worrell.nl>").
 
 -behaviour(gen_server).
@@ -12,10 +12,10 @@
 -export([init/1, handle_call/3, handle_cast/2, handle_info/2, terminate/2, code_change/3]).
 -export([start_link/0, start_link/1]).
 
-%% zp_dispatch exports
+%% z_dispatch exports
 -export([url_for/2, url_for/3, url_for/4, reload/1, reload/2, test/0]).
 
--include_lib("zophrenic.hrl").
+-include_lib("zotonic.hrl").
 
 -record(state, {dispatchlist=undefined, lookup=undefined}).
 
@@ -70,11 +70,11 @@ reload({module_ready}, Context) ->
 %%                     {stop, Reason}
 %% @doc Initiates the server, loads the dispatch list into the webmachine dispatcher
 init(_Args) ->
-    Context = zp_context:new(),
+    Context = z_context:new(),
     process_flag(trap_exit, true),
     State  = #state{dispatchlist=[], lookup=dict:new()},
     State1 = reload_dispatch_list(Context, State),
-    zp_notifier:observe(module_ready, {?MODULE, reload}, Context),
+    z_notifier:observe(module_ready, {?MODULE, reload}, Context),
     {ok, State1}.
 
 
@@ -113,8 +113,8 @@ handle_info(_Info, State) ->
 %% cleaning up. When it returns, the gen_server terminates with Reason.
 %% The return value is ignored.
 terminate(_Reason, _State) ->
-    Context = zp_context:new(),
-    zp_notifier:detach(module_ready, {?MODULE, reload}, Context),
+    Context = z_context:new(),
+    z_notifier:detach(module_ready, {?MODULE, reload}, Context),
     ok.
 
 %% @spec code_change(OldVsn, State, Extra) -> {ok, NewState}
@@ -139,9 +139,9 @@ reload_dispatch_list(Context, State) ->
 
 %% @doc Collect all dispatch lists.  Checks priv/dispatch for all dispatch list definitions.
 collect_dispatch_lists(Context) ->
-    Files      = filelib:wildcard(filename:join([code:lib_dir(zophrenic, priv), "sites", "default", "dispatch", "*"])),
-    Modules    = zp_module_sup:active(Context),
-    ModuleDirs = zp_module_sup:scan(Context),
+    Files      = filelib:wildcard(filename:join([code:lib_dir(zotonic, priv), "sites", "default", "dispatch", "*"])),
+    Modules    = z_module_sup:active(Context),
+    ModuleDirs = z_module_sup:scan(Context),
     ModDisp    = lists:concat(
         [ filelib:wildcard(filename:join([proplists:get_value(M, ModuleDirs), "dispatch", "*"])) || M <- Modules ]
     ),
@@ -214,7 +214,7 @@ dispatch_for_uri_lookup1([{Name, Pattern, _Resource, _Args}|T], Dict) ->
 
 %% @doc Make an uri for the named dispatch with the given parameters
 make_url_for(Name, Args, Escape, UriLookup) ->
-    Name1 = zp_convert:to_atom(Name),
+    Name1 = z_convert:to_atom(Name),
     Args1 = lists:filter(fun
             ({_, <<>>}) -> false;
             ({_, []}) -> false;
@@ -237,7 +237,7 @@ make_url_for1(Args, [], Escape, {QueryStringArgs, Pattern}) ->
                     (S) -> S
                 end,
     UriParts = lists:map(ReplArgs, Pattern), 
-    Uri      = [$/ | zp_utils:combine($/, UriParts)],
+    Uri      = [$/ | z_utils:combine($/, UriParts)],
     case QueryStringArgs of
         [] -> Uri;
         _  ->
@@ -308,7 +308,7 @@ append_qargs(Args, Context) ->
             proplists:delete(qargs, Args);
         true ->
             Args1 = proplists:delete(qargs, Args),
-            Qs = zp_context:get_q_all(Context),
+            Qs = z_context:get_q_all(Context),
             lists:foldr(fun 
                             ({[$q|_]=Key,_Value}=A, Acc) ->
                                 case proplists:is_defined(Key, Args) of
@@ -328,7 +328,7 @@ append_qargs(Args, Context) ->
 % {value, Value, _NewBindings} = erl_eval:exprs(Y, [])}.
 
 test() ->
-    Ctx  = zp_context:new(),
+    Ctx  = z_context:new(),
     List = collect_dispatch_lists(Ctx),
     Dict = dispatch_for_uri_lookup(List),
     dict:to_list(Dict),

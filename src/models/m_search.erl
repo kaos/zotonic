@@ -41,7 +41,7 @@
     get_result/3
 ]).
 
--include_lib("zophrenic.hrl").
+-include_lib("zotonic.hrl").
 
 %% @doc Fetch the value for the key from a model source
 %% @spec m_find_value(Key, Source, Context) -> term()
@@ -74,28 +74,28 @@ m_value(#m{value=#m_search_result{result=Result}}, _Context) ->
 %% @doc Perform a search, wrap the result in a m_search_result record
 %% @spec search(Search, Context) -> #m_search_result{}
 search({SearchName, Props}=Search, Context) ->
-    Result = zp_search:search(Search, Context),
+    Result = z_search:search(Search, Context),
     Total1 = case Result#search_result.total of
         undefined -> length(Result#search_result.result);
         Total -> Total
     end,
     #m_search_result{result=Result, total=Total1, search_name=SearchName, search_props=Props};
 search(SearchName, Context) ->
-    search({zp_convert:to_atom(SearchName), []}, Context).
+    search({z_convert:to_atom(SearchName), []}, Context).
 
 
 %% @doc Perform a paged search, wrap the result in a m_search_result record
 %% @spec search_pager(Search, Context) -> #m_search_result{}
 search_pager({SearchName, Props}, Context) ->
     {Page, PageLen, Props1} = get_paging_props(Props),
-    Result = zp_search:search_pager({SearchName, Props1}, Page, PageLen, Context),
+    Result = z_search:search_pager({SearchName, Props1}, Page, PageLen, Context),
     Total1 = case Result#search_result.total of
         undefined -> length(Result#search_result.result);
         Total -> Total
     end,
     #m_search_result{result=Result, total=Total1, search_name=SearchName, search_props=Props1};
 search_pager(SearchName, Context) ->
-    search_pager({zp_convert:to_atom(SearchName), []}, Context).
+    search_pager({z_convert:to_atom(SearchName), []}, Context).
 
 
 
@@ -121,11 +121,11 @@ get_result(_Key, _Result, _Context) ->
 get_paging_props(Props) ->
     Page = case proplists:get_value(page, Props) of
         undefined -> 1;
-        PageProp -> try zp_convert:to_integer(PageProp) catch _:_ -> 1 end
+        PageProp -> try z_convert:to_integer(PageProp) catch _:_ -> 1 end
     end,
     PageLen = case proplists:get_value(pagelen, Props) of
         undefined -> ?SEARCH_PAGELEN;
-        PageLenProp -> try zp_convert:to_integer(PageLenProp) catch _:_ -> ?SEARCH_PAGELEN end
+        PageLenProp -> try z_convert:to_integer(PageLenProp) catch _:_ -> ?SEARCH_PAGELEN end
     end,
     P1 = proplists:delete(page, Props),
     P2 = proplists:delete(pagelen, P1),

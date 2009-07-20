@@ -6,12 +6,12 @@
 %%      can be sent via the current request being handled or via a comet poll.
 
 
--module(zp_session_page).
+-module(z_session_page).
 -author("Marc Worrell <marc@worrell.nl>").
 
 -behaviour(gen_server).
 
--include_lib("zophrenic.hrl").
+-include_lib("zotonic.hrl").
 
 %% gen_server exports
 -export([init/1, handle_call/3, handle_cast/2, handle_info/2, terminate/2, code_change/3]).
@@ -129,7 +129,7 @@ init(Args) ->
     SessionPid   = proplists:get_value(session_pid, Args),
     IntervalMsec = (?SESSION_PAGE_TIMEOUT div 2) * 1000,
     timer:apply_interval(IntervalMsec, ?MODULE, check_timeout, [self()]),
-    State = #page_state{session_pid=SessionPid, last_detach=zp_utils:now()},
+    State = #page_state{session_pid=SessionPid, last_detach=z_utils:now()},
     {ok, State}.
 
 
@@ -140,30 +140,30 @@ init(Args) ->
 handle_cast(stop, State) ->
     {stop, normal, State};
 handle_cast({set, Key, Value}, State) ->
-    State1 = State#page_state{vars = zp_utils:prop_replace(Key, Value, State#page_state.vars)},
+    State1 = State#page_state{vars = z_utils:prop_replace(Key, Value, State#page_state.vars)},
     {noreply, State1};
 handle_cast({append, Key, Value}, State) ->
-    NewValue = case zp_utils:lookup(Key, State#page_state.vars) of
+    NewValue = case z_utils:lookup(Key, State#page_state.vars) of
         {Key, L} -> L ++ [Value];
         none -> [Value]
     end, 
     
-    State1 = State#page_state{vars = zp_utils:replace(Key, NewValue, State#page_state.vars)},
+    State1 = State#page_state{vars = z_utils:replace(Key, NewValue, State#page_state.vars)},
     {noreply, State1};
 
 handle_cast({comet_attach, CometPid}, State) ->
-    case zp_utils:is_process_alive(CometPid) of
+    case z_utils:is_process_alive(CometPid) of
         true ->
             erlang:monitor(process, CometPid),
             StateComet = State#page_state{comet_pid=CometPid},
             StatePing  = ping_comet(StateComet),
-            zp_session:keepalive(State#page_state.session_pid),
+            z_session:keepalive(State#page_state.session_pid),
             {noreply, StatePing};
         false ->
             {noreply, State}
     end;
 handle_cast(comet_detach, State) ->
-    StateNoComet = State#page_state{comet_pid=undefined, last_detach=zp_utils:now()},
+    StateNoComet = State#page_state{comet_pid=undefined, last_detach=z_utils:now()},
     {noreply, StateNoComet};
 
 handle_cast({add_script, Script}, State) ->
@@ -178,13 +178,13 @@ handle_cast(check_timeout, State) when is_pid(State#page_state.comet_pid) ->
 %% @doc Give the comet process some time to come back, timeout afterwards
 handle_cast(check_timeout, State) ->
     Timeout = State#page_state.last_detach + ?SESSION_PAGE_TIMEOUT,
-    case Timeout =< zp_utils:now() of
+    case Timeout =< z_utils:now() of
         true ->  {stop, normal, State};
         false -> {noreply, State}
     end;
 
 handle_cast(ping, State) ->
-    {noreply, State#page_state{last_detach=zp_utils:now()}};
+    {noreply, State#page_state{last_detach=z_utils:now()}};
 
 %% @doc Trap unknown casts
 handle_cast(Message, State) ->
@@ -217,10 +217,10 @@ handle_call({get, Key}, _From, State) ->
 
 handle_call({incr, Key, Delta}, _From, State) ->
     NV = case proplists:lookup(Key, State#page_state.vars) of
-        {Key, V} -> zp_convert:to_integer(V) + Delta;
+        {Key, V} -> z_convert:to_integer(V) + Delta;
         none -> Delta
     end,
-    State1 = State#page_state{ vars = zp_utils:prop_replace(Key, NV, State#page_state.vars) },
+    State1 = State#page_state{ vars = z_utils:prop_replace(Key, NV, State#page_state.vars) },
     {reply, NV, State1};
 
 handle_call(get_attach_state, _From, State) ->
@@ -241,7 +241,7 @@ handle_call(Message, _From, State) ->
 %%                                   {stop, Reason, State}
 
 handle_info({'DOWN', _MonitorRef, process, Pid, _Info}, State) when Pid == State#page_state.comet_pid ->
-    {noreply, State#page_state{comet_pid=undefined, last_detach=zp_utils:now()}};
+    {noreply, State#page_state{comet_pid=undefined, last_detach=z_utils:now()}};
 handle_info({'DOWN', _MonitorRef, process, Pid, _Info}, State) ->
     Linked = lists:delete(Pid, State#page_state.linked),
     {noreply, State#page_state{linked=Linked}};

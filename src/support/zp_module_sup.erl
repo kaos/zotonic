@@ -5,7 +5,7 @@
 %% @doc Module supervisor.  Starts/restarts module processes.
 %% @todo Take module dependencies into account when starting/restarting modules.
 
--module(zp_module_sup).
+-module(z_module_sup).
 -author('Marc Worrell <marc@worrell.nl>').
 
 -behaviour(supervisor).
@@ -16,7 +16,7 @@
 %% supervisor callbacks
 -export([init/1, deactivate/2, activate/2, active/1, active_dir/1, all/1, scan/1, prio/1, prio_sort/1, module_exists/1]).
 
--include_lib("zophrenic.hrl").
+-include_lib("zotonic.hrl").
 
 %% The default module priority
 -define(MOD_PRIO, 500).
@@ -27,10 +27,10 @@
 start_link() ->
     start_link([]).
 start_link(Args) ->
-    Context = zp_context:new(),
+    Context = z_context:new(),
     Args1 = [{context, Context} | Args],
     Result = supervisor:start_link({local, ?MODULE}, ?MODULE, Args1),
-    zp_notifier:notify({module_ready}, Context),
+    z_notifier:notify({module_ready}, Context),
     Result.
 
 
@@ -52,14 +52,14 @@ upgrade(Context) ->
     [ start_child(Spec) || Spec <- Specs ],
 
     sets:fold(fun(Id, ok) -> 
-                zp_notifier:notify({module_activate, Id}, Context), 
+                z_notifier:notify({module_activate, Id}, Context), 
                 ok
             end, ok, New),
     sets:fold(fun(Id, ok) -> 
-                zp_notifier:notify({module_deactivate, Id}, Context), 
+                z_notifier:notify({module_deactivate, Id}, Context), 
                 ok 
             end, ok, Kill),
-    zp_notifier:notify({module_ready}, Context),
+    z_notifier:notify({module_ready}, Context),
     ok.
 
 
@@ -83,7 +83,7 @@ upgrade(Context) ->
 %% @spec init(proplist()) -> SupervisorTree
 %% @doc supervisor callback.
 init([]) ->
-    init([{context, zp_context:new()}]);
+    init([{context, z_context:new()}]);
 init(Args) ->
     {context, Context} = proplists:lookup(context, Args),
     Ms = lists:filter(fun module_exists/1, active(Context)),
@@ -98,7 +98,7 @@ init(Args) ->
 %% @doc Deactivate a module. The module is marked as deactivated and stopped when it was running.
 %% @spec deactivate(Module, context()) -> ok
 deactivate(Module, Context) ->
-    case zp_db:q("update module set is_active = false, modified = now() where name = $1", [Module], Context) of
+    case z_db:q("update module set is_active = false, modified = now() where name = $1", [Module], Context) of
         1 -> upgrade(Context);
         0 -> ok
     end.
@@ -110,12 +110,12 @@ activate(Module, Context) ->
     Scanned = scan(Context),
     {Module, _Dirname} = proplists:lookup(Module, Scanned),
     F = fun(Ctx) ->
-        case zp_db:q("update module set is_active = true, modified = now() where name = $1", [Module], Ctx) of
-            0 -> zp_db:q("insert into module (name, is_active) values ($1, true)", [Module], Ctx);
+        case z_db:q("update module set is_active = true, modified = now() where name = $1", [Module], Ctx) of
+            0 -> z_db:q("insert into module (name, is_active) values ($1, true)", [Module], Ctx);
             1 -> 1
         end
     end,
-    zp_db:transaction(F, Context),
+    z_db:transaction(F, Context),
     upgrade(Context).
     
     
@@ -123,8 +123,8 @@ activate(Module, Context) ->
 %% @doc Return the list of active modules.
 %% @spec active(context()) -> [ atom() ]
 active(Context) ->
-    Modules = zp_db:q("select name from module where is_active = true order by name", Context),
-    [ zp_convert:to_atom(M) || {M} <- Modules ].
+    Modules = z_db:q("select name from module where is_active = true order by name", Context),
+    [ z_convert:to_atom(M) || {M} <- Modules ].
 
 
 %% @doc Return the list of all active modules and their directories
@@ -138,18 +138,18 @@ active_dir(Context) ->
 %% @doc Return the list of all modules in the database.
 %% @spec active(context()) -> [ atom() ]
 all(Context) ->
-   Modules = zp_db:q("select name from module order by name", Context),
-   [ zp_convert:to_atom(M) || {M} <- Modules ].
+   Modules = z_db:q("select name from module order by name", Context),
+   [ z_convert:to_atom(M) || {M} <- Modules ].
 
 
 %% @doc Scan for a list of modules present in the site's module directories. A module is always a directory,
 %% the name of the directory is the same as the name of the module.
 %% @spec scan(context()) -> [ {atom(), dirname()} ]
 scan(#context{host=Host}) ->
-    Priv  = filename:join([code:lib_dir(zophrenic, priv), "sites", Host, "modules", "mod_*"]),
-    Src   = filename:join([code:lib_dir(zophrenic, modules), "mod_*"]),
+    Priv  = filename:join([code:lib_dir(zotonic, priv), "sites", Host, "modules", "mod_*"]),
+    Src   = filename:join([code:lib_dir(zotonic, modules), "mod_*"]),
     Files = filelib:wildcard(Priv) ++ filelib:wildcard(Src),
-    [ {zp_convert:to_atom(filename:basename(F)), F} ||  F <- Files ].
+    [ {z_convert:to_atom(filename:basename(F)), F} ||  F <- Files ].
 
 
 %% @doc Return the priority of a module. Default priority is 500, lower is higher priority.  Never crash on a missing module.
@@ -169,7 +169,7 @@ prio(Module) ->
 %% @doc Sort the results of a scan on module priority first, module name next. The list is made up of {module, Values} tuples
 %% @spec prio_sort(proplist()) -> proplist()
 prio_sort(ModuleProps) ->
-    WithPrio = [ {zp_module_sup:prio(M), {M, X}} || {M, X} <- ModuleProps ],
+    WithPrio = [ {z_module_sup:prio(M), {M, X}} || {M, X} <- ModuleProps ],
     Sorted = lists:sort(WithPrio),
     [ X || {_Prio, X} <- Sorted ].
 

@@ -8,5 +8,5 @@
 
 html(Context) ->
 	ErrorCode = "404 Page not found",
-    Html = zp_template:render("error.tpl", [{error_code, ErrorCode}], Context),
-	zp_context:output(Html, Context).
+    Html = z_template:render("error.tpl", [{error_code, ErrorCode}], Context),
+	z_context:output(Html, Context).

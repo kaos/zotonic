@@ -67,10 +67,10 @@ LiveValidation.massValidate = function(validations)
 LiveValidation.prototype = 
 {
 
-    validClass: 'zp_valid',
-    invalidClass: 'zp_invalid',
-    messageClass: 'zp_validation_message',
-    validFieldClass: 'zp_valid_field',
+    validClass: 'z_valid',
+    invalidClass: 'z_invalid',
+    messageClass: 'z_validation_message',
+    validFieldClass: 'z_valid_field',
     invalidFieldClass: 'form-field-error',
 
     /**

@@ -5,7 +5,7 @@
 %% @doc Conversion functions for all kinds of data types. 
 %% @doc Changes to Rusty's version: added to_utc(), undefined handling and more to_bool cases.
 
--module(zp_convert).
+-module(z_convert).
 -author("Rusty Klophaus").
 -author("Marc Worrell <marc@worrell.nl>").
 

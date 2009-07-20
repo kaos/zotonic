@@ -5,7 +5,7 @@
 %%      loading path, and locate resources relative
 %%      to this application's path.
 
--module(zophrenic_deps).
+-module(zotonic_deps).
 -author('author <author@example.com>').
 
 -export([ensure/0, ensure/1]).

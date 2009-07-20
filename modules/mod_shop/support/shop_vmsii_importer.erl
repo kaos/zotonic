@@ -19,7 +19,7 @@
     test1/0
 ]).
 
--include_lib("zophrenic.hrl").
+-include_lib("zotonic.hrl").
 
 %%====================================================================
 %% API
@@ -42,7 +42,7 @@ start_link(Args) when is_list(Args) ->
 %%                     {stop, Reason}
 %% @doc Initiates the server.
 init(_Args) ->
-    zp_notifier:observe(dropbox_file, self()),
+    z_notifier:observe(dropbox_file, self()),
     {ok, []}.
 
 %% @spec handle_call(Request, From, State) -> {reply, Reply, State} |

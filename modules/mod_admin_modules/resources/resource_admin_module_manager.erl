@@ -12,7 +12,7 @@
 -include_lib("resource_html.hrl").
 
 is_authorized(ReqData, Context) ->
-    zp_auth:wm_is_authorized(ReqData, Context).
+    z_auth:wm_is_authorized(ReqData, Context).
 
 
 html(Context) ->
@@ -20,5 +20,5 @@ html(Context) ->
         {page_admin_modules, true},
         {modules, mod_admin_modules:all(Context)}
     ],
-	Html = zp_template:render("admin_modules.tpl", Vars, Context),
-	zp_context:output(Html, Context).
+	Html = z_template:render("admin_modules.tpl", Vars, Context),
+	z_context:output(Html, Context).

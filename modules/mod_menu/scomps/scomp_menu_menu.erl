@@ -8,7 +8,7 @@
 
 -export([init/1, varies/2, code_change/3, terminate/1, render/4]).
 
--include("zophrenic.hrl").
+-include("zotonic.hrl").
 
 
 %%      init(Args) -> {ok, State} | {error, Error}
@@ -50,14 +50,14 @@ render(Params, _Vars, Context, _State) ->
     Menu = get_menu(Context),
     Id = proplists:get_value(id, Params),
     CurrentId = find_id(Id, Menu),
-    case zp_depcache:get({menu, CurrentId, Context#context.language}) of
+    case z_depcache:get({menu, CurrentId, Context#context.language}) of
         {ok, CachedMenu} ->
             {ok, CachedMenu};
         undefined ->
             {IdAcc, LIs} = build_menu(Menu, CurrentId, 1, [], [], Context),
             UL = ["<ul id=\"navigation\" class=\"clearfix at-menu\">", LIs, "</ul>"],
             NewMenu = iolist_to_binary(UL),
-            zp_depcache:set({menu, CurrentId, Context#context.language}, NewMenu, ?DAY, [CurrentId, menu | IdAcc]),
+            z_depcache:set({menu, CurrentId, Context#context.language}, NewMenu, ?DAY, [CurrentId, menu | IdAcc]),
             {ok, NewMenu}
     end.
 

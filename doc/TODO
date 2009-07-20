@@ -9,7 +9,7 @@ Result is javascript, might be redirect javascript.
 Validation:
 	- attach validations to data of the to be posted element
 	- sign with nonce and md5
-	- name="bla" add to the post:  "zp_v=bla:email:nonce:aa1b8db21157fae46b72e8731f4023da"
+	- name="bla" add to the post:  "z_v=bla:email:nonce:aa1b8db21157fae46b72e8731f4023da"
 
   wf:wire(continueButton, nameTextBox, #validate { validators=[
     #is_required { text="Required." },
@@ -31,13 +31,13 @@ When you don't supply the delegate then either:
 
 You can access:
 
-	zp_context:q()
-	zp_context:q_validated()
+	z_context:q()
+	z_context:q_validated()
 	
 Javascript needed:
 
 	add-some-validation(#bla),
-	$(#bla).data("zp_validation", "pickled-postback-data");
+	$(#bla).data("z_validation", "pickled-postback-data");
 
 TODO:
 	- add live validation refs in javascript  - done.
@@ -52,7 +52,7 @@ TODO:
 		- check all pickled validation handlers -done.
 			- postback the invalid fields + error messages - done.
 		- call event(submit, ...) of resource (or delegate - as wired to the form) - done.
-		- add javascript zp_validation_error(Id, Error) - done.
+		- add javascript z_validation_error(Id, Error) - done.
 	- add more erlang validations - done.
 	- add redirect action - done.
 
@@ -207,7 +207,7 @@ which is translated as:
  % ...
  Language = erlydtl_runtime:fetch_value(language, Variables),
  % ...
- zp_trans:trans({trans, [{en, "english text"}]}, Language)
+ z_trans:trans({trans, [{en, "english text"}]}, Language)
  % ...
 
 We always need to apply an extra runtime filter on a value to make sure that the value is not a {trans} from a database field.
@@ -222,9 +222,9 @@ or:
 
 
 TODO:
-	- Add the zp_i18n directory for i18n modules - done
+	- Add the z_i18n directory for i18n modules - done
 	- Add the {{ _ en="english text" }} construct - done
-	- Delay zp_trans:trans application for parameters of filters - nice to have - not done yet
+	- Delay z_trans:trans application for parameters of filters - nice to have - not done yet
 	- Modify erlydtl filters so that optional {trans} parameter (and argument) are translated - done
 	- Move language to #context{} - done.
 	- Add all gettext functionality (get .po files, use them, refetch them)
@@ -239,9 +239,9 @@ Especially the erlydtl_runtime:value_lookup() routine must have the context as a
 TODO:
 	- modify erlydtl compile - done.
 	- modify erlydtl runtime lookups - done.
-	- modify zp_scomp to correctly handle contexts - done.
+	- modify z_scomp to correctly handle contexts - done.
 	- modify scomp behaviour + implementations - done.
-	- modify calls to zp_template, add vars parameter - done.
+	- modify calls to z_template, add vars parameter - done.
 	
 
 == Handling of resources in Erlang code and templates ==

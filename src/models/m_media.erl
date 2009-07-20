@@ -27,7 +27,7 @@
     replace_file/4
 ]).
 
--include_lib("zophrenic.hrl").
+-include_lib("zotonic.hrl").
 
 
 
@@ -49,20 +49,20 @@ m_value(#m{}, _Context) ->
     undefined.
 
 
-%% @doc Return the identification of a medium. Used by zp_media_identify:identify()
+%% @doc Return the identification of a medium. Used by z_media_identify:identify()
 %% @spec identify(ImageFilePath, Context) -> {ok, PropList} | {error, Reason}
 identify(Id, Context) when is_integer(Id) ->
-    case zp_db:assoc_row("select id, mime, width, height, orientation from medium where id = $1", [Id], Context) of
+    case z_db:assoc_row("select id, mime, width, height, orientation from medium where id = $1", [Id], Context) of
         undefined ->
             {error, enoent};
         Props ->
             {ok, Props}
     end;
 identify(ImageFile, Context) ->
-    case zp_media_archive:is_archived(ImageFile, Context) of
+    case z_media_archive:is_archived(ImageFile, Context) of
         true ->
-            RelFile = zp_media_archive:rel_archive(ImageFile, Context),
-            case zp_db:assoc_row("select id, mime, width, height, orientation from medium where filename = $1", [RelFile], Context) of
+            RelFile = z_media_archive:rel_archive(ImageFile, Context),
+            case z_db:assoc_row("select id, mime, width, height, orientation from medium where filename = $1", [RelFile], Context) of
                 undefined ->
                     {error, enoent};
                 Props ->
@@ -77,14 +77,14 @@ identify(ImageFile, Context) ->
 exists(undefined, _Context) ->
     false;
 exists([C|_] = Name, Context) when is_integer(C) ->
-    case zp_utils:only_digits(Name) of
+    case z_utils:only_digits(Name) of
         true -> exists(list_to_integer(Name), Context);
         false -> false
     end;
 exists(Id, Context) when is_binary(Id) ->
     exists(binary_to_list(Id), Context);
 exists(Id, Context) -> 
-    case zp_db:q1("select id from medium where id = $1", [Id], Context) of
+    case z_db:q1("select id from medium where id = $1", [Id], Context) of
         undefined -> false;
         _ -> true
     end.
@@ -93,8 +93,8 @@ exists(Id, Context) ->
 %% @doc Get the medium record with the id
 %% @spec get(RscId, Context) -> PropList
 get(Id, Context) ->
-    F = fun() -> zp_db:assoc_props_row("select * from medium where id = $1", [Id], Context) end,
-    zp_depcache:memo(F, {medium, Id}, ?WEEK, [Id]).
+    F = fun() -> z_db:assoc_props_row("select * from medium where id = $1", [Id], Context) end,
+    z_depcache:memo(F, {medium, Id}, ?WEEK, [Id]).
 
 
 %% @doc Get the medium record that depicts the resource id. "depiction" Predicates are preferred, when 
@@ -105,7 +105,7 @@ depiction(Id, Context) when is_integer(Id) ->
     F = fun() ->
         find_previewable(m_edge:objects(Id, depiction, Context) ++ [Id], Context)
     end,
-    zp_depcache:memo(F, {depiction, Id}, ?WEEK, [Id]).
+    z_depcache:memo(F, {depiction, Id}, ?WEEK, [Id]).
 
     %% @doc Find the first image in the the list of depictions that can be used to generate a preview.
     find_previewable([], _Context) ->
@@ -113,7 +113,7 @@ depiction(Id, Context) when is_integer(Id) ->
     find_previewable([Id|Rest], Context) ->
         case get(Id, Context) of
             {ok, Props} ->
-                case zp_media_preview:can_generate_preview(proplists:get_value(mime, Props)) of
+                case z_media_preview:can_generate_preview(proplists:get_value(mime, Props)) of
                     true -> Props;
                     false -> find_previewable(Rest, Context)
                 end;
@@ -131,12 +131,12 @@ depicts(Id, Context) ->
 %% @doc Delete the medium at the id.  The file is queued for later deletion.
 %% @spec delete(RscId, Context) -> ok | {error, Reason}
 delete(Id, Context) ->
-    case zp_acl:rsc_editable(Id, Context) of
+    case z_acl:rsc_editable(Id, Context) of
         true ->
             Depicts = depicts(Id, Context),
-            zp_db:delete(medium, Id, Context),
-            [ zp_depcache:flush(DepictId) || DepictId <- Depicts ],
-            zp_depcache:flush(Id),
+            z_db:delete(medium, Id, Context),
+            [ z_depcache:flush(DepictId) || DepictId <- Depicts ],
+            z_depcache:flush(Id),
             ok;
         false ->
             {error, eacces}
@@ -149,14 +149,14 @@ delete(Id, Context) ->
 replace(Id, Props, Context) ->
     Depicts = depicts(Id, Context),
     F = fun(Ctx) ->
-        {ok, _}  = zp_db:delete(medium, Id, Ctx),
-        {ok, Id} = zp_db:insert(medium, [{id, Id} | Props], Ctx)
+        {ok, _}  = z_db:delete(medium, Id, Ctx),
+        {ok, Id} = z_db:insert(medium, [{id, Id} | Props], Ctx)
     end,
     
-    case zp_db:transaction(F, Context) of
+    case z_db:transaction(F, Context) of
         {ok, _} -> 
-            [ zp_depcache:flush(DepictId) || DepictId <- Depicts ],
-            zp_depcache:flush(Id),
+            [ z_depcache:flush(DepictId) || DepictId <- Depicts ],
+            z_depcache:flush(Id),
             ok;
         {rollback, {Error, _Trace}} ->
              {error, Error}
@@ -189,10 +189,10 @@ insert_file(File, Props, Context) ->
                 Error
         end
     end, 
-    case zp_db:transaction(InsertFun, Context) of
+    case z_db:transaction(InsertFun, Context) of
         {ok, Id} ->
             CatList = m_rsc:is_a(Id, Context),
-            [ zp_depcache:flush(Cat) || Cat <- CatList ],
+            [ z_depcache:flush(Cat) || Cat <- CatList ],
             {ok, Id};
         {error, Reason} -> 
             {error, Reason}
@@ -206,25 +206,25 @@ replace_file(File, RscId, Context) ->
     replace_file(File, RscId, [], Context).
 
 replace_file(File, RscId, Props, Context) ->
-    case zp_acl:rsc_editable(RscId, Context) of
+    case z_acl:rsc_editable(RscId, Context) of
         true ->
             OriginalFilename = proplists:get_value(original_filename, Props, File),
             PropsMedia = add_medium_info(File, [{original_filename, OriginalFilename}], Context),
-            SafeRootName = zp_string:to_rootname(OriginalFilename),
-            SafeFilename = SafeRootName ++ zp_media_identify:extension(proplists:get_value(mime, PropsMedia)),
-            ArchiveFile = zp_media_archive:archive_copy_opt(File, SafeFilename, Context),
+            SafeRootName = z_string:to_rootname(OriginalFilename),
+            SafeFilename = SafeRootName ++ z_media_identify:extension(proplists:get_value(mime, PropsMedia)),
+            ArchiveFile = z_media_archive:archive_copy_opt(File, SafeFilename, Context),
             RootName = filename:rootname(filename:basename(ArchiveFile)),
             MediumRowProps = [
                 {id, RscId}, 
                 {filename, ArchiveFile}, 
                 {rootname, RootName}, 
-                {is_deletable_file, not zp_media_archive:is_archived(File, Context)}
+                {is_deletable_file, not z_media_archive:is_archived(File, Context)}
                 | PropsMedia
             ],
 
             F = fun(Ctx) ->
-                zp_db:delete(medium, RscId, Context),
-                case zp_db:insert(medium, MediumRowProps, Ctx) of
+                z_db:delete(medium, RscId, Context),
+                case z_db:insert(medium, MediumRowProps, Ctx) of
                     {ok, _MediaId} ->
                         % When the resource is in the media category, then move it to the correct sub-category depending
                         % on the mime type of the uploaded file.
@@ -245,9 +245,9 @@ replace_file(File, RscId, Props, Context) ->
             end,
             
             Depicts = depicts(RscId, Context),
-            {ok, Id} = zp_db:transaction(F, Context),
-            [ zp_depcache:flush(DepictId) || DepictId <- Depicts ],
-            zp_depcache:flush(Id),
+            {ok, Id} = z_db:transaction(F, Context),
+            [ z_depcache:flush(DepictId) || DepictId <- Depicts ],
+            z_depcache:flush(Id),
             {ok, Id};
         false ->
             {error, eacces}
@@ -255,7 +255,7 @@ replace_file(File, RscId, Props, Context) ->
 
 
     rsc_is_media_cat(Id, Context) ->
-        case zp_db:q1("select c.name from rsc c join rsc r on r.category_id = c.id where r.id = $1", [Id], Context) of
+        case z_db:q1("select c.name from rsc c join rsc r on r.category_id = c.id where r.id = $1", [Id], Context) of
             <<"media">> -> true;
             <<"image">> -> true;
             <<"audio">> -> true;
@@ -275,7 +275,7 @@ add_medium_info(File, Props, Context) ->
     end,
     PropsMime = case proplists:get_value(mime, PropsSize) of
         undefined ->
-            case zp_media_identify:identify(File, Context) of
+            case z_media_identify:identify(File, Context) of
                 {ok, MediaInfo} -> MediaInfo ++ PropsSize;
                 {error, _Reason} -> PropsSize
             end;

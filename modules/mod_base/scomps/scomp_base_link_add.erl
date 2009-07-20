@@ -8,7 +8,7 @@
 
 -export([init/1, varies/2, code_change/3, terminate/1, render/4]).
 
--include("zophrenic.hrl").
+-include("zotonic.hrl").
 
 init(_Args) -> {ok, []}.
 varies(_Params, _Context) -> undefined.
@@ -16,11 +16,11 @@ code_change(_OldVsn, State, _Extra) -> {ok, State}.
 terminate(_Reason) -> ok.
 
 render(Params, _Vars, Context, _State) ->
-    Id        = zp_ids:optid(proplists:get_value(id, Params)),
-    SubjectId = zp_convert:to_integer(proplists:get_value(subject_id, Params)), 
+    Id        = z_ids:optid(proplists:get_value(id, Params)),
+    SubjectId = z_convert:to_integer(proplists:get_value(subject_id, Params)), 
     Predicate = proplists:get_value(predicate, Params), 
 
-    Anchor = zp_tags:render_tag(
+    Anchor = z_tags:render_tag(
                         <<"a">>,
                         [
                     		{<<"id">>,    Id},
@@ -31,8 +31,8 @@ render(Params, _Vars, Context, _State) ->
                     	"Add a connection"),
 
     Html = [<<"<span>">>, Anchor, <<"</span>">>],
-    Context1 = zp_render:render(Html, Context),
-    Context2 = zp_render:wire(
+    Context1 = z_render:render(Html, Context),
+    Context2 = z_render:wire(
                 Id, 
                 {event,[
                         {type, click}, 

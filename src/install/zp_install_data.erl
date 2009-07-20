@@ -4,7 +4,7 @@
 %%
 %% @doc Initialize the database with start data.
 
--module(zp_install_data).
+-module(z_install_data).
 -author("Marc Worrell <marc@worrell.nl").
 
 %% interface functions
@@ -13,7 +13,7 @@
     install_category/1
 ]).
 
--include_lib("zophrenic.hrl").
+-include_lib("zotonic.hrl").
 
 %% @doc Insert boot data into the database.
 %% @spec install(Connection) -> ok
@@ -35,7 +35,7 @@ install_config(C) ->
     ?DEBUG("Inserting config keys"),
     {ok, 1} = pgsql:equery(C, 
         "insert into config (module, key, value, props, modified) values ($1, $2, $3, $4, now())", 
-        ["zotonic", "version", ?ZOPHRENIC_VERSION, []]),
+        ["zotonic", "version", ?ZOTONIC_VERSION, []]),
     {ok, 1} = pgsql:equery(C, 
         "insert into config (module, key, value, props, modified) values ($1, $2, $3, $4, now())", 
         ["i18n", "language", "en", []]),
@@ -211,7 +211,7 @@ install_rsc(C) ->
 %% @doc Install the admin user as an user.  Uses the hard coded password "admin" when no password defined in the environment.
 install_identity(C) ->
     ?DEBUG("Inserting username/password for the admin"),
-    Password = case os:getenv("ZP_ADMINPASSWORD") of false -> "admin"; PW -> PW end,
+    Password = case os:getenv("ZOTONIC_ADMINPASSWORD") of false -> "admin"; PW -> PW end,
     Hash = m_identity:hash(Password),
     {ok, 1} = pgsql:equery(C, "
         insert into identity (rsc_id, type, key, is_unique, propb)

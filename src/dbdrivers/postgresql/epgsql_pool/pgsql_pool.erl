@@ -15,8 +15,8 @@ opts(Opts) ->
     Defaults = [{host, "localhost"},
                 {port, 5432},
                 {password, ""},
-                {username, "zophrenic"},
-                {database, "zophrenic"}],
+                {username, "zotonic"},
+                {database, "zotonic"}],
     Opts2 = lists:ukeysort(1, proplists:unfold(Opts)),
     proplists:normalize(lists:ukeymerge(1, Opts2, Defaults), []).
 

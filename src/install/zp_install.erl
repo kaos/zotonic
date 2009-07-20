@@ -5,10 +5,10 @@
 %% @doc Install Zophrenic, loads the datamodel into the database
 %% Assumes the database has already been created (which normally needs superuser permissions anyway)
 %%
-%% CREATE DATABASE zophrenic WITH OWNER = zophrenic ENCODING = 'UTF8';
+%% CREATE DATABASE zotonic WITH OWNER = zotonic ENCODING = 'UTF8';
 %% CREATE LANGUAGE "plpgsql";
 
--module(zp_install).
+-module(z_install).
 -author("Marc Worrell <marc@worrell.nl").
 
 %% interface functions
@@ -22,14 +22,14 @@ install(Host) ->
     {ok, C} = pgsql_pool:get_connection(Host),
     ok = pgsql:with_transaction(C, fun install_all/1),
     pgsql_pool:return_connection(Host, C),
-    Context = zp_context:new_for_host(Host),
+    Context = z_context:new_for_host(Host),
     m_category:renumber(Context),
     ok.
 
 
 install_all(C) ->
     install_sql_list(C, model_pgsql()),
-    zp_install_data:install(C),
+    z_install_data:install(C),
     ok.
 
 install_sql_list(C, Model) ->
@@ -45,7 +45,7 @@ model_pgsql() ->
     "CREATE TABLE config
     (
         id serial NOT NULL,
-        module character varying(80) NOT NULL DEFAULT 'zophrenic'::character varying,
+        module character varying(80) NOT NULL DEFAULT 'zotonic'::character varying,
         key character varying(80) NOT NULL DEFAULT ''::character varying,
         value character varying(1000) NOT NULL DEFAULT ''::character varying,
         props bytea,

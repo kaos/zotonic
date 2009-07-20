@@ -10,7 +10,7 @@
 -export([init/1, varies/2, code_change/3, terminate/1, render/4]).
 -export([test/0]).
 
--include("zophrenic.hrl").
+-include("zotonic.hrl").
 
 % Pages before/after the current page
 -define(DELTA, 2).
@@ -72,13 +72,13 @@ build_html(Page, Pages, Dispatch, DispatchArgs, Context) ->
 prev(Page, _Pages, _Dispatch, _DispatchArgs, _Context) when Page =< 1 ->
     ["\n<li>&laquo; prev</li>"];
 prev(Page, _Pages, Dispatch, DispatchArgs, Context) ->
-    Url = zp_dispatcher:url_for(Dispatch, [{page,Page-1}|DispatchArgs], Context),
+    Url = z_dispatcher:url_for(Dispatch, [{page,Page-1}|DispatchArgs], Context),
     ["\n<li><a href=\"",Url,"\">&laquo; prev</a></li>"].
 
 next(Page, Pages, _Dispatch, _DispatchArgs, _Context) when Page >= Pages ->
     ["\n<li>next &raquo;</li>"];
 next(Page, _Pages, Dispatch, DispatchArgs, Context) ->
-    Url = zp_dispatcher:url_for(Dispatch, [{page,Page+1}|DispatchArgs], Context),
+    Url = z_dispatcher:url_for(Dispatch, [{page,Page+1}|DispatchArgs], Context),
     ["\n<li><a href=\"",Url,"\">next &raquo;</a></li>"].
 
 
@@ -114,9 +114,9 @@ pages(Page, Pages) ->
 
 
 urls(Start, Middle, End, Dispatch, DispatchArgs, Context) ->
-    UrlStart  = [ {N, zp_dispatcher:url_for(Dispatch, [{page,N}|DispatchArgs], Context)} || N <- Start ],
-    UrlMiddle = [ {N, zp_dispatcher:url_for(Dispatch, [{page,N}|DispatchArgs], Context)} || N <- Middle ],
-    UrlEnd    = [ {N, zp_dispatcher:url_for(Dispatch, [{page,N}|DispatchArgs], Context)} || N <- End ],
+    UrlStart  = [ {N, z_dispatcher:url_for(Dispatch, [{page,N}|DispatchArgs], Context)} || N <- Start ],
+    UrlMiddle = [ {N, z_dispatcher:url_for(Dispatch, [{page,N}|DispatchArgs], Context)} || N <- Middle ],
+    UrlEnd    = [ {N, z_dispatcher:url_for(Dispatch, [{page,N}|DispatchArgs], Context)} || N <- End ],
     {Part1,Next} = case Middle of
         [] ->
             {UrlStart, max(Start) + 1};
@@ -152,7 +152,7 @@ max(_,B) -> B.
 
 
 test() ->
-    C = zp_context:new(),
+    C = z_context:new(),
     R = #search_result{result=[a], pages=100, page=10},
     {ok, H} = render([{result,R}], [], C, []),
     list_to_binary(H).

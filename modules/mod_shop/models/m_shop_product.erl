@@ -23,7 +23,7 @@
     get_variants_as_proplist/2
 ]).
 
--include_lib("zophrenic.hrl").
+-include_lib("zotonic.hrl").
 -include_lib("../include/shop.hrl").
 
 %% @doc Fetch the value for the key from a model source
@@ -55,11 +55,11 @@ m_value(#m{}, _Context) ->
 
 %% @doc Return the sku with the id.
 get_sku(Id, Context) ->
-    zp_db:assoc_row("select * from shop_sku where id = $1", [Id], Context).
+    z_db:assoc_row("select * from shop_sku where id = $1", [Id], Context).
 
 update_sku(Id, Props, Context) ->
-    true = zp_acl:has_role(admin, Context),
-    zp_db:update(shop_sku, Id, Props, Context).
+    true = z_acl:has_role(admin, Context),
+    z_db:update(shop_sku, Id, Props, Context).
     
 
 get_best_price_as_proplist(Id, Context) ->
@@ -88,9 +88,9 @@ get_best_price(Id, Variant, Context) ->
 %% @todo Add the dependency of this list.  Should bepend on all changes of the skus
 get_skus(Id, Context) ->
     F = fun() ->
-        zp_db:assoc_props("select * from shop_sku where rsc_id = $1 and available order by variant asc", [Id], Context)
+        z_db:assoc_props("select * from shop_sku where rsc_id = $1 and available order by variant asc", [Id], Context)
     end,
-    zp_depcache:memo(F, {skus, Id}, ?HOUR).
+    z_depcache:memo(F, {skus, Id}, ?HOUR).
  
 
 %% @doc Fetch the sku and its price that offers the best price for the product
@@ -145,7 +145,7 @@ is_filled(_) -> true.
 
 get_sku_as_proplist(Id, Variant, Context) ->
     Skus = get_skus(Id, Context),
-    V    = zp_convert:to_binary(Variant),
+    V    = z_convert:to_binary(Variant),
     case lists:filter(fun(Sku) -> proplists:get_value(variant, Sku) == V end, Skus) of
         [S|_] -> S;
         [] -> undefined
@@ -189,11 +189,11 @@ get_variants_as_proplist(Id, Context) ->
     combine_variant(A, B) ->
         StockA = proplists:get_value(stock_avail, A),
         StockB = proplists:get_value(stock_avail, B),
-        zp_utils:prop_replace(stock_avail, StockA + StockB, A).
+        z_utils:prop_replace(stock_avail, StockA + StockB, A).
     
     set_actual_price(Sku, Date) ->
         {Price, OldPrice, _IsVariant} = sku_to_price(Sku, Date),
-        zp_utils:prop_replace(price_actual, Price, [{price_old, OldPrice} | Sku]).
+        z_utils:prop_replace(price_actual, Price, [{price_old, OldPrice} | Sku]).
 
     
 %% @doc Allocate all skus.  Calculate the average allocated price and average old price.
@@ -238,7 +238,7 @@ allocate_sku_price(Id, Variant, N, Context) ->
 %% back ordered sku. The skus are allocated starting with the cheapest.
 %% @spec allocate_sku(Id, Variant, N, Context) -> {Allocated, {BoNr, BoN, BoPrice, BoOldPrice}}
 allocate_sku(Id, Variant, N, Context) ->
-    Skus = zp_db:q("
+    Skus = z_db:q("
             select id, article_nr, stock_avail, price_incl, price_excl, 
                     special_price_incl, special_price_excl, special_start, special_end,
                     medium_id

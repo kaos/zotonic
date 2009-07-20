@@ -27,7 +27,7 @@
 
 %-include_lib("kernel/include/file.hrl").
 -include_lib("webmachine_resource.hrl").
--include_lib("zophrenic.hrl").
+-include_lib("zotonic.hrl").
 
 %% These are used for file serving (move to metadata)
 -record(state, {
@@ -54,7 +54,7 @@
     }).
 
 -define(MAX_AGE, 315360000).
--define(MEDIA_PATH,   filename:join([code:lib_dir(zophrenic, priv), "sites", "default", "files", "archive"])).
+-define(MEDIA_PATH,   filename:join([code:lib_dir(zotonic, priv), "sites", "default", "files", "archive"])).
 
 
 init(ConfigProps) ->
@@ -72,7 +72,7 @@ content_types_provided(ReqData, State) ->
     case State#state.mime of
         undefined ->
             Path = wrq:disp_path(ReqData),
-            CT = zp_utils:guess_mime(Path),
+            CT = z_utils:guess_mime(Path),
             {[{CT, provide_content}], ReqData, State#state{mime=CT}};
         Mime -> 
             {[{Mime, provide_content}], ReqData, State}
@@ -91,10 +91,10 @@ encodings_provided(ReqData, State) ->
 
 
 resource_exists(ReqData, State) ->
-    Context = zp_context:new(ReqData, ?MODULE),
+    Context = z_context:new(ReqData, ?MODULE),
     Path   = wrq:disp_path(ReqData),
     Cached = case State#state.use_cache of
-        true -> zp_depcache:get(cache_key(Path));
+        true -> z_depcache:get(cache_key(Path));
         _    -> undefined
     end,
     case Cached of
@@ -180,7 +180,7 @@ finish_request(ReqData, State) ->
                                         last_modified=State#state.last_modified,
                                         body=State#state.body
                                     },
-                            zp_depcache:set(cache_key(State#state.path), Cache),
+                            z_depcache:set(cache_key(State#state.path), Cache),
                             {ok, ReqData, State};
                         _ ->
                             % No cache or no gzip'ed version (file system cache is fast enough for image serving)
@@ -217,7 +217,7 @@ file_exists(State, Name, Context) ->
 file_exists1([], _RelName, _Context) ->
     false;
 file_exists1([ModuleIndex|T], RelName, Context) when is_atom(ModuleIndex) ->
-    case zp_module_indexer:find(ModuleIndex, RelName, Context) of
+    case z_module_indexer:find(ModuleIndex, RelName, Context) of
         {ok, File} -> {true, File};
         {error, _} -> file_exists1(T, RelName, Context)
     end;
@@ -246,7 +246,7 @@ is_text(_Mime) -> false.
 %% The original media should be in State#media_path
 %% The generated image should be created in State#root
 ensure_preview(ReqData, Path, State) ->
-    {Filepath, PreviewPropList, _Checksum, _ChecksumBaseString} = zp_media_tag:url2props(Path),
+    {Filepath, PreviewPropList, _Checksum, _ChecksumBaseString} = z_media_tag:url2props(Path),
     case mochiweb_util:safe_relative_path(Filepath) of
         undefined ->
             {false, ReqData, State};
@@ -257,9 +257,9 @@ ensure_preview(ReqData, Path, State) ->
                     % Media file exists, perform the resize
                     % @todo make use of a resize server, so that we do not resize too many files at the same time.
                     [Root|_] = State#state.root,
-                    Context = zp_context:new(ReqData, ?MODULE),
+                    Context = z_context:new(ReqData, ?MODULE),
                     PreviewFile = filename:join(Root, Path),
-                    case zp_media_preview:convert(MediaFile, PreviewFile, PreviewPropList, Context) of
+                    case z_media_preview:convert(MediaFile, PreviewFile, PreviewPropList, Context) of
                         ok -> resource_exists(ReqData, State);
                         {error, Reason} -> throw(Reason)
                     end;

@@ -4,7 +4,7 @@
 %%
 %% @doc Utility functions for html.
 
--module(zp_html).
+-module(z_html).
 -author("Marc Worrell <marc@worrell.nl").
 
 %% interface functions
@@ -15,7 +15,7 @@
     strip/1
 ]).
 
--include_lib("zophrenic.hrl").
+-include_lib("zotonic.hrl").
 
 
 %% @doc Escape all properties used for an update statement. Only leaves the body property in tact.

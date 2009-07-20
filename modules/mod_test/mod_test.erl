@@ -16,7 +16,7 @@
 -export([
 ]).
 
--include_lib("zophrenic.hrl").
+-include_lib("zotonic.hrl").
 
 %%====================================================================
 %% API

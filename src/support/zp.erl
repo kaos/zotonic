@@ -16,15 +16,15 @@
     restart/0
 ]).
 
--include_lib("zophrenic.hrl").
+-include_lib("zotonic.hrl").
 
 %% @doc Send a notification
 n(Msg, Context) ->
-    zp_notifier:notify(Msg, Context).
+    z_notifier:notify(Msg, Context).
 
 %% @doc Send a notification to the first observer
 n1(Msg, Context) ->
-    zp_notifier:notify1(Msg, Context).
+    z_notifier:notify1(Msg, Context).
 
 %% @doc (Re)make all erlang source modules and reset the caches.
 m() -> 
@@ -33,13 +33,13 @@ m() ->
 
 %% @doc Reset all caches, reload the dispatch rules and rescan all modules.
 flush() ->
-    C = zp_context:new(),
-    zp_depcache:flush(),
-    zp_dispatcher:reload(C),
+    C = z_context:new(),
+    z_depcache:flush(),
+    z_dispatcher:reload(C),
     n({module_ready}, C).
 
 %% @doc Full restart of Zophrenic
 restart() ->
-    zophrenic:stop(),
-    zophrenic:start().
+    zotonic:stop(),
+    zotonic:start().
 

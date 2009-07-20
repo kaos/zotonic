@@ -20,7 +20,7 @@
     test/0
 ]).
 
--include_lib("zophrenic.hrl").
+-include_lib("zotonic.hrl").
 -include_lib("../include/shop.hrl").
 
 
@@ -35,7 +35,7 @@ install(Context) ->
 
 %% Handle log entries that were not handled, might be because of crashed between saving the entry and running the queries.
 periodic_log_check(Context) ->
-    LogIds = zp_db:q("
+    LogIds = z_db:q("
         select id from shop_adyen_log
         where created < now() - interval '30 minutes'
           and handled = false
@@ -49,7 +49,7 @@ periodic_log_check(Context) ->
 %% @spec payment_uri(Id, Context) -> String
 payment_start(Id, Context) ->
     NowSecs = calendar:datetime_to_gregorian_seconds(calendar:local_time()),
-    Order = zp_db:assoc_row("select * from shop_order where id = $1", [Id], Context),
+    Order = z_db:assoc_row("select * from shop_order where id = $1", [Id], Context),
 
     MerchantReference = integer_to_list(Id),
     PaymentAmount     = integer_to_list(proplists:get_value(total_price_incl, Order)),
@@ -57,7 +57,7 @@ payment_start(Id, Context) ->
     ShipBeforeDate    = erlydtl_dateformat:format(calendar:gregorian_seconds_to_datetime(NowSecs + ?SHOP_ORDER_SHIPMENT), "Y-m-d"),
     SkinCode          = m_config:get_value(adyen, skincode, Context),
     MerchantAccount   = m_config:get_value(adyen, merchant_account, Context),
-    ShopperLocale     = case zp_context:language(Context) of en -> "en_GB"; Lang -> atom_to_list(Lang) end,
+    ShopperLocale     = case z_context:language(Context) of en -> "en_GB"; Lang -> atom_to_list(Lang) end,
     SessionValidity   = erlydtl_dateformat:format(calendar:universal_time_to_local_time(proplists:get_value(expires, Order)), "c"),
     ShopperEmail      = proplists:get_value(email, Order),
     ShopperReference  = integer_to_list(proplists:get_value(visitor_id, Order)),
@@ -90,7 +90,7 @@ payment_start(Id, Context) ->
         {"merchantSig", MerchantSig}
     ],
 
-    PaymentPage = zp_convert:to_list(m_config:get_value(adyen, payment_page, Context)),
+    PaymentPage = z_convert:to_list(m_config:get_value(adyen, payment_page, Context)),
     PaymentPage ++ [$? | mochiweb_util:urlencode(Args)].
 
 
@@ -99,13 +99,13 @@ payment_start(Id, Context) ->
 %% @spec payment_completion(Context) -> {ok, OrderId} | {error, Reason}
 payment_completion(Context) ->
     % http://127.0.0.1:8000/adyen/result?merchantReference=16&skinCode=OnCtxIfz&shopperLocale=nl&paymentMethod=ideal&authResult=AUTHORISED&pspReference=8612409656055305&merchantSig=8AjEyaKiP1xz%2Bp8Ef3BK50T%2Fu1Y%3D
-    MerchantReference = zp_context:get_q("merchantReference", Context, ""),
-    SkinCode       = zp_context:get_q("skinCode", Context, ""),
-    _ShopperLocale = zp_context:get_q("shopperLocale", Context, ""),
-    PaymentMethod  = zp_context:get_q("paymentMethod", Context, ""),
-    AuthResult     = zp_context:get_q("authResult", Context, ""),
-    PspReference   = zp_context:get_q("pspReference", Context, ""),
-    MerchantSig    = zp_context:get_q("merchantSig", Context),
+    MerchantReference = z_context:get_q("merchantReference", Context, ""),
+    SkinCode       = z_context:get_q("skinCode", Context, ""),
+    _ShopperLocale = z_context:get_q("shopperLocale", Context, ""),
+    PaymentMethod  = z_context:get_q("paymentMethod", Context, ""),
+    AuthResult     = z_context:get_q("authResult", Context, ""),
+    PspReference   = z_context:get_q("pspReference", Context, ""),
+    MerchantSig    = z_context:get_q("merchantSig", Context),
     Secret         = m_config:get_value(adyen, secret, Context),
 
     CheckSig = try
@@ -148,10 +148,10 @@ handle_notification(LogId, Context) ->
         handle_notification_trans(LogId, Ctx),
         ok
     end,
-    ok = zp_db:transaction(F, Context).
+    ok = z_db:transaction(F, Context).
 
 handle_notification_trans(LogId, Context) ->
-    {OrderId, EventCode, Success, PaymentMethod, PspReference} = zp_db:q_row("
+    {OrderId, EventCode, Success, PaymentMethod, PspReference} = z_db:q_row("
                 select shop_order_id, event_code, success, payment_method, psp_reference
                 from shop_adyen_log
                 where id = $1", [LogId], Context),
@@ -160,7 +160,7 @@ handle_notification_trans(LogId, Context) ->
         undefined -> 
             ok;
         _ ->
-            NewState = case zp_string:to_upper(EventCode) of
+            NewState = case z_string:to_upper(EventCode) of
                 "AUTHORISATION" ->
                     % When success = true then we got a payment
                     case Success of
@@ -184,33 +184,33 @@ handle_notification_trans(LogId, Context) ->
                 _ -> shop_order:payment_completion(OrderId, NewState, PaymentMethod, PspReference, Context)
             end
     end,
-    zp_db:q("update shop_adyen_log set handled = true where id = $1", [LogId], Context),
+    z_db:q("update shop_adyen_log set handled = true where id = $1", [LogId], Context),
     ok.
     
 
 %% @doc Save the notification.  {ok, LogId, OrderId} when saved or {duplicate, LogId, OrderId}
 save_notification(Qs, Context) ->
-    OrderId = try zp_convert:to_integer(proplists:get_value("merchantReference", Qs)) catch _:_ -> undefined end,
+    OrderId = try z_convert:to_integer(proplists:get_value("merchantReference", Qs)) catch _:_ -> undefined end,
     Cols = [
         {shop_order_id, OrderId},
         {handled, false},
-        {live, zp_convert:to_bool(proplists:get_value("live", Qs))},
+        {live, z_convert:to_bool(proplists:get_value("live", Qs))},
         {event_code, proplists:get_value("eventCode", Qs)},
         {psp_reference, proplists:get_value("pspReference", Qs)},
         {original_reference, proplists:get_value("originalReference", Qs)},
         {merchant_account_code, proplists:get_value("merchantAccountCode", Qs)},
         {event_date, proplists:get_value("eventDate", Qs)},
-        {success, zp_convert:to_bool(proplists:get_value("success", Qs))},
+        {success, z_convert:to_bool(proplists:get_value("success", Qs))},
         {payment_method, proplists:get_value("paymentMethod", Qs)},
         {operations, proplists:get_value("operations", Qs)},
         {reason, proplists:get_value("reason", Qs)},
         {currency, proplists:get_value("currency", Qs)},
-        {value, zp_convert:to_integer(proplists:get_value("value", Qs))},
+        {value, z_convert:to_integer(proplists:get_value("value", Qs))},
         {request, Qs}
     ],
 
     % Check for a duplicate
-    Row = zp_db:q_row("
+    Row = z_db:q_row("
                     select shop_order_id, max(id), max(success::integer)
                     from shop_adyen_log 
                     where event_code = $1 
@@ -222,7 +222,7 @@ save_notification(Qs, Context) ->
     case Row of
         undefined ->
             % new
-            {ok, Id} = zp_db:insert(shop_adyen_log, Cols, Context),
+            {ok, Id} = z_db:insert(shop_adyen_log, Cols, Context),
             {ok, Id, OrderId};
         {_Found, MaxId, MaxSuccess} ->
             % duplicate
@@ -233,7 +233,7 @@ save_notification(Qs, Context) ->
                         1 ->
                             {duplicate, MaxId, OrderId};
                         0 ->
-                            {ok, Id} = zp_db:insert(shop_adyen_log, Cols, Context),
+                            {ok, Id} = z_db:insert(shop_adyen_log, Cols, Context),
                             {ok, Id, OrderId}
                     end;
                 false ->

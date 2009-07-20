@@ -1,59 +1,59 @@
-Zophrenic installation
+Zotonic installation
 ======================
 
 You will need:
 
 1. Install Erlang R12B (13B has not been tested yet).
 2. Install ImageMagick 'convert' and 'identify' tools (also install libjpeg, -tiff, -png and other required libraries).
-   Make sure that the convert and identify tools are in your path so that zophrenic can find them.
+   Make sure that the convert and identify tools are in your path so that zotonic can find them.
 3. Install PostgreSQL (preferably 8.3 or newer).
-4. A copy of the Zophrenic source code.
+4. A copy of the Zotonic source code.
 
 
 Steps:
 
-1. Type "make" in the root of zophrenic (there where the Makefile is located).
+1. Type "make" in the root of zotonic (there where the Makefile is located).
 
 2. Create an user and database in PostgreSQL:
 
-    CREATE USER zophrenic WITH PASSWORD 'yourdbpassword';
-    CREATE DATABASE zophrenic WITH OWNER = zophrenic ENCODING = 'UTF8';
-    GRANT ALL ON DATABASE zophrenic TO zophrenic;
-    \c zophrenic
+    CREATE USER zotonic WITH PASSWORD 'yourdbpassword';
+    CREATE DATABASE zotonic WITH OWNER = zotonic ENCODING = 'UTF8';
+    GRANT ALL ON DATABASE zotonic TO zotonic;
+    \c zotonic
     CREATE LANGUAGE "plpgsql";
 
-3. Copy the file "doc/zophrenic.sh" to a place that is handy for you.
+3. Copy the file "doc/zotonic.sh" to a place that is handy for you.
 
-4. Edit the "zophrenic.sh" script, edit and uncomment at least the following keys:
+4. Edit the "zotonic.sh" script, edit and uncomment at least the following keys:
 
-   The place of zophrenic and the zophrenic.sh script:
+   The place of zotonic and the zotonic.sh script:
 
     BASE
     ME
 
    Passwords and secret signing keys:
 	
-    ZP_DBPASSWORD
-    ZP_ADMINPASSWORD
-    ZOPHRENIC_SIGN_KEY_SIMPLE
-    ZOPHRENIC_SIGN_KEY
+    ZOTONIC_DBPASSWORD
+    ZOTONIC_ADMINPASSWORD
+    ZOTONIC_SIGN_KEY_SIMPLE
+    ZOTONIC_SIGN_KEY
 
 5. Make sure that the directory "priv/sites/default/files" and all its subdirectories are readable 
-   and writeable for the current user. (Which is the user zophrenic will run under.)
+   and writeable for the current user. (Which is the user zotonic will run under.)
 
-6. Start zophrenic in debug mode:
+6. Start zotonic in debug mode:
 
-    zophrenic.sh debug
+    zotonic.sh debug
 
-7. You see zophrenic starting up, lots of messages pass by, and zophrenic will install the initial database.
+7. You see zotonic starting up, lots of messages pass by, and zotonic will install the initial database.
    When something goes wrong here, then it is almost always a problem with the database connection. Check your 
-   database configuration in the zophrenic.sh file.
+   database configuration in the zotonic.sh file.
 
 8. Point your browser to 
 	
     http://127.0.0.1:8000/
 	
-   or logon as admin (with the password you gave at ZP_ADMINPASSWORD) at: 
+   or logon as admin (with the password you gave at ZOTONIC_ADMINPASSWORD) at: 
 
     http://127.0.0.1:8000/admin/
 
@@ -63,5 +63,5 @@ Steps:
   
    Next time you can start with:
 
-    zophrenic.sh start
+    zotonic.sh start
 

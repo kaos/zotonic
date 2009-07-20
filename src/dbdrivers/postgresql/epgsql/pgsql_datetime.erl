@@ -2,7 +2,7 @@
 
 -module(pgsql_datetime).
 
--include_lib("zophrenic.hrl").
+-include_lib("zotonic.hrl").
 
 -export([decode/3, encode/3, test/0]).
 

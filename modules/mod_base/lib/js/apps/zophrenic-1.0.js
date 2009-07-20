@@ -6,25 +6,25 @@
  * Based on nitrogen.js which is copyright 2008-2009 Rusty Klophaus
  */
 
-var	zp_comet_is_running      = false;
-var zp_is_in_postback        = false;
-var zp_postbacks             = [];
-var zp_default_form_postback = false;
-var zp_input_updater         = false;
+var	z_comet_is_running      = false;
+var z_is_in_postback        = false;
+var z_postbacks             = [];
+var z_default_form_postback = false;
+var z_input_updater         = false;
 
 // We need to set the domain of the session cookie to 'test'
 // Then we can try to make an xhr request to 0.test, 1.test etc.
 //document.domain = 'test';
-//var zp_xhr_domain = 'test';
+//var z_xhr_domain = 'test';
 
 
-function zp_dialog_open(title, text)
+function z_dialog_open(title, text)
 {
     $('.dialog').remove();
     $.dialogAdd({title: title, text: text, width: "450px"});
 }
 
-function zp_dialog_close()
+function z_dialog_close()
 {
     $('.dialog-close').click();
 }
@@ -32,7 +32,7 @@ function zp_dialog_close()
 
 /*** Growl messages ***/
 
-function zp_growl_add(message, stay, type)
+function z_growl_add(message, stay, type)
 {
 	stay = stay || false;
 	type = type || 'notice';
@@ -49,32 +49,32 @@ function zp_growl_add(message, stay, type)
 	}
 }
 
-function zp_growl_close()
+function z_growl_close()
 {
 	jQuery. jQuery.noticeRemove($('.notice-item-wrapper'), 400);
 }
 
 /*** Postback loop ***/
 
-function zp_postback_loop() 
+function z_postback_loop() 
 {
-	if (!zp_is_in_postback && zp_postbacks.length != 0) 
+	if (!z_is_in_postback && z_postbacks.length != 0) 
 	{
     	// For now, allow only a single postback at a time.
-    	zp_is_in_postback++;
+    	z_is_in_postback++;
 
-    	var o = zp_postbacks.shift();
-    	zp_do_postback(o.triggerID, o.postback, o.extraParams);
+    	var o = z_postbacks.shift();
+    	z_do_postback(o.triggerID, o.postback, o.extraParams);
 
-    	setTimeout("zp_postback_loop()", 2);
+    	setTimeout("z_postback_loop()", 2);
 	}
 	else
 	{
-    	setTimeout("zp_postback_loop()", 20);
+    	setTimeout("z_postback_loop()", 20);
 	}
 }
 
-function zp_opt_cancel(obj)
+function z_opt_cancel(obj)
 {
     var nodeName = obj.nodeName.toLowerCase();
     if(nodeName == 'radio' || nodeName == 'checkbox')
@@ -87,7 +87,7 @@ function zp_opt_cancel(obj)
 	}
 }
 
-function zp_queue_postback(triggerID, postback, extraParams, noTriggerValue) 
+function z_queue_postback(triggerID, postback, extraParams, noTriggerValue) 
 {
     var triggerValue = '';
 
@@ -102,24 +102,24 @@ function zp_queue_postback(triggerID, postback, extraParams, noTriggerValue)
 	o.postback		= postback;
 	o.extraParams	= extraParams;
 	
-	zp_postbacks.push(o);
+	z_postbacks.push(o);
 }
 
-function zp_do_postback(triggerID, postback, extraParams) 
+function z_do_postback(triggerID, postback, extraParams) 
 {
 	// Get params...
 	var params = 
 		"postback=" + urlencode(postback) + 
-		"&zp_trigger_id=" + urlencode(triggerID) +
-		"&zp_pageid=" + urlencode(zp_pageid) + 
+		"&z_trigger_id=" + urlencode(triggerID) +
+		"&z_pageid=" + urlencode(z_pageid) + 
 		"&" + $.param(extraParams);
 	
-	zp_ajax(params);
+	z_ajax(params);
 }
 
-function zp_ajax(params) 
+function z_ajax(params) 
 {
-	zp_start_spinner();	
+	z_start_spinner();	
 
 	$.ajax({ 
 		url: 		'/postback',
@@ -128,14 +128,14 @@ function zp_ajax(params)
 		dataType: 	'text',
 		success: function(data, textStatus) 
 	    {
-			zp_is_in_postback--;
-			zp_stop_spinner();
+			z_is_in_postback--;
+			z_stop_spinner();
 			
 			try 
 			{
 				//$.misc.log("SUCCESS: " + transport.responseText);
 				eval(data);
-                zp_init_postback_forms();
+                z_init_postback_forms();
 			} 
 			catch(e)
 			{
@@ -145,8 +145,8 @@ function zp_ajax(params)
 		},
 		error: function(xmlHttpRequest, textStatus, errorThrown) 
 	    {
-		    zp_is_in_postback--;
-			zp_stop_spinner();
+		    z_is_in_postback--;
+			z_stop_spinner();
 		    
 		    $.misc.error("FAIL: " + textStatus);
 	    }
@@ -156,21 +156,21 @@ function zp_ajax(params)
 
 /*** Comet long poll ***/
 
-function zp_comet_start()
+function z_comet_start()
 {
-	if (!zp_comet_is_running)
+	if (!z_comet_is_running)
 	{
-		setTimeout("zp_comet();", 1000);
-		zp_comet_is_running = true;
+		setTimeout("z_comet();", 1000);
+		z_comet_is_running = true;
 	}
 }
 
-function zp_comet() 
+function z_comet() 
 {
 	$.ajax({ 
 		url: '/comet',
 		type:'post',
-		data: "zp_pageid=" + urlencode(zp_pageid),
+		data: "z_pageid=" + urlencode(z_pageid),
 		dataType: 'text',
 		success:
 		    function(data, textStatus) 
@@ -178,17 +178,17 @@ function zp_comet()
     			try {
     				//alert("SUCCESS: " + data);
     				eval(data);
-                    zp_init_postback_forms();
+                    z_init_postback_forms();
     			} catch (E) {
     				alert("Error evaluating Comet return value: " + data);
     				alert(E);
     			}
-    			setTimeout("zp_comet();", 10);
+    			setTimeout("z_comet();", 10);
     		},
 		error: 
 		    function(xmlHttpRequest, textStatus, errorThrown) 
 		    {
-			    setTimeout("zp_comet();", 1000);
+			    setTimeout("z_comet();", 1000);
 		    }
 	});
 	return;
@@ -196,24 +196,24 @@ function zp_comet()
 
 /*** Utility functions ***/
 
-function zp_is_enter_key(event) 
+function z_is_enter_key(event) 
 {
 	return (event && event.keyCode == 13);
 }
 
 /*** Spinner, showen when waiting for a postback ***/
 
-function zp_start_spinner()
+function z_start_spinner()
 {
-    if(zp_is_in_postback > 0)
+    if(z_is_in_postback > 0)
     {
     	$('#spinner').fadeIn(100);
     }
 }
 
-function zp_stop_spinner() 
+function z_stop_spinner() 
 {
-    if(zp_is_in_postback == 0)
+    if(z_is_in_postback == 0)
     {
     	$('#spinner').fadeOut(100);
     }
@@ -221,19 +221,19 @@ function zp_stop_spinner()
 
 /*** Drag & drop interface to the postback ***/
 
-function zp_draggable(dragObj, dragOptions, dragTag) 
+function z_draggable(dragObj, dragOptions, dragTag) 
 {
-	$(dragObj).draggable(dragOptions).data("zp_drag_tag", dragTag);	
+	$(dragObj).draggable(dragOptions).data("z_drag_tag", dragTag);	
 }
 
-function zp_droppable(dropObj, dropOptions, dropPostbackInfo) 
+function z_droppable(dropObj, dropOptions, dropPostbackInfo) 
 {
 	dropOptions.greedy = true;
 	dropOptions.drop = function(ev, ui) 
     {
-    	var dragTag = $(ui.draggable[0]).data("zp_drag_tag");
+    	var dragTag = $(ui.draggable[0]).data("z_drag_tag");
     	var dragItem = new Array({name: 'drag_item', value: dragTag});
-    	zp_queue_postback(this.id, dropPostbackInfo, dragItem, true);
+    	z_queue_postback(this.id, dropPostbackInfo, dragItem, true);
     };
 
 	$(dropObj).droppable(dropOptions);
@@ -241,12 +241,12 @@ function zp_droppable(dropObj, dropOptions, dropPostbackInfo)
 
 /*** Sorter and sortables interface to the postback ***/
 
-function zp_sortable(sortableItem, sortTag) 
+function z_sortable(sortableItem, sortTag) 
 {
-	$(sortableItem).data("zp_sort_tag", sortTag);
+	$(sortableItem).data("z_sort_tag", sortTag);
 }
 
-function zp_sorter(sortBlock, sortOptions, sortPostbackInfo) 
+function z_sorter(sortBlock, sortOptions, sortPostbackInfo) 
 {
 	sortOptions.update = function() 
 	{
@@ -254,7 +254,7 @@ function zp_sorter(sortBlock, sortOptions, sortPostbackInfo)
 
 		for (var i = 0; i < this.childNodes.length; i++) 
 		{
-			var sortTag = $(this.childNodes[i]).data("zp_sort_tag");
+			var sortTag = $(this.childNodes[i]).data("z_sort_tag");
 			if (sortTag)
 			{
     			if (sortItems != "") 
@@ -267,7 +267,7 @@ function zp_sorter(sortBlock, sortOptions, sortPostbackInfo)
 		
 		var sortItem = new Array({name: 'sort_items', value: sortItems});
 		
-		zp_queue_postback(this.id, sortPostbackInfo, sortItem, true);
+		z_queue_postback(this.id, sortPostbackInfo, sortItem, true);
 	};
 	
 	$(sortBlock).sortable(sortOptions);
@@ -276,22 +276,22 @@ function zp_sorter(sortBlock, sortOptions, sortPostbackInfo)
 
 /*** typeselect input field ***/
 
-function zp_typeselect(ElementId, postbackInfo)
+function z_typeselect(ElementId, postbackInfo)
 {
-	if (zp_input_updater)
+	if (z_input_updater)
 	{
-		clearTimeout(zp_input_updater);
-		zp_input_updater = false;
+		clearTimeout(z_input_updater);
+		z_input_updater = false;
 	}
 	
-	zp_input_updater = setTimeout(function()
+	z_input_updater = setTimeout(function()
 	{
         var obj = $('#'+ElementId);
 
 		if(obj.val().length >= 2)
 		{
 			obj.addClass('loading');
-			zp_queue_postback(ElementId, postbackInfo)
+			z_queue_postback(ElementId, postbackInfo)
 		}
 	}, 400);
 }
@@ -300,7 +300,7 @@ function zp_typeselect(ElementId, postbackInfo)
 
 // Grab all "postback" forms, let them be handled by Ajax postback calls.
 // This function can be run multiple times.
-function zp_init_postback_forms()
+function z_init_postback_forms()
 {
 	$("form[action*='postback']")
 	.each(function() {
@@ -334,14 +334,14 @@ function zp_init_postback_forms()
 
         this.clk = this.clk_x = this.clk_y = null;
 
-		var postback	= $(this).data("zp_submit_postback");
-		var action		= $(this).data("zp_submit_action");
+		var postback	= $(this).data("z_submit_postback");
+		var action		= $(this).data("z_submit_action");
 		var form_id		= $(this).attr('id');
 		var validations = $(this).formValidationPostback();
         
 		if(!postback)
 		{
-			postback = zp_default_form_postback;
+			postback = z_default_form_postback;
 		}
 
 		if(action)
@@ -365,7 +365,7 @@ function zp_init_postback_forms()
         }
         else
         {
-            zp_queue_postback(form_id, postback, arguments.concat(validations)); 
+            z_queue_postback(form_id, postback, arguments.concat(validations)); 
 		}
 
 		event.stopPropagation();
@@ -381,8 +381,8 @@ $.fn.postbackFileForm = function(trigger_id, postback, validations)
     var a = validations;
 
     a.push({name: "postback", value: postback});
-    a.push({name: "zp_trigger_id", value: trigger_id});
-    a.push({name: "zp_pageid", value: zp_pageid});
+    a.push({name: "z_trigger_id", value: trigger_id});
+    a.push({name: "z_pageid", value: z_pageid});
 
     var $form = this;
     var options = {
@@ -588,10 +588,10 @@ $.fn.formValidationPostback = function()
 
 		if (n)
 		{
-			var v = $(el).data("zp_postback_validation");
+			var v = $(el).data("z_postback_validation");
 			if (v)
 			{
-				a.push({name: "zp_v", value: n+":"+v})
+				a.push({name: "z_v", value: n+":"+v})
 			}
 		}
 	}
@@ -599,14 +599,14 @@ $.fn.formValidationPostback = function()
 }
 
 // Initialize a validator for the element #id
-function zp_init_validator(id, args)
+function z_init_validator(id, args)
 {
     var elt = $('#'+id);
     if (elt)
     {
-        if (!$(elt).data("zp_live_validation"))
+        if (!$(elt).data("z_live_validation"))
         {
-            $(elt).data("zp_live_validation", new LiveValidation(id, args));
+            $(elt).data("z_live_validation", new LiveValidation(id, args));
         }
     }
     else
@@ -616,9 +616,9 @@ function zp_init_validator(id, args)
 }
 
 // Add a validator to the input field
-function zp_add_validator(id, type, args)
+function z_add_validator(id, type, args)
 {
-	var v = $('#'+id).data("zp_live_validation");
+	var v = $('#'+id).data("z_live_validation");
 
 	if(v)
 	{
@@ -636,23 +636,23 @@ function zp_add_validator(id, type, args)
 	}
 }
 
-function zp_set_validator_postback(id, postback)
+function z_set_validator_postback(id, postback)
 {
     if (postback)
     {
-        var pb = $('#'+id).data("zp_postback_validation");
+        var pb = $('#'+id).data("z_postback_validation");
         
         if (pb)
         {
             $.misc.error("Element #"+id+" had already a validation postback, add all validations as one batch.", $('#' +id));
         }
 
-        $('#'+id).data("zp_postback_validation", postback);
+        $('#'+id).data("z_postback_validation", postback);
     }
 }
 
 
-function zp_validation_error(id, error)
+function z_validation_error(id, error)
 {
     if (error == 'invalid')
     {

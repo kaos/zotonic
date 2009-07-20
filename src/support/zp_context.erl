@@ -3,7 +3,7 @@
 
 %% @doc Request context for zophenic request evaluation.
 
--module(zp_context).
+-module(z_context).
 -author("Marc Worrell <marc@worrell.nl>").
 
 -export([
@@ -72,18 +72,18 @@
     copy_scripts/2
 ]).
 
--include_lib("zophrenic.hrl").
+-include_lib("zotonic.hrl").
 
 
 %% @doc Create a new context record for the current request.
 new(ReqData, Module) ->
     Context = #context{wm_reqdata=ReqData, resource_module=Module},
-    Context#context{language=zp_trans:default_language(Context)}.
+    Context#context{language=z_trans:default_language(Context)}.
 
 %% @doc Return a new empty context
 new() -> 
     Context = #context{},
-    Context#context{language=zp_trans:default_language(Context)}.
+    Context#context{language=z_trans:default_language(Context)}.
 
 %% @doc Return an almost empty context for the database connection only, nothing else is initialised
 new_for_host(#context{host=Host}) ->
@@ -121,7 +121,7 @@ prune_for_database(Context) ->
 %% @doc Cleanup a context for cacheable scomp handling.  Resets most of the accumulators to prevent duplicating
 %% between different (cached) renderings.
 prune_for_scomp(VisibleFor, Context) ->
-    zp_acl:set_visible_for(VisibleFor, Context#context{
+    z_acl:set_visible_for(VisibleFor, Context#context{
         dbc=undefined,
 	    wm_reqdata=undefined,
 		updates=[],
@@ -146,7 +146,7 @@ depickle({pickled_context, Host, UserId, Language, _VisitorId}) ->
     Context = #context{host=Host, language=Language},
     case UserId of
         undefined -> Context;
-        _ -> zp_acl:logon(UserId, Context)
+        _ -> z_acl:logon(UserId, Context)
     end.
 
 %% @spec output(list(), Context) -> {io_list(), Context}
@@ -163,12 +163,12 @@ output1([#context{}=C|Rest], Context, Acc) ->
     {Rendered, Context1} = output1(C#context.render, Context, []),
     output1(Rest, merge_scripts(C, Context1), [Rendered|Acc]);
 output1([{script}|Rest], Context, Acc) ->
-    DefaultFormPostback = zp_render:make_postback_info("", "submit", undefined, undefined, undefined, Context),
+    DefaultFormPostback = z_render:make_postback_info("", "submit", undefined, undefined, undefined, Context),
     Script = [
             <<"\n\n<script type='text/javascript'>\n$(function() {\n">>,
-                zp_script:get_page_startup_script(Context),
-                zp_script:get_script(Context), 
-                <<"zp_init_postback_forms();\nzp_default_form_postback = \"">>, DefaultFormPostback, $", $;,
+                z_script:get_page_startup_script(Context),
+                z_script:get_script(Context), 
+                <<"z_init_postback_forms();\nz_default_form_postback = \"">>, DefaultFormPostback, $", $;,
             <<"\n});\n</script>\n">>
            ],
     output1(Rest, Context, [Script|Acc]);
@@ -228,9 +228,9 @@ ensure_all(Context) ->
 ensure_session(Context) ->
     case Context#context.session_pid of
         undefined ->
-            Context1 = zp_session_manager:ensure_session(Context),
-            zp_visitor:associate_session(Context1#context.visitor_pid, Context1#context.session_pid),
-            Context2 = zp_auth:logon_from_session(Context1),
+            Context1 = z_session_manager:ensure_session(Context),
+            z_visitor:associate_session(Context1#context.visitor_pid, Context1#context.session_pid),
+            Context2 = z_auth:logon_from_session(Context1),
             add_nocache_headers(Context2);
         _ ->
             Context    
@@ -240,7 +240,7 @@ ensure_session(Context) ->
 ensure_visitor(Context) ->
     case Context#context.visitor_pid of
         undefined ->
-            zp_visitor_manager:ensure_visitor(Context);
+            z_visitor_manager:ensure_visitor(Context);
         _ ->
             Context    
     end.
@@ -250,7 +250,7 @@ ensure_page_session(Context) ->
     case Context#context.page_pid of
         undefined ->
             Context1 = ensure_session(Context),
-            zp_session:ensure_page_session(Context1, Context#context.session_pid);
+            z_session:ensure_page_session(Context1, Context#context.session_pid);
         _ ->
             Context
     end.
@@ -269,7 +269,7 @@ ensure_qs(Context) ->
             {Body, ContextParsed} = parse_form_urlencoded(Context),
             Query    = wrq:req_qs(ReqData),
             Combined = PathArgs ++ Body ++ Query,
-            QProps = zp_utils:prop_replace('q', Combined, ContextParsed#context.props),
+            QProps = z_utils:prop_replace('q', Combined, ContextParsed#context.props),
             ContextParsed#context{props=QProps}
     end.
 
@@ -301,7 +301,7 @@ set_resource_module(Module, Context) ->
 %% @doc Get a request parameter, either from the query string or the post body.  Post body has precedence over the query string.
 get_q(Key, Context) ->
     case proplists:lookup('q', Context#context.props) of
-        {'q', Qs} -> proplists:get_value(zp_convert:to_list(Key), Qs);
+        {'q', Qs} -> proplists:get_value(z_convert:to_list(Key), Qs);
         none -> undefined
     end.
 
@@ -312,7 +312,7 @@ get_q(Key, Context) ->
 %% @doc Get a request parameter, either from the query string or the post body.  Post body has precedence over the query string.
 get_q(Key, Context, Default) ->
     case proplists:lookup('q', Context#context.props) of
-        {'q', Qs} -> proplists:get_value(zp_convert:to_list(Key), Qs, Default);
+        {'q', Qs} -> proplists:get_value(z_convert:to_list(Key), Qs, Default);
         none -> undefined
     end.
 
@@ -332,7 +332,7 @@ get_q_all(Context) ->
 %% @doc Get the all the parameters with the same name, returns the empty list when non found.
 get_q_all(Key, Context) ->
     {'q', Qs} = proplists:lookup('q', Context#context.props),
-    proplists:get_all_values(zp_convert:to_list(Key), Qs).
+    proplists:get_all_values(z_convert:to_list(Key), Qs).
     
 
 %% @spec get_q_validated(Key, Context) -> Value
@@ -341,7 +341,7 @@ get_q_all(Key, Context) ->
 get_q_validated(Key, Context) ->
     case proplists:lookup('q_validated', Context#context.props) of
         {'q_validated', Qs} ->
-            case proplists:lookup(zp_convert:to_list(Key), Qs) of
+            case proplists:lookup(z_convert:to_list(Key), Qs) of
                 {_Key, Value} -> Value;
                 none -> throw({not_validated, Key})
             end
@@ -354,12 +354,12 @@ get_q_validated(Key, Context) ->
 
 %% @doc Add a script to the all pages of the session. Used for comet feeds.
 add_script_session(Script, Context) ->
-    zp_session:add_script(Script, Context#context.session_pid).
+    z_session:add_script(Script, Context#context.session_pid).
 
 
 %% @doc Add a script to the page in the user agent.  Used for comet feeds.
 add_script_page(Script, Context) ->
-    zp_session_page:add_script(Script, Context#context.page_pid).
+    z_session_page:add_script(Script, Context#context.page_pid).
 
 
 %% @doc Spawn a new process, link it to the session process.
@@ -369,7 +369,7 @@ spawn_link_session(Module, Func, Args, Context) ->
                     session_pid = Context#context.session_pid,
                     page_pid    = Context#context.page_pid
                 },
-    zp_session:spawn_link(Module, Func, Args, LinkContext).
+    z_session:spawn_link(Module, Func, Args, LinkContext).
 
 %% @doc Spawn a new process, link it to the page process.  Used for comet feeds.
 spawn_link_page(Module, Func, Args, Context) ->
@@ -378,13 +378,13 @@ spawn_link_page(Module, Func, Args, Context) ->
                     session_pid = Context#context.session_pid,
                     page_pid    = Context#context.page_pid
                 },
-    zp_session_page:spawn_link(Module, Func, Args, LinkContext).
+    z_session_page:spawn_link(Module, Func, Args, LinkContext).
 
 
 %% @doc Ensure that we have an id for the visitor
 ensure_visitor_id(Context) ->
     Context1 = ensure_visitor(Context),
-    {zp_visitor:ensure_visitor_id(Context1#context.visitor_pid), Context1}.
+    {z_visitor:ensure_visitor_id(Context1#context.visitor_pid), Context1}.
 
 
 %% ------------------------------------------------------------------------------------
@@ -415,7 +415,7 @@ get_value(Key, Context) ->
 %% @spec set_visitor(Key, Value, Context) -> Context
 %% @doc Set the value of the visitor variable Key to Value
 set_visitor(Key, Value, Context) ->
-    zp_visitor:set(Key, Value, Context#context.visitor_pid),
+    z_visitor:set(Key, Value, Context#context.visitor_pid),
     Context.
 
 %% @spec get_visitor(Key, Context) -> Value
@@ -423,13 +423,13 @@ set_visitor(Key, Value, Context) ->
 get_visitor(_Key, #context{visitor_pid=undefined}) ->
     undefined;
 get_visitor(Key, Context) ->
-    zp_visitor:get(Key, Context#context.visitor_pid).
+    z_visitor:get(Key, Context#context.visitor_pid).
 
 
 %% @spec set_session(Key, Value, Context) -> Context
 %% @doc Set the value of the session variable Key to Value
 set_session(Key, Value, Context) ->
-    zp_session:set(Key, Value, Context#context.session_pid),
+    z_session:set(Key, Value, Context#context.session_pid),
     Context.
 
 %% @spec get_session(Key, Context) -> Value
@@ -437,17 +437,17 @@ set_session(Key, Value, Context) ->
 get_session(_Key, #context{session_pid=undefined}) ->
     undefined;
 get_session(Key, Context) ->
-    zp_session:get(Key, Context#context.session_pid).
+    z_session:get(Key, Context#context.session_pid).
 
 %% @spec incr_session(Key, Increment, Context) -> {NewValue, NewContext}
 %% @doc Increment the session variable Key
 incr_session(Key, Value, Context) ->
-    {zp_session:incr(Key, Value, Context#context.session_pid), Context}.
+    {z_session:incr(Key, Value, Context#context.session_pid), Context}.
 
 %% @spec set_page(Key, Value, Context) -> Context
 %% @doc Set the value of the page variable Key to Value
 set_page(Key, Value, Context) ->
-    zp_session_page:set(Key, Value, Context#context.page_pid),
+    z_session_page:set(Key, Value, Context#context.page_pid),
     Context.
 
 %% @spec get_page(Key, Context) -> Value
@@ -455,19 +455,19 @@ set_page(Key, Value, Context) ->
 get_page(_Key, #context{page_pid=undefined}) ->
     undefined;
 get_page(Key, Context) ->
-    zp_session_page:get(Key, Context#context.page_pid).
+    z_session_page:get(Key, Context#context.page_pid).
 
 
 %% @spec incr_page(Key, Increment, Context) -> {NewValue, NewContext}
 %% @doc Increment the page variable Key
 incr_page(Key, Value, Context) ->
-    {zp_session_page:incr(Key, Value, Context#context.session_pid), Context}.
+    {z_session_page:incr(Key, Value, Context#context.session_pid), Context}.
 
 
 %% @spec set(Key, Value, Context) -> Context
 %% @doc Set the value of the context variable Key to Value
 set(Key, Value, Context) ->
-    Props = zp_utils:prop_replace(Key, Value, Context#context.props),
+    Props = z_utils:prop_replace(Key, Value, Context#context.props),
     Context#context{props = Props}.
 
 
@@ -476,7 +476,7 @@ set(Key, Value, Context) ->
 set(PropList, Context) when is_list(PropList) ->
     NewProps = lists:foldl(
         fun ({Key,Value}, Props) -> 
-            zp_utils:prop_replace(Key, Value, Props)
+            z_utils:prop_replace(Key, Value, Props)
         end, Context#context.props, PropList),
     Context#context{props = NewProps}.
 
@@ -507,7 +507,7 @@ get_all(Context) ->
 %% @spec incr_session(Key, Increment, Context) -> {NewValue,NewContext}
 %% @doc Increment the context variable Key
 incr(Key, Value, Context) ->
-    case zp_convert:to_integer(get(Key, Context)) of
+    case z_convert:to_integer(get(Key, Context)) of
         undefined ->
             set(Key, Value, Context),
             Value;
@@ -539,7 +539,7 @@ parse_form_urlencoded(Context) ->
                      {mochiweb_util:parse_qs(Binary), Context}
             end;
         "multipart/form-data" ++ _ ->
-            {Form, ContextRcv} = zp_parse_multipart:recv_parse(Context),
+            {Form, ContextRcv} = z_parse_multipart:recv_parse(Context),
             FileArgs = [ {Name, #upload{filename=Filename, tmpfile=TmpFile}} || {Name, Filename, TmpFile} <- Form#multipart_form.files ],
             {Form#multipart_form.args ++ FileArgs, ContextRcv};
         _Other ->
@@ -549,7 +549,7 @@ parse_form_urlencoded(Context) ->
 
 %% @doc Some user agents have too aggressive client side caching.  These headers prevent
 %% the caching of content on the user agent iff the content generated has a session. You can prevent
-%% addition of these headers by not calling zp_context:ensure_session/1, or zp_context:ensure_all/1.
+%% addition of these headers by not calling z_context:ensure_session/1, or z_context:ensure_all/1.
 %% @spec add_nocache_headers(#context) -> #context
 add_nocache_headers(Context = #context{wm_reqdata=ReqData}) ->
     RD1 = wrq:set_resp_header("Cache-Control", "no-store, no-cache, must-revalidate, post-check=0, pre-check=0", ReqData),

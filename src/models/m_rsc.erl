@@ -1,7 +1,7 @@
 %% @author Marc Worrell <marc@worrell.nl>
 %% @copyright 2009 Marc Worrell
 %%
-%% @doc Model for resource data. Interfaces between zophrenic, templates and the database.
+%% @doc Model for resource data. Interfaces between zotonic, templates and the database.
 
 -module(m_rsc).
 -author("Marc Worrell <marc@worrell.nl>").
@@ -39,7 +39,7 @@
 	rid/2
 ]).
 
--include_lib("zophrenic.hrl").
+-include_lib("zotonic.hrl").
 
 
 %% @doc Fetch the value for the key from a model source
@@ -85,21 +85,21 @@ name_to_id_check(Name, Context) ->
 name_to_id_cat(Name, Cat, Context) when is_integer(Name) ->
     F = fun() ->
         CatId = m_category:name_to_id_check(Cat, Context),
-        case zp_db:q1("select id from rsc where id = $1 and category_id = $2", [Name, CatId], Context) of
+        case z_db:q1("select id from rsc where id = $1 and category_id = $2", [Name, CatId], Context) of
             undefined -> {error, {enoent, Cat, Name}};
             Id -> {ok, Id}
         end
     end,
-    zp_depcache:memo(F, {rsc_name, Name, Cat}, ?DAY, [Cat]);
+    z_depcache:memo(F, {rsc_name, Name, Cat}, ?DAY, [Cat]);
 name_to_id_cat(Name, Cat, Context) ->
     F = fun() ->
         CatId = m_category:name_to_id_check(Cat, Context),
-        case zp_db:q1("select id from rsc where Name = $1 and category_id = $2", [Name, CatId], Context) of
+        case z_db:q1("select id from rsc where Name = $1 and category_id = $2", [Name, CatId], Context) of
             undefined -> {error, {enoent, Cat, Name}};
             Id -> {ok, Id}
         end
     end,
-    zp_depcache:memo(F, {rsc_name, Name, Cat}, ?DAY, [Cat]).
+    z_depcache:memo(F, {rsc_name, Name, Cat}, ?DAY, [Cat]).
 
 name_to_id_cat_check(Name, Cat, Context) ->
     {ok, Id} = name_to_id_cat(Name, Cat, Context),
@@ -110,16 +110,16 @@ name_to_id_cat_check(Name, Cat, Context) ->
 get(Id, Context) ->
     case rid(Id, Context) of
         Rid when is_integer(Rid) ->
-            case zp_depcache:get(Rid) of
+            case z_depcache:get(Rid) of
                 {ok, Resource} -> 
                     Resource;
                 undefined ->
-                    case zp_db:select(rsc, Rid, Context) of
+                    case z_db:select(rsc, Rid, Context) of
                         {ok, Record} ->
-                            zp_depcache:set(Rid, Record, ?WEEK),
+                            z_depcache:set(Rid, Record, ?WEEK),
                             Record;
                         _ ->
-                            zp_depcache:set(Rid, undefined, ?WEEK),
+                            z_depcache:set(Rid, undefined, ?WEEK),
                             undefined
                     end
             end
@@ -130,7 +130,7 @@ get(Id, Context) ->
 %% @spec get_acl_fields(Id, #context) -> #acl_props
 get_acl_props(Id, Context) when is_integer(Id) ->
     F = fun() ->
-        case zp_db:q_row("
+        case z_db:q_row("
             select is_published, visible_for, group_id, publication_start, publication_end 
             from rsc 
             where id = $1", [Id], Context) of
@@ -141,7 +141,7 @@ get_acl_props(Id, Context) when is_integer(Id) ->
                 #acl_props{is_published=false, visible_for=3, group_id=0}
         end
     end,
-    zp_depcache:memo(F, {rsc_acl_fields, Id}, ?DAY, [Id]).
+    z_depcache:memo(F, {rsc_acl_fields, Id}, ?DAY, [Id]).
 
 
 %% @doc Insert a new resource
@@ -164,7 +164,7 @@ update(Id, Props, Context) when is_integer(Id) ->
 exists([C|_] = Name, Context) when is_list(Name) and is_integer(C) ->
     case rid_name(Name, Context) of
         undefined -> 
-            case zp_utils:only_digits(Name) of
+            case z_utils:only_digits(Name) of
                 true -> exists(list_to_integer(Name), Context);
                 false -> false
             end;
@@ -178,15 +178,15 @@ exists(Name, Context) when is_binary(Name) ->
 exists(Id, Context) -> 
     case rid(Id, Context) of
         Rid when is_integer(Rid) ->
-            case zp_depcache:get({exists, Rid}) of
+            case z_depcache:get({exists, Rid}) of
                 {ok, Exists} ->
                     Exists;
                 undefined -> 
-                    Exists = case zp_db:q1("select id from rsc where id = $1", [Rid], Context) of
+                    Exists = case z_db:q1("select id from rsc where id = $1", [Rid], Context) of
                         undefined -> false;
                         _ -> true
                     end,
-                    zp_depcache:set({exists, Rid}, Exists, ?DAY, [Rid]),
+                    z_depcache:set({exists, Rid}, Exists, ?DAY, [Rid]),
                     Exists
             end;
         undefined -> false
@@ -195,7 +195,7 @@ exists(Id, Context) ->
 is_visible(Id, Context) ->
     case rid(Id, Context) of
         RscId when is_integer(RscId) ->
-            zp_acl:rsc_visible(RscId, Context);
+            z_acl:rsc_visible(RscId, Context);
         _ ->
             false
     end.
@@ -203,7 +203,7 @@ is_visible(Id, Context) ->
 is_editable(Id, Context) -> 
     case rid(Id, Context) of
         RscId when is_integer(RscId) ->
-            zp_acl:rsc_editable(RscId, Context);
+            z_acl:rsc_editable(RscId, Context);
         _ ->
             false
     end.
@@ -211,7 +211,7 @@ is_editable(Id, Context) ->
 is_ingroup(Id, Context) -> 
     case rid(Id, Context) of
         RscId when is_integer(RscId) ->
-            zp_acl:rsc_ingroup(RscId, Context);
+            z_acl:rsc_ingroup(RscId, Context);
         _ ->
             false
     end.
@@ -219,7 +219,7 @@ is_ingroup(Id, Context) ->
 is_me(Id, Context) -> 
     case rid(Id, Context) of
         RscId when is_integer(RscId) ->
-            zp_acl:user(Context) == RscId;
+            z_acl:user(Context) == RscId;
         _ ->
             false
     end.
@@ -252,16 +252,16 @@ p(Id, predicates_edit, Context) -> predicates_edit(Id, Context);
     
 % Check if the requested predicate is a readily available property or an edge
 p(Id, Predicate, Context) when is_integer(Id) -> 
-    Value = case zp_depcache:get(Id, Predicate) of
+    Value = case z_depcache:get(Id, Predicate) of
         {ok, V} -> 
             V;
         undefined ->
-            case zp_db:select(rsc, Id, Context) of
+            case z_db:select(rsc, Id, Context) of
                 {ok, Record} ->
-                    zp_depcache:set(Id, Record, ?WEEK, [Id]),
+                    z_depcache:set(Id, Record, ?WEEK, [Id]),
                     proplists:get_value(Predicate, Record);
                 _ ->
-                    zp_depcache:set(Id, undefined, ?WEEK, [Id]),
+                    z_depcache:set(Id, undefined, ?WEEK, [Id]),
                     undefined
             end
     end,
@@ -365,7 +365,7 @@ rid(#rsc_list{list=[R|_]}, _Context) ->
 rid(#rsc_list{list=[]}, _Context) ->
 	undefined;
 rid([C|_] = UniqueName, Context) when is_list(UniqueName) andalso is_integer(C) ->
-    case zp_utils:only_digits(UniqueName) of
+    case z_utils:only_digits(UniqueName) of
         true -> list_to_integer(UniqueName);
         false -> rid_name(UniqueName, Context)
     end;
@@ -382,18 +382,18 @@ rid(<<>>, _Context) ->
 %% @doc Return the id of the resource with a certain unique name.
 %% rid_name(Name, Context) -> int() | undefined
 rid_name(Name, Context) ->
-    Lower = zp_string:to_name(Name),
-    case zp_depcache:get({rsc_name, Lower}) of
+    Lower = z_string:to_name(Name),
+    case z_depcache:get({rsc_name, Lower}) of
         {ok, undefined} ->
             undefined;
         {ok, Id} ->
             Id;
         undefined ->
-            Id = case zp_db:q1("select id from rsc where name = $1", [Lower], Context) of
+            Id = case z_db:q1("select id from rsc where name = $1", [Lower], Context) of
                 undefined -> undefined;
                 Value -> Value
             end,
-            zp_depcache:set({rsc_name, Lower}, Id, ?DAY, [Id, {rsc_name, Lower}]),
+            z_depcache:set({rsc_name, Lower}, Id, ?DAY, [Id, {rsc_name, Lower}]),
             Id
     end.
 
@@ -437,9 +437,9 @@ page_url(Id, Context) ->
     end.
 
 page_url_path([], Args, Context) ->
-    zp_dispatcher:url_for(page, Args, Context);
+    z_dispatcher:url_for(page, Args, Context);
 page_url_path([CatName|Rest], Args, Context) ->
-    case zp_dispatcher:url_for(CatName, Args, Context) of
+    case z_dispatcher:url_for(CatName, Args, Context) of
         undefined -> page_url_path(Rest, Args, Context);
         Url -> Url
     end.

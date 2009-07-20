@@ -6,7 +6,7 @@
 
 -module(action_admin_link_dialog).
 -author("Marc Worrell <marc@worrell.nl").
--include("zophrenic.hrl").
+-include("zotonic.hrl").
 
 %% interface functions
 -export([
@@ -15,11 +15,11 @@
 ]).
 
 render_action(TriggerId, TargetId, Args, Context) ->
-    SubjectId = zp_convert:to_integer(proplists:get_value(subject_id, Args)),
+    SubjectId = z_convert:to_integer(proplists:get_value(subject_id, Args)),
     Predicate = proplists:get_value(predicate, Args),
     Actions   = proplists:get_all_values(action, Args),
     Postback = {link_dialog, SubjectId, Predicate, Actions},
-	{PostbackMsgJS, _PickledPostback} = zp_render:make_postback(Postback, click, TriggerId, TargetId, ?MODULE, Context),
+	{PostbackMsgJS, _PickledPostback} = z_render:make_postback(Postback, click, TriggerId, TargetId, ?MODULE, Context),
 	{PostbackMsgJS, Context}.
 
 
@@ -33,4 +33,4 @@ event({postback, {link_dialog, SubjectId, Predicate, Actions}, _TriggerId, _Targ
         {predicate, Predicate},
         {action, Actions}
     ],
-    zp_render:dialog(Title, "_action_link_dialog.tpl", Vars, Context).
+    z_render:dialog(Title, "_action_link_dialog.tpl", Vars, Context).

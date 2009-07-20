@@ -4,14 +4,14 @@
 %% @doc Validator for checking if an input value is within a certain length range
 
 -module(validator_base_length).
--include("zophrenic.hrl").
+-include("zotonic.hrl").
 -export([render_validator/5, validate/5]).
 
 render_validator(length, TriggerId, _TargetId, Args, Context)  ->
     Min        = proplists:get_value(minimum, Args),
     Max        = proplists:get_value(maximum, Args),
-	JsObject   = zp_utils:js_object(Args),
-	Script     = [<<"zp_add_validator(\"">>,TriggerId,<<"\", \"length\", ">>, JsObject, <<");\n">>],
+	JsObject   = z_utils:js_object(Args),
+	Script     = [<<"z_add_validator(\"">>,TriggerId,<<"\", \"length\", ">>, JsObject, <<");\n">>],
 	{[to_number(Min),to_number(Max)], Script, Context}.
 
 

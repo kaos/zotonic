@@ -6,7 +6,7 @@
 %% @todo Allow the location/id types of redirect to have extra arguments
 
 -module(action_base_redirect).
--include("zophrenic.hrl").
+-include("zotonic.hrl").
 -export([render_action/4]).
 
 render_action(_TriggerId, _TargetId, Args, Context) ->
@@ -23,11 +23,11 @@ render_action(_TriggerId, _TargetId, Args, Context) ->
                             m_rsc:p(Id, page_url, Context)
                     end;
                 DispatchString ->
-                    Dispatch = zp_convert:to_atom(DispatchString),
+                    Dispatch = z_convert:to_atom(DispatchString),
                     Args1 = proplists:delete(dispatch, Args),
-                    zp_dispatcher:url_for(Dispatch, Args1, none, Context)
+                    z_dispatcher:url_for(Dispatch, Args1, none, Context)
             end,
-        	[<<"window.location = \"">>,zp_utils:js_escape(Location),$",$;]
+        	[<<"window.location = \"">>,z_utils:js_escape(Location),$",$;]
     end,
 	{Script, Context}.
     

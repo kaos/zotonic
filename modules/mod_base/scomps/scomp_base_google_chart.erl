@@ -10,7 +10,7 @@
 
 -export([init/1, varies/2, code_change/3, terminate/1, render/4]).
 
--include("zophrenic.hrl").
+-include("zotonic.hrl").
 
 init(_Args) -> {ok, []}.
 varies(_Params, _Context) -> undefined.
@@ -23,20 +23,20 @@ render(Params, _Vars, Context, _State) ->
     Id         = proplists:get_value(id, Params),
     Title      = proplists:get_value(title, Params),
 	Color      = proplists:get_value(color, Params, "909090"),
-	FontSize   = zp_convert:to_integer(proplists:get_value(font_size, Params, 10)),
-	Width      = zp_convert:to_integer(proplists:get_value(width, Params, 300)),
-	Height     = zp_convert:to_integer(proplists:get_value(height, Params, 150)),
+	FontSize   = z_convert:to_integer(proplists:get_value(font_size, Params, 10)),
+	Width      = z_convert:to_integer(proplists:get_value(width, Params, 300)),
+	Height     = z_convert:to_integer(proplists:get_value(height, Params, 150)),
 	GridX      = proplists:get_value(grid_x, Params),
 	GridY      = proplists:get_value(grid_y, Params),
-    GridLineLength  = zp_convert:to_integer(proplists:get_value(grid_line_length, Params, 1)),
-    GridBlankLength = zp_convert:to_integer(proplists:get_value(grid_blank_length, Params, 5)),
+    GridLineLength  = z_convert:to_integer(proplists:get_value(grid_line_length, Params, 1)),
+    GridBlankLength = z_convert:to_integer(proplists:get_value(grid_blank_length, Params, 5)),
     BGColor    = proplists:get_value(background_color, Params, "ffffff"),
     ChartColor = proplists:get_value(chart_color, Params, "ffffff"),
     LegendLoc  = proplists:get_value(legend_location, Params, "bottom"),
     AxesArg    = proplists:get_value(axes, Params, []),
     DataArg    = proplists:get_value(data, Params, []),
-    BarSpace   = zp_convert:to_integer(proplists:get_value(bar_space, Params, 3)),
-    BarGroupSpace   = zp_convert:to_integer(proplists:get_value(bar_group_space, Params, 7)),
+    BarSpace   = z_convert:to_integer(proplists:get_value(bar_space, Params, 3)),
+    BarGroupSpace   = z_convert:to_integer(proplists:get_value(bar_group_space, Params, 7)),
     
 	% Path to Google API
 	Path = "http://chart.apis.google.com/chart?",
@@ -62,27 +62,27 @@ render(Params, _Vars, Context, _State) ->
             		undefined -> [];
             		[]        -> [];
                     <<>>      -> <<>>;
-            		OtherTitle -> ["&chtt=", zp_utils:url_encode(OtherTitle)]
+            		OtherTitle -> ["&chtt=", z_utils:url_encode(OtherTitle)]
             	end,
 	
 	% Title Color and Font Size...
-	TitleStyle = io_lib:format("&chts=~s,~b", [zp_convert:to_list(Color), FontSize]),
+	TitleStyle = io_lib:format("&chts=~s,~b", [z_convert:to_list(Color), FontSize]),
 	
 	% Size...
 	Size = io_lib:format("&chs=~bx~b", [Width, Height]),
 	
 	% Grid...
 	Grid = io_lib:format("&chg=~s,~s,~b,~b", [
-        		zp_convert:to_list(zp_utils:coalesce([GridX, 0])),
-        		zp_convert:to_list(zp_utils:coalesce([GridY, 0])),
+        		z_convert:to_list(z_utils:coalesce([GridX, 0])),
+        		z_convert:to_list(z_utils:coalesce([GridY, 0])),
         		GridLineLength,
         		GridBlankLength
         	]),
 	
 	% Background Colors...
 	BGColors = io_lib:format("&chf=bg,s,~s|c,s,~s", [
-        		zp_convert:to_list(BGColor), 
-        		zp_convert:to_list(ChartColor)
+        		z_convert:to_list(BGColor), 
+        		z_convert:to_list(ChartColor)
         	]),
 	
 	% Legend Location...
@@ -148,7 +148,7 @@ render(Params, _Vars, Context, _State) ->
         	end,
 
     ImageUri = lists:flatten([Path, Type, TitleText, TitleStyle, Size, Grid, BGColors, LegendLocation, BarSize, Axes, Data]),
-	{ok, zp_tags:render_tag(
+	{ok, z_tags:render_tag(
 	        <<"img">>, 
 	        [
         		{<<"id">>,     Id},
@@ -166,7 +166,7 @@ process_axis(N, {axis, Axis}, Context) ->
     FontSize = proplists:get_value(font_size, Axis, 10),
     Color    = proplists:get_value(color, Axis, "909090"),
     
-	Position = case zp_convert:to_list(proplists:get_value(position, Axis, "top")) of
+	Position = case z_convert:to_list(proplists:get_value(position, Axis, "top")) of
             		"top"    -> "t";
             		"right"  -> "r";
             		"bottom" -> "x";
@@ -176,7 +176,7 @@ process_axis(N, {axis, Axis}, Context) ->
 
 	StringLabels = [make_label(X, Context) || X <- proplists:get_value(labels, Axis, [])],
 	Labels       = integer_to_list(N) ++ ":|" ++ string:join(StringLabels, "|"),
-	Style        = io_lib:format("~b,~s,~b", [N, zp_convert:to_list(Color), FontSize]),
+	Style        = io_lib:format("~b,~s,~b", [N, z_convert:to_list(Color), FontSize]),
 	[Position, Labels, Style].
 	
 process_data(_N, {data, Data}) ->
@@ -186,23 +186,23 @@ process_data(_N, {data, Data}) ->
     MinValue     = proplists:get_value(min_value, Data, 0),
     MaxValue     = proplists:get_value(max_value, Data, 100),
 	Color        = proplists:get_value(color, Data),
-	Legend       = zp_convert:to_list(proplists:get_value(legend, Data)),
+	Legend       = z_convert:to_list(proplists:get_value(legend, Data)),
     Values       = proplists:get_value(values, Data, []),
     
 	Scale        = io_lib:format("~b,~b", [MinValue,MaxValue]),
-	StringValues = [zp_convert:to_list(X) || X <- Values],
+	StringValues = [z_convert:to_list(X) || X <- Values],
 	JoinedValues = string:join(StringValues, ","),
 	Styles       = io_lib:format("~b,~b,~b", [LineWidth, LineLength, BlankLength]),
 	[flatten_color(Color), Legend, Scale, Styles, JoinedValues, length(StringValues)].
 
 flatten_color([A|_] = List) when is_list(A) or is_binary(A) or is_atom(A) ->
-    string:join([ zp_convert:to_list(Color) || Color <- List ], ",");
+    string:join([ z_convert:to_list(Color) || Color <- List ], ",");
 flatten_color(A) ->
-    zp_convert:to_list(A).
+    z_convert:to_list(A).
 
 
 make_label(N, Context) when is_integer(N) ->
-    zp_convert:to_list(?TR(m_rsc:p(N, title, Context), Context));
+    z_convert:to_list(?TR(m_rsc:p(N, title, Context), Context));
 make_label(L, Context) -> 
-    zp_convert:to_list(?TR(L, Context)).
+    z_convert:to_list(?TR(L, Context)).
     

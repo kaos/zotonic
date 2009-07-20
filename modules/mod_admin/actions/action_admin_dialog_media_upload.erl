@@ -13,7 +13,7 @@
     event/2
 ]).
 
--include("zophrenic.hrl").
+-include("zotonic.hrl").
 
 render_action(TriggerId, TargetId, Args, Context) ->
     Title = proplists:get_value(title, Args),
@@ -24,7 +24,7 @@ render_action(TriggerId, TargetId, Args, Context) ->
     Actions = proplists:get_all_values(action, Args),
     Stay = proplists:get_value(stay, Args, false),
     Postback = {media_upload_dialog, Title, Id, SubjectId, GroupId, Predicate, Stay, Actions},
-	{PostbackMsgJS, _PickledPostback} = zp_render:make_postback(Postback, click, TriggerId, TargetId, ?MODULE, Context),
+	{PostbackMsgJS, _PickledPostback} = z_render:make_postback(Postback, click, TriggerId, TargetId, ?MODULE, Context),
 	{PostbackMsgJS, Context}.
 
 
@@ -42,14 +42,14 @@ event({postback, {media_upload_dialog, Title, Id, SubjectId, GroupId, Predicate,
         {stay, Stay}
     ],
     DTitle = case Id of undefined -> "Add a new media file"; _ -> "Replace current medium." end,
-    zp_render:dialog(DTitle, "_action_dialog_media_upload.tpl", Vars, Context);
+    z_render:dialog(DTitle, "_action_dialog_media_upload.tpl", Vars, Context);
 
 
 event({submit, {media_upload, EventProps}, _TriggerId, _TargetId}, Context) ->
     Actions = proplists:get_value(actions, EventProps, []),
     Id = proplists:get_value(id, EventProps),
-    Stay = zp_convert:to_bool(proplists:get_value(stay, EventProps, false)),
-    File = zp_context:get_q_validated("upload_file", Context),
+    Stay = z_convert:to_bool(proplists:get_value(stay, EventProps, false)),
+    File = z_context:get_q_validated("upload_file", Context),
     ContextUpload = case File of
         #upload{filename=OriginalFilename, tmpfile=TmpFile} ->
             case Id of
@@ -57,8 +57,8 @@ event({submit, {media_upload, EventProps}, _TriggerId, _TargetId}, Context) ->
                 undefined ->
                     SubjectId = proplists:get_value(subject_id, EventProps),
                     Predicate = proplists:get_value(predicate, EventProps, depiction),
-                    Title   = zp_context:get_q_validated("new_media_title", Context),
-                    GroupId = list_to_integer(zp_context:get_q("group_id", Context)),
+                    Title   = z_context:get_q_validated("new_media_title", Context),
+                    GroupId = list_to_integer(z_context:get_q("group_id", Context)),
 
                     Props = [{title, Title}, {original_filename, OriginalFilename}, {group_id, GroupId}],
                     F = fun(Ctx) ->
@@ -75,7 +75,7 @@ event({submit, {media_upload, EventProps}, _TriggerId, _TargetId}, Context) ->
                                 Error
                         end
                     end,
-                    Result = zp_db:transaction(F, Context),
+                    Result = z_db:transaction(F, Context),
             
                     case Result of
                         {ok, MediaId} ->
@@ -83,13 +83,13 @@ event({submit, {media_upload, EventProps}, _TriggerId, _TargetId}, Context) ->
                                 undefined -> 
                                     case Stay of
                                         true -> Context;
-                                        false -> zp_render:wire({redirect, [{dispatch, "admin_edit_rsc"}, {id, MediaId}]}, Context)
+                                        false -> z_render:wire({redirect, [{dispatch, "admin_edit_rsc"}, {id, MediaId}]}, Context)
                                     end;
                                 _ -> Context
                             end,
-                            zp_render:wire([{growl, [{text, "Uploaded the file."}]} | Actions], ContextRedirect);
+                            z_render:wire([{growl, [{text, "Uploaded the file."}]} | Actions], ContextRedirect);
                         {error, _Error} ->
-                            zp_render:growl_error("Error uploading the file.", Context)
+                            z_render:growl_error("Error uploading the file.", Context)
                     end;
                 
                 %% Replace attached medium with the uploaded file (skip any edge requests)
@@ -97,18 +97,18 @@ event({submit, {media_upload, EventProps}, _TriggerId, _TargetId}, Context) ->
                     Props = [ {original_filename, OriginalFilename} ],
                     case m_media:replace_file(TmpFile, Id, Props, Context) of
                         {ok, _} ->
-                            Context1 = zp_render:wire(Actions, Context),
-                            zp_render:growl("Uploaded the file.", Context1);
+                            Context1 = z_render:wire(Actions, Context),
+                            z_render:growl("Uploaded the file.", Context1);
                         {error, eacces} ->
-                            zp_render:growl_error("You don't have permission to change this page.", Context);
+                            z_render:growl_error("You don't have permission to change this page.", Context);
                         {error, _} ->
-                            zp_render:growl_error("Error uploading the file.", Context)
+                            z_render:growl_error("Error uploading the file.", Context)
                     end
             end;
         _ ->
-            zp_render:growl("No file specified.", Context)
+            z_render:growl("No file specified.", Context)
     end,
 
     % Close the dialog and optionally perform the post upload actions
-    zp_render:wire({dialog_close, []}, ContextUpload).
+    z_render:wire({dialog_close, []}, ContextUpload).
 

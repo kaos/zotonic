@@ -12,12 +12,12 @@
     render_action/4
 ]).
 
--include("zophrenic.hrl").
+-include("zotonic.hrl").
 
 render_action(_TriggerId, _TargetId, Args, Context) -> 
     Title  = proplists:get_value(title, Args, ""),
     Text   = proplists:get_value(text, Args, ""),
-	Script = [<<"zp_dialog_open(\"">>,
-	          zp_utils:js_escape(Title), $", $,, $",
-	          zp_utils:js_escape(Text), $", $), $; ],
+	Script = [<<"z_dialog_open(\"">>,
+	          z_utils:js_escape(Title), $", $,, $",
+	          z_utils:js_escape(Text), $", $), $; ],
 	{Script, Context}.

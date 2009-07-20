@@ -10,6 +10,6 @@
 -include_lib("resource_html.hrl").
 
 html(Context) ->
-    Template = zp_context:get(template, Context),
-    Rendered = zp_template:render(Template, zp_context:get_all(Context), Context),
-    zp_context:output(Rendered, Context).
+    Template = z_context:get(template, Context),
+    Rendered = z_template:render(Template, z_context:get_all(Context), Context),
+    z_context:output(Rendered, Context).

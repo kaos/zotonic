@@ -16,27 +16,27 @@
     m_value/2
 ]).
 
--include_lib("zophrenic.hrl").
+-include_lib("zotonic.hrl").
 
 
 %% @doc Fetch the value for the key from a model source
 %% @spec m_find_value(Key, Source, Context) -> term()
 m_find_value(user, #m{value=undefined}, Context) ->
-    zp_acl:user(Context);
+    z_acl:user(Context);
 m_find_value(is_admin, #m{value=undefined}, Context) ->
-    zp_acl:has_role(admin, Context);
+    z_acl:has_role(admin, Context);
 m_find_value(is_supervisor, #m{value=undefined}, Context) ->
-    zp_acl:has_role(supervisor, Context);
+    z_acl:has_role(supervisor, Context);
 m_find_value(is_community_publisher, #m{value=undefined}, Context) ->
-    zp_acl:has_role(community_publisher, Context);
+    z_acl:has_role(community_publisher, Context);
 m_find_value(is_public_publisher, #m{value=undefined}, Context) ->
-    zp_acl:has_role(public_publisher, Context);
+    z_acl:has_role(public_publisher, Context);
 m_find_value(observer, #m{value=undefined}, Context) ->
-    zp_acl:groups_observer(Context);
+    z_acl:groups_observer(Context);
 m_find_value(member, #m{value=undefined}, Context) ->
-    zp_acl:groups_member(Context);
+    z_acl:groups_member(Context);
 m_find_value(leader, #m{value=undefined}, Context) ->
-    zp_acl:groups_leader(Context);
+    z_acl:groups_leader(Context);
 m_find_value(_Key, #m{value=undefined}, _Context) ->
    undefined.
 

@@ -23,7 +23,7 @@
     predicate_flush/2
 ]).
 
--include_lib("zophrenic.hrl").
+-include_lib("zotonic.hrl").
 
 -record(state, {context}).
 
@@ -76,9 +76,9 @@ start_link(Args) when is_list(Args) ->
 init(Args) ->
     process_flag(trap_exit, true),
     {context, Context} = proplists:lookup(context, Args),
-    zp_notifier:observe(rsc_update,      {?MODULE, rsc_update},      Context),
-    zp_notifier:observe(rsc_update_done, {?MODULE, predicate_flush}, Context),
-    {ok, #state{context=zp_context:new_for_host(Context)}}.
+    z_notifier:observe(rsc_update,      {?MODULE, rsc_update},      Context),
+    z_notifier:observe(rsc_update_done, {?MODULE, predicate_flush}, Context),
+    {ok, #state{context=z_context:new_for_host(Context)}}.
 
 
 %% @spec handle_call(Request, From, State) -> {reply, Reply, State} |
@@ -115,8 +115,8 @@ handle_info(_Info, State) ->
 %% cleaning up. When it returns, the gen_server terminates with Reason.
 %% The return value is ignored.
 terminate(_Reason, State) ->
-    zp_notifier:detach(rsc_update,      {?MODULE, rsc_update},      State#state.context),
-    zp_notifier:detach(rsc_update_done, {?MODULE, rsc_update_done}, State#state.context),
+    z_notifier:detach(rsc_update,      {?MODULE, rsc_update},      State#state.context),
+    z_notifier:detach(rsc_update_done, {?MODULE, rsc_update_done}, State#state.context),
     ok.
 
 %% @spec code_change(OldVsn, State, Extra) -> {ok, NewState}

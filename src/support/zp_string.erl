@@ -4,7 +4,7 @@
 %%
 %% @doc String related functions
 
--module(zp_string).
+-module(z_string).
 -author("Marc Worrell <marc@worrell.nl").
 
 %% interface functions

@@ -4,7 +4,7 @@
 %% @doc Refresh the current page.
 
 -module(action_base_reload).
--include("zophrenic.hrl").
+-include("zotonic.hrl").
 -export([render_action/4]).
 
 render_action(_TriggerId, _TargetId, _Args, Context) ->

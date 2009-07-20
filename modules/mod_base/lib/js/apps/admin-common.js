@@ -40,7 +40,7 @@ tinyInit = {
 	entities: "38,amp,60,lt,62,gt", 
 	accessibility_focus: "1", 
 	tab_focus: ":prev,:next", 
-	content_css: "/lib/js/modules/tinymce/zophrenic.css", 
+	content_css: "/lib/js/modules/tinymce/zotonic.css", 
 	wpeditimage_disable_captions: "", 
 	plugins: "safari"
 }

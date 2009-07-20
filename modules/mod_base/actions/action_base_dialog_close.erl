@@ -12,7 +12,7 @@
     render_action/4
 ]).
 
--include("zophrenic.hrl").
+-include("zotonic.hrl").
 
 render_action(_TriggerId, _TargetId, _Args, Context) -> 
-	{<<"zp_dialog_close();">>, Context}.
+	{<<"z_dialog_close();">>, Context}.

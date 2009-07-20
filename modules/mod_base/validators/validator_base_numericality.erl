@@ -5,7 +5,7 @@
 %%      At the moment this function only accepts integers
 
 -module(validator_base_numericality).
--include("zophrenic.hrl").
+-include("zotonic.hrl").
 -export([render_validator/5, validate/5]).
 
 render_validator(numericality, TriggerId, _TargetId, Args, Context)  ->
@@ -14,15 +14,15 @@ render_validator(numericality, TriggerId, _TargetId, Args, Context)  ->
                     undefined -> { proplists:get_value(minimum, Args), proplists:get_value(maximum, Args) };
                     _ -> {Is,Is}
                 end,
-	JsObject   = zp_utils:js_object([{onlyInt,true}|Args]),
-	Script     = [<<"zp_add_validator(\"">>,TriggerId,<<"\", \"numericality\", ">>, JsObject, <<");\n">>],
+	JsObject   = z_utils:js_object([{onlyInt,true}|Args]),
+	Script     = [<<"z_add_validator(\"">>,TriggerId,<<"\", \"numericality\", ">>, JsObject, <<");\n">>],
 	{[to_number(Min),to_number(Max)], Script, Context}.
 
 
 %% @spec validate(Type, TriggerId, Values, Args, Context) -> {ok,AcceptableValues} | {error,Id,Error}
 %%          Error -> invalid | novalue | {script, Script}
 validate(numericality, Id, Value, [Min,Max], _Context) ->
-    Trimmed = zp_string:trim(Value),
+    Trimmed = z_string:trim(Value),
     case string:to_integer(Trimmed) of
         {error,_Error} -> 
             % Not a number

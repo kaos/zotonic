@@ -5,7 +5,7 @@
 
 -export([encode/3, decode/3, supports/1]).
 
--include_lib("zophrenic.hrl").
+-include_lib("zotonic.hrl").
 
 -define(int32, 1/big-signed-unit:32).
 -define(TERM_MAGIC_NUMBER, 16#01326A3A:1/big-unsigned-unit:32).
@@ -17,9 +17,9 @@ encode(bool, <<1>>, _IntegerDatetime) -> <<1:?int32, 1:1/big-signed-unit:8>>;
 encode(bool, <<>>, _IntegerDatetime)  -> <<1:?int32, 0:1/big-signed-unit:8>>;
 encode(bool, true, _IntegerDatetime)  -> <<1:?int32, 1:1/big-signed-unit:8>>;
 encode(bool, false, _IntegerDatetime) -> <<1:?int32, 0:1/big-signed-unit:8>>;
-encode(int2, N, IntegerDatetime) when is_binary(N); is_list(N) -> encode(int2, zp_convert:to_integer(N), IntegerDatetime);
-encode(int4, N, IntegerDatetime) when is_binary(N); is_list(N) -> encode(int4, zp_convert:to_integer(N), IntegerDatetime);
-encode(int8, N, IntegerDatetime) when is_binary(N); is_list(N) -> encode(int8, zp_convert:to_integer(N), IntegerDatetime);
+encode(int2, N, IntegerDatetime) when is_binary(N); is_list(N) -> encode(int2, z_convert:to_integer(N), IntegerDatetime);
+encode(int4, N, IntegerDatetime) when is_binary(N); is_list(N) -> encode(int4, z_convert:to_integer(N), IntegerDatetime);
+encode(int8, N, IntegerDatetime) when is_binary(N); is_list(N) -> encode(int8, z_convert:to_integer(N), IntegerDatetime);
 encode(int2, N, _IntegerDatetime)     -> <<2:?int32, N:1/big-signed-unit:16>>;
 encode(int4, N, _IntegerDatetime)     -> <<4:?int32, N:1/big-signed-unit:32>>;
 encode(int8, N, _IntegerDatetime)     -> <<8:?int32, N:1/big-signed-unit:64>>;

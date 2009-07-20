@@ -1,20 +1,20 @@
 %% @author Marc Worrell <marc@worrell.nl>
 %% @copyright 2009 Marc Worrell
 
-%% @doc User agent session management for zophrenic.  A ua session is a process started for every
+%% @doc User agent session management for zotonic.  A ua session is a process started for every
 %%      user agent visiting the site.  The session is alive for a fixed period after the 
 %%      last request has been done.  The session manager manages all the ua session processes.
 
 %% TODO: make sure that all sessions and page sessions are linked to some process so that they will be killed 
-%%       when the zophrenic application is stopped.
+%%       when the zotonic application is stopped.
 
 
--module(zp_session_manager).
+-module(z_session_manager).
 -author("Marc Worrell <marc@worrell.nl>").
 -behaviour(gen_server).
 
 %% The name of the session cookie
--define(SESSION_COOKIE, "zp_sid").
+-define(SESSION_COOKIE, "z_sid").
 
 %% gen_server exports
 -export([init/1, handle_call/3, handle_cast/2, handle_info/2, terminate/2, code_change/3]).
@@ -30,7 +30,7 @@
     tick/0
 ]).
 
--include_lib("zophrenic.hrl").
+-include_lib("zotonic.hrl").
 
 %% The session server state
 -record(session_srv, {key2pid, pid2key}).
@@ -100,7 +100,7 @@ handle_call({stop_session, Context}, _From, State) ->
                 S -> forget_session_id(S, State)
             end;
         Pid -> 
-            zp_session:stop(Pid)
+            z_session:stop(Pid)
     end,
     Context1 = clear_session_id(Context),
     {reply, Context1, State};
@@ -116,7 +116,7 @@ handle_call({rename_session, Context}, _From, State) ->
             State1 = erase_session_pid(Pid, State),
             
             % Generate a new session id and set cookie
-            SessionId = zp_ids:id(),
+            SessionId = z_ids:id(),
             Context1  = set_session_id(SessionId, Context),
             State2    = store_session_pid(SessionId, Pid, State1),
             {reply, Context1, State2}
@@ -130,7 +130,7 @@ handle_call(count, _From, State) ->
 %% Dump all sessions to stdout
 handle_call(dump, _From, State) ->
     SesPids = dict:fetch_keys(State#session_srv.pid2key),
-    lists:foreach(fun(Pid) -> zp_session:dump(Pid) end, SesPids),
+    lists:foreach(fun(Pid) -> z_session:dump(Pid) end, SesPids),
     {reply, ok, State};
     
 handle_call(Msg, _From, State) ->
@@ -146,9 +146,9 @@ handle_info(_Msg, State) ->
 
 
 handle_cast(tick, State) ->
-    Tick    = zp_utils:now(),
+    Tick    = z_utils:now(),
     SesPids = dict:fetch_keys(State#session_srv.pid2key),
-    lists:foreach(fun(Pid) -> zp_session:check_expire(Tick, Pid) end, SesPids),
+    lists:foreach(fun(Pid) -> z_session:check_expire(Tick, Pid) end, SesPids),
     {noreply, State};
 
 handle_cast(_Msg, State) -> {noreply, State}.
@@ -160,13 +160,13 @@ code_change(_OldVersion, State, _Extra) -> {ok, State}.
 %% Make sure that the session cookie is set and that the session process has been started.
 ensure_session1(S, P, Context, State) when S == undefined orelse P == error ->
     Pid       = spawn_session(State),
-    SessionId = zp_ids:id(),
+    SessionId = z_ids:id(),
     Context1  = set_session_id(SessionId, Context),
     State1    = store_session_pid(SessionId, Pid, State),
     Context2  = Context1#context{session_pid = Pid},
     {Pid, Context2, State1};
 ensure_session1(_SessionId, Pid, Context, State) ->
-    zp_session:keepalive(Context#context.page_pid, Pid),
+    z_session:keepalive(Context#context.page_pid, Pid),
     Context1  = Context#context{session_pid = Pid},
     {Pid, Context1, State}.
 
@@ -198,7 +198,7 @@ store_session_pid(SessionId, Pid, State) ->
 forget_session_id(SessionId, State) ->
     case dict:find(SessionId, State#session_srv.key2pid) of
         {ok, Pid} ->
-            zp_session:stop(Pid);
+            z_session:stop(Pid);
         error ->
             error
     end.
@@ -220,7 +220,7 @@ session_find_pid(SessionId, State) ->
 %% @spec new_session(State::state()) -> pid()
 %% @doc Spawn a new session, monitor the pid as we want to know about normal exits
 spawn_session(_State) ->
-    case zp_session:start_link() of
+    case z_session:start_link() of
         {ok, Pid} ->
                 erlang:monitor(process, Pid),
                 Pid
@@ -230,25 +230,25 @@ spawn_session(_State) ->
 %% @spec get_session_id(Context) -> undefined | string()
 %% @doc fetch the session id from the request, return error when not found
 get_session_id(Context) ->
-    ReqData = zp_context:get_reqdata(Context),
+    ReqData = z_context:get_reqdata(Context),
     wrq:get_cookie_value(?SESSION_COOKIE, ReqData).
 
 %% @spec set_session_id(SessionId::string(), Context::#context) -> #context
 %% @doc Save the session id in a cookie on the user agent
 set_session_id(SessionId, Context) ->
-    RD = zp_context:get_reqdata(Context),
+    RD = z_context:get_reqdata(Context),
     %% TODO: set the {domain,"example.com"} of the session cookie
     {K,V}    = mochiweb_cookies:cookie(?SESSION_COOKIE, SessionId, [{path, "/"}]),
     RD1 = wrq:set_resp_header(K, V, RD),
-    zp_context:set_reqdata(RD1, Context).
+    z_context:set_reqdata(RD1, Context).
 
 
 %% @spec clear_session_id(Context::#context) -> #context
 %% @doc Remove the session id from the user agent and clear the session pid in the context
 clear_session_id(Context) ->
-    RD = zp_context:get_reqdata(Context),
+    RD = z_context:get_reqdata(Context),
     %% TODO: set the {domain,"example.com"} of the session cookie
     Hdr = mochiweb_cookies:cookie(?SESSION_COOKIE, "", [{max_age, 0}, {path, "/"}]),
     RD1 = wrq:merge_resp_headers([Hdr], RD),
-    zp_context:set_reqdata(RD1, Context#context{session_pid=undefined}).
+    z_context:set_reqdata(RD1, Context#context{session_pid=undefined}).
 

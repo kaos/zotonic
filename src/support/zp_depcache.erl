@@ -3,7 +3,7 @@
 %%
 %% @doc Simple caching server with dependency checks
 
--module(zp_depcache).
+-module(z_depcache).
 -author("Marc Worrell <marc@worrell.nl>").
 -behaviour(gen_server).
 
@@ -18,7 +18,7 @@
 %% internal export
 -export([cleanup/1, cleanup/5]).
 
--include_lib("zophrenic.hrl").
+-include_lib("zotonic.hrl").
 
 -record(state, {now, serial, size=0}).
 -record(meta,  {key, expire, serial, depend}).
@@ -27,8 +27,8 @@
 start_link() -> gen_server:start_link({local, ?MODULE}, ?MODULE, [], []).
 
 
--define(META_TABLE, zp_depcache_meta).
--define(DEPS_TABLE, zp_depcache_deps).
+-define(META_TABLE, z_depcache_meta).
+-define(DEPS_TABLE, z_depcache_deps).
 -define(MEMORY_MAX, 20*1024*1024).
 
 % Number of slots visited for each iteration
@@ -135,7 +135,7 @@ size() ->
 init(_Args) ->
     ets:new(?META_TABLE, [set, named_table, {keypos, 2}, protected]),
     ets:new(?DEPS_TABLE, [set, named_table, {keypos, 2}, protected]),
-    State = #state{now=zp_utils:now(), serial=0},
+    State = #state{now=z_utils:now(), serial=0},
     timer:apply_interval(1000, ?MODULE, tick, []),
     spawn_link(?MODULE, cleanup, [self()]),
     {ok, State}.
@@ -221,7 +221,7 @@ handle_cast(flush, State) ->
     {noreply, State#state{size=0}};
 
 handle_cast(tick, State) ->
-    {noreply, State#state{now=zp_utils:now()}};
+    {noreply, State#state{now=z_utils:now()}};
 
 handle_cast(_Msg, State) ->
     {noreply, State}.
@@ -348,7 +348,7 @@ find_value(_Key, _Data) ->
 cleanup(Pid) ->
     {A1,A2,A3} = now(),
     random:seed(A1, A2, A3),
-    ?MODULE:cleanup(Pid, 0, zp_utils:now(), normal, 0).
+    ?MODULE:cleanup(Pid, 0, z_utils:now(), normal, 0).
 
 %% Wrap around the end of table
 cleanup(Pid, '$end_of_table', Now, _Mode, Ct) ->
@@ -362,14 +362,14 @@ cleanup(Pid, SlotNr, Now, normal, 0) ->
     timer:sleep(1000),
     case ets:info(?META_TABLE, size) of
         0 -> ?MODULE:cleanup(Pid, 0, Now, normal, 0);
-        _ -> ?MODULE:cleanup(Pid, SlotNr, zp_utils:now(), cleanup_mode(Pid), ?CLEANUP_BATCH)
+        _ -> ?MODULE:cleanup(Pid, SlotNr, z_utils:now(), cleanup_mode(Pid), ?CLEANUP_BATCH)
     end;
 
 %% After finishing a batch in cache_full mode, check if the cache is still full, if so keep deleting entries
 cleanup(Pid, SlotNr, Now, cache_full, 0) -> 
     case cleanup_mode(Pid) of
         normal     -> ?MODULE:cleanup(Pid, SlotNr, Now, normal, 0);
-        cache_full -> ?MODULE:cleanup(Pid, SlotNr, zp_utils:now(), cache_full, ?CLEANUP_BATCH)
+        cache_full -> ?MODULE:cleanup(Pid, SlotNr, z_utils:now(), cache_full, ?CLEANUP_BATCH)
     end;
 
 %% Normal cleanup behaviour - check expire stamp and dependencies

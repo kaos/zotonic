@@ -8,7 +8,7 @@
 
 -export([init/1, varies/2, code_change/3, terminate/1, render/4]).
 
--include("zophrenic.hrl").
+-include("zotonic.hrl").
 
 
 %%      init(Args) -> {ok, State} | {error, Error}
@@ -34,7 +34,7 @@ terminate(_Reason) -> ok.
 render(Params, _Vars, Context, _State) ->
     Postback  = proplists:get_value(postback, Params),
     Text      = proplists:get_value(text, Params, <<"Submit">>),
-    Id        = zp_ids:optid(proplists:get_value(id, Params)),
+    Id        = z_ids:optid(proplists:get_value(id, Params)),
     %%Class     = [button | proplists:get_all_values(class, Params)],
     Class     = proplists:get_all_values(class, Params),
     Style     = proplists:get_value(style, Params),
@@ -50,7 +50,7 @@ render(Params, _Vars, Context, _State) ->
 
     Context1 = case Options1 of
                     [] -> Context;
-                    _  -> zp_render:wire(Id, {event,[{type,click}|Options1]}, Context)
+                    _  -> z_render:wire(Id, {event,[{type,click}|Options1]}, Context)
                end,
 
     Attrs = [
@@ -60,12 +60,12 @@ render(Params, _Vars, Context, _State) ->
         {<<"title">>, Title}
     ],
     
-    {Class1, Attrs1} = case zp_convert:to_bool(Disabled) of
+    {Class1, Attrs1} = case z_convert:to_bool(Disabled) of
         false -> {Class, Attrs};
         true -> { ["disabled"|Class], [ {<<"disabled">>,"disabled"}|Attrs] }
     end,
     
-    Context2 = zp_tags:render_tag(
+    Context2 = z_tags:render_tag(
                         <<"button">>,
                         [{<<"class">>,Class1}|Attrs1],
                     	Text,

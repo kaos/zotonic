@@ -1,16 +1,16 @@
 %% @author Marc Worrell <marc@worrell.nl>
 %% @copyright 2009 Marc Worrell
 
-%% @doc Session for zophrenic, holds all information for the current session at an user agent.
+%% @doc Session for zotonic, holds all information for the current session at an user agent.
 %%      An agent can have multiple pages open and an user_session can have multiple sessions.
 %%      The user agent session also starts and monitors the page sessions.
 
 
--module(zp_session).
+-module(z_session).
 -author("Marc Worrell <marc@worrell.nl>").
 -behaviour(gen_server).
 
--include_lib("zophrenic.hrl").
+-include_lib("zotonic.hrl").
 
 %% gen_server exports
 -export([init/1, handle_call/3, handle_cast/2, handle_info/2, terminate/2, code_change/3]).
@@ -122,18 +122,18 @@ handle_cast(stop, Session) ->
 
 %% @doc Reset the timeout counter for the session and, optionally, a specific page
 handle_cast(keepalive, Session) ->
-    Now      = zp_utils:now(),
+    Now      = z_utils:now(),
     Session1 = Session#session{expire=Now + ?SESSION_EXPIRE_N},
     {noreply, Session1};
 
 %% @doc Reset the timeout counter, propagate to the page process.
 handle_cast({keepalive, PageId}, Session) ->
-    Now      = zp_utils:now(),
+    Now      = z_utils:now(),
     Session1 = Session#session{expire=Now + ?SESSION_EXPIRE_N},
     case find_page(PageId, Session1) of
         #page{page_pid=Pid} -> 
             % Keep the page process alive
-            catch zp_session_page:ping(Pid);
+            catch z_session_page:ping(Pid);
         undefined -> 
             ok
     end,
@@ -162,7 +162,7 @@ handle_cast({send_script, Script, PageId}, Session) ->
         undefined -> 
             Session;
         #page{page_pid=Pid} ->
-            zp_session_page:add_script(Script, Pid)
+            z_session_page:add_script(Script, Pid)
     end,
     {noreply, Session};
 
@@ -170,14 +170,14 @@ handle_cast({send_script, Script, PageId}, Session) ->
 %% @doc Add a script to all page's script queues
 handle_cast({add_script, Script}, Session) ->
     F = fun(P) ->
-            catch zp_session_page:add_script(Script, P#page.page_pid)
+            catch z_session_page:add_script(Script, P#page.page_pid)
         end,
     lists:foreach(F, Session#session.pages),
     {noreply, Session};
 
 %% @doc Set the session variable, replaces any old value
 handle_cast({set, Key, Value}, Session) ->
-    {noreply, Session#session{ props = zp_utils:prop_replace(Key, Value, Session#session.props) }};
+    {noreply, Session#session{ props = z_utils:prop_replace(Key, Value, Session#session.props) }};
 
 handle_cast(dump, Session) ->
     io:format("~p~n", [Session]),
@@ -200,10 +200,10 @@ handle_call({get, Key}, _From, Session) ->
 
 handle_call({incr, Key, Delta}, _From, Session) ->
     NV = case proplists:lookup(Key, Session#session.props) of
-        {Key, V} -> zp_convert:to_integer(V) + Delta;
+        {Key, V} -> z_convert:to_integer(V) + Delta;
         none -> Delta
     end,
-    {reply, NV, Session#session{props = zp_utils:prop_replace(Key, NV, Session#session.props)}};
+    {reply, NV, Session#session{props = z_utils:prop_replace(Key, NV, Session#session.props)}};
 
 handle_call({spawn_link, Module, Func, Args, Context}, _From, Session) ->
     Pid    = spawn_link(Module, Func, [Args, Context]),
@@ -212,10 +212,10 @@ handle_call({spawn_link, Module, Func, Args, Context}, _From, Session) ->
     {reply, Pid, Session#session{linked=Linked}};
 
 handle_call({ensure_page_session, Context}, _From, Session) ->
-    Context1  = zp_context:ensure_qs(Context),
-    PageId    = zp_context:get_q(?SESSION_PAGE_Q, Context1),
+    Context1  = z_context:ensure_qs(Context),
+    PageId    = z_context:get_q(?SESSION_PAGE_Q, Context1),
     NewPageId = case PageId of
-                    undefined -> zp_ids:id();
+                    undefined -> z_ids:id();
                     Id -> Id
                 end,
     {NewPage, Session1} = case find_page(NewPageId, Session) of
@@ -226,7 +226,7 @@ handle_call({ensure_page_session, Context}, _From, Session) ->
                                 {P, Session#session{pages=Pages}};
                             #page{page_pid=Pid}=P -> 
                                 % Keep the page alive
-                                catch zp_session_page:ping(Pid),
+                                catch z_session_page:ping(Pid),
                                 {P, Session}
                           end,
     Context2 = Context1#context{page_id=NewPageId, page_pid=NewPage#page.page_pid},
@@ -270,7 +270,7 @@ code_change(_OldVsn, Session, _Extra) ->
 
 %% @doc Initialize a new session record
 new_session(_Args) ->
-    Now = zp_utils:now(),
+    Now = z_utils:now(),
     #session{
             expire=Now + ?SESSION_EXPIRE_1,
             timer_ref=undefined,
@@ -281,7 +281,7 @@ new_session(_Args) ->
 
 %% @doc Return a new page record, monitor the started page process because we want to know about normal exits
 page_start(PageId) ->
-    {ok,PagePid} = zp_session_page:start_link([{session_pid, self()}]),
+    {ok,PagePid} = z_session_page:start_link([{session_pid, self()}]),
     erlang:monitor(process, PagePid),
     #page{page_pid=PagePid, page_id=PageId }.
 

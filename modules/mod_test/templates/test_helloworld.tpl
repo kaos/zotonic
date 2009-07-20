@@ -1,7 +1,7 @@
 <!DOCTYPE html PUBLIC \"-//W3C//DTD XHTML 1.0 Strict//EN\" \"http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd\">
 <html xmlns=\"http://www.w3.org/1999/xhtml\" lang=\"en\">
     <head>
-        <title>zophrenic</title>
+        <title>zotonic</title>
 
 		<link href="/lib/css/zp-base.css" type="text/css" media="screen" rel="stylesheet" /> 
 		<link href="/lib/css/zp-type.css" type="text/css" media="screen" rel="stylesheet" /> 

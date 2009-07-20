@@ -5,12 +5,12 @@
 %% @doc Translate english sentences into other languages
 %% @seealso GNU gettext
 
--module(zp_trans).
+-module(z_trans).
 -author("Marc Worrell <marc@worrell.nl>").
 
 -export([trans/2, default_language/1, is_language/1, lc2/1, lc2descr/1]).
 
--include_lib("zophrenic.hrl").
+-include_lib("zotonic.hrl").
 
 %% @doc translate a string or trans record into another language
 %% @spec trans(From, Language) -> String
@@ -32,7 +32,7 @@ trans(String, Language) ->
 
 %% @doc Return the configured default language for this server
 default_language(Context) ->
-    zp_convert:to_atom(m_config:get_value(i18n, language, en, Context)).
+    z_convert:to_atom(m_config:get_value(i18n, language, en, Context)).
 
 
 %% @doc check if the two letter code is a valid language

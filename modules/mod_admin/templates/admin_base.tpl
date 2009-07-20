@@ -23,7 +23,7 @@
 	</div>
 	<div class="zp-wrapper">
 		<div id="header">
-			<h1 class="zophrenic"><a href="/admin/">Zophrenic</a></h1>
+			<h1 class="zotonic"><a href="/admin/">Zophrenic</a></h1>
 		</div>
 
 		<!--[if lte IE 6]>

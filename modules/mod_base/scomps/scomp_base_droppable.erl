@@ -11,7 +11,7 @@
 
 -export([init/1, varies/2, code_change/3, terminate/1, render/4, event/2]).
 
--include("zophrenic.hrl").
+-include("zotonic.hrl").
 
 init(_Args) -> {ok, []}.
 varies(_Params, _Context) -> undefined.
@@ -33,36 +33,36 @@ render(Params, _Vars, Context, _State) ->
             {error, "droppable scomp, please give the id of the droppable"};
         _ ->
             Delegate1 = case Delegate of
-                            undefined -> zp_context:get_resource_module(Context);
+                            undefined -> z_context:get_resource_module(Context);
                             _ -> Delegate
                         end,
 
         	AcceptGroups1       = groups_to_accept(AcceptGroups),
-        	PickledPostbackInfo = zp_render:make_postback_info({Tag,Delegate1}, sort, Id, Id, ?MODULE, Context),
+        	PickledPostbackInfo = z_render:make_postback_info({Tag,Delegate1}, sort, Id, Id, ?MODULE, Context),
             
-        	Script = io_lib:format( "zp_droppable($('#~s'), { activeClass: '~s', hoverClass: '~s', accept: '~s' }, '~s');", 
+        	Script = io_lib:format( "z_droppable($('#~s'), { activeClass: '~s', hoverClass: '~s', accept: '~s' }, '~s');", 
         	                        [Id, ActiveClass, HoverClass, AcceptGroups1, PickledPostbackInfo]),
 
             % Hook the actions to the element
             Actions = {script, [{script, Script}]},
-            {ok, zp_render:wire(Id, Actions, Context)}
+            {ok, z_render:wire(Id, Actions, Context)}
     end.
 
 
 %% @doc Drops will be delegated to this event handler, which will call the postback resource.
 event({postback, {DropTag,DropDelegate}, TriggerId, _TargetId}, Context) ->
-	DragItem = zp_context:get_q("drag_item", Context),
-	{DragTag,DragDelegate,DragId} = zp_utils:depickle(DragItem),
+	DragItem = z_context:get_q("drag_item", Context),
+	{DragTag,DragDelegate,DragId} = z_utils:depickle(DragItem),
 
     Drop = #dragdrop{tag=DropTag, delegate=DropDelegate, id=TriggerId},
     Drag = #dragdrop{tag=DragTag, delegate=DragDelegate, id=DragId},
 
 	try
-	    Context1 = DropDelegate:event({drop, Drag, Drop}, zp_context:set_resource_module(DropDelegate, Context)),
+	    Context1 = DropDelegate:event({drop, Drag, Drop}, z_context:set_resource_module(DropDelegate, Context)),
 	    
 	    % also notify the dragged element that it has been dragged
 	    try
-	        DragDelegate:event({drag, Drag, Drop}, zp_context:set_resource_module(DragDelegate, Context1))
+	        DragDelegate:event({drag, Drag, Drop}, z_context:set_resource_module(DragDelegate, Context1))
 	    catch
 	        _M1:_E1 -> Context1
 	    end
@@ -71,7 +71,7 @@ event({postback, {DropTag,DropDelegate}, TriggerId, _TargetId}, Context) ->
         _M2:E ->
             ?ERROR("Error in drop routing: ~p~n~p", [E, erlang:get_stacktrace()]),
             Error = io_lib:format("Error in routing drop to module \"~s\"; error: \"~p\"", [DropDelegate,E]),
-            zp_render:wire({growl, [{text,Error}, {stay,1}]}, Context)
+            z_render:wire({growl, [{text,Error}, {stay,1}]}, Context)
     end.
 
 
@@ -80,5 +80,5 @@ groups_to_accept(["all"]) -> "*";
 groups_to_accept(["none"]) -> "";
 groups_to_accept(Groups) ->
 	Groups1 = lists:flatten([Groups]),
-	Groups2 = [".drag_group_" ++ zp_convert:to_list(X) || X <- Groups1],
+	Groups2 = [".drag_group_" ++ z_convert:to_list(X) || X <- Groups1],
 	string:join(Groups2, ", ").

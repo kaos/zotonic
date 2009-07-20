@@ -13,17 +13,17 @@
 
 resource_exists(ReqData, Context) ->
     Context1  = ?WM_REQ(ReqData, Context),
-    ContextQs = zp_context:ensure_qs(Context1),
+    ContextQs = z_context:ensure_qs(Context1),
     try
-        Id = list_to_integer(zp_context:get_q("id", ContextQs)),
-        Ctx = zp_context:set(id, Id, ContextQs),
+        Id = list_to_integer(z_context:get_q("id", ContextQs)),
+        Ctx = z_context:set(id, Id, ContextQs),
         ?WM_REPLY(m_rsc:exists(Id, Ctx), Ctx)
     catch
         _:_ -> ?WM_REPLY(false, ContextQs)
     end.
 
 html(Context) ->
-	Id = zp_context:get(id, Context),
+	Id = z_context:get(id, Context),
 	CatId = m_rsc:p(Id, category_id, Context),
 	CatBrand = mod_shop:category_brands(CatId, Context),
     RscCount = mod_shop:category_rsc_count(CatId, Context),
@@ -33,6 +33,6 @@ html(Context) ->
 	    {prod_count, RscCount},
 	    {cart_count, shop_cart:in_cart(Id, Context)}
 	],
-    Html = zp_template:render("product.tpl", Vars, Context),
-	zp_context:output(Html, Context).
+    Html = z_template:render("product.tpl", Vars, Context),
+	z_context:output(Html, Context).
 

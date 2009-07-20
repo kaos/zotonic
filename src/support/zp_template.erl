@@ -4,7 +4,7 @@
 %% @doc Template handling, compiles and renders django compatible templates using an extended version of erlydtl
 %% @todo Make the template handling dependent on the host of the context (hosts have different modules enabled).
 
--module(zp_template).
+-module(z_template).
 -behaviour(gen_server).
 
 -author("Marc Worrell <marc@worrell.nl>").
@@ -13,7 +13,7 @@
 -export([init/1, handle_call/3, handle_cast/2, handle_info/2, terminate/2, code_change/3]).
 -export([start_link/0]).
 
--include_lib("zophrenic.hrl").
+-include_lib("zotonic.hrl").
 
 %% External exports
 -export([
@@ -69,7 +69,7 @@ render(File, Variables, Context) ->
 %% @spec render_to_iolist(File, Vars, Context) -> {iolist(), Context}
 render_to_iolist(File, Vars, Context) ->
     Html = render(File, Vars, Context),
-    zp_render:render_to_iolist(Html, Context).
+    z_render:render_to_iolist(Html, Context).
 
 
 %% @spec compile(File, Context) -> {ok, atom()} | {error, Reason}
@@ -86,18 +86,18 @@ compile(File, Context) ->
 %% @spec find_template(File, Context) -> {ok, filename()} | {error, code} 
 %% @doc Finds the template designated by the file, check modules.
 find_template(File, Context) ->
-    zp_module_indexer:find(template, File, Context).
+    z_module_indexer:find(template, File, Context).
     
 
 %% @spec find_template(File, All, Context) -> FilenameList
 %% @doc Finds the first or all templates designated by the file, check modules.
 find_template(File, false, Context) ->
-    case zp_module_indexer:find(template, File, Context) of
+    case z_module_indexer:find(template, File, Context) of
         {ok, TemplateFile} -> [TemplateFile];
         {error, _Reason} -> []
     end;
 find_template(File, true, Context) ->
-    zp_module_indexer:find_all(template, File, Context).
+    z_module_indexer:find_all(template, File, Context).
 
 
 %%====================================================================

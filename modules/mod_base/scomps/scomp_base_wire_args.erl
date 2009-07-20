@@ -7,7 +7,7 @@
 
 -export([init/1, varies/2, code_change/3, terminate/1, render/4]).
 
--include("zophrenic.hrl").
+-include("zotonic.hrl").
 
 init(_Args) -> {ok, []}.
 varies(_Params, _Context) -> undefined.
@@ -38,11 +38,11 @@ render(Params, _Vars, Context, _State) ->
 
     Delegate1 = case Delegate of
         undefined -> undefined;
-        _ -> zp_convert:to_atom(Delegate)
+        _ -> z_convert:to_atom(Delegate)
     end,
 
     case Options1 of
-        [_|_] -> {ok, zp_render:wire(Id, TargetId, {event,[{type,Type},{delegate,Delegate1}|Options1]}, Context)};
+        [_|_] -> {ok, z_render:wire(Id, TargetId, {event,[{type,Type},{delegate,Delegate1}|Options1]}, Context)};
         _ -> {ok, Context}
     end.
 

@@ -4,7 +4,7 @@
 %% @doc Disable an element.  Adds the 'disabled' attribute and adds the class 'disabled'.
 
 -module(action_base_disable).
--include("zophrenic.hrl").
+-include("zotonic.hrl").
 -export([render_action/4]).
 
 render_action(TriggerId, TargetId, Args, Context) ->

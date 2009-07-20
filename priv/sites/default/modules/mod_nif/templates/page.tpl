@@ -52,7 +52,7 @@
 							<div class="item-image left">{% image  m.rsc[id].media[1] width=65 height=65 crop %}</div>
 						{% endif %}
 						<p class="intro">
-							<em>{{ m.rsc[id].modified|date:"F d, H:i" }}</em> &mdash; 
+							<em>{{ m.rsc[id].modified|date:"d M, H:i" }}</em> &mdash; 
 							{{ m.rsc[id].summary|ljust:80 }}&hellip;
 							<a href="{{ m.rsc[id].page_url }}" title="{{ m.rsc[id].title }}">Read&nbsp;more</a>
 						</p>

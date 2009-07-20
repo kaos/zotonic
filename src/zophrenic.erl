@@ -3,7 +3,7 @@
 
 %% @doc Start/stop functions for Zophrenic
 
--module(zophrenic).
+-module(zotonic).
 -author('Marc Worrell <marc@worrell.nl>').
 -export([start/0, start/1, stop/0, stop/1]).
 -revision("$Id$").
@@ -17,28 +17,28 @@ ensure_started(App) ->
     end.
 
 %% @spec start() -> ok
-%% @doc Start the zophrenic server.
+%% @doc Start the zotonic server.
 start() -> start([]).
 	
 %% @spec start(_Args) -> ok
-%% @doc Start the zophrenic server.
+%% @doc Start the zotonic server.
 start(_Args) ->
-    zophrenic_deps:ensure(),
+    zotonic_deps:ensure(),
     ensure_started(crypto),
     ensure_started(webmachine),
-    application:start(zophrenic).
+    application:start(zotonic).
 
 %% @spec stop() -> ok
-%% @doc Stop the zophrenic server.
+%% @doc Stop the zotonic server.
 stop() ->
-    Res = application:stop(zophrenic),
+    Res = application:stop(zotonic),
     application:stop(webmachine),
     application:stop(crypto),
     Res.
 
 
 %% @spec stop([Node]) -> void()
-%% @doc Stop a zophrenic server on a specific node
+%% @doc Stop a zotonic server on a specific node
 stop([Node]) ->
     io:format("Stop:~p~n",[Node]),
     case net_adm:ping(Node) of

@@ -5,19 +5,19 @@
 %% @doc This server will install the database when started. It will always return ignore to the supervisor.
 %% This server should be started after the database pool but before any database queries will be done.
 
--module(zp_installer).
+-module(z_installer).
 -author("Marc Worrell <marc@worrell.nl").
 
 %% gen_server exports
 -export([start_link/1]).
 
--include_lib("zophrenic.hrl").
+-include_lib("zotonic.hrl").
 
 %%====================================================================
 %% API
 %%====================================================================
 %% @spec start_link() -> {ok,Pid} | ignore | {error,Error}
-%% @doc Install zophrenic on the databases in the PoolOpts, skips when already installed.
+%% @doc Install zotonic on the databases in the PoolOpts, skips when already installed.
 start_link(Opts) when is_list(Opts) ->
     [ install_check(Name, PoolOpts) || {Name, _Size, PoolOpts} <- Opts ],
     ignore.
@@ -42,7 +42,7 @@ install_check(Name, PoolOpts) ->
                         proplists:get_value(port, PoolOpts),
                         Database
                         ]),
-            zp_install:install(Name);
+            z_install:install(Name);
         1 -> 
             ok
     end.

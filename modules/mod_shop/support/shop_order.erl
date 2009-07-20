@@ -17,7 +17,7 @@
     deallocate_order/2
 ]).
 
--include_lib("zophrenic.hrl").
+-include_lib("zotonic.hrl").
 -include_lib("../include/shop.hrl").
    
 
@@ -25,12 +25,12 @@
 %% @todo Add also the order history
 %% @spec get(OrderId, Context) -> proplist
 get(OrderId, Context) ->
-    Order = zp_db:assoc_row("select * from shop_order where id = $1", [OrderId], Context),
+    Order = z_db:assoc_row("select * from shop_order where id = $1", [OrderId], Context),
     case Order of
         undefined ->
             undefined;
         L when is_list(L) ->
-            Lines = zp_db:assoc("
+            Lines = z_db:assoc("
                     select ol.*, 
                         ol.quantity * ol.price_incl as total_price_incl, 
                         ol.quantity * ol.price_excl as total_price_excl, 
@@ -42,7 +42,7 @@ get(OrderId, Context) ->
 
 
 get_by_name(Name, Context) ->
-    Id = zp_db:q1("select id from shop_order where name = $1", [Name], Context),
+    Id = z_db:q1("select id from shop_order where name = $1", [Name], Context),
     case Id of
         undefined -> undefined;
         _ -> get(Id, Context)
@@ -82,7 +82,7 @@ order_from_cart(TotalAmount, Address, Context) ->
             {0,0},
             Skus),
 
-    {VisitorId, Context1} = zp_context:ensure_visitor_id(Context),
+    {VisitorId, Context1} = z_context:ensure_visitor_id(Context),
 
     %% @todo: Calculate the order/delivery costs, determine the skus for the delivery costs.
     %% @todo Add the order and delivery costs skus to the list of Skus to be ordered.
@@ -95,7 +95,7 @@ order_from_cart(TotalAmount, Address, Context) ->
                 insert_order(VisitorId, SkuAmountIncl, SkuAmountExcl, Skus, Address, Ctx)
             end,
 
-            case zp_db:transaction(F, Context1) of
+            case z_db:transaction(F, Context1) of
                 {ok, OrderId} ->
                     {ok, OrderId, Context1};
                 {rollback, {error, could_not_allocate}} ->
@@ -109,10 +109,10 @@ order_from_cart(TotalAmount, Address, Context) ->
 %% @doc Received a completion from the PSP, check the order if we can mark it as paid
 %% This function should be evaluated within a transaction.
 payment_completion(OrderId, NewState, PaymentMethod, _PspReference, Context) ->
-    OldState = zp_convert:to_atom(zp_db:q1("select status from shop_order where id = $1", [OrderId], Context)),
+    OldState = z_convert:to_atom(z_db:q1("select status from shop_order where id = $1", [OrderId], Context)),
     UpdateState = case NewState of
         payment_authorized when OldState /= payment_authorized ->
-            zp_db:q("
+            z_db:q("
                 update shop_order 
                 set status = $1,
                     payment_method = $2,
@@ -142,12 +142,12 @@ payment_completion(OrderId, NewState, PaymentMethod, _PspReference, Context) ->
 %% @doc Send the order confirmation to the customer
 mail_customer(Order, Context) ->
     {email, To} = proplists:lookup(email, Order),
-    zp_notifier:notify({send_render, To, "email_order_confirmation.tpl", [{order, Order}]}, Context).
+    z_notifier:notify({send_render, To, "email_order_confirmation.tpl", [{order, Order}]}, Context).
 
 
 %% @doc Set a new status of the order. Deallocate order on problems.
 set_status(OrderId, Status, Context) ->
-    zp_db:q("update shop_order set status = $1, status_modified = now() where id = $2", [Status, OrderId], Context),
+    z_db:q("update shop_order set status = $1, status_modified = now() where id = $2", [Status, OrderId], Context),
     case Status of
         canceled        -> deallocate_order(OrderId, Context);
         payment_error   -> deallocate_order(OrderId, Context);
@@ -158,21 +158,21 @@ set_status(OrderId, Status, Context) ->
 
 %% @doc Deallocate all orders of a visitor that are still open.
 deallocate_open_orders(Context) ->
-    {VisitorId, Context1} = zp_context:ensure_visitor_id(Context),
-    Ids = zp_db:q("select id from shop_order where visitor_id = $1 and status = 'new'", [VisitorId], Context1),
+    {VisitorId, Context1} = z_context:ensure_visitor_id(Context),
+    Ids = z_db:q("select id from shop_order where visitor_id = $1 and status = 'new'", [VisitorId], Context1),
     [ deallocate_order(Id, Context1) || {Id} <- Ids ].
     
 
 %% @doc Move the stock allocation in the order lines back to the stock of the skus. All allocated units will be mentioned as backorders.
 deallocate_order(OrderId, Context) ->
-    zp_db:q("
+    z_db:q("
         update shop_sku
         set stock_avail = stock_avail + shop_order_line.allocated
         from shop_order_line 
         where shop_sku.id = shop_order_line.shop_sku_id
           and shop_order_line.shop_order_id = $1
           and shop_order_line.allocated > 0", [OrderId], Context),
-    zp_db:q("
+    z_db:q("
         update shop_order_line
         set backorder  = backorder + allocated,
             allocated  = 0
@@ -186,14 +186,14 @@ insert_order(VisitorId, SkuAmountIncl, SkuAmountExcl, Skus, Address, Context) ->
     Expires = calendar:gregorian_seconds_to_datetime(NowSecs + ?SHOP_ORDER_EXPIRE),
     Args = [
         {visitor_id, VisitorId},
-        {name, zp_ids:id(32)},
+        {name, z_ids:id(32)},
         {status, "new"},
         {expires, Expires},
         {total_price_incl, SkuAmountIncl},
         {total_price_excl, SkuAmountExcl}
         | Address
     ],
-    {ok, Id} = zp_db:insert(shop_order, Args, Context),
+    {ok, Id} = z_db:insert(shop_order, Args, Context),
     insert_order_lines(Id, Skus, Context).
     
     
@@ -217,7 +217,7 @@ insert_order_lines(Id, [Sku|T], Context) ->
                 {allocated, 0},
                 {backorder, 0}
             ],
-            {ok, _} = zp_db:insert(shop_order_line, Args1, Context),
+            {ok, _} = z_db:insert(shop_order_line, Args1, Context),
             insert_order_lines(Id, T, Context);
 
         {_, true} ->
@@ -226,13 +226,13 @@ insert_order_lines(Id, [Sku|T], Context) ->
                 {allocated, 0},
                 {backorder, Sku#sku_alloc.n} | Args
             ],
-            {ok, _} = zp_db:insert(shop_order_line, Args1, Context),
+            {ok, _} = z_db:insert(shop_order_line, Args1, Context),
             insert_order_lines(Id, T, Context);
 
         {_, false} ->
             % Normal order, try to allocate
             
-            InStock = zp_db:q1("select stock_avail from shop_sku where id = $1", [Sku#sku_alloc.sku_id], Context),
+            InStock = z_db:q1("select stock_avail from shop_sku where id = $1", [Sku#sku_alloc.sku_id], Context),
             Alloc = min(InStock, Sku#sku_alloc.n),
 
             Args1 = [
@@ -241,7 +241,7 @@ insert_order_lines(Id, [Sku|T], Context) ->
             ],
 
             % Try to allocate the calculated maximum quantity from the available stock of the sku
-            case zp_db:q("
+            case z_db:q("
                     update shop_sku 
                     set stock_avail = stock_avail - $1 
                     where id = $2 and stock_avail >= $1", 
@@ -249,7 +249,7 @@ insert_order_lines(Id, [Sku|T], Context) ->
                     Context) of
 
                 1 ->
-                    {ok, _} = zp_db:insert(shop_order_line, Args1, Context),
+                    {ok, _} = z_db:insert(shop_order_line, Args1, Context),
                     
                     %% Check if we need to add a backorder
                     case Alloc < Sku#sku_alloc.n of
@@ -257,7 +257,7 @@ insert_order_lines(Id, [Sku|T], Context) ->
                             Args2 = [
                                 {allocated, 0},
                                 {backorder, Sku#sku_alloc.n - Alloc} | Args ],
-                            {ok, _} = zp_db:insert(shop_order_line, Args2, Context);
+                            {ok, _} = z_db:insert(shop_order_line, Args2, Context);
                         false ->
                             ok
                     end,

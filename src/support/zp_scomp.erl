@@ -8,7 +8,7 @@
 %%% @todo Handle code change events for all scomps     
 %%%-------------------------------------------------------------------
 
--module(zp_scomp).
+-module(z_scomp).
 
 -behaviour(gen_server).
 -author("Marc Worrell <marc@worrell.nl>").
@@ -20,7 +20,7 @@
 -export([init/1, handle_call/3, handle_cast/2, handle_info/2,
          terminate/2, code_change/3]).
 
--include_lib("zophrenic.hrl").
+-include_lib("zotonic.hrl").
 
 
 %% @doc The state of the scomp server.  'Cache' holds the cached entries, 'waiting' holds the list
@@ -43,9 +43,9 @@ start_link() ->
 %% @spec render(ScompName, Args, Vars, Context) -> {ok, Context} | {ok, io_list} | {error, Reason}
 %% @doc Render the names scomp, Args are the scomp arguments and Vars are the variables given to the template
 render(ScompName, Args, Vars, Context) ->
-    case zp_module_indexer:find(scomp, ScompName, Context) of
+    case z_module_indexer:find(scomp, ScompName, Context) of
         {ok, ModuleName} ->
-        	ScompContext = zp_context:prune_for_scomp(visible_for(Args), Context), 
+        	ScompContext = z_context:prune_for_scomp(visible_for(Args), Context), 
             render_scomp_module(ModuleName, Args, Vars, ScompContext, Context);
         {error, enoent} ->
             %% No such scomp, as we can switch on/off functionality we do a quiet skip
@@ -54,13 +54,13 @@ render(ScompName, Args, Vars, Context) ->
     end.
 
 render_all(ScompName, Args, Vars, Context) ->
-    case zp_module_indexer:find_all(scomp, ScompName, Context) of
+    case z_module_indexer:find_all(scomp, ScompName, Context) of
         [] -> [];
         ModuleNames when is_list(ModuleNames) ->
-        	ScompContext = zp_context:prune_for_scomp(visible_for(Args), Context),
+        	ScompContext = z_context:prune_for_scomp(visible_for(Args), Context),
         	RenderFun = fun(ModuleName) ->
         	    case render_scomp_module(ModuleName, Args, Vars, ScompContext, Context) of
-        	        {ok, Result} -> zp_context:prune_for_template(Result);
+        	        {ok, Result} -> z_context:prune_for_template(Result);
         	        {error, Reason} -> throw({error, Reason})
         	    end
         	end,
@@ -168,13 +168,13 @@ handle_cast({scomp_ready, Key, Result, MaxAge, Varies}, State) ->
 
     %% If maxage is 0 then there is slam-dunk protection but no additional caching.
     State1 = State#state{ waiting=dict:erase(Key, State#state.waiting) },
-    case zp_convert:to_integer(MaxAge) of
+    case z_convert:to_integer(MaxAge) of
         undefined -> 
             {noreply, State1};
         0 -> 
             {noreply, State1};
         Max ->
-            zp_depcache:set(Key, Result, Max, Varies),
+            z_depcache:set(Key, Result, Max, Varies),
             {noreply, State1}
     end;
     
@@ -220,7 +220,7 @@ cache_lookup(_ScompName, undefined, _Varies, _Context) ->
     undefined;
 cache_lookup(ScompName, EssentialParams, _Varies, Context) ->
     Key = key(ScompName, EssentialParams, Context),
-    case zp_depcache:get(Key) of
+    case z_depcache:get(Key) of
         {ok, Result} -> Result;
         _ -> undefined
     end.
@@ -238,7 +238,7 @@ spawn_cacheable_renderer(ScompName, ScompState, EssentialParams, MaxAge, Varies,
              end,
     Renderer = fun() ->
                      Result = ScompName:render(EssentialParams, [], Context, ScompState),
-                     zp_scomp:scomp_ready(Key, Result, MaxAge, Varies)
+                     z_scomp:scomp_ready(Key, Result, MaxAge, Varies)
                 end,
     spawn(Renderer),
     State#state{waiting=Waiting}.

@@ -10,7 +10,7 @@
 
 -export([init/1, varies/2, code_change/3, terminate/1, render/4]).
 
--include("zophrenic.hrl").
+-include("zotonic.hrl").
 
 init(_Args) -> {ok, []}.
 varies(_Params, _Context) -> undefined.
@@ -27,7 +27,7 @@ render(Params, _Vars, Context, _State) ->
     
 	% Get properties...
 	Delegate1    = case Delegate of
-	                undefined -> zp_context:get_resource_module(Context);
+	                undefined -> z_context:get_resource_module(Context);
 	                _ -> Delegate
 	               end,
 
@@ -35,13 +35,13 @@ render(Params, _Vars, Context, _State) ->
        undefined ->
            {error, "sortable scomp, please give the id of the sortable element"};
        _ ->
-        	PickledTag  = zp_utils:pickle({Tag,Delegate1,Id}),
-        	Script      = io_lib:format("zp_sortable($('#~s'), '~s');", [Id, PickledTag]),
+        	PickledTag  = z_utils:pickle({Tag,Delegate1,Id}),
+        	Script      = io_lib:format("z_sortable($('#~s'), '~s');", [Id, PickledTag]),
 
             Actions = [
                         {script,    [{script, Script}]},
                         {add_class, [{class, ["sortable "|Class]}]}
                     ],
 
-        	{ok, zp_render:wire(Id, Actions, Context)}
+        	{ok, z_render:wire(Id, Actions, Context)}
     end.

@@ -3,7 +3,7 @@
 
 %% @doc Server supplying random strings and unique ids
 
--module(zp_ids).
+-module(z_ids).
 -author("Marc Worrell <marc@worrell.nl>").
 -behaviour(gen_server).
 
@@ -108,7 +108,7 @@ handle_call({id, Len}, _From, State) ->
 handle_call(sign_key, _From, State) ->
     case State#state.sign_key of
         undefined ->
-            SKey = case os:getenv("ZOPHRENIC_SIGN_KEY") of false -> generate_id(50); K -> K end,
+            SKey = case os:getenv("ZOTONIC_SIGN_KEY") of false -> generate_id(50); K -> K end,
             Key  = list_to_binary(SKey),
             {reply, Key, State#state{sign_key=Key}};
         Key -> 
@@ -118,7 +118,7 @@ handle_call(sign_key, _From, State) ->
 handle_call(sign_key_simple, _From, State) ->
     case State#state.sign_key_simple of
         undefined ->
-            SKey = case os:getenv("ZOPHRENIC_SIGN_KEY_SIMPLE") of false -> generate_id(10); K -> K end,
+            SKey = case os:getenv("ZOTONIC_SIGN_KEY_SIMPLE") of false -> generate_id(10); K -> K end,
             Key  = list_to_binary(SKey),
             {reply, Key, State#state{sign_key_simple=Key}};
         Key -> 

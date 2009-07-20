@@ -13,13 +13,13 @@
     event/2
 ]).
 
--include("zophrenic.hrl").
+-include("zotonic.hrl").
 
 render_action(TriggerId, TargetId, Args, Context) ->
     Title = proplists:get_value(title, Args),
     Redirect = proplists:get_value(redirect, Args, true),
     Postback = {predicate_new_dialog, Title, Redirect},
-	{PostbackMsgJS, _PickledPostback} = zp_render:make_postback(Postback, click, TriggerId, TargetId, ?MODULE, Context),
+	{PostbackMsgJS, _PickledPostback} = z_render:make_postback(Postback, click, TriggerId, TargetId, ?MODULE, Context),
 	{PostbackMsgJS, Context}.
 
 
@@ -31,21 +31,21 @@ event({postback, {predicate_new_dialog, Title, Redirect}, _TriggerId, _TargetId}
         {redirect, Redirect },
         {title, Title}
     ],
-    zp_render:dialog("Make a new predicate", "_action_dialog_predicate_new.tpl", Vars, Context);
+    z_render:dialog("Make a new predicate", "_action_dialog_predicate_new.tpl", Vars, Context);
 
 
 event({submit, predicate_new, _TriggerId, _TargetId}, Context) ->
-    Title    = zp_context:get_q("new_predicate_title", Context),
-    Redirect = zp_context:get_q("redirect", Context),
+    Title    = z_context:get_q("new_predicate_title", Context),
+    Redirect = z_context:get_q("redirect", Context),
     {ok, Id} = m_predicate:insert(Title, Context),
 
     % Close the dialog and optionally redirect to the edit page of the new resource
-    Context2 = zp_render:wire({dialog_close, []}, Context),
-    case zp_convert:to_bool(Redirect) of
+    Context2 = z_render:wire({dialog_close, []}, Context),
+    case z_convert:to_bool(Redirect) of
         false ->
             Context2;
         true ->
-            Location = zp_dispatcher:url_for(admin_edit_rsc, [{id, Id}], Context2),
-            zp_render:wire({redirect, [{location, Location}]}, Context2)
+            Location = z_dispatcher:url_for(admin_edit_rsc, [{id, Id}], Context2),
+            z_render:wire({redirect, [{location, Location}]}, Context2)
     end.
 

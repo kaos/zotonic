@@ -8,9 +8,9 @@
 %% @doc Parse multipart/form-data request bodies. Uses a callback function to receive the next parts, can call 
 %% a progress function to report back the progress on receiving the data.
 %%
-%% Adapted from mochiweb_multipart.erl, integrated with webmachine and zophrenic
+%% Adapted from mochiweb_multipart.erl, integrated with webmachine and zotonic
 
--module(zp_parse_multipart).
+-module(z_parse_multipart).
 -author("Marc Worrell <marc@worrell.nl").
 
 %% interface functions
@@ -18,7 +18,7 @@
    recv_parse/1
 ]).
 
--include("zophrenic.hrl").
+-include("zotonic.hrl").
 
 -define(CHUNKSIZE, 4096).
 
@@ -49,7 +49,7 @@ callback(Next, Form) ->
             ContentDisposition = proplists:get_value("content-disposition", Headers),
             NewForm = case ContentDisposition of
                 {"form-data", [{"name", Name}, {"filename",Filename}]} ->
-                    Form#multipart_form{name=Name, filename=Filename, tmpfile="/tmp/zp-"++zp_ids:identifier()++".zptmp"};
+                    Form#multipart_form{name=Name, filename=Filename, tmpfile="/tmp/zp-"++z_ids:identifier()++".zptmp"};
                 {"form-data",[{"name",Name}]} ->
                     Form#multipart_form{name=Name, data=[]};
                 _ ->
@@ -108,7 +108,7 @@ callback(Next, Form) ->
 
 %% @doc Parse the multipart request
 parse_multipart_request(ProgressFunction, Callback, Context) ->
-    ReqData  = zp_context:get_reqdata(Context),
+    ReqData  = z_context:get_reqdata(Context),
     Length   = list_to_integer(wrq:get_req_header("content-length", ReqData)),
     Boundary = iolist_to_binary(get_boundary(wrq:get_req_header("content-type", ReqData))),
     Prefix = <<"\r\n--", Boundary/binary>>,

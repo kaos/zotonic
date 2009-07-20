@@ -6,7 +6,7 @@
 
 -module(action_admin_link).
 -author("Marc Worrell <marc@worrell.nl").
--include("zophrenic.hrl").
+-include("zotonic.hrl").
 
 %% interface functions
 -export([
@@ -17,13 +17,13 @@
 ]).
 
 render_action(TriggerId, TargetId, Args, Context) ->
-    SubjectId = zp_convert:to_integer(proplists:get_value(subject_id, Args)),
-    ObjectId = zp_convert:to_integer(proplists:get_value(object_id, Args)),
+    SubjectId = z_convert:to_integer(proplists:get_value(subject_id, Args)),
+    ObjectId = z_convert:to_integer(proplists:get_value(object_id, Args)),
     Predicate = proplists:get_value(predicate, Args),
     Action = proplists:get_all_values(action, Args),
     
     Postback = {link, SubjectId, Predicate, ObjectId, Action},
-	{PostbackMsgJS, _PickledPostback} = zp_render:make_postback(Postback, click, TriggerId, TargetId, ?MODULE, Context),
+	{PostbackMsgJS, _PickledPostback} = z_render:make_postback(Postback, click, TriggerId, TargetId, ?MODULE, Context),
 	{PostbackMsgJS, Context}.
 
 
@@ -37,7 +37,7 @@ do_link(SubjectId, Predicate, ObjectId, Context) ->
     do_link(SubjectId, Predicate, ObjectId, [], Context).
     
 do_link(SubjectId, Predicate, ObjectId, Action, Context) ->
-    case zp_acl:rsc_editable(SubjectId, Context) of
+    case z_acl:rsc_editable(SubjectId, Context) of
         true ->
             {ok, _EdgeId} = m_edge:insert(SubjectId, Predicate, ObjectId, Context),
             Vars = [
@@ -45,12 +45,12 @@ do_link(SubjectId, Predicate, ObjectId, Action, Context) ->
                 {predicate, Predicate},
                 {object_id, ObjectId}
             ],
-            Html  = zp_template:render("_rsc_edge.tpl", Vars, Context),
-            Title = zp_html:strip(?TR(m_rsc:p(ObjectId, title, Context), Context)),
-            ElementId = "links-"++zp_convert:to_list(SubjectId)++"-"++zp_convert:to_list(Predicate),
-            Context1 = zp_render:insert_bottom(ElementId, Html, Context),
-            zp_render:wire([{growl, [{text, "Added the connection to “"++zp_convert:to_list(Title)++"”."}]} | Action], Context1);
+            Html  = z_template:render("_rsc_edge.tpl", Vars, Context),
+            Title = z_html:strip(?TR(m_rsc:p(ObjectId, title, Context), Context)),
+            ElementId = "links-"++z_convert:to_list(SubjectId)++"-"++z_convert:to_list(Predicate),
+            Context1 = z_render:insert_bottom(ElementId, Html, Context),
+            z_render:wire([{growl, [{text, "Added the connection to “"++z_convert:to_list(Title)++"”."}]} | Action], Context1);
         false ->
-            zp_render:growl_error("Sorry, you have no permission to add the connection.", Context)
+            z_render:growl_error("Sorry, you have no permission to add the connection.", Context)
     end.
     

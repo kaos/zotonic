@@ -82,7 +82,7 @@ maybe_fetch_object(State, Path) ->
     end.
 
 content_types_provided(ReqData, State) ->
-    CT = zp_utils:guess_mime(wrq:disp_path(ReqData)),
+    CT = z_utils:guess_mime(wrq:disp_path(ReqData)),
     {[{CT, provide_content}],
      ReqData,
      State#state{metadata=[{'content-type', CT}|State#state.metadata]}}.

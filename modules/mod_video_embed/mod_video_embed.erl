@@ -25,7 +25,7 @@
     event/2
 ]).
 
--include_lib("zophrenic.hrl").
+-include_lib("zotonic.hrl").
 
 -record(state, {context}).
 
@@ -50,7 +50,7 @@ rsc_update({rsc_update, Id, _OldProps}, Props, Context) ->
                             nop
                     end;
                 EmbedCode ->
-                    EmbedCodeRaw = zp_html:unescape(EmbedCode),
+                    EmbedCodeRaw = z_html:unescape(EmbedCode),
                     EmbedService = proplists:get_value(video_embed_service, Props, ""),
                     MediaProps = [
                         {mime, ?EMBED_MIME},
@@ -86,17 +86,17 @@ media_viewer({media_viewer, Props, _Filename, _Options}, _Context) ->
 event({submit, {add_video_embed, EventProps}, _TriggerId, _TargetId}, Context) ->
     Actions = proplists:get_value(actions, EventProps, []),
     Id = proplists:get_value(id, EventProps),
-    Stay = zp_convert:to_bool(proplists:get_value(stay, EventProps, false)),
-    EmbedService = zp_context:get_q("video_embed_service", Context),
-    EmbedCode = zp_context:get_q_validated("video_embed_code", Context),
+    Stay = z_convert:to_bool(proplists:get_value(stay, EventProps, false)),
+    EmbedService = z_context:get_q("video_embed_service", Context),
+    EmbedCode = z_context:get_q_validated("video_embed_code", Context),
 
     case Id of
         %% Create a new page
         undefined ->
             SubjectId = proplists:get_value(subject_id, EventProps),
             Predicate = proplists:get_value(predicate, EventProps, depiction),
-            Title   = zp_context:get_q_validated("title", Context),
-            GroupId = list_to_integer(zp_context:get_q("group_id", Context)),
+            Title   = z_context:get_q_validated("title", Context),
+            GroupId = list_to_integer(z_context:get_q("group_id", Context)),
 
             Props = [
                 {title, Title},
@@ -119,20 +119,20 @@ event({submit, {add_video_embed, EventProps}, _TriggerId, _TargetId}, Context) -
                 end 
             end,
     
-            case zp_db:transaction(F, Context) of
+            case z_db:transaction(F, Context) of
                 {ok, MediaId} ->
                     ContextRedirect = case SubjectId of
                         undefined ->
                             case Stay of
-                                false -> zp_render:wire({redirect, [{dispatch, "admin_edit_rsc"}, {id, MediaId}]}, Context);
+                                false -> z_render:wire({redirect, [{dispatch, "admin_edit_rsc"}, {id, MediaId}]}, Context);
                                 true -> Context
                             end;
                         _ -> Context
                     end,
-                    zp_render:wire([{growl, [{text, "Made the media page."}]} | Actions], ContextRedirect);
+                    z_render:wire([{growl, [{text, "Made the media page."}]} | Actions], ContextRedirect);
                 {rollback, {_Error, _Trace}} ->
                     ?ERROR("~p~n~p", [_Error, _Trace]),
-                    zp_render:growl_error("Could not create the media page.", Context)
+                    z_render:growl_error("Could not create the media page.", Context)
             end;
         
         %% Update the current page
@@ -144,9 +144,9 @@ event({submit, {add_video_embed, EventProps}, _TriggerId, _TargetId}, Context) -
             ],
             case m_rsc:update(Id, Props, Context) of
                 {ok, _} ->
-                    zp_render:wire([{dialog_close, []} | Actions], Context);
+                    z_render:wire([{dialog_close, []} | Actions], Context);
                 {error, _} ->
-                    zp_render:growl_error("Could not update the page with the new embed code.", Context)
+                    z_render:growl_error("Could not update the page with the new embed code.", Context)
             end
     end.
     
@@ -174,9 +174,9 @@ start_link(Args) when is_list(Args) ->
 init(Args) ->
     process_flag(trap_exit, true),
     {context, Context} = proplists:lookup(context, Args),
-    zp_notifier:observe(rsc_update, {?MODULE, rsc_update}, Context),
-    zp_notifier:observe(media_viewer, {?MODULE, media_viewer}, Context),
-    {ok, #state{context=zp_context:new_for_host(Context)}}.
+    z_notifier:observe(rsc_update, {?MODULE, rsc_update}, Context),
+    z_notifier:observe(media_viewer, {?MODULE, media_viewer}, Context),
+    {ok, #state{context=z_context:new_for_host(Context)}}.
 
 
 %% @spec handle_call(Request, From, State) -> {reply, Reply, State} |
@@ -213,8 +213,8 @@ handle_info(_Info, State) ->
 %% cleaning up. When it returns, the gen_server terminates with Reason.
 %% The return value is ignored.
 terminate(_Reason, State) ->
-    zp_notifier:detach(rsc_update, {?MODULE, rsc_update}, State#state.context),
-    zp_notifier:detach(media_viewer, {?MODULE, media_viewer}, State#state.context),
+    z_notifier:detach(rsc_update, {?MODULE, rsc_update}, State#state.context),
+    z_notifier:detach(media_viewer, {?MODULE, media_viewer}, State#state.context),
     ok.
 
 %% @spec code_change(OldVsn, State, Extra) -> {ok, NewState}

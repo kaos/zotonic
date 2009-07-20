@@ -2,9 +2,9 @@
 %% @copyright 2009 Marc Worrell
 %% @date 2009-04-24
 %%
-%% @doc Handle authentication of zophrenic users.  Also shows the logon screen when authentication is required.
+%% @doc Handle authentication of zotonic users.  Also shows the logon screen when authentication is required.
 
--module(zp_auth).
+-module(z_auth).
 -author("Marc Worrell <marc@worrell.nl").
 
 %% interface functions
@@ -23,7 +23,7 @@
     event/2
 ]).
 
--include_lib("zophrenic.hrl").
+-include_lib("zotonic.hrl").
 
 
 %% @doc Check if the visitor has been authenticated. Assumes a completely initalized context.
@@ -44,9 +44,9 @@ is_auth_recent(_) ->
 logon_pw(Username, Password, Context) ->
     case m_identity:check_username_pw(Username, Password, Context) of
         {ok, Id} ->
-            Context1 = zp_acl:logon(Id, Context),
-            zp_context:set_session(auth_user_id, Id, Context1),
-            zp_context:set_session(auth_timestamp, erlang:universaltime(), Context1),
+            Context1 = z_acl:logon(Id, Context),
+            z_context:set_session(auth_user_id, Id, Context1),
+            z_context:set_session(auth_timestamp, erlang:universaltime(), Context1),
             {true, Context1};
         {error, _Reason} ->
             {false, Context}
@@ -56,24 +56,24 @@ logon_pw(Username, Password, Context) ->
 %% @doc Forget about the user being logged on.
 %% @spec logoff(Context) -> NewContext
 logoff(Context) ->
-    zp_context:set_session(auth_user_id, undefined, Context),
-    zp_acl:logoff(Context).
+    z_context:set_session(auth_user_id, undefined, Context),
+    z_acl:logoff(Context).
     
     
-%% @doc Check if the session contains an authenticated user id. Called after zp_context:ensure_session. When found
+%% @doc Check if the session contains an authenticated user id. Called after z_context:ensure_session. When found
 %% then the user_id of the context is set.
 %% @spec logon_from_session(#context) -> #context
 logon_from_session(Context) ->
-    case zp_context:get_session(auth_user_id, Context) of
+    case z_context:get_session(auth_user_id, Context) of
         undefined -> Context;
-        UserId -> zp_acl:logon(UserId, Context)
+        UserId -> z_acl:logon(UserId, Context)
     end.
 
 
 %% @doc Convenience function to be called from the is_authorized/2 callback in webmachine resources.
 wm_is_authorized(ReqData, Context) ->
     Context1 = ?WM_REQ(ReqData, Context),
-    Context2 = zp_context:ensure_all(Context1), 
+    Context2 = z_context:ensure_all(Context1), 
     case Context2#context.user_id of
         undefined -> 
             ContextLogon = output_logon(Context2), 
@@ -87,22 +87,22 @@ wm_is_authorized(ReqData, Context) ->
 %% The ReqId is the name of the id in the query string or other parameters.  It must be numerical.
 wm_is_authorized(NeedAuth, What, ArgName, ReqData, Context) ->
     Context1 = ?WM_REQ(ReqData, Context),
-    Context2 = zp_context:ensure_all(Context1), 
+    Context2 = z_context:ensure_all(Context1), 
     case NeedAuth andalso Context2#context.user_id == undefined of
         true -> 
             ContextLogon = output_logon(Context2), 
             ?WM_REPLY(?WWW_AUTHENTICATE, ContextLogon);
 
         false -> 
-            Id = zp_context:get_q(ArgName, Context2),
+            Id = z_context:get_q(ArgName, Context2),
             IdN = try list_to_integer(Id) catch _:_ -> 0 end,
             case m_rsc:exists(IdN, Context2) of
                 false -> 
                     ?WM_REPLY(true, Context2);
                 true ->
                     Allow = case What of
-                        visible -> zp_acl:rsc_visible(IdN, Context2);
-                        editable -> zp_acl:rsc_editable(IdN, Context2)
+                        visible -> z_acl:rsc_visible(IdN, Context2);
+                        editable -> z_acl:rsc_editable(IdN, Context2)
                     end,
                     case Allow of
                         false ->
@@ -118,25 +118,25 @@ wm_is_authorized(NeedAuth, What, ArgName, ReqData, Context) ->
 %% @doc Render the logon screen to the reqdata of the context.
 %% @spec output_logon(Context) -> LogonContext
 output_logon(Context) ->
-    Html = zp_template:render("admin_logon.tpl", [], Context),
-    {Data, ContextOut} = zp_context:output(Html, Context),
-    RD1 = zp_context:get_reqdata(ContextOut),
+    Html = z_template:render("admin_logon.tpl", [], Context),
+    {Data, ContextOut} = z_context:output(Html, Context),
+    RD1 = z_context:get_reqdata(ContextOut),
     RD2 = wrq:append_to_resp_body(Data, RD1),
     RD3 = wrq:set_resp_header("Content-Type", "text/html; charset=utf-8", RD2),
-    zp_context:set_reqdata(RD3, ContextOut).
+    z_context:set_reqdata(RD3, ContextOut).
 
 
 
 %% @doc Handle logon events. When successful then reload the current page
 %% @spec event(Event, Context) -> NewContext
 event({submit, logon, _TriggerId, _TargetId}, Context) ->
-    Context1 = zp_session_manager:rename_session(Context),
-    Username = zp_context:get_q("zp-username", Context1),
-    Password = zp_context:get_q("zp-password", Context1),
+    Context1 = z_session_manager:rename_session(Context),
+    Username = z_context:get_q("zp-username", Context1),
+    Password = z_context:get_q("zp-password", Context1),
     case logon_pw(Username, Password, Context1) of
         {true, ContextLogon} -> 
-            zp_render:wire({reload, []}, ContextLogon);
+            z_render:wire({reload, []}, ContextLogon);
         {_, ContextLogon} ->
-            zp_render:growl("Unknown username or password. Please try again.", ContextLogon)
+            z_render:growl("Unknown username or password. Please try again.", ContextLogon)
     end.
     

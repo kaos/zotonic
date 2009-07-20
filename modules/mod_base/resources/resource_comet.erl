@@ -15,7 +15,7 @@
     ]).
 
 -include_lib("webmachine_resource.hrl").
--include_lib("include/zophrenic.hrl").
+-include_lib("include/zotonic.hrl").
 
 
 %% Timeout for comet flush when there is no data, webmachine 0.x had a timeout of 60 seconds, so leave after 55
@@ -28,13 +28,13 @@
 init([]) -> {ok, []}.
 
 malformed_request(ReqData, _Context) ->
-    Context = zp_context:new(ReqData),
+    Context = z_context:new(ReqData),
     ?WM_REPLY(false, Context).
 
 forbidden(ReqData, Context) ->
     %% TODO: prevent that we make a new ua session or a new page session, fail when a new session is needed
     Context1 = ?WM_REQ(ReqData, Context),
-    Context2 = zp_context:ensure_all(Context1),
+    Context2 = z_context:ensure_all(Context1),
     ?WM_REPLY(false, Context2).
 
 allowed_methods(ReqData, Context) ->
@@ -49,7 +49,7 @@ content_types_provided(ReqData, Context) ->
 process_post(ReqData, Context) ->
     Context1 = ?WM_REQ(ReqData, Context),
     erlang:monitor(process, Context1#context.page_pid),
-    zp_session_page:comet_attach(self(), Context1#context.page_pid),
+    z_session_page:comet_attach(self(), Context1#context.page_pid),
     TRef = start_timer(?COMET_FLUSH_EMPTY),
     process_post_loop(Context1, TRef, false).
 
@@ -59,14 +59,14 @@ process_post_loop(Context, TRef, HasData) ->
     receive
         flush ->
             timer:cancel(TRef),
-            zp_session_page:comet_detach(Context#context.page_pid),
+            z_session_page:comet_detach(Context#context.page_pid),
             ?WM_REPLY(true, Context);
 
         script_queued ->
-            Scripts = zp_session_page:get_scripts(Context#context.page_pid),
-            RD  = zp_context:get_reqdata(Context),
+            Scripts = z_session_page:get_scripts(Context#context.page_pid),
+            RD  = z_context:get_reqdata(Context),
             RD1 = wrq:append_to_response_body(Scripts, RD),
-            Context1 = zp_context:set_reqdata(RD1, Context),
+            Context1 = z_context:set_reqdata(RD1, Context),
             TRef1 = case HasData of
                         true  -> TRef;
                         false -> reset_timer(?COMET_FLUSH_DATA, TRef)

@@ -2,8 +2,8 @@
 % Copyright (c) 2008-2009 Rusty Klophaus
 % See MIT-LICENSE for licensing information.
 
--module(zp_script).
--include("zophrenic.hrl").
+-module(z_script).
+-include("zotonic.hrl").
 -export ([
 	add_script/2,
 	get_script/1,
@@ -27,14 +27,14 @@ get_page_startup_script(Context) ->
         undefined ->
             %% No page id, so no comet loop started and generated random page id for postback loop
             [   
-                ?SESSION_PAGE_Q, $=, $", zp_ids:id(), $", $;, 
-                <<"\nzp_postback_loop();\n">>
+                ?SESSION_PAGE_Q, $=, $", z_ids:id(), $", $;, 
+                <<"\nz_postback_loop();\n">>
             ];
         PageId ->
             %% When the browsers start to support enough connections then we can also start the comet loop here.
-            %% To start the comet loop, call: zp_comet_start().
+            %% To start the comet loop, call: z_comet_start().
             [   ?SESSION_PAGE_Q, $=, $", PageId, $", $;, 
-                <<"\nzp_postback_loop();\n">>
+                <<"\nz_postback_loop();\n">>
             ]
     end.
 
@@ -43,8 +43,8 @@ get_script(Context) ->
 
 	% Translate updates to content scripts
 	Update2Script = fun({TargetId, Terms, JSFormatString}, C) ->
-            		    {Html,C1} = zp_render:render_to_iolist(Terms, C),
-            		    Script    = io_lib:format(JSFormatString, [TargetId, zp_utils:js_escape(Html)]),
+            		    {Html,C1} = z_render:render_to_iolist(Terms, C),
+            		    Script    = io_lib:format(JSFormatString, [TargetId, z_utils:js_escape(Html)]),
             		    add_content_script(Script, C1)
             	    end,
 
@@ -52,7 +52,7 @@ get_script(Context) ->
 
 	% Translate actions to scripts
 	Action2Script = fun({TriggerID, TargetID, Actions}, C) ->
-		                {Script,C1} = zp_render:render_actions(TriggerID, TargetID, Actions, C),
+		                {Script,C1} = z_render:render_actions(TriggerID, TargetID, Actions, C),
 		                add_script(Script, C1)
 	                end,
 
@@ -60,7 +60,7 @@ get_script(Context) ->
     
 	% Translate validators to scripts
     Validator2Script = fun({TriggerId, TargetId, Validator}, C) ->
-                            {Script,C1} = zp_render:render_validator(TriggerId, TargetId, Validator, C),
+                            {Script,C1} = z_render:render_validator(TriggerId, TargetId, Validator, C),
                             add_script(Script, C1)
                        end,
 

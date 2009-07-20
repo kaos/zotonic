@@ -47,8 +47,8 @@
 					<a href="{% url admin_edit_rsc id=id %}" class="clearfix">
 						<span class="zp-20">{{ m.rsc[id].title|striptags }}</span>
 						<span class="zp-15">{{ m.identity[id].username|escape }}{% if id|eq:me %}  <strong>(that's you)</strong>{% endif %}</span>
-						<span class="zp-10">{{ m.rsc[id].modified|date:"F d, H:i" }}</span>
-						<span class="zp-10">{{ m.rsc[id].created|date:"F d, H:i" }}</span>
+						<span class="zp-10">{{ m.rsc[id].modified|date:"d M, H:i" }}</span>
+						<span class="zp-10">{{ m.rsc[id].created|date:"d M, H:i" }}</span>
 						<span class="zp-30">
 							{% button action={dialog_set_username_password id=id} text="set username/ password" on_delete={slide_fade_out target=#li.id} %}
 							{% if id|ne:1 %}

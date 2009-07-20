@@ -6,7 +6,7 @@
 %% for scomps (etc) and maintains lookup lists for when the system tries to find a scomp (etc).
 %% @todo Make the lookup lists dependent on the host of the context (hosts have different modules enabled).
 
--module(zp_module_indexer).
+-module(z_module_indexer).
 -author("Marc Worrell <marc@worrell.nl").
 -behaviour(gen_server).
 
@@ -24,7 +24,7 @@
 
 -record(state, {scomps=[], actions=[], validators=[], models=[], templates=[], lib=[]}).
 
--include("zophrenic.hrl").
+-include("zotonic.hrl").
 
 %%====================================================================
 %% API
@@ -32,7 +32,7 @@
 %% @spec start_link() -> {ok,Pid} | ignore | {error,Error}
 %% @doc Starts the server
 start_link() ->
-    start_link([{context, zp_context:new()}]).
+    start_link([{context, z_context:new()}]).
 
 start_link(Args) when is_list(Args) ->
     gen_server:start_link({local, ?MODULE}, ?MODULE, Args, []).
@@ -66,7 +66,7 @@ find_all(What, Name, _Context) ->
 init(Args) ->
     process_flag(trap_exit, true),
     {context, Context} = proplists:lookup(context, Args),
-    zp_notifier:observe(module_ready, self(), Context),
+    z_notifier:observe(module_ready, self(), Context),
     {ok, #state{}}.
 
 
@@ -125,7 +125,7 @@ handle_cast({{module_ready}, Context}, State) ->
     },
     % Reset the template server after reindexing the templates, the templates might originate now from
     % different modules than before, or are using templates that are not available anymore.
-    zp_template:reset(Context),
+    z_template:reset(Context),
     {noreply, State1};
 
 
@@ -148,8 +148,8 @@ handle_info(_Info, State) ->
 %% cleaning up. When it returns, the gen_server terminates with Reason.
 %% The return value is ignored.
 terminate(_Reason, _State) ->
-    Context = zp_context:new(),
-    zp_notifier:detach(module_ready, self(), Context),
+    Context = z_context:new(),
+    z_notifier:detach(module_ready, self(), Context),
     ok.
 
 %% @spec code_change(OldVsn, State, Extra) -> {ok, NewState}
@@ -191,7 +191,7 @@ scan1(What, Context) when What == template orelse What == lib ->
 scan1(What, Context) ->
     {Subdir, Prefix, Extension} = subdir(What),
     Scan = scan_subdir(Subdir, Prefix, Extension, Context), 
-    Sorted = zp_module_sup:prio_sort(Scan),
+    Sorted = z_module_sup:prio_sort(Scan),
     FlattenFun = fun({_Module, {_ModuleDir, Files}}, Acc) ->
         Files1 = [ file2index(What, F) || F <- Files ],
         Files1 ++ Acc
@@ -210,14 +210,14 @@ scan1(What, Context) ->
 
 %% @doc Scan the whole subdir hierarchy for files, used for templates and lib folders.
 scan_subdir_files(Subdir, Context) ->
-    Modules = zp_module_sup:active_dir(Context),
+    Modules = z_module_sup:active_dir(Context),
     Scan1 = fun({Module, Dir}, Acc) ->
-        case zp_utils:list_dir_recursive(filename:join(Dir, Subdir)) of
+        case z_utils:list_dir_recursive(filename:join(Dir, Subdir)) of
             [] -> 
                 Acc;
             Files -> 
                 AbsFiles = [ {F, filename:join([Dir, Subdir, F])} || F <- Files ],
-                [{zp_module_sup:prio(Module), Module, AbsFiles} | Acc]
+                [{z_module_sup:prio(Module), Module, AbsFiles} | Acc]
         end
     end,
     Files = lists:foldl(Scan1, [], Modules),
@@ -228,7 +228,7 @@ scan_subdir_files(Subdir, Context) ->
 %% @doc Scan all module directories for templates/scomps/etc.  Example: scan("scomps", "scomp_", ".erl", Context)
 %% @spec scan_subdir(Subdir, Prefix, Extension, context()) -> [ {ModuleAtom, {ModuleDir, [{Name, File}]}} ]
 scan_subdir(Subdir, Prefix, Extension, Context) ->
-    Modules = zp_module_sup:active_dir(Context),
+    Modules = z_module_sup:active_dir(Context),
     Scan1 = fun({Module, Dir}, Acc) ->
         {Pattern, PrefixLen} = case Prefix of
             [] -> 

@@ -1,4 +1,4 @@
-%% Default dispatch rules for zophrenic
+%% Default dispatch rules for zotonic
 [
 	{home,     [],            resource_template, [ {template, "home.tpl"} ]},
 	{comet,    ["comet"],     resource_comet, []},

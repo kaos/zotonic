@@ -40,7 +40,7 @@
 -author('emmiller@gmail.com').
 -author('marc@worrell.nl').
 
--include_lib("zophrenic.hrl").
+-include_lib("zotonic.hrl").
 
 %% --------------------------------------------------------------------
 %% Definitions
@@ -138,7 +138,7 @@ init_dtl_context(File, Module, Options) when is_list(Module) ->
 init_dtl_context(File, Module, Options) ->
     Ctx = #dtl_context{},
     #dtl_context{
-        local_scopes = [ [{'$autoid', erl_syntax:variable("AutoId_"++zp_ids:identifier())}] ],
+        local_scopes = [ [{'$autoid', erl_syntax:variable("AutoId_"++z_ids:identifier())}] ],
         parse_trail = [File], 
         module = Module,
         custom_tags_dir = proplists:get_value(custom_tags_dir, Options, Ctx#dtl_context.custom_tags_dir),
@@ -215,7 +215,7 @@ forms(File, Module, BodyAst, BodyInfo, Context, TreeWalker, TemplateResetCounter
 	BodyLanguageAst = erl_syntax:match_expr(
 							erl_syntax:variable("Language"),
 							erl_syntax:application(
-						        erl_syntax:atom(zp_context), 
+						        erl_syntax:atom(z_context), 
 						        erl_syntax:atom(language),
 						        [ erl_syntax:variable("ZpContext") ]
 							)
@@ -229,7 +229,7 @@ forms(File, Module, BodyAst, BodyInfo, Context, TreeWalker, TemplateResetCounter
             BodyAutoIdAst = erl_syntax:match_expr(
                                     AutoIdVar,
                                     erl_syntax:application(
-                                                erl_syntax:atom(zp_ids),
+                                                erl_syntax:atom(z_ids),
                                                 erl_syntax:atom(identifier),
                                                 [erl_syntax:integer(8)]
                                     )
@@ -514,7 +514,7 @@ include_ast(File, Args, All, Context, TreeWalker) ->
             {InterpretedArgs, TreeWalker1} = interpreted_args(Args, Context, TreeWalker),
             {ScopedArgs, ArgAsts} = lists:foldr(
                 fun({AKey, AAst}, {ScopeAcc, AstAcc}) ->
-                    Var = "Arg_" ++ zp_ids:identifier(10),
+                    Var = "Arg_" ++ z_ids:identifier(10),
                     AssignAst = erl_syntax:match_expr(erl_syntax:variable(Var), AAst),
                     { [{AKey, erl_syntax:variable(Var)}|ScopeAcc], [AssignAst|AstAcc] }
                 end,
@@ -525,7 +525,7 @@ include_ast(File, Args, All, Context, TreeWalker) ->
             IncludeFun = fun(FilePath, {AstList, InclInfo, TreeW}) ->
                     case parse(FilePath, Context) of
                         {ok, InclusionParseTree} ->
-                            AutoIdVar = "AutoId_"++zp_ids:identifier(),
+                            AutoIdVar = "AutoId_"++z_ids:identifier(),
                             IncludeScope = [ {'$autoid', erl_syntax:variable(AutoIdVar)} | ScopedArgs ],
 
                             {{Ast,Info}, InclTW2} = 
@@ -543,7 +543,7 @@ include_ast(File, Args, All, Context, TreeWalker) ->
                                             erl_syntax:match_expr(
                                                     erl_syntax:variable(AutoIdVar), 
                                                     erl_syntax:application(
-                                                        erl_syntax:atom(zp_ids),
+                                                        erl_syntax:atom(z_ids),
                                                         erl_syntax:atom(identifier),
                                                         [])),
                                             Ast])
@@ -815,7 +815,7 @@ ifequalelse_ast(Args, {IfContentsAst, IfContentsInfo}, {ElseContentsAst, ElseCon
 
 
 with_ast(Value, Variable, Contents, Context, TreeWalker) ->
-    Postfix = zp_ids:identifier(),
+    Postfix = z_ids:identifier(),
     VarName = "With_" ++ Variable ++ [$_|Postfix],
     VarAst = erl_syntax:variable(VarName),
     {{ValueAst, ValueInfo}, TreeWalker1} = value_ast(Value, false, Context, TreeWalker),
@@ -919,13 +919,13 @@ cycle_compat_ast(Names, _Context, TreeWalker) ->
 
 
 %% @author Marc Worrell
-%% @doc Output the trans record with the translation call to zp_trans 
+%% @doc Output the trans record with the translation call to z_trans 
 %% @todo Optimization for the situation where all parameters are constants
 trans_ast(TransLiteral, _Context, TreeWalker) ->
 	% Remove the first and the last character, these were separating the string from the {_ and _} tokens
 	Lit = lists:reverse(tl(lists:reverse(tl(TransLiteral)))),
 	{{erl_syntax:application(
-		erl_syntax:atom(zp_trans),
+		erl_syntax:atom(z_trans),
 		erl_syntax:atom(trans),
 		[
 			erl_syntax:tuple([
@@ -946,7 +946,7 @@ trans_ext_ast(String, Args, Context, TreeWalker) ->
 		erl_syntax:tuple([erl_syntax:atom(Lang), Ast]) || {Lang,Ast} <- ArgsTrans
 	],
 	{{erl_syntax:application(
-		erl_syntax:atom(zp_trans),
+		erl_syntax:atom(z_trans),
 		erl_syntax:atom(trans),
 		[
 			erl_syntax:tuple([
@@ -1090,7 +1090,7 @@ media_ast(FilenameValue, Args, Context, TreeWalker) ->
     FilenameAst = resolve_value_ast(FilenameValue, Context, TreeWalker),
     {ArgsAst, TreeWalker1} = scomp_ast_list_args(Args, Context, TreeWalker),
     AppAst = erl_syntax:application(
-                        erl_syntax:atom(zp_media_tag),
+                        erl_syntax:atom(z_media_tag),
                         erl_syntax:atom(viewer),
                         [   FilenameAst,
                             ArgsAst,
@@ -1122,7 +1122,7 @@ image_ast(FilenameValue, Args, Context, TreeWalker) ->
     FilenameAst = resolve_value_ast(FilenameValue, Context, TreeWalker),
     {ArgsAst, TreeWalker1} = scomp_ast_list_args(Args, Context, TreeWalker),
     AppAst = erl_syntax:application(
-                        erl_syntax:atom(zp_media_tag),
+                        erl_syntax:atom(z_media_tag),
                         erl_syntax:atom(tag),
                         [   FilenameAst,
                             ArgsAst,
@@ -1154,7 +1154,7 @@ image_url_ast(FilenameValue, Args, Context, TreeWalker) ->
     FilenameAst = resolve_value_ast(FilenameValue, Context, TreeWalker),
     {ArgsAst, TreeWalker1} = scomp_ast_list_args(Args, Context, TreeWalker),
     AppAst = erl_syntax:application(
-                        erl_syntax:atom(zp_media_tag),
+                        erl_syntax:atom(z_media_tag),
                         erl_syntax:atom(url),
                         [   FilenameAst,
                             ArgsAst,
@@ -1184,7 +1184,7 @@ url_ast(Name, Args, Context, TreeWalker) ->
     % Check if the 'escape' argument is there
     {ArgsAst, TreeWalker1} = scomp_ast_list_args(Args, Context, TreeWalker),
     AppAst = erl_syntax:application(
-                erl_syntax:atom(zp_dispatcher),
+                erl_syntax:atom(z_dispatcher),
                 erl_syntax:atom(url_for),
                 [   erl_syntax:atom(Name), 
                     ArgsAst,
@@ -1227,11 +1227,11 @@ resolve_value_ast(Value, Context, TreeWalker) ->
     Ast.
 
 
-%% Added by Marc Worrell - handle evaluation of scomps by zp_scomp
+%% Added by Marc Worrell - handle evaluation of scomps by z_scomp
 scomp_ast(ScompName, Args, false = _All, Context, TreeWalker) ->
     {ArgsAst, TreeWalker1} = scomp_ast_list_args(Args, Context, TreeWalker),
     AppAst = erl_syntax:application(
-                erl_syntax:atom(zp_scomp),
+                erl_syntax:atom(z_scomp),
                 erl_syntax:atom(render),
                 [   erl_syntax:atom(ScompName), 
                     ArgsAst,
@@ -1241,7 +1241,7 @@ scomp_ast(ScompName, Args, false = _All, Context, TreeWalker) ->
             ),
     RenderedAst = erl_syntax:variable("Rendered"),
     CleanedAst = erl_syntax:application(
-                erl_syntax:atom(zp_context),
+                erl_syntax:atom(z_context),
                 erl_syntax:atom(prune_for_template),
                 [RenderedAst]
             ),
@@ -1263,7 +1263,7 @@ scomp_ast(ScompName, Args, false = _All, Context, TreeWalker) ->
 scomp_ast(ScompName, Args, true, Context, TreeWalker) ->
     {ArgsAst, TreeWalker1} = scomp_ast_list_args(Args, Context, TreeWalker),
     AppAst = erl_syntax:application(
-                erl_syntax:atom(zp_scomp),
+                erl_syntax:atom(z_scomp),
                 erl_syntax:atom(render_all),
                 [   erl_syntax:atom(ScompName), 
                     ArgsAst,
@@ -1297,7 +1297,7 @@ auto_id_ast({{identifier, _, Name}, {identifier, _, _} = Var}, Context, TreeWalk
                             resolve_scoped_variable_ast("$autoid", Context), 
                             erl_syntax:string([$-|Name]++"-"),
                             erl_syntax:application(
-                                erl_syntax:atom(zp_convert),
+                                erl_syntax:atom(z_convert),
                                 erl_syntax:atom(to_list),
                                 [V])
                         ])
@@ -1351,7 +1351,7 @@ interpreted_argval(Value, Context, TreeWalker) ->
 trans_literal_ast(String) ->
 	Lit = unescape_string_literal(String),
 	erl_syntax:application(
-		erl_syntax:atom(zp_trans),
+		erl_syntax:atom(z_trans),
 		erl_syntax:atom(trans),
 		[
 			erl_syntax:tuple([

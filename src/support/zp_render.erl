@@ -5,11 +5,11 @@
 %% Based on Nitrogen, which is copyright (c) 2008-2009 Rusty Klophaus
 %% See MIT-LICENSE for licensing information.
 
--module(zp_render).
+-module(z_render).
 -author("Marc Worrell <marc@worrell.nl>").
 -author("Rusty Klophaus").
 
--include("zophrenic.hrl").
+-include("zotonic.hrl").
 
 -export ([
 	render/2,
@@ -46,7 +46,7 @@ render([], Context) ->
     Context;
 render(#context{} = C, Context) ->
     C1 = render(C#context.render, Context),
-    C2 = zp_context:merge_scripts(C, C1),
+    C2 = z_context:merge_scripts(C, C1),
     C2;
 render(B, Context) when is_integer(B) orelse is_binary(B) -> 
     Context#context{render=[Context#context.render, B]};
@@ -85,11 +85,11 @@ render_actions(TriggerId, TargetId, [H|T], Context) ->
     {Script2, Context2} = render_actions(TriggerId, TargetId, T, Context1),
     {[Script1,Script2], Context2};
 render_actions(TriggerId, TargetId, {Action, Args}, Context) ->
-	case zp_utils:is_true(proplists:get_value(show_if, Args, true)) of 
+	case z_utils:is_true(proplists:get_value(show_if, Args, true)) of 
 		true -> 
             Trigger      = proplists:get_value(trigger, Args, TriggerId),
 	        Target       = proplists:get_value(target,  Args, TargetId),
-	        case zp_module_indexer:find(action, Action, Context) of
+	        case z_module_indexer:find(action, Action, Context) of
 	            {ok, ActionModule} ->
 			        ActionModule:render_action(Trigger, Target, Args, Context);
 			    {error, enoent} ->
@@ -123,8 +123,8 @@ render_validator(TriggerId, TargetId, Args, Context) ->
     Name        = proplists:get_value(name,  Args, Target),
 
     % The validator object, can have parameters for failureMessage.
-    VldOptions  = zp_utils:js_object(Args, [type,trigger,id,target]),
-    VldScript   = [<<"zp_init_validator(\"">>,Trigger,<<"\", ">>,VldOptions,<<");\n">>],
+    VldOptions  = z_utils:js_object(Args, [type,trigger,id,target]),
+    VldScript   = [<<"z_init_validator(\"">>,Trigger,<<"\", ">>,VldOptions,<<");\n">>],
     
     % Now render and append all individual validations
     % The Postback contains all information to perform a server side validation
@@ -132,7 +132,7 @@ render_validator(TriggerId, TargetId, Args, Context) ->
     RValidation = fun({VType,VArgs}, {PostbackAcc,ScriptAcc,Ctx}) ->
                     VMod = case proplists:get_value(delegate, VArgs) of
                                 undefined -> 
-                                    case zp_module_indexer:find(validator, VType, Context) of
+                                    case z_module_indexer:find(validator, VType, Context) of
                                         {ok, Mod} ->
                                             {ok, Mod};
                                         {error, enoent} ->
@@ -155,8 +155,8 @@ render_validator(TriggerId, TargetId, Args, Context) ->
         [] ->
             {[VldScript|Append], Context1};
         _ ->
-            Pickled  = zp_utils:pickle({Trigger,Name,Postback}),
-            PbScript = [<<"zp_set_validator_postback('">>,Trigger,<<"', '">>, Pickled, <<"');\n">>],
+            Pickled  = z_utils:pickle({Trigger,Name,Postback}),
+            PbScript = [<<"z_set_validator_postback('">>,Trigger,<<"', '">>, Pickled, <<"');\n">>],
             {[PbScript,VldScript|Append], Context1}
     end.
 
@@ -191,7 +191,7 @@ set_value(TargetId, undefined, Context) ->
     Script = "$('#~s').val(\"~s\");",
     add_update(TargetId, "", Script, Context);
 set_value(TargetId, Value, Context) ->
-    Value1 = zp_html:escape(Value),
+    Value1 = z_html:escape(Value),
     Script = "$('#~s').val(\"~s\");",
     add_update(TargetId, Value1, Script, Context).
 
@@ -204,14 +204,14 @@ add_update(TargetId, Html, JSFormatString, Context) ->
 %%% SIMPLE FUNCTION TO SHOW DIALOG OR GROWL (uses the dialog and growl actions) %%%
 
 dialog(Title, Template, Vars, Context) ->
-    {Html, Context1} = zp_template:render_to_iolist(Template, Vars, Context),
-    zp_render:wire({dialog, [{title, Title}, {text, Html}]}, Context1).
+    {Html, Context1} = z_template:render_to_iolist(Template, Vars, Context),
+    z_render:wire({dialog, [{title, Title}, {text, Html}]}, Context1).
 
 growl(Text, Context) ->
-    zp_render:wire({growl, [{text, Text}]}, Context).
+    z_render:wire({growl, [{text, Text}]}, Context).
 
 growl_error(Text, Context) ->
-    zp_render:wire({growl, [{text, Text}, {type, "error"}]}, Context).
+    z_render:wire({growl, [{text, Text}, {type, "error"}]}, Context).
 
 
 %%% POSTBACK ENCODING %%%
@@ -219,11 +219,11 @@ growl_error(Text, Context) ->
 %% @doc Make an encoded string containing information which module and function to call.
 make_postback_info(Tag, EventType, TriggerId, TargetId, Delegate, Context) ->
 	Delegate1 = case Delegate of
-            		undefined -> zp_context:get_resource_module(Context);
-            		_         -> zp_convert:to_atom(Delegate)
+            		undefined -> z_context:get_resource_module(Context);
+            		_         -> z_convert:to_atom(Delegate)
             	end,
 	PostbackInfo = {EventType, TriggerId, TargetId, Tag, Delegate1},
-	zp_utils:pickle(PostbackInfo).
+	z_utils:pickle(PostbackInfo).
 
 
 %% @doc Make a javascript to call the postback, posting an encoded string containing callback information. 
@@ -233,13 +233,13 @@ make_postback(undefined, _EventType, _TriggerId, _TargetId, _Delegate, _Context)
     {[],[]};
 make_postback(PostbackTag, EventType, TriggerId, TargetId, Delegate, Context) ->
 	PickledPostbackInfo = make_postback_info(PostbackTag, EventType, TriggerId, TargetId, Delegate, Context),
-	{[<<"zp_queue_postback('">>,TriggerId,<<"', '">>,PickledPostbackInfo,<<"');">>], PickledPostbackInfo}.
+	{[<<"z_queue_postback('">>,TriggerId,<<"', '">>,PickledPostbackInfo,<<"');">>], PickledPostbackInfo}.
 
 
 make_validation_postback(Validator) ->
     make_validation_postback(Validator,{}).
 make_validation_postback(Validator, Args) ->
-    zp_utils:pickle({Validator, Args}).
+    z_utils:pickle({Validator, Args}).
 
 
 %%% ACTION WIRING %%%

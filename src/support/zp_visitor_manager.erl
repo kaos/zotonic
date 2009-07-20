@@ -30,7 +30,7 @@
 % 	1. Set user process state to 'public' (locking protected and private properties)
 
 
--module(zp_visitor_manager).
+-module(z_visitor_manager).
 -author("Marc Worrell <marc@worrell.nl>").
 
 -behaviour(gen_server).
@@ -42,10 +42,10 @@
 %% interface functions
 -export([ensure_visitor/1]).
 
--include_lib("zophrenic.hrl").
+-include_lib("zotonic.hrl").
 
 %% The name of the person cookie
--define(VISITOR_COOKIE, "zp_pid").
+-define(VISITOR_COOKIE, "z_pid").
 
 %% Max age of the person cookie, 10 years or so.
 -define(VISITOR_COOKIE_MAX_AGE, 3600*24*52*10).
@@ -163,8 +163,8 @@ ensure_visitor_process(Context, State) ->
 %% @spec first_visit(Context, State) -> {NewContex, NewState}
 %% @doc A new visit, set a new visitor cookie, start an anonymous visitor process
 first_visit(Context, State) ->
-    VisitorCookieId = zp_ids:id(),
-    {ok, Pid} = zp_visitor:new_anonymous(VisitorCookieId, Context),
+    VisitorCookieId = z_ids:id(),
+    {ok, Pid} = z_visitor:new_anonymous(VisitorCookieId, Context),
     State1    = store_pid(VisitorCookieId, Pid, State),
     Context1  = set_cookie(VisitorCookieId, Context),
     Context2  = Context1#context{visitor_pid=Pid},
@@ -176,12 +176,12 @@ first_visit(Context, State) ->
 returning(VisitorCookieId, Context, State) ->
     case find_pid(VisitorCookieId, State) of
         {ok, Pid} ->
-            zp_visitor:associate_session(Pid, Context),
+            z_visitor:associate_session(Pid, Context),
             Context1 = Context#context{visitor_pid=Pid},
             {Context1, State};
         error -> 
             % Not started, check if the cookie is associated with a person
-            case zp_visitor:new_returning(VisitorCookieId, Context) of
+            case z_visitor:new_returning(VisitorCookieId, Context) of
                 {ok, Pid} ->
                         %% Cookie was associated with a person, person process started
                         State1   = store_pid(VisitorCookieId, Pid, State),
@@ -219,19 +219,19 @@ erase_pid(Pid, State) ->
 %% @spec get_cookie(Context) -> undefined | VisitorCookieId
 %% @doc fetch the person cookie id from the request, return error when not found
 get_cookie(Context) ->
-    RD = zp_context:get_reqdata(Context),
+    RD = z_context:get_reqdata(Context),
     wrq:get_cookie_value(?VISITOR_COOKIE, RD).
 
 
 %% @spec set_cookie(VisitorCookieId, Context) -> Context
 %% @doc Save the person id in a cookie on the user agent
 set_cookie(VisitorCookieId, Context) ->
-    RD = zp_context:get_reqdata(Context),
+    RD = z_context:get_reqdata(Context),
     %% TODO: set the {domain,"example.com"} of the session cookie
     Options = [{max_age, ?VISITOR_COOKIE_MAX_AGE}, {path, "/"}],
     Hdr = mochiweb_cookies:cookie(?VISITOR_COOKIE, VisitorCookieId, Options),
     RD1 = wrq:merge_resp_headers([Hdr], RD),
-    zp_context:set_reqdata(RD1, Context).
+    z_context:set_reqdata(RD1, Context).
 
 
 %% @spec find_pid(VisitorCookieId, State) ->  error | {ok, pid()}

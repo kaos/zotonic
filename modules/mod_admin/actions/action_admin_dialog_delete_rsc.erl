@@ -13,26 +13,26 @@
     event/2
 ]).
 
--include("zophrenic.hrl").
+-include("zotonic.hrl").
 
 render_action(TriggerId, TargetId, Args, Context) ->
-    Id = zp_convert:to_integer(proplists:get_value(id, Args)),
+    Id = z_convert:to_integer(proplists:get_value(id, Args)),
     OnSuccess = proplists:get_all_values(on_success, Args),
     Postback = {delete_rsc_dialog, Id, OnSuccess},
-	{PostbackMsgJS, _PickledPostback} = zp_render:make_postback(Postback, click, TriggerId, TargetId, ?MODULE, Context),
+	{PostbackMsgJS, _PickledPostback} = z_render:make_postback(Postback, click, TriggerId, TargetId, ?MODULE, Context),
 	{PostbackMsgJS, Context}.
 
 
 %% @doc Fill the dialog with the delete confirmation template. The next step will ask to delete the resource
 %% @spec event(Event, Context1) -> Context2
 event({postback, {delete_rsc_dialog, Id, OnSuccess}, _TriggerId, _TargetId}, Context) ->
-    case zp_acl:rsc_editable(Id, Context) of
+    case z_acl:rsc_editable(Id, Context) of
         true ->
             Vars = [
                 {on_success, OnSuccess},
                 {id, Id}
             ],
-            zp_render:dialog("Confirm delete", "_action_dialog_delete_rsc.tpl", Vars, Context);
+            z_render:dialog("Confirm delete", "_action_dialog_delete_rsc.tpl", Vars, Context);
         false ->
-            zp_render:growl_error("You are not allowed to delete this page.", Context)
+            z_render:growl_error("You are not allowed to delete this page.", Context)
     end.

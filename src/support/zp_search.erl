@@ -4,7 +4,7 @@
 %%
 %% @doc Search the database, interfaces to specific search routines.
 
--module(zp_search).
+-module(z_search).
 -author("Marc Worrell <marc@worrell.nl").
 
 %% interface functions
@@ -17,7 +17,7 @@
     pager/4
 ]).
 
--include_lib("zophrenic.hrl").
+-include_lib("zotonic.hrl").
 
 -define(OFFSET_LIMIT, {1,?SEARCH_PAGELEN}).
 -define(OFFSET_PAGING, {1,1000}).
@@ -45,7 +45,7 @@ pager(#search_result{result=Result} = SearchResult, Page, PageLen, _Context) ->
     Offset = (Page-1) * PageLen + 1,
     OnPage = case Offset =< Total of
         true ->
-            {P,_} = zp_utils:split(PageLen, lists:nthtail(Offset-1, Result)),
+            {P,_} = z_utils:split(PageLen, lists:nthtail(Offset-1, Result)),
             P;
         false ->
             []
@@ -77,7 +77,7 @@ search({SearchName, Props} = Search, Limit, Context) ->
         Cats -> [{cat, Cats} | proplists:delete(cat, Props)]
     end,
     PropsSorted = lists:keysort(1, Props1),
-    case zp_notifier:first({search_query, {SearchName, PropsSorted}, Limit}, Context) of
+    case z_notifier:first({search_query, {SearchName, PropsSorted}, Limit}, Context) of
         undefined -> 
             ?LOG("Unknown search query ~p", [Search]),
             #search_result{};
@@ -85,7 +85,7 @@ search({SearchName, Props} = Search, Limit, Context) ->
             search_result(Result, Limit, Context)
     end;
 search(Name, Limit, Context) ->
-    search({zp_convert:to_atom(Name), []}, Limit, Context).
+    search({z_convert:to_atom(Name), []}, Limit, Context).
 
 
 %% @doc Handle a return value from a search function.  This can be an intermediate SQL statement that still needs to be
@@ -102,13 +102,13 @@ search_result(#search_sql{} = Q, Limit, Context) ->
         _ -> 
             Rows = case Q#search_sql.assoc of
                 false ->
-                    Rs = zp_db:q(Sql, Args, Context),
+                    Rs = z_db:q(Sql, Args, Context),
                     case Rs of
                         [{_}|_] -> [ R || {R} <- Rs ];
                         _ -> Rs
                     end;
                 true ->
-                    zp_db:assoc_props(Sql, Args, Context)
+                    z_db:assoc_props(Sql, Args, Context)
             end,
             #search_result{result=Rows}
     end.
@@ -183,7 +183,7 @@ add_acl_check(_, Args, _Context) ->
 %% @spec add_acl_check1(Table, Alias, Args, Context) -> {Where, NewArgs}
 add_acl_check1(Table, Alias, Args, Context) ->
     % N = length(Args),
-    case zp_acl:can_see(Context) of
+    case z_acl:can_see(Context) of
         ?ACL_VIS_GROUP ->
             % Admin or supervisor, can see everything
             {[], Args};

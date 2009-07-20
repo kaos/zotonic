@@ -3,7 +3,7 @@
 
 %% @doc Visitor process. This server binds all sessions of a visitor together.
 
--module(zp_visitor).
+-module(z_visitor).
 -author("Marc Worrell <marc@worrell.nl>").
 
 -behaviour(gen_server).
@@ -15,7 +15,7 @@
 %% interface functions
 -export([new_anonymous/2, new_returning/2, associate_session/2, get/2, set/3, ensure_visitor_id/1]).
 
--include_lib("zophrenic.hrl").
+-include_lib("zotonic.hrl").
 
 -record(state, {
     sessions=[],
@@ -45,14 +45,14 @@ start_link(Args) when is_list(Args) ->
 %% @doc Start a new anonymous user process, link to the new process.
 new_anonymous(CookieId, Context) ->
     SessionPid = Context#context.session_pid,
-    start_link([{session, SessionPid}, {cookie, CookieId}, {is_new, true}, {context, zp_context:new_for_host(Context)}]).
+    start_link([{session, SessionPid}, {cookie, CookieId}, {is_new, true}, {context, z_context:new_for_host(Context)}]).
 
 
 %% @spec new_returning(CookieId, SessionPid) -> {ok, pid()} | error
 %% @doc Start a new process for the visitor associated with the cookie, return error when no person associated.
 new_returning(CookieId, Context) ->
     SessionPid = Context#context.session_pid,
-    start_link([{session, SessionPid}, {cookie, CookieId}, {is_new, false}, {context, zp_context:new_for_host(Context)}]).
+    start_link([{session, SessionPid}, {cookie, CookieId}, {is_new, false}, {context, z_context:new_for_host(Context)}]).
 
 
 %% @spec associate_session(Pid, SessionPid) -> void()
@@ -136,7 +136,7 @@ handle_cast({associate_session, _SessionPid}, State) ->
     {noreply, State#state{associate_count=State#state.associate_count+1}, ?VISITOR_TIMEOUT};
 
 handle_cast({set, Key, Value}, State) ->
-    Props = zp_utils:prop_replace(Key, Value, State#state.props),
+    Props = z_utils:prop_replace(Key, Value, State#state.props),
     {noreply, State#state{props=Props, dirty=true}, ?VISITOR_TIMEOUT};
 
 %% @doc Trap unknown casts
@@ -201,7 +201,7 @@ add_session(SessionPid, State) ->
 %% @doc Read the visitor properties from the database
 %% @spec get_props(State) -> {rsc_id, PropList}
 get_props(State) ->
-    case zp_db:q("
+    case z_db:q("
         select v.id, v.rsc_id, v.props
         from visitor v join visitor_cookie vc on v.id = vc.visitor_id
         where vc.cookie = $1", [State#state.cookie], State#state.context) 
@@ -218,18 +218,18 @@ save_props(#state{associate_count=Count, dirty=Dirty} = State) when Dirty andals
     case State#state.id of
         undefined ->
             F = fun(Ctx) ->
-                {ok, Id} = zp_db:insert(visitor, [
+                {ok, Id} = z_db:insert(visitor, [
                             {props, State#state.props}, 
                             {rsc_id, State#state.rsc_id}], Ctx),
-                {ok, _} = zp_db:insert(visitor_cookie, [
+                {ok, _} = z_db:insert(visitor_cookie, [
                             {cookie, State#state.cookie}, 
                             {visitor_id, Id}], Ctx),
                 {ok, Id}
             end,
-            {ok, Id} = zp_db:transaction(F, State#state.context),
+            {ok, Id} = z_db:transaction(F, State#state.context),
             State#state{id=Id, dirty=false};
         Id ->
-            zp_db:update(visitor, Id, [
+            z_db:update(visitor, Id, [
                             {props, State#state.props}, 
                             {rsc_id, State#state.rsc_id}, 
                             {modified, calendar:universal_time()}], State#state.context),

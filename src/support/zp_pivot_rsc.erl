@@ -5,7 +5,7 @@
 %% @doc Pivoting server for the rsc table. Takes care of full text indices. Polls the pivot queue for any changed resources.
 %% @todo Support for multiple databases (now only supports the default database).
 
--module(zp_pivot_rsc).
+-module(z_pivot_rsc).
 -author("Marc Worrell <marc@worrell.nl").
 -behaviour(gen_server).
 
@@ -23,7 +23,7 @@
     pg_lang/1
 ]).
 
--include("zophrenic.hrl").
+-include("zotonic.hrl").
 
 % Interval (in seconds) to check if there are any items to be pivoted.
 -define(PIVOT_POLL_INTERVAL, 10).
@@ -144,17 +144,17 @@ code_change(_OldVsn, State, _Extra) ->
 
 %% @doc Poll a database for any queued updates.
 do_poll(Host) ->
-    Context = zp_context:new_for_host(Host),
+    Context = z_context:new_for_host(Host),
     Qs = fetch_queue(Context),
     F = fun(Ctx) ->
         [ pivot_resource(Id, Ctx) || {Id,_Serial} <- Qs]
     end,
-    zp_db:transaction(F, Context),
+    z_db:transaction(F, Context),
     delete_queue(Qs, Context).
 
 %% @doc Pivot a specific id, delete its queue record if present
 do_pivot(Id, Host) ->
-    Context = zp_context:new_for_host(Host),
+    Context = z_context:new_for_host(Host),
     Serial = fetch_queue_id(Id, Context),
     pivot_resource(Id, Context),
     delete_queue(Id, Serial, Context).
@@ -164,24 +164,24 @@ do_pivot(Id, Host) ->
 %% pivot request might come in while we are pivoting.
 %% @spec fetch_queue(Context) -> [{Id,Serial}, ...]
 fetch_queue(Context) ->
-    zp_db:q("select rsc_id, serial from rsc_pivot_queue order by is_update, due limit $1", [?POLL_BATCH], Context).
+    z_db:q("select rsc_id, serial from rsc_pivot_queue order by is_update, due limit $1", [?POLL_BATCH], Context).
 
 %% @doc Fetch the serial of id's queue record
 fetch_queue_id(Id, Context) ->
-    zp_db:q1("select serial from rsc_pivot_queue where id = $1", [Id], Context).
+    z_db:q1("select serial from rsc_pivot_queue where id = $1", [Id], Context).
 
 %% @doc Delete the previously queued ids iff the queue entry has not been updated in the meanwhile
 delete_queue(Qs, Context) ->
     F = fun(Ctx) ->
-        [ zp_db:q("delete from rsc_pivot_queue where rsc_id = $1 and serial = $2", [Id,Serial], Ctx) || {Id,Serial} <- Qs ]
+        [ z_db:q("delete from rsc_pivot_queue where rsc_id = $1 and serial = $2", [Id,Serial], Ctx) || {Id,Serial} <- Qs ]
     end,
-    zp_db:transaction(F, Context).
+    z_db:transaction(F, Context).
 
 %% @doc Delete a specific id/serial combination
 delete_queue(_Id, undefined, _Context) ->
     ok;
 delete_queue(Id, Serial, Context) ->
-    zp_db:q("delete from rsc_pivot_queue where id = $1 and serial = $2", [Id,Serial], Context).
+    z_db:q("delete from rsc_pivot_queue where id = $1 and serial = $2", [Id,Serial], Context).
 
 
 
@@ -194,7 +194,7 @@ pivot_resource(Id, Context) ->
     {ObjIds, ObjTexts} = related(Id, Context),
     {CatIds, CatTexts} = category(proplists:get_value(category_id, R), Context),
     Split = [ (split_lang(Ts, Context)) || Ts <- [A, B, CatTexts, ObjTexts] ],
-    [TA,TB,TC,TD] = [ [ {Lng,list_to_binary(zp_utils:combine(32, Ts))} || {Lng,Ts} <- Ps] || Ps <- Split ],
+    [TA,TB,TC,TD] = [ [ {Lng,list_to_binary(z_utils:combine(32, Ts))} || {Lng,Ts} <- Ps] || Ps <- Split ],
 
     {SqlA, ArgsA} = to_tsv(TA, $A, []),
     {SqlB, ArgsB} = to_tsv(TB, $B, ArgsA),
@@ -239,7 +239,7 @@ pivot_resource(Id, Context) ->
         DateEnd,
         Id
     ],
-    zp_db:q(Sql, SqlArgs, Context).
+    z_db:q(Sql, SqlArgs, Context).
 
 
     %% Make the setweight(to_tsvector()) parts of the update statement
@@ -251,7 +251,7 @@ pivot_resource(Id, Context) ->
                 {[["setweight(to_tsvector('pg_catalog.",pg_lang(Lang),"', $",integer_to_list(N),"), '",Level,"')"] | Sql], As1}
             end, {[], Args}, List),
     
-        {zp_utils:combine(" || ", Sql1), Args1}.
+        {z_utils:combine(" || ", Sql1), Args1}.
             
     
     %      new.tsv := 
@@ -269,11 +269,11 @@ pivot_date(R) ->
     pivot_date1(S, E) when not is_tuple(S) andalso not is_tuple(E) ->
         {undefined, undefined};
     pivot_date1(S, E) when not is_tuple(S) andalso is_tuple(E) ->
-        { {{-4000,0,0},{0,0,0}}, zp_convert:to_utc(E)};
+        { {{-4000,0,0},{0,0,0}}, z_convert:to_utc(E)};
     pivot_date1(S, E) when is_tuple(S) andalso not is_tuple(E) ->
-        {zp_convert:to_utc(S), {{9999,6,1},{0,0,0}} };
+        {z_convert:to_utc(S), {{9999,6,1},{0,0,0}} };
     pivot_date1(S, E) when is_tuple(S) andalso is_tuple(E) ->
-        {zp_convert:to_utc(S), zp_convert:to_utc(E)}.
+        {z_convert:to_utc(S), z_convert:to_utc(E)}.
 
 
 %% @doc Split texts into different languages
@@ -283,16 +283,16 @@ split_lang(Texts, Context) ->
     
 split_lang([], Dict, _Context) -> Dict;
 split_lang([{trans, Texts}|Rest], Dict, Context) ->
-    Dict2 = lists:foldl(fun({Lang,Text}, D) -> add_lang(Lang, zp_html:strip(Text), D) end, Dict, Texts),
+    Dict2 = lists:foldl(fun({Lang,Text}, D) -> add_lang(Lang, z_html:strip(Text), D) end, Dict, Texts),
     split_lang(Rest, Dict2, Context);
 split_lang([Text|Rest], Dict, Context) ->
-    Dict2 = add_lang(zp_context:language(Context), Text, Dict),
+    Dict2 = add_lang(z_context:language(Context), Text, Dict),
     split_lang(Rest, Dict2, Context).
 
     add_lang(Lang, Text, Dict) ->
         case dict:find(Lang, Dict) of
-            {ok, _} -> dict:append(Lang, zp_html:strip(Text), Dict);
-            error -> dict:store(Lang, [zp_html:strip(Text)], Dict)
+            {ok, _} -> dict:append(Lang, z_html:strip(Text), Dict);
+            error -> dict:store(Lang, [z_html:strip(Text)], Dict)
         end.
                 
 
@@ -306,7 +306,7 @@ related(Id, Context) ->
 %% @doc Fetch the names of all categories in the category path
 %% @spec category(int(), Context) -> { IdList, TextsList }
 category(CatId, Context) ->
-    Names = [ zp_convert:to_list(Name) || Name <- m_category:is_a(CatId, Context) ],
+    Names = [ z_convert:to_list(Name) || Name <- m_category:is_a(CatId, Context) ],
     Ids   = [ CatId |  m_category:get_path(CatId, Context) ],
     {Ids, Names}.
 
@@ -339,7 +339,7 @@ fetch_texts({F, V}, {A,B} = Acc) ->
     case do_pivot_field(F) of
         false -> Acc;
         true ->
-            case zp_string:is_string(V) of
+            case z_string:is_string(V) of
                 true -> {A, [V|B]};
                 false -> {A,B}
             end

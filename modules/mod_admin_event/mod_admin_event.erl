@@ -20,7 +20,7 @@
 -export([
 ]).
 
--include_lib("zophrenic.hrl").
+-include_lib("zotonic.hrl").
 
 -record(state, {context}).
 
@@ -47,7 +47,7 @@ start_link(Args) when is_list(Args) ->
 init(Args) ->
     process_flag(trap_exit, true),
     {context, Context} = proplists:lookup(context, Args),
-    {ok, #state{context=zp_context:new_for_host(Context)}}.
+    {ok, #state{context=z_context:new_for_host(Context)}}.
 
 %% @spec handle_call(Request, From, State) -> {reply, Reply, State} |
 %%                                      {reply, Reply, State, Timeout} |

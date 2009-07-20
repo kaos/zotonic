@@ -4,7 +4,7 @@
 %% @doc Submit a form, or the closest form to an id
 
 -module(action_base_submit_form).
--include("zophrenic.hrl").
+-include("zotonic.hrl").
 -export([render_action/4]).
 
 render_action(_TriggerId, _TargetId, Args, Context) ->
@@ -14,8 +14,8 @@ render_action(_TriggerId, _TargetId, Args, Context) ->
                 undefined -> 
                     {[], Context};
                 CloseId ->
-                    {[ $$, $(, $", $#, zp_utils:js_escape(zp_convert:to_list(CloseId)), <<"\").closest(\"form\").submit();">> ], Context}
+                    {[ $$, $(, $", $#, z_utils:js_escape(z_convert:to_list(CloseId)), <<"\").closest(\"form\").submit();">> ], Context}
             end;
         Id ->
-            {[ $$, $(, $", $#, zp_utils:js_escape(zp_convert:to_list(Id)), <<"\").submit();">> ], Context}
+            {[ $$, $(, $", $#, z_utils:js_escape(z_convert:to_list(Id)), <<"\").submit();">> ], Context}
     end.

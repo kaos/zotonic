@@ -4,7 +4,7 @@
 %%
 %% @doc Media archiving utilities.  Manages the files/archive directory of sites.
 
--module(zp_media_archive).
+-module(z_media_archive).
 -author("Marc Worrell <marc@worrell.nl").
 
 %% interface functions
@@ -25,11 +25,11 @@
     safe_filename/1
 ]).
 
--include_lib("zophrenic.hrl").
+-include_lib("zotonic.hrl").
 
 %% @doc Return the absolute path name of a relative file in the archive
 abspath(File, Context) ->
-    filename:join([path_archive(Context), zp_convert:to_list(File)]).
+    filename:join([path_archive(Context), z_convert:to_list(File)]).
 
 %% @doc Ensure that the filename is relative to the archive.  When needed move the file to the archive.  Return the relative path.
 ensure_relative(File, Context) ->
@@ -144,7 +144,7 @@ make_unique(Archive, Rootname, Extension, Nr) ->
 
 %% @doc Return the path to the media archive directory
 path_archive(_Context) ->
-    Priv = code:lib_dir(zophrenic, priv),
+    Priv = code:lib_dir(zotonic, priv),
     filename:join([Priv, "sites", "default", "files", "archive"]).
 
 %% @doc Check if the file is archived (ie. in the archive directory)

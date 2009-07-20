@@ -13,12 +13,12 @@
 -include_lib("resource_html.hrl").
 
 is_authorized(ReqData, Context) ->
-    zp_auth:wm_is_authorized(ReqData, Context).
+    z_auth:wm_is_authorized(ReqData, Context).
 
 
 html(Context) ->
-	Html = zp_template:render("admin_category_sorter.tpl", [{page_admin_category_sorter, true}], Context),
-	zp_context:output(Html, Context).
+	Html = z_template:render("admin_category_sorter.tpl", [{page_admin_category_sorter, true}], Context),
+	z_context:output(Html, Context).
 
 %% @doc Handle the drop of a dragged category. The category can be dropped on another category (making it a sub-category) or on
 %% a separator between two categories.  The first will make the category a sub category, the second will move the category to 
@@ -34,11 +34,11 @@ event({drop, {dragdrop, DragTag, _DragDelegate, _DragId}, {dragdrop, DropTag, _D
     end,
     Context1 = case Result of
        ok -> Context;
-       {error, cycle} ->   zp_render:growl_error("Can not make a category a sub category of itself.", Context);
-       {error, eacces} ->  zp_render:growl_error("You are not allowed to change categories.", Context)
+       {error, cycle} ->   z_render:growl_error("Can not make a category a sub category of itself.", Context);
+       {error, eacces} ->  z_render:growl_error("You are not allowed to change categories.", Context)
     end,
-    {Html, Context2} = zp_template:render_to_iolist("_admin_category_sorter.tpl", [], Context1),
-    zp_render:update("category-sorter", Html, Context2);
+    {Html, Context2} = z_template:render_to_iolist("_admin_category_sorter.tpl", [], Context1),
+    z_render:update("category-sorter", Html, Context2);
 
         
 event(_Event, Context) ->

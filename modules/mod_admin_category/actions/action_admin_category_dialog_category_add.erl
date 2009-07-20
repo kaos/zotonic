@@ -13,34 +13,34 @@
     event/2
 ]).
 
--include("zophrenic.hrl").
+-include("zotonic.hrl").
 
 render_action(TriggerId, TargetId, Args, Context) ->
     OnSuccess = proplists:get_all_values(on_success, Args),
     Postback = {dialog_category_add, OnSuccess},
-	{PostbackMsgJS, _PickledPostback} = zp_render:make_postback(Postback, click, TriggerId, TargetId, ?MODULE, Context),
+	{PostbackMsgJS, _PickledPostback} = z_render:make_postback(Postback, click, TriggerId, TargetId, ?MODULE, Context),
 	{PostbackMsgJS, Context}.
 
 
 %% @doc Fill the dialog with the delete confirmation template. The next step will ask to delete the category.
 %% @spec event(Event, Context1) -> Context2
 event({postback, {dialog_category_add, OnSuccess}, _TriggerId, _TargetId}, Context) ->
-    case zp_acl:has_role(admin, Context) of
+    case z_acl:has_role(admin, Context) of
         true ->
             Vars = [ {on_success, OnSuccess} ],
-            zp_render:dialog("Add category", "_action_dialog_category_add.tpl", Vars, Context);
+            z_render:dialog("Add category", "_action_dialog_category_add.tpl", Vars, Context);
         false ->
-            zp_render:growl_error("Only administrators can add categories.", Context)
+            z_render:growl_error("Only administrators can add categories.", Context)
     end;
 
 %% @doc Handle the form postback. Optionally renaming existing categories.
 event({submit, {category_add, Options}, _TriggerId, _TargetId}, Context) ->
-    case zp_acl:has_role(admin, Context) of
+    case z_acl:has_role(admin, Context) of
         true ->
-            Title    = zp_context:get_q_validated("title", Context),
-            Name     = zp_context:get_q_validated("name", Context),
-            GroupId  = zp_convert:to_integer(zp_context:get_q("group_id", Context, undefined)),
-            ParentId = zp_convert:to_integer(zp_context:get_q("category_id", Context, undefined)),
+            Title    = z_context:get_q_validated("title", Context),
+            Name     = z_context:get_q_validated("name", Context),
+            GroupId  = z_convert:to_integer(z_context:get_q("group_id", Context, undefined)),
+            ParentId = z_convert:to_integer(z_context:get_q("category_id", Context, undefined)),
             
             Props = [
                 {is_published, true},
@@ -56,13 +56,13 @@ event({submit, {category_add, Options}, _TriggerId, _TargetId}, Context) ->
                         PId when is_integer(PId) ->  m_category:move_below(Id, PId, Context);
                         undefined -> nop
                     end,
-                    zp_render:wire(proplists:get_all_values(on_success, Options), Context);
+                    z_render:wire(proplists:get_all_values(on_success, Options), Context);
                 {error, duplicate_name} ->
-                    zp_render:growl_error("This category exists already. Please use another name.", Context);
+                    z_render:growl_error("This category exists already. Please use another name.", Context);
                 {error, Reason} ->
                     Error = io_lib:format("Could not insert the categorie (~p)", [Reason]),
-                    zp_render:growl_error(Error, Context)
+                    z_render:growl_error(Error, Context)
             end;
         false ->
-            zp_render:growl_error("Only administrators can delete categories.", Context)
+            z_render:growl_error("Only administrators can delete categories.", Context)
     end.

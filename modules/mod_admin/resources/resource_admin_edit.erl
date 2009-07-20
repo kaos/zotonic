@@ -15,16 +15,16 @@
 
 %% @todo Change this into "visible" and add a view instead of edit template.
 is_authorized(ReqData, Context) ->
-    zp_auth:wm_is_authorized(true, visible, "id", ReqData, Context).
+    z_auth:wm_is_authorized(true, visible, "id", ReqData, Context).
 
 
 resource_exists(ReqData, Context) ->
     Context1 = ?WM_REQ(ReqData, Context),
-    Context2 = zp_context:ensure_all(Context1),
-    Id = zp_context:get_q("id", Context2),
+    Context2 = z_context:ensure_all(Context1),
+    Id = z_context:get_q("id", Context2),
     try
         IdN = list_to_integer(Id),
-        Context3 = zp_context:set(id, IdN, Context2),
+        Context3 = z_context:set(id, IdN, Context2),
         ?WM_REPLY(m_rsc:exists(IdN, Context3), Context3)
     catch
         _:_ -> ?WM_REPLY(false, Context2)
@@ -33,18 +33,18 @@ resource_exists(ReqData, Context) ->
 
 html(Context) ->
     Vars = [
-        {id, zp_context:get(id, Context)}
+        {id, z_context:get(id, Context)}
     ],
-    Html = zp_template:render("admin_edit.tpl", Vars, Context),
-	zp_context:output(Html, Context).
+    Html = z_template:render("admin_edit.tpl", Vars, Context),
+	z_context:output(Html, Context).
 
 
 %% @doc Handle the submit of the resource edit form
 event({submit, rscform, _FormId, _TargetId}, Context) ->
-    Post = zp_context:get_q_all(Context),
+    Post = z_context:get_q_all(Context),
     Props = filter_props(Post),
     Title = ?TR(proplists:get_value("title", Props), Context),
-    Id = zp_convert:to_integer(proplists:get_value("id", Props)),
+    Id = z_convert:to_integer(proplists:get_value("id", Props)),
     Props1 = proplists:delete("id", Props),
     CatBefore = m_rsc:p(Id, category_id, Context),
     case m_rsc:update(Id, Props1, Context) of
@@ -52,37 +52,37 @@ event({submit, rscform, _FormId, _TargetId}, Context) ->
             case proplists:is_defined("save_view", Post) of
                 true ->
                     PageUrl = m_rsc:p(Id, page_url, Context),
-                    zp_render:wire({redirect, [{location, PageUrl}]}, Context);
+                    z_render:wire({redirect, [{location, PageUrl}]}, Context);
                 false ->
                     case m_rsc:p(Id, category_id, Context) of
                         CatBefore ->
-                            Context1 = zp_render:set_value("field-name", m_rsc:p(Id, name, Context), Context),
-                            Context2 = zp_render:set_value("field-uri",  m_rsc:p(Id, uri, Context1), Context1),
-                            Context3 = zp_render:set_value("slug",  m_rsc:p(Id, slug, Context2), Context2),
-                            Context4 = case zp_convert:to_bool(m_rsc:p(Id, is_protected, Context3)) of
-                                true ->  zp_render:wire("delete-button", {disable, []}, Context3);
-                                false -> zp_render:wire("delete-button", {enable, []}, Context3)
+                            Context1 = z_render:set_value("field-name", m_rsc:p(Id, name, Context), Context),
+                            Context2 = z_render:set_value("field-uri",  m_rsc:p(Id, uri, Context1), Context1),
+                            Context3 = z_render:set_value("slug",  m_rsc:p(Id, slug, Context2), Context2),
+                            Context4 = case z_convert:to_bool(m_rsc:p(Id, is_protected, Context3)) of
+                                true ->  z_render:wire("delete-button", {disable, []}, Context3);
+                                false -> z_render:wire("delete-button", {enable, []}, Context3)
                             end,
-                            zp_render:growl(["Saved ",zp_html:strip(Title),"."], Context4);
+                            z_render:growl(["Saved ",z_html:strip(Title),"."], Context4);
                         _CatOther ->
-                            zp_render:wire({reload, []}, Context)
+                            z_render:wire({reload, []}, Context)
                     end
             end;
         {error, duplicate_uri} ->
-            zp_render:growl_error("Error, duplicate uri. Please change the uri.", Context);
+            z_render:growl_error("Error, duplicate uri. Please change the uri.", Context);
         {error, duplicate_name} ->
-            zp_render:growl_error("Error, duplicate name. Please change the name.", Context);
+            z_render:growl_error("Error, duplicate name. Please change the name.", Context);
         {error, eacces} ->
-            zp_render:growl_error("You don't have permission to edit this page.", Context);
+            z_render:growl_error("You don't have permission to edit this page.", Context);
         {error, _Reason} ->
-            zp_render:growl_error("Something went wrong. Sorry.", Context)
+            z_render:growl_error("Something went wrong. Sorry.", Context)
     end;
 
 event({postback, {reload_media, Opts}, _TriggerId, _TargetId}, Context) ->
     RscId = proplists:get_value(rsc_id, Opts),
     DivId = proplists:get_value(div_id, Opts),
-    {Html, Context1} = zp_template:render_to_iolist("_edit_media.tpl", [{id,RscId}], Context),
-    zp_render:update(DivId, Html, Context1).
+    {Html, Context1} = z_template:render_to_iolist("_edit_media.tpl", [{id,RscId}], Context),
+    z_render:update(DivId, Html, Context1).
 
 
 
@@ -91,8 +91,8 @@ filter_props(Fs) ->
     Remove = [
         "triggervalue",
         "postback",
-        "zp_trigger_id",
-        "zp_pageid",
+        "z_trigger_id",
+        "z_pageid",
         "trigger_value",
         "save_view",
         "save_stay"

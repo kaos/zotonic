@@ -1,8 +1,8 @@
 %% @author Marc Worrell <marc@worrell.nl>
 %% @copyright 2009 Marc Worrell
-%% @doc Main definitions for zophrenic
+%% @doc Main definitions for zotonic
 
--define(ZOPHRENIC_VERSION, "0.1.0").
+-define(ZOTONIC_VERSION, "0.1.0").
 
 -include_lib("deps/webmachine/include/wm_reqdata.hrl").
 
@@ -22,14 +22,14 @@
 
         %% The host (also the id of the database used) 
         host=default,
-        %% The database connection used for (nested) transactions, see zp_db
+        %% The database connection used for (nested) transactions, see z_db
         dbc=undefined,
 
-        %% The language selected, used by zp_trans and others
+        %% The language selected, used by z_trans and others
         language=en,
         
         %% The current logged on person, derived from the session and visitor
-        acl=undefined,      %% opaque placeholder managed by the zp_acl module
+        acl=undefined,      %% opaque placeholder managed by the z_acl module
         user_id=undefined,
 
         %% The state below is the render state, can be cached and/or merged
@@ -49,7 +49,7 @@
         props=[]
     }).
     
--define(WM_REQ(ReqData, Context), zp_context:set_reqdata(ReqData, Context)).
+-define(WM_REQ(ReqData, Context), z_context:set_reqdata(ReqData, Context)).
 -define(WM_REPLY(Reply, Context), {Reply, Context#context.wm_reqdata, Context#context{wm_reqdata=undefined}}).
 
 -define(HOST(Context), Context#context.host).
@@ -65,7 +65,7 @@
     publication_end={{9999,1,1}, {0,0,0}}
 }).
 
-%% Record used for parsing multipart body (see zp_parse_multipart)
+%% Record used for parsing multipart body (see z_parse_multipart)
 -record(multipart_form, {name, data, filename, tmpfile, file, files=[], args=[]}).
 -record(upload, {filename, tmpfile}).
 
@@ -93,13 +93,13 @@
 -record(dragdrop, {tag, delegate, id}).
 
 %% @doc Check if an assumption is true
--define(ASSERT(A,E), zp_utils:assert(A,E)).
+-define(ASSERT(A,E), z_utils:assert(A,E)).
 
 %% @doc Call the translate function, 2nd parameter is either language or context
--define(TR(T,L), zp_trans:trans(T,L)).
+-define(TR(T,L), z_trans:trans(T,L)).
 
 %% The name of the session request parameter
--define(SESSION_PAGE_Q, "zp_pageid").
+-define(SESSION_PAGE_Q, "z_pageid").
 
 %% Number of seconds between two comet polls before the page expires
 -define(SESSION_PAGE_TIMEOUT, 20).

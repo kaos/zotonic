@@ -30,12 +30,12 @@
 
 -export([init/1, varies/2, code_change/3, terminate/1, render/4]).
 
--include("zophrenic.hrl").
+-include("zotonic.hrl").
 
 init(_Args) -> {ok, []}.
 varies(Params, _Context) -> 
     MaxAge = proplists:get_value(maxage, Params),
-    case zp_convert:to_integer(MaxAge) of
+    case z_convert:to_integer(MaxAge) of
         undefined -> 
             undefined; 
         Max ->
@@ -57,5 +57,5 @@ render(Params, Vars, Context, _State) ->
                     Vs
             end,
     Vars1 = lists:foldl(AddC, Vars, Params),
-    {ok, zp_template:render(File, Vars1, Context)}.
+    {ok, z_template:render(File, Vars1, Context)}.
 

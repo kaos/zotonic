@@ -2,7 +2,7 @@
 %% @copyright 2009 Marc Worrell
 
 -module(action_base_growl).
--include("zophrenic.hrl").
+-include("zotonic.hrl").
 -export([render_action/4]).
 
 render_action(_TriggerId, _TargetId, Args, Context) ->
@@ -10,11 +10,11 @@ render_action(_TriggerId, _TargetId, Args, Context) ->
     Stay   = proplists:get_value(stay, Args, 0),
     Type   = proplists:get_value(type, Args, "notice"),
 
-    TextJS = zp_utils:js_escape(Text),
+    TextJS = z_utils:js_escape(Text),
     StayJS = if 
                 Stay > 0 -> $1;
                 true     -> $0
              end,
-	TypeJS = zp_utils:js_escape(Type),
-	Script = [<<"zp_growl_add(\"">>,TextJS,<<"\", ">>, StayJS,<<",\"">>, TypeJS, $", $), $;],
+	TypeJS = z_utils:js_escape(Type),
+	Script = [<<"z_growl_add(\"">>,TextJS,<<"\", ">>, StayJS,<<",\"">>, TypeJS, $", $), $;],
 	{Script, Context}.

@@ -13,13 +13,13 @@
     event/2
 ]).
 
--include("zophrenic.hrl").
+-include("zotonic.hrl").
 
 render_action(TriggerId, TargetId, Args, Context) ->
     OnSuccess = proplists:get_all_values(on_success, Args),
-    Id = zp_convert:to_integer(proplists:get_value(id, Args)),
+    Id = z_convert:to_integer(proplists:get_value(id, Args)),
     Postback = {dialog_artist_event_add, Id, OnSuccess},
-	{PostbackMsgJS, _PickledPostback} = zp_render:make_postback(Postback, click, TriggerId, TargetId, ?MODULE, Context),
+	{PostbackMsgJS, _PickledPostback} = z_render:make_postback(Postback, click, TriggerId, TargetId, ?MODULE, Context),
 	{PostbackMsgJS, Context}.
 
 
@@ -28,17 +28,17 @@ event({postback, {dialog_artist_event_add, Id, OnSuccess}, _TriggerId, _TargetId
         {id, Id},
         {on_success, OnSuccess}
     ],
-    zp_render:dialog("Add an event for the artist.", "_action_dialog_artist_event_add.tpl", Vars, Context);
+    z_render:dialog("Add an event for the artist.", "_action_dialog_artist_event_add.tpl", Vars, Context);
 
 
 %% @doc Delete an username from an user.
 %% @spec event(Event, Context1) -> Context2
 event({submit, {event_add, Props}, _TriggerId, _TargetId}, Context) ->
     ArtistId = proplists:get_value(id, Props),
-    Title = zp_context:get_q_validated("title", Context),
-    Venue = zp_context:get_q("venue", Context),
-    Genres = zp_context:get_q_all("genre", Context),
-    GroupId = list_to_integer(zp_context:get_q("group_id", Context)),
+    Title = z_context:get_q_validated("title", Context),
+    Venue = z_context:get_q("venue", Context),
+    Genres = z_context:get_q_all("genre", Context),
+    GroupId = list_to_integer(z_context:get_q("group_id", Context)),
 
     EventProps = [
         {is_published, true},
@@ -63,10 +63,10 @@ event({submit, {event_add, Props}, _TriggerId, _TargetId}, Context) ->
         end
     end,
     
-    case zp_db:transaction(F, Context) of
+    case z_db:transaction(F, Context) of
         {ok, EventId} ->
-            Context1 = zp_render:growl(["Created the event ",zp_html:escape(Title), "."], Context),
-            zp_render:wire([
+            Context1 = z_render:growl(["Created the event ",z_html:escape(Title), "."], Context),
+            z_render:wire([
                     {dialog_close, []},
                     {redirect, [{dispatch, admin_edit_rsc}, {id, EventId}]}
                     | proplists:get_all_values(on_success, Props) ], Context1);
@@ -74,6 +74,6 @@ event({submit, {event_add, Props}, _TriggerId, _TargetId}, Context) ->
             case Error of
                 _OtherError ->
                     ?DEBUG(Error),
-                    zp_render:growl_error("Could not create the event. Sorry.", Context)
+                    z_render:growl_error("Could not create the event. Sorry.", Context)
             end
     end.

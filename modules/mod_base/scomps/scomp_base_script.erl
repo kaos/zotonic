@@ -8,7 +8,7 @@
 
 -export([init/1, varies/2, code_change/3, terminate/1, render/4]).
 
--include("zophrenic.hrl").
+-include("zotonic.hrl").
 
 
 %%      init(Args) -> {ok, State} | {error, Error}

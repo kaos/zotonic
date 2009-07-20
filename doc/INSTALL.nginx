@@ -1,12 +1,12 @@
-# This is the configuration file we use to proxy nginx to zophrenic.
-# Replace "test.zophrenic.com" with your hostname.
+# This is the configuration file we use to proxy nginx to zotonic.
+# Replace "test.zotonic.com" with your hostname.
 
 server {
         listen 80;
-        server_name  test.zophrenic.com;
+        server_name  test.zotonic.com;
 
-        access_log  /var/log/nginx/test.zophrenic.com.access.log;
-        error_log  /var/log/nginx/test.zophrenic.com.error.log;
+        access_log  /var/log/nginx/test.zotonic.com.access.log;
+        error_log  /var/log/nginx/test.zotonic.com.error.log;
 
         keepalive_timeout 65;
         gzip off;
@@ -37,7 +37,7 @@ server {
              empty_gif;
         }
 
-		# zophrenic serves it's own error pages, so the ones below are not needed
+		# zotonic serves it's own error pages, so the ones below are not needed
 
         #error_page  404  /404.html;
 

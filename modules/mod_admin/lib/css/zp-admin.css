@@ -1,8 +1,8 @@
 /* Project specific styles for Zophrenic websites
 ----------------------------------------------------------
 
-@package:	zophrenic 2009
-@Project	zophrenic admin area
+@package:	zotonic 2009
+@Project	zotonic admin area
 @Author: 	Tim Benniks <tim@timbenniks.com>
 @Created: 	21-03-2009
 
@@ -265,7 +265,7 @@ a:focus {
 
 #header h1 {
 	text-indent: -99999px;
-	background: transparent url(../images/admin_zophrenic.jpg) no-repeat 0 46%;
+	background: transparent url(../images/admin_zotonic.jpg) no-repeat 0 46%;
 	height: 64px;
 	margin: 0 0 18px 0;
 }

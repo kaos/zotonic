@@ -50,7 +50,7 @@ category_brands(Cat, Context) ->
     Id = m_category:name_to_id_check(Cat, Context),
     BrandPred = m_predicate:name_to_id_check(brand, Context),
     {Left, Right} = m_category:get_range(Id, Context),
-    zp_db:q("
+    z_db:q("
         select b.id, b.name, count(r.id)
         from category c
          join rsc r on r.category_id = c.id
@@ -73,7 +73,7 @@ category_subcat_bybrand(CatId, undefined, Context) ->
 category_subcat_bybrand(CatId, BrandId, Context) ->
     BrandPred = m_predicate:name_to_id_check(brand, Context),
     {Left, Right} = m_category:get_range(CatId, Context),
-    Nrs = zp_db:q("
+    Nrs = z_db:q("
         select distinct c.nr
         from category c
          join rsc r on r.category_id = c.id
@@ -99,7 +99,7 @@ category_subcat_bybrand(CatId, BrandId, Context) ->
 category_rsc_count(Cat, Context) ->
     Id = m_category:name_to_id_check(Cat, Context),
     {Left, Right} = m_category:get_range(Id, Context),
-    zp_db:q1("
+    z_db:q1("
         select count(r.id)
         from category c
          join rsc r on r.category_id = c.id
@@ -124,11 +124,11 @@ init(Args) ->
     process_flag(trap_exit, true),
     {context, Context} = proplists:lookup(context, Args),
     install_check(Context),
-    zp_notifier:observe(search_query, {?MODULE, observe}, Context),
+    z_notifier:observe(search_query, {?MODULE, observe}, Context),
 
     % Every 10 minutes a periodic check of Adyen logs and old orders
     timer:send_interval(60 * 1000 * 10, periodic),
-    {ok, #state{context=zp_context:new_for_host(Context)}}.
+    {ok, #state{context=z_context:new_for_host(Context)}}.
 
 %% @spec handle_call(Request, From, State) -> {reply, Reply, State} |
 %%                                      {reply, Reply, State, Timeout} |
@@ -173,7 +173,7 @@ handle_info(_Info, State) ->
 %% cleaning up. When it returns, the gen_server terminates with Reason.
 %% The return value is ignored.
 terminate(_Reason, State) ->
-    zp_notifier:detach(search_query, {?MODULE, observe}, State#state.context),
+    z_notifier:detach(search_query, {?MODULE, observe}, State#state.context),
     ok.
 
 %% @spec code_change(OldVsn, State, Extra) -> {ok, NewState}
@@ -190,16 +190,16 @@ code_change(_OldVsn, State, _Extra) ->
 
 %% @doc Deallocate all orders that are past their expire time
 expire_orders(Context) ->
-    Ids = zp_db:q("select id from shop_order where expires > now() and status = 'new'", Context),
+    Ids = z_db:q("select id from shop_order where expires > now() and status = 'new'", Context),
     F = fun(Ctx) ->
         [ shop_order:set_status(Id, canceled, Ctx) || {Id} <- Ids ]
     end,
-    zp_db:transaction(F, Context).
+    z_db:transaction(F, Context).
 
 
 %% @doc Check is the shop module has been installed.  If not then install all db tables and rscs.
 install_check(Context) ->
-    case zp_db:table_exists("shop_order", Context) of
+    case z_db:table_exists("shop_order", Context) of
         true -> 
             ok;
         false ->

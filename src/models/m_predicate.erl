@@ -31,7 +31,7 @@
     for_subject/2
 ]).
 
--include_lib("zophrenic.hrl").
+-include_lib("zotonic.hrl").
 
 
 %% @doc Fetch the value for the key from a model source
@@ -66,12 +66,12 @@ m_value(#m{}, Context) ->
 %% @spec is_predicate(Pred, Context) -> bool()
 is_predicate(Id, Context) when is_integer(Id) ->
     F = fun() ->
-        case zp_db:q1("select id from rsc where id = $1 and category_id = $2", [Id, cat_id(Context)], Context) of
+        case z_db:q1("select id from rsc where id = $1 and category_id = $2", [Id, cat_id(Context)], Context) of
             undefined -> false;
             _ -> true
         end
     end,
-    zp_depcache:memo(F, {is_predicate, Id}, ?DAY, [predicate]);
+    z_depcache:memo(F, {is_predicate, Id}, ?DAY, [predicate]);
 is_predicate(Pred, Context) ->
     case name_to_id(Pred, Context) of
         {ok, _Id} -> true;
@@ -83,12 +83,12 @@ is_predicate(Pred, Context) ->
 %% @spec id_to_name(Id, Context) -> {ok, atom()} | {error, Reason}
 id_to_name(Id, Context) when is_integer(Id) ->
     F = fun() ->
-        case zp_db:q1("select name from rsc where id = $1 and category_id = $2", [Id, cat_id(Context)], Context) of
+        case z_db:q1("select name from rsc where id = $1 and category_id = $2", [Id, cat_id(Context)], Context) of
             undefined -> {error, {enoent, predicate, Id}};
-            Name -> {ok, zp_convert:to_atom(Name)}
+            Name -> {ok, z_convert:to_atom(Name)}
         end
     end,
-    zp_depcache:memo(F, {predicate_name, Id}, ?DAY, [predicate]).
+    z_depcache:memo(F, {predicate_name, Id}, ?DAY, [predicate]).
 
     
 %% @doc Return the id of the predicate
@@ -110,7 +110,7 @@ get(PredId, Context) when is_integer(PredId) ->
 get(Pred, Context) when is_list(Pred) orelse is_binary(Pred) ->
     get(list_to_atom(string:to_lower(Pred)), Context);
 get(Pred, Context) ->
-    case zp_depcache:get(predicate, Pred) of
+    case z_depcache:get(predicate, Pred) of
         {ok, undefined} ->
             undefined;
         {ok, Value} ->
@@ -121,12 +121,12 @@ get(Pred, Context) ->
 
 %% @doc Return the category ids that are valid as objects
 objects(Id, Context) ->
-    Objects = zp_db:q("select category_id from predicate_category where predicate_id = $1 and is_subject = false", [Id], Context),
+    Objects = z_db:q("select category_id from predicate_category where predicate_id = $1 and is_subject = false", [Id], Context),
     [ R || {R} <- Objects  ].
 
 %% @doc Return the category ids that are valid as subjects
 subjects(Id, Context) ->
-    Subjects = zp_db:q("select category_id from predicate_category where predicate_id = $1 and is_subject = true", [Id], Context),
+    Subjects = z_db:q("select category_id from predicate_category where predicate_id = $1 and is_subject = true", [Id], Context),
     [ R || {R} <- Subjects  ].
 
 
@@ -134,7 +134,7 @@ subjects(Id, Context) ->
 %% @spec all(Context) -> PropList
 all(Context) ->
     F = fun() ->
-        Preds = zp_db:assoc_props("select * from rsc where category_id = $1 order by name", [cat_id(Context)], Context),
+        Preds = z_db:assoc_props("select * from rsc where category_id = $1 order by name", [cat_id(Context)], Context),
         FSetPred = fun(Pred) ->
             Id = proplists:get_value(id, Pred),
             Atom = case proplists:get_value(name, Pred) of
@@ -145,13 +145,13 @@ all(Context) ->
         end,
         [ FSetPred(Pred) || Pred <- Preds]
     end,
-    zp_depcache:memo(F, predicate, ?DAY).
+    z_depcache:memo(F, predicate, ?DAY).
 
 
 %% @doc Insert a new predicate, sets some defaults.
 %% @spec insert(Title, Context) -> {ok, Id} | {error, Reason}
 insert(Title, Context) ->
-    Name = zp_string:to_name(Title),
+    Name = z_string:to_name(Title),
     Uri  = "http://zotonic.net/predicate/" ++ Name,
     Props = [
         {title, Title},
@@ -173,30 +173,30 @@ insert(Title, Context) ->
 
 %% @doc Flush all cached data about predicates.
 flush(_Context) ->
-    zp_depcache:flush(predicate).
+    z_depcache:flush(predicate).
 
 
 %% @doc Update a predicate, save the reversed flag, reset the list of valid subjects and objects.
 %% @spec update(Id, Subjects, Objects, Context) -> void()
 update_noflush(Id, Subjects, Objects, Context) ->
-    SubjectIds = [ zp_convert:to_integer(N) || N <- Subjects, N /= [], N /= <<>> ],
-    ObjectIds = [ zp_convert:to_integer(N) || N <- Objects, N /= [], N /= <<>> ],
+    SubjectIds = [ z_convert:to_integer(N) || N <- Subjects, N /= [], N /= <<>> ],
+    ObjectIds = [ z_convert:to_integer(N) || N <- Objects, N /= [], N /= <<>> ],
     F = fun(Ctx) ->
         update_predicate_category(Id, true, SubjectIds, Ctx),
         update_predicate_category(Id, false, ObjectIds, Ctx),
         ok
     end,
-    ok = zp_db:transaction(F, Context).
+    ok = z_db:transaction(F, Context).
 
 
 update_predicate_category(Id, IsSubject, CatIds, Context) ->
-    OldIdsR = zp_db:q("select category_id from predicate_category where predicate_id = $1 and is_subject = $2", [Id, IsSubject], Context),
+    OldIdsR = z_db:q("select category_id from predicate_category where predicate_id = $1 and is_subject = $2", [Id, IsSubject], Context),
     OldIds  = [ N || {N} <- OldIdsR ],
     % Delete the ones that are not there anymore
-    [ zp_db:q("delete from predicate_category where predicate_id = $1 and category_id = $2 and is_subject = $3", [Id, OldId, IsSubject], Context)
+    [ z_db:q("delete from predicate_category where predicate_id = $1 and category_id = $2 and is_subject = $3", [Id, OldId, IsSubject], Context)
     || OldId <- OldIds, not lists:member(OldId, CatIds)
     ],
-    [ zp_db:insert(predicate_category, [{predicate_id, Id}, {category_id, NewId}, {is_subject, IsSubject}], Context)
+    [ z_db:insert(predicate_category, [{predicate_id, Id}, {category_id, NewId}, {is_subject, IsSubject}], Context)
     || NewId <- CatIds, not lists:member(NewId, OldIds)
     ],
     ok.
@@ -209,12 +209,12 @@ object_category(Id, Context) ->
     F = fun() ->
         case name_to_id(Id, Context) of
             {ok, PredId} ->
-                zp_db:q("select category_id from predicate_category where predicate_id = $1 and is_subject = false", [PredId], Context);
+                z_db:q("select category_id from predicate_category where predicate_id = $1 and is_subject = false", [PredId], Context);
             _ -> 
                 []
         end
     end,
-    zp_depcache:memo(F, {object_category, Id}, ?WEEK, [predicate]).
+    z_depcache:memo(F, {object_category, Id}, ?WEEK, [predicate]).
 
 
 %% @doc Return all the valid categories for subjects.  Return the empty list when there is no constraint.  Note that the resulting array
@@ -224,17 +224,17 @@ subject_category(Id, Context) ->
     F = fun() ->
         case name_to_id(Id, Context) of
             {ok, PredId} ->
-                zp_db:q("select category_id from predicate_category where predicate_id = $1 and is_subject = true", [PredId], Context);
+                z_db:q("select category_id from predicate_category where predicate_id = $1 and is_subject = true", [PredId], Context);
             _ -> 
                 []
         end
     end,
-    zp_depcache:memo(F, {subject_category, Id}, ?WEEK, [predicate]).
+    z_depcache:memo(F, {subject_category, Id}, ?WEEK, [predicate]).
 
 
 %% @doc Return the list of predicates that are valid for the given resource id. Append all predicates that have no restrictions.
 for_subject(Id, Context) ->
-    ValidIds = zp_db:q("
+    ValidIds = z_db:q("
                 select p.predicate_id 
                 from predicate_category p,
                      category pc,
@@ -248,7 +248,7 @@ for_subject(Id, Context) ->
                   and is_subject = true
                 ", [Id], Context),
     Valid = [ ValidId || {ValidId} <- ValidIds ],
-    NoRestrictionIds = zp_db:q("
+    NoRestrictionIds = z_db:q("
                     select r.id
                     from rsc r left join predicate_category p on p.predicate_id = r.id and p.is_subject = true
                     where p.predicate_id is null

@@ -19,7 +19,7 @@
 
 
 -include_lib("webmachine_resource.hrl").
--include_lib("include/zophrenic.hrl").
+-include_lib("include/zotonic.hrl").
 
 -define(AUTH_HEAD, "Basic realm=AdyenNotification").
 
@@ -34,12 +34,12 @@ init([]) -> {ok, []}.
 
 %% Check the HTTP basic authentication supplied by Adyen
 is_authorized(ReqData, _Context) ->
-    Context1 = zp_context:new(ReqData, ?MODULE),
-    Context2 = zp_context:ensure_qs(Context1),
+    Context1 = z_context:new(ReqData, ?MODULE),
+    Context2 = z_context:ensure_qs(Context1),
     case wrq:get_req_header("Authorization", ReqData) of
         "Basic " ++ Base64 ->
-            Username = zp_convert:to_list(m_config:get_value(adyen, notification_username, "adyen", Context2)),
-            Password = zp_convert:to_list(m_config:get_value(adyen, notification_password, "plop!", Context2)),
+            Username = z_convert:to_list(m_config:get_value(adyen, notification_username, "adyen", Context2)),
+            Password = z_convert:to_list(m_config:get_value(adyen, notification_password, "plop!", Context2)),
             case string:tokens(base64:mime_decode_to_string(string:strip(Base64)), ":") of
                 [Username, Password] -> 
                     ?WM_REPLY(true, Context2);
@@ -63,11 +63,11 @@ process_post(ReqData, Context) ->
     Context1 = ?WM_REQ(ReqData, Context),
 
     % Handle the notification, save it in the database
-    shop_adyen:notification(zp_context:get_q_all(Context1), Context1),
+    shop_adyen:notification(z_context:get_q_all(Context1), Context1),
 
-    RD  = zp_context:get_reqdata(Context1),
+    RD  = z_context:get_reqdata(Context1),
     RD1 = wrq:append_to_resp_body(<<"[accepted]">>, RD),
-    ReplyContext = zp_context:set_reqdata(RD1, Context1),
+    ReplyContext = z_context:set_reqdata(RD1, Context1),
     ?WM_REPLY(true, ReplyContext).
 
 

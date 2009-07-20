@@ -12,7 +12,7 @@
     search/3
 ]).
 
--include("zophrenic.hrl").
+-include("zotonic.hrl").
 
 
 search({fulltext_catbrand, [{cat,Cat},{text,QueryText}]}, _OffsetLimit, Context) ->
@@ -27,7 +27,7 @@ search({fulltext_catbrand, [{cat,Cat},{text,QueryText}]}, _OffsetLimit, Context)
                 from="rsc r left join edge e on r.id = e.subject_id and e.predicate_id = $4, category rc, category ic, plainto_tsquery($3, $2) query",
                 where=" query @@ pivot_tsv  and r.category_id = rc.id and rc.nr >= ic.lft and rc.nr <= ic.rght and ic.id = $1",
                 order="rank desc",
-                args=[CatId, QueryText, zp_pivot_rsc:pg_lang(Context#context.language), PredId],
+                args=[CatId, QueryText, z_pivot_rsc:pg_lang(Context#context.language), PredId],
                 tables=[{rsc,"r"}]
             }
     end;
@@ -53,7 +53,7 @@ search({fulltext_catbrand_filter, [{brand,BrandId},{cat,Cat},{text,QueryText}]},
                 from="rsc r left join edge e on r.id = e.subject_id and e.predicate_id = $4, category rc, category ic, plainto_tsquery($3, $2) query",
                 where=" query @@ pivot_tsv and e.object_id = $5 and r.category_id = rc.id and rc.nr >= ic.lft and rc.nr <= ic.rght and ic.id = $1",
                 order="rank desc",
-                args=[CatId, QueryText, zp_pivot_rsc:pg_lang(Context#context.language), PredId, BrandId],
+                args=[CatId, QueryText, z_pivot_rsc:pg_lang(Context#context.language), PredId, BrandId],
                 tables=[{rsc,"r"}]
             }
     end;
@@ -89,7 +89,7 @@ search({shop_sku_list, [{text,QueryText}]}, _OffsetLimit, Context) ->
                 where="query @@ sku.tsv",
                 order="rank desc",
                 tables=[],
-                args=[QueryText, zp_pivot_rsc:pg_lang(Context#context.language)],
+                args=[QueryText, z_pivot_rsc:pg_lang(Context#context.language)],
                 assoc=true
             }
     end;

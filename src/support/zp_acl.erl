@@ -2,13 +2,13 @@
 %% @copyright 2009 Marc Worrell
 %% @date 2009-04-10
 %%
-%% @doc Access Control for zophrenic. Defines what a user can do on the site.
+%% @doc Access Control for zotonic. Defines what a user can do on the site.
 %% The access control is organized around people working together in groups. When you are
 %% member of a group then you can see all content belonging to that group, regardless of publication state.
 %% Other content must be published and is either visible to all or to authenticated users (community).
 
 
--module(zp_acl).
+-module(z_acl).
 -author("Marc Worrell <marc@worrell.nl").
 
 %% interface functions
@@ -37,7 +37,7 @@
     add_user/3
 ]).
 
--include_lib("zophrenic.hrl").
+-include_lib("zotonic.hrl").
 
 -define(ANONYMOUS_COMMUNITY_USER, -1).
 
@@ -85,7 +85,7 @@ group_editable(GroupId, Context) ->
         true ->
             true;
         false ->
-            Gs = zp_acl:groups_member(Context),
+            Gs = z_acl:groups_member(Context),
             lists:member(GroupId, Gs)
     end.
 
@@ -286,7 +286,7 @@ add_defaults(PropList, Context) ->
         Vis -> 
             Max = publish_level(Context),
             if 
-                Max > Vis -> zp_utils:prop_replace(visible_for, Max, PropGroup);
+                Max > Vis -> z_utils:prop_replace(visible_for, Max, PropGroup);
                 true -> PropGroup
             end
     end,

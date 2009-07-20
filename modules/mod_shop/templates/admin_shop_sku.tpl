@@ -31,7 +31,7 @@
 						<span class="zp-20">{{ sku.variant|escape|default:"-" }}</span>
 						<span class="zp-10">{{ sku.stock }}</span>
 						<span class="zp-10">&euro;{{ sku.price_incl|format_price }}</span>
-						<span class="zp-15">{{ sku.imported|date:"F d, H:i" }}</span>
+						<span class="zp-15">{{ sku.imported|date:"d M, H:i" }}</span>
 						<span class="zp-10">
 							{% button text="edit &raquo;" action={redirect dispatch="admin_shop_sku_edit" id=sku.id} %}
 						</span>

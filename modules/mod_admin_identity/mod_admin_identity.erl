@@ -21,7 +21,7 @@
     observe/2
 ]).
 
--include("zophrenic.hrl").
+-include("zotonic.hrl").
 
 -record(state, {context}).
 
@@ -52,8 +52,8 @@ start_link(Args) when is_list(Args) ->
 init(Args) ->
     process_flag(trap_exit, true),
     {context, Context} = proplists:lookup(context, Args),
-    zp_notifier:observe(search_query, {?MODULE, observe}, Context),
-    {ok, #state{context=zp_context:new_for_host(Context)}}.
+    z_notifier:observe(search_query, {?MODULE, observe}, Context),
+    {ok, #state{context=z_context:new_for_host(Context)}}.
 
 %% @spec handle_call(Request, From, State) -> {reply, Reply, State} |
 %%                                      {reply, Reply, State, Timeout} |
@@ -89,7 +89,7 @@ handle_info(_Info, State) ->
 %% cleaning up. When it returns, the gen_server terminates with Reason.
 %% The return value is ignored.
 terminate(_Reason, State) ->
-    zp_notifier:detach(search_query, {?MODULE, observe}, State#state.context),
+    z_notifier:detach(search_query, {?MODULE, observe}, State#state.context),
     ok.
 
 %% @spec code_change(OldVsn, State, Extra) -> {ok, NewState}
@@ -121,7 +121,7 @@ search({users, [{text,QueryText}]}, _OffsetLimit, Context) ->
                 where=" query @@ pivot_tsv",
                 order="rank desc",
                 group_by="r.id",
-                args=[QueryText, zp_pivot_rsc:pg_lang(Context#context.language)],
+                args=[QueryText, z_pivot_rsc:pg_lang(Context#context.language)],
                 tables=[{rsc,"r"}]
             }
     end;

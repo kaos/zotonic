@@ -4,7 +4,7 @@
 %% @doc Enable an element.  Removes the 'disabled' attribute and removes the class 'disabled'.
 
 -module(action_base_enable).
--include("zophrenic.hrl").
+-include("zotonic.hrl").
 -export([render_action/4]).
 
 render_action(TriggerId, TargetId, Args, Context) ->

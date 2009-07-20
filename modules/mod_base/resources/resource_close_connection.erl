@@ -13,7 +13,7 @@
 ]).
 
 -include_lib("webmachine_resource.hrl").
--include_lib("zophrenic.hrl").
+-include_lib("zotonic.hrl").
 
 init([]) -> {ok, []}.
 

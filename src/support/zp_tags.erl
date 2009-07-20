@@ -6,9 +6,9 @@
 %%
 %% @doc Generate a XHTML element with attributes, correctly escape all attributes.
 
--module (zp_tags).
+-module (z_tags).
 
--include("include/zophrenic.hrl").
+-include("include/zotonic.hrl").
 
 -export([render_tag/2, render_tag/3, render_tag/4]).
 -export([optional_escape/1]).
@@ -27,10 +27,10 @@ render_tag("div", Props, #context{} = Context) ->
     render_tag(<<"div">>, Props, Context);
 render_tag(<<"div">>, Props, #context{} = Context) ->
 	Render   = [<<"<div ">>, write_props(Props), <<"></div>">> ],
-	zp_render:render(Render, Context);
+	z_render:render(Render, Context);
 render_tag(TagName, Props, #context{} = Context) ->
 	Render   = [$<, TagName, write_props(Props), $/, $> ],
-	zp_render:render(Render, Context);
+	z_render:render(Render, Context);
 
 render_tag(TagName, Props, Content) ->
 	[ $<, TagName, write_props(Props), $>, Content, $<, $/, TagName, $> ].
@@ -43,7 +43,7 @@ render_tag(TagName, Props, [], Context) ->
     render_tag(TagName, Props, Context);
 render_tag(TagName, Props, Content, Context) ->
 	Render   = [ $<, TagName, write_props(Props), $>, Content, $<, $/, TagName, $> ],
-	zp_render:render(Render, Context).
+	z_render:render(Render, Context).
    
     
 %%% Property display functions %%%
@@ -66,7 +66,7 @@ display_property({Prop, Value}) when is_list(Value) ->
         true -> 
             [32, Prop, $=, $', Value, $'];
         false ->
-            [32, Prop, $=, $', zp_utils:combine_defined(32, Value), $']
+            [32, Prop, $=, $', z_utils:combine_defined(32, Value), $']
 	end;
 display_property({Prop, Value}) when is_atom(Value) ->
 	[32, Prop, $=, $', atom_to_list(Value), $'];

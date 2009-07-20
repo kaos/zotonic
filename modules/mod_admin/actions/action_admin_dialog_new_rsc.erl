@@ -13,7 +13,7 @@
     event/2
 ]).
 
--include("zophrenic.hrl").
+-include("zotonic.hrl").
 
 render_action(TriggerId, TargetId, Args, Context) ->
     Title = proplists:get_value(title, Args),
@@ -21,7 +21,7 @@ render_action(TriggerId, TargetId, Args, Context) ->
     SubjectId = proplists:get_value(subject_id, Args),
     Predicate = proplists:get_value(predicate, Args),
     Postback = {new_rsc_dialog, Title, Redirect, SubjectId, Predicate},
-	{PostbackMsgJS, _PickledPostback} = zp_render:make_postback(Postback, click, TriggerId, TargetId, ?MODULE, Context),
+	{PostbackMsgJS, _PickledPostback} = z_render:make_postback(Postback, click, TriggerId, TargetId, ?MODULE, Context),
 	{PostbackMsgJS, Context}.
 
 
@@ -35,17 +35,17 @@ event({postback, {new_rsc_dialog, Title, Redirect, SubjectId, Predicate}, _Trigg
         {predicate, Predicate},
         {title, Title}
     ],
-    zp_render:dialog("Make a new page", "_action_dialog_new_rsc.tpl", Vars, Context);
+    z_render:dialog("Make a new page", "_action_dialog_new_rsc.tpl", Vars, Context);
 
 
 event({submit, new_page, _TriggerId, _TargetId}, Context) ->
-    Title   = zp_context:get_q("new_rsc_title", Context),
-    GroupId = list_to_integer(zp_context:get_q("group_id", Context)),
-    CatId   = list_to_integer(zp_context:get_q("category_id", Context)),
-    Redirect = zp_context:get_q("redirect", Context),
-    SubjectId = zp_context:get_q("subject_id", Context),
-    Predicate = zp_context:get_q("predicate", Context),
-    IsPublished = zp_context:get_q("is_published", Context),
+    Title   = z_context:get_q("new_rsc_title", Context),
+    GroupId = list_to_integer(z_context:get_q("group_id", Context)),
+    CatId   = list_to_integer(z_context:get_q("category_id", Context)),
+    Redirect = z_context:get_q("redirect", Context),
+    SubjectId = z_context:get_q("subject_id", Context),
+    Predicate = z_context:get_q("predicate", Context),
+    IsPublished = z_context:get_q("is_published", Context),
 
     Props = [
         {category_id, CatId},
@@ -60,18 +60,18 @@ event({submit, new_page, _TriggerId, _TargetId}, Context) ->
         [] -> 
             Context;
         L when is_list(L) ->
-            action_admin_link:do_link(zp_convert:to_integer(SubjectId), Predicate, Id, Context);
+            action_admin_link:do_link(z_convert:to_integer(SubjectId), Predicate, Id, Context);
         _ ->
             Context
     end,
     
     % Close the dialog and optionally redirect to the edit page of the new resource
-    Context2 = zp_render:wire({dialog_close, []}, Context1),
-    case zp_convert:to_bool(Redirect) of
+    Context2 = z_render:wire({dialog_close, []}, Context1),
+    case z_convert:to_bool(Redirect) of
         false ->
             Context2;
         true ->
-            Location = zp_dispatcher:url_for(admin_edit_rsc, [{id, Id}], Context2),
-            zp_render:wire({redirect, [{location, Location}]}, Context2)
+            Location = z_dispatcher:url_for(admin_edit_rsc, [{id, Id}], Context2),
+            z_render:wire({redirect, [{location, Location}]}, Context2)
     end.
 

@@ -11,7 +11,7 @@
 
 -export([init/1, varies/2, code_change/3, terminate/1, render/4]).
 
--include("zophrenic.hrl").
+-include("zotonic.hrl").
 
 init(_Args) -> {ok, []}.
 varies(_Params, _Context) -> undefined.
@@ -38,18 +38,18 @@ render(Params, _Vars, Context, _State) ->
                
 	% Get properties...
 	Delegate1    = case Delegate of
-	                undefined -> zp_context:get_resource_module(Context);
+	                undefined -> z_context:get_resource_module(Context);
 	                _ -> Delegate
 	               end,
-	PickledTag   = zp_utils:pickle({Tag,Delegate1,Id}),
+	PickledTag   = z_utils:pickle({Tag,Delegate1,Id}),
 	GroupClasses = groups_to_classes(Groups1),
 
-	Helper       =  case zp_utils:is_true(Clone) of
+	Helper       =  case z_utils:is_true(Clone) of
             	        true  -> "'clone'";
             		    false -> "'original'"
             	    end,
 	
-	RevertText   =  case zp_convert:to_list(Revert) of
+	RevertText   =  case z_convert:to_list(Revert) of
                 		"true"    -> "true";
                 		"false"   -> "false";
                 		"valid"   -> "'valid'";
@@ -60,7 +60,7 @@ render(Params, _Vars, Context, _State) ->
                         undefined -> "null";
                         []        -> "null";
                         <<>>      -> "null";
-                        _ -> [$',zp_utils:js_escape(Handle),$']
+                        _ -> [$',z_utils:js_escape(Handle),$']
                     end,
 
     AxisText   = case Axis of
@@ -72,7 +72,7 @@ render(Params, _Vars, Context, _State) ->
                     end,
                     
 	% Write out the script to make this element draggable...
-	Script = io_lib:format("zp_draggable($('#~s'), { handle: ~s, helper: ~s, revert: ~s, opacity: ~s, scroll: true, cursor: 'hand', axis: ~s }, '~s');", [
+	Script = io_lib:format("z_draggable($('#~s'), { handle: ~s, helper: ~s, revert: ~s, opacity: ~s, scroll: true, cursor: 'hand', axis: ~s }, '~s');", [
             		Id, 
             		HandleText, 
             		Helper, 
@@ -87,12 +87,12 @@ render(Params, _Vars, Context, _State) ->
                 {script,    [{script, Script}]},
                 {add_class, [{class, GroupClasses}]}
             ],
-    {ok, zp_render:wire(Id, Actions, Context)}.
+    {ok, z_render:wire(Id, Actions, Context)}.
 
 	
 groups_to_classes([]) -> "";
 groups_to_classes(undefined) -> "";
 groups_to_classes(Groups) ->
-	Groups1 = ["drag_group_" ++ zp_convert:to_list(X) || X <- Groups],
+	Groups1 = ["drag_group_" ++ z_convert:to_list(X) || X <- Groups],
 	string:join(Groups1, " ").
 	

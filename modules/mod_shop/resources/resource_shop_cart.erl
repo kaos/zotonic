@@ -16,5 +16,5 @@ html(Context) ->
         {shop_cart_backorder, Backorder}
     ],
 
-    Html = zp_template:render("cart.tpl", Vars, Context),
-	zp_context:output(Html, Context).
+    Html = z_template:render("cart.tpl", Vars, Context),
+	z_context:output(Html, Context).

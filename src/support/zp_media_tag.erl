@@ -11,7 +11,7 @@
 %% /media/attachment/2007/03/31/wedding.jpg
 %%
 
--module(zp_media_tag).
+-module(z_media_tag).
 -author("Marc Worrell <marc@worrell.nl").
 
 %% interface functions
@@ -24,7 +24,7 @@
     test/0
 ]).
 
--include_lib("zophrenic.hrl").
+-include_lib("zotonic.hrl").
 
 
 %% @spec media_viewer(MediaReference, Options, Context) -> {ok, HtmlFragMent} | {error, Reason}
@@ -37,7 +37,7 @@ viewer([], _Options, _Context) ->
 viewer(Id, Options, Context) when is_integer(Id) ->
     viewer(m_media:get(Id, Context), Options, Context);
 viewer([{_Prop, _Value}|_] = Props, Options, Context) ->
-    case zp_convert:to_list(proplists:get_value(filename, Props)) of
+    case z_convert:to_list(proplists:get_value(filename, Props)) of
         None when None == []; None == undefined ->
             viewer1(Props, undefined, Options, Context);
         Filename ->
@@ -48,7 +48,7 @@ viewer(Filename, Options, Context) when is_binary(Filename) ->
     viewer(binary_to_list(Filename), Options, Context);
 viewer(Filename, Options, Context) when is_list(Filename) ->
     FilePath = filename_to_filepath(Filename, Context),
-    case zp_media_identify:identify(FilePath) of
+    case z_media_identify:identify(FilePath) of
         {ok, Props} ->
             viewer1(Props, FilePath, Options, Context);
         {error, _} -> 
@@ -60,7 +60,7 @@ viewer(Filename, Options, Context) when is_list(Filename) ->
     %% @doc Try to generate Html for the media reference.  First check if a module can do this, then 
     %% check the normal image tag.
     viewer1(Props, FilePath, Options, Context) ->
-        case zp_notifier:first({media_viewer, Props, FilePath, Options}, Context) of
+        case z_notifier:first({media_viewer, Props, FilePath, Options}, Context) of
             {ok, Html} -> {ok, Html};
             undefined -> tag(Props, Options, Context)
         end.
@@ -77,7 +77,7 @@ tag([], _Options, _Context) ->
 tag(Id, Options, Context) when is_integer(Id) ->
     tag(m_media:get(Id, Context), Options, Context);
 tag([{_Prop, _Value}|_] = Props, Options, Context) ->
-    case zp_convert:to_list(proplists:get_value(filename, Props)) of
+    case z_convert:to_list(proplists:get_value(filename, Props)) of
         None when None == undefined; None == [] -> 
             {ok, []};
         Filename -> 
@@ -93,7 +93,7 @@ tag(Filename, Options, Context) when is_list(Filename) ->
     tag1(MediaRef, Filename, Options, Context) ->
         {url, Url, TagOpts, ImageOpts} = url1(Filename, Options),
         % Calculate the real size of the image using the options
-        TagOpts1 = case zp_media_preview:size(MediaRef, ImageOpts, Context) of
+        TagOpts1 = case z_media_preview:size(MediaRef, ImageOpts, Context) of
                         {size, Width, Height, _Mime} ->
                             [{width,Width},{height,Height}|TagOpts];
                         _ ->
@@ -104,7 +104,7 @@ tag(Filename, Options, Context) when is_list(Filename) ->
                         undefined -> [{alt,""}|TagOpts1];
                         _ -> TagOpts1
                     end,
-        {ok, zp_tags:render_tag("img", [{src,Url}|TagOpts2])}.
+        {ok, z_tags:render_tag("img", [{src,Url}|TagOpts2])}.
 
 
 %% @doc Give the filepath for the filename being served.
@@ -114,12 +114,12 @@ filename_to_filepath(Filename, #context{host=Host} = Context) ->
         "/" ++ _ ->
             Filename;
         "lib/" ++ _ -> 
-            case zp_module_indexer:find(lib, Filename, Context) of
+            case z_module_indexer:find(lib, Filename, Context) of
                 {ok, Libfile} -> Libfile;
                 _ -> Filename
             end;
         _ ->
-            filename:join([code:lib_dir(zophrenic, priv), "sites", Host, "files", "archive", Filename])
+            filename:join([code:lib_dir(zotonic, priv), "sites", Host, "files", "archive", Filename])
     end.
 
 
@@ -134,7 +134,7 @@ filename_to_urlpath(Filename) ->
 url(Id, Options, Context) when is_integer(Id) ->
     url(m_media:get(Id, Context), Options, Context);
 url([{_Prop, _Value}|_] = Props, Options, _Context) ->
-    case zp_convert:to_list(proplists:get_value(filename, Props)) of
+    case z_convert:to_list(proplists:get_value(filename, Props)) of
         undefined ->
             {error, no_filename};
         Filename -> 
@@ -152,7 +152,7 @@ url1(Filename, Options) ->
     {TagOpts, ImageOpts} = lists:partition(fun is_tagopt/1, Options),
     % Map all ImageOpts to an opt string
     UrlProps = props2url(ImageOpts),
-    Checksum = zp_utils:checksum([Filename,UrlProps,".jpg"]),
+    Checksum = z_utils:checksum([Filename,UrlProps,".jpg"]),
     {url, list_to_binary(filename_to_urlpath(lists:flatten([Filename,UrlProps,$(,Checksum,").jpg"]))), 
           TagOpts,
           ImageOpts}.
@@ -175,18 +175,18 @@ props2url([], Width, Height, Acc) ->
                 {undefined,_H} -> [$x|integer_to_list(Height)];
                 {_W,_H} -> integer_to_list(Width) ++ [$x|integer_to_list(Height)]
             end,
-    lists:flatten([$(, zp_utils:combine(")(", [Size|lists:reverse(Acc)]), $)]);
+    lists:flatten([$(, z_utils:combine(")(", [Size|lists:reverse(Acc)]), $)]);
 
 props2url([{width,Width}|Rest], _Width, Height, Acc) ->
-    props2url(Rest, zp_convert:to_integer(Width), Height, Acc);
+    props2url(Rest, z_convert:to_integer(Width), Height, Acc);
 props2url([{height,Height}|Rest], Width, _Height, Acc) ->
-    props2url(Rest, Width, zp_convert:to_integer(Height), Acc);
+    props2url(Rest, Width, z_convert:to_integer(Height), Acc);
 props2url([{Prop}|Rest], Width, Height, Acc) ->
     props2url(Rest, Width, Height, [atom_to_list(Prop)|Acc]);
 props2url([{Prop,true}|Rest], Width, Height, Acc) ->
     props2url(Rest, Width, Height, [atom_to_list(Prop)|Acc]);
 props2url([{Prop,Value}|Rest], Width, Height, Acc) ->
-    props2url(Rest, Width, Height, [[atom_to_list(Prop),$-,zp_convert:to_list(Value)]|Acc]).
+    props2url(Rest, Width, Height, [[atom_to_list(Prop),$-,z_convert:to_list(Value)]|Acc]).
 
 
 %% @spec url2props(Url) -> {Filepath,PreviewPropList,Checksum,ChecksumBaseString}
@@ -199,7 +199,7 @@ url2props(Url) ->
     LastParen       = string:rchr(PropsRoot, $(),
     {Props,[$(|Check]} = lists:split(LastParen-1, PropsRoot),
     Check1          = string:strip(Check, right, $)),
-    zp_utils:checksum_assert([Filepath,Props,".jpg"], Check1),
+    z_utils:checksum_assert([Filepath,Props,".jpg"], Check1),
     PropList        = string:tokens(Props, ")("),
     PropList1       = case PropList of
                         [] -> [];
@@ -225,12 +225,12 @@ url2props1([P|Rest], Acc) ->
                 [$-|A] -> A;
                 _ -> Arg
             end,
-    Filter = zp_media_preview:string2filter(Prop, Arg1),
+    Filter = z_media_preview:string2filter(Prop, Arg1),
     url2props1(Rest, [Filter|Acc]).
 
 
 test() ->
-    Context = zp_context:new(),
+    Context = z_context:new(),
     {   "koe.jpg", [{width,400},{crop,east},{blur},{grey}], 
         "61DADDE06035A4CD4862D99688EC0FFF","(400x)(crop-east)(blur)(grey)"} 
     = url2props("koe.jpg(400x)(crop-east)(blur)(grey)(61DADDE06035A4CD4862D99688EC0FFF).jpg"),

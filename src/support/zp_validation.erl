@@ -1,22 +1,22 @@
 %% @author Marc Worrell <marc@worrell.nl>
 %% @copyright 2009  Marc Worrell
 %%
-%% @doc Handle parameter validation of a request. Checks for the presence of zp_v elements containing validation information.
+%% @doc Handle parameter validation of a request. Checks for the presence of z_v elements containing validation information.
 
--module(zp_validation).
+-module(z_validation).
 -export([validate_query_args/1]).
 
--include_lib("zophrenic.hrl").
+-include_lib("zotonic.hrl").
 
 %% @todo Translate unique id-names to base names (after validation)   #name -> fghw-name in postback+qs -> name in validated result
 
 %% @spec validate_query_args(Context) -> {ok, NewContext} | {error, NewContext}
-%% @doc Checks for zp_v arguments, performs enclosed checks and adds the validated terms to the q_validated list.
+%% @doc Checks for z_v arguments, performs enclosed checks and adds the validated terms to the q_validated list.
 %%      Errors are reported back to the user agent
 validate_query_args(Context) ->
-    case zp_context:get(q_validated, Context) of
+    case z_context:get(q_validated, Context) of
         undefined ->
-            Validations = zp_context:get_q_all("zp_v", Context),
+            Validations = z_context:get_q_all("z_v", Context),
             Validated   = lists:map(fun(X) -> validate(X,Context) end, Validations),
 
             % format is like: [{"email",{ok,"me@example.com"}}]
@@ -34,7 +34,7 @@ validate_query_args(Context) ->
             {Errors,Values} = lists:partition(IsError, Validated),
             QsValidated     = lists:map(GetValue, Values),
 
-            Context1 = zp_context:set(q_validated, QsValidated, Context),
+            Context1 = z_context:set(q_validated, QsValidated, Context),
             Context2 = report_errors(Errors, Context1),
             
             case Errors of
@@ -50,19 +50,19 @@ validate_query_args(Context) ->
 report_errors([], Context) -> 
     Context;
 report_errors([{_Id, {error, _ErrId, {script, Script}}}|T], Context) ->
-    Context1 = zp_script:add_script(Script, Context),
+    Context1 = z_script:add_script(Script, Context),
     report_errors(T, Context1);
 report_errors([{_Id, {error, ErrId, Error}}|T], Context) ->
-    Script   = [<<"zp_validation_error('">>, ErrId, <<"', \"">>, zp_utils:js_escape(atom_to_list(Error)),<<"\");\n">>],
-    Context1 = zp_script:add_script(Script, Context),
+    Script   = [<<"z_validation_error('">>, ErrId, <<"', \"">>, z_utils:js_escape(atom_to_list(Error)),<<"\");\n">>],
+    Context1 = z_script:add_script(Script, Context),
     report_errors(T, Context1).
 
 
 %% @doc Perform all validations
 validate(Val, Context) ->
     [Name,Pickled]          = string:tokens(Val, ":"),
-    {Id,Name,Validations} = zp_utils:depickle(Pickled),
-    Value                 = zp_context:get_q(Name, Context),
+    {Id,Name,Validations} = z_utils:depickle(Pickled),
+    Value                 = z_context:get_q(Name, Context),
 
     %% Fold all validations, propagate errors
     ValidateF = fun

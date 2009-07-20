@@ -13,28 +13,28 @@
     event/2
 ]).
 
--include("zophrenic.hrl").
+-include("zotonic.hrl").
 
 render_action(TriggerId, TargetId, Args, Context) ->
-    Id = zp_convert:to_integer(proplists:get_value(id, Args)),
-    MemberId = zp_convert:to_integer(proplists:get_value(member_id, Args)),
+    Id = z_convert:to_integer(proplists:get_value(id, Args)),
+    MemberId = z_convert:to_integer(proplists:get_value(member_id, Args)),
     OnSuccess = proplists:get_all_values(on_success, Args),
     Postback = {group_member_delete_dialog, Id, MemberId, OnSuccess},
-	{PostbackMsgJS, _PickledPostback} = zp_render:make_postback(Postback, click, TriggerId, TargetId, ?MODULE, Context),
+	{PostbackMsgJS, _PickledPostback} = z_render:make_postback(Postback, click, TriggerId, TargetId, ?MODULE, Context),
 	{PostbackMsgJS, Context}.
 
 
 %% @doc Fill the dialog with the delete confirmation template. The next step will ask to delete the member from the group.
 %% @spec event(Event, Context1) -> Context2
 event({postback, {group_member_delete_dialog, Id, MemberId, OnSuccess}, _TriggerId, _TargetId}, Context) ->
-    case zp_acl:has_group_role(leader, Id, Context) of
+    case z_acl:has_group_role(leader, Id, Context) of
         true ->
             Vars = [
                 {on_success, OnSuccess},
                 {id, Id},
                 {member_id, MemberId}
             ],
-            zp_render:dialog("Confirm removal of member", "_action_dialog_group_member_delete.tpl", Vars, Context);
+            z_render:dialog("Confirm removal of member", "_action_dialog_group_member_delete.tpl", Vars, Context);
         false ->
-            zp_render:growl_error("Only administrators or group leaders can remove members from groups.", Context)
+            z_render:growl_error("Only administrators or group leaders can remove members from groups.", Context)
     end.

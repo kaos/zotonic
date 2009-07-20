@@ -7,7 +7,7 @@
 
 -module(action_admin_modules_module_rescan).
 -author("Marc Worrell <marc@worrell.nl").
--include("zophrenic.hrl").
+-include("zotonic.hrl").
 
 %% interface functions
 -export([
@@ -18,14 +18,14 @@
 render_action(TriggerId, TargetId, Args, Context) ->
     Actions = proplists:get_all_values(action, Args),
     Postback = {module_rescan, Actions},
-	{PostbackMsgJS, _PickledPostback} = zp_render:make_postback(Postback, click, TriggerId, TargetId, ?MODULE, Context),
+	{PostbackMsgJS, _PickledPostback} = z_render:make_postback(Postback, click, TriggerId, TargetId, ?MODULE, Context),
 	{PostbackMsgJS, Context}.
 
 
 %% @doc Signal the module indexer to rescan all modules for actions, templates etc.
 %% @spec event(Event, Context1) -> Context2
 event({postback, {module_rescan, Actions}, _TriggerId, _TargetId}, Context) ->
-    zp_notifier:notify({module_ready}, Context),
-    zp_dispatcher:reload(Context),
-    Context1 = zp_render:growl("Module rescan is in progress.", Context),
-    zp_render:wire(Actions, Context1).
+    z_notifier:notify({module_ready}, Context),
+    z_dispatcher:reload(Context),
+    Context1 = z_render:growl("Module rescan is in progress.", Context),
+    z_render:wire(Actions, Context1).

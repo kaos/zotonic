@@ -13,10 +13,10 @@
     install/1
 ]).
 
--include_lib("zophrenic.hrl").
+-include_lib("zotonic.hrl").
 
 install(Context) ->
-    zp_acl:sudo(fun(Ctx) -> install1(Ctx) end, Context).
+    z_acl:sudo(fun(Ctx) -> install1(Ctx) end, Context).
 
 install1(Context) ->
     F = fun(Ctx) ->
@@ -32,13 +32,13 @@ install1(Context) ->
         shop_adyen:install(Ctx)
     end,
 
-    ok = zp_db:transaction(F, Context),
-    zp_depcache:flush(),
+    ok = z_db:transaction(F, Context),
+    z_depcache:flush(),
     ok.
 
 
 install_tables(Context) ->
-    [ [] = zp_db:q(Sql, Context) || Sql <- tables_sql() ],
+    [ [] = z_db:q(Sql, Context) || Sql <- tables_sql() ],
     ok.
 
 
@@ -432,14 +432,14 @@ install_rsc(Context) ->
         case proplists:get_value(product_nr, R) of
             undefined -> ok;
             ProdNr ->
-                File = filename:join([code:lib_dir(zophrenic, priv), "sites", "default", "files", "archive",  integer_to_list(ProdNr) ++ ".jpg"]),
+                File = filename:join([code:lib_dir(zotonic, priv), "sites", "default", "files", "archive",  integer_to_list(ProdNr) ++ ".jpg"]),
                 {ok, FileRscId} = m_media:insert_file(File, [{visible_for, 0}, {group, admins}, {creator_id, 1}], Context),
                 m_edge:insert(Id, depiction, FileRscId, Context)
         end
     end,
     [ M(IR) || IR <- IdRsc],
 
-    BrandPred = zp_db:q1("select id from rsc where name = 'brand'", Context),
+    BrandPred = z_db:q1("select id from rsc where name = 'brand'", Context),
     [ m_edge:insert(m_rsc:name_to_id_check(S, Context), 
                     BrandPred, 
                     m_rsc:name_to_id_check(O, Context), 
@@ -524,12 +524,12 @@ install_sku(Context) ->
         ]
     ],
     
-    [ {ok, _} = zp_db:insert(shop_sku, Sku, Context) || Sku <- Skus ],
+    [ {ok, _} = z_db:insert(shop_sku, Sku, Context) || Sku <- Skus ],
     ok.
 
 
 install_order_status(Context) ->
-    zp_db:q("
+    z_db:q("
         insert into shop_order_status (status) values
             ('new'),
             ('payment_requested'),

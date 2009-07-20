@@ -4,19 +4,19 @@
 %% Based on code by Rusty Klophaus
 
 -module(validator_base_email).
--include("zophrenic.hrl").
+-include("zotonic.hrl").
 -export([render_validator/5, validate/5]).
 
 render_validator(email, TriggerId, _TargetId, Args, Context)  ->
-	JsObject = zp_utils:js_object(Args), 
-	Script   = [<<"zp_add_validator(\"">>,TriggerId,<<"\", \"email\", ">>, JsObject, <<");\n">>],
+	JsObject = z_utils:js_object(Args), 
+	Script   = [<<"z_add_validator(\"">>,TriggerId,<<"\", \"email\", ">>, JsObject, <<");\n">>],
 	{[], Script, Context}.
 
 
 %% @spec validate(Type, TriggerId, Values, Args, Context) -> {ok,AcceptableValues} | {error,Id,Error}
 %%          Error -> invalid | novalue | {script, Script}
 validate(email, Id, Value, _Args, _Context) ->
-    case zp_string:trim(Value) of
+    case z_string:trim(Value) of
         [] -> {ok, []};
         Trimmed ->
             case re:run(Trimmed, re(), [extended]) of

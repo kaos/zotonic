@@ -23,15 +23,15 @@ html(Context) ->
                 {order_id, OrderId},
                 {order, Order}
             ],
-            Html = zp_template:render("checkout_confirm.tpl", Vars, Context),
-            zp_context:output(Html, Context);
+            Html = z_template:render("checkout_confirm.tpl", Vars, Context),
+            z_context:output(Html, Context);
             
         {error, sig_invalid} ->
             % Somebody is hacking our url - bail out
             Vars = [
                 {sig_invalid, true}
             ],
-            Html = zp_template:render("checkout_confirm.tpl", Vars, Context),
-            zp_context:output(Html, Context)
+            Html = z_template:render("checkout_confirm.tpl", Vars, Context),
+            z_context:output(Html, Context)
     end.
 

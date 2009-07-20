@@ -7,5 +7,5 @@
 -include_lib("resource_html.hrl").
 
 html(Context) ->
-    Html = zp_template:render("bike.tpl", [], Context),
-	zp_context:output(Html, Context).
+    Html = z_template:render("bike.tpl", [], Context),
+	z_context:output(Html, Context).

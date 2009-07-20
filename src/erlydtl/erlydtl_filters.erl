@@ -37,7 +37,7 @@
 
 -compile(export_all).
 
--include_lib("zophrenic.hrl").
+-include_lib("zotonic.hrl").
 
 -define(NO_ENCODE(C), ((C >= $a andalso C =< $z) orelse
                                   (C >= $A andalso C =< $Z) orelse
@@ -46,7 +46,7 @@
                                   orelse C =:= $~ orelse C =:= $_))).
 
 opttrans({trans, _}=Trans, Language) ->
-	zp_trans:trans(Trans, Language);
+	z_trans:trans(Trans, Language);
 opttrans(V, _Language) ->
 	V.
 
@@ -57,7 +57,7 @@ add(Input, Number) when is_binary(Input) ->
 add(Input, Number) when is_list(Input) ->
     integer_to_list(add(list_to_integer(Input), Number));
 add(Input, Number) when is_integer(Input) ->
-    Input + zp_convert:to_integer(Number).
+    Input + z_convert:to_integer(Number).
 
 
 append(Input, undefined) ->
@@ -65,7 +65,7 @@ append(Input, undefined) ->
 append(undefined, Append) ->
     Append;
 append(Input, Append) ->
-    zp_convert:to_list(Input) ++ zp_convert:to_list(Append).
+    z_convert:to_list(Input) ++ z_convert:to_list(Append).
 
 
 insert(Input, Insert) ->
@@ -76,7 +76,7 @@ lt(undefined, _Number) ->
     undefined;
 lt(Input, Number) ->
     try
-        zp_convert:to_integer(Input) < zp_convert:to_integer(Number)
+        z_convert:to_integer(Input) < z_convert:to_integer(Number)
     catch
         _:_ -> undefined
     end.
@@ -85,7 +85,7 @@ le(undefined, _Number) ->
     undefined;
 le(Input, Number) ->
     try
-        zp_convert:to_integer(Input) =< zp_convert:to_integer(Number)
+        z_convert:to_integer(Input) =< z_convert:to_integer(Number)
     catch
         _:_ -> undefined
     end.
@@ -94,7 +94,7 @@ eq(undefined, _Number) ->
     undefined;
 eq(Input, Number) ->
     try
-        zp_convert:to_list(Input) == zp_convert:to_list(Number)
+        z_convert:to_list(Input) == z_convert:to_list(Number)
     catch
         _:_ -> undefined
     end.
@@ -104,42 +104,42 @@ ne(undefined, _Number) ->
     undefined;
 ne(Input, Number) ->
     try
-        zp_convert:to_list(Input) /= zp_convert:to_list(Number)
+        z_convert:to_list(Input) /= z_convert:to_list(Number)
     catch
         _:_ -> undefined
     end.
 
 
 b_not(Input) ->
-    not zp_convert:to_bool(Input).
+    not z_convert:to_bool(Input).
 
 
 b_or(Input, Parm) ->
-    zp_convert:to_bool(Input) or zp_convert:to_bool(Parm).
+    z_convert:to_bool(Input) or z_convert:to_bool(Parm).
 
 
 b_xor(Input, Parm) ->
-    zp_convert:to_bool(Input) xor zp_convert:to_bool(Parm).
+    z_convert:to_bool(Input) xor z_convert:to_bool(Parm).
 
 
 b_and(Input, Parm) ->
-    zp_convert:to_bool(Input) and zp_convert:to_bool(Parm).
+    z_convert:to_bool(Input) and z_convert:to_bool(Parm).
 
 
 ornot(Input, Parm) ->
-    zp_convert:to_bool(Input) or not zp_convert:to_bool(Parm).
+    z_convert:to_bool(Input) or not z_convert:to_bool(Parm).
 
 
 andnot(Input, Parm) ->
-    zp_convert:to_bool(Input) and not zp_convert:to_bool(Parm).
+    z_convert:to_bool(Input) and not z_convert:to_bool(Parm).
 
 
 notor(Input, Parm) ->
-    not zp_convert:to_bool(Input) or zp_convert:to_bool(Parm).
+    not z_convert:to_bool(Input) or z_convert:to_bool(Parm).
 
 
 notand(Input, Parm) ->
-    not zp_convert:to_bool(Input) and zp_convert:to_bool(Parm).
+    not z_convert:to_bool(Input) and z_convert:to_bool(Parm).
 
 
 capfirst(undefined) ->
@@ -154,7 +154,7 @@ center(undefined, _Number) ->
 center(Input, Number) when is_binary(Input) ->
     list_to_binary(center(binary_to_list(Input), Number));
 center(Input, Number) when is_list(Input) ->
-    string:centre(Input, zp_convert:to_integer(Number)).
+    string:centre(Input, z_convert:to_integer(Number)).
 
 
 date(undefined, _FormatStr) ->
@@ -280,7 +280,7 @@ striptags(In) when is_integer(In) ->
 striptags(In) when is_float(In) ->
     In;
 striptags(In) ->
-    zp_html:strip(In).
+    z_html:strip(In).
     
 
 % Translate atoms and numbers to strings
@@ -299,13 +299,13 @@ stringify(In) ->
 slugify(undefined) ->
     undefined;
 slugify(Input) ->
-    zp_string:to_slug(Input).
+    z_string:to_slug(Input).
 
 
 join(Input, Separator) when is_binary(Input) ->
     join(binary_to_list(Input), Separator);
 join(Input, Separator) when is_list(Input) ->
-    string:join(Input, zp_binary:to_list(Separator));
+    string:join(Input, z_binary:to_list(Separator));
 join(Input, _) ->
     Input.
 
@@ -344,7 +344,7 @@ length_is(Input, Number) when is_list(Input), is_integer(Number) ->
 length_is(Input, Number) when is_list(Input), is_list(Number) ->
     ?MODULE:length(Input) =:= Number;
 length_is(_Input, Number) ->
-    1 =:= zp_convert:to_integer(Number).
+    1 =:= z_convert:to_integer(Number).
 
 
 linebreaksbr(undefined) ->
@@ -360,7 +360,7 @@ ljust(undefined, _Number) ->
 ljust(Input, Number) when is_binary(Input) ->
     list_to_binary(ljust(binary_to_list(Input), Number));
 ljust(Input, Number) when is_list(Input) ->
-    string:left(Input, zp_convert:to_integer(Number));
+    string:left(Input, z_convert:to_integer(Number));
 ljust(Input, _Number) -> 
     Input.
 
@@ -368,7 +368,7 @@ ljust(Input, _Number) ->
 lower(undefined) ->
     undefined;
 lower(Input) when is_list(Input) or is_binary(Input) ->
-    zp_string:to_lower(Input);
+    z_string:to_lower(Input);
 lower(Input) ->
     Input.
 
@@ -394,14 +394,14 @@ rjust(undefined, _Number) ->
 rjust(Input, Number) when is_binary(Input) ->
     list_to_binary(rjust(binary_to_list(Input), Number));
 rjust(Input, Number) when is_list(Input) ->
-    string:right(Input, zp_convert:to_integer(Number));
+    string:right(Input, z_convert:to_integer(Number));
 rjust(Input, _Number) -> 
     Input.
 
 upper(undefined) ->
     undefined;
 upper(Input) when is_list(Input) or is_binary(Input) ->
-    zp_string:to_upper(Input);
+    z_string:to_upper(Input);
 upper(Input) ->
     Input.
 
@@ -421,17 +421,17 @@ yesno(B) ->
         false -> "yes"
     end.
 yesno(undefined, Values) ->
-    case string:tokens(zp_convert:to_list(Values), ",") of
+    case string:tokens(z_convert:to_list(Values), ",") of
         [_Yes, _No, Maybe] -> Maybe;
         [_Yes, No] -> No
     end;
 yesno(B, Values) ->
     case erlydtl_runtime:is_false(B) of
         true ->
-            [_Yes,No|_Rest] = string:tokens(zp_convert:to_list(Values), ","),
+            [_Yes,No|_Rest] = string:tokens(z_convert:to_list(Values), ","),
             No;
         false -> 
-            [Yes|_Rest] = string:tokens(zp_convert:to_list(Values), ","),
+            [Yes|_Rest] = string:tokens(z_convert:to_list(Values), ","),
             Yes
     end.
 

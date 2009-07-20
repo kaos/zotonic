@@ -4,7 +4,7 @@
 %% @doc Replace the content of the target with the result of a render action.
 
 -module(action_base_update).
--include("zophrenic.hrl").
+-include("zotonic.hrl").
 -export([render_action/4]).
 
 render_action(_TriggerId, TargetId, Args, Context) ->
@@ -13,6 +13,6 @@ render_action(_TriggerId, TargetId, Args, Context) ->
         undefined ->
             { proplists:get_value(text, Args, ""), Context };
         Template ->
-            zp_template:render_to_iolist(Template, Args, Context)
+            z_template:render_to_iolist(Template, Args, Context)
     end,
-    {[], zp_render:update(Update, Html, ContextHtml)}.
+    {[], z_render:update(Update, Html, ContextHtml)}.

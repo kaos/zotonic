@@ -25,7 +25,7 @@
     clear/1
 ]).
 
--include_lib("zophrenic.hrl").
+-include_lib("zotonic.hrl").
 -include_lib("../include/shop.hrl").
 
 
@@ -68,11 +68,11 @@ tpl_sync_cart_info(Context) ->
 
     %% Update the small cart info on the page
     tpl_sync_cart_info(_Total, 0, Context) ->
-        zp_render:update("cart-info", "Uw winkelmand is leeg", Context);
+        z_render:update("cart-info", "Uw winkelmand is leeg", Context);
     tpl_sync_cart_info(Total, 1, Context) ->
-        zp_render:update("cart-info", "Eén product van &euro;"++format_price(Total), Context);
+        z_render:update("cart-info", "Eén product van &euro;"++format_price(Total), Context);
     tpl_sync_cart_info(Total, Count, Context) ->
-        zp_render:update("cart-info", integer_to_list(Count)++" producten, &euro;"++format_price(Total), Context).
+        z_render:update("cart-info", integer_to_list(Count)++" producten, &euro;"++format_price(Total), Context).
     
 
 
@@ -80,11 +80,11 @@ tpl_sync_cart_info(Context) ->
 %% @spec tpl_sync_cart_prices(Context) -> Context
 tpl_sync_cart_prices(Context) ->
     {Count, Total, Backorders, Cart} = tpl_cart_allocated(Context),
-    C1 = zp_render:update("cart-price-total", format_price(Total), Context),
+    C1 = z_render:update("cart-price-total", format_price(Total), Context),
     C2 = tpl_sync_cart_info(Total, Count, C1),
     C3 = case Backorders of
-        0 -> zp_render:wire("backorder-info", {slide_fade_out, []}, C2);
-        _ -> zp_render:wire("backorder-info", {slide_fade_in, []}, C2)
+        0 -> z_render:wire("backorder-info", {slide_fade_out, []}, C2);
+        _ -> z_render:wire("backorder-info", {slide_fade_in, []}, C2)
     end,
     lists:foldl(
         fun(CartProd, C) ->
@@ -95,22 +95,22 @@ tpl_sync_cart_prices(Context) ->
             OldPrice   = proplists:get_value(price_old, CartProd),
             Backorder  = proplists:get_value(backorder, CartProd),
             
-            ID = integer_to_list(Id) ++ [$- | zp_string:to_slug(zp_convert:to_list(Variant))],
+            ID = integer_to_list(Id) ++ [$- | z_string:to_slug(z_convert:to_list(Variant))],
             Cback = case Backorder of
                 0 ->
-                    zp_render:wire("cart-backorder-p-"++ID, {fade_out, []}, C);
+                    z_render:wire("cart-backorder-p-"++ID, {fade_out, []}, C);
                 _ ->
-                    Cbo = zp_render:update("cart-backorder-"++ID, integer_to_list(Backorder), C),
-                    zp_render:wire("cart-backorder-p-"++ID, {fade_in, []}, Cbo)
+                    Cbo = z_render:update("cart-backorder-"++ID, integer_to_list(Backorder), C),
+                    z_render:wire("cart-backorder-p-"++ID, {fade_in, []}, Cbo)
             end,
             Cold = case AvgPrice == OldPrice of
                 true ->
-                    zp_render:update("cart-price-old-"++ID, "", Cback);
+                    z_render:update("cart-price-old-"++ID, "", Cback);
                 false ->
-                    zp_render:update("cart-price-old-"++ID, ["&euro;",format_price(OldPrice)], Cback)
+                    z_render:update("cart-price-old-"++ID, ["&euro;",format_price(OldPrice)], Cback)
             end,
-            Ctotal = zp_render:update("cart-price-"++ID, format_price(TotalPrice), Cold),
-            zp_render:update("cart-price-avg-"++ID, format_price(AvgPrice), Ctotal)
+            Ctotal = z_render:update("cart-price-"++ID, format_price(TotalPrice), Cold),
+            z_render:update("cart-price-avg-"++ID, format_price(AvgPrice), Ctotal)
         end,
         C3,
         Cart).
@@ -146,7 +146,7 @@ format_price(Price) ->
 %% @doc Get the shopping cart of the current user
 %% @spec get_cart(Context) -> [{Id,N},..]
 get_cart(Context) ->
-    case zp_context:get_visitor(shop_cart, Context) of
+    case z_context:get_visitor(shop_cart, Context) of
         undefined -> [];
         <<>> -> [];
         Cart -> Cart
@@ -154,7 +154,7 @@ get_cart(Context) ->
 
 %% @doc Clear the shopping cart, used after receiving payments
 clear(Context) ->
-    zp_context:set_visitor(shop_cart, [], Context).
+    z_context:set_visitor(shop_cart, [], Context).
 
 
 %% @doc Get the count of the product in the cart, regardless of the variant
@@ -180,7 +180,7 @@ in_cart(Id, Variant, Context) when is_binary(Variant) andalso is_integer(Id) ->
 add_product(Id, Variant, Context) when is_binary(Variant) andalso is_integer(Id) ->
     Cart = get_cart(Context),
     {N, Cart1} = add_cart(Cart, Id, Variant),
-    zp_context:set_visitor(shop_cart, Cart1, Context), 
+    z_context:set_visitor(shop_cart, Cart1, Context), 
     N.
 
     add_cart(Cart, Id, Variant) ->
@@ -201,7 +201,7 @@ decr_product(Id, Variant, Context) when is_binary(Variant) andalso is_integer(Id
         {value, #cart{n=1}} -> {1, Cart};
         _ -> {0, Cart}
     end,
-    zp_context:set_visitor(shop_cart, Cart1, Context), 
+    z_context:set_visitor(shop_cart, Cart1, Context), 
     N1.
 
 
@@ -218,7 +218,7 @@ decr_product(Id, Variant, Context) when is_binary(Variant) andalso is_integer(Id
 del_product(Id, Variant, Context) when is_binary(Variant) andalso is_integer(Id) ->
     Cart = get_cart(Context),
     Cart1 = lists:keydelete({Id, Variant}, #cart.idv, Cart),
-    zp_context:set_visitor(shop_cart, Cart1, Context).
+    z_context:set_visitor(shop_cart, Cart1, Context).
 
 
 

@@ -1,6 +1,6 @@
 /**
 *	zp.imageviewer()
-*	This function is used to view the big version of images in the zophrenic CMS
+*	This function is used to view the big version of images in the zotonic CMS
 *
 *   Copyright (c) 2009 Tim Benniks
 *

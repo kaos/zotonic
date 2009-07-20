@@ -15,16 +15,16 @@
 
 %% @todo Change this into "visible" and add a view instead of edit template.
 is_authorized(ReqData, Context) ->
-    zp_auth:wm_is_authorized(true, visible, "id", ReqData, Context).
+    z_auth:wm_is_authorized(true, visible, "id", ReqData, Context).
 
 
 resource_exists(ReqData, Context) ->
     Context1 = ?WM_REQ(ReqData, Context),
-    Context2 = zp_context:ensure_all(Context1),
-    Id = zp_context:get_q("id", Context2),
+    Context2 = z_context:ensure_all(Context1),
+    Id = z_context:get_q("id", Context2),
     try
         IdN = list_to_integer(Id),
-        Context3 = zp_context:set(id, IdN, Context2),
+        Context3 = z_context:set(id, IdN, Context2),
         case m_predicate:get(IdN, Context) of
             undefined -> ?WM_REPLY(false, Context3);
             _ -> ?WM_REPLY(true, Context3)
@@ -35,23 +35,23 @@ resource_exists(ReqData, Context) ->
 
 
 html(Context) ->
-    Id = zp_context:get(id, Context),
+    Id = z_context:get(id, Context),
     Vars = [
         {id, Id}
     ],
-    Html = zp_template:render("admin_predicate_edit.tpl", Vars, Context),
-	zp_context:output(Html, Context).
+    Html = z_template:render("admin_predicate_edit.tpl", Vars, Context),
+	z_context:output(Html, Context).
 
 
 %% @doc Handle the submit of the resource edit form
 event({submit, predform, _FormId, _TargetId}, Context) ->
-    Post = zp_context:get_q_all(Context),
+    Post = z_context:get_q_all(Context),
     Props = filter_props(Post),
     Title = proplists:get_value("title", Props),
     Id = proplists:get_value("id", Props),
     Props1 = proplists:delete("id", Props),
-    m_predicate:update(zp_convert:to_integer(Id), Props1, Context),
-    zp_render:growl(["Saved ",zp_html:strip(?TR(Title, Context))], Context).
+    m_predicate:update(z_convert:to_integer(Id), Props1, Context),
+    z_render:growl(["Saved ",z_html:strip(?TR(Title, Context))], Context).
 
 
 %% @doc Remove some properties that are part of the postback
@@ -59,8 +59,8 @@ filter_props(Fs) ->
     Remove = [
         "triggervalue",
         "postback",
-        "zp_trigger_id",
-        "zp_pageid",
+        "z_trigger_id",
+        "z_pageid",
         "trigger_value"
     ],
     lists:foldl(fun(P, Acc) -> proplists:delete(P, Acc) end, Fs, Remove).

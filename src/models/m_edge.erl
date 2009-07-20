@@ -27,32 +27,32 @@
     subject_predicate_ids/2
 ]).
 
--include_lib("zophrenic.hrl").
+-include_lib("zotonic.hrl").
 
 
 
 %% @doc Get the complete edge with the id
 get(Id, Context) ->
-    zp_db:assoc_row("select * from edge where id = $1", [Id], Context).
+    z_db:assoc_row("select * from edge where id = $1", [Id], Context).
 
 %% @doc Get the edge id of a subject/pred/object combination
 get_id(SubjectId, Pred, ObjectId, Context) ->
     PredId = m_predicate:name_to_id_check(Pred, Context),
-    zp_db:q1("select id from edge where subject_id = $1 and object_id = $2 and predicate_id = $3", [SubjectId, PredId, ObjectId], Context).
+    z_db:q1("select id from edge where subject_id = $1 and object_id = $2 and predicate_id = $3", [SubjectId, PredId, ObjectId], Context).
 
 %% @doc Return the full description of all edges from a subject, grouped by predicate
 get_edges(SubjectId, Context) ->
-    case zp_depcache:get({edges, SubjectId}) of
+    case z_depcache:get({edges, SubjectId}) of
         {ok, Edges} -> 
             Edges;
         undefined ->
-            Edges = zp_db:assoc("
+            Edges = z_db:assoc("
                 select e.id, e.subject_id, e.predicate_id, p.name, e.object_id, e.seq 
                 from edge e join predicate p on p.id = e.predicate_id 
                 where e.subject_id = $1 
                 order by e.predicate_id, e.seq, e.id", [SubjectId], Context),
-            Edges1 = zp_utils:group_proplists(name, Edges),
-            zp_depcache:set({edges, SubjectId}, Edges1, ?DAY, [SubjectId]),
+            Edges1 = z_utils:group_proplists(name, Edges),
+            z_depcache:set({edges, SubjectId}, Edges1, ?DAY, [SubjectId]),
             Edges1
     end.
 
@@ -67,11 +67,11 @@ insert(SubjectId, Pred, ObjectId, Context) ->
     insert1(SubjectId, PredId, ObjectId, Context).
     
     insert1(SubjectId, PredId, ObjectId, Context) ->
-        case zp_db:q1("select id from edge where subject_id = $1 and object_id = $2 and predicate_id = $3", [SubjectId, ObjectId, PredId], Context) of
+        case z_db:q1("select id from edge where subject_id = $1 and object_id = $2 and predicate_id = $3", [SubjectId, ObjectId, PredId], Context) of
             undefined ->
-                {ok, EdgeId} = zp_db:insert(edge, [{subject_id, SubjectId}, {object_id, ObjectId}, {predicate_id, PredId}], Context),
-                zp_depcache:flush(SubjectId),
-                zp_depcache:flush(ObjectId),
+                {ok, EdgeId} = z_db:insert(edge, [{subject_id, SubjectId}, {object_id, ObjectId}, {predicate_id, PredId}], Context),
+                z_depcache:flush(SubjectId),
+                z_depcache:flush(ObjectId),
                 {ok, EdgeId};
             EdgeId ->
                 % Edge exists - skip
@@ -81,11 +81,11 @@ insert(SubjectId, Pred, ObjectId, Context) ->
 
 %% @doc Delete an edge by Id
 delete(Id, Context) ->
-    case zp_db:q("select subject_id, object_id from edge where id = $1", [Id], Context) of
+    case z_db:q("select subject_id, object_id from edge where id = $1", [Id], Context) of
         [{SubjectId,ObjectId}] ->
-            zp_db:delete(edge, Id, Context),
-            zp_depcache:flush(SubjectId),
-            zp_depcache:flush(ObjectId),
+            z_db:delete(edge, Id, Context),
+            z_depcache:flush(SubjectId),
+            z_depcache:flush(ObjectId),
             ok;
         [] -> 
             ok
@@ -94,9 +94,9 @@ delete(Id, Context) ->
 %% @doc Delete an edge by subject, object and predicate id
 delete(SubjectId, Pred, ObjectId, Context) ->
     PredId = m_predicate:name_to_id_check(Pred, Context),
-    zp_db:q("delete from edge where subject_id = $1 and object_id = $2 and predicate_id = $3",  [SubjectId, ObjectId, PredId], Context),
-    zp_depcache:flush(SubjectId),
-    zp_depcache:flush(ObjectId),
+    z_db:q("delete from edge where subject_id = $1 and object_id = $2 and predicate_id = $3",  [SubjectId, ObjectId, PredId], Context),
+    z_depcache:flush(SubjectId),
+    z_depcache:flush(ObjectId),
     ok.
     
 
@@ -128,13 +128,13 @@ objects(Id, Pred, Context) when is_atom(Pred) ->
         {ok, PredId} -> objects(Id, PredId, Context)
     end;
 objects(Id, Pred, Context) ->
-    case zp_depcache:get({objects, Pred, Id}) of
+    case z_depcache:get({objects, Pred, Id}) of
         {ok, Objects} ->
             Objects;
         undefined ->
-            Ids = zp_db:q("select object_id from edge where subject_id = $1 and predicate_id = $2 order by seq,id", [Id, Pred], Context),
+            Ids = z_db:q("select object_id from edge where subject_id = $1 and predicate_id = $2 order by seq,id", [Id, Pred], Context),
             Objects = [ ObjId || {ObjId} <- Ids ],
-            zp_depcache:set({objects, Pred, Id}, Objects, ?DAY, [Id]),
+            z_depcache:set({objects, Pred, Id}, Objects, ?DAY, [Id]),
             Objects
     end.
 
@@ -149,13 +149,13 @@ subjects(Id, Pred, Context) when is_atom(Pred) ->
         {ok, PredId} -> subjects(Id, PredId, Context)
     end;
 subjects(Id, Pred, Context) ->
-    case zp_depcache:get({subjects, Pred, Id}) of
+    case z_depcache:get({subjects, Pred, Id}) of
         {ok, Objects} ->
             Objects;
         undefined ->
-            Ids = zp_db:q("select subject_id from edge where object_id = $1 and predicate_id = $2 order by id", [Id, Pred], Context),
+            Ids = z_db:q("select subject_id from edge where object_id = $1 and predicate_id = $2 order by id", [Id, Pred], Context),
             Subjects = [ SubjId || {SubjId} <- Ids ],
-            zp_depcache:set({subjects, Pred, Id}, Subjects, ?HOUR, [Id]),
+            z_depcache:set({subjects, Pred, Id}, Subjects, ?HOUR, [Id]),
             Subjects
     end.
 
@@ -164,41 +164,41 @@ subjects(Id, Pred, Context) ->
 %% @spec objects(Id, Context) -> list()
 objects(Id, Context) ->
     F = fun() ->
-        Ids = zp_db:q("select object_id from edge where subject_id = $1 order by predicate_id, seq, id", [Id], Context),
+        Ids = z_db:q("select object_id from edge where subject_id = $1 order by predicate_id, seq, id", [Id], Context),
         [ ObjId || {ObjId} <- Ids]
     end,
-    zp_depcache:memo(F, {objects, Id}, ?DAY, [Id]).
+    z_depcache:memo(F, {objects, Id}, ?DAY, [Id]).
 
 %% @doc Return all subject ids of the resource
 %% @spec subjects(Id, Context) -> list()
 subjects(Id, Context) ->
     F = fun() ->
-        Ids = zp_db:q("select subject_id from edge where object_id = $1 order by predicate_id, id", [Id], Context),
+        Ids = z_db:q("select subject_id from edge where object_id = $1 order by predicate_id, id", [Id], Context),
         [ SubjId || {SubjId} <- Ids]
     end,
-    zp_depcache:memo(F, {subjects, Id}, ?HOUR, [Id]).
+    z_depcache:memo(F, {subjects, Id}, ?HOUR, [Id]).
 
 
 %% @doc Return the list of predicates in use by edges to objects from the id
 %% @spec object_preds(Id, Context) -> List
 object_predicates(Id, Context) ->
-    Ps = zp_db:q("select distinct p.name from edge e join rsc p on e.predicate_id = p.id where e.subject_id = $1 order by name", [Id], Context),
+    Ps = z_db:q("select distinct p.name from edge e join rsc p on e.predicate_id = p.id where e.subject_id = $1 order by name", [Id], Context),
     [ list_to_atom(binary_to_list(P)) || {P} <- Ps ].
 
 %% @doc Return the list of predicates is use by edges from subjects to the id
 %% @spec object_preds(Id, Context) -> List
 subject_predicates(Id, Context) ->
-    Ps = zp_db:q("select distinct p.name from edge e join rsc p on e.predicate_id = p.id where e.object_id = $1 order by name", [Id], Context),
+    Ps = z_db:q("select distinct p.name from edge e join rsc p on e.predicate_id = p.id where e.object_id = $1 order by name", [Id], Context),
     [ list_to_atom(binary_to_list(P)) || {P} <- Ps ].
 
 %% @doc Return the list of predicate ids in use by edges to objects from the id
 %% @spec object_preds(Id, Context) -> List
 object_predicate_ids(Id, Context) ->
-    Ps = zp_db:q("select distinct predicate_id from edge where subject_id = $1", [Id], Context),
+    Ps = z_db:q("select distinct predicate_id from edge where subject_id = $1", [Id], Context),
     [ P || {P} <- Ps ].
 
 %% @doc Return the list of predicates is use by edges from subjects to the id
 %% @spec object_preds(Id, Context) -> List
 subject_predicate_ids(Id, Context) ->
-    Ps = zp_db:q("select distinct predicate_id from edge where object_id = $1", [Id], Context),
+    Ps = z_db:q("select distinct predicate_id from edge where object_id = $1", [Id], Context),
     [ P || {P} <- Ps ].

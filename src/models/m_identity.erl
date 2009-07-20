@@ -24,7 +24,7 @@
     hash_is_equal/2
 ]).
 
--include_lib("zophrenic.hrl").
+-include_lib("zotonic.hrl").
 
 
 %% @doc Fetch the value for the key from a model source
@@ -56,7 +56,7 @@ m_value(#m{value=V}, _Context) ->
 
 %% @doc Check if the resource has any credentials that will make him/her an user
 is_user(Id, Context) ->
-    case zp_db:q1("select count(*) from identity where rsc_id = $1 and type in ('username_pw', 'openid')", [Id], Context) of
+    case z_db:q1("select count(*) from identity where rsc_id = $1 and type in ('username_pw', 'openid')", [Id], Context) of
         0 -> false;
         _ -> true
     end.
@@ -64,14 +64,14 @@ is_user(Id, Context) ->
 %% @doc Return the username of the resource id, undefined if no username
 %% @spec get_username(ResourceId, Context) -> Username | undefined
 get_username(Id, Context) ->
-    zp_db:q1("select key from identity where rsc_id = $1 and type = 'username_pw'", [Id], Context).
+    z_db:q1("select key from identity where rsc_id = $1 and type = 'username_pw'", [Id], Context).
 
 
 %% @doc Delete an username from a resource.
 %% @spec delete_username(ResourceId, Context) -> void
 delete_username(Id, Context) when is_integer(Id), Id /= 1 ->
-    case zp_acl:has_role(admin, Context) orelse zp_acl:user(Context) == Id of
-        true ->  zp_db:q("delete from identity where rsc_id = $1 and type = 'username_pw'", [Id], Context);
+    case z_acl:has_role(admin, Context) orelse z_acl:user(Context) == Id of
+        true ->  z_db:q("delete from identity where rsc_id = $1 and type = 'username_pw'", [Id], Context);
         false -> {error, eacces}
     end.
 
@@ -79,13 +79,13 @@ delete_username(Id, Context) when is_integer(Id), Id /= 1 ->
 %% @doc Change the username of the resource id, only possible if there is already an username/password set
 %% @spec set_username(ResourceId, Username, Context) -> ok | {error, Reason}
 set_username(Id, Username, Context) ->
-    case zp_acl:has_role(admin, Context) orelse zp_acl:user(Context) == Id of
+    case z_acl:has_role(admin, Context) orelse z_acl:user(Context) == Id of
         true ->
             F = fun(Ctx) ->
-                UniqueTest = zp_db:q1("select count(*) from identity where type = 'username_pw' and rsc_id <> $1 and key = $2", [Id, Username], Ctx),
+                UniqueTest = z_db:q1("select count(*) from identity where type = 'username_pw' and rsc_id <> $1 and key = $2", [Id, Username], Ctx),
                 case UniqueTest of
                     0 ->
-                        case zp_db:q("update identity set key = $2 where rsc_id = $1 and type = 'username_pw'", [Id, Username], Ctx) of
+                        case z_db:q("update identity set key = $2 where rsc_id = $1 and type = 'username_pw'", [Id, Username], Ctx) of
                             1 -> ok;
                             0 -> {error, enoent};
                             {error, _} -> {error, eexist} % assume duplicate key error?
@@ -94,7 +94,7 @@ set_username(Id, Username, Context) ->
                         {error, eexist}
                 end
             end,
-            zp_db:transaction(F, Context);
+            z_db:transaction(F, Context);
         false ->
             {error, eacces}
     end.
@@ -103,12 +103,12 @@ set_username(Id, Username, Context) ->
 %% @doc Set the username/password of a resource.  Replaces any existing username/password.
 %% @spec set_username_pw(RscId, Username, Password) -> ok | {error, Reason}
 set_username_pw(Id, Username, Password, Context) ->
-    case zp_acl:has_role(admin, Context) orelse zp_acl:user(Context) == Id of
+    case z_acl:has_role(admin, Context) orelse z_acl:user(Context) == Id of
         true ->
             Username1 = string:to_lower(Username),
             Hash = hash(Password),
             F = fun(Ctx) ->
-                Rupd = zp_db:q("
+                Rupd = z_db:q("
                             update identity 
                             set key = $2,
                                 propb = $3,
@@ -116,10 +116,10 @@ set_username_pw(Id, Username, Password, Context) ->
                             where type = 'username_pw' and rsc_id = $1", [Id, Username1, Hash], Ctx),
                 case Rupd of
                     0 ->
-                        UniqueTest = zp_db:q1("select count(*) from identity where type = 'username_pw' and key = $1", [Username], Ctx),
+                        UniqueTest = z_db:q1("select count(*) from identity where type = 'username_pw' and key = $1", [Username], Ctx),
                         case UniqueTest of
                             0 ->
-                                zp_db:q("insert into identity (rsc_id, is_unique, type, key, propb) values ($1, true, 'username_pw', $2, $3)", [Id, Username1, Hash], Ctx);
+                                z_db:q("insert into identity (rsc_id, is_unique, type, key, propb) values ($1, true, 'username_pw', $2, $3)", [Id, Username1, Hash], Ctx);
                             _Other ->
                                 throw({error, eexist})
                         end;
@@ -127,7 +127,7 @@ set_username_pw(Id, Username, Password, Context) ->
                         1
                 end
             end,
-            case zp_db:transaction(F, Context) of
+            case z_db:transaction(F, Context) of
                 1 -> ok;
                 R -> R
             end;
@@ -140,14 +140,14 @@ set_username_pw(Id, Username, Password, Context) ->
 %% @spec check_username_pw(Username, Password, Context) -> {ok, Id} | {error, Reason}
 check_username_pw(Username, Password, Context) ->
     Username1 = string:to_lower(Username),
-    Row = zp_db:q_row("select id, rsc_id, propb from identity where type = 'username_pw' and key = $1", [Username1], Context),
+    Row = z_db:q_row("select id, rsc_id, propb from identity where type = 'username_pw' and key = $1", [Username1], Context),
     case Row of
         undefined ->
             {error, nouser};
         {Id, RscId, Hash} ->
             case hash_is_equal(Password, Hash) of
                 true -> 
-                    zp_db:q("update identity set visited = now() where id = $1", [Id], Context),
+                    z_db:q("update identity set visited = now() where id = $1", [Id], Context),
                     {ok, RscId};
                 false ->
                     {error, password}
@@ -159,16 +159,16 @@ check_username_pw(Username, Password, Context) ->
 %% @doc Fetch all credentials belonging to the user "id"
 %% @spec get_credentials(integer(), context()) -> list()
 get_rsc(Id, Context) ->
-    zp_db:assoc("select * from identity where rsc_id = $1", [Id], Context).
+    z_db:assoc("select * from identity where rsc_id = $1", [Id], Context).
 
 get_rsc(Id, Type, Context) ->
-    zp_db:assoc_row("select * from identity where rsc_id = $1 and type = '$2'", [Id, Type], Context).
+    z_db:assoc_row("select * from identity where rsc_id = $1 and type = '$2'", [Id, Type], Context).
 
 
 %% @doc Hash a password, using sha1 and a salt
 %% @spec hash(Password) -> tuple()
 hash(Pw) ->
-    Salt = zp_ids:id(10),
+    Salt = z_ids:id(10),
     Hash = crypto:sha([Salt,Pw]),
     {hash, Salt, Hash}.
 
