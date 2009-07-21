@@ -22,6 +22,7 @@
 -export([
     rsc_update/3,
     media_viewer/2,
+    media_stillimage/2,
     event/2
 ]).
 
@@ -75,6 +76,21 @@ media_viewer({media_viewer, Props, _Filename, _Options}, _Context) ->
             case proplists:get_value(video_embed_code, Props) of
                 undefined -> undefined;
                 EmbedCode -> {ok, EmbedCode}
+            end;
+        _ ->
+            undefined
+    end.
+
+
+%% @doc Return the filename of a still image to be used for image tags.
+%% @spec media_stillimage(Notification, _Context) -> undefined | {ok, Html}
+media_stillimage({media_stillimage, Props}, Context) ->
+    case proplists:get_value(mime, Props) of
+        ?EMBED_MIME ->
+            case proplists:get_value(video_embed_service, Props) of
+                <<"youtube">> -> {ok, "lib/images/youtube.jpg"};
+                <<"vimeo">> -> {ok, "lib/images/vimeo.jpg"};
+                _ -> {ok, "lib/images/embed.jpg"}
             end;
         _ ->
             undefined
@@ -176,6 +192,7 @@ init(Args) ->
     {context, Context} = proplists:lookup(context, Args),
     z_notifier:observe(rsc_update, {?MODULE, rsc_update}, Context),
     z_notifier:observe(media_viewer, {?MODULE, media_viewer}, Context),
+    z_notifier:observe(media_stillimage, {?MODULE, media_stillimage}, Context),
     {ok, #state{context=z_context:new_for_host(Context)}}.
 
 
@@ -215,6 +232,7 @@ handle_info(_Info, State) ->
 terminate(_Reason, State) ->
     z_notifier:detach(rsc_update, {?MODULE, rsc_update}, State#state.context),
     z_notifier:detach(media_viewer, {?MODULE, media_viewer}, State#state.context),
+    z_notifier:detach(media_stillimage, {?MODULE, media_stillimage}, State#state.context),
     ok.
 
 %% @spec code_change(OldVsn, State, Extra) -> {ok, NewState}

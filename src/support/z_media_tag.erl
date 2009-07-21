@@ -78,8 +78,11 @@ tag(Id, Options, Context) when is_integer(Id) ->
     tag(m_media:get(Id, Context), Options, Context);
 tag([{_Prop, _Value}|_] = Props, Options, Context) ->
     case z_convert:to_list(proplists:get_value(filename, Props)) of
-        None when None == undefined; None == [] -> 
-            {ok, []};
+        None when None == undefined; None == <<>>; None == [] -> 
+            case z_notifier:first({media_stillimage, Props}, Context) of
+                {ok, Filename} -> tag1(Props, Filename, Options, Context);
+                _ -> {ok, []}
+            end;
         Filename -> 
             tag1(Props, Filename, Options, Context)
     end;

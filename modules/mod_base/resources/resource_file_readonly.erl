@@ -251,13 +251,21 @@ ensure_preview(ReqData, Path, State) ->
         undefined ->
             {false, ReqData, State};
         Safepath  ->
-            MediaFile = filename:join(State#state.media_path, Safepath),
+            Context = z_context:new(ReqData, ?MODULE),
+            MediaFile = case Safepath of
+                "lib/" ++ LibPath -> 
+                    case z_module_indexer:find(lib, LibPath, Context) of
+                        {ok, ModuleFilename} -> ModuleFilename;
+                        {error, _} -> filename:join(State#state.media_path, Safepath)
+                    end;
+                _ ->
+                    filename:join(State#state.media_path, Safepath)
+            end,
             case filelib:is_regular(MediaFile) of
                 true ->
                     % Media file exists, perform the resize
                     % @todo make use of a resize server, so that we do not resize too many files at the same time.
                     [Root|_] = State#state.root,
-                    Context = z_context:new(ReqData, ?MODULE),
                     PreviewFile = filename:join(Root, Path),
                     case z_media_preview:convert(MediaFile, PreviewFile, PreviewPropList, Context) of
                         ok -> resource_exists(ReqData, State);

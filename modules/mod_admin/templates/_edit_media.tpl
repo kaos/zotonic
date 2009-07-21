@@ -8,7 +8,7 @@
 			{% sortable id=#medium.media_id tag=edge_id %}
 			<li id="{{ #medium.media_id }}" class="edit_media left clearfix">
 				{% with m.rsc[media_id].medium as medium %}
-					<a href="{% url admin_edit_rsc id=media_id %}">{% image medium.filename width=200 height=200 crop %}</a>
+					<a href="{% url admin_edit_rsc id=media_id %}">{% image medium width=200 height=200 crop %}</a>
 
 					{% with m.rsc[media_id].title|striptags|default:"untitled" as title %}
 					<div class="rsc-edge do_unlink">
