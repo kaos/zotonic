@@ -23,7 +23,7 @@
 			<div class="padding">
 				{% include "_view.tpl" %}
 							
-				{% with m.search[{latest cat="event"}] as result %}
+				{% with m.search[{upcoming cat="event"}] as result %}
 
 					<ul class="program-list clearfix">
 
