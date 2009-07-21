@@ -112,13 +112,13 @@ depiction(Id, Context) when is_integer(Id) ->
         undefined;
     find_previewable([Id|Rest], Context) ->
         case get(Id, Context) of
-            {ok, Props} ->
+            undefined ->
+                find_previewable(Rest, Context);
+            Props ->
                 case z_media_preview:can_generate_preview(proplists:get_value(mime, Props)) of
                     true -> Props;
                     false -> find_previewable(Rest, Context)
-                end;
-            {error, _} ->
-                find_previewable(Rest, Context)
+                end
         end.
     
 
