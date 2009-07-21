@@ -1,19 +1,21 @@
 %% Dispatch rules for mod_nif.
 
 [
-	{home,		[],						resource_template,	[ {template, "home.tpl"} ]},
-	{page,    	["page", id],       	resource_page,		[ {template, "page.tpl"} ]},
-	{page,    	["page", id, slug], 	resource_page,		[ {template, "page.tpl"} ]},
-	{program,   ["program", id],       	resource_page,		[ {template, "program.tpl"} ]},
-	{program,   ["program", id, slug], 	resource_page,		[ {template, "program.tpl"} ]},
-	{artists,   ["artists", id], 		resource_page,		[ {template, "artists.tpl"} ]},
-	{artists,   ["artists", id, slug], 	resource_page,		[ {template, "artists.tpl"} ]},
-	{artist,    ["artist", id], 		resource_page,		[ {template, "artist.tpl"} ]},
-	{artist,    ["artist", id, slug], 	resource_page,		[ {template, "artist.tpl"} ]},
-	{event,     ["event", id],			resource_page,		[ {template, "event.tpl"} ]},
-	{event,     ["event", id, slug], 	resource_page,		[ {template, "event.tpl"} ]},
-	{venue,   	["venue", id],			resource_page,		[ {template, "venue.tpl"} ]},
-	{venue,     ["venue", id, slug], 	resource_page,		[ {template, "venue.tpl"} ]},
-	{news,   	["news", id],			resource_page,		[ {template, "news.tpl"} ]},
-	{news,      ["news", id, slug], 	resource_page,		[ {template, "news.tpl"} ]}
+	{home,		[],							resource_template,	[ {template, "home.tpl"} ]},
+	{page,    	["page", id],       		resource_page,		[ {template, "page.tpl"} ]},
+	{page,    	["page", id, slug], 		resource_page,		[ {template, "page.tpl"} ]},
+	{program,   ["program", id],       		resource_page,		[ {template, "program.tpl"} ]},
+	{program,   ["program", id, slug], 		resource_page,		[ {template, "program.tpl"} ]},
+	{artists,   ["artists", id], 			resource_page,		[ {template, "artists.tpl"} ]},
+	{artists,   ["artists", id, slug], 		resource_page,		[ {template, "artists.tpl"} ]},
+	{artist,    ["artist", id], 			resource_page,		[ {template, "artist.tpl"} ]},
+	{artist,    ["artist", id, slug], 		resource_page,		[ {template, "artist.tpl"} ]},
+	{event,     ["event", id],				resource_page,		[ {template, "event.tpl"} ]},
+	{event,     ["event", id, slug], 		resource_page,		[ {template, "event.tpl"} ]},
+	{venue,   	["venue", id],				resource_page,		[ {template, "venue.tpl"} ]},
+	{venue,     ["venue", id, slug], 		resource_page,		[ {template, "venue.tpl"} ]},
+	{news,   	["news", id],				resource_page,		[ {template, "news.tpl"} ]},
+	{news,      ["news", id, slug], 		resource_page,		[ {template, "news.tpl"} ]},
+	{collection,["collection", id],			resource_page,		[ {template, "collection.tpl"} ]},
+	{collection,["collection", id, slug],	resource_page,		[ {template, "collection.tpl"} ]}
 ].
