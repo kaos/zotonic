@@ -12,7 +12,7 @@
 	{artist,    ["artist", id, slug], 	resource_page,		[ {template, "artist.tpl"} ]},
 	{event,     ["event", id],			resource_page,		[ {template, "event.tpl"} ]},
 	{event,     ["event", id, slug], 	resource_page,		[ {template, "event.tpl"} ]},
-	{venue,   	["venue", id,			resource_page,		[ {template, "venue.tpl"} ]},
+	{venue,   	["venue", id],			resource_page,		[ {template, "venue.tpl"} ]},
 	{venue,     ["venue", id, slug], 	resource_page,		[ {template, "venue.tpl"} ]},
 	{news,   	["news", id],			resource_page,		[ {template, "news.tpl"} ]},
 	{news,      ["news", id, slug], 	resource_page,		[ {template, "news.tpl"} ]}
