@@ -24,7 +24,8 @@
     insert/2,
     delete/2,
     update/3,
-        
+    duplicate/3,
+    
 	exists/2, 
 	
 	is_visible/2, is_editable/2, is_ingroup/2, is_me/2, 
@@ -161,9 +162,15 @@ delete(Id, Context) when is_integer(Id) ->
 
 
 %% @doc Update a resource
-%% @spec update(Props, Props, Context) -> {ok, Id} | {error, Reason}
+%% @spec update(Id, Props, Context) -> {ok, Id} | {error, Reason}
 update(Id, Props, Context) when is_integer(Id) ->
     m_rsc_update:update(Id, Props, Context).
+
+
+%% @doc Duplicate a resource.
+%% @spec duplicate(Id, Props, Context) -> {ok, NewId} | {error, Reason}
+duplicate(Id, Props, Context) ->
+    m_rsc_update:duplicate(Id, Props, Context).
 
 
 exists([C|_] = Name, Context) when is_list(Name) and is_integer(C) ->

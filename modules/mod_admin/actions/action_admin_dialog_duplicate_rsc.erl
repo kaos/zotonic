@@ -41,7 +41,7 @@ event({submit, {duplicate_page, ActionProps}, _TriggerId, _TargetId}, Context) -
         {title, Title},
         {is_published, IsPublished}
     ],
-    {ok, NewId} = m_rsc_update:duplicate(Id, Props, Context),
+    {ok, NewId} = m_rsc:duplicate(Id, Props, Context),
 
     % Close the dialog and redirect to the edit page of the new resource
     Context1 = z_render:wire({dialog_close, []}, Context),

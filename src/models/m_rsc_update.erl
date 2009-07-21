@@ -80,17 +80,27 @@ delete_nocheck(Id, Context) ->
 
 
 %% @doc Duplicate a resource, creating a new resource with the given title.
+%% @spec duplicate(int(), PropList, Context) -> {ok, int()} | {error, Reason}
 %% @todo Also duplicate the attached medium.
 duplicate(Id, DupProps, Context) ->
-    Props = m_rsc:get_raw(Id, Context),
-    FilteredProps = props_filter_protected(Props),
-    InsProps = lists:foldl(
-                    fun({Key, Value}, Acc) ->
-                        z_utils:prop_replace(Key, Value, Acc)
-                    end,
-                    FilteredProps,
-                    DupProps),
-    insert(InsProps, Context).
+    case z_acl:rsc_visible(Id, Context) of
+        true ->
+            Props = m_rsc:get_raw(Id, Context),
+            FilteredProps = props_filter_protected(Props),
+            InsProps = lists:foldl(
+                            fun({Key, Value}, Acc) ->
+                                z_utils:prop_replace(Key, Value, Acc)
+                            end,
+                            FilteredProps,
+                            DupProps ++ [
+                                {name,undefined}, {uri,undefined}, {page_path,undefined},
+                                {is_authoritative,false}, {is_protected,false},
+                                {slug,undefined}
+                            ]),
+            insert(InsProps, Context);
+        false ->
+            {error, eacces}
+    end.
 
 
 %% @doc Update a resource
@@ -218,17 +228,17 @@ preflight_check(insert_rsc, Props, Context) ->
     preflight_check(-1, Props, Context);
 preflight_check(_Id, [], _Context) ->
     ok;
-preflight_check(Id, [{name, Name}|T], Context) ->
+preflight_check(Id, [{name, Name}|T], Context) when Name =/= undefined ->
     case z_db:q1("select count(*) from rsc where name = $1 and id <> $2", [Name, Id], Context) of
         0 ->  preflight_check(Id, T, Context);
         _N -> {error, duplicate_name}
     end;
-preflight_check(Id, [{page_path, Path}|T], Context) ->
+preflight_check(Id, [{page_path, Path}|T], Context) when Path =/= undefined ->
     case z_db:q1("select count(*) from rsc where page_path = $1 and id <> $2", [Path, Id], Context) of
         0 ->  preflight_check(Id, T, Context);
         _N -> {error, duplicate_page_path}
     end;
-preflight_check(Id, [{uri, Uri}|T], Context) ->
+preflight_check(Id, [{uri, Uri}|T], Context) when Uri =/= undefined ->
     case z_db:q1("select count(*) from rsc where uri = $1 and id <> $2", [Uri, Id], Context) of
         0 ->  preflight_check(Id, T, Context);
         _N -> {error, duplicate_uri}
@@ -241,11 +251,15 @@ preflight_check(Id, [_H|T], Context) ->
 %% @spec props_filter(Props1, Acc, Context) -> Props2
 props_filter([], Acc, _Context) ->
     Acc;
+props_filter([{uri, undefined}|T], Acc, Context) ->
+    props_filter(T, [{uri, undefined} | Acc], Context);
 props_filter([{uri, <<>>}|T], Acc, Context) ->
     props_filter(T, [{uri, undefined} | Acc], Context);
 props_filter([{uri, ""}|T], Acc, Context) ->
     props_filter(T, [{uri, undefined} | Acc], Context);
 
+props_filter([{name, undefined}|T], Acc, Context) ->
+    props_filter(T, [{name, undefined} | Acc], Context);
 props_filter([{name, <<>>}|T], Acc, Context) ->
     props_filter(T, [{name, undefined} | Acc], Context);
 props_filter([{name, ""}|T], Acc, Context) ->
@@ -253,6 +267,8 @@ props_filter([{name, ""}|T], Acc, Context) ->
 props_filter([{name, Name}|T], Acc, Context) ->
     props_filter(T, [{name, z_string:to_name(Name)} | Acc], Context);
 
+props_filter([{page_path, undefined}|T], Acc, Context) ->
+    props_filter(T, [{page_path, undefined} | Acc], Context);
 props_filter([{page_path, <<>>}|T], Acc, Context) ->
     props_filter(T, [{page_path, undefined} | Acc], Context);
 props_filter([{page_path, ""}|T], Acc, Context) ->
