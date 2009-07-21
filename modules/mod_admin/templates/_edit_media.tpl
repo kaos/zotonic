@@ -2,20 +2,22 @@
 
 	<div id="{{ #unlink_message }}"></div>
 	
-	{% sorter id=#media tag={object_sorter predicate="depiction" id=id} %}
-	<ul id="{{ #media }}">
+	{% sorter id=#media tag={object_sorter predicate="depiction" id=id} placeholer="sortable-placeholder" %}
+	<ul id="{{ #media }}" class="media-sorter">
 		{% for media_id, edge_id in m.edge.o[id].depiction %}
 			{% sortable id=#medium.media_id tag=edge_id %}
-			<li id="{{ #medium.media_id }}" class="edit_media left clearfix">
+			<li id="{{ #medium.media_id }}" class="edit_media clearfix">
 				{% with m.rsc[media_id].medium as medium %}
-					<a href="{% url admin_edit_rsc id=media_id %}">{% image medium width=200 height=200 crop %}</a>
+					{% image medium width=200 height=200 crop %}
 
 					{% with m.rsc[media_id].title|striptags|default:"untitled" as title %}
-					<div class="rsc-edge do_unlink">
-						<span class="clearfix">
-							<span id="{{ #unlink.media_id }}" class="unlink-cross do_tooltip" title="Disconnect {{title}}."></span>
-							<span class="unlink-item"><a href="{% url admin_edit_rsc id=media_id %}">{{ title }}</a></span>
-						</span>
+					<div class="media-unlink-wrapper">
+						<div class="rsc-edge do_unlink">
+							<span class="clearfix">
+								<span id="{{ #unlink.media_id }}" class="unlink-cross do_tooltip" title="Disconnect {{title}}."></span>
+								<span class="unlink-item"><a href="{% url admin_edit_rsc id=media_id %}">{{ title }}</a></span>
+							</span>
+						</div>
 					</div>
 					{% endwith %}
 

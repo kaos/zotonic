@@ -92,11 +92,11 @@
 		background-position: 0 0;
 	}
 
-	ul li.ui-sortable-helper {
+/*	ul li.ui-sortable-helper {
 		background: #778DA8 !important;
 		color: #fff !important;
 		cursor: move !important;
-	}
+	}*/
 
 	.finder-placeholder {
 		background: #f2f2f2 !important;

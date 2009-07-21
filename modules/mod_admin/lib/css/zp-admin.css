@@ -337,6 +337,7 @@ a:focus {
 			-webkit-border-top-left-radius: 0;
 		}
 	
+	
 /* forms
 ---------------------------------------------------------- */
 
@@ -468,6 +469,33 @@ a.button {
 	margin: 0 0 9px 0;
 }
 
+ul.media-sorter li {
+	width: 200px;
+	float: left;
+	margin: 0 18px 9px 0;
+	position: relative;
+	cursor: move;
+}
+
+	ul.media-sorter li img {
+		float: none;
+	}
+	
+	ul.media-sorter li .rsc-edge {
+		margin: 5px 0 0 4px;
+	}
+	
+	ul.media-sorter li .media-unlink-wrapper {
+		position: absolute;
+		bottom: 8px;
+		left: 4px;
+		background: #888;
+		width: 200px;
+		height: 30px;
+		opacity: .95;
+		border-top: 1px solid #555;
+	}
+
 
 /* Modules - Autocompleter
 ---------------------------------------------------------- */
@@ -591,13 +619,12 @@ a.button {
 /* Modules - Sortable
 ---------------------------------------------------------- */
 
-.sortable-placeholder {
-	background: #fff;
-	display: block;
-	width: 100%;
-	height: 20px;
-	margin: 0 0 18px 0;
-	border: 2px dashed #e0e0e0;
+.sortable-placeholder,
+.ui-sortable-placeholder {
+	background: #eee !important;
+	display: block !important;
+	border: 1px dashed #888 !important;
+	visibility: visible !important;
 }
 
 
@@ -690,8 +717,6 @@ li.hover, li.hover a {
 	background: none;
 	margin: 6px 0;
 }
-
-
 
 ul.categories {
 	padding: 8px 6px 0;
