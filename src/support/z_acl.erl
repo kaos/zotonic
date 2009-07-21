@@ -17,7 +17,9 @@
     rsc_editable/2,
     rsc_ingroup/2,
     group_editable/2,
+    sudo/1,
     sudo/2,
+    anondo/1,
     anondo/2,
     logon/2,
     logoff/1,
@@ -100,6 +102,9 @@ sudo({M,F,A}, Context) ->
 sudo(F, Context) when is_function(F, 1) ->
     F(set_admin(Context)).
 
+sudo(Context) ->
+    set_admin(Context).
+
     set_admin(#context{acl=undefined} = Context) ->
         Context#context{acl=#acl{is_admin=true}, user_id=1};
     set_admin(Context) ->
@@ -116,6 +121,9 @@ anondo({M,F,A}, Context) ->
     erlang:apply(M, F, A ++ [set_anonymous(Context)]);
 anondo(F, Context) when is_function(F, 1) ->
     F(set_anonymous(Context)).
+
+anondo(Context) ->
+    set_anonymous(Context).
 
     set_anonymous(Context) ->
         Context#context{acl=#acl{}, user_id=undefined}.

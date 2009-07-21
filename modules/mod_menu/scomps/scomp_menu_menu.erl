@@ -54,11 +54,7 @@ render(Params, _Vars, Context, _State) ->
         {ok, CachedMenu} ->
             {ok, CachedMenu};
         undefined ->
-            BuildF = fun(Ctx) ->
-                build_menu(Menu, CurrentId, 1, [], [], Ctx)
-            end,
-            
-            {IdAcc, LIs} = z_acl:anondo(BuildF, Context),
+            {IdAcc, LIs} = build_menu(Menu, CurrentId, 1, [], [], z_acl:anondo(Context)),
             UL = ["<ul id=\"navigation\" class=\"clearfix at-menu\">", LIs, "</ul>"],
             NewMenu = iolist_to_binary(UL),
             z_depcache:set({menu, CurrentId, Context#context.language}, NewMenu, ?DAY, [CurrentId, menu | IdAcc]),
