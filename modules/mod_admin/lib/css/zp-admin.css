@@ -470,7 +470,7 @@ a.button {
 }
 
 ul.media-sorter li {
-	width: 200px;
+	width: 227px;
 	float: left;
 	margin: 0 18px 9px 0;
 	position: relative;
@@ -490,7 +490,7 @@ ul.media-sorter li {
 		bottom: 8px;
 		left: 4px;
 		background: #888;
-		width: 200px;
+		width: 227px;
 		height: 30px;
 		opacity: .95;
 		border-top: 1px solid #555;
@@ -625,6 +625,9 @@ ul.media-sorter li {
 	display: block !important;
 	border: 1px dashed #888 !important;
 	visibility: visible !important;
+	height: 200px !important;
+	padding: 0 !important;
+	margin: 6px 16px 18px 0 !important;
 }
 
 
