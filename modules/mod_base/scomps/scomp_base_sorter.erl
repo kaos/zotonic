@@ -111,7 +111,7 @@ groups_to_classes([<<>>]) -> "";
 groups_to_classes([""]) -> "";
 groups_to_classes(Groups) ->
 	Groups1 = lists:flatten(Groups),
-	Groups2 = ["drag_group_" ++ zp:to_list(X) || X <- Groups1],
+	Groups2 = ["drag_group_" ++ z_convert:to_list(X) || X <- Groups1],
 	string:join(Groups2, " ").
 	
 
