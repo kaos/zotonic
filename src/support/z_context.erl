@@ -69,7 +69,9 @@
     language/1,
     
     merge_scripts/2,
-    copy_scripts/2
+    copy_scripts/2,
+    
+    set_resp_header/3
 ]).
 
 -include_lib("zotonic.hrl").
@@ -521,6 +523,14 @@ incr(Key, Value, Context) ->
 %% @doc Return the selected language of the Context
 language(Context) ->
     Context#context.language.
+    
+    
+%% @doc Add a response header to the request in the context.
+%% @spec add_response_header(Header, Value, Context) -> NewContext
+set_resp_header(Header, Value, Context = #context{wm_reqdata=ReqData}) ->
+    RD1 = wrq:set_resp_header(Header, Value, ReqData),
+    Context#context{wm_reqdata=RD1}.
+
 
 %% ------------------------------------------------------------------------------------
 %% Local helper functions

@@ -29,10 +29,14 @@ is_authorized(ReqData, Context) ->
     z_auth:wm_is_authorized(false, visible, "id", ReqData, Context).
 
 
-%% @doc Show the page.
+%% @doc Show the page.  Add a noindex header when requested by the editor.
 html(Context) ->
 	Id = z_convert:to_integer(z_context:get_q("id", Context)),
-	Template = z_context:get(template, Context, "page.tpl"),
-    Html = z_template:render(Template, [ {id, Id} | z_context:get_all(Context) ], Context),
-	z_context:output(Html, Context).
+    Context1 = case z_convert:to_bool(m_rsc:p(Id, seo_noindex, Context)) of
+        true ->  z_context:set_resp_header("X-Robots-Tag", "noindex", Context);
+        false -> Context
+    end,
+	Template = z_context:get(template, Context1, "page.tpl"),
+    Html = z_template:render(Template, [ {id, Id} | z_context:get_all(Context) ], Context1),
+	z_context:output(Html, Context1).
 
