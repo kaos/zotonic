@@ -30,7 +30,7 @@
 	
 				<ul class="items-list">
 					{% for id in m.rsc[id].s.atvenue %}
-					<li>
+					<li class="clearfix">
 						<h3>
 							<a href="{{ m.rsc[id].page_url }}" title="{{ m.rsc[id].title }}">
 								{{ m.rsc[id].title }}

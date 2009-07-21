@@ -30,7 +30,7 @@
 	
 				<ul class="items-list">
 					{% for id in m.search[{latest cat="news"}] %}
-					<li>
+					<li class="clearfix">
 						<h3><a href="{{ m.rsc[id].page_url }}" title="{{ m.rsc[id].title }}">{{ m.rsc[id].title|striptags }}</a></h3>
 						{% if m.rsc[id].media[1] %}
 							<div class="item-image left">{% image m.rsc[id].media[1] width=65 height=65 crop %}</div>
