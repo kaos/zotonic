@@ -289,9 +289,9 @@
 													<ul id="{{ #links.name }}" class="clearfix">
 													{% for o_id, edge_id in m.edge.o[id][name] %}
 														{% include "_rsc_edge.tpl" subject_id=id predicate=name object_id=o_id edge_id=edge_id %}
-													{% empty %}
-														<ul>&nbsp;</ul>
 													{% endfor %}
+														{# always keep one li so that there is a dropzone #}
+														<ul>&nbsp;</ul>
 													</ul>
 													
 													{% if is_editable %}
