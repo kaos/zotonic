@@ -12,6 +12,7 @@
     insert/2,
     delete/2,
     update/3,
+    duplicate/3,
     
     delete_nocheck/2,
     props_filter/3,
@@ -76,7 +77,21 @@ delete_nocheck(Id, Context) ->
         {error, Reason} ->
             {error, Reason}
     end.
-    
+
+
+%% @doc Duplicate a resource, creating a new resource with the given title.
+%% @todo Also duplicate the attached medium.
+duplicate(Id, DupProps, Context) ->
+    Props = m_rsc:get_raw(Id, Context),
+    FilteredProps = props_filter_protected(Props),
+    InsProps = lists:foldl(
+                    fun({Key, Value}, Acc) ->
+                        z_utils:prop_replace(Key, Value, Acc)
+                    end,
+                    FilteredProps,
+                    DupProps),
+    insert(InsProps, Context).
+
 
 %% @doc Update a resource
 %% @spec update(Id, Props, Context) -> {ok, Id} | {error, Reason}

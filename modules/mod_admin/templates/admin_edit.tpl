@@ -176,6 +176,13 @@
 										{% endif %}
 										
 										{% button class="discard-resource right do_tooltip" text="cancel" action={redirect back} title="Go back." %}
+
+										{% if is_editable %}
+											{% button type="submit" id="save_duplicate" class="save-resource right do_tooltip" text="duplicate" title="Duplicate this page." %}
+										{% else %}
+											{% button class="save-resource right do_tooltip" text="duplicate" action={dialog_duplicate_rsc id=id}  title="Duplicate this page." %}
+										{% endif %}
+
 										{% button class="discard-resource right do_tooltip" disabled=r.is_protected|ornot:is_editable id="delete-button" text="delete" action={dialog_delete_rsc id=r.id on_success={redirect back}} title="Delete this page." %}
 									</div>
 									

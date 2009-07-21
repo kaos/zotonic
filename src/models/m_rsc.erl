@@ -19,6 +19,7 @@
     name_to_id_cat_check/3,
     
     get/2,
+    get_raw/2,
     get_acl_props/2,
     insert/2,
     delete/2,
@@ -106,24 +107,28 @@ name_to_id_cat_check(Name, Cat, Context) ->
     Id.
 
 %% @doc Read a whole resource
-%% @spec get(Id, Context) -> 
+%% @spec get(Id, Context) -> PropList | undefined
 get(Id, Context) ->
     case rid(Id, Context) of
         Rid when is_integer(Rid) ->
-            case z_depcache:get(Rid) of
-                {ok, Resource} -> 
-                    Resource;
-                undefined ->
-                    case z_db:select(rsc, Rid, Context) of
-                        {ok, Record} ->
-                            z_depcache:set(Rid, Record, ?WEEK),
-                            Record;
-                        _ ->
-                            z_depcache:set(Rid, undefined, ?WEEK),
-                            undefined
-                    end
-            end
+            F = fun() ->
+                get_raw(Rid, Context)
+            end,
+            z_depcache:memo(F, Rid, ?WEEK)
     end.
+
+%% @doc Get the resource from the database, do not fetch the pivot fields.
+get_raw(Id, Context) when is_integer(Id) ->
+    z_db:assoc_props_row("
+            select
+                id, uri, name, page_path, 
+                is_authoritative, is_published, is_featured, is_protected,
+                publication_start, publication_end,
+                group_id, creator_id, modifier_id, version, category_id,
+                visible_for, comment_by, comments, rating, rating_count,
+                slug, props, created, modified
+            from rsc
+            where id = $1", [Id], Context).
 
 
 %% @doc Get the ACL fields for the resource with the id. The id must be an integer

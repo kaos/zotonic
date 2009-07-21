@@ -63,7 +63,13 @@ event({submit, rscform, _FormId, _TargetId}, Context) ->
                                 true ->  z_render:wire("delete-button", {disable, []}, Context3);
                                 false -> z_render:wire("delete-button", {enable, []}, Context3)
                             end,
-                            z_render:growl(["Saved ",z_html:strip(Title),"."], Context4);
+                            Context5 = z_render:growl(["Saved ",z_html:strip(Title),"."], Context4),
+                            case proplists:is_defined("save_duplicate", Post) of
+                                true ->
+                                    z_render:wire({dialog_duplicate_rsc, [{id, Id}]}, Context5);
+                                false ->
+                                    Context5
+                            end;
                         _CatOther ->
                             z_render:wire({reload, []}, Context)
                     end
@@ -95,6 +101,7 @@ filter_props(Fs) ->
         "z_pageid",
         "trigger_value",
         "save_view",
+        "save_duplicate",
         "save_stay"
     ],
     lists:foldl(fun(P, Acc) -> proplists:delete(P, Acc) end, Fs, Remove).
