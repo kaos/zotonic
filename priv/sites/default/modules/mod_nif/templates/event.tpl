@@ -48,22 +48,20 @@
 						{% endwith %}
 					{% endif %}	
 							
-					{% if m.rsc[id].media[1] %}
-						<p>{% image m.rsc[id].media[1] width=444 height=90 crop %}</p>
-					{% endif %}		
-				</div>
-								
-				{% if m.rsc[id].body %}
-					{{ m.rsc[id].body }}
-				{% endif %}
-				
-				{% if m.rsc[id].media %}				
-					{% for media_id in m.rsc[id].media %}
-						{% if not media_id[1] %}
-							{% image media_id width=300 height=300 crop %}
+					{% with m.rsc[id].media as media %}
+						{% if media %}
+							<p>{% media media[1] width=444 height=90 crop %}</p>
 						{% endif %}
-					{% endfor %}
-				{% endif %}
+					{% endwith %}		
+				</div>
+
+				{{ m.rsc[id].body }}
+				
+				{% for media_id in m.rsc[id].media %}
+					{% if not forloop.first %}
+						{% media media_id width=300 height=300 crop %}
+					{% endif %}
+				{% endfor %}
 			</div>
 		</div>
 
@@ -73,11 +71,13 @@
 					
 					<h1>About {{ m.rsc[id].title }}</h1>
 					<p class="clearfix">
-						{% if m.rsc[id].media[1] %}
-							<a href="{{ m.rsc[id].page_url }}" title="{{ m.rsc[id].title }}">
-								{% image m.rsc[id].media[1] width=65 height=65 crop %}
-							</a>		
-						{% endif %}
+						{% with m.rsc[id].depiction as depiction %}
+							{% if depiction %}
+								<a href="{{ m.rsc[id].page_url }}" title="{{ m.rsc[id].title }}">
+									{% image depiction width=65 height=65 crop %}
+								</a>		
+							{% endif %}
+						{% endwith %}
 						
 						{{ m.rsc[id].summary }} <a href="{{ m.rsc[id].page_url }}" title="{{ m.rsc[id].title }}">Read more</a>
 					</p>
