@@ -4,7 +4,7 @@
 	
 	{% sorter id=#media tag={object_sorter predicate="depiction" id=id} %}
 	<ul id="{{ #media }}">
-		{% for media_id, edge_id in m.edge.o[id].depiction %} %}
+		{% for media_id, edge_id in m.edge.o[id].depiction %}
 			{% sortable id=#medium.media_id tag=edge_id %}
 			<li id="{{ #medium.media_id }}" class="edit_media left clearfix">
 				{% with m.rsc[media_id].medium as medium %}
