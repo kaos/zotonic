@@ -4,8 +4,8 @@
 	
 	{% sorter id=#media tag={object_sorter predicate="depiction" id=id} %}
 	<ul id="{{ #media }}">
-		{% for media_id in m.rsc[id].media %}
-			{% sortable id=#medium.media_id tag=media_id %}
+		{% for media_id, edge_id in m.edge.o[id].depiction %} %}
+			{% sortable id=#medium.media_id tag=edge_id %}
 			<li id="{{ #medium.media_id }}" class="edit_media left clearfix">
 				{% with m.rsc[media_id].medium as medium %}
 					<a href="{% url admin_edit_rsc id=media_id %}">{% image medium.filename width=200 height=200 crop %}</a>

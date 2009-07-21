@@ -93,8 +93,8 @@ event({postback, {reload_media, Opts}, _TriggerId, _TargetId}, Context) ->
 event({sort, Sorted, {dragdrop, {object_sorter, Props}, _, _}}, Context) ->
     RscId     = proplists:get_value(id, Props),
     Predicate = proplists:get_value(predicate, Props),
-    ObjectIds = [ ObjectId || {dragdrop, ObjectId, _, _ElementId} <- Sorted ],
-    m_edge:update_sequence(RscId, Predicate, ObjectIds, Context),
+    EdgeIds   = [ EdgeId || {dragdrop, EdgeId, _, _ElementId} <- Sorted ],
+    m_edge:update_sequence_edge_ids(RscId, Predicate, EdgeIds, Context),
     Context.
     
 

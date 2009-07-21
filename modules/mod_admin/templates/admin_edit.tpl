@@ -287,8 +287,10 @@
 												<div class="unlink-wrapper clearfix">
 													{% sorter id=#links.name tag={object_sorter predicate=name id=id} %}
 													<ul id="{{ #links.name }}" class="clearfix">
-													{% for o_id in r.o[name] %}
-														{% include "_rsc_edge.tpl" subject_id=id predicate=name object_id=o_id %}
+													{% for o_id, edge_id in m.edge.o[id][name] %}
+														{% include "_rsc_edge.tpl" subject_id=id predicate=name object_id=o_id edge_id=edge_id %}
+													{% empty %}
+														<ul>&nbsp;</ul>
 													{% endfor %}
 													</ul>
 													
