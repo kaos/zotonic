@@ -4,7 +4,7 @@
 %%
 %% @doc Some easy shortcut functions.
 
--module(zp).
+-module(z).
 -author("Marc Worrell <marc@worrell.nl").
 
 %% interface functions
