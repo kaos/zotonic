@@ -1,7 +1,7 @@
 %% @author Marc Worrell <marc@worrell.nl>
 %% @copyright 2009 Marc Worrell
 %%
-%% @doc Render the menu.  Add classes to highlight the current item.
+%% @doc Render the menu.  Add classes to highlight the current item.  The menu is always build as seen by the anonymous user.
 
 -module(scomp_menu_menu).
 -behaviour(gen_scomp).
@@ -54,7 +54,11 @@ render(Params, _Vars, Context, _State) ->
         {ok, CachedMenu} ->
             {ok, CachedMenu};
         undefined ->
-            {IdAcc, LIs} = build_menu(Menu, CurrentId, 1, [], [], Context),
+            BuildF = fun(Ctx) ->
+                build_menu(Menu, CurrentId, 1, [], [], Ctx)
+            end,
+            
+            {IdAcc, LIs} = z_acl:anondo(BuildF, Context),
             UL = ["<ul id=\"navigation\" class=\"clearfix at-menu\">", LIs, "</ul>"],
             NewMenu = iolist_to_binary(UL),
             z_depcache:set({menu, CurrentId, Context#context.language}, NewMenu, ?DAY, [CurrentId, menu | IdAcc]),
@@ -97,7 +101,7 @@ find_id(Id, [_|T]) ->
 
 
 menu_item(N, T, Id, Nr, Context) ->
-    case m_rsc:exists(N, Context) of
+    case m_rsc:exists(N, Context) andalso m_rsc:is_visible(N, Context) of
         true ->
             First = case Nr of 1 -> " first "; _ -> [] end,
             Last  = case T of [] -> " last "; _ -> [] end,

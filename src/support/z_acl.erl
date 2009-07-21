@@ -18,6 +18,7 @@
     rsc_ingroup/2,
     group_editable/2,
     sudo/2,
+    anondo/2,
     logon/2,
     logoff/1,
     default/2,
@@ -95,8 +96,7 @@ group_editable(GroupId, Context) ->
 sudo({M,F}, Context) ->
     erlang:apply(M, F, [set_admin(Context)]);
 sudo({M,F,A}, Context) ->
-    ContextSu = set_admin(Context),
-    erlang:apply(M, F, A ++ [ContextSu]);
+    erlang:apply(M, F, A ++ [set_admin(Context)]);
 sudo(F, Context) when is_function(F, 1) ->
     F(set_admin(Context)).
 
@@ -106,6 +106,19 @@ sudo(F, Context) when is_function(F, 1) ->
         Acl  = Context#context.acl,
         Acl1 = Acl#acl{is_admin=true},
         Context#context{acl=Acl1}.
+
+
+%% @doc Call a function as the anonymous user.
+%% @spec anondo(FuncDef, #context) -> FuncResult
+anondo({M,F}, Context) ->
+    erlang:apply(M, F, [set_anonymous(Context)]);
+anondo({M,F,A}, Context) ->
+    erlang:apply(M, F, A ++ [set_anonymous(Context)]);
+anondo(F, Context) when is_function(F, 1) ->
+    F(set_anonymous(Context)).
+
+    set_anonymous(Context) ->
+        Context#context{acl=#acl{}, user_id=undefined}.
 
 
 %% @doc Log the user with the id on, fill the acl field of the context
