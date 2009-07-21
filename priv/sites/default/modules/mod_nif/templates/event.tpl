@@ -58,9 +58,7 @@
 				{{ m.rsc[id].body }}
 				
 				{% for media_id in m.rsc[id].media %}
-					{% if not forloop.first %}
-						{% media media_id width=300 height=300 crop %}
-					{% endif %}
+					{% media media_id width=300 height=300 crop %}
 				{% endfor %}
 			</div>
 		</div>
