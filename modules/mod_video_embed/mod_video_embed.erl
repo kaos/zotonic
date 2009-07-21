@@ -129,7 +129,7 @@ event({submit, {add_video_embed, EventProps}, _TriggerId, _TargetId}, Context) -
                             end;
                         _ -> Context
                     end,
-                    z_render:wire([{growl, [{text, "Made the media page."}]} | Actions], ContextRedirect);
+                    z_render:wire([{dialog_close, []}, {growl, [{text, "Made the media page."}]} | Actions], ContextRedirect);
                 {rollback, {_Error, _Trace}} ->
                     ?ERROR("~p~n~p", [_Error, _Trace]),
                     z_render:growl_error("Could not create the media page.", Context)
