@@ -88,9 +88,15 @@ event({postback, {reload_media, Opts}, _TriggerId, _TargetId}, Context) ->
     RscId = proplists:get_value(rsc_id, Opts),
     DivId = proplists:get_value(div_id, Opts),
     {Html, Context1} = z_template:render_to_iolist("_edit_media.tpl", [{id,RscId}], Context),
-    z_render:update(DivId, Html, Context1).
+    z_render:update(DivId, Html, Context1);
 
-
+event({sort, Sorted, {dragdrop, {object_sorter, Props}, _, _}}, Context) ->
+    RscId     = proplists:get_value(id, Props),
+    Predicate = proplists:get_value(predicate, Props),
+    ObjectIds = [ ObjectId || {dragdrop, ObjectId, _, _ElementId} <- Sorted ],
+    m_edge:update_sequence(RscId, Predicate, ObjectIds, Context),
+    Context.
+    
 
 %% @doc Remove some properties that are part of the postback
 filter_props(Fs) ->

@@ -285,11 +285,12 @@
 											{% ifnotequal name "depiction" %}
 												<h4>{{ p.title }}</h4>
 												<div class="unlink-wrapper clearfix">
-													<div id="links-{{id}}-{{name}}" class="clearfix">
+													{% sorter id=#links.name tag={object_sorter predicate=name id=id} %}
+													<ul id="{{ #links.name }}" class="clearfix">
 													{% for o_id in r.o[name] %}
 														{% include "_rsc_edge.tpl" subject_id=id predicate=name object_id=o_id %}
 													{% endfor %}
-													</div>
+													</ul>
 													
 													{% if is_editable %}
 														{% link_add subject_id=id predicate=name %}

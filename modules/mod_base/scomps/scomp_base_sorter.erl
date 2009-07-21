@@ -101,7 +101,7 @@ event({postback, {SortTag,SortDelegate}, TriggerId, _TargetId}, Context) ->
 	    SortDelegate:event({sort, Sorted, Drop}, Context)
     catch
         _M:E ->
-            Error = io_lib:format("Error in routing sort to \"~s:sort_event/3\"; error: \"~p\"", [SortDelegate,E]),
+            Error = io_lib:format("Error in routing sort to \"~s:event/2\"; error: \"~p\"", [SortDelegate,E]),
             z_render:wire({growl, [{text,Error}, {stay,1}, {type, error}]}, Context)
     end.
 

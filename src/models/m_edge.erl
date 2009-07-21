@@ -21,6 +21,7 @@
     subjects/3,
     objects/2,
     subjects/2,
+    update_sequence/4,
     object_predicates/2,
     subject_predicates/2,
     object_predicate_ids/2,
@@ -177,6 +178,43 @@ subjects(Id, Context) ->
         [ SubjId || {SubjId} <- Ids]
     end,
     z_depcache:memo(F, {subjects, Id}, ?HOUR, [Id]).
+
+
+%% @doc Reorder the edges so that the mentioned ids are in front, in the listed order.
+%% @spec update_sequence(Id, Predicate, ObjectIds, Context) -> ok | {error, Reason}
+update_sequence(Id, Pred, ObjectIds, Context) ->
+    case z_acl:rsc_editable(Id, Context) of
+        true ->
+            PredId = m_predicate:name_to_id_check(Pred, Context),
+            F = fun(Ctx) ->
+                All = z_db:q("
+                            select object_id, id 
+                            from edge 
+                            where predicate_id = $1
+                              and subject_id = $2", [PredId, Id], Ctx),
+                
+                MissingIds = lists:foldl(
+                            fun({OId, _}, Acc) ->
+                                case lists:member(OId, ObjectIds) of
+                                    true -> Acc;
+                                    false -> [OId | Acc]
+                                end
+                            end,
+                            [],
+                            All),
+
+                SortedIds = ObjectIds ++ lists:reverse(MissingIds),
+                SortedEdgeIds = [ proplists:get_value(OId, All, -1) || OId <- SortedIds ],
+                z_db:update_sequence(edge, SortedEdgeIds, Ctx),
+                ok
+            end,
+            
+            Result = z_db:transaction(F, Context),
+            z_depcache:flush(Id),
+            Result;
+        false ->
+            {error, eacces}
+    end.
 
 
 %% @doc Return the list of predicates in use by edges to objects from the id
