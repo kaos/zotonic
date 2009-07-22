@@ -24,7 +24,7 @@
 				{% include "_view.tpl" %}
 				
 				<div class="program-filter-wrapper" style="padding: 6px;">
-					<h5>Please use these buttons to filter the program</h5>
+					<h5>Please use these tools to filter the program by day and genre.</h5>
 					<div class="program-day-wrapper clearfix">
 						<a href="#" class="button">9 september</a>
 						<a href="#" class="button selected">10 september</a>
