@@ -20,7 +20,7 @@
 {% if m.rsc[id].media %}
 	{% for media_id in m.rsc[id].media %}
 		{% if not forloop.first %}
-			<p class="block-image">
+			<p class="block-image clear">
 				{% image media_id width=580 alt=m.rsc[media_id].title %}
 				{% if media_id.summary %}
 					<span class="block-image-caption">{{ media_id.summary }}</span>

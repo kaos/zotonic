@@ -275,6 +275,23 @@ span.block-image-caption {
 	color: #666;
 }
 
+
+/* forms
+------------------------------------------------------ */
+
+input[type="checkbox"] {
+	vertical-align: text-bottom;
+	margin: 3px 3px 0 0;
+}
+
+label {
+	width: auto;
+	color: #666;
+	margin: 0 18px 0 0;
+	font-size: 12px;
+}
+
+
 /* pages - home
 ------------------------------------------------------ */
 
@@ -318,6 +335,11 @@ h1#home-header {
 /* pages - program
 -------------------------------------------------------- */
 
+.list-headers {
+	color: #666;
+	font-size: 12px;
+}
+
 ul.program-list {
 	margin: 0 0 18px 0;
 }
@@ -327,6 +349,10 @@ ul.program-list li {
 	padding: 0 0 36px 0;
 	border-bottom: 1px dotted #888;
 }
+	
+	ul.program-list li.uneven {
+		background: #f9f9f9;
+	}
 
 	ul.program-list li p {
 		margin: 0;
@@ -369,6 +395,27 @@ li p.event-info {
 	li p.event-info a:hover {
 		color: #4192b9;
 	}
+	
+.program-genres-wrapper {
+	margin: 0 0 9px 0;
+	padding: 0 0 9px 0;
+	border-bottom: 1px solid #f1f1f1;
+}
+
+.program-day-wrapper {
+	margin: 0 0 6px 0;
+}
+
+.program-day-wrapper a.selected {
+	font-weight: bold;
+	border: 1px solid #000;
+	color: #000;
+}
+
+	.program-day-wrapper a.button {
+		margin: 0 3px 0 0;
+	}
+
 
 /* pages - news
 --------------------------------------------------------*/
@@ -425,16 +472,16 @@ ul.performance-genres {
 /* pages - artists
 --------------------------------------------------------*/
 
-ul.artists-list {
+.artsits-list {
 	margin: 0 0 18px 0;
 }
 
-ul.artists-list li {
+.artsits-list li {
 	margin: 0 0 26px 0;
 	padding: 0 0 36px 0;
 	border-bottom: 1px dotted #888;
 }
 
-	ul.artists-list li p {
+	.artsits-list li p {
 		margin: 0;
 	}

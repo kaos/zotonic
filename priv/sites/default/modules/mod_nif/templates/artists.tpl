@@ -31,13 +31,17 @@
 	
 							<li class="clearfix">
 								<h2><a href="{{ m.rsc[id].page_url }}" title="{{ m.rsc[id].title }}">{{ m.rsc[id].title }}</a></h2>
+								{% if m.rsc[id].media[1] %}
 								<div class="item-image left">
 									<a href="{{ m.rsc[id].page_url }}" title="{{ m.rsc[id].title }}">
 										{% image m.rsc[id].media[1] width=180 height=90 crop %}
 									</a>
 								</div>
-	
-								<p>{{ m.rsc[id].summary }}</p>
+								{% endif %}
+							
+								{% if m.rsc[id].summary %}
+									<p>{{ m.rsc[id].summary }}</p>
+								{% endif %}
 							</li>	
 						{% empty %}
 							<li>

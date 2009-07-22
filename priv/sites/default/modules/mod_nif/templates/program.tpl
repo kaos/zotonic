@@ -22,14 +22,36 @@
 		<div id="content" class="zp-65">
 			<div class="padding">
 				{% include "_view.tpl" %}
-							
+				
+				<div class="program-day-wrapper clearfix">
+					<a href="#" class="button">9 september</a>
+					<a href="#" class="button selected">10 september</a>
+					<a href="#" class="button">11 september</a>
+					<a href="#" class="button">17 september</a>
+					<a href="#" class="button">18 september</a>
+					<a href="#" class="button">19 september</a>
+				</div>
+				
+				<div class="program-genres-wrapper clearfix">
+					<div class="form-item left"><label><input type="checkbox" name="genre" value="rock" />Rock</label></div>
+					<div class="form-item left"><label><input type="checkbox" name="genre" value="rock" />For kids</label></div>
+					<div class="form-item left"><label><input type="checkbox" name="genre" value="rock" />Non english</label></div>
+					<div class="form-item left"><label><input type="checkbox" name="genre" value="Dance" />Dance</label></div>
+					<div class="form-item left"><label><input type="checkbox" name="genre" value="Play" />Play</label></div>
+					<div class="form-item left"><label><input type="checkbox" name="genre" value="Music" />Music</label></div>
+				</div>
+				
 				{% with m.search[{upcoming cat="event"}] as result %}
 
-					<ul class="program-list clearfix">
-
+					<div class="list-headers">
+						<span class="zp-33">Performance</span>
+						<span class="zp-33">Date</span>
+						<span class="zp-33">Artist</span>
+					</div>
+					<ul class="program-list clear clearfix">
 						{% for id in result %}
 	
-							<li class="clearfix performance-info-wrapper">
+							<li class="clearfix performance-info-wrapper {% cycle 'even' 'uneven' %}">
 								<span class="artist zp-33"><a href="{{ m.rsc[id].page_url }}" title="{{ m.rsc[id].title }}">{{ m.rsc[id].title }}</a></span>
 								
 								{% if m.rsc[id].date_start %}
