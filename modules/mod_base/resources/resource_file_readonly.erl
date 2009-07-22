@@ -58,10 +58,11 @@
 init(ConfigProps) ->
     UseCache       = proplists:get_value(use_cache, ConfigProps, false),
     {root, Root}   = proplists:lookup(root, ConfigProps),
+    Path           = proplists:get_value(path, ConfigProps),
     IsMediaPreview = proplists:get_value(is_media_preview, ConfigProps, false),
     MediaPath      = proplists:get_value(media_path, ConfigProps, ?MEDIA_PATH),
     ContentDisposition = proplists:get_value(content_disposition, ConfigProps),
-    {ok, #state{root=Root, use_cache=UseCache, is_media_preview=IsMediaPreview, media_path=MediaPath, content_disposition=ContentDisposition}}.
+    {ok, #state{path=Path, root=Root, use_cache=UseCache, is_media_preview=IsMediaPreview, media_path=MediaPath, content_disposition=ContentDisposition}}.
     
 allowed_methods(ReqData, State) ->
     {['HEAD', 'GET'], ReqData, State}.
@@ -69,7 +70,10 @@ allowed_methods(ReqData, State) ->
 content_types_provided(ReqData, State) ->
     case State#state.mime of
         undefined ->
-            Path = wrq:disp_path(ReqData),
+            Path = case State#state.path of
+                undefined -> wrq:disp_path(ReqData);
+                ConfiguredPath -> ConfiguredPath
+            end, 
             CT = z_utils:guess_mime(Path),
             {[{CT, provide_content}], ReqData, State#state{mime=CT}};
         Mime -> 
@@ -90,7 +94,10 @@ encodings_provided(ReqData, State) ->
 
 resource_exists(ReqData, State) ->
     Context = z_context:new(ReqData, ?MODULE),
-    Path   = wrq:disp_path(ReqData),
+    Path = case State#state.path of
+        undefined -> wrq:disp_path(ReqData);
+        ConfiguredPath -> ConfiguredPath
+    end, 
     Cached = case State#state.use_cache of
         true -> z_depcache:get(cache_key(Path));
         _    -> undefined

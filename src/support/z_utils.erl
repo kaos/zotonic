@@ -426,10 +426,9 @@ replace1(F, T, [C|R], Acc) ->
 %% @doc  Guess the mime type of a file by the extension of its filename.
 guess_mime(File) ->
     case filename:extension(File) of
-	".htm" ->
-	    "text/html";
-	_ ->
-	    webmachine_util:guess_mime(File)
+	".htm" -> "text/html";
+	".ico" -> "image/vnd.microsoft.icon";
+	_ -> webmachine_util:guess_mime(File)
 end.
 
 

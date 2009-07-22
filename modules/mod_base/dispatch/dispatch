@@ -1,31 +1,55 @@
-%% Default dispatch rules for zotonic
+%% Base dispatch rules for zotonic
 [
-	{home,     [],            resource_template, [ {template, "home.tpl"} ]},
-	{comet,    ["comet"],     resource_comet, []},
-	{postback, ["postback"],  resource_postback, []},
-	{close_connection, ["close-connection"],  resource_close_connection, []},
+    %% The home page, just shows the "home.tpl" template.
+    {home,     [],            resource_template, [ {template, "home.tpl"} ]},
 
-	{page,    ["page", id],       resource_page, [ {template, "page.tpl"} ]},
-	{page,    ["page", id, slug], resource_page, [ {template, "page.tpl"} ]},
+    %% Comet connection, used with long polls from the browser.
+    {comet,    ["comet"],     resource_comet, []},
+    
+    %% Postback of events from the browser to the server, dispatched from the postback resource.
+    {postback, ["postback"],  resource_postback, []},
+    
+    %% Used in Ajax file upload, fixes a problem in Safari.  Just closes the connection.
+    {close_connection, ["close-connection"],  resource_close_connection, []},
 
-	{id,	   ["id", id],	  resource_id, []},
+    %% Normal page to show a resource.
+    {page,    ["page", id],       resource_page, [ {template, "page.tpl"} ]},
+    {page,    ["page", id, slug], resource_page, [ {template, "page.tpl"} ]},
 
-	{lib,      ["lib",'*'],   resource_lib, [ {use_cache, false} ]},
+    %% The id controller redirects depending on the accept header sent by the user agent.
+    {id,       ["id", id],    resource_id, []},
 
-	{image,    ["image",'*'], resource_file_readonly, [ 
-											{root,["priv/sites/default/files/preview"]}, 
-											{use_cache, false},
-											{is_media_preview, true},
-											{media_path, "priv/sites/default/files/archive"}
-										]},
-	{media_inline, ["media","inline",'*'], resource_file_readonly, [ 
-											{root,["priv/sites/default/files/archive"]}, 
-											{use_cache, false},
-											{content_disposition, inline}
-										]},
-	{media_attachment, ["media","attachment",'*'], resource_file_readonly, [ 
-											{root,["priv/sites/default/files/archive"]}, 
-											{use_cache, false},
-											{content_disposition, attachment}
-										]}											
+    % CSS and Javascript files from the "lib" module folder. Possibly more than one file combined in one request.
+    {lib,      ["lib",'*'],   resource_lib, [ {use_cache, false} ]},
+
+    %% Resized images, expects resize parameters and a checksum. Places resized images in the root folder.
+    %% The original images must be present in the media_path.
+    {image,    ["image",'*'], resource_file_readonly, [ 
+                                            {root,["priv/sites/default/files/preview"]}, 
+                                            {use_cache, false},
+                                            {is_media_preview, true},
+                                            {media_path, "priv/sites/default/files/archive"}
+                                        ]},
+    
+    %% Inline display of original uploaded files. Assumes the files are in the root folder.
+    {media_inline, ["media","inline",'*'], resource_file_readonly, [ 
+                                            {root,["priv/sites/default/files/archive"]}, 
+                                            {use_cache, false},
+                                            {content_disposition, inline}
+                                        ]},
+
+    %% Download of original uploaded files. Assumes the files are in the root folder.
+    {media_attachment, ["media","attachment",'*'], resource_file_readonly, [ 
+                                            {root,["priv/sites/default/files/archive"]}, 
+                                            {use_cache, false},
+                                            {content_disposition, attachment}
+                                        ]},
+
+    %% Serves the favicon.ico from "lib/images/favicon.ico" in the modules.
+    {favicon, ["favicon.ico"], resource_file_readonly, [ 
+                                            {path, "images/favicon.ico"},
+                                            {root,[lib]}, 
+                                            {use_cache, false},
+                                            {content_disposition, inline}
+                                        ]}
 ].
