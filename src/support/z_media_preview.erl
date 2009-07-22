@@ -46,7 +46,7 @@ convert(InFile, OutFile, Filters, Context) ->
                     Cmd     = ["convert \"", z_utils:os_escape(InFile), "[0]\" ", Args1, " \"", z_utils:os_escape(OutFile), "\""],
                     file:delete(OutFile),
                     ok = filelib:ensure_dir(OutFile),
-                    Result  = os:cmd(lists:flatten(Cmd)),
+                    Result  = z_media_preview_server:exec(lists:flatten(Cmd), OutFile),
                     case filelib:is_regular(OutFile) of
                         true ->
                             ok;
@@ -345,6 +345,6 @@ test() ->
     Filters = [{crop,center}, {width,80}, {height,80}],
     {_W,_H,Args} = cmd_args(Props, Filters),
     CmdArgs = lists:flatten(z_utils:combine(32, Args)),
-    "  -gravity Center -extent 122x80 -thumbnail 122x80\\! -gravity NorthWest -crop 80x80+21+0 +repage   -unsharp 0.3x0.7  -quality 100" = CmdArgs,
+    "-background \"white\"   -gravity Center -extent 122x80 -thumbnail 122x80\\! -gravity NorthWest -crop 80x80+21+0 +repage -colorspace \"RGB\"   -unsharp 0.3x0.7  -quality 99" = CmdArgs,
     ok.
 

@@ -119,6 +119,10 @@ init([]) ->
                 {z_pivot_rsc, start_link, []}, 
                 permanent, 5000, worker, dynamic},
 
+    PreviewServer = {z_media_preview_server,
+                {z_media_preview_server, start_link, []}, 
+                permanent, 5000, worker, dynamic},
+
     ModuleIndexer = {z_module_indexer,
                 {z_module_indexer, start_link, []},
                 permanent, 5000, worker, dynamic},
@@ -129,7 +133,7 @@ init([]) ->
 
     Processes = [
             MochiWeb, Ids, Postgres, Depcache, Notifier, Installer, Session, Visitor, 
-            Dispatcher, Template, Scomp, DropBox, Pivot,
+            Dispatcher, Template, Scomp, DropBox, Pivot, PreviewServer,
             ModuleIndexer, Modules
     ],
     {ok, {{one_for_one, 1000, 10}, Processes}}.
