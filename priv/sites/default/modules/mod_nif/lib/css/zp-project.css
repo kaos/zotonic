@@ -420,3 +420,11 @@ ul.performance-genres {
 		color: #666;
 		font-style: italic;
 	}
+	
+	
+/* pages - artists
+--------------------------------------------------------*/
+
+ul.artists-list li {
+	margin: 0 0 36px 0;
+}

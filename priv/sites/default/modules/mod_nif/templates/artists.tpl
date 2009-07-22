@@ -25,7 +25,7 @@
 							
 				{% with m.search[{latest cat="artist"}] as result %}
 
-					<ul class="program-list clearfix">
+					<ul class="artsits-list clearfix">
 
 						{% for id in result %}
 	
