@@ -97,6 +97,9 @@ Nonterminals
     Filter
 	AutoId
 	
+	LibTag
+	LibList
+	
     LoadTag
     LoadNames
     
@@ -151,6 +154,7 @@ Terminals
 	image_url_keyword
     in_keyword
     include_keyword
+	lib_keyword
     load_keyword
 	media_keyword
     not_keyword
@@ -190,6 +194,7 @@ Elements -> Elements TransTag : '$1' ++ ['$2'].
 Elements -> Elements ExtendsTag : '$1' ++ ['$2'].
 Elements -> Elements IncludeTag : '$1' ++ ['$2'].
 Elements -> Elements NowTag : '$1' ++ ['$2'].
+Elements -> Elements LibTag : '$1' ++ ['$2'].
 Elements -> Elements LoadTag : '$1' ++ ['$2'].
 Elements -> Elements CycleTag : '$1' ++ ['$2'].
 Elements -> Elements BlockBlock : '$1' ++ ['$2'].
@@ -210,6 +215,7 @@ Elements -> Elements MediaTag : '$1' ++ ['$2'].
 Elements -> Elements TransExtTag : '$1' ++ ['$2'].
 Elements -> Elements WithBlock : '$1' ++ ['$2'].
 
+
 ValueBraced -> open_var Value close_var : '$2'.
 
 TransTag -> open_trans trans_text close_trans : {trans, '$2'}.
@@ -220,6 +226,10 @@ NowTag -> open_tag now_keyword string_literal close_tag : {date, now, '$3'}.
 
 OptionalAll -> all_keyword : true.
 OptionalAll -> '$empty' : false.
+
+LibTag -> open_tag lib_keyword LibList close_tag : {lib, '$3'}.
+LibList -> string_literal : ['$1'].
+LibList -> LibList string_literal : '$1' ++ ['$2'].
 
 LoadTag -> open_tag load_keyword LoadNames close_tag : {load, '$3'}.
 LoadNames -> identifier : ['$1'].

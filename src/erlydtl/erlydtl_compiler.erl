@@ -386,6 +386,8 @@ body_ast(DjangoParseTree, Context, TreeWalker) ->
                 url_ast(Name, Args, Context, TreeWalkerAcc);
             ({'print', Value}, TreeWalkerAcc) ->
                 print_ast(Value, Context, TreeWalkerAcc);
+            ({'lib', LibList}, TreeWalkerAcc) ->
+                lib_ast(LibList, Context, TreeWalkerAcc);
             (ValueToken, TreeWalkerAcc) -> 
                 {{ValueAst,ValueInfo},ValueTreeWalker} = value_ast(ValueToken, true, Context, TreeWalkerAcc),
                 {{format(ValueAst, Context),ValueInfo},ValueTreeWalker}
@@ -1194,7 +1196,6 @@ url_ast(Name, Args, Context, TreeWalker) ->
     {{AppAst, #ast_info{}}, TreeWalker1}.  
 
 
-
 print_ast(Value, Context, TreeWalker) ->
     ValueAst = resolve_value_ast(Value, Context, TreeWalker),
     PrintAst = erl_syntax:application(
@@ -1220,6 +1221,18 @@ print_ast(Value, Context, TreeWalker) ->
                 erl_syntax:string("</pre>")
             ]),
     {{PreAst, #ast_info{}}, TreeWalker}. 
+
+
+lib_ast(LibList, _Context, TreeWalker) ->
+    Libs = [ unescape_string_literal(V) || {string_literal, _, V} <- LibList ],
+    LibsAst = erl_syntax:list([ erl_syntax:string(L) || L <- Libs ]),
+    Ast = erl_syntax:application(
+                erl_syntax:atom(z_lib_include),
+                erl_syntax:atom(tag),
+                [   LibsAst,
+                    erl_syntax:variable("ZpContext")
+                ]),
+    {{Ast, #ast_info{}}, TreeWalker}.
 
 
 resolve_value_ast(Value, Context, TreeWalker) ->

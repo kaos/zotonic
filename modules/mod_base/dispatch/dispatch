@@ -10,10 +10,8 @@
 
 	{id,	   ["id", id],	  resource_id, []},
 
-	{lib,      ["lib",'*'],   resource_file_readonly, [ 
-											{root,[lib]}, 
-											{use_cache, false}
-										]},
+	{lib,      ["lib",'*'],   resource_lib, [ {use_cache, false} ]},
+
 	{image,    ["image",'*'], resource_file_readonly, [ 
 											{root,["priv/sites/default/files/preview"]}, 
 											{use_cache, false},

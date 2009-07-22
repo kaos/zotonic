@@ -6,15 +6,16 @@
 
 	<meta name="author" content="Tim Benniks" />
 	
-	<link href="/lib/css/zp-compressed.css" type="text/css" media="screen" rel="stylesheet" />
-	<link href="/lib/css/zp-admin.css" type="text/css" media="screen" rel="stylesheet" />
+	{% lib 
+		"css/zp-compressed.css"
+		"css/zp-admin.css"
+		"css/zp-wysiwyg.css"
+		"css/zp-dialog.css"
+		"css/zp-formreplace.css"
+		"css/zp-finder.css"
+		"css/zp-growl.css"
+	%}
 
-	<link href="/lib/css/zp-wysiwyg.css" type="text/css" media="screen" rel="stylesheet" />
-	<link href="/lib/css/zp-dialog.css" type="text/css" media="screen" rel="stylesheet" />
-	<link href="/lib/css/zp-formreplace.css" type="text/css" media="screen" rel="stylesheet" />
-	<link href="/lib/css/zp-finder.css" type="text/css" media="screen" rel="stylesheet" />
-	<link href="/lib/css/zp-growl.css" type="text/css" media="screen" rel="stylesheet" />
-	
 	<!--[if IE]><link href="/lib/css/zp-ie.css" type="text/css" media="screen" rel="stylesheet" /><![endif]-->
 </head>
 <body class="zp-wide">

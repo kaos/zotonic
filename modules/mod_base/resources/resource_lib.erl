@@ -1,17 +1,14 @@
 %% @author Marc Worrell <marc@worrell.nl>
 %% @copyright 2009 Marc Worrell
 %%
-%% @doc Serve static (image) files from a configured list of directories or template lookup keys.  Caches files in the local depcache.
-%% Is also able to generate previews (if configured to do so).
+%% @doc Serve static library files (css and js).  Library files can be combined in one path, using z_lib_include:tag/2
 %%
 %% Serves files like:
 %% 
-%% /image/2007/03/31/wedding.jpg(300x300)(crop-center)(709a-a3ab6605e5c8ce801ac77eb76289ac12).jpg
-%% /media/inline/<filepath>
-%% /media/attachment/<filepath>
+%% /lib/<filepath>
 
 
--module(resource_file_readonly).
+-module(resource_lib).
 -export([init/1]).
 -export([allowed_methods/2,
 	 resource_exists/2,
@@ -30,12 +27,10 @@
 %% These are used for file serving (move to metadata)
 -record(state, {
         root=undefined,
-        media_path=undefined,
-        is_media_preview=false,
         content_disposition=undefined,
         use_cache=false,
         encode_data=false,
-        fullpath=undefined,
+        fullpaths=undefined,
         is_cached=false,
         path=undefined,
         mime=undefined,
@@ -45,23 +40,19 @@
 
 -record(cache, {
     path=undefined,
-    fullpath=undefined,
+    fullpaths=undefined,
     mime=undefined,
     last_modified=undefined,
     body=undefined
     }).
 
 -define(MAX_AGE, 315360000).
--define(MEDIA_PATH,   filename:join([code:lib_dir(zotonic, priv), "sites", "default", "files", "archive"])).
-
 
 init(ConfigProps) ->
-    UseCache       = proplists:get_value(use_cache, ConfigProps, false),
-    {root, Root}   = proplists:lookup(root, ConfigProps),
-    IsMediaPreview = proplists:get_value(is_media_preview, ConfigProps, false),
-    MediaPath      = proplists:get_value(media_path, ConfigProps, ?MEDIA_PATH),
+    UseCache = proplists:get_value(use_cache, ConfigProps, false),
+    Root = proplists:get_value(root, ConfigProps, [lib]),
     ContentDisposition = proplists:get_value(content_disposition, ConfigProps),
-    {ok, #state{root=Root, use_cache=UseCache, is_media_preview=IsMediaPreview, media_path=MediaPath, content_disposition=ContentDisposition}}.
+    {ok, #state{root=Root, use_cache=UseCache, content_disposition=ContentDisposition}}.
     
 allowed_methods(ReqData, State) ->
     {['HEAD', 'GET'], ReqData, State}.
@@ -97,24 +88,20 @@ resource_exists(ReqData, State) ->
     end,
     case Cached of
         undefined ->
-            case file_exists(State, Path, Context) of 
-            	{true, FullPath} -> 
-            	    {true, ReqData, State#state{path=Path, fullpath=FullPath}};
-            	_ -> 
-            	    %% We might be able to generate a new preview
-            	    case State#state.is_media_preview of
-            	        true ->
-            	            % Generate a preview, recurse on success
-            	            ensure_preview(ReqData, Path, State);
-            	        false ->
-                    	    {false, ReqData, State}
-            	    end
+            Paths = z_lib_include:uncollapse(Path),
+            FullPaths = [ file_exists(State, P, Context) || P <- Paths ],
+            case lists:member(false, FullPaths) of
+                true ->
+                    {false, ReqData, State};
+                false ->
+                    FullPaths1 = [ P || {true, P} <- FullPaths ],
+                    {true, ReqData, State#state{path=Path, fullpaths=FullPaths1}}
             end;
         {ok, Cache} ->
             {true, ReqData, State#state{
                             is_cached=true,
                             path=Cache#cache.path,
-                            fullpath=Cache#cache.fullpath,
+                            fullpaths=Cache#cache.fullpaths,
                             mime=Cache#cache.mime,
                             last_modified=Cache#cache.last_modified,
                             body=Cache#cache.body
@@ -131,12 +118,23 @@ last_modified(ReqData, State) ->
     RD1 = wrq:set_resp_header("Cache-Control", "public, max-age="++integer_to_list(?MAX_AGE), ReqData),
     case State#state.last_modified of
         undefined -> 
-            LMod = filelib:last_modified(State#state.fullpath),
+            LMod = max_last_modified(State#state.fullpaths, {{1970,1,1},{12,0,0}}),
             {LMod, RD1, State#state{last_modified=LMod}};
         LMod ->
             {LMod, RD1, State}
     end.
 
+    %% @doc Find the latest modification time of a list of files.
+    max_last_modified([], Mod) ->
+        Mod;
+    max_last_modified([F|Rest], Mod) ->
+        LMod = filelib:last_modified(F),
+        case LMod > Mod of
+            true -> max_last_modified(Rest, LMod);
+            false -> max_last_modified(Rest, Mod)
+        end.
+
+        
 expires(ReqData, State) ->
     NowSecs = calendar:datetime_to_gregorian_seconds(calendar:universal_time()),
     {calendar:gregorian_seconds_to_datetime(NowSecs + ?MAX_AGE), ReqData, State}.
@@ -149,10 +147,15 @@ provide_content(ReqData, State) ->
     end,
     {Content, State1} = case State#state.body of
         undefined ->
-            {ok, Data} = file:read_file(State#state.fullpath),
+            Data = [ read_data(F) || F <- State#state.fullpaths ],
+            Data1 = case State#state.mime of
+                "text/javascript" -> z_utils:combine([$;, $\n], Data);
+                "application/x-javascript" -> z_utils:combine([$;, $\n], Data);
+                _ -> z_utils:combine($\n, Data)
+            end,
             Body = case State#state.encode_data of 
-                true -> encode_data(Data);
-                false -> Data
+                true -> encode_data(Data1);
+                false -> Data1
             end,
             {Body, State#state{body=Body}};
         Body -> 
@@ -160,7 +163,11 @@ provide_content(ReqData, State) ->
     end,
     {Content, RD1, State1}.
     
+    read_data(F) ->
+        {ok, Data} = file:read_file(F),
+        Data.
     
+
 finish_request(ReqData, State) ->
     case State#state.is_cached of
         false ->
@@ -173,7 +180,7 @@ finish_request(ReqData, State) ->
                             % Cache the served file in the depcache.  Cache it for 3600 secs.
                             Cache = #cache{
                                         path=State#state.path,
-                                        fullpath=State#state.fullpath,
+                                        fullpaths=State#state.fullpaths,
                                         mime=State#state.mime,
                                         last_modified=State#state.last_modified,
                                         body=State#state.body
@@ -238,37 +245,10 @@ is_text("application/xml") -> true;
 is_text(_Mime) -> false.
 
 
-%% @spec ensure_preview(ReqData, Path, State) -> {Boolean, State}
-%% @doc Generate the file on the path from an archived media file.
-%% The path is like: 2007/03/31/wedding.jpg(300x300)(crop-center)(709a-a3ab6605e5c8ce801ac77eb76289ac12).jpg
-%% The original media should be in State#media_path
-%% The generated image should be created in State#root
-ensure_preview(ReqData, Path, State) ->
-    {Filepath, PreviewPropList, _Checksum, _ChecksumBaseString} = z_media_tag:url2props(Path),
-    case mochiweb_util:safe_relative_path(Filepath) of
-        undefined ->
-            {false, ReqData, State};
-        Safepath  ->
-            Context = z_context:new(ReqData, ?MODULE),
-            MediaFile = filename:join(State#state.media_path, Safepath),
-            case filelib:is_regular(MediaFile) of
-                true ->
-                    % Media file exists, perform the resize
-                    % @todo make use of a resize server, so that we do not resize too many files at the same time.
-                    [Root|_] = State#state.root,
-                    PreviewFile = filename:join(Root, Path),
-                    case z_media_preview:convert(MediaFile, PreviewFile, PreviewPropList, Context) of
-                        ok -> resource_exists(ReqData, State);
-                        {error, Reason} -> throw(Reason)
-                    end;
-                false ->
-                    {false, ReqData, State}
-            end
-    end.
-
-
 
 %% Encode the data so that the identity variant comes first and then the gzip'ed variant
+encode_data(Data) when is_list(Data) ->
+    encode_data(iolist_to_binary(Data));
 encode_data(Data) when is_binary(Data) ->
     Gzip = zlib:gzip(Data),
     Size = size(Data),
