@@ -396,10 +396,25 @@ li p.event-info {
 		color: #4192b9;
 	}
 	
+.program-filter-wrapper {
+	margin: 0 0 18px 0;
+	padding: 6px;
+	border: 1px solid #e0e0e0;
+	background: #f2f2f2;
+}
+
+	.program-filter-wrapper h5 {
+		color: #888;
+		font-size: 12px;
+		margin: 0 0 6px 0;
+	}
+
 .program-genres-wrapper {
-	margin: 0 0 9px 0;
-	padding: 0 0 9px 0;
-	border-bottom: 1px solid #f1f1f1;
+	margin: 0 0 18px 0;
+}
+
+.program-genres-wrapper .form-item {
+	margin: 0;
 }
 
 .program-day-wrapper {

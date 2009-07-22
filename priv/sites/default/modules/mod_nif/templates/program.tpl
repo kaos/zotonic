@@ -23,23 +23,32 @@
 			<div class="padding">
 				{% include "_view.tpl" %}
 				
-				<div class="program-day-wrapper clearfix">
-					<a href="#" class="button">9 september</a>
-					<a href="#" class="button selected">10 september</a>
-					<a href="#" class="button">11 september</a>
-					<a href="#" class="button">17 september</a>
-					<a href="#" class="button">18 september</a>
-					<a href="#" class="button">19 september</a>
-				</div>
+				<div class="program-filter-wrapper" style="padding: 6px;">
+					<h5>Please uses there buttons to filter the program</h5>
+					<div class="program-day-wrapper clearfix">
+						<a href="#" class="button">9 september</a>
+						<a href="#" class="button selected">10 september</a>
+						<a href="#" class="button">11 september</a>
+						<a href="#" class="button">17 september</a>
+						<a href="#" class="button">18 september</a>
+						<a href="#" class="button">19 september</a>
+					</div>
 				
-				<div class="program-genres-wrapper clearfix">
-					<div class="form-item left"><label><input type="checkbox" name="genre" value="rock" />Rock</label></div>
-					<div class="form-item left"><label><input type="checkbox" name="genre" value="rock" />For kids</label></div>
-					<div class="form-item left"><label><input type="checkbox" name="genre" value="rock" />Non english</label></div>
-					<div class="form-item left"><label><input type="checkbox" name="genre" value="Dance" />Dance</label></div>
-					<div class="form-item left"><label><input type="checkbox" name="genre" value="Play" />Play</label></div>
-					<div class="form-item left"><label><input type="checkbox" name="genre" value="Music" />Music</label></div>
-				</div>
+					<div class="program-genres-wrapper clearfix">
+						<div class="form-item left"><label><input type="checkbox" name="genre" value="rock" />Rock</label></div>
+						<div class="form-item left"><label><input type="checkbox" name="genre" value="rock" />For kids</label></div>
+						<div class="form-item left"><label><input type="checkbox" name="genre" value="rock" />Non english</label></div>
+						<div class="form-item left"><label><input type="checkbox" name="genre" value="Dance" />Dance</label></div>
+						<div class="form-item left"><label><input type="checkbox" name="genre" value="Play" />Play</label></div>
+						<div class="form-item left"><label><input type="checkbox" name="genre" value="Music" />Music</label></div>
+					</div>
+				
+					<div>
+						<input id="filter-list" type="text" name="" style="width: 571px;" value="filter the program list by typing the name of a show." />
+					</div>
+				</div>	
+				
+				<hr />
 				
 				{% with m.search[{upcoming cat="event"}] as result %}
 
