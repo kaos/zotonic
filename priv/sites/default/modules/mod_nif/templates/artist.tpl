@@ -26,16 +26,16 @@
 
 		<div id="sidebar" class="zp-30">
 			<div class="padding">
-				<h1>All events by {{ m.rsc[id].title }}</h1>
+				<h4 class="sidebar-title">Performances</h4>
 	
 				<ul class="items-list">
 					{% for id in m.rsc[id].s.performer %}
 					<li class="clearfix">
-						<h3>
+						<h2>
 							<a href="{{ m.rsc[id].page_url }}" title="{{ m.rsc[id].title }}">
 								{{ m.rsc[id].title }}
 							</a>
-						</h3>
+						</h2>
 						<h4>
 							<a href="{{ m.rsc[id].o.atvenue.page_url }}" title="{{ m.rsc[id].o.atvenue.title }}">
 								{{ m.rsc[id].o.atvenue.title }}
@@ -62,7 +62,7 @@
 					</li>
 					{% empty %}
 					<li>
-						No events to show.
+						No performances to show.
 					</li>
 					{% endfor %}
 				</ul>

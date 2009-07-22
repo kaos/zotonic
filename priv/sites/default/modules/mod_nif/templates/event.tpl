@@ -21,45 +21,64 @@
 		<div id="content" class="zp-65">
 			<div class="padding">
 				
-				<h1>{{ m.rsc[id].title }}</h1>
+				<h1>{{ m.rsc[id].title }} by <a href="{{ m.rsc[id].o.performer.page_url }}" title="{{ m.rsc[id].o.performer.title }}">{{ m.rsc[id].o.performer.title }}</a></h1>
+				
+				<div class="performance-info-wrapper clearfix">
+					<span class="artist zp-30"><a href="{{ m.rsc[id].page_url }}" title="{{ m.rsc[id].title }}">{{ m.rsc[id].title }}</a></span>
+					
+					{% if m.rsc[id].date_start %}
+						{% with m.rsc[id].date_start as date_start %}
+							{% with m.rsc[id].date_end as date_end %}
+								<span class="time-wrapper zp-50">
+									from 
+									<span class="time">{{ date_start|date:"H:i A" }}</span>
+
+									{% ifnotequal date_start date_end %}
+										&mdash; <span class="time">{{ date_end|date:"H:i A" }}</span>
+									{% endifnotequal %}
+
+									<span class="day">on {{ date_start|date:"l" }}</span>
+									<span class="date">{{ date_start|date:"d M" }}.</span>
+								</span>
+							{% endwith %}
+						{% endwith %}
+					{% endif %}
+				</div>
+				<ul class="performance-genres">
+					<li>For kids,</li>
+					<li>Dance,</li>
+					<li>English</li>
+				</ul>
+				
+				{% if m.rsc[id].media[1] %}
+					<p class="inline-image">
+						{% image m.rsc[id].media[1] width=288 height=288 crop alt=m.rsc[m.rsc[id].media[1]].title %}
+						{% if m.rsc[id].media[1].summary %}
+							<span class="inline-image-caption">{{ m.rsc[id].media[1].summary }}</span>
+						{% endif %}
+					</p>
+				{% endif %}
 				
 				{% if m.rsc[id].summary %}
 					<p class="intro">{{ m.rsc[id].summary }}</p>
 				{% endif %}
 				
-				<div class="date-image-wrapper clearfix">
-					{% if m.rsc[id].date_start %}
-						{% with m.rsc[id].date_start as date_start %}
-							{% with m.rsc[id].date_end as date_end %}
-								<div class="date-leaf">
-									<span class="day">{{ date_start|date:"d" }}</span>
-									<span class="month">{{ date_start|date:"F" }}</span>
-									<span class="time">{{ date_start|date:"H:i A" }}</span>
-								</div>
-						
-								{% ifnotequal date_start date_end %}
-									<div class="date-leaf">
-										<span class="day">{{ date_end|date:"d" }}</span>
-										<span class="month">{{ date_end|date:"F" }}</span>
-										<span class="time">{{ date_end|date:"H:i A" }}</span>
-									</div>
-								{% endifnotequal %}
-							{% endwith %}
-						{% endwith %}
-					{% endif %}	
-							
-					{% with m.rsc[id].media as media %}
-						{% if media %}
-							<p>{% media media[1] width=444 height=90 crop %}</p>
-						{% endif %}
-					{% endwith %}		
-				</div>
+				{% if m.rsc[id].body %}
+					{{ m.rsc[id].body }}
+				{% endif %}
 
-				{{ m.rsc[id].body }}
-				
-				{% for media_id in m.rsc[id].media %}
-					{% media media_id width=300 height=300 crop %}
-				{% endfor %}
+				{% if m.rsc[id].media %}
+					{% for media_id in m.rsc[id].media %}
+						{% if not forloop.first %}
+							<p class="block-image">
+								{% image media_id width=580  alt=m.rsc[media_id].title %}
+								{% if media_id.summary %}
+									<span class="block-image-caption">{{ media_id.summary }}</span>
+								{% endif %}
+							</p>
+						{% endif %}
+					{% endfor %}
+				{% endif %}
 			</div>
 		</div>
 
@@ -72,7 +91,7 @@
 						{% with m.rsc[id].depiction as depiction %}
 							{% if depiction %}
 								<a href="{{ m.rsc[id].page_url }}" title="{{ m.rsc[id].title }}">
-									{% image depiction width=65 height=65 crop %}
+									{% image depiction width=65 height=65 crop alt=""  %}
 								</a>		
 							{% endif %}
 						{% endwith %}

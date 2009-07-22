@@ -148,8 +148,8 @@ body {
 	
 		.at-menu ul li a {
 			background: #57b8e6;
-			color: #fff;
-			font-size: 13px;
+			color: #000;
+			font-size: 11px;
 			border-bottom: 1px solid #fff;
 			height: 27px;
 			line-height: 27px;
@@ -211,19 +211,22 @@ h4 {
 	font-size: 13px;
 }
 
-	h2 a,
-	h3 a,
-	h4 a {
-		color: #000;
-		text-decoration: none;
-	}
-	
-	h2 a:hover,
-	h3 a:hover,
-	h4 a:hover {
-		color: #4192b9;
+	h4.sidebar-title {
+		margin: 0 0 9px 0;
 	}
 
+h2 a,
+h3 a,
+h4 a {
+	color: #000;
+	text-decoration: none;
+}
+
+h2 a:hover,
+h3 a:hover,
+h4 a:hover {
+	color: #4192b9;
+}
 
 p.intro {
 	color: #111;
@@ -245,6 +248,32 @@ ul.items-list li {
 	font-size: 12px;
 }
 
+
+/* images
+------------------------------------------------------ */
+
+p.inline-image {
+	margin: 4px 18px 0 0;
+	float: left;
+}
+
+p.inline-image img,
+p.block-image img {
+	margin: 0;
+	float: none;
+	display: block;
+}
+
+p.block-image {
+	margin: 0 0 18px 0;
+	float: none;
+}
+
+span.inline-image-caption,
+span.block-image-caption {
+	font-size: 11px;
+	color: #666;
+}
 
 /* pages - home
 ------------------------------------------------------ */
@@ -289,27 +318,18 @@ h1#home-header {
 /* pages - program
 -------------------------------------------------------- */
 
+ul.program-list {
+	margin: 0 0 18px 0;
+}
+
 ul.program-list li {
-	margin: 0 0 36px 0;
+	margin: 0 0 1px 0;
 	padding: 0 0 36px 0;
 	border-bottom: 1px dotted #888;
 }
 
 	ul.program-list li p {
 		margin: 0;
-	}
-	
-ul.program-list li h2 span,
-ul.program-list li h2 span a {
-	text-decoration: none;
-	color: #888;
-	font-weight: normal;
-	font-size: 12px;
-	font-style: italic;
-}
-
-	ul.program-list li h2 span a:hover {
-		color: #000;
 	}
 
 .date-leaf {
@@ -350,10 +370,6 @@ li p.event-info {
 		color: #4192b9;
 	}
 
-.date-image-wrapper {
-	margin: 0 0 18px 0;
-}
-
 /* pages - news
 --------------------------------------------------------*/
 
@@ -367,4 +383,40 @@ ul.news-list li {
 
 	ul.program-list li p {
 		margin: 0;
+	}
+	
+	
+/* pages - performance
+--------------------------------------------------------*/
+
+.performance-info-wrapper {
+	margin: 0 0 3px 0;
+	padding: 6px;
+	background: #f2f2f2;
+	border: 1px solid #e0e0e0;
+}
+
+ul.program-list li.performance-info-wrapper {
+	padding: 6px;
+	border: 1px solid #e0e0e0;
+}
+
+.artist a {
+	font-weight: bold;
+	color: #000;
+}
+
+	.artist a:hover {
+		color: #4192b9;
+	}
+
+ul.performance-genres {
+		margin : 0 0 18px 0;
+}
+
+	ul.performance-genres li {
+		display: inline;
+		font-size: 11px;
+		color: #666;
+		font-style: italic;
 	}

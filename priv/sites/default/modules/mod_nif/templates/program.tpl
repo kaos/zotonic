@@ -19,7 +19,7 @@
 {% block content %}
 	
 	<div id="content-wrapper" class="clearfix">
-		<div id="content">
+		<div id="content" class="zp-65">
 			<div class="padding">
 				{% include "_view.tpl" %}
 							
@@ -29,39 +29,23 @@
 
 						{% for id in result %}
 	
-							<li class="clearfix">
-								<h2><a href="{{ m.rsc[id].page_url }}" title="{{ m.rsc[id].title }}">{{ m.rsc[id].title }}</a> <span class="genres"><a href="#">Cabaret</a>, <a href="#">for kids</a>, <a href="#">english</a></span></h2>
-								<div class="item-image left">
-									<a href="{{ m.rsc[id].page_url }}" title="{{ m.rsc[id].title }}">
-										{% if m.rsc[id].media[1] %}
-											{% image m.rsc[id].media[1] width=180 height=90 crop %}
-										{% else %}
-											{% image m.rsc[id].o.performer.media[1] width=180 height=90 crop %}
-										{% endif %}
-									</a>
-								</div>
-	
+							<li class="clearfix performance-info-wrapper">
+								<span class="artist zp-33"><a href="{{ m.rsc[id].page_url }}" title="{{ m.rsc[id].title }}">{{ m.rsc[id].title }}</a></span>
+								
 								{% if m.rsc[id].date_start %}
 									{% with m.rsc[id].date_start as date_start %}
 										{% with m.rsc[id].date_end as date_end %}
-											<div class="date-leaf">
-												<span class="day">{{ date_start|date:"d" }}</span>
-												<span class="month">{{ date_start|date:"F" }}</span>
+											<span class="time-wrapper zp-33">
 												<span class="time">{{ date_start|date:"H:i A" }}</span>
-											</div>
-									
-											{% ifnotequal date_start date_end %}
-												<div class="date-leaf">
-													<span class="day">{{ date_end|date:"d" }}</span>
-													<span class="month">{{ date_end|date:"F" }}</span>
-													<span class="time">{{ date_end|date:"H:i A" }}</span>
-												</div>
-											{% endifnotequal %}
+
+												{% ifnotequal date_start date_end %}
+													&mdash; <span class="time">{{ date_end|date:"H:i A" }}</span>
+												{% endifnotequal %}
+											</span>
+											<span class="venue zp-20"><a href="{{ m.rsc[id].o.performer.page_url }}" title="{{ m.rsc[id].o.performer.title }}">{{ m.rsc[id].o.performer.title }}</a></span>
 										{% endwith %}
 									{% endwith %}
-								{% endif %}	
-								<p class="event-info">By <a href="{{ m.rsc[id].o.performer.page_url }}" title="{{ m.rsc[id].o.performer.title }}">{{ m.rsc[id].o.performer.title }}</a> &mdash; <a href="{{ m.rsc[id].o.atvenue.page_url }}">{{ m.rsc[id].o.atvenue.title }}</a>.</p>						
-								<p>{{ m.rsc[id].summary|ljust:140 }}&hellip; <a href="{{ m.rsc[id].page_url }}" title="{{ m.rsc[id].title }}">Read more</a></p>
+								{% endif %}
 							</li>	
 						{% empty %}
 							<li>
@@ -73,6 +57,35 @@
 					
 				{% endwith %}
 			
+			</div>
+		</div>
+		
+		<div id="sidebar" class="zp-30">
+			<div class="padding">
+				<h1>Latest news items</h1>
+	
+				<ul class="items-list">
+					{% for id in m.search[{latest cat="news"}] %}
+					<li class="clearfix">
+						<h3><a href="{{ m.rsc[id].page_url }}" title="{{ m.rsc[id].title }}">{{ m.rsc[id].title|striptags }}</a></h3>
+						{% if m.rsc[id].media[1] %}
+							<div class="item-image left">{% image m.rsc[id].media[1] width=65 height=65 crop %}</div>
+						{% endif %}
+						
+						<p class="intro">
+							<em>{{ m.rsc[id].modified|date:"d M, H:i" }}</em> &mdash; 
+							{{ m.rsc[id].summary|ljust:80 }}&hellip;
+							<a href="{{ m.rsc[id].page_url }}" title="{{ m.rsc[id].title }}">Read&nbsp;more</a>
+						</p>
+					</li>
+					{% empty %}
+					<li>
+						No news to show.
+					</li>
+					{% endfor %}
+				</ul>
+				
+				<p><a href="{% url news %}" title="View all news">View all news items</a></p>
 			</div>
 		</div>
 	</div>
