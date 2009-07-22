@@ -119,10 +119,15 @@ cmd_args(FileProps, Filters) ->
     Filters2   = [  {make_image, Mime},
                     {correct_orientation, Orientation},
                     {resize, ResizeWidth, ResizeHeight}, 
-                    {crop, CropArgs} | Filters1],
+                    {crop, CropArgs},
+                    {colorspace, "RGB"} | Filters1],
     Filters3 = case is_blurred(Filters2) of
                     true ->  Filters2 ++ [{quality}];
                     false -> Filters2 ++ [{sharpen_small}, {quality}]
+               end,
+    Filters4 = case proplists:get_value(background, Filters3) of
+                    undefined -> [{background,"white"} | Filters3];
+                    _ -> Filters3
                end,
 
     {EndWidth,EndHeight,Args} = lists:foldl(fun (Filter, {W,H,Acc}) -> 
@@ -130,7 +135,7 @@ cmd_args(FileProps, Filters) ->
                                                 {NewW,NewH,[Arg|Acc]} 
                                             end,
                                             {ImageWidth,ImageHeight,[]},
-                                            Filters3),
+                                            Filters4),
     {EndWidth, EndHeight, lists:reverse(Args)}.
 
 
@@ -172,6 +177,8 @@ filter2arg({correct_orientation, Orientation}, Width, Height) ->
     end;
 filter2arg({background, Color}, Width, Height) ->
     {Width, Height, ["-background ", $", z_utils:os_escape(Color), $"]};
+filter2arg({colorspace, Colorspace}, Width, Height) ->
+    {Width, Height, ["-colorspace ", $", z_utils:os_escape(Colorspace), $"]};
 filter2arg({width, _}, Width, Height) ->
     {Width, Height, []};
 filter2arg({height, _}, Width, Height) ->
