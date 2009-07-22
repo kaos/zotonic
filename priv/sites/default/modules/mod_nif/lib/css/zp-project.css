@@ -425,6 +425,16 @@ ul.performance-genres {
 /* pages - artists
 --------------------------------------------------------*/
 
-ul.artists-list li {
-	margin: 0 0 36px 0;
+ul.artists-list {
+	margin: 0 0 18px 0;
 }
+
+ul.artists-list li {
+	margin: 0 0 26px 0;
+	padding: 0 0 36px 0;
+	border-bottom: 1px dotted #888;
+}
+
+	ul.artists-list li p {
+		margin: 0;
+	}
