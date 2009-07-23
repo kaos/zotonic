@@ -206,7 +206,7 @@ file_exists(_State, [], _Context) ->
     false;
 file_exists(State, Name, Context) ->
     RelName = case hd(Name) of
-        "/" -> tl(Name);
+        $/ -> tl(Name);
         _ -> Name
     end,
     case mochiweb_util:safe_relative_path(RelName) of

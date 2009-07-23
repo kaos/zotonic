@@ -33,7 +33,7 @@ allowed_methods(ReqData, State) ->
 
 file_path(State, Name) ->
     RelName = case hd(Name) of
-        "/" -> tl(Name);
+        $/ -> tl(Name);
         _ -> Name
     end,
     case mochiweb_util:safe_relative_path(RelName) of
