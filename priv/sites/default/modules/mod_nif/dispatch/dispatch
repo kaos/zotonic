@@ -17,5 +17,6 @@
 	{news,   	["news", id],				resource_page,		[ {template, "news.tpl"} ]},
 	{news,      ["news", id, slug], 		resource_page,		[ {template, "news.tpl"} ]},
 	{collection,["collection", id],			resource_page,		[ {template, "collection.tpl"} ]},
-	{collection,["collection", id, slug],	resource_page,		[ {template, "collection.tpl"} ]}
+	{collection,["collection", id, slug],	resource_page,		[ {template, "collection.tpl"} ]},
+	{search,	["search"],					resource_page,		[ {template, "search.tpl"}, {id, "page_search"} ]}
 ].

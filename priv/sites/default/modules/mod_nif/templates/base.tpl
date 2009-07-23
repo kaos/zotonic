@@ -21,7 +21,10 @@
 	<div class="zp-wrapper">
 		
 		{% block pageheader %}{% endblock %}	
-		{% block navigation %}{% endblock %}	
+		<div class="navigation-search-wrapper">
+			{% block navigation %}{% menu id=id %}{% endblock %}
+			{% block search %}{% include "_searchfield.tpl" %}{% endblock %}
+		</div>	
 		{% block content %}{% endblock %}
 		
 		<div id="footer">

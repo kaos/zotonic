@@ -45,7 +45,27 @@ body {
 		margin: 0 0 18px 0;
 	}
 
-	/* essential navigation styles 
+	#navigation {
+		width: 631px;
+		float: left;
+	}
+
+	/* search field next to navigation
+	--------------------------------------------------------------- */
+	
+	.search-field {
+		margin: 0 0 0 18px;
+	}
+	
+		.search-field input {
+			border-width: 1px;
+			margin: 0 3px 0 0;
+			padding: 3px 0 1px 0;
+			border: 1px solid #666;
+			width: 235px;
+		}
+
+	/* essential navigation styles
 	--------------------------------------------------------------- */
 	
 	.at-menu ul {
@@ -306,6 +326,17 @@ label {
 }
 
 
+/* pager
+------------------------------------------------------ */
+
+ul.pager {
+	margin: 0 0 18px 0;
+}
+
+ul.pager li {
+	display: inline;
+}
+
 /* pages - home
 ------------------------------------------------------ */
 
@@ -371,6 +402,10 @@ ul.program-list li {
 	}
 
 	ul.program-list li p {
+		margin: 0;
+	}
+
+	span.media img {
 		margin: 0;
 	}
 
