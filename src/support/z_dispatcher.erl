@@ -142,19 +142,16 @@ collect_dispatch_lists(Context) ->
     Files      = filelib:wildcard(filename:join([code:lib_dir(zotonic, priv), "sites", "default", "dispatch", "*"])),
     Modules    = z_module_sup:active(Context),
     ModuleDirs = z_module_sup:scan(Context),
-    ModDisp    = lists:concat(
-        [ filelib:wildcard(filename:join([proplists:get_value(M, ModuleDirs), "dispatch", "*"])) || M <- Modules ]
-    ),
-
-    Dispatch   = [
-                    lists:map(fun get_file_dispatch/1, ModDisp++Files)
-                 ],
+    ModDisp    = [ {M, filelib:wildcard(filename:join([proplists:get_value(M, ModuleDirs), "dispatch", "*"]))} || M <- Modules ],
+    ModDispOnPrio = lists:concat([ ModFiles || {_Mod, ModFiles} <- z_module_sup:prio_sort(ModDisp) ]),
+    Dispatch   = lists:map(fun get_file_dispatch/1, ModDispOnPrio++Files),
     lists:flatten(Dispatch).
     
 
 %% @doc Set the dispatch list of the webmachine dispatcher.
 dispatch_webmachine(DispatchList) ->
     WMList = [list_to_tuple(tl(tuple_to_list(Disp))) || Disp <- DispatchList],
+    ?DEBUG(WMList),
     application:set_env(webmachine, dispatch_list, WMList).
     
 
