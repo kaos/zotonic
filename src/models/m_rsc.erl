@@ -188,7 +188,7 @@ duplicate(Id, Props, Context) ->
 %% This should be called as part of another update or transaction and does not resync the caches.
 %% @spec touch(Id, Context) -> {ok, Id} | {error, Reason}
 touch(Id, Context) ->
-    case z_db:q("update rsc set version = version + 1, modifier_id = $1, modified = now() where id = $2", [z_acl:user(Context), Id]) of
+    case z_db:q("update rsc set version = version + 1, modifier_id = $1, modified = now() where id = $2", [z_acl:user(Context), Id], Context) of
         1 -> {ok, Id};
         0 -> {error, enoent}
     end.
