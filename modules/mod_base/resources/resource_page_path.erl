@@ -42,5 +42,5 @@ to_html(ReqData, Context) ->
     Location = m_rsc:p(Id, default_page_url, Context),
     Url = "http://" ++ wrq:get_req_header("host", ReqData) ++ Location,
     ReqData1 = wrq:set_resp_header("Location", Url, ReqData),
-    ReqData2 = wrq:set_response_code(303, ReqData1),
-    {{halt, 303}, ReqData2, Context}.
+    ReqData2 = wrq:set_response_code(302, ReqData1),
+    {{halt, 302}, ReqData2, Context}.
