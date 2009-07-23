@@ -85,25 +85,28 @@
 
 		<div id="sidebar" class="zp-30">
 			<div class="padding">
-				{% with m.rsc[id].o.performer as id %}
+				{% with m.rsc[id].o.performer as performer_id %}
 					
 					<h1>{{ m.rsc[id].title }}</h1>
 					<p class="clearfix">
-						{% with m.rsc[id].depiction as depiction %}
+						{% with m.rsc[performer_id].depiction as depiction %}
 							{% if depiction %}
-								<a href="{{ m.rsc[id].page_url }}" title="{{ m.rsc[id].title }}">
+								<a href="{{ m.rsc[performer_id].page_url }}" title="{{ m.rsc[performer_id].title }}">
 									{% image depiction width=65 height=65 crop alt=""  %}
 								</a>		
 							{% endif %}
 						{% endwith %}
 						
-						{{ m.rsc[id].summary }} <a href="{{ m.rsc[id].page_url }}" title="{{ m.rsc[id].title }}">Read more</a>
+						{{ m.rsc[performer_id].summary }} <a href="{{ m.rsc[performer_id].page_url }}" title="{{ m.rsc[performer_id].title }}">Read more</a>
 					</p>
 					
-					<ul>
-						{% for subject_id in m.rsc[id].s.performer %}
+					<ul class="matching-events">
+						{% for subject_id in m.rsc[performer_id].s.performer %}
 							{% ifnotequal subject_id id %}
-								<li>{{ m.rsc[subject_id].title }}</li>
+								<li>
+									<span class="zp-40">{{ m.rsc[subject_id].title }}</span>
+									<span class="zp-60">{{ m.rsc[subject_id].date_start|date:"H:i A" }} &mdash; {{ m.rsc[subject_id].date_end|date:"H:i A" }}</span>
+								</li>
 							{% endifnotequal %}
 						{% endfor %}
 					</ul>	

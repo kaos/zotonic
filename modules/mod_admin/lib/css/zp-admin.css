@@ -456,6 +456,14 @@ a.button {
 		width: 348px;
 	}
 
+input[type="checkbox"], 
+input[type="radio"],
+.dialog input[type="checkbox"],
+.dialog input[type="radio"] {
+	width: auto;
+}
+
+
 /* Edit page Media
 ---------------------------------------------------------- */
 
