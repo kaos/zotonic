@@ -23,14 +23,14 @@
 				
 				<h1>{{ m.rsc[id].title }}</h1>
 				
-				<div class="performance-info-wrapper clearfix">
-					<span class="artist zp-30"><a href="{{ m.rsc[id].page_url }}" title="{{ m.rsc[id].title }}">{{ m.rsc[id].title }}</a></span>
+				<div class="clearfix">
+					{#<span class="artist zp-30"><a href="{{ m.rsc[id].page_url }}" title="{{ m.rsc[id].title }}">{{ m.rsc[id].title }}</a></span>#}
 					
 					{% if m.rsc[id].date_start %}
 						{% with m.rsc[id].date_start as date_start %}
 							{% with m.rsc[id].date_end as date_end %}
 								<span class="time-wrapper zp-70">
-									from 
+									From 
 									<span class="time">{{ date_start|date:"H:i A" }}</span>
 
 									{% ifnotequal date_start date_end %}
@@ -45,9 +45,10 @@
 					{% endif %}
 				</div>
 				<ul class="performance-genres">
-					<li>For kids,</li>
-					<li>Dance,</li>
-					<li>English</li>
+					<li>Genres:</li>
+					<li>for kids,</li>
+					<li>dance,</li>
+					<li>english</li>
 				</ul>
 				
 				{% if m.rsc[id].media[1] %}
