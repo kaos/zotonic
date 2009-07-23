@@ -6,7 +6,7 @@
 
 {% if m.rsc[id].media[1] %}
 	<p class="inline-image">
-		{% image m.rsc[id].media[1] width=288 height=288 crop alt=m.rsc[m.rsc[id].media[1]].title %}
+		{% media m.rsc[id].media[1] width=288 height=288 crop alt=m.rsc[m.rsc[id].media[1]].title %}
 		{% if m.rsc[id].media[1].summary %}
 			<span class="inline-image-caption">{{ m.rsc[id].media[1].summary }}</span>
 		{% endif %}
@@ -21,7 +21,7 @@
 	{% for media_id in m.rsc[id].media %}
 		{% if not forloop.first %}
 			<p class="block-image clear">
-				{% image media_id width=580 alt=m.rsc[media_id].title %}
+				{% media media_id width=580 alt=m.rsc[media_id].title %}
 				{% if media_id.summary %}
 					<span class="block-image-caption">{{ media_id.summary }}</span>
 				{% endif %}
