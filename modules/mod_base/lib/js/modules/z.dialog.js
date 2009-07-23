@@ -57,7 +57,7 @@
 										.append(dialogTop, dialogContent, dialogBottom)
 										.fadeIn(300)
 										.css({left: leftPos, top: topPos, width: options.width})
-										.draggable({ handle: dialogTop, opacity: 0.90, zIndex: 2700, iframeFix: true, scroll: true});
+										.draggable({addClasses: false, handle: dialogTop, opacity: 0.90, zIndex: 2700, iframeFix: true, scroll: true});
 								
 				$(document).keypress(function(e)
 				{

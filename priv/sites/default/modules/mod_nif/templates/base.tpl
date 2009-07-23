@@ -8,9 +8,11 @@
 	<meta name="description" content="{{ m.rsc[id].seo_desc }}" />
 	<meta name="author" content="Tim Benniks &copy; 2009" />
 
-	<link href="/lib/css/zp-compressed.css" type="text/css" media="screen" rel="stylesheet" /> 
-	<link href="/lib/css/zp-project.css" type="text/css" media="screen" rel="stylesheet" /> 
-
+	{% lib
+		"/css/zp-compressed.css"
+		"/css/zp-project.css"
+	%}
+	
 	<!--[if IE]><link href="/lib/css/zp-ie.css" type="text/css" media="screen" rel="stylesheet" /><![endif]--> 
 </head>
 <body class="{% block pageclass %}{% endblock %}">

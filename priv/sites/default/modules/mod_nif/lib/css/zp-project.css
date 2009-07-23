@@ -283,6 +283,12 @@ span.block-image-caption {
 	color: #666;
 }
 
+p.block-image embed,
+p.block-image object {
+	width: 580px;
+	height: 380px;
+}
+
 
 /* forms
 ------------------------------------------------------ */

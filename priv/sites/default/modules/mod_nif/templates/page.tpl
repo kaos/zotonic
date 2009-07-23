@@ -13,7 +13,7 @@
 {% endblock %}
 
 {% block navigation %}
-	{% menu id=id %}	
+	{% menu id=id %}
 {% endblock %}
 
 {% block content %}

@@ -99,7 +99,15 @@
 						
 						{{ m.rsc[id].summary }} <a href="{{ m.rsc[id].page_url }}" title="{{ m.rsc[id].title }}">Read more</a>
 					</p>
-
+					
+					<ul>
+						{% for subject_id in m.rsc[id].s.performer %}
+							{% ifnotequal subject_id id %}
+								<li>{{ m.rsc[subject_id].title }}</li>
+							{% endifnotequal %}
+						{% endfor %}
+					</ul>	
+					
 				{% endwith %}	
 			</div>
 		</div>

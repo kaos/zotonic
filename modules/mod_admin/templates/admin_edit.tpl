@@ -39,10 +39,11 @@
 									</div>
 
 									{% if m.acl.is_admin or m.acl.is_public_publisher %}
+									<div class="path-unique-name-wrapper clearfix">
 										<div class="zp-50">
 											<div class="form-item clearfix">
 												<label for="field-page-path">Page path, default is <em>{{ r.default_page_url|escape }}</em></label>
-												<input type="text" id="field-page-path" name="page_path" value="{{ r.page_path }}"  style="width: 90%" />
+												<input type="text" id="field-page-path" name="page_path" value="{{ r.page_path }}" />
 											</div>
 										</div>
 									
@@ -50,7 +51,7 @@
 											<div class="zp-50">
 												<div class="form-item clearfix">
 													<label for="field-name">Unique name</label>
-													<input type="text" id="field-name" name="name" value="{{ r.name }}" style="width: 90%" />
+													<input type="text" id="field-name" name="name" value="{{ r.name }}" />
 												</div>
 											</div>
 										{% else %}
@@ -60,8 +61,7 @@
 												</div>
 											</div>
 										{% endif %}
-
-										<div style="clear:left">&nbsp;</div>
+									</div>
 									{% endif %}
 									
 									{% if m.acl.is_admin %}

@@ -364,9 +364,11 @@ a.button {
 	margin: 0 3px 0 0;
 }
 
+/*
 #poststuff .form-item:last-child {
 	margin: 0;
 }
+*/
 
 #quick-search input {
 	margin: 0 3px 0 0;
@@ -446,6 +448,13 @@ a.button {
 	margin: 0 3px 0 0;
 }
 
+.admin-form .path-unique-name-wrapper input {
+	width: 356px;
+}
+
+	.admin-form .path-unique-name-wrapper input#field-page-path {
+		width: 348px;
+	}
 
 /* Edit page Media
 ---------------------------------------------------------- */
@@ -710,10 +719,6 @@ li.hover, li.hover a {
 	border-color: #fff;
 }
 
-.ui-draggable-dragging .buttons {
-	display: none;
-}
-
 .short-list .line {
 	height: 15px;
 	border: 1px dotted #ccc !important;
@@ -747,13 +752,9 @@ ul.categories li a {
 	cursor: pointer;
 }
 
-.ui-draggable-dragging {
+#category-sorter .ui-draggable-dragging,
+.navigation-manager .ui-draggable-dragging {
 	width: 339px !important;
-}
-
-.ui-draggable-dragging .button-wrapper,
-.ui-draggable-dragging button {
-	display: none;
 }
 
 .grippy {
