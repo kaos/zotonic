@@ -93,7 +93,7 @@
 		
 		<div id="sidebar" class="zp-30">
 			<div class="padding">
-				<h1>Latest news items</h1>
+				<h1>Latest news</h1>
 	
 				<ul class="items-list">
 					{% for id in m.search[{latest cat="news"}] %}

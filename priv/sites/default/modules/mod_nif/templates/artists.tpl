@@ -25,7 +25,7 @@
 							
 				{% with m.search[{latest cat="artist"}] as result %}
 
-					<ul class="artsits-list clearfix">
+					<ul class="artists-list clearfix">
 
 						{% for id in result %}
 	
@@ -45,7 +45,7 @@
 							</li>	
 						{% empty %}
 							<li>
-								<p>Helaas zijn geen artiesten gevonden.</p>
+								<p>No artists have been found.</p>
 							</li>
 						{% endfor %}
 				
@@ -58,7 +58,7 @@
 		
 		<div id="sidebar" class="zp-30">
 			<div class="padding">
-				<h1>Latest news items</h1>
+				<h1>Latest news</h1>
 
 				<ul class="items-list">
 					{% for id in m.search[{latest cat="news"}] %}

@@ -3,8 +3,8 @@
 
 body {
 	background: #57b8e6 url(/lib/images/bg.gif) top left no-repeat;
-	font-family: Arial, sans-serif;
-	font-size: 13px;
+	font-family: Georgia, Times, serif;
+	font-size: 14px;
 	color: #111;
 }
 
@@ -13,7 +13,7 @@ body {
 ------------------------------------------------------ */
 
 .zp-wrapper {
-	margin: 14px 0 0 56px;
+	margin: 33px 0 0 56px;
 }
 
 	.home .zp-wrapper {
@@ -34,7 +34,7 @@ body {
 
 #content,
 #sidebar {
-	background: #fff;
+	background: oldlace;
 }
 
 
@@ -103,17 +103,14 @@ body {
 	
 	.at-menu a {
 		color: #000;
-		font-size: 15px;
-		font-weight: bold;
+		font-size: 19px;
+		font-weight: normal;
 		height: 36px;
+		font-family: impact, arial, sans-serif;
 		line-height: 36px;
+		letter-spacing: 1px;
 		padding: 0 18px;
 		text-decoration: none;
-	}
-	
-	.at-menu a, 
-	.at-menu a:visited  { /* visited pseudo selector so IE6 applies text colour */
-		color: #000;
 	}
 	
 	.at-menu li {
@@ -124,6 +121,11 @@ body {
 		background: #fff;
 	}
 	
+		.at-menu li li a.current {
+			background: #fff;
+			color: #000;
+		}
+		
 		.at-menu li li a:hover {
 			background: #57b8e6;
 			color: #000;
@@ -135,8 +137,9 @@ body {
 	.at-menu a:hover, 
 	.at-menu a:active,
 	.at-menu a.current {
-		background:	#fff;
+		background: oldlace;
 		outline: 0;
+		color: #57b8e6;
 	}
 	
 		.at-menu ul {
@@ -147,8 +150,8 @@ body {
 		}
 	
 		.at-menu ul li a {
-			background: #57b8e6;
-			color: #000;
+			background: #000;
+			color: #fff;
 			font-size: 11px;
 			border-bottom: 1px solid #fff;
 			height: 27px;
@@ -181,18 +184,19 @@ h1#header {
 	height: 210px;
 	background: transparent url(/lib/images/header.gif) top left no-repeat;
 	text-indent: -9999px;
-	margin: 0 0 0 -54px;
+	margin: 0 0 0 0px;
 }
 
 h1 {
-	font-family: Arial, sans-serif;
-	font-size: 23px;
-	font-weight: bold;
-	line-height: 27px;
+	font-family: Impact, Arial, sans-serif;
+	font-size: 28px;
+	font-weight: normal;
+	line-height: 36px;
 	margin: 0 0 9px 0;
 }
 
 h2 {
+	font-family: "Arial black", Arial, sans-serif;
 	color: #222;
 	font-size: 18px;
 	font-weight: normal;
@@ -225,7 +229,7 @@ h4 a {
 h2 a:hover,
 h3 a:hover,
 h4 a:hover {
-	color: #4192b9;
+	color: #57b8e6;
 }
 
 p.intro {
@@ -286,7 +290,7 @@ input[type="checkbox"] {
 
 label {
 	width: auto;
-	color: #666;
+	color: #fff;
 	margin: 0 18px 0 0;
 	font-size: 12px;
 }
@@ -399,12 +403,12 @@ li p.event-info {
 .program-filter-wrapper {
 	margin: 0 0 18px 0;
 	padding: 6px;
-	border: 1px solid #e0e0e0;
-	background: #f2f2f2;
+	border: 1px solid #fff;
+	background: #57b8e6;
 }
 
 	.program-filter-wrapper h5 {
-		color: #888;
+		color: #fff;
 		font-size: 12px;
 		margin: 0 0 6px 0;
 	}
@@ -441,6 +445,7 @@ ul.news-list {
 
 ul.news-list li {
 	margin: 0 0 18px 0;
+	border-bottom: 2px dotted dimgray;
 }
 
 	ul.program-list li p {
@@ -487,16 +492,16 @@ ul.performance-genres {
 /* pages - artists
 --------------------------------------------------------*/
 
-.artsits-list {
+.artists-list {
 	margin: 0 0 18px 0;
 }
 
-.artsits-list li {
+.artists-list li {
 	margin: 0 0 26px 0;
 	padding: 0 0 36px 0;
-	border-bottom: 1px dotted #888;
+	border-bottom: 2px dotted dimgray;
 }
 
-	.artsits-list li p {
+	.artists-list li p {
 		margin: 0;
 	}

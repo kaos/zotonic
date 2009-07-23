@@ -10,7 +10,7 @@
 
 {% block pageheader %}
 	<h1 id="header">New Island Festival. Created by Dutch artists. Governors Island september 10-20</h1>
-{% endblock %}	
+{% endblock %}
 
 {% block navigation %}
 	{% menu id=id %}	
@@ -26,7 +26,7 @@
 
 		<div id="sidebar" class="zp-30">
 			<div class="padding">
-				<h1>Latest news items</h1>
+				<h1>Latest news</h1>
 	
 				<ul class="items-list">
 					{% for id in m.search[{latest cat="news"}] %}

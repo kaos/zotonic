@@ -21,7 +21,7 @@
 		<div id="content" class="zp-65">
 			<div class="padding">
 				
-				<h1>{{ m.rsc[id].title }} by <a href="{{ m.rsc[id].o.performer.page_url }}" title="{{ m.rsc[id].o.performer.title }}">{{ m.rsc[id].o.performer.title }}</a></h1>
+				<h1>{{ m.rsc[id].title }}</h1>
 				
 				<div class="performance-info-wrapper clearfix">
 					<span class="artist zp-30"><a href="{{ m.rsc[id].page_url }}" title="{{ m.rsc[id].title }}">{{ m.rsc[id].title }}</a></span>
@@ -29,7 +29,7 @@
 					{% if m.rsc[id].date_start %}
 						{% with m.rsc[id].date_start as date_start %}
 							{% with m.rsc[id].date_end as date_end %}
-								<span class="time-wrapper zp-50">
+								<span class="time-wrapper zp-70">
 									from 
 									<span class="time">{{ date_start|date:"H:i A" }}</span>
 
@@ -86,7 +86,7 @@
 			<div class="padding">
 				{% with m.rsc[id].o.performer as id %}
 					
-					<h1>About {{ m.rsc[id].title }}</h1>
+					<h1>{{ m.rsc[id].title }}</h1>
 					<p class="clearfix">
 						{% with m.rsc[id].depiction as depiction %}
 							{% if depiction %}

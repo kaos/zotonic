@@ -41,7 +41,7 @@
 					</li>
 					{% empty %}
 					<li>
-						No news to show.
+						No collection items to show.
 					</li>
 					{% endfor %}
 				</ul>
