@@ -29,23 +29,25 @@
 
 %% @doc Check if the update contains information for a group.  If so then update
 %% the group information in the db and remove it from the update props.
-%% @spec rsc_update({rsc_update, ResourceId, OldResourceProps}, UpdateProps, Context) -> NewUpdateProps
-rsc_update({rsc_update, Id, _OldProps}, Props, Context) ->
+%% @spec rsc_update({rsc_update, ResourceId, OldResourceProps}, {DidUpdate, UpdateProps}, Context) -> {NewDidUpdate, NewUpdateProps}
+rsc_update({rsc_update, Id, _OldProps}, {Changed, Props}, Context) ->
     case       proplists:is_defined(group_is_admin, Props) 
         orelse proplists:is_defined(group_is_supervisor, Props)
         orelse proplists:is_defined(group_is_community_publisher, Props)
         orelse proplists:is_defined(group_is_public_publisher, Props) of
 
         true ->
+            %% Should check if this updates the props, but for now we take the simple approach.
             m_group:update_noflush(Id, Props, Context),
-            
+
             % Remove all the group props
-            proplists:delete(group_is_admin, 
-                proplists:delete(group_is_supervisor, 
-                    proplists:delete(group_is_community_publisher, 
-                        proplists:delete(group_is_public_publisher, Props))));
+            Props1 = proplists:delete(group_is_admin, 
+                        proplists:delete(group_is_supervisor, 
+                            proplists:delete(group_is_community_publisher, 
+                                proplists:delete(group_is_public_publisher, Props)))),
+            {true, Props1};
         false ->
-            Props
+            {Changed, Props}
     end.
 
 %%====================================================================

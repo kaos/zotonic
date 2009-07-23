@@ -108,7 +108,12 @@ insert(SubjectId, Pred, ObjectId, Context) ->
     insert1(SubjectId, PredId, ObjectId, Context) ->
         case z_db:q1("select id from edge where subject_id = $1 and object_id = $2 and predicate_id = $3", [SubjectId, ObjectId, PredId], Context) of
             undefined ->
-                {ok, EdgeId} = z_db:insert(edge, [{subject_id, SubjectId}, {object_id, ObjectId}, {predicate_id, PredId}], Context),
+                F = fun(Ctx) ->
+                    m_rsc:touch(SubjectId, Ctx),
+                    z_db:insert(edge, [{subject_id, SubjectId}, {object_id, ObjectId}, {predicate_id, PredId}], Ctx)
+                end,
+                
+                {ok, EdgeId} = z_db:transaction(F, Context),
                 z_depcache:flush(SubjectId),
                 z_depcache:flush(ObjectId),
                 {ok, EdgeId};
@@ -122,7 +127,12 @@ insert(SubjectId, Pred, ObjectId, Context) ->
 delete(Id, Context) ->
     case z_db:q("select subject_id, object_id from edge where id = $1", [Id], Context) of
         [{SubjectId,ObjectId}] ->
-            z_db:delete(edge, Id, Context),
+            F = fun(Ctx) ->
+                m_rsc:touch(SubjectId, Ctx),
+                z_db:delete(edge, Id, Ctx)
+            end,
+            
+            z_db:transaction(F, Context),
             z_depcache:flush(SubjectId),
             z_depcache:flush(ObjectId),
             ok;
@@ -133,7 +143,12 @@ delete(Id, Context) ->
 %% @doc Delete an edge by subject, object and predicate id
 delete(SubjectId, Pred, ObjectId, Context) ->
     PredId = m_predicate:name_to_id_check(Pred, Context),
-    z_db:q("delete from edge where subject_id = $1 and object_id = $2 and predicate_id = $3",  [SubjectId, ObjectId, PredId], Context),
+    F = fun(Ctx) ->
+        m_rsc:touch(SubjectId, Ctx),
+        z_db:q("delete from edge where subject_id = $1 and object_id = $2 and predicate_id = $3",  [SubjectId, ObjectId, PredId], Context)
+    end,
+    
+    z_db:transaction(F, Context),
     z_depcache:flush(SubjectId),
     z_depcache:flush(ObjectId),
     ok.
@@ -272,6 +287,7 @@ update_sequence(Id, Pred, ObjectIds, Context) ->
                 SortedIds = ObjectIds ++ lists:reverse(MissingIds),
                 SortedEdgeIds = [ proplists:get_value(OId, All, -1) || OId <- SortedIds ],
                 z_db:update_sequence(edge, SortedEdgeIds, Ctx),
+                m_rsc:touch(Id, Ctx),
                 ok
             end,
             
@@ -334,6 +350,7 @@ update_sequence_edge_ids(Id, Pred, EdgeIds, Context) ->
                                 All),
                 SortedEdgeIds = EdgeIds ++ lists:reverse(AppendToEnd),
                 z_db:update_sequence(edge, SortedEdgeIds, Ctx),
+                m_rsc:touch(Id, Ctx),
                 ok
             end,
 

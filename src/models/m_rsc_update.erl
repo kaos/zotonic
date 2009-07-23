@@ -167,7 +167,7 @@ update(Id, Props, Context) when is_integer(Id) orelse Id == insert_rsc ->
                         ],
                         
                         % Allow the update props to be modified.
-                        UpdatePropsN = z_notifier:foldr({rsc_update, RscId, BeforeProps}, UpdateProps1, Ctx),
+                        {Changed, UpdatePropsN} = z_notifier:foldr({rsc_update, RscId, BeforeProps}, {false, UpdateProps1}, Ctx),
                         UpdatePropsN1 = case proplists:get_value(category_id, UpdatePropsN) of
                             undefined ->
                                 UpdatePropsN;
@@ -176,14 +176,21 @@ update(Id, Props, Context) when is_integer(Id) orelse Id == insert_rsc ->
                                 [ {pivot_category_nr, CatNr} | UpdatePropsN]
                         end,
                         
-                        case z_db:update(rsc, RscId, UpdatePropsN1, Ctx) of
-                            {ok, _RowsModified} -> {ok, RscId, UpdatePropsN, BeforeCatList, RenumberCats};
-                            {error, Reason} -> {error, Reason}
-                        end                        
+                        case Id == rsc_id orelse Changed orelse is_changed(RscId, UpdatePropsN1, Ctx) of
+                            true ->
+                                case z_db:update(rsc, RscId, UpdatePropsN1, Ctx) of
+                                    {ok, _RowsModified} -> {ok, RscId, UpdatePropsN, BeforeCatList, RenumberCats};
+                                    {error, Reason} -> {error, Reason}
+                                end;
+                            false ->
+                                {ok, RscId, notchanged}
+                        end
                     end,
                     % End of transaction function
                     
                     case z_db:transaction(TransactionF, Context) of
+                        {ok, NewId, notchanged} ->
+                            {ok, NewId};
                         {ok, NewId, NewProps, OldCatList, RenumberCats} ->    
                             z_depcache:flush(NewId),
                             case proplists:get_value(name, NewProps) of
@@ -222,6 +229,30 @@ update(Id, Props, Context) when is_integer(Id) orelse Id == insert_rsc ->
     end.
 
 
+%% @doc Check if the update will change the data in the database
+%% @spec is_changed(int(), Props, Context) -> bool()
+is_changed(Id, Props, Context) ->
+    Current = m_rsc:get_raw(Id, Context),
+    is_prop_changed(Props, Current).
+    
+    is_prop_changed([], _Current) ->
+        false;
+    is_prop_changed([{version, _}|Rest], Current) ->
+        is_prop_changed(Rest, Current);
+    is_prop_changed([{modifier_id, _}|Rest], Current) ->
+        is_prop_changed(Rest, Current);
+    is_prop_changed([{modified, _}|Rest], Current) ->
+        is_prop_changed(Rest, Current);
+    is_prop_changed([{pivot_category_nr, _}|Rest], Current) ->
+        is_prop_changed(Rest, Current);
+    is_prop_changed([{Prop, Value}|Rest], Current) ->
+        case z_utils:are_equal(Value, proplists:get_value(Prop, Current)) of
+            true -> is_prop_changed(Rest, Current);
+            false -> true  % The property Prop has been changed.
+        end.
+
+        
+    
 %% @doc Check if all props are acceptable. Examples are unique name, uri etc.
 %% @spec preflight_check(Id, Props, Context) -> ok | {error, Reason}
 preflight_check(insert_rsc, Props, Context) ->

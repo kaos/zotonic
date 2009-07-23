@@ -27,6 +27,7 @@
     delete/2,
     update/3,
     duplicate/3,
+    touch/2,
     
 	exists/2, 
 	
@@ -182,6 +183,16 @@ update(Id, Props, Context) when is_integer(Id) ->
 duplicate(Id, Props, Context) ->
     m_rsc_update:duplicate(Id, Props, Context).
 
+
+%% @doc "Touch" the rsc, incrementing the version nr and the modification date/ modifier_id. 
+%% This should be called as part of another update or transaction and does not resync the caches.
+%% @spec touch(Id, Context) -> {ok, Id} | {error, Reason}
+touch(Id, Context) ->
+    case z_db:q("update rsc set version = version + 1, modifier_id = $1, modified = now() where id = $2", [z_acl:user(Context), Id]) of
+        1 -> {ok, Id};
+        0 -> {error, enoent}
+    end.
+    
 
 exists([C|_] = Name, Context) when is_list(Name) and is_integer(C) ->
     case rid_name(Name, Context) of

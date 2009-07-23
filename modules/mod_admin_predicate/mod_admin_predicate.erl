@@ -30,8 +30,8 @@
 
 %% @doc Check if the update contains information for a predicate.  If so then update
 %% the predicate information in the db and remove it from the update props.
-%% @spec rsc_update({rsc_update, ResourceId, OldResourceProps}, UpdateProps, Context) -> NewUpdateProps
-rsc_update({rsc_update, Id, _OldProps}, Props, Context) ->
+%% @spec rsc_update({rsc_update, ResourceId, OldResourceProps}, {Changed, UpdateProps}, Context) -> {NewChanged, NewUpdateProps}
+rsc_update({rsc_update, Id, _OldProps}, {Changed, Props}, Context) ->
     case       proplists:is_defined(predicate_subject, Props) 
         orelse proplists:is_defined(predicate_object, Props) of
 
@@ -40,10 +40,11 @@ rsc_update({rsc_update, Id, _OldProps}, Props, Context) ->
             Objects  = proplists:get_all_values(predicate_object, Props),
             m_predicate:update_noflush(Id, Subjects, Objects, Context),
 
-            proplists:delete(predicate_subject, 
-                proplists:delete(predicate_object, Props));
+            Props1 = proplists:delete(predicate_subject, 
+                        proplists:delete(predicate_object, Props)),
+            {true, Props1};
         false ->
-            Props
+            {Changed, Props}
     end.
 
 %% @doc Whenever a predicate has been updated we have to flush the predicate cache.

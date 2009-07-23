@@ -34,21 +34,24 @@
 -define(EMBED_MIME, <<"text/html-video-embed">>).
 
 %% @doc Check if the update contains video embed information.  If so then update the attached medium item.
-%% @spec rsc_update({rsc_update, ResourceId, OldResourceProps}, UpdateProps, Context) -> NewUpdateProps
-rsc_update({rsc_update, Id, _OldProps}, Props, Context) ->
+%% @spec rsc_update({rsc_update, ResourceId, OldResourceProps}, {Changed, UpdateProps}, Context) -> {NewChanged, NewUpdateProps}
+rsc_update({rsc_update, Id, _OldProps}, {Changed, Props}, Context) ->
     case proplists:is_defined(video_embed_code, Props) of
         true -> 
-            case proplists:get_value(video_embed_code, Props) of
+            EmbedChanged = case proplists:get_value(video_embed_code, Props) of
                 Empty when Empty == undefined; Empty == <<>>; Empty == [] ->
                     % Delete the media record iff the media mime type is our mime type
                     case m_media:identify(Id, Context) of
                         {ok, Props} ->
                             case proplists:get_value(mime, Props) of
-                                ?EMBED_MIME -> m_media:delete(Id, Context);
-                                _ -> nop
+                                ?EMBED_MIME -> 
+                                    m_media:delete(Id, Context),
+                                    true;
+                                _ -> 
+                                    false
                             end;
                         _ ->
-                            nop
+                            false
                     end;
                 EmbedCode ->
                     EmbedCodeRaw = z_html:unescape(EmbedCode),
@@ -58,13 +61,33 @@ rsc_update({rsc_update, Id, _OldProps}, Props, Context) ->
                         {video_embed_code, EmbedCodeRaw},
                         {video_embed_service, EmbedService}
                     ],
-                    ok = m_media:replace(Id, MediaProps, Context)
+
+                    case m_media:get(Id, Context) of
+                        undefined ->
+                            %% Will change
+                            ok = m_media:replace(Id, MediaProps, Context),
+                            true;
+                        OldMediaProps ->
+                            case        z_utils:are_equal(proplists:get_value(mime, OldMediaProps), ?EMBED_MIME)
+                                andalso z_utils:are_equal(proplists:get_value(video_embed_code, OldMediaProps), EmbedCodeRaw)
+                                andalso z_utils:are_equal(proplists:get_value(video_embed_service, OldMediaProps), EmbedService) of
+                            
+                                true ->
+                                    %% Not changed
+                                    false; 
+                                false -> 
+                                    %% Changed, update the medium record
+                                    ok = m_media:replace(Id, MediaProps, Context),
+                                    true
+                            end
+                    end
             end,
 
-            proplists:delete(video_embed_code, 
-                proplists:delete(video_embed_service, Props));
+            Props1 = proplists:delete(video_embed_code, 
+                        proplists:delete(video_embed_service, Props)),
+            {Changed or EmbedChanged, Props1};
         false ->
-            Props
+            {Changed, Props}
     end.
 
 
@@ -84,7 +107,7 @@ media_viewer({media_viewer, Props, _Filename, _Options}, _Context) ->
 
 %% @doc Return the filename of a still image to be used for image tags.
 %% @spec media_stillimage(Notification, _Context) -> undefined | {ok, Html}
-media_stillimage({media_stillimage, Props}, Context) ->
+media_stillimage({media_stillimage, Props}, _Context) ->
     case proplists:get_value(mime, Props) of
         ?EMBED_MIME ->
             case proplists:get_value(video_embed_service, Props) of

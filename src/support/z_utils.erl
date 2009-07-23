@@ -44,7 +44,8 @@
 	split/2,
 	replace1/3,
 	guess_mime/1,
-	list_dir_recursive/1
+	list_dir_recursive/1,
+	are_equal/2
 ]).
 
 %%% FORMAT %%%
@@ -467,3 +468,25 @@ list_dir_recursive(Dir) ->
                 end
         end.
 
+
+%% @doc Check if two arguments are equal, optionally converting them
+are_equal(Arg1, Arg2) when Arg1 =:= Arg2 ->
+    true;
+are_equal(Arg1, Arg2) when is_boolean(Arg1) ->
+    Arg1 == z_convert:to_bool(Arg2);
+are_equal(Arg1, Arg2) when is_boolean(Arg2) ->
+    Arg2 == z_convert:to_bool(Arg1);
+are_equal(Arg1, Arg2) when is_atom(Arg1) ->
+    are_equal(atom_to_list(Arg1), Arg2);
+are_equal(Arg1, Arg2) when is_atom(Arg2) ->
+    are_equal(Arg1, atom_to_list(Arg2));
+are_equal(Arg1, Arg2) when is_binary(Arg1) ->
+    are_equal(binary_to_list(Arg1), Arg2);
+are_equal(Arg1, Arg2) when is_binary(Arg2) ->
+    are_equal(Arg1, binary_to_list(Arg2));
+are_equal(Arg1, Arg2) when is_integer(Arg1) ->
+    are_equal(integer_to_list(Arg1), Arg2);
+are_equal(Arg1, Arg2) when is_integer(Arg2) ->
+    are_equal(Arg1, integer_to_list(Arg2));
+are_equal(_Arg1, _Arg2) ->
+    false.
