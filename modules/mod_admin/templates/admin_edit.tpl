@@ -316,7 +316,7 @@
 													</ul>
 													
 													{% if is_editable %}
-														{% link_add subject_id=id predicate=name %}
+														{% dialog_link_add subject_id=id predicate=name element_id=#links.name %}
 													{% endif %}
 												</div>
 												<hr />

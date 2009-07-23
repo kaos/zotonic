@@ -3,7 +3,7 @@
 %%
 %% @doc Create a button for opening a dialog where the user can select an object for a new edge.
 
--module(scomp_base_link_add).
+-module(scomp_admin_dialog_link_add).
 -behaviour(gen_scomp).
 
 -export([init/1, varies/2, code_change/3, terminate/1, render/4]).
@@ -19,7 +19,7 @@ render(Params, _Vars, Context, _State) ->
     Id        = z_ids:optid(proplists:get_value(id, Params)),
     SubjectId = z_convert:to_integer(proplists:get_value(subject_id, Params)), 
     Predicate = proplists:get_value(predicate, Params), 
-
+    ElementId = proplists:get_value(element_id, Params),
     Anchor = z_tags:render_tag(
                         <<"a">>,
                         [
@@ -36,6 +36,6 @@ render(Params, _Vars, Context, _State) ->
                 Id, 
                 {event,[
                         {type, click}, 
-                        {action, {link_dialog, [{subject_id, SubjectId}, {predicate, Predicate}]} }
+                        {action, {dialog_link, [{subject_id, SubjectId}, {predicate, Predicate}, {element_id, ElementId}]} }
                 ]}, Context1),
     {ok, Context2}.
