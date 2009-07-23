@@ -193,12 +193,13 @@ search({fulltext, [{text,QueryText}]}, _OffsetLimit, Context) ->
                 tables=[{rsc,"r"}]
             };
         _ ->
+            TsQuery = to_tsquery(QueryText, Context),
             #search_sql{
                 select="r.id, ts_rank_cd(pivot_tsv, query, 32) AS rank",
-                from="rsc r, plainto_tsquery($2, $1) query",
+                from="rsc r, to_tsquery($2, $1) query",
                 where=" query @@ pivot_tsv",
                 order="rank desc",
-                args=[QueryText, z_pivot_rsc:pg_lang(Context#context.language)],
+                args=[TsQuery, z_pivot_rsc:pg_lang(Context#context.language)],
                 tables=[{rsc,"r"}]
             }
     end;
@@ -214,12 +215,13 @@ search({fulltext, [{cat,Cat},{text,QueryText}]}, _OffsetLimit, Context) ->
                 tables=[{rsc,"r"}]
             };
         _ ->
+            TsQuery = to_tsquery(QueryText, Context),
             #search_sql{
                 select="r.id, ts_rank_cd(pivot_tsv, query, 32) AS rank",
-                from="rsc r, plainto_tsquery($2, $1) query",
+                from="rsc r, to_tsquery($2, $1) query",
                 where=" query @@ pivot_tsv",
                 order="rank desc",
-                args=[QueryText, z_pivot_rsc:pg_lang(Context#context.language)],
+                args=[TsQuery, z_pivot_rsc:pg_lang(Context#context.language)],
                 cats=[{"r", Cat}],
                 tables=[{rsc,"r"}]
             }
