@@ -20,16 +20,12 @@
 
 %% @doc Generate the link and/or script tags for the given files.
 tag(Files, Context) ->
-    {Css, Js} = split_css_js([ z_convert:to_list(F) || F <- Files]),
-    CssSort = collapse_dirs(Css),
-    JsSort= collapse_dirs(Js),
-    CssPath = string:join(CssSort, ","),
-    JsPath = string:join(JsSort, ","),
+    {Css, CssPath, Js, JsPath} = collapsed_paths(Files),
     LinkElement = case CssPath of
         [] ->
             [];
         _ -> 
-            ModCss = newest(Js, {{1900,1,1},{12,0,0}}, Context),
+            ModCss = newest(Css, {{1900,1,1},{12,0,0}}, Context),
             iolist_to_binary([ <<"<link href=\"/lib">>, CssPath, $,, integer_to_list(ModCss), <<".css\" type=\"text/css\" media=\"screen\" rel=\"stylesheet\" />">>])
     end,
     ScriptElement = case JsPath of
@@ -41,6 +37,16 @@ tag(Files, Context) ->
     end,
     [LinkElement, ScriptElement].
 
+
+%% @doc Make the collapsed paths for the js and the css files.
+collapsed_paths(Files) ->
+    {Css, Js} = split_css_js([ z_convert:to_list(F) || F <- Files]),
+    CssSort = collapse_dirs(Css),
+    JsSort= collapse_dirs(Js),
+    CssPath = string:join(CssSort, ","),
+    JsPath = string:join(JsSort, ","),
+    {Css, CssPath, Js, JsPath}.
+    
 
 %% @doc Given the filepath of the request, return all files collapsed in the path.
 %% @spec uncollapse(string()) -> list()
@@ -62,7 +68,7 @@ uncollapse(Path) ->
         
         uncollapse_dirs([], _Dirname, Acc) ->
             Acc;
-        uncollapse_dirs([[$/|File]|Rest], _Dirname, Acc) ->
+        uncollapse_dirs([[$/|_]=File|Rest], _Dirname, Acc) ->
             uncollapse_dirs(Rest, filename:dirname(File), [File|Acc]);
         uncollapse_dirs([File|Rest], Dirname, Acc) ->
             File1 = Dirname ++ [$/ | File],
@@ -79,7 +85,7 @@ collapse_dirs([File|Files]) ->
         lists:reverse(Acc);
     collapse_dirs([File|Files], PrevTk, Acc) ->
         FileTk = string:tokens(dirname(File), "/"),
-        case drop_prefix(FileTk, PrevTk) of
+        case drop_prefix(PrevTk, FileTk) of
             {[], []} ->
                 % File is in the same directory
                 collapse_dirs(Files, FileTk, [filename:rootname(filename:basename(File)) | Acc ]);
@@ -87,7 +93,7 @@ collapse_dirs([File|Files]) ->
                 % File is in a subdirectory from A
                 RelFile = string:join(B, "/") ++ [$/ | filename:rootname(filename:basename(File))],
                 collapse_dirs(Files, FileTk, [RelFile | Acc]);
-            {_A, _B} ->
+            {A, B} ->
                 % File is in a (sub-)directory higher from the previous one, reset to top level
                 collapse_dirs(Files, FileTk, [ensure_abspath(filename:rootname(File)) | Acc ])
         end.
@@ -141,14 +147,13 @@ split_css_js(Files) ->
 
 test() ->
     Files = [
-        "js/apps/zotonic-1.0.js",
-        "js/apps/z.wmngr.js",
-        "js/modules/z.notice.js",
-        "js/modules/z.unlink.js",
-        "js/modules/lvalid-1.3.js"
+        "/a/b1.js",
+        "/a/b2.js",
+        "/a/b/c.js",
+        "/a/b3.js"
     ],
-    Context = z_context:new(),
-    tag(Files, Context),
-    uncollapse("js/apps/zotonic-1.0,z.wmngr,/js/modules/z.notice,z.unlink,lvalid-1.3,63415422477.js").
+    {[],[],["/a/b1.js","/a/b2.js","/a/b/c.js","/a/b3.js"],"/a/b1,b2,b/c,/a/b3"} = collapsed_paths(Files),
+    ["/a/b1.js","/a/b2.js","/a/b/c.js","/a/b3.js"] = uncollapse("/a/b1,b2,b/c,/a/b3,63415422477.js"),
+    ok.
     
 
