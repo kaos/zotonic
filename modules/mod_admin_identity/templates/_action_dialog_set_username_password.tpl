@@ -1,6 +1,6 @@
 
 <p>
-	Please give an unique username and a password. Usernames and passwords are case sensitive, so please be careful when entering them.
+	Give an unique username and a password. Usernames and passwords are case sensitive, so be careful when entering them.
 	{% if username and not id|eq:1 %}
 		<br/>Click “delete” to remove any existing username/ password from the person, the person won't be an user anymore.
 	{% endif %}

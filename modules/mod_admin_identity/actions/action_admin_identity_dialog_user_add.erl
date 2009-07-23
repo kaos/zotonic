@@ -28,7 +28,7 @@ event({postback, {dialog_user_add, OnSuccess}, _TriggerId, _TargetId}, Context) 
             Vars = [
                 {on_success, OnSuccess}
             ],
-            z_render:dialog("Add a new user", "_action_dialog_user_add.tpl", Vars, Context);
+            z_render:dialog("Add a new user.", "_action_dialog_user_add.tpl", Vars, Context);
         false ->
             z_render:growl_error("Only administrators can add users.", Context)
     end;

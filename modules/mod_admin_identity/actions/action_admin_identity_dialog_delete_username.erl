@@ -37,7 +37,7 @@ event({postback, {dialog_delete_username, Id, OnSuccess}, _TriggerId, _TargetId}
                         {id, Id},
                         {username, Username}
                     ],
-                    z_render:dialog("Confirm delete", "_action_dialog_delete_username.tpl", Vars, Context)
+                    z_render:dialog("Confirm user deletion.", "_action_dialog_delete_username.tpl", Vars, Context)
             end;
         false ->
             z_render:growl_error("Only an administrator can delete usernames.", Context)

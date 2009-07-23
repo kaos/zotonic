@@ -12,7 +12,11 @@
 			that the former has logon credentials attached to its page record.</p>
 	
 		<div class="clearfix">
-			{% button text="New User" action={dialog_user_add on_success={reload}} %}
+			{% if m.acl.is_admin %}
+				{% button text="New User" action={dialog_user_add on_success={reload}} %}
+			{% else %}
+				<p>You need to be an administrator to add users.</p>
+			{% endif %}
 
 			<div class="quick-search-wrapper right">
 				<form method="get" action="{% url admin_user %}">

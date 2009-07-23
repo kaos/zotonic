@@ -11,9 +11,23 @@
 
 			<p>
 				All pages belong to a group. Users that are member of a group can edit pages belonging to that group.
-				<br/>Here you can view which groups are available and an administrator can add new groups.
-				<br/>A group leader can add or remove members from a group.
 			</p>
+			
+			<div class="zp-50">
+				<p>
+					A <strong>group leader</strong> can add or remove members from a group.
+					<br/>A <strong>group member</strong> can edit or add pages belonging to a group.
+					<br/>A <strong>group observer</strong> can see all pages in a group but not change them.
+				</p>
+			</div>
+			<div class="zp-50">
+				<p>
+					An <strong>administrator</strong> can change all pages and administer the sytem
+					<br/>A <strong>supervisor</strong> can see all pages of all groups but not change them.
+					<br/>A <strong>community publisher</strong> can publish pages visible to all members.
+					<br/>A <strong>public publisher</strong> can publish pages visible to the whole world.
+				</p>
+			</div>
 
 			{% if editable %}
 			<div class="clearfix">
@@ -29,9 +43,9 @@
 			<ul class="short-list">
 				<li class="headers clearfix">
 					<span class="zp-20">Title</span>
-					<span class="zp-5">Member</span>
-					<span class="zp-5">Leader</span>
-					<span class="zp-5">Observer</span>
+					<span class="zp-5">You are Member</span>
+					<span class="zp-5">You are Leader</span>
+					<span class="zp-5">You are Observer</span>
 					<span class="zp-10">Administrator</span>
 					<span class="zp-10">Supervisor</span>
 					<span class="zp-10">Community Publisher</span>

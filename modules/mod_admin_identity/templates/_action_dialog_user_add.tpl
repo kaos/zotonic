@@ -53,32 +53,36 @@
 		</div>
 
 		<hr />
-		
-		<h3>Group for person page</h3>
-		<p>This defines who will be able to edit the person page of this user.</p>
 
-		<div class="form-item">
-			<label for="{{ #group_id }}">Group</label>
-			<select id="{{ #group_id }}" name="group_id">
-			{% for group_id in m.acl.member %}
-				<option value="{{ group_id }}">{{ m.rsc[group_id].title }}</option>
-			{% endfor %}
-			</select>
-		</div>
+		{% with m.search[{all_bytitle cat="group"}] as all_groups %}
 
-		<hr />
+			<h3>Group for person page</h3>
+			<p>This defines who will be able to edit the person page of this user.</p>
 
-		<h3>Member of</h3>
-		<p>This defines the access rights the user will obtain. When you want to add the new user to more groups then click on the <em>groups</em> menu item.</p>
+			<div class="form-item">
+				<label for="{{ #group_id }}">Group</label>
+				<select id="{{ #group_id }}" name="group_id">
+				{% for title, group_id in all_groups %}
+					<option value="{{ group_id }}">{{ title }}</option>
+				{% endfor %}
+				</select>
+			</div>
 
-		<div class="form-item">
-			<label for="{{ #member_id }}">Group</label>
-			<select id="{{ #member_id }}" name="member_id">
-			{% for member_id in m.acl.leader %}
-				<option value="{{ member_id }}">{{ m.rsc[member_id].title }}</option>
-			{% endfor %}
-			</select>
-		</div>
+			<hr />
+
+			<h3>Member of</h3>
+			<p>This defines the access rights the user will obtain. When you want to add the new user to more groups then click on the <em>groups</em> menu item.</p>
+
+			<div class="form-item">
+				<label for="{{ #member_id }}">Group</label>
+				<select id="{{ #member_id }}" name="member_id">
+				{% for title, member_id in all_groups %}
+					<option value="{{ member_id }}">{{ title }}</option>
+				{% endfor %}
+				</select>
+			</div>
+
+		{% endwith %}
 
 		<hr/>
 
