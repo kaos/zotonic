@@ -49,8 +49,6 @@
 					#}
 				</div>	
 				
-				<hr />
-				
 				{% with m.search[{upcoming cat="event"}] as result %}
 
 					<div class="list-headers">
