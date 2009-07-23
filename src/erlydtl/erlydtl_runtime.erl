@@ -12,30 +12,31 @@ find_value(Key, #m{model=Model} = M, Context) ->
     Model:m_find_value(Key, M, Context);
     
 % Index of list with an integer like "a[2]"
-find_value(Key, L, _Context) when is_integer(Key) andalso is_list(L) ->
+find_value(Key, L, _Context) when is_integer(Key), is_list(L) ->
     try
         lists:nth(Key, L)
     catch
         _:_ -> undefined
     end;
-find_value(Key, {GBSize, GBData}, _Context) when is_integer(GBSize) ->
-    case gb_trees:lookup(Key, {GBSize, GBData}) of
-        {value, Val} ->
-            Val;
-        _ ->
-            undefined
-    end;
 
 %% q and q_validated are indexed with strings, this because the indices are from
 %% the query string and post. Wrap them in a 'q' tuple to force a subsequent lookup.
-find_value(Key, {q}, Context) ->
-    z_context:get_q(atom_to_list(Key), Context);
-find_value(Key, {q_validated}, Context) ->
-    z_context:get_q_validated(atom_to_list(Key), Context);
+find_value(Key, q, Context) ->
+    z_context:get_q(z_convert:to_list(Key), Context);
+find_value(Key, q_validated, Context) ->
+    z_context:get_q_validated(z_convert:to_list(Key), Context);
 find_value(q, _Vars, _Context) ->
-    {q};
+    q;
 find_value(q_validated, _Vars, _Context) ->
-    {q_validated};
+    q_validated;
+
+%% Assume a predicate/property lookup in a list of ids, map to lookup of first entry
+find_value(Key, [N|_], Context) when is_atom(Key), is_integer(N) ->
+	m_rsc:p(N, Key, Context);
+
+%% Property of a resource, just assume an integer is a rsc id
+find_value(Key, Id, Context) when is_integer(Id) ->
+	m_rsc:p(Id, Key, Context);
 
 %% Regular proplist lookup
 find_value(Key, L, _Context) when is_list(L) ->
@@ -52,10 +53,6 @@ find_value(Key, #rsc_list{list=[H|_T]}, Context) ->
 	find_value(Key, H, Context);
 find_value(_Key, #rsc_list{list=[]}, _Context) ->
 	undefined;
-
-%% Property of a resource, just dereference any integer
-find_value(Key, Id, Context) when is_integer(Id) ->
-	m_rsc:p(Id, Key, Context);
 
 % Index of tuple with an integer like "a[2]"
 find_value(Key, T, _Context) when is_integer(Key) andalso is_tuple(T) ->
@@ -92,36 +89,36 @@ find_value(Key, #search_result{} = S, _Context) ->
     end;
 
 %% Other cases: context, dict or parametrized module lookup.
-find_value(Key, Tuple, _Context) when is_tuple(Tuple) ->
+find_value(Key, Tuple, Context) when is_tuple(Tuple) ->
     Module = element(1, Tuple),
     case Module of
-        context ->
+        context -> 
             z_context:get_value(Key, Tuple);
         dict -> 
             case dict:find(Key, Tuple) of
-                {ok, Val} ->
-                    Val;
-                _ ->
-                    undefined
+                {ok, Val} -> Val;
+                _ -> undefined
             end;
         Module ->
             Exports = Module:module_info(exports),
             case proplists:get_value(Key, Exports) of
-                1 ->
-                    Tuple:Key();
+                0 -> Tuple:Key();
+                1 -> Tuple:Key(Context);
                 _ ->
                     case proplists:get_value(get, Exports) of
-                        1 -> 
-                            Tuple:get(Key);
+                        1 -> Tuple:get(Key);
+                        2 -> Tuple:get(Key, Context);
                         _ ->
                             undefined
                     end
             end
     end;
 
-%% When the current value lookup is a function, the context is always passed to F
-find_value(Key, F, Context) when is_function(F) ->
+%% When the current value lookup is a function, the context can be passed to F
+find_value(Key, F, Context) when is_function(F, 2) ->
 	F(Key, Context);
+find_value(Key, F, _Context) when is_function(F, 1) ->
+	F(Key);
 
 %% Any subvalue of a non-existant value is undefined
 find_value(_Key, undefined, _Context) ->
