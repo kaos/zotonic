@@ -16,6 +16,8 @@
 	{% menu id=m.rsc.home.id %}
 {% endblock %}
 
+{% block search %}{% endblock %}
+
 {% block content %}
 	<div id="home-background">
 		<div id="home-content">
