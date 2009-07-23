@@ -81,14 +81,14 @@
 		shadowClass : 'sf-shadow'
 	};
 	sf.defaults = {
-		hoverClass	: 'sfHover',
+		hoverClass	: 'at-hover',
 		pathClass	: 'overideThisToUse',
 		pathLevels	: 1,
-		delay		: 800,
+		delay		: 300,
 		animation	: {opacity:'show'},
 		speed		: 'normal',
-		autoArrows	: true,
-		dropShadows : true,
+		autoArrows	: false,
+		dropShadows : false,
 		disableHI	: false,		// true disables hoverIntent detection
 		onInit		: function(){}, // callback functions
 		onBeforeShow: function(){},

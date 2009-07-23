@@ -43,19 +43,19 @@
 						</h4>
 						{% if m.rsc[id].media %}
 							<div class="item-image left">
-								<a href="{{ m.rsc[id].page_url }}" title="{{ m.rsc[id].title }}">							
+								<a href="{{ m.rsc[id].page_url }}" title="{{ m.rsc[id].title }}">
 									{% image m.rsc[id].media[1] width=65 height=65 crop %}
 								</a>
 							</div>
 						{% else %}
 							<div class="item-image left">
-								<a href="{{ m.rsc[id].page_url }}" title="{{ m.rsc[id].title }}">							
+								<a href="{{ m.rsc[id].page_url }}" title="{{ m.rsc[id].title }}">
 									{% image m.rsc[id].o.performer.media[1] width=65 height=65 crop %}
 								</a>
 							</div>
 						{% endif %}
 						<p class="intro">
-							<am>{{ m.rsc[id].date_start|date:"M d, H:i" }} &mdash; {{ m.rsc[id].date_end|date:"M d, H:i" }}</em>
+							<em>{{ m.rsc[id].date_start|date:"M d, H:i" }} &mdash; {{ m.rsc[id].date_end|date:"M d, H:i" }}</em>
 							{{ m.rsc[id].summary|ljust:80 }}&hellip;
 							<a href="{{ m.rsc[id].page_url }}" title="{{ m.rsc[id].title }}">Read&nbsp;more</a>
 						</p>

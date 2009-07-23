@@ -87,7 +87,7 @@
 			<div class="padding">
 				{% with m.rsc[id].o.performer as performer_id %}
 					
-					<h1>{{ m.rsc[id].title }}</h1>
+					<h1>{{ m.rsc[performer_id].title }}</h1>
 					<p class="clearfix">
 						{% with m.rsc[performer_id].depiction as depiction %}
 							{% if depiction %}
@@ -100,11 +100,13 @@
 						{{ m.rsc[performer_id].summary }} <a href="{{ m.rsc[performer_id].page_url }}" title="{{ m.rsc[performer_id].title }}">Read more</a>
 					</p>
 					
-					<ul class="matching-events">
+					<ul class="program-list">
 						{% for subject_id in m.rsc[performer_id].s.performer %}
 							{% ifnotequal subject_id id %}
-								<li>
-									<span class="zp-40">{{ m.rsc[subject_id].title }}</span>
+								<li class="clearfix performance-info-wrapper">
+									<span class="zp-40">
+										<a href="{{ m.rsc[subject_id].page_url }}" title="{{ m.rsc[subject_id].title }}">{{ m.rsc[subject_id].title }}</a>
+									</span>
 									<span class="zp-60">{{ m.rsc[subject_id].date_start|date:"H:i A" }} &mdash; {{ m.rsc[subject_id].date_end|date:"H:i A" }}</span>
 								</li>
 							{% endifnotequal %}
