@@ -43,9 +43,10 @@
 						<div class="form-item left"><label><input type="checkbox" name="genre" value="Music" />Music</label></div>
 					</div>
 				
-					<div>
+					{#<div>
 						<input id="filter-list" type="text" name="" style="width: 571px;" value="filter the program list by typing the name of a show." />
 					</div>
+					#}
 				</div>	
 				
 				<hr />
@@ -73,7 +74,7 @@
 													&mdash; <span class="time">{{ date_end|date:"H:i A" }}</span>
 												{% endifnotequal %}
 											</span>
-											<span class="venue zp-20"><a href="{{ m.rsc[id].o.performer.page_url }}" title="{{ m.rsc[id].o.performer.title }}">{{ m.rsc[id].o.performer.title }}</a></span>
+											<span class="venue zp-33"><a href="{{ m.rsc[id].o.performer.page_url }}" title="{{ m.rsc[id].o.performer.title }}">{{ m.rsc[id].o.performer.title }}</a></span>
 										{% endwith %}
 									{% endwith %}
 								{% endif %}

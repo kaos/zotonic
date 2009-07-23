@@ -41,6 +41,10 @@ body {
 /* navigation
 ------------------------------------------------------ */
 
+	.home #navigation {
+		margin: 0 0 18px 0;
+	}
+
 	/* essential navigation styles 
 	--------------------------------------------------------------- */
 	
@@ -143,7 +147,7 @@ body {
 	}
 	
 		.at-menu ul {
-			margin: 3px 0 0 0;
+			margin: 0;
 			border-left: 1px solid #fff;
 			border-top: 1px solid #fff;
 			border-right: 1px solid #fff;
@@ -152,7 +156,7 @@ body {
 		.at-menu ul li a {
 			background: #000;
 			color: #fff;
-			font-size: 11px;
+			font-size: 12px;
 			border-bottom: 1px solid #fff;
 			height: 27px;
 			line-height: 27px;
@@ -349,13 +353,11 @@ ul.program-list {
 }
 
 ul.program-list li {
-	margin: 0 0 1px 0;
-	padding: 0 0 36px 0;
-	border-bottom: 1px dotted #888;
+	padding: 6px 0;
+	border-bottom: 1px dotted dimgray;
 }
 	
 	ul.program-list li.uneven {
-		background: #f9f9f9;
 	}
 
 	ul.program-list li p {
@@ -414,7 +416,7 @@ li p.event-info {
 	}
 
 .program-genres-wrapper {
-	margin: 0 0 18px 0;
+	margin: 0;
 }
 
 .program-genres-wrapper .form-item {
@@ -456,21 +458,10 @@ ul.news-list li {
 /* pages - performance
 --------------------------------------------------------*/
 
-.performance-info-wrapper {
-	margin: 0 0 3px 0;
-	padding: 6px;
-	background: #f2f2f2;
-	border: 1px solid #e0e0e0;
-}
-
-ul.program-list li.performance-info-wrapper {
-	padding: 6px;
-	border: 1px solid #e0e0e0;
-}
-
 .artist a {
 	font-weight: bold;
 	color: #000;
+	text-decoration: none;
 }
 
 	.artist a:hover {
