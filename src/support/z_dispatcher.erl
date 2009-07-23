@@ -151,7 +151,6 @@ collect_dispatch_lists(Context) ->
 %% @doc Set the dispatch list of the webmachine dispatcher.
 dispatch_webmachine(DispatchList) ->
     WMList = [list_to_tuple(tl(tuple_to_list(Disp))) || Disp <- DispatchList],
-    ?DEBUG(WMList),
     application:set_env(webmachine, dispatch_list, WMList).
     
 
