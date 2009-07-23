@@ -17,6 +17,8 @@
     name_to_id_check/2,
     name_to_id_cat/3,
     name_to_id_cat_check/3,
+
+    page_path_to_id/2,
     
     get/2,
     get_raw/2,
@@ -106,6 +108,14 @@ name_to_id_cat(Name, Cat, Context) ->
 name_to_id_cat_check(Name, Cat, Context) ->
     {ok, Id} = name_to_id_cat(Name, Cat, Context),
     Id.
+
+page_path_to_id(Path, Context) ->
+    Path1 = [ $/, string:strip(Path, both, $/)],
+    case z_db:q1("select id from rsc where page_path = $1", [Path1], Context) of
+        undefined -> {error, enoent};
+        Id -> {ok, Id}
+    end.
+
 
 %% @doc Read a whole resource
 %% @spec get(Id, Context) -> PropList | undefined
@@ -249,7 +259,12 @@ p(Id, is_editable, Context) -> is_editable(Id, Context);
 p(Id, is_ingroup, Context) -> is_ingroup(Id, Context);
 p(Id, is_a, Context) -> [ {C,true} || C <- is_a(Id, Context) ];
 p(Id, exists, Context) -> exists(Id, Context);
-p(Id, page_url, Context) -> page_url(Id, Context);
+p(Id, page_url, Context) -> 
+    case p(Id, page_path, Context) of
+        undefined -> page_url(Id, Context);
+        PagePath -> PagePath
+    end;
+p(Id, default_page_url, Context) -> page_url(Id, Context);
 p(Id, group, Context) -> 
     case p(Id, group_id, Context) of
         undefined -> undefined;

@@ -247,38 +247,53 @@ preflight_check(Id, [_H|T], Context) ->
     preflight_check(Id, T, Context).
 
 
-%% @doc Remove protected properties and convert some other to the correct data type
+%% @doc Remove properties the user is not allowed to change and convert some other to the correct data type
 %% @spec props_filter(Props1, Acc, Context) -> Props2
 props_filter([], Acc, _Context) ->
     Acc;
-props_filter([{uri, undefined}|T], Acc, Context) ->
-    props_filter(T, [{uri, undefined} | Acc], Context);
-props_filter([{uri, <<>>}|T], Acc, Context) ->
-    props_filter(T, [{uri, undefined} | Acc], Context);
-props_filter([{uri, ""}|T], Acc, Context) ->
-    props_filter(T, [{uri, undefined} | Acc], Context);
 
-props_filter([{name, undefined}|T], Acc, Context) ->
-    props_filter(T, [{name, undefined} | Acc], Context);
-props_filter([{name, <<>>}|T], Acc, Context) ->
-    props_filter(T, [{name, undefined} | Acc], Context);
-props_filter([{name, ""}|T], Acc, Context) ->
-    props_filter(T, [{name, undefined} | Acc], Context);
+props_filter([{uri, Uri}|T], Acc, Context) ->
+    case z_acl:has_role(admin, Context) of
+        true ->
+            case Uri of
+                Empty when Empty == undefined; Empty == []; Empty == <<>> -> 
+                    props_filter(T, [{uri, undefined} | Acc], Context);
+                _ ->
+                    props_filter(T, [{uri, Uri} | Acc], Context)
+            end;
+        false ->
+            props_filter(T, Acc, Context)
+    end;
+
 props_filter([{name, Name}|T], Acc, Context) ->
-    props_filter(T, [{name, z_string:to_name(Name)} | Acc], Context);
+    case z_acl:has_role(admin, Context) of
+        true ->
+            case Name of
+                Empty when Empty == undefined; Empty == []; Empty == <<>> -> 
+                    props_filter(T, [{name, undefined} | Acc], Context);
+                _ ->
+                    props_filter(T, [{name, z_string:to_name(Name)} | Acc], Context)
+            end;
+        false ->
+            props_filter(T, Acc, Context)
+    end;
 
-props_filter([{page_path, undefined}|T], Acc, Context) ->
-    props_filter(T, [{page_path, undefined} | Acc], Context);
-props_filter([{page_path, <<>>}|T], Acc, Context) ->
-    props_filter(T, [{page_path, undefined} | Acc], Context);
-props_filter([{page_path, ""}|T], Acc, Context) ->
-    props_filter(T, [{page_path, undefined} | Acc], Context);
 props_filter([{page_path, Path}|T], Acc, Context) ->
-    Tokens = string:tokens(z_convert:to_list(Path), "/"),
-    AsSlug = lists:map(fun(X) -> z_string:to_slug(X) end, Tokens),
-    case string:strip(string:join(AsSlug, "/"), both, $/) of
-        [] -> props_filter(T, [{page_path, undefined} | Acc], Context);
-        P  -> props_filter(T, [{page_path, P} | Acc], Context)
+    case z_acl:has_role(public_publisher, Context) of
+        true ->
+            case Path of
+                Empty when Empty == undefined; Empty == []; Empty == <<>> -> 
+                    props_filter(T, [{page_path, undefined} | Acc], Context);
+                _ ->
+                    Tokens = string:tokens(z_convert:to_list(Path), "/"),
+                    AsSlug = lists:map(fun(X) -> z_string:to_slug(X) end, Tokens),
+                    case [$/ | string:strip(string:join(AsSlug, "/"), both, $/)] of
+                        [] -> props_filter(T, [{page_path, undefined} | Acc], Context);
+                        P  -> props_filter(T, [{page_path, P} | Acc], Context)
+                    end
+            end;
+        false ->
+            props_filter(T, Acc, Context)
     end;
 
 props_filter([{slug, undefined}|T], Acc, Context) ->
@@ -291,9 +306,19 @@ props_filter([{slug, Slug}|T], Acc, Context) ->
     props_filter(T, [{slug, z_string:to_slug(Slug)} | Acc], Context);
 
 props_filter([{is_published, P}|T], Acc, Context) ->
-    props_filter(T, [{is_published, z_convert:to_bool(P)} | Acc], Context);
+    case z_acl:has_role(public_publisher, Context) of
+        true ->
+            props_filter(T, [{is_published, z_convert:to_bool(P)} | Acc], Context);
+        false ->
+            props_filter(T, Acc, Context)
+    end;
 props_filter([{is_authoritative, P}|T], Acc, Context) ->
-    props_filter(T, [{is_authoritative, z_convert:to_bool(P)} | Acc], Context);
+    case z_acl:has_role(admin, Context) of
+        true ->
+            props_filter(T, [{is_authoritative, z_convert:to_bool(P)} | Acc], Context);
+        false ->
+            props_filter(T, Acc, Context)
+    end;
 props_filter([{is_featured, P}|T], Acc, Context) ->
     props_filter(T, [{is_featured, z_convert:to_bool(P)} | Acc], Context);
 

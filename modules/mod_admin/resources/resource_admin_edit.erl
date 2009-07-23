@@ -58,17 +58,18 @@ event({submit, rscform, _FormId, _TargetId}, Context) ->
                         CatBefore ->
                             Context1 = z_render:set_value("field-name", m_rsc:p(Id, name, Context), Context),
                             Context2 = z_render:set_value("field-uri",  m_rsc:p(Id, uri, Context1), Context1),
-                            Context3 = z_render:set_value("slug",  m_rsc:p(Id, slug, Context2), Context2),
-                            Context4 = case z_convert:to_bool(m_rsc:p(Id, is_protected, Context3)) of
-                                true ->  z_render:wire("delete-button", {disable, []}, Context3);
-                                false -> z_render:wire("delete-button", {enable, []}, Context3)
+                            Context3 = z_render:set_value("field-page-path",  m_rsc:p(Id, page_path, Context1), Context2),
+                            Context4 = z_render:set_value("slug",  m_rsc:p(Id, slug, Context3), Context3),
+                            Context5 = case z_convert:to_bool(m_rsc:p(Id, is_protected, Context4)) of
+                                true ->  z_render:wire("delete-button", {disable, []}, Context4);
+                                false -> z_render:wire("delete-button", {enable, []}, Context4)
                             end,
-                            Context5 = z_render:growl(["Saved ",z_html:strip(Title),"."], Context4),
+                            Context6 = z_render:growl(["Saved ",z_html:strip(Title),"."], Context5),
                             case proplists:is_defined("save_duplicate", Post) of
                                 true ->
-                                    z_render:wire({dialog_duplicate_rsc, [{id, Id}]}, Context5);
+                                    z_render:wire({dialog_duplicate_rsc, [{id, Id}]}, Context6);
                                 false ->
-                                    Context5
+                                    Context6
                             end;
                         _CatOther ->
                             z_render:wire({reload, []}, Context)

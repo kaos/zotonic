@@ -84,7 +84,8 @@ wm_is_authorized(ReqData, Context) ->
 
 
 %% @doc Convenience function to be called from the is_authorized/2 callback in webmachine resources.
-%% The ReqId is the name of the id in the query string or other parameters.  It must be numerical.
+%% The ArgName is the name of the id in the query string or other parameters.  When it is an atom
+%% then the context is checked before the query args are checked.
 wm_is_authorized(NeedAuth, What, ArgName, ReqData, Context) ->
     Context1 = ?WM_REQ(ReqData, Context),
     Context2 = z_context:ensure_all(Context1), 
@@ -94,15 +95,24 @@ wm_is_authorized(NeedAuth, What, ArgName, ReqData, Context) ->
             ?WM_REPLY(?WWW_AUTHENTICATE, ContextLogon);
 
         false -> 
-            Id = z_context:get_q(ArgName, Context2),
-            IdN = try list_to_integer(Id) catch _:_ -> 0 end,
-            case m_rsc:exists(IdN, Context2) of
+            Id = case ArgName of
+                N when is_integer(N) ->
+                    N;
+                A when is_atom(A) -> 
+                    case z_context:get(A, Context2) of
+                        undefined -> z_convert:to_integer(z_context:get_q(A, Context2));
+                        FromDisp -> m_rsc:name_to_id_check(FromDisp, Context2)
+                    end;
+                _ ->
+                    z_convert:to_integer(z_context:get_q(ArgName, Context2))
+            end,
+            case m_rsc:exists(Id, Context2) of
                 false -> 
                     ?WM_REPLY(true, Context2);
                 true ->
                     Allow = case What of
-                        visible -> z_acl:rsc_visible(IdN, Context2);
-                        editable -> z_acl:rsc_editable(IdN, Context2)
+                        visible -> z_acl:rsc_visible(Id, Context2);
+                        editable -> z_acl:rsc_editable(Id, Context2)
                     end,
                     case Allow of
                         false ->
