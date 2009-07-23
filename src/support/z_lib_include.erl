@@ -93,7 +93,7 @@ collapse_dirs([File|Files]) ->
                 % File is in a subdirectory from A
                 RelFile = string:join(B, "/") ++ [$/ | filename:rootname(filename:basename(File))],
                 collapse_dirs(Files, FileTk, [RelFile | Acc]);
-            {A, B} ->
+            {_A, _B} ->
                 % File is in a (sub-)directory higher from the previous one, reset to top level
                 collapse_dirs(Files, FileTk, [ensure_abspath(filename:rootname(File)) | Acc ])
         end.
