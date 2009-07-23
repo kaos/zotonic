@@ -10,10 +10,6 @@
 
 {% block pageheader %}
 	<h1 id="header">New Island Festival. Created by Dutch artists. Governors Island september 10-20</h1>
-{% endblock %}	
-
-{% block navigation %}
-	{% menu id=m.rsc.news.id %}	
 {% endblock %}
 
 {% block content %}
