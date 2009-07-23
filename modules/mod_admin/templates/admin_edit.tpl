@@ -129,7 +129,7 @@
 										%}
 
 										{% button text="add existing media item" 
-											action={link_dialog subject_id=id predicate="depiction"
+											action={dialog_link subject_id=id predicate="depiction"
 												action={postback
 															postback={reload_media rsc_id=id div_id=#media}
 															delegate="resource_admin_edit"}
