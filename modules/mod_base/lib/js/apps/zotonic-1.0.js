@@ -77,7 +77,9 @@ function z_postback_loop()
 function z_opt_cancel(obj)
 {
     var nodeName = obj.nodeName.toLowerCase();
-    if(nodeName == 'radio' || nodeName == 'checkbox')
+    var nodeType = $(obj).attr("type");
+
+    if (nodeName == 'input' &&  (nodeType == 'checkbox' || nodeType == 'radio'))
 	{
 		return true;
 	}
