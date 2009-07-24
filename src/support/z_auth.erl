@@ -100,8 +100,13 @@ wm_is_authorized(NeedAuth, What, ArgName, ReqData, Context) ->
                     N;
                 A when is_atom(A) -> 
                     case z_context:get(A, Context2) of
-                        undefined -> z_convert:to_integer(z_context:get_q(A, Context2));
-                        FromDisp -> m_rsc:name_to_id_check(FromDisp, Context2)
+                        undefined ->
+                            z_convert:to_integer(z_context:get_q(A, Context2));
+                        FromDisp ->
+                            case m_rsc:name_to_id(FromDisp, Context2) of
+                                {ok, FromDispId} -> FromDispId;
+                                {error, _Reason} -> undefined
+                            end
                     end;
                 _ ->
                     z_convert:to_integer(z_context:get_q(ArgName, Context2))
