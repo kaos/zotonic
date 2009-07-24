@@ -56,7 +56,7 @@ event({submit, {event_add, Props}, _TriggerId, _TargetId}, Context) ->
                     undefined -> nop;
                     _ -> m_edge:insert(EventId, atvenue, list_to_integer(Venue), Ctx)
                 end,
-                [ m_edge:insert(EventId, relation, list_to_integer(Genre), Ctx) || Genre <- Genres, Genre /= [] ],
+                [ m_edge:insert(EventId, hasgenre, list_to_integer(Genre), Ctx) || Genre <- Genres, Genre /= [] ],
                 {ok, EventId};
             {error, InsReason} ->
                 throw({error, InsReason})

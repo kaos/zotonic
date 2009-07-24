@@ -233,7 +233,8 @@ install_predicate(C) ->
         [ 304, true,   "depiction","http://xmlns.com/foaf/0.1/depiction",               [{reversed, false},{title, {trans, [{en,"Depiction"},{nl,"Afbeelding"}]}}]],
 
         [ 305, true,   "atvenue",  "http://zotonic.net/predicate/atvenue",              [{reversed, false},{title, "Venue"}]],
-        [ 306, true,   "performer","http://zotonic.net/predicate/performer",            [{reversed, false},{title, "Performer"}]]
+        [ 306, true,   "performer","http://zotonic.net/predicate/performer",            [{reversed, false},{title, "Performer"}]],
+        [ 307, true,   "hasgenre", "http://zotonic.net/predicate/hasgenre",             [{reversed, false},{title, "Genre"}]]
     ],
 
     {ok, CatId}   = pgsql:squery1(C, "select id from rsc where name = 'predicate'"),
@@ -253,7 +254,9 @@ install_predicate(C) ->
         {305, true,  108}, %  Event -> atvenue   -> _
         {305, false, 120}, %  _     -> atvenue   -> venue
         {306, true,  108}, %  Event -> performer -> _
-        {306, false, 121}  %  _     -> performer -> artist
+        {306, false, 121}, %  _     -> performer -> artist
+        {307, true,  108}, %  Event -> hasgenre  -> _
+        {307, false, 124}  %  _     -> hasgenre  -> genre
     ],
     
     [ {ok, 1} = pgsql:equery(C, "
