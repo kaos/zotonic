@@ -56,7 +56,8 @@ render(File, Variables, Context) ->
                             <<>>
                      end;
                 {error, Reason} ->
-                    ?ERROR("Error compiling template: ~s (~p)", [File, Reason]),
+                    Reason1 = try lists:flatten(Reason) catch _:_ -> Reason end,
+                    ?ERROR("Error compiling template: ~s (~p)", [File, Reason1]),
                     <<>>
             end;
         {error, Reason} ->
