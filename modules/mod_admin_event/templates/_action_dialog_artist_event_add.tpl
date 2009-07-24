@@ -26,7 +26,7 @@
 		<div class="form-item">
 		{% for title, id in m.search[{all_bytitle cat="genre"}] %}
 			<input id="{{ #genre.id }}" type="checkbox" value="{{ id }}" name="genre" />
-			<label for="{{ #genre.id}}">{{ title }}</label>
+			<label for="{{ #genre.id}}">{{ title }}</label><br/>
 		{% endfor %}
 		</div>
 
