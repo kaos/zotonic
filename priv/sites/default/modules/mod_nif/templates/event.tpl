@@ -42,9 +42,11 @@
 				</div>
 				<ul class="performance-genres">
 					<li>Genres:</li>
-					<li>for kids,</li>
-					<li>dance,</li>
-					<li>english</li>
+					{% for genre_id in m.rsc[id].o.hasgenre %}
+						<li>{{ m.rsc[genre_id].title }}{% if not forloop.last %},{% endif %}</li>
+					{% empty %}
+						<li>no genre</li>
+					{% endfor %}
 				</ul>
 				
 				{% if m.rsc[id].media[1] %}
