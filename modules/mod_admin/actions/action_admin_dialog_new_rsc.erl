@@ -16,26 +16,34 @@
 -include("zotonic.hrl").
 
 render_action(TriggerId, TargetId, Args, Context) ->
+    Cat = proplists:get_value(cat, Args),
     Title = proplists:get_value(title, Args),
     Redirect = proplists:get_value(redirect, Args, true),
     SubjectId = proplists:get_value(subject_id, Args),
     Predicate = proplists:get_value(predicate, Args),
-    Postback = {new_rsc_dialog, Title, Redirect, SubjectId, Predicate},
+    Postback = {new_rsc_dialog, Title, Cat, Redirect, SubjectId, Predicate},
 	{PostbackMsgJS, _PickledPostback} = z_render:make_postback(Postback, click, TriggerId, TargetId, ?MODULE, Context),
 	{PostbackMsgJS, Context}.
 
 
 %% @doc Fill the dialog with the new page form. The form will be posted back to this module.
 %% @spec event(Event, Context1) -> Context2
-event({postback, {new_rsc_dialog, Title, Redirect, SubjectId, Predicate}, _TriggerId, _TargetId}, Context) ->
+event({postback, {new_rsc_dialog, Title, Cat, Redirect, SubjectId, Predicate}, _TriggerId, _TargetId}, Context) ->
+    CatName = case Cat of
+        undefined -> "page";
+        _ -> z_convert:to_list(?TR(m_rsc:p(Cat, title, Context), Context))
+    end,
+
     Vars = [
         {delegate, atom_to_list(?MODULE)},
         {redirect, Redirect },
         {subject_id, SubjectId},
         {predicate, Predicate},
-        {title, Title}
+        {title, Title},
+        {cat, Cat},
+        {catname, CatName}
     ],
-    z_render:dialog("Make a new page", "_action_dialog_new_rsc.tpl", Vars, Context);
+    z_render:dialog("Make a new "++CatName++".", "_action_dialog_new_rsc.tpl", Vars, Context);
 
 
 event({submit, new_page, _TriggerId, _TargetId}, Context) ->

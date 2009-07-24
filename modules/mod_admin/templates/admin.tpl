@@ -9,6 +9,7 @@
 			<h2>Zotonic Dashboard</h2>
 
 			<div class="clearfix">
+				{% all include "_admin_make_page_buttons.tpl" %}
 				{% button class="" text="Make a new page" action={dialog_new_rsc title=""} %}
 				{% button class="" text="Make a new media item" action={dialog_media_upload title=""} %}
 			</div>

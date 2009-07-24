@@ -9,10 +9,6 @@
 {% wire id=#form type="submit" postback="new_page" delegate=delegate %}
 <form id="{{ #form }}" method="POST" action="postback">
 
-	<input type="hidden" name="subject_id" value="{{ subject_id }}" />
-	<input type="hidden" name="predicate" value="{{ predicate }}" />
-	<input type="hidden" name="redirect" value="{{ redirect }}" />
-
 	<div class="new-rsc-wrapper">
 		<div class="form-item clearfix">
 			<label for="new_rsc_title" style="color:white">Page title</label>
@@ -24,7 +20,7 @@
 			<label for="{{ #category }}">Category</label>
 			<select id="{{ #category }}" name="category_id">
 			{% for cat_id, level, indent, name in m.category.all_flat %}
-				<option value="{{cat_id}}">
+				<option value="{{cat_id}}" {% ifequal name cat %}selected="selected" {% endifequal %}>
 					{{ indent }}{{ m.rsc[cat_id].title|default:name }}
 				</option>
 			{% endfor %}
@@ -45,9 +41,13 @@
 			</select>
 		</div>
 		
-		<button type="submit">Make page</button>
-		
+		<button type="submit">Make {{catname}}</button>
+
 		{% button action={dialog_close} text="Cancel" %}
+
+		<input type="hidden" name="subject_id" value="{{ subject_id }}" />
+		<input type="hidden" name="predicate" value="{{ predicate }}" />
+		<input type="hidden" name="redirect" value="{{ redirect }}" />
 	</div>
 </form>
 
