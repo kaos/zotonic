@@ -18,12 +18,15 @@
 
 %% interface functions
 -export([
+    observe/2
 ]).
 
 -include_lib("zotonic.hrl").
 
 -record(state, {context}).
 
+observe({search_query, Req, OffsetLimit}, Context) ->
+    search(Req, OffsetLimit, Context).
 
 %%====================================================================
 %% API
@@ -47,6 +50,7 @@ start_link(Args) when is_list(Args) ->
 init(Args) ->
     process_flag(trap_exit, true),
     {context, Context} = proplists:lookup(context, Args),
+    z_notifier:observe(search_query, {?MODULE, observe}, Context),
     {ok, #state{context=z_context:new_for_host(Context)}}.
 
 %% @spec handle_call(Request, From, State) -> {reply, Reply, State} |
@@ -82,7 +86,8 @@ handle_info(_Info, State) ->
 %% terminate. It should be the opposite of Module:init/1 and do any necessary
 %% cleaning up. When it returns, the gen_server terminates with Reason.
 %% The return value is ignored.
-terminate(_Reason, _State) ->
+terminate(_Reason, State) ->
+    z_notifier:detach(search_query, {?MODULE, observe}, State#state.context),
     ok.
 
 %% @spec code_change(OldVsn, State, Extra) -> {ok, NewState}
@@ -95,4 +100,38 @@ code_change(_OldVsn, State, _Extra) ->
 %%====================================================================
 %% support functions
 %%====================================================================
+
+
+
+search({nif_program, [{day, Day}, {genre, Genre}]}, _OffetLimit, Context) ->
+    DateStart = {{2009,9,Day}, {4,0,0}},
+    DateEnd   = {{2009,9,Day+1}, {4,0,0}},
+    case Genre of
+        Empty when Empty == []; Empty == undefined ->
+            #search_sql{
+                select="r.id, r.pivot_date_start",
+                from="rsc r",
+                where="pivot_date_start <= $1 and pivot_date_end >= $2",
+                order="r.pivot_date_start asc",
+                tables=[{rsc,"r"}],
+                args=[DateEnd, DateStart],
+                cats=[{"r", event}]
+            };
+        _ ->
+            PredHasGenreId = m_predicate:name_to_id_check(hasgenre, Context),
+            InIds = string:join([ integer_to_list(N) || N <- Genre], ","),
+            #search_sql{
+                select="distinct r.id, r.pivot_date_start",
+                from="rsc r, edge e",
+                where="r.id = e.subject_id and e.predicate_id = $1 and e.object_id in (" ++ InIds
+                    ++ ") and pivot_date_start <= $2 and pivot_date_end >= $3"
+                    ,
+                order="r.pivot_date_start asc",
+                tables=[{rsc,"r"}],
+                args=[PredHasGenreId, DateEnd, DateStart],
+                cats=[{"r", event}]
+            }
+    end;
+search(_, _, _) ->
+    undefined.
 
