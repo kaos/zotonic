@@ -44,6 +44,11 @@ html(Context) ->
 %% @spec get_id(Context) -> int()
 get_id(Context) ->
     case z_context:get(id, Context) of
-        undefined -> z_convert:to_integer(z_context:get_q("id", Context));
-        ConfId -> m_rsc:name_to_id_check(ConfId, Context)
+        undefined -> 
+            z_convert:to_integer(z_context:get_q("id", Context));
+        ConfId ->
+            case m_rsc:name_to_id(ConfId, Context) of
+                {ok, Id} -> Id;
+                _ -> false
+            end
     end.
