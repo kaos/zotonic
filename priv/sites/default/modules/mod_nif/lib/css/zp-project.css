@@ -86,11 +86,13 @@ body {
 	.at-menu li {
 		float: left;
 		position: relative;
+		display: inline;
 	}
 	
 	.at-menu a {
 		display: block;
 		position: relative;
+		float: left;
 	}
 	
 	.at-menu li:hover ul,
@@ -145,6 +147,11 @@ body {
 	.at-menu li li {
 		background: #fff;
 	}
+	
+		.at-menu li li a {
+			float: none;
+			display: block;
+		}	
 	
 		.at-menu li li a.current {
 			background: #fff;

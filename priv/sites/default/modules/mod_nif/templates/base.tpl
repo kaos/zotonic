@@ -21,7 +21,7 @@
 	<div class="zp-wrapper">
 		
 		{% block pageheader %}{% endblock %}	
-		<div class="navigation-search-wrapper">
+		<div class="navigation-search-wrapper clearfix">
 			{% block navigation %}{% menu id=id %}{% endblock %}
 			{% block search %}{% include "_searchfield.tpl" %}{% endblock %}
 		</div>	
