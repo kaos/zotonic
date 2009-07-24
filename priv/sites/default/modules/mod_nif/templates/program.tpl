@@ -21,7 +21,7 @@
 				
 				{# This id will be updated when the selection is changed. #}
 				<div id="the-program">
-					{% include "_program.tpl" %}
+					{% include "_program.tpl" program_page %}
 				</div>
 			</div>
 		</div>

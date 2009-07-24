@@ -28,7 +28,8 @@
 		{% for title, id in m.search[{all_bytitle cat="genre"}] %}
 			<div class="form-item left">
 				<label>
-					<input id="{{ #cat.id }}" type="checkbox" name="{{ id }}" value="1" {% if id|member:genre %}checked="checked"{% endif %} />
+					<input id="{{ #cat.id }}" type="checkbox" name="{{ id }}" value="1" 
+						{% if id|member:genre %}checked="checked"{% else %}{% if program_page and not genre %}checked="checked"{% endif %}{% endif %} />
 					{{ title }}
 				</label>
 			</div>
