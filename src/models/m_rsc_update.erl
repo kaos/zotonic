@@ -162,7 +162,7 @@ update(Id, Props, Context) when is_integer(Id) orelse Id == insert_rsc ->
                         UpdateProps1 = [
                             {version, z_db:q1("select version+1 from rsc where id = $1", [RscId], Ctx)},
                             {modifier_id, z_acl:user(Ctx)},
-                            {modified, erlang:universaltime()}
+                            {modified, calendar:local_time()}
                             | UpdateProps
                         ],
                         
@@ -455,7 +455,7 @@ recombine_dates(Props) ->
     {Dates2, DatesNull1} = collect_empty_dates(Dates1, [], DatesNull),
     Dates3 = [ {Name, date_from_default(Now, D)} || {Name, D} <- Dates2 ],
     DateGroups2 = [ {Name, dategroup_fill_parts(date_from_default(Now, S), E)} || {Name, {S,E}} <- DateGroups1 ],
-    Dates4 = lists:foldl(fun({Name, {S, E}}, Acc) -> [{Name++"_start", z_convert:to_utc(S)}, {Name++"_end", z_convert:to_utc(E)} | Acc] end, Dates3, DateGroups2),
+    Dates4 = lists:foldl(fun({Name, {S, E}}, Acc) -> [{Name++"_start", S}, {Name++"_end", E} | Acc] end, Dates3, DateGroups2),
     Dates4 ++ DatesNull1 ++ Props1.
 
 
@@ -547,7 +547,7 @@ group_dates(Dates) ->
     
 
 dategroup_fill_parts( S, {{undefined,undefined,undefined},{undefined,undefined,undefined}} ) ->
-    {S, {{9999,6,1},{0,0,0}}};
+    {S, ?ST_JUTTEMIS};
 dategroup_fill_parts( {{Ys,Ms,Ds},{Hs,Is,Ss}}, {{undefined,Me,De},{He,Ie,Se}} ) ->
     dategroup_fill_parts( {{Ys,Ms,Ds},{Hs,Is,Ss}}, {{Ys,Me,De},{He,Ie,Se}} );
 dategroup_fill_parts( {{Ys,Ms,Ds},{Hs,Is,Ss}}, {{Ye,undefined,De},{He,Ie,Se}} ) ->
@@ -593,7 +593,7 @@ to_int(A) ->
 
 test() ->
     [{"publication_start",{{2009,7,9},{0,0,0}}},
-          {"publication_end",{{9999,6,1},{0,0,0}}},
+          {"publication_end",?ST_JUTTEMIS},
           {"plop","hello"}]
      = recombine_dates([
         {"dt:y:0:publication_start", "2009"},

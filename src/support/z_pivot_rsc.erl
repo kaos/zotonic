@@ -269,11 +269,11 @@ pivot_date(R) ->
     pivot_date1(S, E) when not is_tuple(S) andalso not is_tuple(E) ->
         {undefined, undefined};
     pivot_date1(S, E) when not is_tuple(S) andalso is_tuple(E) ->
-        { {{-4000,0,0},{0,0,0}}, z_convert:to_utc(E)};
+        { {{-4000,0,0},{0,0,0}}, E};
     pivot_date1(S, E) when is_tuple(S) andalso not is_tuple(E) ->
-        {z_convert:to_utc(S), {{9999,6,1},{0,0,0}} };
+        {S, ?ST_JUTTEMIS};
     pivot_date1(S, E) when is_tuple(S) andalso is_tuple(E) ->
-        {z_convert:to_utc(S), z_convert:to_utc(E)}.
+        {S, E}.
 
 
 %% @doc Split texts into different languages

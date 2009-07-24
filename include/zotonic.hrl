@@ -55,6 +55,8 @@
 -define(HOST(Context), Context#context.host).
 -define(DBC(Context), Context#context.dbc).
 
+-define(ST_JUTTEMIS, {{9999,6,1}, {12,0,0}}.
+
 %% ACL fields for an acl check. Fields are initialized for the visible resource.
 %% This is used for fetching the acl fields from a resource record.
 -record(acl_props, {
@@ -62,7 +64,7 @@
     group_id=1,
     visible_for=0,
     publication_start={{1900,1,1},{0,0,0}},
-    publication_end={{9999,1,1}, {0,0,0}}
+    publication_end=?ST_JUTTEMIS
 }).
 
 %% Record used for parsing multipart body (see z_parse_multipart)

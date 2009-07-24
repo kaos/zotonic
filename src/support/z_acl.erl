@@ -350,7 +350,7 @@ acl_visible(Acl, #context{user_id=undefined}) ->
                 false ->
                     false;
                 true ->
-                    Date = calendar:universal_time(),
+                    Date = calendar:local_time(),
                     Acl#acl_props.publication_start =< Date andalso Acl#acl_props.publication_end >= Date
             end
     end;
@@ -378,7 +378,7 @@ acl_visible(Acl, Context) ->
     acl_is_published(Acl) ->
         case Acl#acl_props.is_published of
             true ->
-                Date = calendar:universal_time(),
+                Date = calendar:local_time(),
                 Acl#acl_props.publication_start =< Date andalso Acl#acl_props.publication_end >= Date;
             false ->
                 false

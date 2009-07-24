@@ -46,7 +46,7 @@ logon_pw(Username, Password, Context) ->
         {ok, Id} ->
             Context1 = z_acl:logon(Id, Context),
             z_context:set_session(auth_user_id, Id, Context1),
-            z_context:set_session(auth_timestamp, erlang:universaltime(), Context1),
+            z_context:set_session(auth_timestamp, calendar:universal_time(), Context1),
             {true, Context1};
         {error, _Reason} ->
             {false, Context}

@@ -3,7 +3,7 @@
 %% @copyright Copyright (c) 2009 Marc Worrell
 %%
 %% @doc Conversion functions for all kinds of data types. 
-%% @doc Changes to Rusty's version: added to_utc(), undefined handling and more to_bool cases.
+%% @doc Changes to Rusty's version: added date conversion, undefined handling and more to_bool cases.
 
 -module(z_convert).
 -author("Rusty Klophaus").
@@ -16,8 +16,12 @@
 	to_binary/1, 
 	to_integer/1,
 	to_bool/1,
-	to_utc/1
+	to_utc/1,
+	to_localtime/1
 ]).
+
+
+-include("zotonic.hrl").
 
 
 %%% CONVERSION %%%
@@ -79,14 +83,28 @@ to_bool(<<"DISABLED">>) -> false;
 to_bool(_) -> true.
 
 
-%% @doc Convert a local time to utc
+%% @doc Convert a local date time to utc
 to_utc(undefined) ->
     undefined;
+to_utc({{9999,_,_}, _}) ->
+    ?ST_JUTTEMIS;
 to_utc(D) ->
-    case calendar:local_time_to_universal_time_dst(D) of
+    case catch calendar:local_time_to_universal_time_dst(D) of
         [] -> D;    % This time never existed in the local time, just take it as-is
         [UTC] -> UTC;
-        [DstUTC, _UTC] -> DstUTC
+        [DstUTC, _UTC] -> DstUTC;
+        {'EXIT', _} -> D
     end.
 
+
+%% @doc Convert a utc date time to local
+to_localtime(undefined) ->
+    undefined;
+to_localtime({{9999,_,_},_}) ->
+    ?ST_JUTTEMIS;
+to_localtime(D) ->
+    case catch calendar:universal_time_to_local_time(D) of
+        {'EXIT', _} -> D;
+        LocalD -> LocalD
+    end.
 
