@@ -97,7 +97,14 @@ duplicate(Id, DupProps, Context) ->
                                 {is_authoritative,false}, {is_protected,false},
                                 {slug,undefined}
                             ]),
-            insert(InsProps, Context);
+            case insert(InsProps, Context) of
+                {ok, NewId} ->
+                    % Duplicate all edges
+                    m_edge:duplicate(Id, NewId, Context),
+                    {ok, NewId};
+                {error, Reason} ->
+                    {error, Reason}
+            end;
         false ->
             {error, eacces}
     end.

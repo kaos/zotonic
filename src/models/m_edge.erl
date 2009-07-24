@@ -21,6 +21,7 @@
     insert/4,
     delete/2,
     delete/4,
+    duplicate/3,
     object/4,
     subject/4,
     objects/3,
@@ -152,6 +153,28 @@ delete(SubjectId, Pred, ObjectId, Context) ->
     z_depcache:flush(SubjectId),
     z_depcache:flush(ObjectId),
     ok.
+
+
+%% @doc Duplicate all edges from one id to another id.
+duplicate(Id, ToId, Context) ->
+    case z_acl:rsc_editable(Id, Context) of
+        true ->
+            F = fun(Ctx) ->
+                m_rsc:touch(ToId, Ctx),
+                Edges = z_db:q("select predicate_id, object_id, seq from edge where subject_id = $1", [Id], Ctx),
+                UserId = z_acl:user(Ctx),
+                [
+                    catch z_db:insert(edge, [{subject_id, ToId}, {predicate_id, PredId}, {object_id, ObjId}, {seq, Seq}, {creator_id, UserId}], Ctx)
+                    || {PredId, ObjId, Seq} <- Edges
+                ]
+            end,
+            z_db:transaction(F, Context),
+            z_depcache:flush(ToId),
+            ok;
+        false ->
+            {error, enoent}
+    end.
+    
     
 
 %% @doc Return the Nth object with a certaing predicate of a subject.
