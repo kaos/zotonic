@@ -226,7 +226,11 @@ add_cat_check(_Alias, [], _Context) ->
 add_cat_check(Alias, Cats, Context) ->
     Ranges = m_category:ranges(Cats, Context),
     CatChecks = [ cat_check1(Alias, Range) || Range <- Ranges ],
-    "(" ++ string:join(CatChecks, " or ") ++ ")".
+    case CatChecks of
+        [] -> [];
+        [_CatCheck] -> CatChecks;
+        _ -> "(" ++ string:join(CatChecks, " or ") ++ ")"
+    end.
 
 
     cat_check1(Alias, {From,From}) ->
