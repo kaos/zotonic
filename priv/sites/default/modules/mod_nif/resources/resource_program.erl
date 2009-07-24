@@ -31,8 +31,13 @@ is_authorized(ReqData, Context) ->
 
 %% @doc Show the page.
 html(Context) ->
+    {Day, GenreIds} = case z_context:get_visitor(program_filter, Context) of
+        undefined -> {default_day(), undefined};
+        SavedFilters -> SavedFilters
+    end,
+    ?DEBUG(GenreIds),
 	Id = get_id(Context),
-    Html = z_template:render("program.tpl", [ {id, Id}, {day, default_day()} | z_context:get_all(Context) ], Context),
+    Html = z_template:render("program.tpl", [ {id, Id}, {day, Day}, {genre, GenreIds} | z_context:get_all(Context) ], Context),
 	z_context:output(Html, Context).
 
 
@@ -54,6 +59,8 @@ event({submit, {search, Props}, _TriggerId, _TargetId}, Context) ->
         undefined -> proplists:get_value(day, Props);
         D -> D
     end,
+    ?DEBUG(GenreIds),
+    z_context:set_visitor(program_filter, {Day, GenreIds}, Context),
     {Html, Context1} = z_template:render_to_iolist("_program.tpl", [{day, Day}, {genre, GenreIds}], Context),
     z_render:update("the-program", Html, Context1).
 
