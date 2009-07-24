@@ -73,8 +73,9 @@ m_value(#m{value=#m_search_result{result=Result}}, _Context) ->
 
 %% @doc Perform a search, wrap the result in a m_search_result record
 %% @spec search(Search, Context) -> #m_search_result{}
-search({SearchName, Props}=Search, Context) ->
-    Result = z_search:search(Search, Context),
+search({SearchName, Props}, Context) ->
+    {Page, PageLen, Props1} = get_paging_props(Props),
+    Result = z_search:search({SearchName, Props1}, {(Page-1)*PageLen+1,PageLen}, Context),
     Total1 = case Result#search_result.total of
         undefined -> length(Result#search_result.result);
         Total -> Total
