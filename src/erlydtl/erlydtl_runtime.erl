@@ -205,7 +205,7 @@ cache(MaxAge, Name, Args, Func, Context) ->
             Cat1 = lists:map(fun z_convert:to_atom/1, Cat),
             VisibleFor = z_acl:args_to_visible_for(Args),
             FuncContext = z_acl:set_visible_for(VisibleFor, Context),
-            Key = {tpl, Name, Varies, z_acl:cache_key(FuncContext)},
+            Key = {Name, Varies, z_acl:cache_key(FuncContext)},
             F = fun() ->
                 Func(FuncContext)
             end,

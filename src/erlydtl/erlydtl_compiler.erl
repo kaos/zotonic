@@ -1266,7 +1266,7 @@ cache_ast(MaxAge, {identifier, _, Name}, Args, Body, Context, TreeWalker) ->
                   erl_syntax:atom(erlydtl_runtime),
                   erl_syntax:atom(cache),
                   [ MaxAgeAst,
-                    erl_syntax:atom(list_to_atom(Name)),
+                    erl_syntax:atom(list_to_atom("$tpl$" ++ Name)),
                     ArgsAst,
                     FuncAst,
                     z_context_ast(Context)]
