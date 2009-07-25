@@ -43,7 +43,10 @@ upgrade() ->
 %% @doc supervisor callback.
 init([]) ->
     % Listen to IP address and Port
-    WebIp      = case os:getenv("ZOTONIC_IP")   of false -> any; Anyip -> Anyip end,   
+    WebIp      = case os:getenv("ZOTONIC_IP")   of
+        Any when Any == false; Any == []; Any == "*"; Any == "any" -> any;
+        ConfIP -> ConfIP 
+    end,   
     WebPort    = case os:getenv("ZOTONIC_PORT") of false -> 8000; Anyport -> list_to_integer(Anyport) end,   
 
     % Default connection for database

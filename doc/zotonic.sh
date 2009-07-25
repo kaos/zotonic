@@ -35,7 +35,7 @@ SNAME=zotonic001
 export HEART_COMMAND="$ZOTONIC_SH start"
 
 ## The port and IP address zotonic will bind to (defaults to all ip addresses and port 8000)
-# export ZOTONIC_IP=127.0.0.1
+export ZOTONIC_IP=any
 export ZOTONIC_PORT=8000
 
 ## The admin password - this is the initial password, you can change it in the /admin
