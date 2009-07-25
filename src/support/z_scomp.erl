@@ -45,7 +45,7 @@ start_link() ->
 render(ScompName, Args, Vars, Context) ->
     case z_module_indexer:find(scomp, ScompName, Context) of
         {ok, ModuleName} ->
-        	ScompContext = z_context:prune_for_scomp(visible_for(Args), Context), 
+        	ScompContext = z_context:prune_for_scomp(z_acl:args_to_visible_for(Args), Context), 
             render_scomp_module(ModuleName, Args, Vars, ScompContext, Context);
         {error, enoent} ->
             %% No such scomp, as we can switch on/off functionality we do a quiet skip
@@ -57,7 +57,7 @@ render_all(ScompName, Args, Vars, Context) ->
     case z_module_indexer:find_all(scomp, ScompName, Context) of
         [] -> [];
         ModuleNames when is_list(ModuleNames) ->
-        	ScompContext = z_context:prune_for_scomp(visible_for(Args), Context),
+        	ScompContext = z_context:prune_for_scomp(a_acl:args_to_visible_for(Args), Context),
         	RenderFun = fun(ModuleName) ->
         	    case render_scomp_module(ModuleName, Args, Vars, ScompContext, Context) of
         	        {ok, Result} -> z_context:prune_for_template(Result);
@@ -264,24 +264,7 @@ scomp_list(State) ->
     dict:fetch_keys(State#state.scomps).
 
 
-%% @doc Translate "visible_for" scomp parameter to the appropriate visible for level.
-%% @spec visible_for(proplist()) -> 0 | 1 | 2 | 3
-visible_for(Args) ->
-    case proplists:get_value(visible_for, Args) of
-        undefined   -> ?ACL_VIS_USER;
-        "user"      -> ?ACL_VIS_USER;
-        3           -> ?ACL_VIS_USER;
-        "group"     -> ?ACL_VIS_GROUP;
-        2           -> ?ACL_VIS_GROUP;
-        "community" -> ?ACL_VIS_COMMUNITY;
-        1           -> ?ACL_VIS_COMMUNITY;
-        "world"     -> ?ACL_VIS_PUBLIC;
-        "public"    -> ?ACL_VIS_PUBLIC;
-        0           -> ?ACL_VIS_PUBLIC
-    end.
-
-
 %% @doc Create an unique key for the scomp and the visibility level it is rendered for
 %% @spec key(atom(), proplist(), context()) -> term()
 key(ScompName, EssentialParams, Context) ->
-    {ScompName, EssentialParams, Context#context.user_id, Context#context.acl, Context#context.language}.
+    {ScompName, EssentialParams, z_acl:cache_key(Context), Context#context.language}.

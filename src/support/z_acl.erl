@@ -37,6 +37,8 @@
     has_user/1,
     add_defaults/2,
     set_visible_for/2,
+    args_to_visible_for/1,
+    cache_key/1,
     add_user/3
 ]).
 
@@ -326,6 +328,29 @@ set_visible_for(?ACL_VIS_GROUP, Context) ->
     Context#context{acl=#acl{}};
 set_visible_for(?ACL_VIS_USER, Context) ->
     Context.
+
+
+%% @doc Translate "visible_for" parameter to the appropriate visibility level.
+%% @spec visible_for(proplist()) -> 0 | 1 | 2 | 3
+args_to_visible_for(Args) ->
+    case proplists:get_value(visible_for, Args) of
+        undefined   -> ?ACL_VIS_USER;
+        "user"      -> ?ACL_VIS_USER;
+        3           -> ?ACL_VIS_USER;
+        "group"     -> ?ACL_VIS_GROUP;
+        2           -> ?ACL_VIS_GROUP;
+        "community" -> ?ACL_VIS_COMMUNITY;
+        1           -> ?ACL_VIS_COMMUNITY;
+        "world"     -> ?ACL_VIS_PUBLIC;
+        "public"    -> ?ACL_VIS_PUBLIC;
+        0           -> ?ACL_VIS_PUBLIC
+    end.
+
+
+%% @doc Return a term that can be used as the ACL part of cache key.
+%% @spec cache_key(Context) -> term()
+cache_key(Context) ->
+    {Context#context.user_id, Context#context.acl}.
 
 
 %% @doc Add the current user id as the prop, when the prop is not set.
