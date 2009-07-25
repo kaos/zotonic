@@ -5,7 +5,7 @@
 
 -module(zotonic).
 -author('Marc Worrell <marc@worrell.nl>').
--export([start/0, start/1, stop/0, stop/1]).
+-export([start/0, start/1, stop/0, stop/1, update/0, update/1]).
 -revision("$Id$").
 
 ensure_started(App) ->
@@ -46,3 +46,22 @@ stop([Node]) ->
     	pang -> io:format("There is no node with this name~n")
     end,
     init:stop().
+
+
+%% @spec update() -> ok
+%% @doc Update the server.  Compiles and loads any new code, flushes caches and rescans all modules.
+update() ->
+    z:m(),
+    ok.
+
+
+%% @spec update([Node]) -> ok
+%% @doc Update the server on a specific node with new code on disk and flush the caches.
+update([Node]) ->
+    io:format("Update:~p~n",[Node]),
+    case net_adm:ping(Node) of
+    	pong -> rpc:cast(Node, zotonic, update, []);
+    	pang -> io:format("There is no node with this name~n")
+    end,
+    init:stop().
+
