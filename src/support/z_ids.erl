@@ -27,6 +27,7 @@
     optid/1,
     sign_key/0,
     sign_key_simple/0,
+    set_sign_key_simple/1,
     number/0,
     number/1,
     start_link/0
@@ -69,7 +70,11 @@ sign_key() ->
 %% @doc Get the key for less secure signing of data (without nonce).
 sign_key_simple() -> 
     gen_server:call(?MODULE, sign_key_simple).
-    
+
+%% @spec set_sign_key_simple(binary()) -> binary()
+%% @doc Set the key for less secure signing of data (without nonce), returning the previous key.
+set_sign_key_simple(Key) -> 
+    gen_server:call(?MODULE, {set_sign_key_simple, Key}).
 
 %% @doc Return a big random integer, but smaller than maxint32
 number() ->
@@ -124,6 +129,9 @@ handle_call(sign_key_simple, _From, State) ->
         Key -> 
             {reply, Key, State}
     end;
+
+handle_call({set_sign_key_simple, Key}, _From, State) ->
+    {reply, State#state.sign_key_simple, State#state{sign_key_simple = Key}};
 
 handle_call(Msg, _From, State) ->
     {stop, {unknown_call, Msg}, State}.

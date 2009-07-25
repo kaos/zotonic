@@ -156,7 +156,8 @@ url1(Filename, Options) ->
     % Map all ImageOpts to an opt string
     UrlProps = props2url(ImageOpts),
     Checksum = z_utils:checksum([Filename,UrlProps,".jpg"]),
-    {url, list_to_binary(filename_to_urlpath(lists:flatten([Filename,UrlProps,$(,Checksum,").jpg"]))), 
+    PropCheck = mochiweb_util:quote_plus(lists:flatten([UrlProps,$(,Checksum,$)])),
+    {url, list_to_binary(filename_to_urlpath(lists:flatten([Filename,PropCheck,".jpg"]))), 
           TagOpts,
           ImageOpts}.
 
@@ -234,20 +235,29 @@ url2props1([P|Rest], Acc) ->
 
 test() ->
     Context = z_context:new(),
-    {   "koe.jpg", [{width,400},{crop,east},{blur},{grey}], 
-        "61DADDE06035A4CD4862D99688EC0FFF","(400x)(crop-east)(blur)(grey)"} 
-    = url2props("koe.jpg(400x)(crop-east)(blur)(grey)(61DADDE06035A4CD4862D99688EC0FFF).jpg"),
+    OldSignKey = z_ids:set_sign_key_simple("test"),
+    try
+        {   "koe.jpg", [{width,400},{crop,east},{blur},{grey}], 
+            "791202B7AEEF0BBF0A5AE3B43652431E","(400x)(crop-east)(blur)(grey)"} 
+        = url2props("koe.jpg(400x)(crop-east)(blur)(grey)(791202B7AEEF0BBF0A5AE3B43652431E).jpg"),
     
-    "(300x300)(crop-center)" 
-    = props2url([{width,300},{height,300},{crop,center}]),
+        "(300x300)(crop-center)" 
+        = props2url([{width,300},{height,300},{crop,center}]),
     
-    {ok,[60,"img",
-          [ [32,<<"src">>,61,39,
-             <<"/image/koe.jpg(300x300)(crop-center)(0F96A52C1BD7F22E5833316DC9483913).jpg">>,39],
-            [],
-            [32,<<"width">>,61,39,<<"300">>,39],
-            [32,<<"height">>,61,39,<<"300">>,39],
-            [32,<<"class">>,61,39,"some-class",39]],
-          47,62]} = 
-    tag(<<"koe.jpg">>, [{width,300},{height,300},{crop,center},{class,"some-class"}], Context),
-    ok.
+        {ok,[60,"img",
+              [ [32,<<"src">>,61,39,
+                 <<"/image/koe.jpg%28300x300%29%28crop-center%29%2845036B4120DBFE5E5859B1ADFFB8E5A1%29.jpg">>,39],
+                [],
+                [32,<<"width">>,61,39,<<"300">>,39],
+                [32,<<"height">>,61,39,<<"300">>,39],
+                [32,<<"class">>,61,39,"some-class",39]],
+              47,62]} = 
+        tag(<<"koe.jpg">>, [{width,300},{height,300},{crop,center},{class,"some-class"}], Context),
+        z_ids:set_sign_key_simple(OldSignKey),
+        ok
+    catch 
+        _:Error ->
+            z_ids:set_sign_key_simple(OldSignKey),
+            Error
+    end.
+    

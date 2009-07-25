@@ -55,7 +55,7 @@ file_exists(State, Name) ->
     end.
 
 resource_exists(ReqData, State) ->
-    Path = wrq:disp_path(ReqData),
+    Path = mochiweb_util:unquote(wrq:disp_path(ReqData)),
     case file_exists(State, Path) of 
     	{true, _} ->
     	    {true, ReqData, State};
@@ -82,7 +82,7 @@ maybe_fetch_object(State, Path) ->
     end.
 
 content_types_provided(ReqData, State) ->
-    CT = z_utils:guess_mime(wrq:disp_path(ReqData)),
+    CT = z_utils:guess_mime(mochiweb_util:unquote(wrq:disp_path(ReqData))),
     {[{CT, provide_content}],
      ReqData,
      State#state{metadata=[{'content-type', CT}|State#state.metadata]}}.
@@ -94,7 +94,7 @@ content_types_accepted(ReqData, State) ->
      State#state{metadata=[{'content-type', CT}|State#state.metadata]}}.
 
 accept_content(ReqData, State) ->
-    Path = wrq:disp_path(ReqData),
+    Path = mochiweb_util:unquote(wrq:disp_path(ReqData)),
     FP = file_path(State, Path),
     ok = filelib:ensure_dir(filename:dirname(FP)),
     RD1 = case file_exists(State, Path) of 
@@ -127,14 +127,14 @@ create_path(ReqData, State) ->
     end.
 
 delete_resource(ReqData, State) ->
-    Path = wrq:disp_path(ReqData),
+    Path = mochiweb_util:unquote(wrq:disp_path(ReqData)),
     case file:delete(file_path(State, Path)) of
         ok -> {true, ReqData, State};
         _ -> {false, ReqData, State}
     end.
 
 provide_content(ReqData, State) ->
-    Path = wrq:disp_path(ReqData),
+    Path = mochiweb_util:unquote(wrq:disp_path(ReqData)),
     case maybe_fetch_object(State, Path) of 
 	{true, NewState} ->
 	    Body = NewState#state.response_body,
@@ -144,7 +144,7 @@ provide_content(ReqData, State) ->
     end.
 
 last_modified(ReqData, State) ->
-    Path = wrq:disp_path(ReqData),
+    Path = mochiweb_util:unquote(wrq:disp_path(ReqData)),
     {true, FullPath} = file_exists(State, Path),
     LMod = filelib:last_modified(FullPath),
     {LMod, ReqData, State#state{metadata=[{'last-modified',

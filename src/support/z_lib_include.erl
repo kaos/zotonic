@@ -17,6 +17,7 @@
     test/0
 ]).
 
+-define(SEP, $~).
 
 %% @doc Generate the link and/or script tags for the given files.
 tag(Files, Context) ->
@@ -26,14 +27,14 @@ tag(Files, Context) ->
             [];
         _ -> 
             ModCss = newest(Css, {{1900,1,1},{12,0,0}}, Context),
-            iolist_to_binary([ <<"<link href=\"/lib">>, CssPath, $,, integer_to_list(ModCss), <<".css\" type=\"text/css\" media=\"screen\" rel=\"stylesheet\" />">>])
+            iolist_to_binary([ <<"<link href=\"/lib">>, CssPath, ?SEP, integer_to_list(ModCss), <<".css\" type=\"text/css\" media=\"screen\" rel=\"stylesheet\" />">>])
     end,
     ScriptElement = case JsPath of
         [] ->
             [];
         _ -> 
             ModJs = newest(Js, {{1900,1,1},{12,0,0}}, Context),
-            iolist_to_binary([ <<"<script src=\"/lib">>, JsPath, $,, integer_to_list(ModJs), <<".js\" type=\"text/javascript\"></script>">>])
+            iolist_to_binary([ <<"<script src=\"/lib">>, JsPath, ?SEP, integer_to_list(ModJs), <<".js\" type=\"text/javascript\"></script>">>])
     end,
     [LinkElement, ScriptElement].
 
@@ -43,15 +44,15 @@ collapsed_paths(Files) ->
     {Css, Js} = split_css_js([ z_convert:to_list(F) || F <- Files]),
     CssSort = collapse_dirs(Css),
     JsSort= collapse_dirs(Js),
-    CssPath = string:join(CssSort, ","),
-    JsPath = string:join(JsSort, ","),
+    CssPath = string:join(CssSort, [?SEP]),
+    JsPath = string:join(JsSort, [?SEP]),
     {Css, CssPath, Js, JsPath}.
     
 
 %% @doc Given the filepath of the request, return all files collapsed in the path.
 %% @spec uncollapse(string()) -> list()
 uncollapse(Path) ->
-    Parts = string:tokens(Path, ","),
+    Parts = string:tokens(Path, [?SEP]),
     case uncollapse_dirs(Parts) of
         [File] ->
             [File];
@@ -152,8 +153,8 @@ test() ->
         "/a/b/c.js",
         "/a/b3.js"
     ],
-    {[],[],["/a/b1.js","/a/b2.js","/a/b/c.js","/a/b3.js"],"/a/b1,b2,b/c,/a/b3"} = collapsed_paths(Files),
-    ["/a/b1.js","/a/b2.js","/a/b/c.js","/a/b3.js"] = uncollapse("/a/b1,b2,b/c,/a/b3,63415422477.js"),
+    {[],[],["/a/b1.js","/a/b2.js","/a/b/c.js","/a/b3.js"],"/a/b1~~b2~~b/c~~/a/b3"} = collapsed_paths(Files),
+    ["/a/b1.js","/a/b2.js","/a/b/c.js","/a/b3.js"] = uncollapse("/a/b1~~b2~~b/c~~/a/b3~~63415422477.js"),
     ok.
     
 

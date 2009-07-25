@@ -71,7 +71,7 @@ content_types_provided(ReqData, State) ->
     case State#state.mime of
         undefined ->
             Path = case State#state.path of
-                undefined -> wrq:disp_path(ReqData);
+                undefined -> mochiweb_util:unquote(wrq:disp_path(ReqData));
                 ConfiguredPath -> ConfiguredPath
             end, 
             CT = z_utils:guess_mime(Path),
@@ -95,7 +95,7 @@ encodings_provided(ReqData, State) ->
 resource_exists(ReqData, State) ->
     Context = z_context:new(ReqData, ?MODULE),
     Path = case State#state.path of
-        undefined -> wrq:disp_path(ReqData);
+        undefined -> mochiweb_util:unquote(wrq:disp_path(ReqData));
         ConfiguredPath -> ConfiguredPath
     end, 
     Cached = case State#state.use_cache of

@@ -60,7 +60,7 @@ allowed_methods(ReqData, State) ->
 content_types_provided(ReqData, State) ->
     case State#state.mime of
         undefined ->
-            Path = wrq:disp_path(ReqData),
+            Path = mochiweb_util:unquote(wrq:disp_path(ReqData)),
             CT = z_utils:guess_mime(Path),
             {[{CT, provide_content}], ReqData, State#state{mime=CT}};
         Mime -> 
@@ -81,7 +81,7 @@ encodings_provided(ReqData, State) ->
 
 resource_exists(ReqData, State) ->
     Context = z_context:new(ReqData, ?MODULE),
-    Path   = wrq:disp_path(ReqData),
+    Path   = mochiweb_util:unquote(wrq:disp_path(ReqData)),
     Cached = case State#state.use_cache of
         true -> z_depcache:get(cache_key(Path));
         _    -> undefined
