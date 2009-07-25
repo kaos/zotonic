@@ -109,6 +109,10 @@ Nonterminals
     CallTag
     CallWithTag
 
+	CacheBlock
+	CacheBraced
+	EndCacheBraced
+
 	UrlTag
 	PrintTag
 	ImageTag
@@ -125,6 +129,7 @@ Terminals
 	as_keyword
     autoescape_keyword
     block_keyword
+	cache_keyword
     call_keyword
     close_tag
     close_var
@@ -137,6 +142,7 @@ Terminals
 	empty_keyword
     endautoescape_keyword
     endblock_keyword
+	endcache_keyword
     endcomment_keyword
     endfor_keyword
     endif_keyword
@@ -214,6 +220,7 @@ Elements -> Elements ImageUrlTag : '$1' ++ ['$2'].
 Elements -> Elements MediaTag : '$1' ++ ['$2'].
 Elements -> Elements TransExtTag : '$1' ++ ['$2'].
 Elements -> Elements WithBlock : '$1' ++ ['$2'].
+Elements -> Elements CacheBlock : '$1' ++ ['$2'].
 
 
 ValueBraced -> open_var Value close_var : '$2'.
@@ -303,6 +310,10 @@ EndAutoEscapeBraced -> open_tag endautoescape_keyword close_tag.
 WithBlock -> WithBraced Elements EndWithBraced : {with, '$1', '$2'}.
 WithBraced -> open_tag with_keyword Value as_keyword identifier close_tag : ['$3', '$5'].
 EndWithBraced -> open_tag endwith_keyword close_tag.
+
+CacheBlock -> CacheBraced Elements EndCacheBraced : {cache, '$1', '$2'}.
+CacheBraced -> open_tag cache_keyword Value identifier Args close_tag : [ '$3', '$4', '$5' ].
+EndCacheBraced -> open_tag endcache_keyword close_tag.
 
 Filter -> identifier : ['$1'].
 Filter -> identifier colon TermValue : ['$1', '$3'].

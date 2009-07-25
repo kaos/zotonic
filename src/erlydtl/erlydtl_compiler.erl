@@ -217,7 +217,7 @@ forms(File, Module, BodyAst, BodyInfo, Context, TreeWalker, TemplateResetCounter
 							erl_syntax:application(
 						        erl_syntax:atom(z_context), 
 						        erl_syntax:atom(language),
-						        [ erl_syntax:variable("ZpContext") ]
+						        [ z_context_ast(Context) ]
 							)
 					),
 
@@ -369,7 +369,7 @@ body_ast(DjangoParseTree, Context, TreeWalker) ->
             ({'tag', {'identifier', _, Name}, Args, All}, TreeWalkerAcc) ->
                 tag_ast(Name, Args, All, Context, TreeWalkerAcc);
             ({'call', {'identifier', _, Name}}, TreeWalkerAcc) ->
-            	call_ast(Name, TreeWalkerAcc);
+            	call_ast(Name, Context, TreeWalkerAcc);
             ({'call', {'identifier', _, Name}, With}, TreeWalkerAcc) ->
             	call_with_ast(Name, With, Context, TreeWalkerAcc);
             ({'cycle', Names}, TreeWalkerAcc) ->
@@ -388,6 +388,8 @@ body_ast(DjangoParseTree, Context, TreeWalker) ->
                 print_ast(Value, Context, TreeWalkerAcc);
             ({'lib', LibList}, TreeWalkerAcc) ->
                 lib_ast(LibList, Context, TreeWalkerAcc);
+            ({'cache', [MaxAge, Ident, Args], CacheContents}, TreeWalkerAcc) ->
+                cache_ast(MaxAge, Ident, Args, CacheContents, Context, TreeWalkerAcc);
             (ValueToken, TreeWalkerAcc) -> 
                 {{ValueAst,ValueInfo},ValueTreeWalker} = value_ast(ValueToken, true, Context, TreeWalkerAcc),
                 {{format(ValueAst, Context),ValueInfo},ValueTreeWalker}
@@ -703,7 +705,7 @@ resolve_variable_ast({index_value, Variable, Index}, Context, TreeWalker, Finder
     Ast = erl_syntax:application(
             erl_syntax:atom(erlydtl_runtime), 
             erl_syntax:atom(FinderFunction),
-            [IndexAst, VarAst, erl_syntax:variable("ZpContext")]),
+            [IndexAst, VarAst, z_context_ast(Context)]),
     {{Ast, VarName, merge_info(Info, Info2)}, TreeWalker3};
            
 resolve_variable_ast({attribute, {{identifier, _, AttrName}, Variable}}, Context, TreeWalker, FinderFunction) ->
@@ -711,7 +713,7 @@ resolve_variable_ast({attribute, {{identifier, _, AttrName}, Variable}}, Context
     Ast = erl_syntax:application(
             erl_syntax:atom(erlydtl_runtime),
             erl_syntax:atom(FinderFunction),
-            [erl_syntax:atom(AttrName), VarAst, erl_syntax:variable("ZpContext")]),
+            [erl_syntax:atom(AttrName), VarAst, z_context_ast(Context)]),
     {{Ast, VarName, Info}, TreeWalker2};
 
 resolve_variable_ast({variable, {identifier, _, VarName}}, Context, TreeWalker, FinderFunction) ->
@@ -720,7 +722,7 @@ resolve_variable_ast({variable, {identifier, _, VarName}}, Context, TreeWalker, 
             erl_syntax:application(
                 erl_syntax:atom(erlydtl_runtime), 
                 erl_syntax:atom(FinderFunction),
-                [erl_syntax:atom(VarName), erl_syntax:variable("Variables"), erl_syntax:variable("ZpContext")]);
+                [erl_syntax:atom(VarName), erl_syntax:variable("Variables"), z_context_ast(Context)]);
         Val ->
             Val
     end,
@@ -731,7 +733,7 @@ resolve_variable_ast({apply_filter, Variable, Filter}, Context, TreeWalker, Find
     ValueAst = erl_syntax:application(
             erl_syntax:atom(erlydtl_runtime),
             erl_syntax:atom(to_value),
-            [VarAst, erl_syntax:variable("ZpContext")]
+            [VarAst, z_context_ast(Context)]
         ),
     {{VarValue, Info2}, TreeWalker3} = filter_ast1(Filter, ValueAst, Context, TreeWalker2),
     {{VarValue, VarName, merge_info(Info, Info2)}, TreeWalker3};
@@ -748,6 +750,14 @@ resolve_scoped_variable_ast(VarName, Context) ->
                     _ -> Value
                 end
         end, undefined, Context#dtl_context.local_scopes).
+
+
+%% @doc Return the AST for the z_context var
+z_context_ast(Context) ->
+    case resolve_scoped_variable_ast("ZpContext", Context) of
+        undefined -> erl_syntax:variable("ZpContext"); 
+        Ast -> Ast
+    end.
 
 
 format(Ast, Context) ->
@@ -842,7 +852,7 @@ for_loop_ast(IteratorList, Variable, Contents, EmptyPartContents, Context, TreeW
     CounterAst = erl_syntax:application(erl_syntax:atom(erlydtl_runtime), 
         erl_syntax:atom(increment_counter_stats), [erl_syntax:variable("Counters")]),
     {{VarAst, VarName, VarInfo}, TreeWalker3} = resolve_variable_ast(Variable, Context, TreeWalker2),
-    ListAst = erl_syntax:application(erl_syntax:atom(erlydtl_runtime), erl_syntax:atom(to_list), [VarAst, erl_syntax:variable("ZpContext")]),
+    ListAst = erl_syntax:application(erl_syntax:atom(erlydtl_runtime), erl_syntax:atom(to_list), [VarAst, z_context_ast(Context)]),
     CounterVars0 = case resolve_scoped_variable_ast("forloop", Context) of
         undefined ->
             erl_syntax:application(erl_syntax:atom(erlydtl_runtime), erl_syntax:atom(init_counter_stats), [ListAst]);
@@ -910,7 +920,7 @@ cycle_ast(Names, Context, TreeWalker) ->
 
     {{erl_syntax:application(
         erl_syntax:atom('erlydtl_runtime'), erl_syntax:atom('cycle'),
-        [erl_syntax:tuple(NamesTuple), erl_syntax:variable("Counters"), erl_syntax:variable("ZpContext")]), #ast_info{}}, TreeWalker1}.
+        [erl_syntax:tuple(NamesTuple), erl_syntax:variable("Counters"), z_context_ast(Context)]), #ast_info{}}, TreeWalker1}.
 
 %% Older Django templates treat cycle with comma-delimited elements as strings
 cycle_compat_ast(Names, _Context, TreeWalker) ->
@@ -1051,19 +1061,19 @@ tag_ast(Name, Args, All, Context, TreeWalker) ->
         parse_trail = [ Source | Context#dtl_context.parse_trail ]}, TreeWalker)).
 
 
-call_ast(Module, TreeWalkerAcc) ->
-    call_ast(Module, erl_syntax:variable("Variables"), #ast_info{}, TreeWalkerAcc).
+call_ast(Module, Context, TreeWalkerAcc) ->
+    call_ast(Module, erl_syntax:variable("Variables"), #ast_info{}, Context, TreeWalkerAcc).
 
 call_with_ast(Module, Variable, Context, TreeWalker) ->
     {{VarAst, VarName, VarInfo}, TreeWalker1} = resolve_variable_ast(Variable, Context, TreeWalker),
-    call_ast(Module, VarAst, merge_info(VarInfo, #ast_info{var_names=[VarName]}), TreeWalker1).
+    call_ast(Module, VarAst, merge_info(VarInfo, #ast_info{var_names=[VarName]}), Context, TreeWalker1).
         
-call_ast(Module, Variable, AstInfo, TreeWalker) ->
+call_ast(Module, Variable, AstInfo, Context, TreeWalker) ->
      AppAst = erl_syntax:application(
 		erl_syntax:atom(Module),
 		erl_syntax:atom(render),
 		[   Variable,
-		    erl_syntax:variable("ZpContext")
+		    z_context_ast(Context)
 		]),
     RenderedAst = erl_syntax:variable("Rendered"),
     OkAst = erl_syntax:clause(
@@ -1096,7 +1106,7 @@ media_ast(FilenameValue, Args, Context, TreeWalker) ->
                         erl_syntax:atom(viewer),
                         [   FilenameAst,
                             ArgsAst,
-                            erl_syntax:variable("ZpContext")
+                            z_context_ast(Context)
                         ]
                     ),
     RenderedAst = erl_syntax:variable("Rendered"),
@@ -1128,7 +1138,7 @@ image_ast(FilenameValue, Args, Context, TreeWalker) ->
                         erl_syntax:atom(tag),
                         [   FilenameAst,
                             ArgsAst,
-                            erl_syntax:variable("ZpContext")
+                            z_context_ast(Context)
                         ]
                     ),
     RenderedAst = erl_syntax:variable("Rendered"),
@@ -1160,7 +1170,7 @@ image_url_ast(FilenameValue, Args, Context, TreeWalker) ->
                         erl_syntax:atom(url),
                         [   FilenameAst,
                             ArgsAst,
-                            erl_syntax:variable("ZpContext")
+                            z_context_ast(Context)
                         ]
                     ),
     RenderedAst = erl_syntax:variable("Rendered"),
@@ -1190,7 +1200,7 @@ url_ast(Name, Args, Context, TreeWalker) ->
                 erl_syntax:atom(url_for),
                 [   erl_syntax:atom(Name), 
                     ArgsAst,
-                    erl_syntax:variable("ZpContext")
+                    z_context_ast(Context)
                 ]
             ),
     {{AppAst, #ast_info{}}, TreeWalker1}.  
@@ -1223,16 +1233,45 @@ print_ast(Value, Context, TreeWalker) ->
     {{PreAst, #ast_info{}}, TreeWalker}. 
 
 
-lib_ast(LibList, _Context, TreeWalker) ->
+lib_ast(LibList, Context, TreeWalker) ->
     Libs = [ unescape_string_literal(V) || {string_literal, _, V} <- LibList ],
     LibsAst = erl_syntax:list([ erl_syntax:string(L) || L <- Libs ]),
     Ast = erl_syntax:application(
                 erl_syntax:atom(z_lib_include),
                 erl_syntax:atom(tag),
                 [   LibsAst,
-                    erl_syntax:variable("ZpContext")
+                    z_context_ast(Context)
                 ]),
     {{Ast, #ast_info{}}, TreeWalker}.
+
+
+%% @todo Add the caching code!
+cache_ast(MaxAge, {identifier, _, Name}, Args, Body, Context, TreeWalker) ->
+    {ArgsAst, ArgsTreeWalker} = scomp_ast_list_args(Args, Context, TreeWalker),
+    {{MaxAgeAst, MaxAgeInfo}, MaxAgeTreeWalker} = value_ast(MaxAge, false, Context, ArgsTreeWalker),
+    ContextVarAst = erl_syntax:variable("Ctx_" ++ z_ids:identifier(10)),
+    {{BodyAst, BodyInfo}, BodyTreeWalker} = body_ast(
+                                                Body, 
+                                                Context#dtl_context{local_scopes = [ [{'ZpContext', ContextVarAst}] | Context#dtl_context.local_scopes ]},
+                                                MaxAgeTreeWalker),
+    FuncAst = erl_syntax:fun_expr([
+        erl_syntax:clause(
+            [ ContextVarAst ], 
+            none, 
+            [ BodyAst ]
+        )
+    ]),
+
+    CacheAst = erl_syntax:application(
+                  erl_syntax:atom(erlydtl_runtime),
+                  erl_syntax:atom(cache),
+                  [ MaxAgeAst,
+                    erl_syntax:atom(list_to_atom(Name)),
+                    ArgsAst,
+                    FuncAst,
+                    z_context_ast(Context)]
+            ),
+    {{CacheAst, merge_info(MaxAgeInfo, BodyInfo)}, BodyTreeWalker}.
 
 
 resolve_value_ast(Value, Context, TreeWalker) ->
@@ -1249,7 +1288,7 @@ scomp_ast(ScompName, Args, false = _All, Context, TreeWalker) ->
                 [   erl_syntax:atom(ScompName), 
                     ArgsAst,
                     erl_syntax:variable("Variables"),
-                    erl_syntax:variable("ZpContext")
+                    z_context_ast(Context)
                 ]
             ),
     RenderedAst = erl_syntax:variable("Rendered"),
@@ -1281,7 +1320,7 @@ scomp_ast(ScompName, Args, true, Context, TreeWalker) ->
                 [   erl_syntax:atom(ScompName), 
                     ArgsAst,
                     erl_syntax:variable("Variables"),
-                    erl_syntax:variable("ZpContext")
+                    z_context_ast(Context)
                 ]
             ),
     {{AppAst, #ast_info{}}, TreeWalker1}.

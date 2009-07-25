@@ -193,3 +193,21 @@ increment_counter_stats([{counter, Counter}, {counter0, Counter0}, {revcounter, 
 
 cycle(NamesTuple, Counters, Context) when is_tuple(NamesTuple) ->
     element(fetch_value(counter0, Counters, Context) rem size(NamesTuple) + 1, NamesTuple).
+
+
+cache(MaxAge, Name, Args, Func, Context) ->
+    case proplists:get_value(if_anonymous, Args, false) andalso z_acl:user(Context) =:= undefined of
+        true ->
+            Func(Context);
+        false ->
+            Varies = lists:flatten(proplists:get_all_values(varies, Args)),
+            Cat = proplists:get_all_values(cat, Args),
+            Cat1 = lists:map(fun z_convert:to_atom/1, Cat),
+            VisibleFor = z_acl:args_to_visible_for(Args),
+            FuncContext = z_acl:set_visible_for(VisibleFor, Context),
+            Key = {Name, Varies, z_acl:cache_key(FuncContext)},
+            F = fun() ->
+                Func(FuncContext)
+            end,
+            z_depcache:memo(F, Key, MaxAge, Varies ++ Cat1)
+    end.
