@@ -2,6 +2,8 @@
 <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
 <plist version="1.0">
 <dict>
+	<key>currentDocument</key>
+	<string>priv/sites/default/modules/mod_nif/templates/base.tpl</string>
 	<key>documents</key>
 	<array>
 		<dict>
@@ -13,8 +15,6 @@
 			<string>deps</string>
 		</dict>
 		<dict>
-			<key>expanded</key>
-			<true/>
 			<key>name</key>
 			<string>doc</string>
 			<key>regexFolderFilter</key>
@@ -23,8 +23,6 @@
 			<string>doc</string>
 		</dict>
 		<dict>
-			<key>expanded</key>
-			<true/>
 			<key>name</key>
 			<string>include</string>
 			<key>regexFolderFilter</key>
@@ -43,6 +41,8 @@
 			<string>modules</string>
 		</dict>
 		<dict>
+			<key>expanded</key>
+			<true/>
 			<key>name</key>
 			<string>priv</string>
 			<key>regexFolderFilter</key>
@@ -51,8 +51,6 @@
 			<string>priv</string>
 		</dict>
 		<dict>
-			<key>expanded</key>
-			<true/>
 			<key>name</key>
 			<string>src</string>
 			<key>regexFolderFilter</key>
@@ -62,7 +60,7 @@
 		</dict>
 	</array>
 	<key>fileHierarchyDrawerWidth</key>
-	<integer>324</integer>
+	<integer>293</integer>
 	<key>metaData</key>
 	<dict>
 		<key>deps/mochiweb/src/mochiweb.app</key>
@@ -165,19 +163,19 @@
 			<key>firstVisibleLine</key>
 			<integer>20</integer>
 		</dict>
-		<key>src/install/zp_install_data.erl</key>
+		<key>priv/sites/default/modules/mod_nif/templates/base.tpl</key>
 		<dict>
 			<key>caret</key>
 			<dict>
 				<key>column</key>
-				<integer>0</integer>
+				<integer>4</integer>
 				<key>line</key>
-				<integer>0</integer>
+				<integer>31</integer>
 			</dict>
 			<key>firstVisibleColumn</key>
 			<integer>0</integer>
 			<key>firstVisibleLine</key>
-			<integer>0</integer>
+			<integer>1</integer>
 		</dict>
 		<key>src/models/m_identity.erl</key>
 		<dict>
@@ -193,41 +191,17 @@
 			<key>firstVisibleLine</key>
 			<integer>0</integer>
 		</dict>
-		<key>src/support/zp_convert.erl</key>
-		<dict>
-			<key>caret</key>
-			<dict>
-				<key>column</key>
-				<integer>0</integer>
-				<key>line</key>
-				<integer>0</integer>
-			</dict>
-			<key>firstVisibleColumn</key>
-			<integer>0</integer>
-			<key>firstVisibleLine</key>
-			<integer>34</integer>
-		</dict>
 	</dict>
+	<key>openDocuments</key>
+	<array>
+		<string>priv/sites/default/modules/mod_nif/templates/base.tpl</string>
+	</array>
 	<key>showFileHierarchyDrawer</key>
 	<false/>
 	<key>showFileHierarchyPanel</key>
 	<true/>
 	<key>treeState</key>
 	<dict>
-		<key>doc</key>
-		<dict>
-			<key>isExpanded</key>
-			<true/>
-			<key>subItems</key>
-			<dict/>
-		</dict>
-		<key>include</key>
-		<dict>
-			<key>isExpanded</key>
-			<true/>
-			<key>subItems</key>
-			<dict/>
-		</dict>
 		<key>modules</key>
 		<dict>
 			<key>isExpanded</key>
@@ -240,13 +214,6 @@
 					<true/>
 					<key>subItems</key>
 					<dict>
-						<key>dispatch</key>
-						<dict>
-							<key>isExpanded</key>
-							<true/>
-							<key>subItems</key>
-							<dict/>
-						</dict>
 						<key>templates</key>
 						<dict>
 							<key>isExpanded</key>
@@ -258,37 +225,70 @@
 				</dict>
 			</dict>
 		</dict>
-		<key>src</key>
+		<key>priv</key>
 		<dict>
 			<key>isExpanded</key>
 			<true/>
 			<key>subItems</key>
 			<dict>
-				<key>erlydtl</key>
+				<key>sites</key>
 				<dict>
 					<key>isExpanded</key>
 					<true/>
 					<key>subItems</key>
-					<dict/>
-				</dict>
-				<key>install</key>
-				<dict>
-					<key>isExpanded</key>
-					<true/>
-					<key>subItems</key>
-					<dict/>
-				</dict>
-				<key>models</key>
-				<dict>
-					<key>isExpanded</key>
-					<true/>
-					<key>subItems</key>
-					<dict/>
+					<dict>
+						<key>default</key>
+						<dict>
+							<key>isExpanded</key>
+							<true/>
+							<key>subItems</key>
+							<dict>
+								<key>modules</key>
+								<dict>
+									<key>isExpanded</key>
+									<true/>
+									<key>subItems</key>
+									<dict>
+										<key>mod_nif</key>
+										<dict>
+											<key>isExpanded</key>
+											<true/>
+											<key>subItems</key>
+											<dict>
+												<key>lib</key>
+												<dict>
+													<key>isExpanded</key>
+													<true/>
+													<key>subItems</key>
+													<dict>
+														<key>css</key>
+														<dict>
+															<key>isExpanded</key>
+															<true/>
+															<key>subItems</key>
+															<dict/>
+														</dict>
+													</dict>
+												</dict>
+												<key>templates</key>
+												<dict>
+													<key>isExpanded</key>
+													<true/>
+													<key>subItems</key>
+													<dict/>
+												</dict>
+											</dict>
+										</dict>
+									</dict>
+								</dict>
+							</dict>
+						</dict>
+					</dict>
 				</dict>
 			</dict>
 		</dict>
 	</dict>
 	<key>windowFrame</key>
-	<string>{{101, 17}, {1371, 1003}}</string>
+	<string>{{0, 68}, {1280, 710}}</string>
 </dict>
 </plist>
