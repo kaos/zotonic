@@ -217,6 +217,7 @@ h1#header {
 	background: transparent url(/lib/images/header.gif) top left no-repeat;
 	text-indent: -9999px;
 	margin: 0 0 0 0px;
+	cursor: pointer;
 }
 
 h1 {
@@ -333,6 +334,13 @@ label {
 	font-size: 12px;
 }
 
+.edit-this-page {
+	margin: 18px 0;
+}
+
+	.edit-this-page button {
+		margin: 0;
+	}
 
 /* pager
 ------------------------------------------------------ */

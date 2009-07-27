@@ -11,5 +11,9 @@
 	$(function()
 	{
 	    $.widgetManager();
+		$('h1#header').click(function()
+		{
+			window.location = '/';
+		});
 	});
 </script>

@@ -13,6 +13,9 @@
 		"/css/zp-project.css"
 	%}
 	
+	<link rel="icon" href="favicon.ico" type="image/x-icon" />
+	<link rel="shortcut icon" href="favicon.ico" type="image/x-icon" />
+	
 	<!--[if IE]><link href="/lib/css/zp-ie.css" type="text/css" media="screen" rel="stylesheet" /><![endif]--> 
 </head>
 <body class="{% block pageclass %}{% endblock %}">

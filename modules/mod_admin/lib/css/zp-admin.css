@@ -364,6 +364,12 @@ a.button {
 	margin: 0 3px 0 0;
 }
 
+button.disabled {
+	color: #999;
+	border: 1px solid #aaa;
+	cursor: default;
+}
+
 /*
 #poststuff .form-item:last-child {
 	margin: 0;
