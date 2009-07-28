@@ -84,7 +84,7 @@
 		<div id="sidebar" class="zp-30">
 			<div class="padding">
 				{% with m.rsc[id].o.performer as performer_id %}
-					
+					<h4 class="sidebar-title">Artist:</h4>
 					<h1>{{ m.rsc[performer_id].title }}</h1>
 					<p class="clearfix">
 						{% with m.rsc[performer_id].depiction as depiction %}

@@ -22,7 +22,7 @@
 
 		<div id="sidebar" class="zp-30">
 			<div class="padding">
-				<h4 class="sidebar-title">Performances</h4>
+				<h4 class="sidebar-title">Performances:</h4>
 	
 				<ul class="items-list">
 					{% for id in m.rsc[id].s.performer %}
