@@ -223,14 +223,16 @@ h1#header {
 h1 {
 	font-family: Impact, Arial, sans-serif;
 	font-size: 28px;
+	letter-spacing: 1px;
 	font-weight: normal;
 	line-height: 36px;
 	margin: 0 0 9px 0;
 }
 
 h2 {
-	font-family: "Arial black", Arial, sans-serif;
-	color: #222;
+	font-family: Impact, Arial, sans-serif;
+	letter-spacing: 1px;
+Å	color: #222;
 	font-size: 18px;
 	font-weight: normal;
 	line-height: 18px;
