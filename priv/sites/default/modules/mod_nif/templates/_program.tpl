@@ -62,10 +62,10 @@
 					{% with m.rsc[id].date_start as date_start %}
 						{% with m.rsc[id].date_end as date_end %}
 							<span class="time-wrapper zp-33">
-								<span class="time">{{ date_start|date:"H:i A" }}</span>
+								<span class="time">{{ date_start|date:"f A" }}</span>
 
 								{% ifnotequal date_start date_end %}
-									&mdash; <span class="time">{{ date_end|date:"H:i A" }}</span>
+									&mdash; <span class="time">{{ date_end|date:"f A" }}</span>
 								{% endifnotequal %}
 							</span>
 							<span class="venue zp-33"><a href="{{ m.rsc[id].o.performer.page_url }}" title="{{ m.rsc[id].o.performer.title }}">{{ m.rsc[id].o.performer.title }}</a></span>

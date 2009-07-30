@@ -38,13 +38,12 @@ body {
 }
 
 #sponsor-logos li,
-ul.links-list li {
+.links-list li {
 	display: block;
-	float: left;
 	margin: 0 0 18px 0;
 }
 
-ul.links-list li img,
+.links-list li img,
 #sponsor-logos li img {
 	margin: 0;
 }
