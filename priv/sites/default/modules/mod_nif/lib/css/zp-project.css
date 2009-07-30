@@ -318,6 +318,11 @@ p.block-image img {
 p.block-image {
 	margin: 0 0 18px 0;
 	float: none;
+	clear: both;
+}
+
+p.block-image:first-child {
+	margin: 18px 0 0 0;
 }
 
 span.inline-image-caption,
