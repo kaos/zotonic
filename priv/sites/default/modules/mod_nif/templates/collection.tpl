@@ -14,11 +14,11 @@
 
 {% block content %}
 	<div id="content-wrapper" class="clearfix">
-		<div id="content">
+		<div id="content" class="zp-65">
 			<div class="padding">
 				{% include "_view.tpl" %}
 				
-				<ul class="news-list clearfix">
+				<ul class="collection-list clearfix">
 					{% for id in m.rsc[id].o.collection_member %}
 					<li class="clearfix">
 						<h2>
@@ -26,22 +26,65 @@
 								{{ m.rsc[id].title }}
 							</a>
 						</h2>
-						
+						<h4>
+							<a href="{{ m.rsc[id].o.atvenue.page_url }}" title="{{ m.rsc[id].o.atvenue.title }}">
+								{{ m.rsc[id].o.atvenue.title }}
+							</a>
+						</h4>
 						{% if m.rsc[id].media %}
-							<div class="item-image left">{% image m.rsc[id].media[1] width=180 height=90 crop %}</div>
+							<div class="item-image left">
+								<a href="{{ m.rsc[id].page_url }}" title="{{ m.rsc[id].title }}">
+									{% image m.rsc[id].media[1] width=65 height=65 crop %}
+								</a>
+							</div>
+						{% else %}
+							<div class="item-image left">
+								<a href="{{ m.rsc[id].page_url }}" title="{{ m.rsc[id].title }}">
+									{% image m.rsc[id].o.performer.media[1] width=65 height=65 crop %}
+								</a>
+							</div>
 						{% endif %}
-						
 						<p class="intro">
-							{{ m.rsc[id].summary}}
+							<em>{{ m.rsc[id].date_start|date:"M d, H:i" }} &mdash; {{ m.rsc[id].date_end|date:"M d, H:i" }}</em>
+							{{ m.rsc[id].summary|ljust:80 }}&hellip;
+							<a href="{{ m.rsc[id].page_url }}" title="{{ m.rsc[id].title }}">Read&nbsp;more</a>
 						</p>
 					</li>
 					{% empty %}
 					<li>
-						No collection items to show.
+						No performances to show.
+					</li>
+					{% endfor %}
+				</ul>
+			</div>
+		</div>
+
+		<div id="sidebar" class="zp-30">
+			<div class="padding">
+				<h1>Latest news</h1>
+	
+				<ul class="items-list">
+					{% for id in m.search[{latest cat="news"}] %}
+					<li class="clearfix">
+						<h3><a href="{{ m.rsc[id].page_url }}" title="{{ m.rsc[id].title }}">{{ m.rsc[id].title|striptags }}</a></h3>
+						{% if m.rsc[id].media[1] %}
+							<div class="item-image left">{% image m.rsc[id].media[1] width=65 height=65 crop %}</div>
+						{% endif %}
+						
+						<p class="intro">
+							<em>{{ m.rsc[id].modified|date:"d M, H:i" }}</em> &mdash; 
+							{{ m.rsc[id].summary|ljust:80 }}&hellip;
+							<a href="{{ m.rsc[id].page_url }}" title="{{ m.rsc[id].title }}">Read&nbsp;more</a>
+						</p>
+					</li>
+					{% empty %}
+					<li>
+						No news to show.
 					</li>
 					{% endfor %}
 				</ul>
 				
+				<p><a href="{% url news %}" title="View all news">View all news items</a></p>
 			</div>
 		</div>
 	</div>
