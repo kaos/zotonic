@@ -37,7 +37,8 @@ body {
 	background: oldlace;
 }
 
-#sponsor-logos li {
+#sponsor-logos li,
+ul.links-list li {
 	display: block;
 	float: left;
 }

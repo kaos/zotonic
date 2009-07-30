@@ -18,11 +18,11 @@
 			<div class="padding">
 				{% include "_view.tpl" %}
 				
-				<ul class="collection-list clearfix">
+				<ul class="links-list clearfix">
 					{% for id in m.rsc[id].o.collection_member %}
 					<li class="clearfix">
 						{% if m.rsc[id].media %}
-							<div class="item-image left">{% image m.rsc[id].media[1] height=150 %}</div>
+							<div class="item-image left">{% image m.rsc[id].media[1] height=250 %}</div>
 						{% endif %}
 					</li>
 					{% empty %}
