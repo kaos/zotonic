@@ -23,7 +23,7 @@
 					<li class="clearfix">
 						{% if m.rsc[id].media %}
 							<div class="item-image left">
-								<a href="{{ m.rsc[id].website }}" title="{{ m.rsc[id].title }}" target="_blank">{% image m.rsc[id].media[1] height=80 %}</a>
+								<a href="{{ m.rsc[id].website }}" title="{{ m.rsc[id].title }}" target="_blank">{% image m.rsc[id].media[1] width=250 %}</a>
 							</div>
 						{% endif %}
 					</li>
