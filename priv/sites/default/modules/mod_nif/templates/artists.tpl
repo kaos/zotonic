@@ -19,7 +19,7 @@
 			<div class="padding">
 				{% include "_view.tpl" %}
 							
-				{% with m.search.paged[{latest cat="artist" pagelen=100}] as result %}
+				{% with m.search.paged[{all_bytitle cat="artist" pagelen=100}] as result %}
 
 					<ul class="artists-list clearfix">
 
