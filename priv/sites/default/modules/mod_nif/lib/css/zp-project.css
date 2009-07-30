@@ -65,7 +65,7 @@ body {
 	--------------------------------------------------------------- */
 	
 	.search-field {
-		margin: 0 0 0 18px;
+		margin: 7px 0 0 18px;
 	}
 	
 		.search-field input {
@@ -164,7 +164,7 @@ body {
 		}	
 	
 		.at-menu li li a.current {
-			background: #fff;
+			background: #57b8e6;
 			color: #000;
 		}
 		
@@ -201,7 +201,7 @@ body {
 		}
 		
 		.at-menu ul li a:hover {
-			background: #fff;
+			background: #57b8e6;
 			color: #000;
 		}
 
@@ -360,6 +360,15 @@ label {
 	.edit-this-page button {
 		margin: 0;
 	}
+
+button.search {
+	background: none;
+	font-family: Impact, arial, sans-serif;
+	border: none;
+	font-size: 14px;
+	margin: 0;
+	padding: 0;
+}
 
 /* pager
 ------------------------------------------------------ */
