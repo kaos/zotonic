@@ -22,7 +22,9 @@
 					{% for id in m.rsc[id].o.collection_member %}
 					<li class="clearfix">
 						{% if m.rsc[id].media %}
-							<div class="item-image left">{% image m.rsc[id].media[1] height=250 %}</div>
+							<div class="item-image left">
+								<a href="{{ m.rsc[id].website }}" title="{{ m.rsc[id].title }}" target="_blank">{% image m.rsc[id].media[1] height=80 %}</a>
+							</div>
 						{% endif %}
 					</li>
 					{% empty %}
