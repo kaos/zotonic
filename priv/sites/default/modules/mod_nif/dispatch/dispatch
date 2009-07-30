@@ -6,6 +6,9 @@
 	{program,   ["program"],       		    resource_program,	[]},
 	{artists,   ["artists"], 		    	resource_page,		[ {template, "artists.tpl"}, {id, page_artists} ]},
 	{news,   	["news"],   				resource_page,		[ {template, "news.tpl"}, {id, page_news} ]},
+	{links,		["links"],					resource_page,		[ {template, "links.tpl"}, {id, page_links} ]},
+	{press,		["press"],					resource_page,		[ {template, "press.tpl"}, {id, page_press} ]},
+	{search,	["search"],					resource_page,		[ {template, "search.tpl"}, {id, page_search} ]},
 
 	{page,    	["page", id],       		resource_page,		[ {template, "page.tpl"} ]},
 	{page,    	["page", id, slug], 		resource_page,		[ {template, "page.tpl"} ]},
@@ -14,8 +17,5 @@
 	{event,     ["event", id],				resource_page,		[ {template, "event.tpl"} ]},
 	{event,     ["event", id, slug], 		resource_page,		[ {template, "event.tpl"} ]},
 	{venue,   	["venue", id],				resource_page,		[ {template, "venue.tpl"} ]},
-	{venue,     ["venue", id, slug], 		resource_page,		[ {template, "venue.tpl"} ]},
-	{collection,["collection", id],			resource_page,		[ {template, "collection.tpl"} ]},
-	{collection,["collection", id, slug],	resource_page,		[ {template, "collection.tpl"} ]},
-	{search,	["search"],					resource_page,		[ {template, "search.tpl"}, {id, "page_search"} ]}
+	{venue,     ["venue", id, slug], 		resource_page,		[ {template, "venue.tpl"} ]}
 ].
