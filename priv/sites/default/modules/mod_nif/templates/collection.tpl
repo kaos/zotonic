@@ -18,37 +18,21 @@
 			<div class="padding">
 				{% include "_view.tpl" %}
 				
-				<ul class="items-list clearfix">
+				<ul class="artists-list clearfix">
 					{% for id in m.rsc[id].o.collection_member %}
 					<li class="clearfix">
-						<h2>
+						<h2><a href="{{ m.rsc[id].page_url }}" title="{{ m.rsc[id].title }}">{{ m.rsc[id].title }}</a></h2>
+						{% if m.rsc[id].media[1] %}
+						<div class="item-image left">
 							<a href="{{ m.rsc[id].page_url }}" title="{{ m.rsc[id].title }}">
-								{{ m.rsc[id].title }}
+								{% image m.rsc[id].media[1] width=180 height=90 crop %}
 							</a>
-						</h2>
-						<h4>
-							<a href="{{ m.rsc[id].o.atvenue.page_url }}" title="{{ m.rsc[id].o.atvenue.title }}">
-								{{ m.rsc[id].o.atvenue.title }}
-							</a>
-						</h4>
-						{% if m.rsc[id].media %}
-							<div class="item-image left">
-								<a href="{{ m.rsc[id].page_url }}" title="{{ m.rsc[id].title }}">
-									{% image m.rsc[id].media[1] width=65 height=65 crop %}
-								</a>
-							</div>
-						{% else %}
-							<div class="item-image left">
-								<a href="{{ m.rsc[id].page_url }}" title="{{ m.rsc[id].title }}">
-									{% image m.rsc[id].o.performer.media[1] width=65 height=65 crop %}
-								</a>
-							</div>
+						</div>
 						{% endif %}
-						<p class="intro">
-							<em>{{ m.rsc[id].date_start|date:"M d, H:i" }} &mdash; {{ m.rsc[id].date_end|date:"M d, H:i" }}</em>
-							{{ m.rsc[id].summary|ljust:80 }}&hellip;
-							<a href="{{ m.rsc[id].page_url }}" title="{{ m.rsc[id].title }}">Read&nbsp;more</a>
-						</p>
+					
+						{% if m.rsc[id].summary %}
+							<p>{{ m.rsc[id].summary }}</p>
+						{% endif %}
 					</li>
 					{% empty %}
 					<li>
