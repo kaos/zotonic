@@ -1,7 +1,7 @@
 <h1>{{ m.rsc[id].title }}</h1>
 
 {% if m.rsc[id].website %}
-	<p class="website" style="margin: 0 0 9px 0;"><a href="{{ m.rsc[id].website }}" title="{{ m.rsc[id].title }}">{{ m.rsc[id].website }}</a></p>
+	<p class="website" style="margin: 0 0 9px 0;"><a href="{{ m.rsc[id].website }}" title="{{ m.rsc[id].title }}">Visit website</a></p>
 {% endif %}
 
 {% if m.rsc[id].summary %}

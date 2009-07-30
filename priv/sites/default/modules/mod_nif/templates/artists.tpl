@@ -19,7 +19,7 @@
 			<div class="padding">
 				{% include "_view.tpl" %}
 							
-				{% with m.search[{latest cat="artist"}] as result %}
+				{% with m.search.paged[{latest cat="artist"}] as result %}
 
 					<ul class="artists-list clearfix">
 
@@ -46,6 +46,8 @@
 						{% endfor %}
 				
 					</ul>
+					
+					{% pager result=result dispatch="artists" qargs %}
 					
 				{% endwith %}
 			

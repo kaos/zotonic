@@ -34,9 +34,8 @@
 			<div class="edit-this-page clearfix">
 				{% include "_edit_button.tpl" %}
 			</div>
-			<ul id="sponsor-logos">
-				<li><a href=""></a></li>
-			</ul>
+			
+			{% include "_footer.tpl" %}
 		</div>
 	</div>
 

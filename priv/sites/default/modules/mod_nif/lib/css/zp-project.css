@@ -37,6 +37,11 @@ body {
 	background: oldlace;
 }
 
+#sponsor-logos li {
+	display: block;
+	float: left;
+}
+
 
 /* navigation
 ------------------------------------------------------ */
