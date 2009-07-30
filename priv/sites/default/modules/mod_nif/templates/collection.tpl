@@ -31,7 +31,7 @@
 						{% endif %}
 					
 						{% if m.rsc[id].summary %}
-							<p>{{ m.rsc[id].summary }}</p>
+							<p>{{ m.rsc[id].summary }} <a href="{{ m.rsc[id].page_url }}" title="{{ m.rsc[id].title }}">Read&nbsp;more</a></p>
 						{% endif %}
 					</li>
 					{% empty %}
