@@ -18,7 +18,7 @@
 			<div class="padding">
 				{% include "_view.tpl" %}
 				
-				<ul class="collection-list clearfix">
+				<ul class="items-list clearfix">
 					{% for id in m.rsc[id].o.collection_member %}
 					<li class="clearfix">
 						<h2>
