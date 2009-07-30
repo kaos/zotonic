@@ -7,6 +7,7 @@
 	{artists,   ["artists"], 		    	resource_page,		[ {template, "artists.tpl"}, {id, page_artists} ]},
 	{news,   	["news"],   				resource_page,		[ {template, "news.tpl"}, {id, page_news} ]},
 	{links,		["links"],					resource_page,		[ {template, "links.tpl"}, {id, page_links} ]},
+	{sponsors,	["links"],					resource_page,		[ {template, "links.tpl"}, {id, page_sponsors} ]},
 	{press,		["press"],					resource_page,		[ {template, "press.tpl"}, {id, page_press} ]},
 	{search,	["search"],					resource_page,		[ {template, "search.tpl"}, {id, page_search} ]},
 
