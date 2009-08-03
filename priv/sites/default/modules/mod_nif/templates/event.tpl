@@ -27,10 +27,10 @@
 							{% with m.rsc[id].date_end as date_end %}
 								<span class="time-wrapper zp-70">
 									From 
-									<span class="time">{{ date_start|date:"H:i A" }}</span>
+									<span class="time">{{ date_start|date:"f A" }}</span>
 
 									{% ifnotequal date_start date_end %}
-										&mdash; <span class="time">{{ date_end|date:"H:i A" }}</span>
+										&mdash; <span class="time">{{ date_end|date:"f A" }}</span>
 									{% endifnotequal %}
 
 									<span class="day">on {{ date_start|date:"l" }}</span>
@@ -105,7 +105,7 @@
 									<span class="zp-40">
 										<a href="{{ m.rsc[subject_id].page_url }}" title="{{ m.rsc[subject_id].title }}">{{ m.rsc[subject_id].title }}</a>
 									</span>
-									<span class="zp-60">{{ m.rsc[subject_id].date_start|date:"H:i A" }} &mdash; {{ m.rsc[subject_id].date_end|date:"H:i A" }}</span>
+									<span class="zp-60">{{ m.rsc[subject_id].date_start|date:"f A" }} &mdash; {{ m.rsc[subject_id].date_end|date:"f A" }}</span>
 								</li>
 							{% endifnotequal %}
 						{% endfor %}

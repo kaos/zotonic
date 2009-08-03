@@ -30,10 +30,10 @@
 								{% with m.rsc[id].date_start as date_start %}
 									{% with m.rsc[id].date_end as date_end %}
 										<span class="time-wrapper zp-50">
-											<span class="time">{{ date_start|date:"H:i A" }}</span>
+											<span class="time">{{ date_start|date:"f A" }}</span>
 
 											{% ifnotequal date_start date_end %}
-												&mdash; <span class="time">{{ date_end|date:"H:i A" }}</span>
+												&mdash; <span class="time">{{ date_end|date:"f A" }}</span>
 											{% endifnotequal %}
 											
 											<span class="day">on {{ date_start|date:"l" }}</span>
@@ -60,7 +60,7 @@
 				<h1>Latest news</h1>
 	
 				<ul class="items-list">
-					{% for id in m.search[{latest cat="news"}] %}
+					{% for id in m.search[{latest cat="news" pagelen="5"}] %}
 					<li class="clearfix">
 						<h3><a href="{{ m.rsc[id].page_url }}" title="{{ m.rsc[id].title }}">{{ m.rsc[id].title|striptags }}</a></h3>
 						{% if m.rsc[id].media[1] %}
@@ -68,7 +68,7 @@
 						{% endif %}
 						
 						<p class="intro">
-							<em>{{ m.rsc[id].modified|date:"d M, H:i" }}</em> &mdash; 
+							<em>{{ m.rsc[id].modified|date:"d M, f A" }}</em> &mdash; 
 							{{ m.rsc[id].summary|ljust:80 }}&hellip;
 							<a href="{{ m.rsc[id].page_url }}" title="{{ m.rsc[id].title }}">Read&nbsp;more</a>
 						</p>
@@ -79,8 +79,6 @@
 					</li>
 					{% endfor %}
 				</ul>
-				
-				<p><a href="{% url news %}" title="View all news">View all news items</a></p>
 			</div>
 		</div>
 	</div>

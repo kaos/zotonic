@@ -44,7 +44,7 @@
 				<h1>Latest news</h1>
 	
 				<ul class="items-list">
-					{% for id in m.search[{latest cat="news"}] %}
+					{% for id in m.search[{latest cat="news" pagelen="5"}] %}
 					<li class="clearfix">
 						<h3><a href="{{ m.rsc[id].page_url }}" title="{{ m.rsc[id].title }}">{{ m.rsc[id].title|striptags }}</a></h3>
 						{% if m.rsc[id].media[1] %}
@@ -52,7 +52,7 @@
 						{% endif %}
 						
 						<p class="intro">
-							<em>{{ m.rsc[id].modified|date:"d M, H:i" }}</em> &mdash; 
+							<em>{{ m.rsc[id].modified|date:"d M, f A" }}</em> &mdash; 
 							{{ m.rsc[id].summary|ljust:80 }}&hellip;
 							<a href="{{ m.rsc[id].page_url }}" title="{{ m.rsc[id].title }}">Read&nbsp;more</a>
 						</p>
@@ -63,8 +63,6 @@
 					</li>
 					{% endfor %}
 				</ul>
-				
-				<p><a href="{% url news %}" title="View all news">View all news items</a></p>
 			</div>
 		</div>
 	</div>
