@@ -1,11 +1,11 @@
 <h1>{{ m.rsc[id].title }}</h1>
 
 {% if m.rsc[id].website %}
-	<p class="website" style="margin: 0 0 9px 0;"><a href="{{ m.rsc[id].website }}" title="{{ m.rsc[id].title }}">Visit website</a></p>
+	<p class="website"><a href="{{ m.rsc[id].website }}" title="{{ m.rsc[id].title }}">Visit website</a></p>
 {% endif %}
 
 {% if m.rsc[id].o.about %}
-	<p class="website" style="margin: 0 0 9px 0;">About:
+	<p class="about">About:
 	{% for id in m.rsc[id].o.about %}
 		<a href="{{ m.rsc[id].page_url }}" title="{{ m.rsc[id].title }}">{{ m.rsc[id].title }}</a>{% if not forloop.last %}, {% endif %} 
 	{% endfor %}
