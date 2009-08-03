@@ -57,6 +57,13 @@ body {
 	margin: 180px 0 0 0;
 }
 
+	p.footer-text {
+		clear: both;
+		color: #eee;
+		font-size: 12px;
+		margin: 18px 0;
+	}
+
 
 /* navigation
 ------------------------------------------------------ */

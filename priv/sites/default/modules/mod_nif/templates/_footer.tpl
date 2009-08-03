@@ -1,4 +1,4 @@
-<ul id="sponsor-logos">
+<ul id="sponsor-logos" class="clearfix">
 	{% for id in m.rsc.footer_collection.o.collection_member %}
 	<li class="clearfix">
 		{% if m.rsc[id].media %}
@@ -9,3 +9,9 @@
 	</li>
 	{% endfor %}
 </ul>
+
+{% if m.rsc.footer_collection.summary %}
+<p class="footer-text">
+	{{ m.rsc.footer_collection.summary }}
+</p>
+{% endif %}
