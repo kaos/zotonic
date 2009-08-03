@@ -51,6 +51,7 @@
 					{% endfor %}
 				</ul>
 			</div>
+			<p class="newletter-link"><a href="#">Subscribe to our newsletter</a></p>
 		</div>
 	</div>
 {% endblock %}

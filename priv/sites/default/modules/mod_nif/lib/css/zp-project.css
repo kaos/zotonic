@@ -68,12 +68,12 @@ body {
 	margin: 18px 0;
 }
 
-.newletter-link {
+p.newletter-link {
 	position: absolute;
 	bottom: -52px;
 }
 
-	.newletter-link a {
+	p.newletter-link a {
 		color: #fff;
 	}
 
