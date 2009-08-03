@@ -3,7 +3,7 @@
 	<li class="clearfix">
 		{% if m.rsc[id].media %}
 			<div class="item-image left">
-				<a href="{{ m.rsc[id].website }}" title="{{ m.rsc[id].title }}" target="_blank">{% image m.rsc[id].media[1] height=60 %}</a>
+				<a href="{{ m.rsc[id].website }}" title="{{ m.rsc[id].title }}" target="_blank">{% image m.rsc[id].media[1] height=30 %}</a>
 			</div>
 		{% endif %}
 	</li>
