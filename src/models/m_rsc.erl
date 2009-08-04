@@ -276,6 +276,16 @@ p(Id, page_url, Context) ->
         PagePath -> PagePath
     end;
 p(Id, default_page_url, Context) -> page_url(Id, Context);
+p(Id, resource_uri, Context) ->
+    case rid(Id, Context) of
+        undefined ->
+            undefined;
+        IdNr ->
+            case p(IdNr, is_authoritative, Context) of
+                true ->  iolist_to_binary(z_context:abs_url(z_dispatcher:url_for(id, [{id, IdNr}], Context), Context));
+                false -> p_cached(IdNr, resource_uri, Context) 
+            end
+    end;
 p(Id, group, Context) -> 
     case p(Id, group_id, Context) of
         undefined -> undefined;
@@ -290,33 +300,37 @@ p(Id, predicates_edit, Context) -> predicates_edit(Id, Context);
     
 % Check if the requested predicate is a readily available property or an edge
 p(Id, Predicate, Context) when is_integer(Id) -> 
-    Value = case z_depcache:get(Id, Predicate) of
-        {ok, V} -> 
-            V;
-        undefined ->
-            case z_db:select(rsc, Id, Context) of
-                {ok, Record} ->
-                    z_depcache:set(Id, Record, ?WEEK, [Id]),
-                    proplists:get_value(Predicate, Record);
-                _ ->
-                    z_depcache:set(Id, undefined, ?WEEK, [Id]),
-                    undefined
-            end
-    end,
-    case Value of
-        undefined ->
-            % Unknown properties will be checked against the predicates, returns o(Predicate).
-            case m_predicate:is_predicate(Predicate, Context) of
-                true -> o(Id, Predicate, Context);
-                false -> undefined
-            end;
-        _ ->
-            Value
-    end;
+    p_cached(Id, Predicate, Context);
 p(undefined, _Predicate, _Context) ->
     undefined;
 p(Id, Predicate, Context) ->
     p(rid(Id, Context), Predicate, Context).
+
+
+    p_cached(Id, Predicate, Context) ->
+        Value = case z_depcache:get(Id, Predicate) of
+            {ok, V} -> 
+                V;
+            undefined ->
+                case z_db:select(rsc, Id, Context) of
+                    {ok, Record} ->
+                        z_depcache:set(Id, Record, ?WEEK, [Id]),
+                        proplists:get_value(Predicate, Record);
+                    _ ->
+                        z_depcache:set(Id, undefined, ?WEEK, [Id]),
+                        undefined
+                end
+        end,
+        case Value of
+            undefined ->
+                % Unknown properties will be checked against the predicates, returns o(Predicate).
+                case m_predicate:is_predicate(Predicate, Context) of
+                    true -> o(Id, Predicate, Context);
+                    false -> undefined
+                end;
+            _ ->
+                Value
+        end.
 
 
 %% Return a list of all edge predicates of this resource

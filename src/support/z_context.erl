@@ -17,6 +17,8 @@
     prune_for_scomp/2,
     output/2,
 
+    abs_url/2,
+    
     pickle/1,
     depickle/1,
     
@@ -134,6 +136,43 @@ prune_for_scomp(VisibleFor, Context) ->
 		validators=[],
 		render=[]
     }).
+
+
+%% @doc Make the url an absolute url by prepending the hostname.
+%% @spec abs_url(string(), Context) -> string()
+abs_url(Url, Context) when is_binary(Url) ->
+    abs_url(binary_to_list(Url), Context);
+abs_url(Url, Context) ->
+    case has_url_protocol(Url) of
+        true ->
+            Url;
+        false ->
+            ["http://", hostname(Context), Url]
+    end.
+    
+    has_url_protocol([]) -> 
+        false;
+    has_url_protocol([H|T]) when is_integer($a) andalso H >= $a andalso H =< $z ->
+        has_url_protocol(T);
+    has_url_protocol([$:|_]) ->
+        true;
+    has_url_protocol(_) ->
+        false.
+
+%% @doc Return the current hostname
+%% @spec hostname(Context) -> string()
+hostname(Context = #context{wm_reqdata=ReqData}) ->
+    case m_config:get(system, hostname, Context) of
+        undefined ->
+            case wrq:get_req_header("host", ReqData) of
+                undefined ->
+                    "localhost";
+                Hostname ->
+                    Hostname
+            end;
+        Hostname ->
+            Hostname
+    end.
 
 
 %% @doc Pickle a context for storing in the database
