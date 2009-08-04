@@ -19,7 +19,7 @@
 			<div class="padding">
 				{% include "_view.tpl" %}
 							
-				{% with m.search.paged[{latest cat="artist" pagelen=100}] as result %}
+				{% with m.search[{latest cat="artist" pagelen=200}] as result %}
 
 					<ul class="artists-list clearfix">
 
@@ -38,7 +38,7 @@
 								{% if m.rsc[id].summary %}
 									<p>{{ m.rsc[id].summary }}</p>
 								{% endif %}
-							</li>	
+							</li>
 						{% empty %}
 							<li>
 								<p>No artists have been found.</p>
@@ -46,8 +46,6 @@
 						{% endfor %}
 				
 					</ul>
-					
-					{% pager result=result dispatch="artists" qargs %}
 					
 				{% endwith %}
 			
@@ -83,5 +81,3 @@
 		</div>
 	</div>
 {% endblock %}
-
-{% block sidebar %}{% endblock %}
