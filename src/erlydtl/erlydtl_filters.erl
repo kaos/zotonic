@@ -178,6 +178,9 @@ escapejs(Input) when is_binary(Input) ->
 escapejs(Input) when is_list(Input) ->
     escapejs(Input, []).
 
+escapexml(B) ->
+    z_xml:escape(B).
+
 first(undefined) ->
     undefined;
 first([First|_Rest]) ->
@@ -414,7 +417,6 @@ urlencode(Input) when is_list(Input) ->
 urlencode(_Input) ->
     <<>>.
 
-
 yesno(B) ->
     case erlydtl_runtime:is_false(B) of
         true -> "no";
@@ -490,6 +492,7 @@ escapejs(Binary, Index) when is_binary(Binary) ->
         _ ->
             Binary
     end.
+
 
 fix_ampersands(Input, Index) when is_binary(Input) ->
     case Input of
