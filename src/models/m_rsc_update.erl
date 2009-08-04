@@ -137,7 +137,7 @@ update(Id, Props, Context) when is_integer(Id) orelse Id == insert_rsc ->
                                 GroupIdN = proplists:get_value(group_id, InsPropsN),
                                 case z_acl:group_editable(GroupIdN, Ctx) of
                                     true ->
-                                        {ok, InsId} = z_db:insert(rsc, InsPropsN, Ctx),
+                                        {ok, InsId} = z_db:insert(rsc, [{creator_id, z_acl:user(Ctx)} | InsPropsN], Ctx),
 
                                         % Insert a category record for categories. Categories are so low level that we want
                                         % to make sure that all categories always have a category record attached.
