@@ -83,8 +83,9 @@
 
 		<div id="sidebar" class="zp-30">
 			<div class="padding">
-				{% with m.rsc[id].o.performer as performer_id %}
-					<h4 class="sidebar-title">Artist:</h4>
+				<h4 class="sidebar-title">Artist:</h4>
+
+				{% for performer_id in m.rsc[id].o.performer %}
 					<h1>{{ m.rsc[performer_id].title }}</h1>
 					<p class="clearfix">
 						{% with m.rsc[performer_id].depiction as depiction %}
@@ -111,7 +112,7 @@
 						{% endfor %}
 					</ul>	
 					
-				{% endwith %}	
+				{% endfor %}	
 			</div>
 			<p class="newletter-link"><a href="mailto:info@newislandfestival.com?subject=sign me up for mailing list of New Island Festival September 10-20, 2009" title="sign up for our mailinglist">Subscribe to our newsletter</a></p>
 		</div>
