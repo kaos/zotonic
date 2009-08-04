@@ -74,11 +74,25 @@ event({submit, {search, Props}, _TriggerId, _TargetId}, Context) ->
         find_day(Rest).
 
 
-%% @doc Return the default day for showing the program
+%% @doc Return the default day for showing the program.  The program runs only two weekends.
 default_day() ->
-    case calendar:local_time() of
-        {{Y,M,D}, _} when Y == 2009, M == 9 ->
-            case D of
+    %% Ok, we have a timezone problem here.
+    %% The US people are watching from NY, that is GMT-5, the server is at GMT+1.
+    %% They expect to see the day as if it is their timezone.
+    %% So we need switch days only after 04:00 hours GMT.
+    %% The normal program also runs till 04:00 night, so we have a delta of 4+4 hours.
+    UniversalTime = calendar:universal_time(),
+    Delta = case UniversalTime of
+        {_, {Hour,_Min, _Sec}} when Hour < 8 -> 
+            %% It is still yesterday's program in NY.
+            -1;
+        _ ->
+            %% It is today's program in NY.
+            0
+    end,
+    case UniversalTime of
+        {{Y,M,D},_}  when Y == 2009, M == 9 ->
+            case D + Delta of
                 N when N >= 10, N =< 13 -> N;
                 N when N >= 17, N =< 20 -> N;
                 N when N > 13, N < 17 -> 17;
