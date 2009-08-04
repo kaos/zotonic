@@ -2,7 +2,7 @@
 %% @copyright 2009 Marc Worrell
 %% @date 2009-04-17
 %%
-%% @doc Utility functions for html.
+%% @doc Utility functions for html processing.
 
 -module(z_html).
 -author("Marc Worrell <marc@worrell.nl").
@@ -46,7 +46,7 @@ escape_props(Props) ->
         V.
 
 
-%% @doc Special html escape function that leaves some entities in tact, making it save to escape a text multiple times.
+%% @doc Escape a string so that it is valid within HTML/ XML.
 %% @spec escape(iolist()) -> iolist()
 escape(undefined) -> 
     undefined;
@@ -61,16 +61,6 @@ escape(B) when is_binary(B) ->
 
     escape(<<>>, Acc) -> 
         Acc;
-    escape(<<"&amp;", T/binary>>, Acc) ->
-        escape(T, <<Acc/binary, "&amp;">>);
-    escape(<<"&quot;", T/binary>>, Acc) ->
-        escape(T, <<Acc/binary, "&quot;">>);
-    escape(<<"&#39;", T/binary>>, Acc) ->
-        escape(T, <<Acc/binary, "&#39;">>);
-    escape(<<"&lt;", T/binary>>, Acc) ->
-        escape(T, <<Acc/binary, "&lt;">>);
-    escape(<<"&gt;", T/binary>>, Acc) ->
-        escape(T, <<Acc/binary, "&gt;">>);
     escape(<<"&euro;", T/binary>>, Acc) ->
         escape(T, <<Acc/binary, "€">>);
     escape(<<$&, T/binary>>, Acc) ->
