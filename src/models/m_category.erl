@@ -21,6 +21,7 @@
     get_range/2,
     get_range_by_name/2,
     get_path/2,
+    last_modified/2,
     is_a/2,
     is_a/3,
     get_page_count/2,
@@ -206,6 +207,21 @@ id_to_name(Id, Context) when is_integer(Id) ->
         z_convert:to_atom(Nm)
     end,
     z_depcache:memo(F, {category_id_to_name, Id}, ?WEEK, [category]).
+
+
+%% @doc Return the last modification date of the category. Returns false
+%% @spec last_modified(Cat::term(), Context) -> {ok, {{Y,M,D},{Hour,Min,Sec}}} | {error, Reason}.
+last_modified(Cat, Context) ->
+    case name_to_id(Cat, Context) of
+        {ok, CatId} ->
+            {Left, Right} = get_range(CatId, Context),
+            case z_db:q1("select max(modified) from rsc where pivot_category_nr >= $1 and pivot_category_nr <= $2", [Left, Right], Context) of
+                false -> {error, enoent};
+                Date -> {ok, Date}
+            end;
+        {error, Reason} ->
+            {error, Reason}
+    end.
 
 
 %% @doc Move the category below another category, placing it at the end of the children of that category.
