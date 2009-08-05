@@ -48,27 +48,27 @@
 
 {% with m.search[{nif_program day=day genre=genre pagelen=1000}] as result %}
 	<div class="list-headers">
-		<span class="zp-33">Performance</span>
-		<span class="zp-33">Date</span>
-		<span class="zp-33">Artist</span>
+		<span class="zp-45">Performance</span>
+		<span class="zp-30">Date</span>
+		<span class="zp-25">Artist</span>
 	</div>
 	<ul class="program-list clear clearfix">
 		{% for id, date_start in result %}
 
 			<li class="clearfix performance-info-wrapper {% cycle 'even' 'uneven' %}">
-				<span class="artist zp-33"><a href="{{ m.rsc[id].page_url }}" title="{{ m.rsc[id].title }}">{{ m.rsc[id].title }}</a></span>
+				<span class="artist zp-45"><a href="{{ m.rsc[id].page_url }}" title="{{ m.rsc[id].title }}">{{ m.rsc[id].title }}</a></span>
 			
 				{% if m.rsc[id].date_start %}
 					{% with m.rsc[id].date_start as date_start %}
 						{% with m.rsc[id].date_end as date_end %}
-							<span class="time-wrapper zp-33">
+							<span class="time-wrapper zp-30">
 								<span class="time">{{ date_start|date:"f A" }}</span>
 
 								{% ifnotequal date_start date_end %}
 									&mdash; <span class="time">{{ date_end|date:"f A" }}</span>
 								{% endifnotequal %}
 							</span>
-							<span class="venue zp-33"><a href="{{ m.rsc[id].o.performer.page_url }}" title="{{ m.rsc[id].o.performer.title }}">{{ m.rsc[id].o.performer.title }}</a></span>
+							<span class="venue zp-25"><a href="{{ m.rsc[id].o.performer.page_url }}" title="{{ m.rsc[id].o.performer.title }}">{{ m.rsc[id].o.performer.title }}</a></span>
 						{% endwith %}
 					{% endwith %}
 				{% endif %}
