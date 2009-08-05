@@ -11,6 +11,10 @@
     new/0,
     new_for_host/1,
 
+    site/0,
+    site/1,
+    hostname/1,
+    
     prune_for_async/1,
     prune_for_template/1,
     prune_for_database/1,
@@ -81,12 +85,12 @@
 
 %% @doc Create a new context record for the current request.
 new(ReqData, Module) ->
-    Context = #context{wm_reqdata=ReqData, resource_module=Module},
+    Context = #context{wm_reqdata=ReqData, resource_module=Module, host=site(ReqData)},
     Context#context{language=z_trans:default_language(Context)}.
 
 %% @doc Return a new empty context
 new() -> 
-    Context = #context{},
+    Context = #context{host=site()},
     Context#context{language=z_trans:default_language(Context)}.
 
 %% @doc Return an almost empty context for the database connection only, nothing else is initialised
@@ -96,6 +100,67 @@ new_for_host(#context{host=Host}) ->
 new_for_host(Host) ->
     Context = new(),
     Context#context{host=Host}.
+
+
+
+%% @doc Return the host name, directly maps to a sitename in the site folder.
+%% @spec host() -> atom()
+site() ->
+    case os:getenv("ZOTONIC_SITE") of 
+        false -> default;
+        Host -> list_to_atom(Host)
+    end.   
+
+
+%% @doc Maps the host in the request to a site in the sites folder.
+%% @spec site(wm_reqdata) -> atom()
+site(#context{host=Host}) ->
+    Host;
+%% @spec site(wm_reqdata) -> atom()
+site(ReqData) ->
+    case wrq:get_req_header("host", ReqData) of
+        undefined ->
+            site();
+
+        Hostname ->
+            Parts = string:tokens(string:to_lower(Hostname), "."),
+            NoWww = case Parts of
+                ["www" | Rest] -> Rest;
+                _ -> Parts
+            end,
+            NoTld = case NoWww of
+                [] ->
+                    [];
+                _ ->
+                    {A, _Tail} = lists:split(length(NoWww) - 1, NoWww),
+                    A
+            end,
+            HostName = z_string:to_name(string:concat(NoTld, "_")),
+            HostDir  = filename:join([code:lib_dir(zotonic, priv), "sites", HostName]),
+            case filelib:is_dir(HostDir) of
+                true ->
+                    list_to_atom(HostName);
+                false ->
+                    site()
+            end
+    end.
+
+
+%% @doc Return the current hostname from the config or reqdata
+%% @spec hostname(Context) -> string()
+hostname(Context = #context{wm_reqdata=ReqData}) ->
+    case m_config:get(system, hostname, Context) of
+        undefined ->
+            case wrq:get_req_header("host", ReqData) of
+                undefined ->
+                    "localhost";
+                Hostname ->
+                    Hostname
+            end;
+        Hostname ->
+            Hostname
+    end.
+
 
 %% @doc Make the context safe to use in a async message
 prune_for_async(#context{wm_reqdata=ReqData, host=Host, acl=Acl, props=Props}) ->
@@ -159,20 +224,6 @@ abs_url(Url, Context) ->
     has_url_protocol(_) ->
         false.
 
-%% @doc Return the current hostname
-%% @spec hostname(Context) -> string()
-hostname(Context = #context{wm_reqdata=ReqData}) ->
-    case m_config:get(system, hostname, Context) of
-        undefined ->
-            case wrq:get_req_header("host", ReqData) of
-                undefined ->
-                    "localhost";
-                Hostname ->
-                    Hostname
-            end;
-        Hostname ->
-            Hostname
-    end.
 
 
 %% @doc Pickle a context for storing in the database

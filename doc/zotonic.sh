@@ -34,6 +34,9 @@ SNAME=zotonic001
 # The command used to restart zotonic when crashed, only used after a "zotonic.sh start"
 export HEART_COMMAND="$ZOTONIC_SH start"
 
+## The default site for unknown hosts, is a directory in the priv/sites/ directory.
+export ZOTONIC_SITE="default"
+
 ## The port and IP address zotonic will bind to (defaults to all ip addresses and port 8000)
 export ZOTONIC_IP=any
 export ZOTONIC_PORT=8000

@@ -92,9 +92,10 @@ handle_call(Message, _From, State) ->
 %% @spec handle_cast(Msg, State) -> {noreply, State} |
 %%                                  {noreply, State, Timeout} |
 %%                                  {stop, Reason, State}
-%% Poll the queue for all databases
+%% Poll the queue for the default host
+%% @todo Poll for all hosts in the sites dir (when we have multiple pools)
 handle_cast({poll}, State) ->
-    do_poll(default),
+    do_poll(z_context:site()),
     {noreply, State};
 
 %% Poll the queue for a particular database

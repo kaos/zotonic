@@ -12,7 +12,6 @@
     abspath/2,
     ensure_relative/2,
     ensure_relative/3,
-    path_archive/1,
     is_archived/2,
     archive_file/2,
     archive_file/3,
@@ -29,7 +28,7 @@
 
 %% @doc Return the absolute path name of a relative file in the archive
 abspath(File, Context) ->
-    filename:join([path_archive(Context), z_convert:to_list(File)]).
+    filename:join([z_path:media_archive(Context), z_convert:to_list(File)]).
 
 %% @doc Ensure that the filename is relative to the archive.  When needed move the file to the archive.  Return the relative path.
 ensure_relative(File, Context) ->
@@ -99,7 +98,7 @@ archive_copy_opt(Filename, NewBasename, Context) ->
 
 %% Return an unique filename for archiving the file
 archive_filename(Filename, Context) ->
-    Archive = path_archive(Context),
+    Archive = z_path:media_archive(Context),
     {{Y,M,D}, _} = calendar:local_time(),
     Rootname = filename:rootname(filename:basename(Filename)),
     Extension = filename:extension(Filename),
@@ -142,21 +141,16 @@ make_unique(Archive, Rootname, Extension, Nr) ->
     end.
 
 
-%% @doc Return the path to the media archive directory
-path_archive(_Context) ->
-    Priv = code:lib_dir(zotonic, priv),
-    filename:join([Priv, "sites", "default", "files", "archive"]).
-
 %% @doc Check if the file is archived (ie. in the archive directory)
 is_archived(Filename, Context) ->
     Fileabs = filename:absname(Filename),
-    Archive = path_archive(Context) ++ "/",
+    Archive = z_path:media_archive(Context) ++ "/",
     lists:prefix(Archive, Fileabs).
     
 
 %% @doc Remove the path to the archive directory, return a filename relative to the archive directory
 rel_archive(Filename, Context) ->
     Fileabs = filename:absname(Filename),
-    Archive = path_archive(Context) ++ "/",
+    Archive = z_path:media_archive(Context) ++ "/",
     true = lists:prefix(Archive, Fileabs),
     lists:nthtail(length(Archive), Fileabs).

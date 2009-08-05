@@ -29,15 +29,15 @@
 
 %% These are used for file serving (move to metadata)
 -record(state, {
-        root=undefined,
-        media_path=undefined,
+        root=undefined,                 % Preconfigured media preview directory
+        media_path=undefined,           % Preconfigured media archive directory
         is_media_preview=false,
         content_disposition=undefined,
         use_cache=false,
         encode_data=false,
         fullpath=undefined,
         is_cached=false,
-        path=undefined,
+        path=undefined,                 % Preconfigured file to serve
         mime=undefined,
         last_modified=undefined,
         body=undefined
@@ -52,17 +52,21 @@
     }).
 
 -define(MAX_AGE, 315360000).
--define(MEDIA_PATH,   filename:join([code:lib_dir(zotonic, priv), "sites", "default", "files", "archive"])).
 
 
 init(ConfigProps) ->
-    UseCache       = proplists:get_value(use_cache, ConfigProps, false),
-    {root, Root}   = proplists:lookup(root, ConfigProps),
+    %% Possible predefined file to serve. For example the favicon.ico
     Path           = proplists:get_value(path, ConfigProps),
+    %% You can overule the media preview (root) and archive (media_path) paths.
+    Root           = proplists:get_value(root, ConfigProps),
+    MediaPath      = proplists:get_value(media_path, ConfigProps),
+    %% Misc settings, note that caching can be turned of when you use Varnish
+    UseCache       = proplists:get_value(use_cache, ConfigProps, false),
     IsMediaPreview = proplists:get_value(is_media_preview, ConfigProps, false),
-    MediaPath      = proplists:get_value(media_path, ConfigProps, ?MEDIA_PATH),
     ContentDisposition = proplists:get_value(content_disposition, ConfigProps),
-    {ok, #state{path=Path, root=Root, use_cache=UseCache, is_media_preview=IsMediaPreview, media_path=MediaPath, content_disposition=ContentDisposition}}.
+    {ok, #state{path=Path, root=Root, use_cache=UseCache, 
+                is_media_preview=IsMediaPreview, media_path=MediaPath, 
+                content_disposition=ContentDisposition}}.
     
 allowed_methods(ReqData, State) ->
     {['HEAD', 'GET'], ReqData, State}.
@@ -216,7 +220,15 @@ file_exists(State, Name, Context) ->
                 "/" -> tl(SafePath);
                 _ -> SafePath
             end,
-            file_exists1(State#state.root, RelName, Context)
+            Root = case State#state.root of
+                undefined -> 
+                    case State#state.is_media_preview of
+                        true  -> [z_path:media_preview(Context)];
+                        false -> [z_path:media_archive(Context)]
+                    end;
+                ConfRoot -> ConfRoot
+            end,
+            file_exists1(Root, RelName, Context)
     end.
 
 file_exists1([], _RelName, _Context) ->
@@ -248,8 +260,8 @@ is_text(_Mime) -> false.
 %% @spec ensure_preview(ReqData, Path, State) -> {Boolean, State}
 %% @doc Generate the file on the path from an archived media file.
 %% The path is like: 2007/03/31/wedding.jpg(300x300)(crop-center)(709a-a3ab6605e5c8ce801ac77eb76289ac12).jpg
-%% The original media should be in State#media_path
-%% The generated image should be created in State#root
+%% The original media should be in State#media_path (or z_path:media_archive)
+%% The generated image should be created in State#root (or z_path:media_preview)
 ensure_preview(ReqData, Path, State) ->
     {Filepath, PreviewPropList, _Checksum, _ChecksumBaseString} = z_media_tag:url2props(Path),
     case mochiweb_util:safe_relative_path(Filepath) of
@@ -257,19 +269,27 @@ ensure_preview(ReqData, Path, State) ->
             {false, ReqData, State};
         Safepath  ->
             Context = z_context:new(ReqData, ?MODULE), 
+            MediaPath = case State#state.media_path of
+                undefined -> z_path:media_archive(Context);
+                ConfMediaPath -> ConfMediaPath
+            end,
+            
             MediaFile = case Safepath of 
                     "lib/" ++ LibPath ->  
                         case z_module_indexer:find(lib, LibPath, Context) of 
                             {ok, ModuleFilename} -> ModuleFilename; 
-                            {error, _} -> filename:join(State#state.media_path, Safepath) 
+                            {error, _} -> filename:join(MediaPath, Safepath) 
                         end; 
                     _ -> 
-                        filename:join(State#state.media_path, Safepath) 
+                        filename:join(MediaPath, Safepath) 
             end,
             case filelib:is_regular(MediaFile) of
                 true ->
                     % Media file exists, perform the resize
-                    [Root|_] = State#state.root,
+                    Root = case State#state.root of
+                        [ConfRoot|_] -> ConfRoot;
+                        _ -> z_path:media_preview(Context)
+                    end,
                     PreviewFile = filename:join(Root, Path),
                     case z_media_preview:convert(MediaFile, PreviewFile, PreviewPropList, Context) of
                         ok -> resource_exists(ReqData, State);
@@ -296,3 +316,5 @@ decode_data(gzip, Data) ->
     <<Size:32, _Rest/binary>> = Data,
     <<Size:32, _Identity:Size/binary, Gzip/binary>> = Data,
     Gzip.
+
+    

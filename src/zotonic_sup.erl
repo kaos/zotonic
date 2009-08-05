@@ -42,6 +42,9 @@ upgrade() ->
 %% @spec init([]) -> SupervisorTree
 %% @doc supervisor callback.
 init([]) ->
+    % Default site name
+    DefaultSite= case os:getenv("ZOTONIC_SITE") of false -> default; AnySite -> list_to_atom(AnySite) end,
+
     % Listen to IP address and Port
     WebIp      = case os:getenv("ZOTONIC_IP")   of
         Any when Any == false; Any == []; Any == "*"; Any == "any" -> any;
@@ -70,7 +73,7 @@ init([]) ->
 	            permanent, 5000, worker, dynamic},
 
     DbPoolConfig = [
-        {default, 10, [{host, DbHost}, {port, DbPort}, {username, DbUser}, {password, DbPassword}, {database, DbDatabase}]}
+        {DefaultSite, 10, [{host, DbHost}, {port, DbPort}, {username, DbUser}, {password, DbPassword}, {database, DbDatabase}]}
     ],
     
 

@@ -2,6 +2,8 @@
 %% @copyright 2009 Marc Worrell
 %%
 %% @doc Simple dropbox handler, monitors a directory and signals new files.
+%% @todo Make this work for non-default sites (ie. start a dropbox server for all sites, best is to make this into a module)
+%%
 %% Flow:
 %% 1. An user uploads/moves a file to the dropbox
 %% 2. Dropbox handler sees the file, moves it so a safe place, and notifies the file handler of it existance.
