@@ -1,0 +1,186 @@
+/* Zoton.com project css
+----------------------------------------------------------
+
+@package:	atatonic CSS framework 2009	
+@Author: 	Tim Benniks <tim@timbenniks.com>
+@Created: 	28-04-2009
+
+---------------------------------------------------------- */
+
+body {
+	font: 12px/20px "Lucida Grande", Arial, sans-serif; /* uses a 10px grind (5 - 10 - 15 - 20 - 25 - 30 - etc) */
+	color: #666;
+	background: url(../images/bg.gif) repeat-x top;
+}
+
+.zp-wrapper {
+	margin: 0 auto -81px;
+	height: auto!important;
+	min-height: 100%;
+}
+
+	
+/* Typography
+-------------------------------------------------------------- */
+
+h1 {
+	font-size: 20px;
+	line-height: 30px;
+	font-weight: normal;
+	color: #09647e;
+	font-family: Helvetica, Arial, sans-serif;
+}
+
+h2 {
+	font-size: 15px;
+	line-height: 20px;
+	font-weight: normal;
+	color: #0c8db2;
+}
+
+h3 {
+	font-size: 13px;
+	line-height: 20px;
+	font-weight: bold;
+	color: #444;
+}
+
+h4 {
+	font-size: 13px;
+	line-height: 20px;
+	font-weight: normal;
+}
+
+h5 {
+	font-size: 13px;
+	line-height: 20px;
+}
+
+p {
+	margin: 0 0 20px 0;
+}
+
+p.intro {
+	font-size: 15px;
+	color: #0c8db2;
+	line-height: 25px;
+}
+
+#sidebar p {
+	font-size: 11px;
+}
+
+a,
+a:focus {
+	color: #09647e;
+	text-decoration: none;
+}
+
+a:hover {
+	color: #444;
+}
+
+	
+/* sticky footer CSS
+---------------------------------------------------------- */
+
+html, 
+body {
+	height: 100%;
+}
+
+.footer, 
+.push {
+	height: 81px;
+}
+
+
+/* Navigation and page basics
+---------------------------------------------------------- */
+
+#header {
+	position: relative;
+	height: 180px;
+}
+
+.logo {
+	position: absolute;
+	top: 27px
+}
+
+ul#navigation {
+	position: absolute;
+	top: 103px;
+	left: 0;
+}
+
+ul#navigation li {
+	display: inline;
+	
+}
+
+#navigation li a,
+#navigation li a:focus {
+	background: transparent url(../images/menu_sep.gif) no-repeat right top;
+	color: #fff;
+	display: block;
+	margin: 0;
+	padding: 0 25px;
+	text-transform: uppercase;
+	float: left;
+	line-height: 50px;
+	height: 50px;
+}
+
+#navigation li.home {
+	background: transparent url(../images/menu_sep.gif) no-repeat left top;
+}
+			
+#navigation li a:hover,
+#navigation li a.active {
+	background: #0aa1cd url(../images/menu_sep.gif) no-repeat right top;
+}
+
+#content .padding {
+	padding: 0 80px 0 0;
+}
+
+#footer {
+	width: 100%;
+	background: url(../images/footer_bg.gif) repeat-x right top;
+}
+
+#footer p {
+	font-size: 11px;
+	padding: 15px 0 0;
+}
+
+.footer-content {
+	width: 970px;
+	margin: 0 auto;
+	background: url(../images/footer_img.gif) no-repeat right top;
+	height: 81px;
+}
+
+.footer-navigation {
+	padding: 15px 0 0 0;
+}
+
+
+ul.footer-navigation li {
+	display: inline;
+	margin: 0 5px 0 0;
+}
+
+.footer-navigation li a,
+.footer-navigation li a:focus {
+	font-size: 11px;
+}
+
+ul.regular {
+	margin: -10px 0 20px 0;
+	font-size: 11px;
+	list-style-image: none;
+	list-style-position: inside;
+	list-style-type: circle;
+}
