@@ -110,6 +110,17 @@ ne(Input, Number) ->
     end.
 
 
+eq_day({Y,M,D}, {Y,M,D}) ->
+    true;
+eq_day({{Y,M,D}, _}, {{Y,M,D}, _}) ->
+    true;
+eq_day(_, _) ->
+    false.
+
+ne_day(A, B) ->
+    not eq_day(A,B).
+
+
 b_not(Input) ->
     not z_convert:to_bool(Input).
 
@@ -156,6 +167,12 @@ center(Input, Number) when is_binary(Input) ->
 center(Input, Number) when is_list(Input) ->
     string:centre(Input, z_convert:to_integer(Number)).
 
+
+date_range([A, B], [WithDate, Sep, EqDate]) ->
+    case eq_day(A, B) of
+        true -> [ date(A, WithDate), Sep, date(B, EqDate) ];
+        false -> [ date(A, WithDate), Sep, date(B, WithDate) ]
+    end.
 
 date(undefined, _FormatStr) ->
     undefined;
