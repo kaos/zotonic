@@ -78,9 +78,14 @@ m_value(#m{value=V}, _Context) ->
 %% @doc Return the id of the resource with the name
 % @spec name_to_id(NameString, Context) -> int() | undefined
 name_to_id(Name, Context) ->
-    case rid_name(Name, Context) of
-        Id when is_integer(Id) -> {ok, Id};
-        _ -> {error, {enoent, rsc, Name}}
+    case is_list(Name) andalso z_utils:only_digits(Name) of
+        true ->
+            {ok, z_convert:to_integer(Name)};
+        false ->
+            case rid_name(Name, Context) of
+                Id when is_integer(Id) -> {ok, Id};
+                _ -> {error, {enoent, rsc, Name}}
+            end
     end.
 
 name_to_id_check(Name, Context) ->
@@ -416,7 +421,7 @@ rid(#rsc_list{list=[R|_]}, _Context) ->
 	R;
 rid(#rsc_list{list=[]}, _Context) ->
 	undefined;
-rid([C|_] = UniqueName, Context) when is_list(UniqueName) andalso is_integer(C) ->
+rid([C|_] = UniqueName, Context) when is_integer(C) ->
     case z_utils:only_digits(UniqueName) of
         true -> list_to_integer(UniqueName);
         false -> rid_name(UniqueName, Context)
@@ -433,6 +438,8 @@ rid(<<>>, _Context) ->
 
 %% @doc Return the id of the resource with a certain unique name.
 %% rid_name(Name, Context) -> int() | undefined
+rid_name(Name, _Context) when is_integer(Name) ->
+    Name;
 rid_name(Name, Context) ->
     Lower = z_string:to_name(Name),
     case z_depcache:get({rsc_name, Lower}) of

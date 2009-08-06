@@ -25,7 +25,9 @@ resource_exists(ReqData, Context) ->
 
 %% @doc Check if the current user is allowed to view the resource. 
 is_authorized(ReqData, Context) ->
-    z_auth:wm_is_authorized(false, visible, id, ReqData, Context).
+    Context1  = ?WM_REQ(ReqData, Context),
+    ContextQs = z_context:ensure_qs(Context1),
+    z_auth:wm_is_authorized(false, visible, get_id(ContextQs), ReqData, Context).
 
 
 %% @doc Show the page.  Add a noindex header when requested by the editor.
@@ -41,14 +43,13 @@ html(Context) ->
 
 
 %% @doc Fetch the id from the request or the dispatch configuration.
-%% @spec get_id(Context) -> int()
+%% @spec get_id(Context) -> int() | false
 get_id(Context) ->
-    case z_context:get(id, Context) of
-        undefined -> 
-            z_convert:to_integer(z_context:get_q("id", Context));
-        ConfId ->
-            case m_rsc:name_to_id(ConfId, Context) of
-                {ok, Id} -> Id;
-                _ -> false
-            end
+    ReqId = case z_context:get(id, Context) of
+        undefined -> z_context:get_q("id", Context);
+        ConfId -> ConfId
+    end,
+    case m_rsc:name_to_id(ReqId, Context) of
+        {ok, RscId} -> RscId;
+        _ -> false
     end.
