@@ -132,6 +132,43 @@ search({nif_program, [{day, Day}, {genre, Genre}]}, _OffetLimit, Context) ->
                 cats=[{"r", event}]
             }
     end;
+
+search({nif_artist_upcoming, [{id, Id}]}, _OffetLimit, Context) ->
+    %% It should be upcoming from today, which is today in NY.
+    {Date,{H,_,_}} = calendar:universal_time(),
+    Date1 = case H of 
+        Hr when Hr < 6 ->
+            %% Take 6 hours time diff to be sure
+            calendar:gregorian_days_to_date(calendar:date_to_gregorian_days(Date) - 1);
+        _ -> 
+            Date
+    end,
+            
+    PredPerfomerId = m_predicate:name_to_id_check(performer, Context),
+    #search_sql{
+        select="r.id",
+        from="rsc r, edge e",
+        where="r.id = e.subject_id and e.predicate_id = $1 and e.object_id = $2
+            and r.pivot_date_end >= $3"
+            ,
+        order="r.pivot_date_start asc",
+        tables=[{rsc,"r"}],
+        args=[PredPerfomerId, Id, Date1],
+        cats=[{"r", event}]
+    };
+
+search({nif_artist_events, [{id, Id}]}, _OffetLimit, Context) ->
+    PredPerfomerId = m_predicate:name_to_id_check(performer, Context),
+    #search_sql{
+        select="r.id",
+        from="rsc r, edge e",
+        where="r.id = e.subject_id and e.predicate_id = $1 and e.object_id = $2",
+        order="r.pivot_date_start asc",
+        tables=[{rsc,"r"}],
+        args=[PredPerfomerId, Id],
+        cats=[{"r", event}]
+    };
+
 search(_, _, _) ->
     undefined.
 

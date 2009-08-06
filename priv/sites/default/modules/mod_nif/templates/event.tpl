@@ -86,7 +86,7 @@
 				<h4 class="sidebar-title">Artist:</h4>
 
 				{% for performer_id in m.rsc[id].o.performer %}
-					<h1>{{ m.rsc[performer_id].title }}</h1>
+					<h1><a href="{{ m.rsc[performer_id].page_url }}">{{ m.rsc[performer_id].title }}</a></h1>
 					<p class="clearfix">
 						{% with m.rsc[performer_id].depiction as depiction %}
 							{% if depiction %}
@@ -100,13 +100,11 @@
 					</p>
 					
 					<ul class="program-list">
-						{% for subject_id in m.rsc[performer_id].s.performer %}
+						{% for subject_id in m.search[{nif_artist_events id=performer_id}] %}
 							{% ifnotequal subject_id id %}
 								<li class="clearfix performance-info-wrapper">
-									<span class="zp-40">
-										<a href="{{ m.rsc[subject_id].page_url }}" title="{{ m.rsc[subject_id].title }}">{{ m.rsc[subject_id].title }}</a>
-									</span>
-									<span class="zp-60">{{ m.rsc[subject_id].date_start|date:"f A" }} &mdash; {{ m.rsc[subject_id].date_end|date:"f A" }}</span>
+									<a href="{{ m.rsc[subject_id].page_url }}" title="{{ m.rsc[subject_id].title }}">{{ m.rsc[subject_id].title }}</a><br/>
+									{{ [m.rsc[subject_id].date_start, m.rsc[subject_id].date_end]|date_range:["M d, f A", " &mdash; ", "f A"] }}
 								</li>
 							{% endifnotequal %}
 						{% endfor %}

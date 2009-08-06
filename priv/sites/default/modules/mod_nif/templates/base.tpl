@@ -21,8 +21,8 @@
 		"/css/zp-project.css"
 	%}
 	
-	<link rel="icon" href="favicon.ico" type="image/x-icon" />
-	<link rel="shortcut icon" href="favicon.ico" type="image/x-icon" />
+	<link rel="icon" href="/favicon.ico" type="image/x-icon" />
+	<link rel="shortcut icon" href="/favicon.ico" type="image/x-icon" />
 	{% include "_atom_feed_link.tpl" cat="news" %}
 	
 	<!-- make crappy ie8 emulate ie7 so the menu works -->

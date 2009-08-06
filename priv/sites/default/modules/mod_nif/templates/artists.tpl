@@ -19,17 +19,17 @@
 			<div class="padding">
 				{% include "_view.tpl" %}
 							
-				{% with m.search[{latest cat="artist" pagelen=200}] as result %}
+				{% with m.search[{all_bytitle cat="artist" pagelen=200}] as result %}
 
 					<ul class="artists-list clearfix">
 
-						{% for id in result %}
+						{% for title, id in result %}
 	
 							<li class="clearfix">
-								<h2><a href="{{ m.rsc[id].page_url }}" title="{{ m.rsc[id].title }}">{{ m.rsc[id].title }}</a></h2>
+								<h2><a href="{{ m.rsc[id].page_url }}" title="{{ title }}">{{ title }}</a></h2>
 								{% if m.rsc[id].media[1] %}
 								<div class="item-image left">
-									<a href="{{ m.rsc[id].page_url }}" title="{{ m.rsc[id].title }}">
+									<a href="{{ m.rsc[id].page_url }}" title="{{ title }}">
 										{% image m.rsc[id].media[1] width=180 height=90 crop %}
 									</a>
 								</div>
