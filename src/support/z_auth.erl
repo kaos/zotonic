@@ -19,6 +19,7 @@
     
     wm_is_authorized/2,
     wm_is_authorized/5,
+    wm_output_logon/1,
     
     event/2
 ]).
@@ -128,6 +129,13 @@ wm_is_authorized(NeedAuth, What, ArgName, ReqData, Context) ->
                     end
             end
     end.
+
+
+%% @doc Render the logon screen and return the www_authenticate response for webmachine.
+%% @spec wm_output_logon(Context) -> {bool(), ReqData, NewContext}
+wm_output_logon(Context) ->
+    ContextLogon = output_logon(Context), 
+    ?WM_REPLY(?WWW_AUTHENTICATE, ContextLogon).
 
 
 %% @doc Render the logon screen to the reqdata of the context.
