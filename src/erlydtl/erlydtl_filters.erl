@@ -216,6 +216,8 @@ fix_ampersands(Input) when is_list(Input) ->
 
 force_escape(undefined) -> 
     <<>>;
+force_escape(Input) when is_atom(Input) ->
+    escape(atom_to_list(Input), []);
 force_escape(Input) when is_list(Input) ->
     escape(Input, []);
 force_escape(Input) when is_binary(Input) ->
