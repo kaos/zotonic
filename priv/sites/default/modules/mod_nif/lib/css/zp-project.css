@@ -68,9 +68,14 @@ body {
 	margin: 18px 0;
 }
 
+	.footer-text a {
+		color: #fff;
+		text-decoration: underline;
+	}
+
 	.footer-text span,
 	.footer-text span a {
-		color: #57b8e6;
+		color: #57B8E6;
 	}
 
 p.newletter-link {
