@@ -149,7 +149,7 @@ site(ReqData) ->
 %% @doc Return the current hostname from the config or reqdata
 %% @spec hostname(Context) -> string()
 hostname(Context = #context{wm_reqdata=ReqData}) ->
-    case m_config:get(system, hostname, Context) of
+    case m_config:get_value(site, hostname, Context) of
         undefined ->
             case wrq:get_req_header("host", ReqData) of
                 undefined ->
