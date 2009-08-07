@@ -57,6 +57,7 @@ install_modules(C) ->
         "mod_admin",
         "mod_admin_address",
         "mod_admin_category",
+        "mod_admin_config",
         "mod_admin_event",
         "mod_admin_group",
         "mod_admin_identity",
