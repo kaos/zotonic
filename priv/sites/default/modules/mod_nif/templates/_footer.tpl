@@ -12,7 +12,10 @@
 
 {% if m.rsc.footer_collection.summary %}
 <p class="footer-text">
-	{{ m.rsc.footer_collection.summary }} <a href="http://www.mannschaft.org" title="Website by Mannschaft">Mannschaft</a> &mdash; <a href="http://www.zotonic.com" title="Powered by Zotonic">Zotonic
-	<span><a href="http://www.timbenniks.nl">Tim Benniks</a>, <a href="http://www.whatwebwhat.com">Marc Worrell</a></span>
+	{{ m.rsc.footer_collection.summary }} <a href="http://www.mannschaft.org" title="Website by Mannschaft">Mannschaft</a> &mdash; <a href="http://www.zotonic.com" title="Powered by Zotonic">Zotonic</a>
+	<span>
+		<a href="http://www.timbenniks.nl">Tim Benniks</a>
+		<a href="http://www.whatwebwhat.com">Marc Worrell</a>
+	</span>
 </p>
 {% endif %}
