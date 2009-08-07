@@ -68,6 +68,11 @@ body {
 	margin: 18px 0;
 }
 
+	.footer-text span,
+	.footer-text span a {
+		color: #57b8e6;
+	}
+
 p.newletter-link {
 	position: absolute;
 	bottom: -52px;
