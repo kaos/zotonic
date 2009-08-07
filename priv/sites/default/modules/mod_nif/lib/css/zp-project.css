@@ -61,20 +61,20 @@ body {
 	margin: 180px 0 0 0;
 }
 
-.footer-text {
+#footer .footer-text {
 	clear: both;
 	color: #eee;
 	font-size: 11px;
 	margin: 18px 0;
 }
 
-	p.footer-text a {
+	#footer p.footer-text a {
 		color: #fff !important;
 		text-decoration: underline !important;
 	}
 
-	.footer-text span,
-	.footer-text span a {
+	#footer .footer-text span,
+	#footer .footer-text span a {
 		color: #57B8E6 !important;
 	}
 
