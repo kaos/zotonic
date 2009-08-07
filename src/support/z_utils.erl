@@ -286,12 +286,20 @@ only_letters([C|T]) when (C >= $a andalso C =< $z) orelse (C >= $A andalso C =< 
 only_letters(_) ->
     false.
 
-only_digits([]) -> 
-    true;
-only_digits([C|R]) when C >= $0 andalso C =< $9 ->
-    only_digits(R);
-only_digits(_) ->
-    false.
+only_digits([]) ->
+    false;
+only_digits(L) when is_list(L) ->
+    only_digits1(L);
+only_digits(B) when is_binary(B) ->
+    only_digits(binary_to_list(B)).
+
+    only_digits1([]) -> 
+        true;
+    only_digits1([C|R]) when C >= $0 andalso C =< $9 ->
+        only_digits1(R);
+    only_digits1(_) ->
+        false.
+
 
 combine_defined(Sep, List) ->
     List2 = lists:filter(fun(X) -> X /= undefined end, List),
