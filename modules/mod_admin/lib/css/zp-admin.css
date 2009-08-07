@@ -50,7 +50,7 @@ hr {
 .short-list,
 .item  {
 	margin: 0 0 18px 0;
-	padding: 0 6px;
+	padding: 0;
 	background: #f1f1f1;
 	border: solid #ddd;
 	border-width: 0 1px 1px 1px;
@@ -85,6 +85,7 @@ hr {
 .short-list li {
 	display: block;
 	margin: 0;
+	padding: 0 6px;
 	line-height: 27px;
 	border-bottom: 1px solid #e0e0e0;
 }
