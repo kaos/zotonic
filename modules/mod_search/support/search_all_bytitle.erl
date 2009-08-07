@@ -23,9 +23,16 @@ search(Cat, Context) ->
         {ok, CatId} ->
             {Left,Right} = m_category:get_range(CatId, Context),
             Ids = z_db:q("select id from rsc where pivot_category_nr >= $1 and pivot_category_nr <= $2", [Left,Right], Context),
-            IdTitles = [ {?TR(m_rsc:p(Id, title, Context), Context), Id} || {Id} <- Ids, m_rsc:is_visible(Id, Context) ],
+            IdTitles = [ add_title(Id, Context) || {Id} <- Ids, m_rsc:is_visible(Id, Context) ],
             Sorted = lists:sort(IdTitles),
-            #search_result{result=Sorted, all=Sorted, total=length(Sorted)};
+            Result = [ {Title, Id} || {_Name, Title, Id} <- Sorted ],
+            #search_result{result=Result, all=Sorted, total=length(Sorted)};
         {error, _Reason} ->
             #search_result{}
     end.
+
+
+    add_title(Id, Context) ->
+        Title = ?TR(m_rsc:p(Id, title, Context), Context),
+        {z_string:to_name(Title), Title, Id}.
+    
