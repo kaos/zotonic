@@ -69,13 +69,14 @@ body {
 }
 
 	#footer p.footer-text a {
-		color: #fff !important;
-		text-decoration: underline !important;
+		color: #fff;
+		text-decoration: underline;
 	}
 
 	#footer .footer-text span,
 	#footer .footer-text span a {
 		color: #57B8E6 !important;
+		text-decoration: none !important;
 	}
 
 p.newletter-link {
