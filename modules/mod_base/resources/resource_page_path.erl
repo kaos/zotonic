@@ -38,9 +38,10 @@ content_types_provided(ReqData, Context) ->
    {[{"text/html", to_html}], ReqData, Context}.
  
 to_html(ReqData, Context) ->
-    Id       = z_context:get(id, Context),
-    Location = m_rsc:p(Id, default_page_url, Context),
-    Url = "http://" ++ wrq:get_req_header("host", ReqData) ++ Location,
+    Context1 = z_context:set_reqdata(ReqData, Context),
+    Id       = z_context:get(id, Context1),
+    Location = m_rsc:p(Id, default_page_url, Context1),
+    Url      = z_context:abs_url(Location, Context1),
     ReqData1 = wrq:set_resp_header("Location", Url, ReqData),
     ReqData2 = wrq:set_response_code(302, ReqData1),
     {{halt, 302}, ReqData2, Context}.

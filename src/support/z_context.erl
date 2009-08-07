@@ -103,12 +103,13 @@ new_for_host(Host) ->
 
 
 
-%% @doc Return the host name, directly maps to a sitename in the site folder.
+%% @doc Return the site name, directly maps to a sitename in the site folder.  This will be
+%% set in the context as the 'host'.  The hostname can be found in the config key: site.hostname
 %% @spec host() -> atom()
 site() ->
     case os:getenv("ZOTONIC_SITE") of 
         false -> default;
-        Host -> list_to_atom(Host)
+        Site -> list_to_atom(Site)
     end.   
 
 
