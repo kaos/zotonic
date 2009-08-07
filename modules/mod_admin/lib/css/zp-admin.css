@@ -99,9 +99,13 @@ hr {
 	
 	.short-list li a {
 		text-decoration: none;
-		color: #666;
+		color: #555;
 	}
-	
+
+    .short-list li.unpublished a {
+        color: #888;
+    }
+
 		.short-list li a:hover {
 			background: #eee;
 			color: #000;

@@ -29,7 +29,7 @@
 					<span class="zp-10">Options</span>
 				</li>
 			{% for id, pred_id in result %}
-				<li id="{{ #li.id }}">
+				<li id="{{ #li.id }}" {% if not m.rsc[id].is_published %}class="unpublished" {% endif %}>
 					<a href="{% url admin_edit_rsc id=id %}" class="clearfix">
 						<span class="zp-30">{{ m.rsc[id].title|striptags|default:"<em>untitled</em>" }}</span>
 						<span class="zp-15">{{ m.predicate[pred_id].title }}</span>

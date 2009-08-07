@@ -33,7 +33,7 @@
 							</li>
 							
 							{% for id in m.search[{latest cat="text"}] %}
-							<li>
+							<li {% if not m.rsc[id].is_published %}class="unpublished" {% endif %}>
 								<a href="{% url admin_edit_rsc id=id %}" class="clearfix">
 									<span class="zp-35">{{ m.rsc[id].title|striptags|default:"<em>untitled</em>" }}</span>
 									<span class="zp-25">{{ m.rsc[id].category.name }}</span>
@@ -68,7 +68,7 @@
 							</li>
 							
 							{% for id in m.search[{latest cat="person"}] %}
-							<li>
+							<li {% if not m.rsc[id].is_published %}class="unpublished" {% endif %}>
 								<a href="{% url admin_edit_rsc id=id %}" class="clearfix">
 									<span class="zp-35">{{ m.rsc[id].title|striptags|default:"<em>untitled</em>" }}</span>
 									<span class="zp-25">{{ m.rsc[id].category.name }}</span>
@@ -107,7 +107,7 @@
 							</li>
 							
 							{% for id in m.search[{latest cat="location"}] %}
-							<li>
+							<li {% if not m.rsc[id].is_published %}class="unpublished" {% endif %}>
 								<a href="{% url admin_edit_rsc id=id %}" class="clearfix">
 									<span class="zp-35">{{ m.rsc[id].title|striptags|default:"<em>untitled</em>" }}</span>
 									<span class="zp-25">{{ m.rsc[id].category.name }}</span>
@@ -142,7 +142,7 @@
 							</li>
 							
 							{% for id in m.search[{latest cat="event"}] %}
-							<li>
+							<li {% if not m.rsc[id].is_published %}class="unpublished" {% endif %}>
 								<a href="{% url admin_edit_rsc id=id %}" class="clearfix">
 									<span class="zp-35">{{ m.rsc[id].title|striptags|default:"<em>untitled</em>" }}</span>
 									<span class="zp-25">{{ m.rsc[id].date_start|date:"d M Y, H:i"|default:"-" }}</span>
@@ -178,7 +178,7 @@
 							</li>
 							
 							{% for id in m.search[{latest cat="media"}] %}
-							<li>
+							<li {% if not m.rsc[id].is_published %}class="unpublished" {% endif %}>
 								<a href="{% url admin_edit_rsc id=id %}" class="clearfix">
 									<span class="zp-10">{% image id width=40 height=18 crop %}&nbsp;</span>
 									

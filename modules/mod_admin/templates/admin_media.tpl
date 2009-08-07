@@ -36,7 +36,7 @@
 				{% for id, rank in result %}
 					{% with m.rsc[id] as r %}
 						{% with r.medium as medium %}
-						<li id="{{ #li.id }}">
+						<li id="{{ #li.id }}" {% if not m.rsc[id].is_published %}class="unpublished" {% endif %}>
 							<a href="{% url admin_edit_rsc id=id %}" class="clearfix">
 								<span class="zp-10">{% image medium width=80 height=60 crop %}&nbsp;</span>
 								<span class="zp-20">{{ r.title|striptags|default:"<em>untitled</em>" }}</span>

@@ -14,12 +14,6 @@
 
 		{% button text="Rescan modules" action={module_rescan} %}
 		
-		<style>
-			li.enabled a span {
-				color: black;
-			}
-		</style>
-		
 		<div class="clear">&nbsp;</div>
 
 		<h3 class="above-list ">Modules overview</h3>
@@ -32,7 +26,7 @@
 				<span class="zp-10">Activate</span>
 			</li>
 		{% for prio, module, props in modules %}
-			<li id="{{ #li.module }}" {% if props.active %}class="enabled" {% endif %}>
+			<li id="{{ #li.module }}" {% if not props.active %}class="unpublished" {% endif %}>
 				<a href="#" class="clearfix">
 					<span class="zp-20">{{ props.mod_title|default:props.title }}</span>
 					<span class="zp-45">{{ props.mod_description|default:"-" }}</span>

@@ -44,7 +44,7 @@
 					<span class="zp-10">Options</span>
 				</li>
 			{% for id, rank in result %}
-				<li id="{{ #li.id }}">
+				<li id="{{ #li.id }}" {% if not m.rsc[id].is_published %}class="unpublished" {% endif %}>
 					<a href="{% url admin_edit_rsc id=id %}" class="clearfix">
 						{% if is_event %}
 							<span class="zp-20">{{ m.rsc[id].title|striptags|default:"<em>untitled</em>" }}</span>
