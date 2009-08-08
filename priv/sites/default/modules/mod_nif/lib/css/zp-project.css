@@ -44,7 +44,7 @@ body {
 #sponsor-logos li {
 	display: block;
 	float: left;
-	margin: 0 6px 0 0;
+	margin: 0 6px 6px 0;
 }
 
 .links-list li {
@@ -462,7 +462,7 @@ h1#home-header {
 	height: 290px !important;
 	width: 582px !important;
 }
-
+w
 	#media-viewer img {
 		display: none;
 	}
