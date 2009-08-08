@@ -48,8 +48,7 @@
 
 {% with m.search[{nif_program day=day genre=genre pagelen=1000}] as result %}
 	<div class="list-headers">
-		<span class="zp-15">&nbsp;</span>
-		<span class="zp-40">performance &amp; other events</span>
+		<span class="zp-55">performance &amp; other events</span>
 		<span class="zp-25">Time</span>
 		<span class="zp-20">Artist</span>
 	</div>
@@ -57,7 +56,7 @@
 		{% for id, date_start in result %}
 
 			<li class="clearfix performance-info-wrapper {% cycle 'even' 'uneven' %}">
-				<span class="image zp-15">{% image m.rsc[id].media[1] width=80 height=18 crop %}</span>
+				<span class="image zp-15">{% image m.rsc[id].media[1] width=80 height=30 crop %}</span>
 				
 				<span class="artist zp-40"><a href="{{ m.rsc[id].page_url }}" title="{{ m.rsc[id].title }}">{{ m.rsc[id].title }}</a></span>
 			

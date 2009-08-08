@@ -487,6 +487,7 @@ ul.program-list {
 ul.program-list li {
 	padding: 6px 0;
 	border-bottom: 1px dotted dimgray;
+	font-size: 12px;
 }
 	
 	ul.program-list li.uneven {
