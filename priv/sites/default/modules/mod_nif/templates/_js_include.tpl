@@ -11,6 +11,7 @@
 	$(function()
 	{
 	    $.widgetManager();
+		$('#media-viewer').show();
 		$('h1#header').click(function()
 		{
 			window.location = '/';

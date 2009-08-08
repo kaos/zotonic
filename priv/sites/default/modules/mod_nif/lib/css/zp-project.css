@@ -458,7 +458,7 @@ h1#home-header {
 	
 #media-viewer {
 	margin: 0 0 18px 307px;
-	display: block;
+	display: none;
 	height: 290px !important;
 	width: 582px !important;
 }
