@@ -6,8 +6,8 @@
 	{% with m.rsc.home as r %}
 		<h1>{{ r.title }}</h1>
 		
-		<p class="intro">
-			{{ r.intro }}
+		<p class="summary">
+			{{ r.summary }}
 		</p>
 		
 		{{ r.body }}
@@ -18,6 +18,6 @@
 {% block sidebar %}
 	{% for id in m.search[{latest}] %}
 		<h1><a href="{{ m.rsc[id].page_url }}">{{ m.rsc[id].title }}</a></h1>
-		<p>{{ m.rsc[id].intro }} <a href="{{ m.rsc[id].page_url }}">Read more...</a></p>
+		<p>{{ m.rsc[id].summary }} <a href="{{ m.rsc[id].page_url }}">Read more...</a></p>
 	{% endfor %}
 {% endblock %}
