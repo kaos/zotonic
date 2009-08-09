@@ -17,7 +17,7 @@
 
 {% block sidebar %}
 	{% for id in m.search[{latest}] %}
-		<h1>{{ m.rsc.id.title }}</h1>
-		<p>{{ m.rsc.id.intro }}</p>
+		<h1><a href="{{ m.rsc[id].page_url }}">{{ m.rsc[id].title }}</a></h1>
+		<p>{{ m.rsc[id].intro }} <a href="{{ m.rsc[id].page_url }}">Read more...</a></p>
 	{% endfor %}
 {% endblock %}
