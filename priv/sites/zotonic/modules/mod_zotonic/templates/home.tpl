@@ -16,8 +16,8 @@
 
 
 {% block sidebar %}
-	{% foreach id in m.search[{latest}] %}
+	{% for id in m.search[{latest}] %}
 		<h1>{% m.rsc.id.title %}</h1>
 		<p>{% m.rsc.id.intro %}</p>
-	{% endforeach %}
+	{% endfor %}
 {% endblock %}
