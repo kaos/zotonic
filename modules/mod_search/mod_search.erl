@@ -141,6 +141,14 @@ search({featured, [{cat,Cat},{object,ObjectId},{predicate,Predicate}]}, _OffsetL
         tables=[{rsc,"r"}]
     };
 
+
+search({latest, []}, _OffsetLimit, _Context) ->
+    #search_sql{
+        select="r.id",
+        from="rsc r",
+        order="r.modified desc, r.id desc",
+        tables=[{rsc,"r"}]
+    };
 search({latest, [{cat, Cat}]}, _OffsetLimit, _Context) ->
     #search_sql{
         select="r.id",
@@ -149,6 +157,7 @@ search({latest, [{cat, Cat}]}, _OffsetLimit, _Context) ->
         cats=[{"r", Cat}],
         tables=[{rsc,"r"}]
     };
+
 
 search({upcoming, [{cat, Cat}]}, _OffsetLimit, _Context) ->
     #search_sql{
