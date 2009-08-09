@@ -13,14 +13,14 @@
 	</style>
 	
 	<div class="program-day-wrapper clearfix day{{ day }}">
-			{% button type="submit" id="d10" text="thursday 10" %}
-			{% button type="submit" id="d11" text="friday 11" %}
-			{% button type="submit" id="d12" text="saturday 12" %}
-			{% button type="submit" id="d13" text="sunday 13" %}
-			{% button type="submit" id="d17" text="thursday 17" %}
-			{% button type="submit" id="d18" text="friday 18" %}
-			{% button type="submit" id="d19" text="saturday 19" %}
-			{% button type="submit" id="d20" text="sunday 20" %}
+			{% button type="submit" id="d10" text="thu 10th" %}
+			{% button type="submit" id="d11" text="fri 11th" %}
+			{% button type="submit" id="d12" text="sat 12th" %}
+			{% button type="submit" id="d13" text="sun 13th" %}
+			{% button type="submit" id="d17" text="thu 17th" %}
+			{% button type="submit" id="d18" text="fri 18th" %}
+			{% button type="submit" id="d19" text="sat 19th" %}
+			{% button type="submit" id="d20" text="sun 20th" %}
 		</p>
 	</div>
 
@@ -48,7 +48,7 @@
 
 {% with m.search[{nif_program day=day genre=genre pagelen=1000}] as result %}
 	<div class="list-headers">
-		<span class="zp-55">performance &amp; other events</span>
+		<span class="zp-55">Performance &amp; other events</span>
 		<span class="zp-25">Time</span>
 		<span class="zp-20">Artist</span>
 	</div>
