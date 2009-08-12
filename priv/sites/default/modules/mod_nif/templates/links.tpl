@@ -18,19 +18,17 @@
 			<div class="padding">
 				{% include "_view.tpl" %}
 				
-				<ul class="links-list clearfix">
-					{% for id in m.rsc[id].o.collection_member %}
-					<li class="clearfix left">
-						{% if m.rsc[id].media %}
-							<a href="{{ m.rsc[id].website }}" title="{{ m.rsc[id].title }}" target="_blank">{% image m.rsc[id].media[1] width=190 height=267 %}</a>
-						{% endif %}
-					</li>
-					{% empty %}
-					<li>
-						No links to show.
-					</li>
-					{% endfor %}
-				</ul>
+				{% for ids in m.rsc[id].o.collection_member|split_in:3 %}
+					<ul class="links-list clearfix">
+						{% for id in ids %}
+							<li class="clearfix">
+								{% if m.rsc[id].media %}
+									<a href="{{ m.rsc[id].website }}" title="{{ m.rsc[id].title }}" target="_blank">{% image m.rsc[id].media[1] width=190 height=267 %}</a>
+								{% endif %}
+							</li>
+						{% endfor %}
+					</ul>
+				{% endfor %}
 			</div>
 		</div>
 
