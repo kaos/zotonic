@@ -9,7 +9,7 @@
 	{sponsors,	["sponsors"],				resource_page,		[ {template, "links.tpl"}, {id, page_sponsors} ]},
 	{press,		["press"],					resource_page,		[ {template, "press.tpl"}, {id, page_press} ]},
 	{search,	["search"],					resource_page,		[ {template, "search.tpl"}, {id, page_search} ]},
-	{news,		["news"],					resource_page,		[ {template, "news.tpl"}, {id, page_news} ]},
+	{news_overview, ["news"],		    	resource_page,		[ {template, "news.tpl"}, {id, page_news} ]},
 
 	{page,    	["page", id],       		resource_page,		[ {template, "page.tpl"} ]},
 	{page,    	["page", id, slug], 		resource_page,		[ {template, "page.tpl"} ]},
