@@ -20,9 +20,9 @@
 				
 				<ul class="links-list clearfix">
 					{% for id in m.rsc[id].o.collection_member %}
-					<li class="clearfix">
+					<li class="clearfix left">
 						{% if m.rsc[id].media %}
-							<a href="{{ m.rsc[id].website }}" title="{{ m.rsc[id].title }}" target="_blank">{% image m.rsc[id].media[1] width=250 height=267 %}</a>
+							<a href="{{ m.rsc[id].website }}" title="{{ m.rsc[id].title }}" target="_blank">{% image m.rsc[id].media[1] width=190 height=267 %}</a>
 						{% endif %}
 					</li>
 					{% empty %}

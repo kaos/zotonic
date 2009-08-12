@@ -1,4 +1,4 @@
-<a href="{{ m.rsc.ny400.page_url }}" title="{{ m.rsc.ny400.title }}">{% image m.rsc.ny400_logo.media[1] %}</a>
+<a href="http://www.ny400.org/" title="{{ m.rsc.ny400.title }}">{% image m.rsc.ny400_logo.media[1] %}</a>
 
 {% cache 3600 news cat="news" %}
 
