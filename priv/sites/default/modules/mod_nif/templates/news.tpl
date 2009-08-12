@@ -28,7 +28,7 @@
 						{% endif %}
 						
 						<p class="intro">
-							<em>{{ m.rsc[id].modified|date:"F d, H:i" }}</em> &mdash; {{ m.rsc[id].summary }}
+							<em>{{ m.rsc[id].modified|date:"N d" }}</em> &mdash; {{ m.rsc[id].summary }}
 						</p>
 						
 						{{ m.rsc[id].body }}

@@ -34,7 +34,7 @@
 									{% endifnotequal %}
 
 									<span class="day">on {{ date_start|date:"l" }}</span>
-									<span class="date">{{ date_start|date:"d M" }}.</span>
+									<span class="date">{{ date_start|date:"N d" }}.</span>
 								</span>
 							{% endwith %}
 						{% endwith %}
@@ -104,7 +104,7 @@
 							{% ifnotequal subject_id id %}
 								<li class="clearfix performance-info-wrapper">
 									<a href="{{ m.rsc[subject_id].page_url }}" title="{{ m.rsc[subject_id].title }}">{{ m.rsc[subject_id].title }}</a><br/>
-									{{ [m.rsc[subject_id].date_start, m.rsc[subject_id].date_end]|date_range:["M d, f A", " &mdash; ", "f A"] }}
+									{{ [m.rsc[subject_id].date_start, m.rsc[subject_id].date_end]|date_range:["N d, f A", " &mdash; ", "f A"] }}
 								</li>
 							{% endifnotequal %}
 						{% endfor %}

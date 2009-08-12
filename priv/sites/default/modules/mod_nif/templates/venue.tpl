@@ -46,7 +46,7 @@
 							</div>
 						{% endif %}
 						<p class="intro">
-							<am>{{ m.rsc[id].date_start|date:"M d, f A" }} &mdash; {{ m.rsc[id].date_end|date:"M d, f A" }}</em>
+							<em>{{ [m.rsc[subject_id].date_start, m.rsc[subject_id].date_end]|date_range:["N d, f A", " &mdash; ", "f A"] }}</em>
 							{{ m.rsc[id].summary|ljust:80 }}&hellip;
 							<a href="{{ m.rsc[id].page_url }}" title="{{ m.rsc[id].title }}">Read&nbsp;more</a>
 						</p>

@@ -58,6 +58,7 @@
 
 </form>
 
+{% cache 3600 program cat="event" cat="artist" cat="venue" varies={day day=day} varies=genre %}
 {% with m.search[{nif_program day=day genre=genre pagelen=1000}] as result %}
 	<div class="list-headers">
 		<span class="zp-55">Performance or Event</span>
@@ -102,5 +103,6 @@
 
 	</ul>
 {% endwith %}
+{% endcache %}
 
 
