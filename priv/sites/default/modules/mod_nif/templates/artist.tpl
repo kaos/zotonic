@@ -25,37 +25,39 @@
 				<h4 class="sidebar-title">Performances:</h4>
 	
 				<ul class="items-list">
-					{% for id in m.search[{nif_artist_events id=id}] %}
-					<li class="clearfix">
-						<h2>
-							<a href="{{ m.rsc[id].page_url }}" title="{{ m.rsc[id].title }}">
-								{{ m.rsc[id].title }}
-							</a>
-						</h2>
-						<h4>
-							<a href="{{ m.rsc[id].o.atvenue.page_url }}" title="{{ m.rsc[id].o.atvenue.title }}">
-								{{ m.rsc[id].o.atvenue.title }}
-							</a>
-						</h4>
-						{% if m.rsc[id].media %}
-							<div class="item-image left">
-								<a href="{{ m.rsc[id].page_url }}" title="{{ m.rsc[id].title }}">
-									{% image m.rsc[id].media[1] width=65 height=65 crop %}
+					{% for ids in m.search[{nif_artist_events id=id}]|group_by:"title" %}
+						<li class="clearfix">
+							<h2>
+								<a href="{{ m.rsc[ids[1]].page_url }}" title="{{ m.rsc[ids[1]].title }}">
+									{{ m.rsc[ids[1]].title }}
 								</a>
-							</div>
-						{% else %}
-							<div class="item-image left">
-								<a href="{{ m.rsc[id].page_url }}" title="{{ m.rsc[id].title }}">
-									{% image m.rsc[id].o.performer.media[1] width=65 height=65 crop %}
+							</h2>
+							<h4>
+								<a href="{{ m.rsc[ids[1]].o.atvenue.page_url }}" title="{{ m.rsc[ids[1]].o.atvenue.title }}">
+									{{ m.rsc[ids[1]].o.atvenue.title }}
 								</a>
-							</div>
-						{% endif %}
-						<p class="intro">
-							<em>{{ [m.rsc[id].date_start, m.rsc[id].date_end]|date_range:["M d, f A", " &mdash; ", "f A"] }}</em>
-							{{ m.rsc[id].summary|ljust:80 }}&hellip;
-							<a href="{{ m.rsc[id].page_url }}" title="{{ m.rsc[id].title }}">Read&nbsp;more</a>
-						</p>
-					</li>
+							</h4>
+							{% if m.rsc[ids[1]].media %}
+								<div class="item-image left">
+									<a href="{{ m.rsc[ids[1]].page_url }}" title="{{ m.rsc[ids[1]].title }}">
+										{% image m.rsc[ids[1]].media[1] width=65 height=65 crop %}
+									</a>
+								</div>
+							{% else %}
+								<div class="item-image left">
+									<a href="{{ m.rsc[ids[1]].page_url }}" title="{{ m.rsc[ids[1]].title }}">
+										{% image m.rsc[ids[1]].o.performer.media[1] width=65 height=65 crop %}
+									</a>
+								</div>
+							{% endif %}
+							<p class="intro">
+								{% for id in ids %}
+									<em><a href="{{ m.rsc[id].page_url }}">{{ [m.rsc[id].date_start, m.rsc[id].date_end]|date_range:["M d, f A", " &mdash; ", "f A"] }}</a></em> {% if not forloop.last %}<br/>{% endif %}
+								{% endfor %}
+								{{ m.rsc[ids[1]].summary|ljust:80 }}&hellip;
+								<a href="{{ m.rsc[ids[1]].page_url }}" title="{{ m.rsc[ids[1]].title }}">Read&nbsp;more</a>
+							</p>
+						</li>
 					{% empty %}
 					<li>
 						No performances to show.
