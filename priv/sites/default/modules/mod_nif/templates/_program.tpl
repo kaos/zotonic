@@ -13,20 +13,26 @@
 	</style>
 	
 	<div class="program-day-wrapper clearfix day{{ day }}">
-			{% button type="submit" id="d10" text="thu 10th" %}
-			{% button type="submit" id="d11" text="fri 11th" %}
-			{% button type="submit" id="d12" text="sat 12th" %}
-			{% button type="submit" id="d13" text="sun 13th" %}
-			{% button type="submit" id="d17" text="thu 17th" %}
-			{% button type="submit" id="d18" text="fri 18th" %}
-			{% button type="submit" id="d19" text="sat 19th" %}
-			{% button type="submit" id="d20" text="sun 20th" %}
+		<p>
+			{% button type="submit" id="d10" text="Thursday, Sept. 10" %}
+			{% button type="submit" id="d11" text="Friday, Sept. 11" %}
+			{% button type="submit" id="d12" text="Saturday, Sept. 12" %}
+			{% button type="submit" id="d13" text="Sunday, Sept. 13" %}
 		</p>
+		<p class="clear">
+			{% button type="submit" id="d17" text="Thursday, Sept. 17" %}
+			{% button type="submit" id="d18" text="Friday, Sept. 18" %}
+			{% button type="submit" id="d19" text="Saturday, Sept. 19" %}
+			{% button type="submit" id="d20" text="Sunday, Sept. 20" %}
+		</p>
+	</div>
+
+	<div class="program-day-wrapper clearfix day{{ day }}">
 	</div>
 
 	<div class="program-genres-wrapper clearfix">
 		<h5>
-		{% button text="show all genres" postback={show_all day=day} delegate="resource_program" %} or show only:
+		{% button text="Show All Genres" postback={show_all day=day} delegate="resource_program" %} or show only:
 		</h5>
 		
 		<div class="clear">
@@ -54,7 +60,7 @@
 
 {% with m.search[{nif_program day=day genre=genre pagelen=1000}] as result %}
 	<div class="list-headers">
-		<span class="zp-55">Performance &amp; other events</span>
+		<span class="zp-55">Performance or Event</span>
 		<span class="zp-25">Time</span>
 		<span class="zp-20">Artist</span>
 	</div>
@@ -83,7 +89,7 @@
 			</li>	
 		{% empty %}
 			<li>
-				<p>Sorry, that day there are no events with that genre.</p>
+				<p>Sorry, this day there are no events with the selected genres.</p>
 			</li>
 		{% endfor %}
 
