@@ -30,9 +30,6 @@
 						<p class="intro">
 							<em>{{ m.rsc[id].modified|date:"N d" }}</em> &mdash; {{ m.rsc[id].summary }}
 						</p>
-						
-						{{ m.rsc[id].body }}
-												
 					</li>
 					{% empty %}
 					<li>

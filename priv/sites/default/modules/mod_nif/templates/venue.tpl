@@ -40,7 +40,7 @@
 							</div>
 						{% else %}
 							<div class="item-image left">
-								<a href="{{ m.rsc[id].page_url }}" title="{{ m.rsc[id].title }}">							
+								<a href="{{ m.rsc[id].page_url }}" title="{{ m.rsc[id].title }}">
 									{% image m.rsc[id].o.performer.media[1] width=65 height=65 crop %}
 								</a>
 							</div>
