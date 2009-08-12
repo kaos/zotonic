@@ -360,10 +360,10 @@ body_ast(DjangoParseTree, Context, TreeWalker) ->
                 ifequalelse_ast(Args, IfAstInfo, ElseAstInfo, Context, TreeWalker2);                    
             ({'with', [Expr, Identifiers], WithContents}, TreeWalkerAcc) ->
                 with_ast(Expr, Identifiers, WithContents, Context, TreeWalkerAcc);
-            ({'for', {'in', IteratorList, Variable}, Contents}, TreeWalkerAcc) ->
-                for_loop_ast(IteratorList, Variable, Contents, none, Context, TreeWalkerAcc);
-            ({'for', {'in', IteratorList, Variable}, Contents, EmptyPartContents}, TreeWalkerAcc) ->
-                for_loop_ast(IteratorList, Variable, Contents, EmptyPartContents, Context, TreeWalkerAcc);
+            ({'for', {'in', IteratorList, Value}, Contents}, TreeWalkerAcc) ->
+                for_loop_ast(IteratorList, Value, Contents, none, Context, TreeWalkerAcc);
+            ({'for', {'in', IteratorList, Value}, Contents, EmptyPartContents}, TreeWalkerAcc) ->
+                for_loop_ast(IteratorList, Value, Contents, EmptyPartContents, Context, TreeWalkerAcc);
             ({'load', Names}, TreeWalkerAcc) ->
                 load_ast(Names, Context, TreeWalkerAcc);
             ({'tag', {'identifier', _, Name}, Args, All}, TreeWalkerAcc) ->
@@ -478,7 +478,7 @@ value_ast(ValueToken, AsString, Context, TreeWalker) ->
         {'index_value', _, _} = Variable ->
             {{Ast, VarName, VarInfo}, TreeWalker1} = resolve_indexvariable_ast(Variable, Context, TreeWalker),
             {{Ast, merge_info(VarInfo, #ast_info{var_names = [VarName]})}, TreeWalker1};
-        {model, {identifier, _, VarName}} = Model ->
+        {model, {identifier, _, _}} = Model ->
             {{Ast, VarName, VarInfo}, TreeWalker1} = resolve_variable_ast(Model, Context, TreeWalker),
             {{Ast, merge_info(VarInfo, #ast_info{var_names = [VarName]})}, TreeWalker1};
         {tuple_value, {identifier, _, TupleName}, TupleArgs} ->
@@ -587,7 +587,7 @@ filter_ast(Variable, Filter, Context, TreeWalker) ->
             {{erl_syntax:application(
                     erl_syntax:atom(erlydtl_filters), 
                     erl_syntax:atom(force_escape), 
-                    [UnescapedAst]), 
+                    [UnescapedAst, z_context_ast(Context)]), 
                 Info}, TreeWalker2};
         _ ->
             {{UnescapedAst, Info}, TreeWalker2}
@@ -600,12 +600,12 @@ filter_ast_noescape(Variable, Filter, Context, TreeWalker) ->
     {{FilterAst,Info2},TreeWalker3} = filter_ast1(Filter, VariableAst, Context, TreeWalker2),
     {{FilterAst, merge_info(Info, Info2)}, TreeWalker3}.
 
-filter_ast1([{identifier, _, Name}], VariableAst, _Context, TreeWalker) ->
-    FilterAst = erl_syntax:application(erl_syntax:atom(erlydtl_filters), erl_syntax:atom(Name), [VariableAst]),
+filter_ast1([{identifier, _, Name}], VariableAst, Context, TreeWalker) ->
+    FilterAst = erl_syntax:application(erl_syntax:atom(erlydtl_filters), erl_syntax:atom(Name), [VariableAst, z_context_ast(Context)]),
     {{FilterAst, #ast_info{}}, TreeWalker};
 filter_ast1([{identifier, _, Name}, Arg], VariableAst, Context, TreeWalker) ->
     {{ArgAst, Info},TreeWalker2} = value_ast(Arg, false, Context, TreeWalker),
-    FilterAst = erl_syntax:application(erl_syntax:atom(erlydtl_filters), erl_syntax:atom(Name), [VariableAst, ArgAst]),
+    FilterAst = erl_syntax:application(erl_syntax:atom(erlydtl_filters), erl_syntax:atom(Name), [VariableAst, ArgAst, z_context_ast(Context)]),
     {{FilterAst, Info}, TreeWalker2}.
     
  
@@ -672,22 +672,22 @@ resolve_ifexpression_ast({expr, Expr, {AndOr, ExprList}}, Context, TreeWalker) -
 
 
 resolve_variable_ast(VarTuple, Context, TreeWalker) ->
-    opttrans_variable_ast(resolve_variable_ast(VarTuple, Context, TreeWalker, 'fetch_value')).
+    opttrans_variable_ast(resolve_variable_ast(VarTuple, Context, TreeWalker, 'fetch_value'), Context).
 
 resolve_ifvariable_ast(VarTuple, Context, TreeWalker) ->
-    opttrans_variable_ast(resolve_variable_ast(VarTuple, Context, TreeWalker, 'find_value')).
+    opttrans_variable_ast(resolve_variable_ast(VarTuple, Context, TreeWalker, 'find_value'), Context).
 
 resolve_indexvariable_ast(VarTuple, Context, TreeWalker) ->
-    opttrans_variable_ast(resolve_variable_ast(VarTuple, Context, TreeWalker, 'fetch_value')).
+    opttrans_variable_ast(resolve_variable_ast(VarTuple, Context, TreeWalker, 'fetch_value'), Context).
 
 
-opttrans_variable_ast({{Ast, VarName, Info}, TreeWalker}) ->
+opttrans_variable_ast({{Ast, VarName, Info}, TreeWalker}, Context) ->
     Ast1 = erl_syntax:application(
             erl_syntax:atom(erlydtl_filters), 
             erl_syntax:atom(opttrans),
 			[
 				Ast,
-				erl_syntax:variable("Language")
+				z_context_ast(Context)
 			]),
 	{{Ast1, VarName, Info}, TreeWalker}.
 
@@ -761,17 +761,17 @@ z_context_ast(Context) ->
 
 
 format(Ast, Context) ->
-    auto_escape(stringify(Ast), Context).
+    auto_escape(stringify(Ast, Context), Context).
 
-stringify(Ast) ->
+stringify(Ast, Context) ->
     erl_syntax:application(erl_syntax:atom(erlydtl_filters), erl_syntax:atom(stringify),
-        [Ast]).
+        [Ast, z_context_ast(Context)]).
 
 auto_escape(Value, Context) ->
     case Context#dtl_context.auto_escape of
         on ->
             erl_syntax:application(erl_syntax:atom(erlydtl_filters), erl_syntax:atom(force_escape),
-                [Value]);
+                [Value, z_context_ast(Context)]);
         _ ->
             Value
     end.
@@ -860,7 +860,7 @@ with_ast(Value, Variables, Contents, Context, TreeWalker) ->
     {{WithAst, merge_info(ValueInfo,InnerInfo)}, TreeWalker2}.
     
     
-for_loop_ast(IteratorList, Variable, Contents, EmptyPartContents, Context, TreeWalker) ->
+for_loop_ast(IteratorList, LoopValue, Contents, EmptyPartContents, Context, TreeWalker) ->
     Vars = lists:map(fun({identifier, _, Iterator}) -> 
                     erl_syntax:variable("Var_" ++ Iterator) 
             end, IteratorList),
@@ -872,13 +872,16 @@ for_loop_ast(IteratorList, Variable, Contents, EmptyPartContents, Context, TreeW
                     end, IteratorList)] | Context#dtl_context.local_scopes]}, TreeWalker),
     CounterAst = erl_syntax:application(erl_syntax:atom(erlydtl_runtime), 
         erl_syntax:atom(increment_counter_stats), [erl_syntax:variable("Counters")]),
-    {{VarAst, VarName, VarInfo}, TreeWalker3} = resolve_variable_ast(Variable, Context, TreeWalker2),
-    ListAst = erl_syntax:application(erl_syntax:atom(erlydtl_runtime), erl_syntax:atom(to_list), [VarAst, z_context_ast(Context)]),
+
+    {{LoopValueAst, LoopValueInfo}, TreeWalker3} = value_ast(LoopValue, false, Context, TreeWalker2),
+
+    ListAst = erl_syntax:application(erl_syntax:atom(erlydtl_runtime), erl_syntax:atom(to_list), [LoopValueAst, z_context_ast(Context)]),
+
     CounterVars0 = case resolve_scoped_variable_ast("forloop", Context) of
         undefined ->
             erl_syntax:application(erl_syntax:atom(erlydtl_runtime), erl_syntax:atom(init_counter_stats), [ListAst]);
-        Value ->
-            erl_syntax:application(erl_syntax:atom(erlydtl_runtime), erl_syntax:atom(init_counter_stats), [ListAst, Value])
+        ForLoopValue ->
+            erl_syntax:application(erl_syntax:atom(erlydtl_runtime), erl_syntax:atom(init_counter_stats), [ListAst, ForLoopValue])
     end,
 
     ForLoopF = fun(BaseListAst) -> erl_syntax:application(
@@ -911,7 +914,7 @@ for_loop_ast(IteratorList, Variable, Contents, EmptyPartContents, Context, TreeW
                 [ForLoopF(LAst)]),
             {erl_syntax:case_expr(ListAst, [EmptyClauseAst, LoopClauseAst]), merge_info(Info,EmptyPartInfo), EmptyWalker} 
     end,
-    {{CompleteForLoopAst, merge_info(VarInfo, Info2#ast_info{var_names = [VarName]})}, TreeWalker4}.
+    {{CompleteForLoopAst, merge_info(LoopValueInfo, Info2)}, TreeWalker4}.
 
 load_ast(Names, _Context, TreeWalker) ->
     CustomTags = lists:merge([X || {identifier, _ , X} <- Names], TreeWalker#treewalker.custom_tags),

@@ -43,6 +43,7 @@
 	randomize/2,
 	split/2,
 	split_in/2,
+	group_by/3,
 	replace1/3,
 	guess_mime/1,
 	list_dir_recursive/1,
@@ -437,6 +438,37 @@ split_in(L, N) when is_list(L) ->
         split_in(L, [], lists:reverse(Acc1));
     split_in([H|T], Acc1, [HA|HT]) ->
         split_in(T, [[H|HA]|Acc1], HT).
+
+%% @doc Group by a property or m_rsc property, keeps the input list in the same order.
+group_by([], _, _Context) ->
+    [];
+group_by(L, Prop, Context) ->
+    LP = [ group_by_addprop(H, Prop, Context) || H <- L ],
+    Dict1 = group_by_dict(LP, dict:new()),
+    group_by_fetch_in_order(LP, [], Dict1, []).
+
+    group_by_fetch_in_order([], _, _, Acc) ->
+        lists:reverse(Acc);
+    group_by_fetch_in_order([{Key,_}|T], Ks, Dict, Acc) ->
+        case lists:member(Key, Ks) of
+            true -> group_by_fetch_in_order(T, Ks, Dict, Acc);
+            false -> group_by_fetch_in_order(T, [Key|Ks], Dict, [dict:fetch(Key, Dict)|Acc])
+        end.
+    
+    group_by_dict([], Dict) ->
+        Dict;
+    group_by_dict([{Key,V}|T], Dict) ->
+        case dict:is_key(Key, Dict) of
+            true -> group_by_dict(T, dict:append(Key, V, Dict));
+            false -> group_by_dict(T, dict:store(Key, [V], Dict))
+        end.
+    
+    group_by_addprop(Id, Prop, Context) when is_integer(Id) ->
+        {m_rsc:p(Id, Prop, Context), Id};
+    group_by_addprop(L, Prop, _Context) when is_list(L) ->
+        {proplists:get_value(Prop, L), L};
+    group_by_addprop(N, _Prop, _Context) ->
+        {undefined, N}.
 
 
 replace1(F, T, L) ->
