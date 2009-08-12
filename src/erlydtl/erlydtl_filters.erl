@@ -401,6 +401,10 @@ lower(Input) ->
     Input.
 
 
+make_list(In) ->
+    z_convert:to_list(In).
+
+
 member(_S, undefined) ->
     false;
 member(S, [H|_] = L) when is_list(S) andalso is_binary(H) ->
