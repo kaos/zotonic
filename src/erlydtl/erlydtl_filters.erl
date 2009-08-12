@@ -299,10 +299,10 @@ is_undefined(V, Context) ->
     not(is_defined(V, Context)).
 
 
-split_in(In, N, _Context) when is_list(In) orelse is_binary(In) ->
-    z_utils:split_in(In, N);
-split_in(In, _N, _Context) ->
-    In.
+split_in(undefined, _N, _Context) ->
+    undefined;
+split_in(In, N, Context) ->
+    z_utils:split_in(erlydtl_runtime:to_list(In, Context), N).
 
 
 striptags(undefined, _Context) ->
