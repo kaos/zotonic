@@ -25,17 +25,23 @@
 	</div>
 
 	<div class="program-genres-wrapper clearfix">
+		<h5>
+		{% button text="show all genres" postback={show_all day=day} delegate="resource_program" %} or show only:
+		</h5>
+		
+		<div class="clear">
 		{% for title, id in m.search[{all_bytitle cat="genre"}] %}
 			<div class="form-item left">
 				<label>
 					<input id="{{ #cat.id }}" type="checkbox" name="{{ id }}" value="1" 
-						{% if id|member:genre %}checked="checked"{% else %}{% if program_page and not genre %}checked="checked"{% endif %}{% endif %} />
+						{% if id|member:genre %}checked="checked"{% endif %} />
 					{{ title }}
 				</label>
 			</div>
 			{% wire id=#cat.id type="change" action={submit id=#form} %}
 		{% endfor %}
-		
+		</div>
+
 	</div>
 
 	{#<div>

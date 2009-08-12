@@ -60,18 +60,24 @@ event({submit, {search, Props}, _TriggerId, _TargetId}, Context) ->
     end,
     z_context:set_visitor(program_filter, {Day, GenreIds}, Context),
     {Html, Context1} = z_template:render_to_iolist("_program.tpl", [{day, Day}, {genre, GenreIds}], Context),
-    z_render:update("the-program", Html, Context1).
+    z_render:update("the-program", Html, Context1);
+
+% @doc Handle show_all button, resets all the genres.
+event({postback, {show_all, Props}, TriggerId, TargetId}, Context) ->
+    event({submit, {search, Props}, TriggerId, TargetId}, Context).
 
 
-    find_day([]) -> 
-        undefined; 
-    find_day([{[$d|Nr], _} | Rest]) ->
-        case z_utils:only_digits(Nr) of
-            true -> list_to_integer(Nr);
-            false -> find_day(Rest)
-        end;
-    find_day([_|Rest]) ->
-        find_day(Rest).
+
+find_day([]) -> 
+    undefined; 
+find_day([{[$d|Nr], _} | Rest]) ->
+    case z_utils:only_digits(Nr) of
+        true -> list_to_integer(Nr);
+        false -> find_day(Rest)
+    end;
+find_day([_|Rest]) ->
+    find_day(Rest).
+
 
 
 %% @doc Return the default day for showing the program.  The program runs only two weekends.
