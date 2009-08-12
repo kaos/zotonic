@@ -52,7 +52,7 @@
 						{% endif %}
 						
 						<p class="intro">
-							<em>{{ m.rsc[id].modified|date:"d M, f A" }}</em> &mdash; 
+							<em>{{ m.rsc[id].modified|date:"N d" }}</em> &mdash; 
 							{{ m.rsc[id].summary|ljust:80 }}&hellip;
 							<a href="{{ m.rsc[id].page_url }}" title="{{ m.rsc[id].title }}">Read&nbsp;more</a>
 						</p>
