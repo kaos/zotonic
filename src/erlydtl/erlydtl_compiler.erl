@@ -358,8 +358,8 @@ body_ast(DjangoParseTree, Context, TreeWalker) ->
                 {IfAstInfo, TreeWalker1} = body_ast(ElseContents, Context, TreeWalkerAcc),
                 {ElseAstInfo, TreeWalker2} = body_ast(IfContents, Context, TreeWalker1),
                 ifequalelse_ast(Args, IfAstInfo, ElseAstInfo, Context, TreeWalker2);                    
-            ({'with', [Expr, {'identifier', _, Identifier}], WithContents}, TreeWalkerAcc) ->
-                with_ast(Expr, Identifier, WithContents, Context, TreeWalkerAcc);
+            ({'with', [Expr, Identifiers], WithContents}, TreeWalkerAcc) ->
+                with_ast(Expr, Identifiers, WithContents, Context, TreeWalkerAcc);
             ({'for', {'in', IteratorList, Variable}, Contents}, TreeWalkerAcc) ->
                 for_loop_ast(IteratorList, Variable, Contents, none, Context, TreeWalkerAcc);
             ({'for', {'in', IteratorList, Variable}, Contents, EmptyPartContents}, TreeWalkerAcc) ->
@@ -826,16 +826,37 @@ ifequalelse_ast(Args, {IfContentsAst, IfContentsInfo}, {ElseContentsAst, ElseCon
     {{Ast, merge_info(Info1, Info#ast_info{var_names = VarNames})}, TreeWalker1}.         
 
 
-with_ast(Value, Variable, Contents, Context, TreeWalker) ->
+%% With statement with only a single variable, easy & quick match.
+with_ast(Value, [{identifier, _, V}], Contents, Context, TreeWalker) ->
     Postfix = z_ids:identifier(),
-    VarName = "With_" ++ Variable ++ [$_|Postfix],
-    VarAst = erl_syntax:variable(VarName),
+    VarAst  = erl_syntax:variable("With_" ++ V ++ [$_|Postfix]),
     {{ValueAst, ValueInfo}, TreeWalker1} = value_ast(Value, false, Context, TreeWalker),
+    LocalScope = [ {list_to_atom(V), VarAst} ],
     {{InnerAst, InnerInfo}, TreeWalker2} = body_ast(
             Contents,
-            Context#dtl_context{local_scopes=[[{list_to_atom(Variable), VarAst}] | Context#dtl_context.local_scopes]}, 
+            Context#dtl_context{local_scopes=[LocalScope | Context#dtl_context.local_scopes]}, 
             TreeWalker1),
     WithAst = erl_syntax:block_expr([erl_syntax:match_expr(VarAst, ValueAst), InnerAst]),
+    {{WithAst, merge_info(ValueInfo,InnerInfo)}, TreeWalker2};
+    
+%% With statement with multiple vars, match against tuples and lists.
+with_ast(Value, Variables, Contents, Context, TreeWalker) ->
+    Postfix = z_ids:identifier(),
+    VarAsts = lists:map(fun({identifier, _, V}) -> 
+                    erl_syntax:variable("With_" ++ V ++ [$_|Postfix]) 
+            end, Variables),
+    {{ValueAst, ValueInfo}, TreeWalker1} = value_ast(Value, false, Context, TreeWalker),
+    LocalScope = lists:map( fun({identifier, _, V}) ->
+                                    {list_to_atom(V), erl_syntax:variable("With_" ++ V ++ [$_|Postfix]) } 
+                            end, Variables),
+    {{InnerAst, InnerInfo}, TreeWalker2} = body_ast(
+            Contents,
+            Context#dtl_context{local_scopes=[LocalScope | Context#dtl_context.local_scopes]}, 
+            TreeWalker1),
+            
+    ListClauseAst = erl_syntax:clause([erl_syntax:list(VarAsts)], none, [InnerAst]),
+    TupleClauseAst = erl_syntax:clause([erl_syntax:tuple(VarAsts)], none, [InnerAst]),
+    WithAst = erl_syntax:case_expr(ValueAst, [ListClauseAst, TupleClauseAst]),
     {{WithAst, merge_info(ValueInfo,InnerInfo)}, TreeWalker2}.
     
     

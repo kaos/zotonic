@@ -295,6 +295,12 @@ is_undefined(V) ->
     not(is_defined(V)).
 
 
+split_in(In, N) when is_list(In) orelse is_binary(In) ->
+    z_utils:split_in(In, N);
+split_in(In, _N) ->
+    In.
+
+
 striptags(undefined) ->
     undefined;
 striptags(In) when is_integer(In) ->

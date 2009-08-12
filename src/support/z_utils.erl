@@ -42,6 +42,7 @@
 	randomize/1,
 	randomize/2,
 	split/2,
+	split_in/2,
 	replace1/3,
 	guess_mime/1,
 	list_dir_recursive/1,
@@ -418,6 +419,24 @@ split(0, Rest, Acc) ->
     {lists:reverse(Acc), Rest};
 split(N, [A|Rest], Acc) ->
     split(N-1, Rest, [A|Acc]).
+
+
+split_in(L, N) when N =< 1 ->
+    L;
+split_in(L, N) when is_binary(L) ->
+    split_in(binary_to_list(L), N);
+split_in(L, N) when is_list(L) ->
+    [ lists:reverse(SubList) || SubList <- split_in(L, [], split_in_acc0(N, [])) ].
+
+    split_in_acc0(0, Acc) -> Acc;
+    split_in_acc0(N, Acc) -> split_in_acc0(N-1, [[] | Acc]).
+
+    split_in([], Acc1, Acc0) ->
+        lists:reverse(Acc1) ++ Acc0;
+    split_in(L, Acc1, []) ->
+        split_in(L, [], lists:reverse(Acc1));
+    split_in([H|T], Acc1, [HA|HT]) ->
+        split_in(T, [[H|HA]|Acc1], HT).
 
 
 replace1(F, T, L) ->
