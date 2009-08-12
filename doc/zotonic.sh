@@ -88,7 +88,7 @@ case $1 in
     ;;
  
   debug)
-    $ERL -pa $PA -sname $SNAME -boot start_sasl -s zotonic
+    $ERL +P 10000000 +K true -pa $PA -sname $SNAME -boot start_sasl -s zotonic
     ;;
  
   stop)
