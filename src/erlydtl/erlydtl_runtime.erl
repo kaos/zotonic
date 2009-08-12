@@ -196,10 +196,14 @@ cycle(NamesTuple, Counters, Context) when is_tuple(NamesTuple) ->
 
 
 cache(MaxAge, Name, Args, Func, Context) ->
-    case proplists:get_value(if_anonymous, Args, false) andalso z_acl:user(Context) =:= undefined of
-        true ->
-            Func(Context);
+    DoCache = case z_convert:to_bool(proplists:get_value(if_anonymous, Args, false)) of
+        true -> z_acl:user(Context) =:= undefined;
+        false -> true
+    end,
+    case DoCache of
         false ->
+            Func(Context);
+        true ->
             Varies = lists:flatten(proplists:get_all_values(varies, Args)),
             Cat = proplists:get_all_values(cat, Args),
             Cat1 = lists:map(fun z_convert:to_atom/1, Cat),
