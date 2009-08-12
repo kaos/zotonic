@@ -16,7 +16,9 @@
 	{% menu id=m.rsc.home.id %}
 {% endblock %}
 
-{% block search %}{% endblock %}
+{% block search %}
+	<a href="http://www.ny400.org" title="NY400"><img class="left" alt="" src="/lib/images/ny400.jpg" /></a>
+{% endblock %}
 
 {% block content %}
 	<div id="home-background">
