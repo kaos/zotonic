@@ -12,7 +12,8 @@ You will need:
 
 Steps:
 
-1. Type "make" in the root of zotonic (there where the Makefile is located).
+1. Type "make" in the root of zotonic (there where the Makefile is located). (*1)
+	
 
 2. Create an user and database in PostgreSQL:
 
@@ -65,3 +66,8 @@ Steps:
 
     zotonic.sh start
 
+
+
+Operating system specific notes:
+-------------------------------
+*1	If you're running on FreeBSD, make sure you've got the 'GNU' 'make' (check with 'make --version', which should give you GNU, and version info) If you're not running GNU-make as a default, edit the Makefile to run with 'gmake' (make sure gmake is available first))
