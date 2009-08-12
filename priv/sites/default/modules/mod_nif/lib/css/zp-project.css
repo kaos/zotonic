@@ -591,6 +591,7 @@ ul.news-list {
 ul.news-list li {
 	margin: 0 0 18px 0;
 	border-bottom: 2px dotted dimgray;
+	padding: 0 0 18px;
 }
 
 	ul.program-list li p {
