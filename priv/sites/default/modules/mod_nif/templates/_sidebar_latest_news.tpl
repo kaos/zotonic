@@ -9,5 +9,8 @@
 		No news to show.
 	</li>
 	{% endfor %}
+	
+	<p><a href="/news">All news.</a></p>
+	
 </ul>
 {% endcache %}

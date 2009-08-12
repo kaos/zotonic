@@ -55,7 +55,7 @@
 		
 		<div id="sidebar" class="zp-30">
 			<div class="padding">
-				{% include "_sidebar_latest_news.tpl"}
+				{% include "_sidebar_latest_news.tpl" %}
 			</div>
 			<p class="newletter-link"><a href="mailto:info@newislandfestival.com?subject=sign me up for mailing list of New Island Festival September 10-20, 2009" title="sign up for our mailinglist">Subscribe to our newsletter</a></p>
 		</div>
