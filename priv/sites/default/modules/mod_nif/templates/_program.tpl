@@ -74,7 +74,7 @@
 					<a href="{{ m.rsc[id].page_url }}" title="{{ m.rsc[id].title }}">{{ m.rsc[id].title }}</a>
 					{% for genre in m.rsc[id].hasgenre %}
 						{% ifequal genre.name "free_event" %}
-							<br />{{ genre.title }}
+							<br /><span class="free-event-label">{{ genre.title }}</span>
 						{% endifequal %}
 					{% endfor %}
 				</span>
