@@ -33,9 +33,7 @@
 								</a>
 							</h2>
 							<h4>
-								<a href="{{ m.rsc[ids[1]].o.atvenue.page_url }}" title="{{ m.rsc[ids[1]].o.atvenue.title }}">
-									{{ m.rsc[ids[1]].o.atvenue.title }}
-								</a>
+								{{ m.rsc[ids[1]].o.atvenue.title }}
 							</h4>
 							{% if m.rsc[ids[1]].media %}
 								<div class="item-image left">

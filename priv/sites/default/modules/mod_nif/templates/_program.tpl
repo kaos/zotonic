@@ -70,7 +70,14 @@
 			<li class="clearfix performance-info-wrapper {% cycle 'even' 'uneven' %}">
 				<span class="image zp-15">{% image m.rsc[id].media[1] width=80 height=30 crop %}</span>
 				
-				<span class="artist zp-40"><a href="{{ m.rsc[id].page_url }}" title="{{ m.rsc[id].title }}">{{ m.rsc[id].title }}</a></span>
+				<span class="artist zp-40">
+					<a href="{{ m.rsc[id].page_url }}" title="{{ m.rsc[id].title }}">{{ m.rsc[id].title }}</a>
+					{% for genre in m.rsc[id].hasgenre %}
+						{% ifequal genre.name "free_event" %}
+							<br />{{ genre.title }}
+						{% endifequal %}
+					{% endfor %}
+				</span>
 			
 				{% if m.rsc[id].date_start %}
 					{% with m.rsc[id].date_start as date_start %}

@@ -4,11 +4,7 @@
 		{% if m.rsc[id].media %}
 			<div class="item-image left">
 				<a href="{{ m.rsc[id].website }}" title="{{ m.rsc[id].title }}" target="_blank">
-					{% if forloop.first %}
-						{% image m.rsc[id].media[1] height=86 %}
-					{% else %}
-						{% image m.rsc[id].media[1] height=40 %}
-					{% endif %}
+					{% image m.rsc[id].media[1] height=40 %}
 				</a>
 			</div>
 		{% endif %}
