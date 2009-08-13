@@ -30,14 +30,16 @@
 {% endif %}
 
 {% if m.rsc[id].media %}
-	{% for media_id in m.rsc[id].media %}
-		{% if not forloop.first %}
-			<p class="block-image clear">
-				{% media media_id width=580 alt=m.rsc[media_id].title %}
-				{% if media_id.summary %}
-					<span class="block-image-caption">{{ media_id.summary }}</span>
-				{% endif %}
-			</p>
-		{% endif %}
+	{% for ids in m.rsc[id].media|tail|split_in:2 %}
+		<div class="zp-50">
+			{% for id in ids %}
+				<p class="inline-image inline-event-image">
+					{% media id width=288 alt=m.rsc[id].title %}
+					{% if m.rsc[id].summary %}
+						<span class="inline-image-caption">{{ m.rsc[id].summary }}</span>
+					{% endif %}
+				</p>
+			{% endfor %}
+		</div>
 	{% endfor %}
 {% endif %}
