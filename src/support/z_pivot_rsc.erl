@@ -203,7 +203,7 @@ pivot_resource(Id, Context) ->
     {SqlD, ArgsD} = to_tsv(TD, $D, ArgsC),
 
     TsvSql = [SqlA, " || ", SqlB, " || ", SqlC, " || ", SqlD],
-    
+
     TsvObj = [ [" zpo",integer_to_list(OId)] || OId <- ObjIds ],
     TsvCat = [ [" zpc",integer_to_list(CId)] || CId <- CatIds ],
     TsvIds = list_to_binary([TsvObj,TsvCat]),
@@ -327,12 +327,12 @@ fetch_texts({F, Value}, {A,B}) when is_binary(Value) ->
         false -> {A,B};
         true -> {A, [Value|B]}
     end;
-fetch_texts({F, {{Y,M,D},{H,Min,S}} = Date}, {A,B})
+fetch_texts({F, {{Y,M,D},{H,Min,S}} = Date}, {A,B} = Acc)
     when is_integer(Y) andalso is_integer(M) andalso is_integer(D) 
         andalso is_integer(H) andalso is_integer(Min) andalso is_integer(S) ->
     case do_pivot_field(F) of
-        false -> {A,B};
-        true -> {A, [erlydtl_dateformat:format(Date, "Y-m-d H:i:s")|B]}
+        false -> Acc;
+        true -> {A, [erlydtl_dateformat:format(Date, "Y m d H i s F l h")|B]}
     end;
 fetch_texts({_, {trans, _} = V}, {A,B}) ->
     {A, [V|B]};
@@ -342,7 +342,7 @@ fetch_texts({F, V}, {A,B} = Acc) ->
         true ->
             case z_string:is_string(V) of
                 true -> {A, [V|B]};
-                false -> {A,B}
+                false -> Acc
             end
     end.
 
