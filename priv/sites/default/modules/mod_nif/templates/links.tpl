@@ -23,7 +23,7 @@
 						{% for id in ids %}
 							<li class="clearfix">
 								{% if m.rsc[id].media %}
-									<a href="{{ m.rsc[id].website }}" title="{{ m.rsc[id].title }}" target="_blank">{% image m.rsc[id].media[1] width=190 height=267 %}</a>
+									<a href="{{ m.rsc[id].website }}" title="{{ m.rsc[id].title }}" target="_blank">{% image m.rsc[id].media[1] width=190 height=267 alt=m.rsc[id].title %}</a>
 								{% endif %}
 							</li>
 						{% endfor %}
