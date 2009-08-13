@@ -20,11 +20,28 @@
 
 			{% pager result=result dispatch="admin_overview_rsc" qargs %}
 			
-			<h3 class="above-list ">
-				Pages overview{% if q.qs %}, 
-				matching “{{ q.qs|escape }}”
-				{% button text="show all" action={redirect dispatch="admin_overview_rsc"} %}
-			{% endif %}</h3>
+			<form name="{{ #form }}" method="GET" action="{% url admin_overview_rsc qs=q.qs %}">
+				<h3 class="above-list ">
+					Pages overview{% if q.qs %}, 
+						matching “{{ q.qs|escape }}”
+						{% button text="show all" action={redirect dispatch="admin_overview_rsc" qcat=q.qcat} %}
+					{% endif %}
+
+					{% with q.qcat as qcat %}
+						&mdash; filter on category
+						<select id="{{ #category }}" name="qcat">
+						{% for cat_id, level, indent, name in m.category.all_flat %}
+							<option value="{{ name }}" {% ifequal name qcat %}selected="selected" {% endifequal %}>
+								{{ indent }}{{ m.rsc[cat_id].title|default:name }}
+							</option>
+						{% endfor %}
+						</select>
+						
+						{% wire type="change" id=#category action={submit} %}
+					{% endwith %}
+				</h3>
+			</form>
+
 			<ul class="short-list">
 				<li class="headers clearfix">
 					{% if is_event %}
@@ -50,7 +67,7 @@
 							<span class="zp-20">{{ m.rsc[id].title|striptags|default:"<em>untitled</em>" }}</span>
 							<span class="zp-15">{{ m.rsc[id].o.performer.title|default:"-" }}</span>
 							<span class="zp-15">{{ m.rsc[id].date_start|date:"d M Y, H:i"|default:"-" }}</span>
-							<span class="zp-10">{{ m.rsc[id].category.name }}</span>
+							<span class="zp-10">{{ m.rsc[m.rsc[id].category_id].title }}</span>
 							<span class="zp-15">{{ m.rsc[id].modified|date:"d M Y, H:i" }}</span>
 							<span class="zp-15">{{ m.rsc[m.rsc[id].modifier_id].title|default:"-" }}</span>
 						{% else %}
