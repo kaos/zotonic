@@ -44,7 +44,7 @@
 					{{ title }}
 				</label>
 			</div>
-			{% wire id=#cat.id type="change" action={submit id=#form} %}
+			{% wire id=#cat.id action={submit id=#form} %}
 		{% endfor %}
 		</div>
 
