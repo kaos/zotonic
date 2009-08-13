@@ -59,7 +59,7 @@ format({{_,_,_} = Date,{_,_,_} = Time}, FormatString) ->
 format({_,_,_} = Date, FormatString) ->
    replace_tags(Date, {0,0,0}, FormatString);
 format(DateTime, FormatString) ->
-   io:format("Unrecognised date paramater : ~p~n", [DateTime]),
+   io:format("Unrecognised date parameter : ~p~n", [DateTime]),
    FormatString.
 
 replace_tags(Date, Time, Input) ->
@@ -119,7 +119,7 @@ tag_to_value($G, _, {H,_,_}) ->
 
 % Hour, 12-hour format; i.e. '01' to '12'
 tag_to_value($h, _, {H,_,_}) ->
-   integer_to_list_zerofill(integer_to_list(hour_24to12(H)));
+   integer_to_list_zerofill(hour_24to12(H));
 
 % Hour, 24-hour format; i.e. '00' to '23'
 tag_to_value($H, _, {H,_,_}) ->
