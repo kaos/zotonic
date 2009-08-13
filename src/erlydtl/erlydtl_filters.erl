@@ -434,7 +434,11 @@ member(_S, _L, _Context) ->
 
 
 nthtail(L, N, _Context) when is_list(L) ->
-    lists:nthtail(z_convert:to_integer(N), L);
+    try
+        lists:nthtail(z_convert:to_integer(N), L)
+    catch 
+        _:_ -> []
+    end;
 nthtail(_L, _N, _Context) ->
     [].
 
