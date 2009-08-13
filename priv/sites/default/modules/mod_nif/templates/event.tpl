@@ -71,7 +71,7 @@
 						<div class="zp-50">
 							{% for id in ids %}
 								<p class="inline-image inline-event-image">
-									{% media id width=275 alt=m.rsc[id].title %}
+									{% media id width=288 alt=m.rsc[id].title %}
 									{% if media_id.summary %}
 										<span class="block-image-caption">{{ media_id.summary }}</span>
 									{% endif %}

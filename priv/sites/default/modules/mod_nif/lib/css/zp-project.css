@@ -389,6 +389,12 @@ p.block-image object {
 	height: 380px;
 }
 
+p.inline-event-image embed,
+p.inline-event-image object {
+	width: 288px;
+	height: 188px;
+}
+
 
 /* forms
 ------------------------------------------------------ */
@@ -467,7 +473,7 @@ h1#home-header {
 	height: 290px !important;
 	width: 582px !important;
 }
-w
+
 	#media-viewer img {
 		display: none;
 	}
