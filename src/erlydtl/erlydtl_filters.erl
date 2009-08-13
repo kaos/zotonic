@@ -433,6 +433,12 @@ member(_S, _L, _Context) ->
     undefined.
 
 
+nthtail(L, N, _Context) when is_list(L) ->
+    lists:nthtail(z_convert:to_integer(N), L);
+nthtail(_L, _N, _Context) ->
+    [].
+
+
 rjust(undefined, _Number, _Context) -> 
     undefined;
 rjust(Input, Number, Context) when is_binary(Input) ->
@@ -441,6 +447,13 @@ rjust(Input, Number, _Context) when is_list(Input) ->
     string:right(Input, z_convert:to_integer(Number));
 rjust(Input, _Number, _Context) -> 
     Input.
+
+
+tail([_|T], _Context) ->
+    T;
+tail(_, _Context) ->
+    [].
+
 
 upper(undefined, _Context) ->
     undefined;
