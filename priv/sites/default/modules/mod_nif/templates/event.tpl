@@ -67,11 +67,11 @@
 				{% endif %}
 
 				{% if m.rsc[id].media %}
-					{% for ids in m.rsc[id].media|split_in:2 %}
+					{% for ids in m.rsc[id].media|tail|split_in:2 %}
 						<div class="zp-50">
 							{% for id in ids %}
 								<p class="inline-image">
-									{% media id width=275 alt=m.rsc[id].title %}
+									{% media id width=275 height=275 calt=m.rsc[id].title %}
 									{% if media_id.summary %}
 										<span class="block-image-caption">{{ media_id.summary }}</span>
 									{% endif %}
