@@ -433,14 +433,17 @@ member(_S, _L, _Context) ->
     undefined.
 
 
-nthtail(L, N, _Context) when is_list(L) ->
-    try
-        lists:nthtail(z_convert:to_integer(N), L)
-    catch 
-        _:_ -> []
-    end;
-nthtail(_L, _N, _Context) ->
-    [].
+nthtail(In, N, Context) ->
+    case erlydtl_runtime:to_list(In, Context) of
+        L when is_list(L) ->
+            try
+                lists:nthtail(z_convert:to_integer(N), L)
+            catch 
+                _:_ -> []
+            end;
+        _ -> 
+            []
+    end.
 
 
 rjust(undefined, _Number, _Context) -> 
@@ -453,10 +456,11 @@ rjust(Input, _Number, _Context) ->
     Input.
 
 
-tail([_|T], _Context) ->
-    T;
-tail(_, _Context) ->
-    [].
+tail(In, Context) ->
+    case erlydtl_runtime:to_list(In, Context) of
+        [_|T] -> T;
+        _ -> []
+    end.
 
 
 upper(undefined, _Context) ->
