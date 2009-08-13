@@ -391,8 +391,8 @@ p.block-image object {
 
 p.inline-event-image embed,
 p.inline-event-image object {
-	width: 288px;
-	height: 188px;
+	width: 288px !important;
+	height: 188px !important;
 }
 
 
