@@ -18,12 +18,32 @@
 
 %% interface functions
 -export([
+    observe/2
 ]).
 
 -include_lib("zotonic.hrl").
 
 -record(state, {context}).
 
+
+observe({search_query, Req, OffsetLimit}, Context) ->
+    search(Req, OffsetLimit, Context).
+
+    %% @doc Return the list of events for a performer, ordered on start date
+    %% @spec search(SearchSpec, Range, Context) -> #search_sql{}
+    search({event_for_performer, [{id, Id}]}, _OffsetLimit, Context) ->
+        PredPerfomerId = m_predicate:name_to_id_check(performer, Context),
+        #search_sql{
+            select="r.id",
+            from="rsc r, edge e",
+            where="r.id = e.subject_id and e.predicate_id = $1 and e.object_id = $2",
+            order="r.pivot_date_start asc",
+            tables=[{rsc,"r"}],
+            args=[PredPerfomerId, Id],
+            cats=[{"r", event}]
+        };
+    search(_, _, _) ->
+        undefined.
 
 %%====================================================================
 %% API
@@ -47,6 +67,7 @@ start_link(Args) when is_list(Args) ->
 init(Args) ->
     process_flag(trap_exit, true),
     {context, Context} = proplists:lookup(context, Args),
+    z_notifier:observe(search_query, {?MODULE, observe}, Context),
     {ok, #state{context=z_context:new_for_host(Context)}}.
 
 %% @spec handle_call(Request, From, State) -> {reply, Reply, State} |
@@ -82,7 +103,8 @@ handle_info(_Info, State) ->
 %% terminate. It should be the opposite of Module:init/1 and do any necessary
 %% cleaning up. When it returns, the gen_server terminates with Reason.
 %% The return value is ignored.
-terminate(_Reason, _State) ->
+terminate(_Reason, State) ->
+    z_notifier:detach(search_query, {?MODULE, observe}, State#state.context),
     ok.
 
 %% @spec code_change(OldVsn, State, Extra) -> {ok, NewState}

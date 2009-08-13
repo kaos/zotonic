@@ -12,7 +12,7 @@
 	
 			<h3 class="clear">Existing events</h3>
 
-			{% for event_id in r.s.performer %}
+			{% for event_id in m.search[{event_for_performer id=id pagelen=100}] %}
 				<div class="rsc-edge">
 					<span class="clearfix">
 						<span class="unlink-item">
