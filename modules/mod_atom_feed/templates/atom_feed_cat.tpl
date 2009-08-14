@@ -4,7 +4,7 @@
 	<logo />
 	<link rel="self" type="application/atom+xml" href="{{ site_url }}{% url atom_feed cat=cat %}" />
 	<id>{{ site_url }}{% url atom_feed cat=cat %}</id>
-	<title>{{m.rsc.home.title}} - {{ m.rsc[cat].title|escapexml }}</title>
+	<title>{{ m.rsc.home.title|escapexml }} - {{ m.rsc[cat].title|escapexml }}</title>
 
 	{% for id in m.search[{latest cat=cat}] %}
 		{% include "_atom_entry.tpl" id=id %}
