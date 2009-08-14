@@ -408,7 +408,8 @@ label {
 	width: auto;
 	color: #fff;
 	margin: 0 18px 0 0;
-	font-size: 12px;
+	font-size: 11px;
+	width: 117px;
 }
 
 .edit-this-page {
@@ -566,8 +567,12 @@ li p.event-info {
 	.program-filter-wrapper h5 {
 		color: #fff;
 		font-size: 12px;
-		margin: 0 0 6px 0;
+		margin: 6px 0 0 0;
 	}
+	
+		.program-filter-wrapper h5 button {
+			margin: 0 3px 0 0;
+		}
 
 .program-genres-wrapper {
 	margin: 0;
@@ -583,6 +588,7 @@ li p.event-info {
 
 	.program-day-wrapper button {
 		margin: 0 3px 6px 0;
+		width: 117px;
 	}
 
 .program-day-wrapper a.selected {
