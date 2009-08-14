@@ -98,6 +98,19 @@
 								{% endwith %}
 							</div>
 						</div>
+
+						<div class="item-wrapper">
+							<h3 class="above-item">Website</h3>
+							<div class="item">
+								<fieldset class="admin-form">
+									<div class="form-item clearfix">
+										<label for="media-website">Website for clicks on image</label>
+										<input type="text" id="media-website" name="website" class="zp-100" value="{{ r.website }}"/>
+									</div>
+								</fieldset>
+							</div>
+						</div>
+
 						{% endif %}
 
 						<div class="item-wrapper">

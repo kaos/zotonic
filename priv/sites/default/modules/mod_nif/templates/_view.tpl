@@ -34,7 +34,11 @@
 		<div class="zp-50">
 			{% for id in ids %}
 				<p class="inline-image inline-event-image">
-					{% media id width=288 alt=m.rsc[id].title %}
+					{% if m.rsc[id].website %}
+						<a href="{{ m.rsc[id].website }}" title="Go to {{m.rsc[id].title}}">{% media id width=288 alt=m.rsc[id].title %}</a>
+					{% else %}
+						{% media id width=288 alt=m.rsc[id].title %}
+					{% endif %}
 					{% if m.rsc[id].summary %}
 						<span class="inline-image-caption">{{ m.rsc[id].summary }}</span>
 					{% endif %}
