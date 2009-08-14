@@ -32,7 +32,10 @@ content_types_provided(ReqData, Context) ->
 
 provide_content(ReqData, Context) ->
     Context1 = ?WM_REQ(ReqData, Context),
-    Context2 = z_context:ensure_all(Context1),
+    Context2 = case z_context:get(anonymous, Context) of
+        true -> z_context:ensure_qs(Context1);
+        _ -> z_context:ensure_all(Context1)
+    end,
     Template = z_context:get(template, Context2),
     Rendered = z_template:render(Template, z_context:get_all(Context), Context2),
     {Output, OutputContext} = z_context:output(Rendered, Context2),
