@@ -4,11 +4,11 @@
 %%
 %% @doc Generates a sitemap.  For now rather crude version that will only work with smaller sites.
 
--module(mod_sitemap).
+-module(mod_seo_sitemap).
 -author("Marc Worrell <marc@worrell.nl>").
 -behaviour(gen_server).
 
--mod_title("Sitemap.xml").
+-mod_title("SEO Sitemap").
 -mod_description("Generates sitemap for crawlers, enables better indexing of your site.").
 -mod_prio(600).
 
