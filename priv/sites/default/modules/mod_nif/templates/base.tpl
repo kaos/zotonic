@@ -12,9 +12,9 @@
 	<title>{% block title %}New Island Festival{% endblock %} &mdash; New Island Festival</title>
 
 	<meta http-equiv="Content-type" content="text/html; charset=utf-8" />
-	<meta name="keywords" content="{{ m.rsc[id].seo_keywords }}" />
-	<meta name="description" content="{{ m.rsc[id].seo_desc }}" />
 	<meta name="author" content="Tim Benniks &copy; 2009" />
+
+	{% all include "_html_head.tpl" %}
 
 	{% lib
 		"/css/zp-compressed.css"
@@ -55,15 +55,7 @@
 	{% include "_js_include.tpl" %}
 
 	{% script %}
-	
-	<script type="text/javascript">
-	var gaJsHost = (("https:" == document.location.protocol) ? "https://ssl." : "http://www.");
-	document.write(unescape("%3Cscript src='" + gaJsHost + "google-analytics.com/ga.js' type='text/javascript'%3E%3C/script%3E"));
-	</script>
-	<script type="text/javascript">
-	try {
-	var pageTracker = _gat._getTracker("UA-888876-10");
-	pageTracker._trackPageview();
-	} catch(err) {}</script>
+
+	{% all include "_html_body.tpl" %}
 </body>
 </html>

@@ -53,6 +53,10 @@ install_modules(C) ->
         "mod_search",
         "mod_video_embed",
         "mod_atom_feed",
+        
+        "mod_seo",
+        "mod_seo_google",
+        "mod_seo_sitemap",
 
         "mod_admin",
         "mod_admin_address",
