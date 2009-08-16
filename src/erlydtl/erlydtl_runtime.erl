@@ -38,6 +38,13 @@ find_value(Key, [N|_], Context) when is_atom(Key), is_integer(N) ->
 find_value(Key, Id, Context) when is_integer(Id) ->
 	m_rsc:p(Id, Key, Context);
 
+%% Lookup current date/time, defaults to calendar:local_time/0
+find_value(now, L, _Context) when is_list(L) ->
+    case proplists:get_value(now, L) of
+        undefined -> calendar:local_time();
+        Now -> Now
+    end;
+
 %% Regular proplist lookup
 find_value(Key, L, _Context) when is_list(L) ->
     proplists:get_value(Key, L);

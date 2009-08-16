@@ -80,7 +80,7 @@ identifier_to_keyword({identifier, Pos, String}, {PrevToken, Acc}) when PrevToke
 identifier_to_keyword({identifier, Pos, String}, {_PrevToken, Acc}) ->
     %% After the first keyword of a tag we accept a limited set of keywords
     RevString = lists:reverse(String),
-    Keywords = ["in", "not", "or", "and", "xor", "firstof", "now", "regroup", "templatetag", "with", "as"], 
+    Keywords = ["in", "not", "or", "and", "xor", "firstof", "regroup", "templatetag", "with", "as"], 
     Type = case lists:member(RevString, Keywords) of
         true -> list_to_atom(RevString ++ "_keyword");
         _ ->    identifier
