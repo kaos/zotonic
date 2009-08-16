@@ -15,7 +15,7 @@
 	</url>
 
 {% cache 3600 sitemap_xml cat="text" cat="event" cat="location" cat="collection" cat="person" %}
-	{% for id in m.search[{latest cat="text" cat="event" cat="location" cat="collection" pagelen=20000}] %}
+	{% for id in m.search[{latest cat="text" cat="event" cat="location" cat="collection" cat="person" pagelen=20000}] %}
 		{% if not m.rsc[id].seo_noindex %}
 			{% with m.rsc[id].page_url as page_url %}
 				{% ifnotequal page_url "/" %}
