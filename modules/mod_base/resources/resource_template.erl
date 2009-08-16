@@ -37,6 +37,8 @@ provide_content(ReqData, Context) ->
         _ -> z_context:ensure_all(Context1)
     end,
     Template = z_context:get(template, Context2),
-    Rendered = z_template:render(Template, z_context:get_all(Context), Context2),
+    Vars = z_context:get_all(Context),
+    Vars1 = [{now, calendar:local_time()} | Vars],
+    Rendered = z_template:render(Template, Vars1, Context2),
     {Output, OutputContext} = z_context:output(Rendered, Context2),
     ?WM_REPLY(Output, OutputContext).
