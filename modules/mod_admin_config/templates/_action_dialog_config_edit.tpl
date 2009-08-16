@@ -7,7 +7,7 @@
 
 		<div class="form-item clearfix">
 			<label for="{{ #value }}">Value</label>
-			<input type="text" id="{{ #value }}" name="val" value="" />
+			<input type="text" id="{{ #value }}" name="val" value="{{ m.config[module][key].value|escape }}" />
 		</div>
 
 		<button type="submit">Save</button>
