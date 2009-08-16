@@ -20,7 +20,6 @@
     add_product/3,
     decr_product/3,
     del_product/3,
-    format_price/1,
     get_cart/1,
     clear/1
 ]).
@@ -70,9 +69,9 @@ tpl_sync_cart_info(Context) ->
     tpl_sync_cart_info(_Total, 0, Context) ->
         z_render:update("cart-info", "Uw winkelmand is leeg", Context);
     tpl_sync_cart_info(Total, 1, Context) ->
-        z_render:update("cart-info", "Eén product van &euro;"++format_price(Total), Context);
+        z_render:update("cart-info", "Eén product van &euro;"++format_price(Total, Context), Context);
     tpl_sync_cart_info(Total, Count, Context) ->
-        z_render:update("cart-info", integer_to_list(Count)++" producten, &euro;"++format_price(Total), Context).
+        z_render:update("cart-info", integer_to_list(Count)++" producten, &euro;"++format_price(Total, Context), Context).
     
 
 
@@ -80,7 +79,7 @@ tpl_sync_cart_info(Context) ->
 %% @spec tpl_sync_cart_prices(Context) -> Context
 tpl_sync_cart_prices(Context) ->
     {Count, Total, Backorders, Cart} = tpl_cart_allocated(Context),
-    C1 = z_render:update("cart-price-total", format_price(Total), Context),
+    C1 = z_render:update("cart-price-total", format_price(Total, Context), Context),
     C2 = tpl_sync_cart_info(Total, Count, C1),
     C3 = case Backorders of
         0 -> z_render:wire("backorder-info", {slide_fade_out, []}, C2);
@@ -107,10 +106,10 @@ tpl_sync_cart_prices(Context) ->
                 true ->
                     z_render:update("cart-price-old-"++ID, "", Cback);
                 false ->
-                    z_render:update("cart-price-old-"++ID, ["&euro;",format_price(OldPrice)], Cback)
+                    z_render:update("cart-price-old-"++ID, ["&euro;",format_price(OldPrice, Context)], Cback)
             end,
-            Ctotal = z_render:update("cart-price-"++ID, format_price(TotalPrice), Cold),
-            z_render:update("cart-price-avg-"++ID, format_price(AvgPrice), Ctotal)
+            Ctotal = z_render:update("cart-price-"++ID, format_price(TotalPrice, Context), Cold),
+            z_render:update("cart-price-avg-"++ID, format_price(AvgPrice, Context), Ctotal)
         end,
         C3,
         Cart).
@@ -137,10 +136,10 @@ get_cart_prices(Context) ->
 
 %% @doc Format a price for displaying purposes, surpresses the ",00"
 %% @spec format_price(float) -> String
-format_price(undefined) -> 
+format_price(undefined, _Context) -> 
     "-";
-format_price(Price) ->
-    erlydtl_filters:format_price(Price).
+format_price(Price, Context) ->
+    erlydtl_filters:format_price(Price, Context).
 
 
 %% @doc Get the shopping cart of the current user
