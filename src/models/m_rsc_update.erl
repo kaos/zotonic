@@ -26,10 +26,13 @@
 %% @doc Insert a new resource. Crashes when insertion is not allowed.
 %% @spec insert(Props, Context) -> {ok, Id} | {error, Reason}
 insert(Props, Context) ->
+    insert(Props, true, Context).
+
+insert(Props, EscapeTexts, Context) ->
     PropsAcl = z_acl:add_defaults(Props, Context),
     PropsDefaults = props_defaults(PropsAcl, Context),
-    update(insert_rsc, PropsDefaults, Context).
-
+    update(insert_rsc, PropsDefaults, EscapeTexts, Context).
+    
 
 %% @doc Delete a resource
 %% @spec delete(Props, Context) -> ok | {error, Reason}
@@ -87,17 +90,18 @@ duplicate(Id, DupProps, Context) ->
         true ->
             Props = m_rsc:get_raw(Id, Context),
             FilteredProps = props_filter_protected(Props),
+            SafeDupProps = z_html:escape_props(DupProps),
             InsProps = lists:foldl(
                             fun({Key, Value}, Acc) ->
                                 z_utils:prop_replace(Key, Value, Acc)
                             end,
                             FilteredProps,
-                            DupProps ++ [
+                            SafeDupProps ++ [
                                 {name,undefined}, {uri,undefined}, {page_path,undefined},
                                 {is_authoritative,false}, {is_protected,false},
                                 {slug,undefined}
                             ]),
-            case insert(InsProps, Context) of
+            case insert(InsProps, false, Context) of
                 {ok, NewId} ->
                     % Duplicate all edges
                     m_edge:duplicate(Id, NewId, Context),
@@ -112,14 +116,20 @@ duplicate(Id, DupProps, Context) ->
 
 %% @doc Update a resource
 %% @spec update(Id, Props, Context) -> {ok, Id} | {error, Reason}
-update(Id, Props, Context) when is_integer(Id) orelse Id == insert_rsc ->
+update(Id, Props, Context) ->
+    update(Id, Props, true, Context).
+
+update(Id, Props, EscapeTexts, Context) when is_integer(Id) orelse Id == insert_rsc ->
     case Id == insert_rsc orelse z_acl:rsc_editable(Id, Context) of
         true ->
             TextProps = recombine_dates(Props),
             AtomProps = [ {z_convert:to_atom(P), V} || {P, V} <- TextProps ],
             FilteredProps = props_filter(AtomProps, [], Context),
             EditableProps = props_filter_protected(FilteredProps),
-            SafeProps = z_html:escape_props(EditableProps),
+            SafeProps = case EscapeTexts of
+                true -> z_html:escape_props(EditableProps);
+                false -> EditableProps
+            end,
             case preflight_check(Id, SafeProps, Context) of
                 ok ->
                     % This function will be executed in a transaction
