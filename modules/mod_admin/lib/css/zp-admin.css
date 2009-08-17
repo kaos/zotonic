@@ -436,6 +436,10 @@ button.disabled {
 	font-family: "Lucida Grande", Helvetica, sans-serif;
 }
 
+#sidebar input[type="text"] { 
+    width: 338px;
+}
+
 .admin-form textarea.seo-desc {
 	height: auto;
 }

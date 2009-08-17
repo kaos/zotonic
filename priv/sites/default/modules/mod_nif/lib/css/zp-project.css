@@ -549,6 +549,12 @@ ul.program-list li {
 	display: block;
 }
 
+.date-remarks {
+    display: block;
+    color: #666;
+    font-size: 11px;
+}
+
 li p.event-info {
 	font-weight: bold;
 }

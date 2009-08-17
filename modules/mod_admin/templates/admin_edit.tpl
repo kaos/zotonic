@@ -294,6 +294,10 @@
 											<label>Till</label>
 											{% include "_edit_date.tpl" date=r.date_end name="date_end" is_end=1 %}
 										</div>
+										<div class="form-item">
+											<label>Remarks</label>
+											<input type="text" name="date_remarks" value="{{ r.date_remarks }}" />
+										</div>
 									</fieldset>
 								</div>
 							</div>

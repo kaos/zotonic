@@ -89,7 +89,11 @@
 								{% ifnotequal date_start date_end %}
 									&mdash; <span class="time">{{ date_end|date:"f A" }}</span>
 								{% endifnotequal %}
+								{% if m.rsc[id].date_remarks %}
+									<span class="date-remarks">{{ m.rsc[id].date_remarks }}</span>
+								{% endif %}
 							</span>
+							
 							<span class="venue zp-20"><a href="{{ m.rsc[id].o.performer.page_url }}" title="{{ m.rsc[id].o.performer.title }}">{{ m.rsc[id].o.performer.title }}</a></span>
 						{% endwith %}
 					{% endwith %}

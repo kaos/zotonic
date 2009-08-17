@@ -35,6 +35,9 @@
 
 									<span class="day">on {{ date_start|date:"l" }}</span>
 									<span class="date">{{ date_start|date:"N d" }}.</span>
+									{% if m.rsc[id].date_remarks %}
+										<span class="date-remarks">{{ m.rsc[id].date_remarks }}</span>
+									{% endif %}
 								</span>
 							{% endwith %}
 						{% endwith %}

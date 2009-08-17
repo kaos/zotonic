@@ -54,7 +54,9 @@
 							</p>
 							<p class="clear">
 							{% for id in ids %}
-								<a href="{{ m.rsc[id].page_url }}">{{ [m.rsc[id].date_start, m.rsc[id].date_end]|date_range:["N d, f A", " &mdash; ", "f A"] }}</a> {% if not forloop.last %}<br/>{% endif %}
+								<a href="{{ m.rsc[id].page_url }}">
+									{{ [m.rsc[id].date_start, m.rsc[id].date_end]|date_range:["N d, f A", " &mdash; ", "f A"] }}
+								</a> {% if not forloop.last %}<br/>{% endif %}
 							{% endfor %}
 							</p>
 						</li>
