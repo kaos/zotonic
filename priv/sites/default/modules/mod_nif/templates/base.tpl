@@ -26,7 +26,7 @@
 	{% include "_atom_feed_link.tpl" cat="news" %}
 	
 	<!-- make crappy ie8 emulate ie7 so the menu works -->
-	<meta http-equiv="X-UA-Compatible" content="IE=EmulateIE7" />
+	<meta http-equiv="X-UA-Compatible" content="IE=7.5">
 	
 	<!--[if IE]><link href="/lib/css/zp-ie.css" type="text/css" media="screen" rel="stylesheet" /><![endif]--> 
 </head>
