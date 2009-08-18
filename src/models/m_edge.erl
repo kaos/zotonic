@@ -388,14 +388,20 @@ update_sequence_edge_ids(Id, Pred, EdgeIds, Context) ->
 %% @doc Return the list of predicates in use by edges to objects from the id
 %% @spec object_preds(Id, Context) -> List
 object_predicates(Id, Context) ->
-    Ps = z_db:q("select distinct p.name from edge e join rsc p on e.predicate_id = p.id where e.subject_id = $1 order by name", [Id], Context),
-    [ list_to_atom(binary_to_list(P)) || {P} <- Ps ].
+    F = fun() ->
+        Ps = z_db:q("select distinct p.name from edge e join rsc p on e.predicate_id = p.id where e.subject_id = $1 order by name", [Id], Context),
+        [ list_to_atom(binary_to_list(P)) || {P} <- Ps ]
+    end,
+    z_depcache:memo(F, {object_preds, Id}, ?DAY, [Id]).
 
 %% @doc Return the list of predicates is use by edges from subjects to the id
 %% @spec object_preds(Id, Context) -> List
 subject_predicates(Id, Context) ->
-    Ps = z_db:q("select distinct p.name from edge e join rsc p on e.predicate_id = p.id where e.object_id = $1 order by name", [Id], Context),
-    [ list_to_atom(binary_to_list(P)) || {P} <- Ps ].
+    F = fun() ->
+        Ps = z_db:q("select distinct p.name from edge e join rsc p on e.predicate_id = p.id where e.object_id = $1 order by name", [Id], Context),
+        [ list_to_atom(binary_to_list(P)) || {P} <- Ps ]
+    end,
+    z_depcache:memo(F, {subject_preds, Id}, ?DAY, [Id]).
 
 %% @doc Return the list of predicate ids in use by edges to objects from the id
 %% @spec object_preds(Id, Context) -> List
