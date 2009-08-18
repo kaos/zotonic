@@ -1,8 +1,14 @@
 {% with m.config.seo.keywords.value as keywords %}
 	{% with m.config.seo.description.value as description %}
 		{% if id %}
-	<meta name="keywords" content="{{ m.rsc[id].seo_keywords }} {{ keywords }}" />
-	<meta name="description" content="{{ m.rsc[id].seo_desc }} {{ description }}" />
+			{% with m.rsc[id].seo_keywords as seo_keywords %}
+				{% if seo_keywords %}
+	<meta name="keywords" content="{{ seo_keywords }}, {{ keywords }}" />
+				{% else %}
+	<meta name="keywords" content="{% for predicate in m.rsc[id].op %}{% ifnotequal predicate "depiction" %}{% for oid in m.rsc[id].o[predicate] %}{{ m.rsc[oid].title }}, {% endfor %}{% endifnotequal %}{% endfor %}{{ keywords }}" />
+				{% endif %}
+	<meta name="description" content="{{ m.rsc[id].seo_desc|default:m.rsc[id].summary }} {{ description }}" />
+			{% endwith %}
 		{% else %}
 			{% if keywords or description %}
 	<meta name="keywords" content="{{ keywords }}" />
