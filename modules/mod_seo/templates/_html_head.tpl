@@ -1,6 +1,8 @@
 {% with m.config.seo.keywords.value as keywords %}
 	{% with m.config.seo.description.value as description %}
 		{% if id %}
+	<link rel="shorturl" href="{% url id id=id %}" />
+	<link rel="canonical" href="{{ m.rsc[id].page_url }}" />
 			{% with m.rsc[id].seo_keywords as seo_keywords %}
 				{% if seo_keywords %}
 	<meta name="keywords" content="{{ seo_keywords }}, {{ keywords }}" />
