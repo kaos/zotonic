@@ -13,7 +13,7 @@
 	</li>
 	{% endfor %}
 	
-	<p><a href="{% url news_overview %}">All news.</a></p>
+	<p><a href="{% url news_overview %}">All news</a></p>
 	
 </ul>
 {% endcache %}
