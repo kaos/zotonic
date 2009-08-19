@@ -397,6 +397,7 @@ p.inline-event-image object {
 input[type="checkbox"] {
 	vertical-align: text-bottom;
 	margin: 3px 3px 0 0;
+	border: none;
 }
 
 label {
