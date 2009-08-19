@@ -25,7 +25,7 @@
 				<h4 class="sidebar-title">Performances:</h4>
 	
 				<ul class="items-list">
-					{% for ids in m.search[{nif_artist_events id=id}]|group_by:"title" %}
+					{% for ids in m.search[{nif_artist_events id=id pagelen=200}]|group_by:"title" %}
 						<li class="clearfix">
 							<h2>
 								<a href="{{ m.rsc[ids[1]].page_url }}" title="{{ m.rsc[ids[1]].title }}">

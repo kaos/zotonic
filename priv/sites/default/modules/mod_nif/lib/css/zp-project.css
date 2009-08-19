@@ -545,6 +545,7 @@ ul.program-list li {
     display: block;
     color: #666;
     font-size: 11px;
+	font-style: italic;
 }
 
 li p.event-info {
