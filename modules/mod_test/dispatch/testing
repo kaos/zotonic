@@ -1,5 +1,5 @@
 [
 %% Just for testing
-{test,       ["test"],       resource_test_helloworld,        []},
-{helloworld, ["helloworld"], resource_template, [{template, "helloworld.tpl"}]}
+{helloworld, ["helloworld"], resource_template, [{template, "helloworld.tpl"}, {anonymous, true}]},
+{test,       ["test"],       resource_test_helloworld,        []}
 ].
