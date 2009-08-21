@@ -13,6 +13,8 @@
 
 	{page,    	["page", id],       		resource_page,		[ {template, "page.tpl"} ]},
 	{page,    	["page", id, slug], 		resource_page,		[ {template, "page.tpl"} ]},
+	{media,    	["media", id],       		resource_page,		[ {template, "media.tpl"} ]},
+	{media,    	["media", id, slug], 		resource_page,		[ {template, "media.tpl"} ]},
 	{artist,    ["artist", id], 			resource_page,		[ {template, "artist.tpl"} ]},
 	{artist,    ["artist", id, slug], 		resource_page,		[ {template, "artist.tpl"} ]},
 	{event,     ["event", id],				resource_page,		[ {template, "event.tpl"} ]},
