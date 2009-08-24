@@ -47,7 +47,7 @@ charsets_provided(ReqData, Context) ->
 
 
 content_types_provided(ReqData, Context) ->
-    {[{"application/xml+atom", provide_content}], ReqData, Context}.
+    {[{"application/atom+xml", provide_content}], ReqData, Context}.
 
 
 resource_exists(ReqData, Context) ->
