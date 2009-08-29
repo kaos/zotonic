@@ -14,6 +14,7 @@
 	{% endfor %}
 	
 	<p><a href="{% url news_overview %}">All news</a></p>
+	<p><a href="http://www.facebook.com/pages/NEW-ISLAND-FESTIVAL/144622515990" title="Find us on facebook"><img alt="Find us on facebook"  src="/lib/images/facebook.jpg" /></p>
 	
 </ul>
 {% endcache %}
