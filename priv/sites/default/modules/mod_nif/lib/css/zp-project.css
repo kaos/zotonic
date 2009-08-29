@@ -664,3 +664,7 @@ ul.performance-genres {
 	.artists-list li p {
 		margin: 0;
 	}
+	
+.newletter-link {
+	clear: both;
+}
