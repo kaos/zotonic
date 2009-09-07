@@ -24,7 +24,10 @@
 	<div id="home-background">
 		<div id="home-content">
 			<p>{{ m.rsc.home.summary }}</p>
-
+			<p class="button-wrapper clearfix">
+				<a class="button" href=" http://www.newislandfestival.com/page/564/tickets" title="For $35 All-Access Festival Passport Click Here">For $35 All-Access Festival Passport Click Here</a>
+				<a class="button clear" href="http://www.newislandfestival.com/event/1288/armin-van-buuren" title="Armin van Buuren FREE Sept. 12">Armin van Buuren FREE Sept. 12</a>
+			</p>
 			<div id="media-viewer" class="do_cycle {speed: 2500, timeout: 2500}">
 				{% if m.rsc.media_viewer.media %}
 				
