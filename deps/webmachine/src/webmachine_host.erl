@@ -28,13 +28,14 @@ get_host_dispatch_list(Req) ->
     {ok, DispatchList} = application:get_env(webmachine, dispatch_list),
     case DispatchList of
         [#wm_host_dispatch_list{}|_] ->
-            Host = list_to_binary(get_host(Req)),
-            case get_dispatch_host(Host, DispatchList) of
+            {Host, Port} = get_host(Req),
+            HostBin = list_to_binary(Host),
+            case get_dispatch_host(HostBin, DispatchList) of
                 {ok, DL} ->
                     {ok, DL#wm_host_dispatch_list.host, DL#wm_host_dispatch_list.dispatch_list};
 
                 undefined ->
-                    FoundHost = case get_dispatch_alias(Host, DispatchList) of
+                    FoundHost = case get_dispatch_alias(HostBin, DispatchList) of
                                     {ok, _} = Found -> Found;
                                     undefined -> get_dispatch_default(DispatchList)
                                 end,
@@ -44,14 +45,10 @@ get_host_dispatch_list(Req) ->
                                 true ->
                                     % Redirect, keep the port number
                                     Hostname = binary_to_list(DL#wm_host_dispatch_list.hostname),
-                                    Hostname1 = case Req:get_header_value("Host") of
-                                        undefined -> Hostname;
-                                        ReqHost ->
-                                            case string:tokens(string:to_lower(ReqHost), ":") of
-                                                [_|[]] -> Hostname;
-                                                [_|Rest] -> string:join([Hostname|Rest], ":")
-                                            end
-                                    end,
+                                    Hostname1 = case Port of
+                                                    "80" -> Hostname;
+                                                    _ -> Hostname ++ [$:|Port]
+                                                end,
                                     {redirect, Hostname1};
                                 false ->
                                     {ok, DL#wm_host_dispatch_list.host, DL#wm_host_dispatch_list.dispatch_list}
@@ -66,13 +63,24 @@ get_host_dispatch_list(Req) ->
 
 
 get_host(Req) ->
-    case Req:get_header_value("Host") of
+    Host =  case Req:get_header_value("X-Forwarded-Host") of
+                undefined -> 
+                    case Req:get_header_value("X-Host") of
+                        undefined -> Req:get_header_value("Host");
+                        XHost -> XHost
+                    end;
+                XFwdHost -> XFwdHost
+            end,
+    case Host of
         undefined -> 
-            "";
-        Host -> 
+            {"", "80"};
+        _ -> 
             % Split the optional port number from the host name
-            [H|_] = string:tokens(string:to_lower(Host), ":"),
-            H
+            [H|Rest] = string:tokens(string:to_lower(Host), ":"),
+            case Rest of
+                [] -> {H, "80"};
+                [Port|_] -> {H, Port}
+            end
     end.
 
 
