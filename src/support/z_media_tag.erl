@@ -242,7 +242,7 @@ url2props1([P|Rest], Acc) ->
 
 
 test() ->
-    Context = z_context:new(),
+    Context = z_context:new(default),
     OldSignKey = z_ids:set_sign_key_simple("test"),
     try
         {   "koe.jpg", [{width,400},{crop,east},{blur},{grey}], 

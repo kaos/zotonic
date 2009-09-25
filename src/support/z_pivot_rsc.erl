@@ -3,7 +3,6 @@
 %% @date 2009-04-17
 %%
 %% @doc Pivoting server for the rsc table. Takes care of full text indices. Polls the pivot queue for any changed resources.
-%% @todo Support for multiple databases (now only supports the default database).
 
 -module(z_pivot_rsc).
 -author("Marc Worrell <marc@worrell.nl").
@@ -11,11 +10,10 @@
 
 %% gen_server exports
 -export([init/1, handle_call/3, handle_cast/2, handle_info/2, terminate/2, code_change/3]).
--export([start_link/0, start_link/1]).
+-export([start_link/1]).
 
 %% interface functions
 -export([
-    poll/0,
     poll/1,
     pivot/2,
     
@@ -31,38 +29,31 @@
 % Number of queued ids taken from the queue at one go
 -define(POLL_BATCH, 100).
 
--record(state, {timer}).
+-record(state, {context, timer}).
 
-
-
-%% @doc Poll all databases, periodically called by a timer
-%% @spec poll() -> void()
-poll() ->
-    gen_server:cast(?MODULE, {poll}).
 
 %% @doc Poll the pivot queue for the database in the context
 %% @spec poll(Context) -> void()
 poll(Context) ->
-    Host = ?HOST(Context),
-    gen_server:cast(?MODULE, {poll, Host}).
+    gen_server:cast(Context#context.pivot_server, poll).
 
 
 %% @doc An immediate pivot request for a resource
 %% @spec pivot(Id, Context) -> void()
 pivot(Id, Context) ->
-    Host = ?HOST(Context),
-    gen_server:cast(?MODULE, {pivot, Id, Host}).
+    gen_server:cast(Context#context.pivot_server, {pivot, Id}).
 
 
 %%====================================================================
 %% API
 %%====================================================================
-%% @spec start_link() -> {ok,Pid} | ignore | {error,Error}
+%% @spec start_link(SiteProps) -> {ok,Pid} | ignore | {error,Error}
 %% @doc Starts the server
-start_link() -> 
-    start_link([]).
-start_link(Args) when is_list(Args) ->
-    gen_server:start_link({local, ?MODULE}, ?MODULE, Args, []).
+start_link(SiteProps) ->
+    {host, Host} = proplists:lookup(host, SiteProps),
+    Name = z_utils:name_for_host(?MODULE, Host),
+    gen_server:start_link({local, Name}, ?MODULE, SiteProps, []).
+
 
 %%====================================================================
 %% gen_server callbacks
@@ -73,9 +64,11 @@ start_link(Args) when is_list(Args) ->
 %%                     ignore               |
 %%                     {stop, Reason}
 %% @doc Initiates the server.
-init(_Args) ->
-    Timer = timer:apply_interval(?PIVOT_POLL_INTERVAL * 1000, ?MODULE, poll, []),
-    {ok, #state{timer=Timer}}.
+init(SiteProps) ->
+    Context = z_context:new(proplists:get_value(host, SiteProps)),
+    Timer = timer:apply_interval(?PIVOT_POLL_INTERVAL * 1000, ?MODULE, poll, [Context]),
+    {ok, #state{timer=Timer, context=Context}}.
+
 
 %% @spec handle_call(Request, From, State) -> {reply, Reply, State} |
 %%                                      {reply, Reply, State, Timeout} |
@@ -93,20 +86,14 @@ handle_call(Message, _From, State) ->
 %%                                  {noreply, State, Timeout} |
 %%                                  {stop, Reason, State}
 %% Poll the queue for the default host
-%% @todo Poll for all hosts in the sites dir (when we have multiple pools)
-handle_cast({poll}, State) ->
-    do_poll(z_context:site()),
-    {noreply, State};
-
-%% Poll the queue for a particular database
-handle_cast({poll, Host}, State) ->
-    do_poll(Host),
+handle_cast(poll, State) ->
+    do_poll(State#state.context),
     {noreply, State};
 
 
 %% Poll the queue for a particular database
-handle_cast({pivot, Id, Host}, State) ->
-    do_pivot(Id, Host),
+handle_cast({pivot, Id}, State) ->
+    do_pivot(Id, State#state.context),
     {noreply, State};
 
 
@@ -144,8 +131,7 @@ code_change(_OldVsn, State, _Extra) ->
 %%====================================================================
 
 %% @doc Poll a database for any queued updates.
-do_poll(Host) ->
-    Context = z_context:new_for_host(Host),
+do_poll(Context) ->
     Qs = fetch_queue(Context),
     F = fun(Ctx) ->
         [ pivot_resource(Id, Ctx) || {Id,_Serial} <- Qs]
@@ -154,8 +140,7 @@ do_poll(Host) ->
     delete_queue(Qs, Context).
 
 %% @doc Pivot a specific id, delete its queue record if present
-do_pivot(Id, Host) ->
-    Context = z_context:new_for_host(Host),
+do_pivot(Id, Context) ->
     Serial = fetch_queue_id(Id, Context),
     pivot_resource(Id, Context),
     delete_queue(Id, Serial, Context).

@@ -81,7 +81,7 @@ provide_content(ReqData, Context) ->
         {Content, _Context2} = z_template:render_to_iolist("atom_feed_cat.tpl", Vars, Context1),
         Content
     end,
-    Content = z_depcache:memo(F, {atom_feed, CatName}, ?MAX_AGE, [CatName]),
+    Content = z_depcache:memo(F, {atom_feed, CatName}, ?MAX_AGE, [CatName], Context1),
     ?WM_REPLY(Content, Context1).
 
 

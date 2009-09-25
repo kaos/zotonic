@@ -33,8 +33,8 @@ m() ->
 
 %% @doc Reset all caches, reload the dispatch rules and rescan all modules.
 flush() ->
-    C = z_context:new(),
-    z_depcache:flush(),
+    C = z_context:new(default),
+    z_depcache:flush(C),
     z_dispatcher:reload(C),
     n({module_ready}, C).
 

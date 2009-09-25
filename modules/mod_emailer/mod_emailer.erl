@@ -75,10 +75,10 @@ send_render(To, HtmlTemplate, TextTemplate, Vars, Context) ->
 %%====================================================================
 %% API
 %%====================================================================
-%% @spec start_link() -> {ok,Pid} | ignore | {error,Error}
+%% @spec start_link(Args) -> {ok,Pid} | ignore | {error,Error}
 %% @doc Starts the server
 start_link(Args) when is_list(Args) ->
-    gen_server:start_link({local, ?MODULE}, ?MODULE, Args, []).
+    gen_server:start_link(?MODULE, Args, []).
 
 %%====================================================================
 %% gen_server callbacks
@@ -103,7 +103,7 @@ init(Args) ->
         ehlo     = m_config:get_value(?MODULE, ehlo, ?EMAILER_EHLO, Context),
         username = m_config:get_value(?MODULE, username, Context),
         password = m_config:get_value(?MODULE, password, Context),
-        context  = z_context:new_for_host(Context)
+        context  = z_context:new(Context)
     }}.
 
 

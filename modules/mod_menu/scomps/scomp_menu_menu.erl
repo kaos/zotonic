@@ -50,14 +50,14 @@ render(Params, _Vars, Context, _State) ->
     Menu = get_menu(Context),
     Id = proplists:get_value(id, Params),
     CurrentId = find_id(Id, Menu),
-    case z_depcache:get({menu, CurrentId, Context#context.language}) of
+    case z_depcache:get({menu, CurrentId, Context#context.language}, Context) of
         {ok, CachedMenu} ->
             {ok, CachedMenu};
         undefined ->
             {IdAcc, LIs} = build_menu(Menu, CurrentId, 1, [], [], z_acl:anondo(Context)),
             UL = ["<ul id=\"navigation\" class=\"clearfix at-menu do_superfish\">", LIs, "</ul>"],
             NewMenu = iolist_to_binary(UL),
-            z_depcache:set({menu, CurrentId, Context#context.language}, NewMenu, ?DAY, [CurrentId, menu | IdAcc]),
+            z_depcache:set({menu, CurrentId, Context#context.language}, NewMenu, ?DAY, [CurrentId, menu | IdAcc], Context),
             {ok, NewMenu}
     end.
 
@@ -104,7 +104,7 @@ menu_item(N, T, Id, Nr, Context) ->
             Current = case N == Id of true -> " current "; _ -> [] end,
             [
                 "<li id=\"nav-item-", integer_to_list(Nr), "\" class=\"",First,Last,"\">",
-                    "<a href=\"", m_rsc:p(N, page_url, Context), "\" class=\"", Current, m_rsc:p(N, slug, Current), "\">",
+                    "<a href=\"", m_rsc:p(N, page_url, Context), "\" class=\"", Current, m_rsc:p(N, slug, Context), "\">",
                         ?TR(m_rsc:p(N, title, Context), Context),
                 "</a>"
             ];

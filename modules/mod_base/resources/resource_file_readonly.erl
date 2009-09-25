@@ -103,7 +103,7 @@ resource_exists(ReqData, State) ->
         ConfiguredPath -> ConfiguredPath
     end, 
     Cached = case State#state.use_cache of
-        true -> z_depcache:get(cache_key(Path));
+        true -> z_depcache:get(cache_key(Path), Context);
         _    -> undefined
     end,
     case Cached of
@@ -189,7 +189,8 @@ finish_request(ReqData, State) ->
                                         last_modified=State#state.last_modified,
                                         body=State#state.body
                                     },
-                            z_depcache:set(cache_key(State#state.path), Cache),
+                            Context = z_context:new(ReqData, ?MODULE),
+                            z_depcache:set(cache_key(State#state.path), Cache, Context),
                             {ok, ReqData, State};
                         _ ->
                             % No cache or no gzip'ed version (file system cache is fast enough for image serving)

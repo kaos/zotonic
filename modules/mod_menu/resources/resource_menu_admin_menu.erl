@@ -59,7 +59,7 @@ save_menu(Menu, Context) ->
     case z_acl:has_role(public_publisher, Context) of
         true ->
             m_config:set_prop(menu, menu_default, menu, Menu, Context), 
-            z_depcache:flush(menu),
+            z_depcache:flush(menu, Context),
             Context;
         false ->
             z_render:growl_error("Sorry, you need to be public publisher to edit the menu.", Context)

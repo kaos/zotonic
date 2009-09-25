@@ -33,7 +33,7 @@ install1(Context) ->
     end,
 
     ok = z_db:transaction(F, Context),
-    z_depcache:flush(),
+    z_depcache:flush(Context),
     ok.
 
 

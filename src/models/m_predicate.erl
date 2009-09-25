@@ -71,7 +71,7 @@ is_predicate(Id, Context) when is_integer(Id) ->
             _ -> true
         end
     end,
-    z_depcache:memo(F, {is_predicate, Id}, ?DAY, [predicate]);
+    z_depcache:memo(F, {is_predicate, Id}, ?DAY, [predicate], Context);
 is_predicate(Pred, Context) ->
     case name_to_id(Pred, Context) of
         {ok, _Id} -> true;
@@ -88,7 +88,7 @@ id_to_name(Id, Context) when is_integer(Id) ->
             Name -> {ok, z_convert:to_atom(Name)}
         end
     end,
-    z_depcache:memo(F, {predicate_name, Id}, ?DAY, [predicate]).
+    z_depcache:memo(F, {predicate_name, Id}, ?DAY, [predicate], Context).
 
     
 %% @doc Return the id of the predicate
@@ -110,7 +110,7 @@ get(PredId, Context) when is_integer(PredId) ->
 get(Pred, Context) when is_list(Pred) orelse is_binary(Pred) ->
     get(list_to_atom(string:to_lower(Pred)), Context);
 get(Pred, Context) ->
-    case z_depcache:get(predicate, Pred) of
+    case z_depcache:get(predicate, Pred, Context) of
         {ok, undefined} ->
             undefined;
         {ok, Value} ->
@@ -145,7 +145,7 @@ all(Context) ->
         end,
         [ FSetPred(Pred) || Pred <- Preds]
     end,
-    z_depcache:memo(F, predicate, ?DAY).
+    z_depcache:memo(F, predicate, ?DAY, Context).
 
 
 %% @doc Insert a new predicate, sets some defaults.
@@ -172,8 +172,8 @@ insert(Title, Context) ->
 
 
 %% @doc Flush all cached data about predicates.
-flush(_Context) ->
-    z_depcache:flush(predicate).
+flush(Context) ->
+    z_depcache:flush(predicate, Context).
 
 
 %% @doc Update a predicate, save the reversed flag, reset the list of valid subjects and objects.
@@ -214,7 +214,7 @@ object_category(Id, Context) ->
                 []
         end
     end,
-    z_depcache:memo(F, {object_category, Id}, ?WEEK, [predicate]).
+    z_depcache:memo(F, {object_category, Id}, ?WEEK, [predicate], Context).
 
 
 %% @doc Return all the valid categories for subjects.  Return the empty list when there is no constraint.  Note that the resulting array
@@ -229,7 +229,7 @@ subject_category(Id, Context) ->
                 []
         end
     end,
-    z_depcache:memo(F, {subject_category, Id}, ?WEEK, [predicate]).
+    z_depcache:memo(F, {subject_category, Id}, ?WEEK, [predicate], Context).
 
 
 %% @doc Return the list of predicates that are valid for the given resource id. Append all predicates that have no restrictions.

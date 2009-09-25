@@ -14,7 +14,7 @@
 -author("Marc Worrell <marc@worrell.nl>").
 
 %% API
--export([start_link/0, render/4, render_all/4, scomp_ready/4]).
+-export([start_link/1, render/4, render_all/4, scomp_ready/5]).
 
 %% gen_server callbacks
 -export([init/1, handle_call/3, handle_cast/2, handle_info/2,
@@ -26,18 +26,20 @@
 %% @doc The state of the scomp server.  'Cache' holds the cached entries, 'waiting' holds the list
 %%      of entries being rendered for the cache.  'Now' is the current time in seconds, updated with 
 %%      a timer to prevent too many time lookups.
--record(state, {waiting, scomps}).
+-record(state, {context, waiting, scomps}).
 
 
 %%====================================================================
 %% API
 %%====================================================================
 %%--------------------------------------------------------------------
-%% Function: start_link() -> {ok,Pid} | ignore | {error,Error}
+%% Function: start_link(SiteProps) -> {ok,Pid} | ignore | {error,Error}
 %% Description: Starts the server
 %%--------------------------------------------------------------------
-start_link() ->
-  gen_server:start_link({local, ?MODULE}, ?MODULE, [], []).
+start_link(SiteProps) ->
+    {host, Host} = proplists:lookup(host, SiteProps),
+    Name = z_utils:name_for_host(?MODULE, Host),
+    gen_server:start_link({local, Name}, ?MODULE, SiteProps, []).
 
 
 %% @spec render(ScompName, Args, Vars, Context) -> {ok, Context} | {ok, io_list} | {error, Reason}
@@ -68,16 +70,16 @@ render_all(ScompName, Args, Vars, Context) ->
     end.
 
 
-%% @spec scomp_ready(Key, Result, MaxAge, Varies) -> none()
+%% @spec scomp_ready(ScompPid, Key, Result, MaxAge, Varies) -> none()
 %% @doc Called when a cacheable scomp has been rendered, places the scomp in the cache and
 %%      posts the result to all waiting processes
-scomp_ready(Key, Result, MaxAge, Varies) ->
-    gen_server:cast(?MODULE, {scomp_ready, Key, Result, MaxAge, Varies}).
+scomp_ready(ScompPid, Key, Result, MaxAge, Varies) ->
+    gen_server:cast(ScompPid, {scomp_ready, Key, Result, MaxAge, Varies}).
 
 
 
 render_scomp_module(ModuleName, Args, Vars, ScompContext, Context) ->
-    case gen_server:call(?MODULE, {render, ModuleName, Args, ScompContext}) of
+    case gen_server:call(Context#context.scomp_server, {render, ModuleName, Args, ScompContext}) of
         {renderer, M, F, ScompState} ->
             ScompContextWM = ScompContext#context{wm_reqdata=Context#context.wm_reqdata},
             erlang:apply(M, F, [Args, Vars, ScompContextWM, ScompState]);
@@ -91,15 +93,17 @@ render_scomp_module(ModuleName, Args, Vars, ScompContext, Context) ->
 %%====================================================================
 
 %%--------------------------------------------------------------------
-%% Function: init(Args) -> {ok, State} |
+%% Function: init(SiteProps) -> {ok, State} |
 %%                         {ok, State, Timeout} |
 %%                         ignore               |
 %%                         {stop, Reason}
 %% Description: Initiates the server
 %%--------------------------------------------------------------------
-init([]) ->
+init(SiteProps) ->
+    Host = proplists:get_value(host, SiteProps),
+    Context = z_context:new(Host),
     timer:start(),
-    {ok, #state{waiting=dict:new(), scomps=dict:new()}}.
+    {ok, #state{context=Context, waiting=dict:new(), scomps=dict:new()}}.
 
 
 %%--------------------------------------------------------------------
@@ -141,7 +145,7 @@ handle_call({render, ModuleName, Args, Context}, From, State) ->
                         undefined ->
                             {reply, {renderer, ModuleName, render, ScompState}, State2};
                         {EssentialParams, MaxAge, Varies} ->
-                            StateSpawned = spawn_cacheable_renderer(ModuleName, ScompState, EssentialParams, MaxAge, Varies, Context, From, State2),
+                            StateSpawned = spawn_cacheable_renderer(self(), ModuleName, ScompState, EssentialParams, MaxAge, Varies, Context, From, State2),
                             {noreply, StateSpawned}
                     end
             end;
@@ -174,7 +178,7 @@ handle_cast({scomp_ready, Key, Result, MaxAge, Varies}, State) ->
         0 -> 
             {noreply, State1};
         Max ->
-            z_depcache:set(Key, Result, Max, Varies),
+            z_depcache:set(Key, Result, Max, Varies, State#state.context),
             {noreply, State1}
     end;
     
@@ -220,7 +224,7 @@ cache_lookup(_ScompName, undefined, _Varies, _Context) ->
     undefined;
 cache_lookup(ScompName, EssentialParams, _Varies, Context) ->
     Key = key(ScompName, EssentialParams, Context),
-    case z_depcache:get(Key) of
+    case z_depcache:get(Key, Context) of
         {ok, Result} -> Result;
         _ -> undefined
     end.
@@ -229,7 +233,7 @@ cache_lookup(ScompName, EssentialParams, _Varies, Context) ->
 %% @doc Render a scomp where we can cache the result.  The scomp is rendered and reported
 %%      back to this scomp server, which then replies all callee processes that are waiting and
 %%      caches the result.
-spawn_cacheable_renderer(ScompName, ScompState, EssentialParams, MaxAge, Varies, Context, From, State) ->
+spawn_cacheable_renderer(ScompPid, ScompName, ScompState, EssentialParams, MaxAge, Varies, Context, From, State) ->
     Key = key(ScompName, EssentialParams, Context),
     Waiting = try
                 dict:append(Key, From, State#state.waiting)
@@ -238,7 +242,7 @@ spawn_cacheable_renderer(ScompName, ScompState, EssentialParams, MaxAge, Varies,
              end,
     Renderer = fun() ->
                      Result = ScompName:render(EssentialParams, [], Context, ScompState),
-                     z_scomp:scomp_ready(Key, Result, MaxAge, Varies)
+                     ?MODULE:scomp_ready(ScompPid, Key, Result, MaxAge, Varies)
                 end,
     spawn(Renderer),
     State#state{waiting=Waiting}.

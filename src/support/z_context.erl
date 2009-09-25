@@ -7,11 +7,9 @@
 -author("Marc Worrell <marc@worrell.nl>").
 
 -export([
+    new/1,
     new/2,
-    new/0,
-    new_for_host/1,
 
-    site/0,
     site/1,
     hostname/1,
     
@@ -83,34 +81,44 @@
 -include_lib("zotonic.hrl").
 
 
-%% @doc Create a new context record for the current request.
+%% @doc Return a new empty context, no request is initialized.
+%% @spec new(HostDescr) -> Context2
+%%      HostDescr = Context | atom() | ReqData
+new(#context{host=Host}) ->
+    Context = set_server_names(#context{host=Host}),
+    Context#context{language=z_trans:default_language(Context)};
+new(Host) when is_atom(Host) ->
+    Context = set_server_names(#context{host=Host}),
+    Context#context{language=z_trans:default_language(Context)};
+new(ReqData) ->
+    Context = set_server_names(#context{wm_reqdata=ReqData, host=site(ReqData)}),
+    Context#context{language=z_trans:default_language(Context)}.
+    
+
+%% @doc Create a new context record for the current request and resource module
 new(ReqData, Module) ->
-    Context = #context{wm_reqdata=ReqData, resource_module=Module, host=site(ReqData)},
+    Context = set_server_names(#context{wm_reqdata=ReqData, resource_module=Module, host=site(ReqData)}),
     Context#context{language=z_trans:default_language(Context)}.
 
-%% @doc Return a new empty context
-new() -> 
-    Context = #context{host=site()},
-    Context#context{language=z_trans:default_language(Context)}.
 
-%% @doc Return an almost empty context for the database connection only, nothing else is initialised
-new_for_host(#context{host=Host}) ->
-    Context = new(),
-    Context#context{host=Host};
-new_for_host(Host) ->
-    Context = new(),
-    Context#context{host=Host}.
+%% @doc Set all server names for the given host.
+%% @spec set_server_names(Context1) -> Context2
+set_server_names(#context{host=Host} = Context) ->
+    HostAsList = [$$ | atom_to_list(Host)],
+    Context#context{
+        depcache=list_to_atom("z_depcache"++HostAsList),
+        notifier=list_to_atom("z_notifier"++HostAsList),
+        session_manager=list_to_atom("z_session_manager"++HostAsList),
+        visitor_manager=list_to_atom("z_visitor_manager"++HostAsList),
+        dispatcher=list_to_atom("z_dispatcher"++HostAsList),
+        template_server=list_to_atom("z_template"++HostAsList),
+        scomp_server=list_to_atom("z_scomp"++HostAsList),
+        dropbox_server=list_to_atom("z_dropbox"++HostAsList),
+        pivot_server=list_to_atom("z_pivot_rsc"++HostAsList),
+        module_indexer=list_to_atom("z_module_indexer"++HostAsList),
+        module_sup=list_to_atom("z_module_sup"++HostAsList)
+    }.
 
-
-
-%% @doc Return the site name, directly maps to a sitename in the site folder.  This will be
-%% set in the context as the 'host'.  The hostname can be found in the config key: site.hostname
-%% @spec host() -> atom()
-site() ->
-    case os:getenv("ZOTONIC_SITE") of 
-        false -> default;
-        Site -> list_to_atom(Site)
-    end.   
 
 
 %% @doc Maps the host in the request to a site in the sites folder.
@@ -119,31 +127,9 @@ site(#context{host=Host}) ->
     Host;
 %% @spec site(wm_reqdata) -> atom()
 site(ReqData) ->
-    case wrq:get_req_header("host", ReqData) of
-        undefined ->
-            site();
-
-        Hostname ->
-            Parts = string:tokens(string:to_lower(Hostname), "."),
-            NoWww = case Parts of
-                ["www" | Rest] -> Rest;
-                _ -> Parts
-            end,
-            NoTld = case NoWww of
-                [] ->
-                    [];
-                _ ->
-                    {A, _Tail} = lists:split(length(NoWww) - 1, NoWww),
-                    A
-            end,
-            HostName = z_string:to_name(string:concat(NoTld, "_")),
-            HostDir  = filename:join([code:lib_dir(zotonic, priv), "sites", HostName]),
-            case filelib:is_dir(HostDir) of
-                true ->
-                    list_to_atom(HostName);
-                false ->
-                    site()
-            end
+    case wrq:host(ReqData) of
+        undefined -> default;
+        Host -> Host
     end.
 
 
@@ -164,8 +150,24 @@ hostname(Context = #context{wm_reqdata=ReqData}) ->
 
 
 %% @doc Make the context safe to use in a async message
-prune_for_async(#context{wm_reqdata=ReqData, host=Host, acl=Acl, props=Props}) ->
-    #context{wm_reqdata=ReqData, host=Host, acl=Acl, props=Props}.
+prune_for_async(#context{} = Context) ->
+    #context{
+        wm_reqdata=Context#context.wm_reqdata, 
+        host=Context#context.host, 
+        acl=Context#context.acl, 
+        props=Context#context.props,
+        depcache=Context#context.depcache,
+        notifier=Context#context.notifier,
+        session_manager=Context#context.session_manager,
+        visitor_manager=Context#context.visitor_manager,
+        dispatcher=Context#context.dispatcher,
+        template_server=Context#context.template_server,
+        scomp_server=Context#context.scomp_server,
+        dropbox_server=Context#context.dropbox_server,
+        pivot_server=Context#context.pivot_server,
+        module_indexer=Context#context.module_indexer,
+        module_sup=Context#context.module_sup
+    }.
 
 
 %% @doc Cleanup a context for the output stream
@@ -186,7 +188,22 @@ prune_for_template(Output) -> Output.
 
 %% @doc Cleanup a context so that it can be used exclusively for database connections
 prune_for_database(Context) ->
-    #context{host=Context#context.host, dbc=Context#context.dbc}.
+    #context{
+        host=Context#context.host, 
+        dbc=Context#context.dbc,
+        depcache=Context#context.depcache,
+        notifier=Context#context.notifier,
+        session_manager=Context#context.session_manager,
+        visitor_manager=Context#context.visitor_manager,
+        dispatcher=Context#context.dispatcher,
+        template_server=Context#context.template_server,
+        scomp_server=Context#context.scomp_server,
+        dropbox_server=Context#context.dropbox_server,
+        pivot_server=Context#context.pivot_server,
+        module_indexer=Context#context.module_indexer,
+        module_sup=Context#context.module_sup
+    }.
+
 
 %% @doc Cleanup a context for cacheable scomp handling.  Resets most of the accumulators to prevent duplicating
 %% between different (cached) renderings.
@@ -236,7 +253,7 @@ pickle(Context) ->
 %% @doc Depickle a context for restoring from a database
 %% @todo pickle/depickle the visitor id (when any)
 depickle({pickled_context, Host, UserId, Language, _VisitorId}) ->
-    Context = #context{host=Host, language=Language},
+    Context = set_server_names(#context{host=Host, language=Language}),
     case UserId of
         undefined -> Context;
         _ -> z_acl:logon(UserId, Context)

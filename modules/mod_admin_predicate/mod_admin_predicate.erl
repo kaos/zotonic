@@ -15,7 +15,7 @@
 
 %% gen_server exports
 -export([init/1, handle_call/3, handle_cast/2, handle_info/2, terminate/2, code_change/3]).
--export([start_link/0, start_link/1]).
+-export([start_link/1]).
 
 %% interface functions
 -export([
@@ -60,10 +60,8 @@ predicate_flush({rsc_update_done, _UpdateAction, _Id, BeforeCatList, CatList}, C
 %%====================================================================
 %% @spec start_link() -> {ok,Pid} | ignore | {error,Error}
 %% @doc Starts the server
-start_link() -> 
-    start_link([]).
 start_link(Args) when is_list(Args) ->
-    gen_server:start_link({local, ?MODULE}, ?MODULE, Args, []).
+    gen_server:start_link(?MODULE, Args, []).
 
 %%====================================================================
 %% gen_server callbacks
@@ -79,7 +77,7 @@ init(Args) ->
     {context, Context} = proplists:lookup(context, Args),
     z_notifier:observe(rsc_update,      {?MODULE, rsc_update},      Context),
     z_notifier:observe(rsc_update_done, {?MODULE, predicate_flush}, Context),
-    {ok, #state{context=z_context:new_for_host(Context)}}.
+    {ok, #state{context=z_context:new(Context)}}.
 
 
 %% @spec handle_call(Request, From, State) -> {reply, Reply, State} |

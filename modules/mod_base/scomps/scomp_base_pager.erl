@@ -152,7 +152,7 @@ max(_,B) -> B.
 
 
 test() ->
-    C = z_context:new(),
+    C = z_context:new(default),
     R = #search_result{result=[a], pages=100, page=10},
     {ok, H} = render([{result,R}], [], C, []),
     list_to_binary(H).

@@ -22,6 +22,21 @@
 
         %% The host (also the id of the database used) 
         host=default,
+        
+        %% Servers and supervisors for the site/host
+        depcache,
+        notifier,
+        session_manager,
+        visitor_manager,
+        dispatcher,
+        template_server,
+        scomp_server,
+        dropbox_server,
+        pivot_server,
+        module_indexer,
+        module_sup,
+        
+        
         %% The database connection used for (nested) transactions, see z_db
         dbc=undefined,
 

@@ -33,7 +33,7 @@
 start_link() -> 
     start_link([]).
 start_link(Args) when is_list(Args) ->
-    gen_server:start_link({local, ?MODULE}, ?MODULE, Args, []).
+    gen_server:start_link(?MODULE, Args, []).
 
 %%====================================================================
 %% gen_server callbacks
@@ -47,7 +47,7 @@ start_link(Args) when is_list(Args) ->
 init(Args) ->
     process_flag(trap_exit, true),
     {context, Context} = proplists:lookup(context, Args),
-    {ok, #state{context=z_context:new_for_host(Context)}}.
+    {ok, #state{context=z_context:new(Context)}}.
 
 
 %% @spec handle_call(Request, From, State) -> {reply, Reply, State} |

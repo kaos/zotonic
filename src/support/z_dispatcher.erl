@@ -10,55 +10,70 @@
 
 %% gen_server exports
 -export([init/1, handle_call/3, handle_cast/2, handle_info/2, terminate/2, code_change/3]).
--export([start_link/0, start_link/1]).
+-export([start_link/1]).
 
 %% z_dispatch exports
--export([url_for/2, url_for/3, url_for/4, reload/1, reload/2, test/0]).
+-export([url_for/2, url_for/3, url_for/4, hostname/1, dispatchinfo/1, reload/1, reload/2, test/0]).
 
 -include_lib("zotonic.hrl").
 
--record(state, {dispatchlist=undefined, lookup=undefined}).
+-record(state, {dispatchlist=undefined, lookup=undefined, context, host, hostname, hostalias}).
 
 %%====================================================================
 %% API
 %%====================================================================
-%% @spec start_link() -> {ok,Pid} | ignore | {error,Error}
+%% @spec start_link(SiteProps) -> {ok,Pid} | ignore | {error,Error}
 %% @doc Starts the dispatch server
-start_link() ->
-    start_link([]).
-start_link(Args) when is_list(Args) ->
-    gen_server:start_link({local, ?MODULE}, ?MODULE, Args, []).
+start_link(SiteProps) ->
+    {host, Host} = proplists:lookup(host, SiteProps),
+    Name = z_utils:name_for_host(?MODULE, Host),
+    gen_server:start_link({local, Name}, ?MODULE, SiteProps, []).
 
 
-%% @spec url_for(atom()) -> iolist()
+%% @spec url_for(atom(), Context) -> iolist()
 %% @doc Construct an uri from a named dispatch, assuming no parameters
-url_for(Name, #context{} = _Context) ->
-    gen_server:call(?MODULE, {'url_for', Name, [], html}).
+url_for(Name, #context{dispatcher=Dispatcher}) ->
+    gen_server:call(Dispatcher, {'url_for', Name, [], html}).
 
 
-%% @spec url_for(atom(), Args) -> iolist()
+%% @spec url_for(atom(), Args, Context) -> iolist()
 %%        type Args = PropList
 %% @doc Construct an uri from a named dispatch and the parameters
-url_for(Name, Args, #context{} = Context) ->
+url_for(Name, Args, #context{dispatcher=Dispatcher} = Context) ->
     Args1 = append_qargs(Args, Context),
-    gen_server:call(?MODULE, {'url_for', Name, Args1, html}).
+    gen_server:call(Dispatcher, {'url_for', Name, Args1, html}).
 
 
-%% @spec url_for(atom(), Args) -> iolist()
+%% @spec url_for(atom(), Args, bool(), Context) -> iolist()
 %%        type Args = PropList
 %% @doc Construct an uri from a named dispatch and the parameters
-url_for(Name, Args, Escape, #context{} = Context) ->
+url_for(Name, Args, Escape, #context{dispatcher=Dispatcher} = Context) ->
     Args1 = append_qargs(Args, Context),
-    gen_server:call(?MODULE, {'url_for', Name, Args1, Escape}).
+    gen_server:call(Dispatcher, {'url_for', Name, Args1, Escape}).
+
+
+%% @spec hostname(Context) -> iolist()
+%% @doc Fetch the preferred hostname for this site
+hostname(#context{dispatcher=Dispatcher}) ->
+    gen_server:call(Dispatcher, 'hostname').
+
+
+%% @spec dispatchinfo(Context) -> {host, hostname, hostalias, dispatchlist}
+%% @doc Fetch the dispatchlist for the site.
+dispatchinfo(#context{dispatcher=Dispatcher}) -> 
+    gen_server:call(Dispatcher, 'dispatchinfo');
+dispatchinfo(Server) when is_pid(Server) orelse is_atom(Server) -> 
+    gen_server:call(Server, 'dispatchinfo').
 
 
 %% @doc Reload all dispatch lists.  Finds new dispatch lists and adds them to the dispatcher
-reload(Context) ->
-    gen_server:cast(?MODULE, {'reload', Context}).
+reload(#context{dispatcher=Dispatcher}) ->
+    gen_server:call(Dispatcher, 'reload'),
+    z_sites_sup:update_dispatchinfo().
 
 reload({module_ready}, Context) ->
-    gen_server:cast(?MODULE, {'reload', Context}).
-    
+    reload(Context).
+
 
 %%====================================================================
 %% gen_server callbacks
@@ -69,13 +84,22 @@ reload({module_ready}, Context) ->
 %%                     ignore               |
 %%                     {stop, Reason}
 %% @doc Initiates the server, loads the dispatch list into the webmachine dispatcher
-init(_Args) ->
-    Context = z_context:new(),
+init(SiteProps) ->
+    {host, Host} = proplists:lookup(host, SiteProps),
+    {hostname, Hostname} = proplists:lookup(hostname, SiteProps),
+    HostAlias = proplists:get_all_values(hostalias, SiteProps),
+    Context = z_context:new(Host),
     process_flag(trap_exit, true),
-    State  = #state{dispatchlist=[], lookup=dict:new()},
-    State1 = reload_dispatch_list(Context, State),
+    State  = #state{
+                dispatchlist=[], 
+                lookup=dict:new(),
+                context=Context, 
+                host=Host, 
+                hostname=iolist_to_binary(Hostname), 
+                hostalias=[iolist_to_binary(Alias) || Alias <- HostAlias]
+    },
     z_notifier:observe(module_ready, {?MODULE, reload}, Context),
-    {ok, State1}.
+    {ok, State}.
 
 
 %% @spec handle_call(Request, From, State) -> {reply, Reply, State} |
@@ -85,19 +109,30 @@ init(_Args) ->
 %%                                      {stop, Reason, Reply, State} |
 %%                                      {stop, Reason, State}
 %% Description: Handling call messages
+%% @doc Create the url for the dispatch rule with name and arguments Args.
 handle_call({'url_for', Name, Args, Escape}, _From, State) ->
     Uri = make_url_for(Name, Args, Escape, State#state.lookup),
-    {reply, Uri, State}.
+    {reply, Uri, State};
 
+%% @doc Return the preferred hostname for the site
+handle_call('hostname', _From, State) ->
+    {reply, State#state.hostname, State};
+
+%% @doc Return the dispatchinfo for the site  {host, hostname, hostaliases, dispatchlist}
+handle_call('dispatchinfo', _From, State) ->
+    {reply, {State#state.host, State#state.hostname, State#state.hostalias, State#state.dispatchlist}, State};
+
+%% @doc Reload the dispatch list, signal the sites supervisor that the dispatch list has been changed.
+%% The site supervisor will collect all dispatch lists and send them at once to webmachine.
+handle_call('reload', _From, State) ->
+    State1 = reload_dispatch_list(State),
+    {reply, ok, State1}.
 
 %% @spec handle_cast(Msg, State) -> {noreply, State} |
 %%                                  {noreply, State, Timeout} |
 %%                                  {stop, Reason, State}
-%% @doc Handling cast messages
-handle_cast({'reload', Context}, State) ->
-    State1 = reload_dispatch_list(Context, State),
-    {noreply, State1}.
-
+handle_cast(_Msg, State) ->
+    {noreply, State}.
 
 %% @spec handle_info(Info, State) -> {noreply, State} |
 %%                                       {noreply, State, Timeout} |
@@ -112,9 +147,8 @@ handle_info(_Info, State) ->
 %% terminate. It should be the opposite of Module:init/1 and do any necessary
 %% cleaning up. When it returns, the gen_server terminates with Reason.
 %% The return value is ignored.
-terminate(_Reason, _State) ->
-    Context = z_context:new(),
-    z_notifier:detach(module_ready, {?MODULE, reload}, Context),
+terminate(_Reason, State) ->
+    z_notifier:detach(module_ready, {?MODULE, reload}, State#state.context),
     ok.
 
 %% @spec code_change(OldVsn, State, Extra) -> {ok, NewState}
@@ -130,43 +164,37 @@ code_change(_OldVsn, State, _Extra) ->
 
 
 %% @doc Reload the dispatch list and send it to the webmachine dispatcher.
-reload_dispatch_list(Context, State) ->
+reload_dispatch_list(#state{context=Context} = State) ->
     DispatchList = collect_dispatch_lists(Context),
-    LookupDict   = dispatch_for_uri_lookup(DispatchList),
-    dispatch_webmachine(DispatchList),
+    LookupDict = dispatch_for_uri_lookup(DispatchList),
     State#state{dispatchlist=DispatchList, lookup=LookupDict}.
 
 
 %% @doc Collect all dispatch lists.  Checks priv/dispatch for all dispatch list definitions.
 collect_dispatch_lists(Context) ->
-    Files      = filelib:wildcard(filename:join([code:lib_dir(zotonic, priv), "sites", "default", "dispatch", "*"])),
+    Files      = filelib:wildcard(filename:join([code:lib_dir(zotonic, priv), "sites", Context#context.host, "dispatch", "*"])),
     Modules    = z_module_sup:active(Context),
     ModuleDirs = z_module_sup:scan(Context),
     ModDisp    = [ {M, filelib:wildcard(filename:join([proplists:get_value(M, ModuleDirs), "dispatch", "*"]))} || M <- Modules ],
     ModDispOnPrio = lists:concat([ ModFiles || {_Mod, ModFiles} <- z_module_sup:prio_sort(ModDisp) ]),
     Dispatch   = lists:map(fun get_file_dispatch/1, ModDispOnPrio++Files),
     lists:flatten(Dispatch).
-    
 
-%% @doc Set the dispatch list of the webmachine dispatcher.
-dispatch_webmachine(DispatchList) ->
-    WMList = [list_to_tuple(tl(tuple_to_list(Disp))) || Disp <- DispatchList],
-    application:set_env(webmachine, dispatch_list, WMList).
-    
 
 %% @doc Fetch a dispatch list from a module (if the module exports dispatch/0)
-get_module_dispatch(Mod) ->
-    try
-        Exports = Mod:module_info(exports),
-        case proplists:is_defined(dispatch, Exports) of
-            true -> Mod:dispatch();
-            false -> []
-        end
-    catch 
-        M:E ->
-            ?ERROR("Module dispatch error: ~p  ~p", [Mod, {M,E}]),
-            []
-    end.
+%get_module_dispatch(Mod) ->
+%    try
+%        Exports = Mod:module_info(exports),
+%        case proplists:is_defined(dispatch, Exports) of
+%            true -> Mod:dispatch();
+%            false -> []
+%        end
+%    catch 
+%        M:E ->
+%            ?ERROR("Module dispatch error: ~p  ~p", [Mod, {M,E}]),
+%            []
+%    end.
+
 
 %% @doc Read a dispatch file, the file should contain a valid Erlang dispatch datastructure.
 get_file_dispatch(File) ->
@@ -324,7 +352,7 @@ append_qargs(Args, Context) ->
 % {value, Value, _NewBindings} = erl_eval:exprs(Y, [])}.
 
 test() ->
-    Ctx  = z_context:new(),
+    Ctx  = z_context:new(default),
     List = collect_dispatch_lists(Ctx),
     Dict = dispatch_for_uri_lookup(List),
     dict:to_list(Dict),

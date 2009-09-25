@@ -2,7 +2,7 @@
 %% @copyright 2009 Marc Worrell
 %%
 %% @doc Simple dropbox handler, monitors a directory and signals new files.
-%% @todo Make this work for non-default sites (ie. start a dropbox server for all sites, best is to make this into a module)
+%% @todo Make this into a module
 %%
 %% Flow:
 %% 1. An user uploads/moves a file to the dropbox
@@ -14,11 +14,11 @@
 
 %% gen_server exports
 -export([init/1, handle_call/3, handle_cast/2, handle_info/2, terminate/2, code_change/3]).
--export([start_link/0, start_link/1]).
+-export([start_link/1]).
 
 %% interface functions
 -export([
-    scan/0,
+    scan/1,
     test/0
 ]).
 
@@ -27,43 +27,45 @@
 
 -include_lib("zotonic.hrl").
 
--record(state, {dropbox_dir, processing_dir, unhandled_dir, min_age, max_age}).
+-record(state, {dropbox_dir, processing_dir, unhandled_dir, min_age, max_age, host, context}).
 
 %%====================================================================
 %% API
 %%====================================================================
-%% @spec start_link() -> {ok,Pid} | ignore | {error,Error}
+%% @spec start_link(SiteArgs) -> {ok,Pid} | ignore | {error,Error}
 %% @doc Starts the dropbox server
-start_link() -> 
-    start_link([]).
-start_link(Args) when is_list(Args) ->
-    gen_server:start_link({local, ?MODULE}, ?MODULE, Args, []).
+start_link(SiteProps) ->
+    {host, Host} = proplists:lookup(host, SiteProps),
+    Name = z_utils:name_for_host(?MODULE, Host),
+    gen_server:start_link({local, Name}, ?MODULE, SiteProps, []).
 
 
-%% @spec scan() -> void()
+%% @spec scan(context()) -> void()
 %% @doc Perform a scan of the dropbox, periodically called by a timer.
-scan() ->
-    gen_server:cast(?MODULE, scan).
+scan(Context) ->
+    gen_server:cast(Context#context.dropbox_server, scan).
 
 %%====================================================================
 %% gen_server callbacks
 %%====================================================================
 
-%% @spec init(Args) -> {ok, State} |
+%% @spec init(SiteProps) -> {ok, State} |
 %%                     {ok, State, Timeout} |
 %%                     ignore               |
 %%                     {stop, Reason}
 %% @doc Initiates the server.  Options are: dropbox_dir, processing_dir, unhandled_dir, interval, max_age and min_age
-init(Args) ->
-    FilesDir = filename:join([code:lib_dir(zotonic, priv), "sites", "default", "files"]),
-    DropBox  = string:strip(proplists:get_value(dropbox_dir,    Args, filename:join([FilesDir, "dropbox"])),    right, $/), 
-    ProcDir  = string:strip(proplists:get_value(processing_dir, Args, filename:join([FilesDir, "processing"])), right, $/), 
-    UnDir    = string:strip(proplists:get_value(unhandled_dir,  Args, filename:join([FilesDir, "unhandled"])),  right, $/), 
-    Interval = proplists:get_value(interval, Args, 10000),
-    MinAge   = proplists:get_value(min_age, Args, 10),
-    MaxAge   = proplists:get_value(max_age, Args, 3600),
-    State    = #state{dropbox_dir=DropBox, processing_dir=ProcDir, unhandled_dir=UnDir, min_age=MinAge, max_age=MaxAge},
-    timer:apply_interval(Interval, ?MODULE, scan, []),
+init(SiteProps) ->
+    Host     = proplists:get_value(host, SiteProps),
+    Context  = z_context:new(Host),
+    FilesDir = filename:join([code:lib_dir(zotonic, priv), "sites", Host, "files"]),
+    DropBox  = string:strip(proplists:get_value(dropbox_dir,            SiteProps, filename:join([FilesDir, "dropbox"])),    right, $/), 
+    ProcDir  = string:strip(proplists:get_value(dropbox_processing_dir, SiteProps, filename:join([FilesDir, "processing"])), right, $/), 
+    UnDir    = string:strip(proplists:get_value(dropbox_unhandled_dir,  SiteProps, filename:join([FilesDir, "unhandled"])),  right, $/), 
+    Interval = proplists:get_value(dropbox_interval, SiteProps, 10000),
+    MinAge   = proplists:get_value(dropbox_min_age, SiteProps, 10),
+    MaxAge   = proplists:get_value(dropbox_max_age, SiteProps, 3600),
+    State    = #state{dropbox_dir=DropBox, processing_dir=ProcDir, unhandled_dir=UnDir, min_age=MinAge, max_age=MaxAge, host=Host, context=Context},
+    timer:apply_interval(Interval, ?MODULE, scan, [Context]),
     {ok, State}.
 
 
@@ -143,7 +145,7 @@ do_scan(State) ->
                                 end,
                                 ToProcess,
                                 Moved),
-    lists:foreach(fun(F) -> z_notifier:notify({dropbox_file, F}) end, ToProcess1).
+    lists:foreach(fun(F) -> z_notifier:notify({dropbox_file, F}, State#state.context) end, ToProcess1).
 
 
 %% @doc Scan a directory, return list of files not changed in the last 10 seconds.

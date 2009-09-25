@@ -90,7 +90,7 @@ get_skus(Id, Context) ->
     F = fun() ->
         z_db:assoc_props("select * from shop_sku where rsc_id = $1 and available order by variant asc", [Id], Context)
     end,
-    z_depcache:memo(F, {skus, Id}, ?HOUR).
+    z_depcache:memo(F, {skus, Id}, ?HOUR, Context).
  
 
 %% @doc Fetch the sku and its price that offers the best price for the product

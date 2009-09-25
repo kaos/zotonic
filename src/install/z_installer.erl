@@ -18,14 +18,15 @@
 %%====================================================================
 %% @spec start_link() -> {ok,Pid} | ignore | {error,Error}
 %% @doc Install zotonic on the databases in the PoolOpts, skips when already installed.
-start_link(Opts) when is_list(Opts) ->
-    [ install_check(Name, PoolOpts) || {Name, _Size, PoolOpts} <- Opts ],
+start_link(SiteProps) when is_list(SiteProps) ->
+    install_check(SiteProps),
     ignore.
 
-install_check(Name, PoolOpts) ->
+install_check(SiteProps) ->
     % Check if the config table exists, if so then assume that all is ok
-    Database = proplists:get_value(database, PoolOpts),
-    {ok, C} = pgsql_pool:get_connection(Name),
+    Name     = proplists:get_value(host, SiteProps),
+    Database = proplists:get_value(dbdatabase, SiteProps),
+    {ok, C}  = pgsql_pool:get_connection(Name),
     {ok, HasConfig} = pgsql:equery1(C, "
             select count(*) 
             from information_schema.tables 
@@ -37,9 +38,9 @@ install_check(Name, PoolOpts) ->
     case HasConfig of
         0 ->
             ?LOG("Installing database ~p@~p:~p ~p", [
-                        proplists:get_value(user, PoolOpts),
-                        proplists:get_value(host, PoolOpts),
-                        proplists:get_value(port, PoolOpts),
+                        proplists:get_value(dbuser, SiteProps),
+                        proplists:get_value(dbhost, SiteProps),
+                        proplists:get_value(dbport, SiteProps),
                         Database
                         ]),
             z_install:install(Name);

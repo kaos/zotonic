@@ -70,9 +70,9 @@ delete_nocheck(Id, Context) ->
             end,
     
             % Flush all cached entries depending on this entry, one of its subjects or its categories.
-            z_depcache:flush(Id),
-            [ z_depcache:flush(SubjectId) || SubjectId <- Referrers ],
-            [ z_depcache:flush(Cat) || Cat <- CatList ],
+            z_depcache:flush(Id, Context),
+            [ z_depcache:flush(SubjectId, Context) || SubjectId <- Referrers ],
+            [ z_depcache:flush(Cat, Context) || Cat <- CatList ],
     
             % Notify all modules that the rsc has been deleted
             z_notifier:notify({rsc_update_done, delete, Id, CatList, []}, Context),
@@ -209,10 +209,10 @@ update(Id, Props, EscapeTexts, Context) when is_integer(Id) orelse Id == insert_
                         {ok, NewId, notchanged} ->
                             {ok, NewId};
                         {ok, NewId, NewProps, OldCatList, RenumberCats} ->    
-                            z_depcache:flush(NewId),
+                            z_depcache:flush(NewId, Context),
                             case proplists:get_value(name, NewProps) of
                                 undefined -> nop;
-                                Name -> z_depcache:flush({rsc_name, z_convert:to_list(Name)})
+                                Name -> z_depcache:flush({rsc_name, z_convert:to_list(Name)}, Context)
                             end,
 
                             NewCatList = m_rsc:is_a(NewId, Context),
@@ -225,7 +225,7 @@ update(Id, Props, EscapeTexts, Context) when is_integer(Id) orelse Id == insert_
                             end,
                             
                             % Flush all cached content that is depending on one of the updated categories
-                            [ z_depcache:flush(Cat) || Cat <- AllCatList ],
+                            [ z_depcache:flush(Cat, Context) || Cat <- AllCatList ],
 
                             % Notify that a new resource has been inserted, or that an existing one is updated
                             case Id of

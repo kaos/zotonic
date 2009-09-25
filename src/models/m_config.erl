@@ -52,19 +52,19 @@ m_value(#m{value=Module}, Context) ->
 %% @doc Return all configurations gives a nested proplist (module, key)
 
 all(Context) ->
-    case z_depcache:get(config) of
+    case z_depcache:get(config, Context) of
         {ok, Cs} ->
             Cs;
         undefined ->
             Cs = z_db:assoc_props("select * from config order by module, key", Context),
             Indexed = [ {M, z_utils:index_proplist(key, CMs)} || {M,CMs} <- z_utils:group_proplists(module, Cs) ],
-            z_depcache:set(config, Indexed, ?DAY),
+            z_depcache:set(config, Indexed, ?DAY, Context),
             Indexed
     end.
 
 
 get(Module, Context) when is_atom(Module) ->
-    case z_depcache:get(config, Module) of
+    case z_depcache:get(config, Module, Context) of
         {ok, undefined} ->
             undefined;
         {ok, Cs} ->
@@ -75,7 +75,7 @@ get(Module, Context) when is_atom(Module) ->
     end.
 
 get(Module, Key, Context) when is_atom(Module) andalso is_atom(Key) ->
-    case z_depcache:get(config, Module) of
+    case z_depcache:get(config, Module, Context) of
         {ok, undefined} ->
             undefined;
         {ok, Cs} ->
@@ -106,7 +106,7 @@ set_value(Module, Key, Value, Context) ->
         0 -> z_db:insert(config, [{module,Module}, {key, Key}, {value, Value}], Context);
         1 -> ok
     end,
-    z_depcache:flush(config).
+    z_depcache:flush(config, Context).
 
 
 set_prop(Module, Key, Prop, PropValue, Context) ->
@@ -114,11 +114,11 @@ set_prop(Module, Key, Prop, PropValue, Context) ->
         undefined -> z_db:insert(config, [{module,Module}, {key,Key}, {Prop,PropValue}], Context);
         Id -> z_db:update(config, Id, [{Prop,PropValue}], Context)
     end,
-    z_depcache:flush(config).
+    z_depcache:flush(config, Context).
 
 delete(Module, Key, Context) ->
     z_db:q("delete from config where module = $1 and key = $2", [Module, Key], Context),
-    z_depcache:flush(config).
+    z_depcache:flush(config, Context).
 
 
 get_id(Module, Key, Context) ->

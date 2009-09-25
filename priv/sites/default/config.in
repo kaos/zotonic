@@ -1,0 +1,36 @@
+% Configuration of the New Island Festival site
+% Copy this file to 'config' and change the settings below.
+% TODO: move the NIF site to another repository
+[
+    % This site is enabled or not.
+    {enabled, true},
+    
+    % Atomic hostname, MUST be equal to the directory name of this site.
+    {host, zotonic},
+
+    % Hostname for virtual host support
+    {hostname, "newislandfestival.com"},
+    {hostalias, "www.newislandfestival.com"},
+    {hostalias, "nif.zotonic.com"},
+
+    
+    % PostgreSQL database connection
+    {dbhost, "127.0.0.1"},
+    {dbport, 5432},
+    {dbuser, "zotonic"},
+    {dbpassword, ""},
+    {dbdatabase, "nif"},
+    
+    % Admin password, used during installation. You can change it later
+    {adminpassword, "admin"},
+    
+    % Key used for signing image urls with image manipulations (crop, rotate, resize, etc.)
+    % When not set then zotonic will generate a new key on every restart, forcing old image urls to fail.
+    % A new key will also forces regenerating images, which takes cpu time and will fill your hard disk.
+    {sign_key_simple, "--change-me--"},
+    
+    % Key used for signing postbacks - this _must_ be a hard to guess key, otherwise your system is insecure.
+    % When not defined, then zotonic will generate a new key on every restart.
+    % When a new key is generated then all postbacks from old html pages will fail.
+    {sign_key, "--change-me--"}
+].

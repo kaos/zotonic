@@ -42,22 +42,12 @@ upgrade() ->
 %% @spec init([]) -> SupervisorTree
 %% @doc supervisor callback.
 init([]) ->
-    % Default site name
-    DefaultSite= case os:getenv("ZOTONIC_SITE") of false -> default; AnySite -> list_to_atom(AnySite) end,
-
     % Listen to IP address and Port
     WebIp      = case os:getenv("ZOTONIC_IP")   of
         Any when Any == false; Any == []; Any == "*"; Any == "any" -> any;
         ConfIP -> ConfIP 
     end,   
     WebPort    = case os:getenv("ZOTONIC_PORT") of false -> 8000; Anyport -> list_to_integer(Anyport) end,   
-
-    % Default connection for database
-    DbHost     = case os:getenv("ZOTONIC_DBHOST")     of false -> "localhost"; AnyDbHost -> AnyDbHost end,
-    DbPort     = case os:getenv("ZOTONIC_DBPORT")     of false -> 5432; AnyDbPort -> list_to_integer(AnyDbPort) end,
-    DbUser     = case os:getenv("ZOTONIC_DBUSER")     of false -> "zotonic"; AnyDbUser -> AnyDbUser end,
-    DbPassword = case os:getenv("ZOTONIC_DBPASSWORD") of false -> ""; AnyDbPassword -> AnyDbPassword end,
-    DbDatabase = case os:getenv("ZOTONIC_DB")         of false -> "zotonic"; AnyDbDatabase -> AnyDbDatabase end,
 
     WebConfig = [
 		 {ip, WebIp},
@@ -68,79 +58,33 @@ init([]) ->
 		 {backlog, 500}
 	],
 
-    MochiWeb = {webmachine_mochiweb,
+    % Listen to the ip address and port for all sites.
+    Webmachine = {webmachine_mochiweb,
 	            {webmachine_mochiweb, start, [WebConfig]}, 
 	            permanent, 5000, worker, dynamic},
 
-    DbPoolConfig = [
-        {DefaultSite, 10, [{host, DbHost}, {port, DbPort}, {username, DbUser}, {password, DbPassword}, {database, DbDatabase}]}
-    ],
-    
-
+    % Random id generation
     Ids     = {z_ids,
 	            {z_ids, start_link, []}, 
 	            permanent, 5000, worker, dynamic},
     
+    % Database connection, connections are made by z_site_sup instances.
     Postgres = {epgsql_pool,
-                {epgsql_pool, start_link, [DbPoolConfig]},
+                {epgsql_pool, start_link, [[]]},
                 permanent, 5000, worker, dynamic},
-                
-    Depcache = {z_depcache,
-                {z_depcache, start_link, []}, 
-                permanent, 5000, worker, dynamic},
-
-    Notifier = {z_notifier,
-	            {z_notifier, start_link, []}, 
-	            permanent, 5000, worker, dynamic},
-
-    Installer = {z_installer,
-                {z_installer, start_link, [DbPoolConfig]},
-                permanent, 1, worker, dynamic},
-
-    Session = {z_session_manager,
-	            {z_session_manager, start_link, []}, 
-	            permanent, 5000, worker, dynamic},
-
-    Visitor = {z_visitor_manager,
-	            {z_visitor_manager, start_link, []}, 
-	            permanent, 5000, worker, dynamic},
-
-    Dispatcher = {z_dispatcher,
-	            {z_dispatcher, start_link, []}, 
-	            permanent, 5000, worker, dynamic},
-
-    Template = {z_template,
-	            {z_template, start_link, []}, 
-	            permanent, 5000, worker, dynamic},
-
-    Scomp = {z_scomp,
-	            {z_scomp, start_link, []}, 
-	            permanent, 5000, worker, dynamic},
-
-    DropBox = {z_dropbox,
-                {z_dropbox, start_link, []}, 
-                permanent, 5000, worker, dynamic},
-
-    Pivot = {z_pivot_rsc,
-                {z_pivot_rsc, start_link, []}, 
-                permanent, 5000, worker, dynamic},
-
+    
+    % Image resizer, prevents to many images to be resized at once, bogging the processor.
     PreviewServer = {z_media_preview_server,
                 {z_media_preview_server, start_link, []}, 
                 permanent, 5000, worker, dynamic},
 
-    ModuleIndexer = {z_module_indexer,
-                {z_module_indexer, start_link, []},
+    % Sites supervisor, starts all enabled sites
+    SitesSup = {z_sites_sup,
+                {z_sites_sup, start_link, []},
                 permanent, 5000, worker, dynamic},
-
-    Modules = {z_module_sup,
-                {z_module_sup, start_link, []},
-                permanent, 5000, worker, dynamic},
-
+                
     Processes = [
-            MochiWeb, Ids, Postgres, Depcache, Notifier, Installer, Session, Visitor, 
-            Dispatcher, Template, Scomp, DropBox, Pivot, PreviewServer,
-            ModuleIndexer, Modules
+            Webmachine, Ids, Postgres, PreviewServer, SitesSup
     ],
     {ok, {{one_for_one, 1000, 10}, Processes}}.
 

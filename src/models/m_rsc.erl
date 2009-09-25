@@ -100,7 +100,7 @@ name_to_id_cat(Name, Cat, Context) when is_integer(Name) ->
             Id -> {ok, Id}
         end
     end,
-    z_depcache:memo(F, {rsc_name, Name, Cat}, ?DAY, [Cat]);
+    z_depcache:memo(F, {rsc_name, Name, Cat}, ?DAY, [Cat], Context);
 name_to_id_cat(Name, Cat, Context) ->
     F = fun() ->
         CatId = m_category:name_to_id_check(Cat, Context),
@@ -109,7 +109,7 @@ name_to_id_cat(Name, Cat, Context) ->
             Id -> {ok, Id}
         end
     end,
-    z_depcache:memo(F, {rsc_name, Name, Cat}, ?DAY, [Cat]).
+    z_depcache:memo(F, {rsc_name, Name, Cat}, ?DAY, [Cat], Context).
 
 name_to_id_cat_check(Name, Cat, Context) ->
     {ok, Id} = name_to_id_cat(Name, Cat, Context),
@@ -131,7 +131,7 @@ get(Id, Context) ->
             F = fun() ->
                 get_raw(Rid, Context)
             end,
-            z_depcache:memo(F, Rid, ?WEEK)
+            z_depcache:memo(F, Rid, ?WEEK, Context)
     end.
 
 %% @doc Get the resource from the database, do not fetch the pivot fields.
@@ -163,7 +163,7 @@ get_acl_props(Id, Context) when is_integer(Id) ->
                 #acl_props{is_published=false, visible_for=3, group_id=0}
         end
     end,
-    z_depcache:memo(F, {rsc_acl_fields, Id}, ?DAY, [Id]).
+    z_depcache:memo(F, {rsc_acl_fields, Id}, ?DAY, [Id], Context).
 
 
 %% @doc Insert a new resource
@@ -216,7 +216,7 @@ exists(Name, Context) when is_binary(Name) ->
 exists(Id, Context) -> 
     case rid(Id, Context) of
         Rid when is_integer(Rid) ->
-            case z_depcache:get({exists, Rid}) of
+            case z_depcache:get({exists, Rid}, Context) of
                 {ok, Exists} ->
                     Exists;
                 undefined -> 
@@ -224,7 +224,7 @@ exists(Id, Context) ->
                         undefined -> false;
                         _ -> true
                     end,
-                    z_depcache:set({exists, Rid}, Exists, ?DAY, [Rid]),
+                    z_depcache:set({exists, Rid}, Exists, ?DAY, [Rid], Context),
                     Exists
             end;
         undefined -> false
@@ -313,16 +313,16 @@ p(Id, Predicate, Context) ->
 
 
     p_cached(Id, Predicate, Context) ->
-        Value = case z_depcache:get(Id, Predicate) of
+        Value = case z_depcache:get(Id, Predicate, Context) of
             {ok, V} -> 
                 V;
             undefined ->
                 case z_db:select(rsc, Id, Context) of
                     {ok, Record} ->
-                        z_depcache:set(Id, Record, ?WEEK, [Id]),
+                        z_depcache:set(Id, Record, ?WEEK, [Id], Context),
                         proplists:get_value(Predicate, Record);
                     _ ->
-                        z_depcache:set(Id, undefined, ?WEEK, [Id]),
+                        z_depcache:set(Id, undefined, ?WEEK, [Id], Context),
                         undefined
                 end
         end,
@@ -442,7 +442,7 @@ rid_name(Name, _Context) when is_integer(Name) ->
     Name;
 rid_name(Name, Context) ->
     Lower = z_string:to_name(Name),
-    case z_depcache:get({rsc_name, Lower}) of
+    case z_depcache:get({rsc_name, Lower}, Context) of
         {ok, undefined} ->
             undefined;
         {ok, Id} ->
@@ -452,7 +452,7 @@ rid_name(Name, Context) ->
                 undefined -> undefined;
                 Value -> Value
             end,
-            z_depcache:set({rsc_name, Lower}, Id, ?DAY, [Id, {rsc_name, Lower}]),
+            z_depcache:set({rsc_name, Lower}, Id, ?DAY, [Id, {rsc_name, Lower}], Context),
             Id
     end.
 

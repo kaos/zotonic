@@ -37,7 +37,7 @@
 
 %% gen_server exports
 -export([init/1, handle_call/3, handle_cast/2, handle_info/2, terminate/2, code_change/3]).
--export([start_link/0, start_link/1]).
+-export([start_link/1]).
 
 %% interface functions
 -export([ensure_visitor/1]).
@@ -58,20 +58,19 @@
 %% API
 %%====================================================================
 
-%% @spec start_link() -> {ok,Pid} | ignore | {error,Error}
+%% @spec start_link(SiteProps) -> {ok,Pid} | ignore | {error,Error}
 %% @doc Starts the person manager server
-start_link() ->
-    start_link([]).
-start_link(Args) when is_list(Args) ->
-    gen_server:start_link({local, ?MODULE}, ?MODULE, Args, []).
-
+start_link(SiteProps) -> 
+    {host, Host} = proplists:lookup(host, SiteProps),
+    Name = z_utils:name_for_host(?MODULE, Host),
+    gen_server:start_link({local, Name}, ?MODULE, SiteProps, []).
 
 
 %% @doc Ensure that the context has a valid person pid. When there is a session pid then the session is
 %%      added to the person process.
 %% @spec ensure_visitor(Context) -> Context
-ensure_visitor(Context) ->
-    gen_server:call(?MODULE, {ensure_visitor, Context}).
+ensure_visitor(#context{visitor_manager=VisitorManager} = Context) ->
+    gen_server:call(VisitorManager, {ensure_visitor, Context}).
 
 
 

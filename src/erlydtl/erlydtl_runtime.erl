@@ -220,5 +220,5 @@ cache(MaxAge, Name, Args, Func, Context) ->
             F = fun() ->
                 Func(FuncContext)
             end,
-            z_depcache:memo(F, Key, MaxAge, Varies ++ Cat1)
+            z_depcache:memo(F, Key, MaxAge, Varies ++ Cat1, FuncContext)
     end.

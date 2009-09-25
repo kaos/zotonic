@@ -13,7 +13,7 @@
 
 %% gen_server exports
 -export([init/1, handle_call/3, handle_cast/2, handle_info/2, terminate/2, code_change/3]).
--export([start_link/0, start_link/1]).
+-export([start_link/1]).
 
 %% interface functions
 -export([
@@ -22,7 +22,7 @@
     find_all/3
 ]).
 
--record(state, {scomps=[], actions=[], validators=[], models=[], templates=[], lib=[]}).
+-record(state, {context, scomps=[], actions=[], validators=[], models=[], templates=[], lib=[]}).
 
 -include("zotonic.hrl").
 
@@ -31,43 +31,43 @@
 %%====================================================================
 %% @spec start_link() -> {ok,Pid} | ignore | {error,Error}
 %% @doc Starts the server
-start_link() ->
-    start_link([{context, z_context:new()}]).
-
-start_link(Args) when is_list(Args) ->
-    gen_server:start_link({local, ?MODULE}, ?MODULE, Args, []).
+start_link(SiteProps) ->
+    {host, Host} = proplists:lookup(host, SiteProps),
+    Name = z_utils:name_for_host(?MODULE, Host),
+    gen_server:start_link({local, Name}, ?MODULE, SiteProps, []).
 
     
 %% @doc Reindex the list of all scomps, etc for the site in the context.
 reindex(Context) ->
-    gen_server:cast(?MODULE, {{module_ready}, Context}).
+    gen_server:cast(Context#context.module_indexer, module_ready).
 
 
 %% @doc Find a scomp, validator etc.
 %% @spec find(What, Name, Context) -> {ok, term()} | {error, Reason}
-find(What, Name, _Context) ->
-    gen_server:call(?MODULE, {find, What, Name}).
+find(What, Name, Context) ->
+    gen_server:call(Context#context.module_indexer, {find, What, Name}).
+
 
 %% @doc Find a scomp, validator etc.
 %% @spec find_all(What, Name, Context) -> list()
-find_all(What, Name, _Context) ->
-    gen_server:call(?MODULE, {find_all, What, Name}).
+find_all(What, Name, Context) ->
+    gen_server:call(Context#context.module_indexer, {find_all, What, Name}).
 
 
 %%====================================================================
 %% gen_server callbacks
 %%====================================================================
 
-%% @spec init(Args) -> {ok, State} |
+%% @spec init(SiteProps) -> {ok, State} |
 %%                     {ok, State, Timeout} |
 %%                     ignore               |
 %%                     {stop, Reason}
 %% @doc Initiates the server.
-init(Args) ->
+init(SiteProps) ->
     process_flag(trap_exit, true),
-    {context, Context} = proplists:lookup(context, Args),
+    Context = z_context:new(proplists:get_value(host, SiteProps)),
     z_notifier:observe(module_ready, self(), Context),
-    {ok, #state{}}.
+    {ok, #state{context=Context}}.
 
 
 %% @spec handle_call(Request, From, State) -> {reply, Reply, State} |
@@ -113,8 +113,8 @@ handle_call(Message, _From, State) ->
 %%                                  {noreply, State, Timeout} |
 %%                                  {stop, Reason, State}
 %% @doc Scan for all scomps etc. for the context given.
-handle_cast({{module_ready}, Context}, State) ->
-    Scanned = scan(Context),
+handle_cast({{module_ready}, _NotifyContext}, State) ->
+    Scanned = scan(State#state.context),
     State1 = State#state{
         scomps     = proplists:get_value(scomp, Scanned),
         actions    = proplists:get_value(action, Scanned),
@@ -125,7 +125,7 @@ handle_cast({{module_ready}, Context}, State) ->
     },
     % Reset the template server after reindexing the templates, the templates might originate now from
     % different modules than before, or are using templates that are not available anymore.
-    z_template:reset(Context),
+    z_template:reset(State#state.context),
     {noreply, State1};
 
 
@@ -147,9 +147,8 @@ handle_info(_Info, State) ->
 %% terminate. It should be the opposite of Module:init/1 and do any necessary
 %% cleaning up. When it returns, the gen_server terminates with Reason.
 %% The return value is ignored.
-terminate(_Reason, _State) ->
-    Context = z_context:new(),
-    z_notifier:detach(module_ready, self(), Context),
+terminate(_Reason, State) ->
+    z_notifier:detach(module_ready, self(), State#state.context),
     ok.
 
 %% @spec code_change(OldVsn, State, Extra) -> {ok, NewState}

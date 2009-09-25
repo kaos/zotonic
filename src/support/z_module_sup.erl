@@ -11,7 +11,7 @@
 -behaviour(supervisor).
 
 %% External exports
--export([start_link/0, start_link/1, upgrade/1]).
+-export([start_link/1, upgrade/1]).
 
 %% supervisor callbacks
 -export([init/1, deactivate/2, activate/2, active/1, active_dir/1, all/1, scan/1, prio/1, prio_sort/1, module_exists/1]).
@@ -24,12 +24,12 @@
 
 %% @spec start_link(Args) -> ServerRet
 %% @doc API for starting the module supervisor.
-start_link() ->
-    start_link([]).
-start_link(Args) ->
-    Context = z_context:new(),
-    Args1 = [{context, Context} | Args],
-    Result = supervisor:start_link({local, ?MODULE}, ?MODULE, Args1),
+start_link(SiteProps) ->
+    Host = proplists:get_value(host, SiteProps),
+    Context = z_context:new(Host),
+    Args1 = [{context, Context} | SiteProps],
+    Name = z_utils:name_for_host(?MODULE, Host),
+    Result = supervisor:start_link({local, Name}, ?MODULE, Args1),
     z_notifier:notify({module_ready}, Context),
     Result.
 
@@ -38,18 +38,19 @@ start_link(Args) ->
 %% @doc Reload the list of all modules, add processes if necessary.
 upgrade(Context) ->
     {ok, {_, Specs}} = init([{context, Context}]),
-
-    Old  = sets:from_list([Name || {Name, _, _, _} <- supervisor:which_children(?MODULE)]),
+    ModuleSup = Context#context.module_sup,
+    
+    Old  = sets:from_list([Name || {Name, _, _, _} <- supervisor:which_children(ModuleSup)]),
     New  = sets:from_list([Name || {Name, _, _, _, _, _} <- Specs]),
     Kill = sets:subtract(Old, New),
 
     sets:fold(fun (Id, ok) ->
-		      supervisor:terminate_child(?MODULE, Id),
-		      supervisor:delete_child(?MODULE, Id),
+		      supervisor:terminate_child(ModuleSup, Id),
+		      supervisor:delete_child(ModuleSup, Id),
 		      ok
 	      end, ok, Kill),
 
-    [ start_child(Spec) || Spec <- Specs ],
+    [ start_child(ModuleSup, Spec) || Spec <- Specs ],
 
     sets:fold(fun(Id, ok) -> 
                 z_notifier:notify({module_activate, Id}, Context), 
@@ -64,7 +65,7 @@ upgrade(Context) ->
 
 
     %% @doc Try to start the child, do not crash on missing modules.
-    start_child({Name, _, _, _, _, _} = Spec) ->
+    start_child(ModuleSup, {Name, _, _, _, _, _} = Spec) ->
         Info =  try
                     erlang:get_module_info(Name, attributes)
                 catch
@@ -74,7 +75,7 @@ upgrade(Context) ->
                 end,
         case Info of
             L when is_list(L) ->
-                supervisor:start_child(?MODULE, Spec);
+                supervisor:start_child(ModuleSup, Spec);
             error ->
                 error
         end.
@@ -82,8 +83,6 @@ upgrade(Context) ->
 
 %% @spec init(proplist()) -> SupervisorTree
 %% @doc supervisor callback.
-init([]) ->
-    init([{context, z_context:new()}]);
 init(Args) ->
     {context, Context} = proplists:lookup(context, Args),
     Ms = lists:filter(fun module_exists/1, active(Context)),

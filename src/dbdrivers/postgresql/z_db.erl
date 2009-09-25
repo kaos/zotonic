@@ -350,14 +350,14 @@ columns(Table, Context) when is_atom(Table) ->
     columns(atom_to_list(Table), Context);
 columns(Table, Context) ->
     Db = Context#context.host,
-    case z_depcache:get({columns, Db, Table}) of
+    case z_depcache:get({columns, Db, Table}, Context) of
         {ok, Cols} -> 
             Cols;
         _ ->
             C = get_connection(Context),
             Cols = pgsql:columns(C, Table),
             return_connection(C, Context),
-            z_depcache:set({columns, Db, Table}, Cols, ?YEAR, [{database, Db}]),
+            z_depcache:set({columns, Db, Table}, Cols, ?YEAR, [{database, Db}], Context),
             Cols
     end.
 

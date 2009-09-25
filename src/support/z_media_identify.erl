@@ -26,7 +26,7 @@ identify(ImageFile, Context) ->
                 {error, _Reason} -> identify_file(ImageFile, Context)
             end
     end,
-    z_depcache:memo(F, {media_identify, ImageFile}, ?DAY, [media_identify]).
+    z_depcache:memo(F, {media_identify, ImageFile}, ?DAY, [media_identify], Context).
     
 
 

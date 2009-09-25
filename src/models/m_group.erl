@@ -83,7 +83,7 @@ get(Id, Context) ->
     F = fun() ->
         z_db:assoc_row("select * from \"group\" where id = $1", [Id], Context)
     end,
-    z_depcache:memo(F, {group, Id}, ?WEEK, [Id]).
+    z_depcache:memo(F, {group, Id}, ?WEEK, [Id], Context).
 
 
 name_to_id(Name, Context) ->
@@ -144,7 +144,7 @@ add_member(Id, RscId, Context) ->
                 end
             end,
             Result = z_db:transaction(F, Context),
-            z_depcache:flush({groups, RscId}),
+            z_depcache:flush({groups, RscId}, Context),
             Result;
         false ->
             {error, eacces}
@@ -163,7 +163,7 @@ add_observer(Id, RscId, Context) ->
                 end
             end,
             Result = z_db:transaction(F, Context),
-            z_depcache:flush({groups, RscId}),
+            z_depcache:flush({groups, RscId}, Context),
             Result;
         false ->
             {error, eacces}
@@ -182,7 +182,7 @@ add_leader(Id, RscId, Context) ->
                 end
             end,
             Result = z_db:transaction(F, Context),
-            z_depcache:flush({groups, RscId}),
+            z_depcache:flush({groups, RscId}, Context),
             Result;
         false ->
             {error, eacces}
@@ -206,7 +206,7 @@ delete_member(RscGroupId, Context) ->
             case z_acl:has_group_role(leader, GroupId, Context) of
                 true ->
                     z_db:delete(rsc_group, RscGroupId, Context),
-                    z_depcache:flush({groups, RscId}),
+                    z_depcache:flush({groups, RscId}, Context),
                     ok;
                 false ->
                     {error, eacces}
@@ -217,7 +217,7 @@ delete_member(Id, RscId, Context) ->
     case z_acl:has_group_role(leader, Id, Context) of
         true ->
             z_db:q("delete from rsc_group where group_id = $1 and rsc_id = $2",[Id, RscId], Context),
-            z_depcache:flush({groups, RscId}),
+            z_depcache:flush({groups, RscId}, Context),
             ok;
         false ->
             {error, eacces}
@@ -237,7 +237,7 @@ groups_member(PersonId, Context) ->
         Groups = z_db:q("select group_id from rsc_group where rsc_id = $1 and is_observer = false", [PersonId], Context),
         [ G || {G} <- Groups ]
     end,
-    z_depcache:memo(F, {groups_member, PersonId}, ?DAY, [{groups, PersonId}]).
+    z_depcache:memo(F, {groups_member, PersonId}, ?DAY, [{groups, PersonId}], Context).
 
 
 %% @doc Return the group ids the current person can only view
@@ -253,7 +253,7 @@ groups_observer(PersonId, Context) ->
         Groups = z_db:q("select group_id from rsc_group where rsc_id = $1 and is_observer = true", [PersonId], Context),
         [ G || {G} <- Groups ]
     end,
-    z_depcache:memo(F, {groups_observer, PersonId}, ?DAY, [{groups, PersonId}]).
+    z_depcache:memo(F, {groups_observer, PersonId}, ?DAY, [{groups, PersonId}], Context).
 
 
 %% @doc Return the group ids the current person can view
@@ -268,7 +268,7 @@ groups_visible(PersonId, Context) ->
         Groups = z_db:q("select group_id from rsc_group where rsc_id = $1", [PersonId], Context),
         [ G || {G} <- Groups ]
     end,
-    z_depcache:memo(F, {groups_visible, PersonId}, ?DAY, [{groups, PersonId}]).
+    z_depcache:memo(F, {groups_visible, PersonId}, ?DAY, [{groups, PersonId}], Context).
 
 
 %% @doc Return the group ids the current person is leader of
@@ -283,7 +283,7 @@ groups_leader(PersonId, Context) ->
         Groups = z_db:q("select group_id from rsc_group where rsc_id = $1 and is_leader = true", [PersonId], Context),
         [ G || {G} <- Groups ]
     end,
-    z_depcache:memo(F, {groups_leader, PersonId}, ?DAY, [{groups, PersonId}]).
+    z_depcache:memo(F, {groups_leader, PersonId}, ?DAY, [{groups, PersonId}], Context).
 
 
 %% @doc Return the roles the current person has

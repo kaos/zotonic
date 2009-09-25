@@ -9,22 +9,24 @@
 
 %% gen_server exports
 -export([init/1, handle_call/3, handle_cast/2, handle_info/2, terminate/2, code_change/3]).
--export([start_link/0]).
+-export([start_link/1]).
 
 %% depcache exports
--export([set/2, set/3, set/4, get/1, get/2, flush/1, flush/0, tick/0, size/0]).
--export([memo/1, memo/2, memo/3, memo/4]).
+-export([set/3, set/4, set/5, get/2, get/3, flush/2, flush/1, tick/1, size/1]).
+-export([memo/2, memo/3, memo/4, memo/5]).
 
 %% internal export
--export([cleanup/1, cleanup/5]).
+-export([cleanup/3, cleanup/7]).
 
 -include_lib("zotonic.hrl").
 
--record(state, {now, serial, size=0}).
+-record(state, {now, serial, size=0, meta_table, deps_table}).
 -record(meta,  {key, expire, serial, depend}).
 -record(depend,{key, serial}).
 
-start_link() -> gen_server:start_link({local, ?MODULE}, ?MODULE, [], []).
+start_link(SiteProps) -> 
+    Host = proplists:get_value(host, SiteProps),
+    gen_server:start_link({local, z_utils:name_for_host(?MODULE, Host)}, ?MODULE, SiteProps, []).
 
 
 -define(META_TABLE, z_depcache_meta).
@@ -35,34 +37,34 @@ start_link() -> gen_server:start_link({local, ?MODULE}, ?MODULE, [], []).
 -define(CLEANUP_BATCH, 100).
 
 
-memo({M,F,A}) ->
-    memo({M,F,A}, ?HOUR, []).
+memo({M,F,A}, #context{} = Context) ->
+    memo({M,F,A}, ?HOUR, [], Context).
 
-memo({M,F,A}, MaxAge) ->
-    memo({M,F,A}, MaxAge, []);
-memo(F, Key) ->
-    memo(F, Key, ?HOUR, []).
+memo({M,F,A}, MaxAge, #context{} = Context) ->
+    memo({M,F,A}, MaxAge, [], Context);
+memo(F, Key, Context) ->
+    memo(F, Key, ?HOUR, [], Context).
 
-memo({M,F,A}, MaxAge, Dep) ->
+memo({M,F,A}, MaxAge, Dep, #context{} = Context) ->
     Key = memo_key({M,F,A}),
-    case ?MODULE:get(Key) of
+    case ?MODULE:get(Key, Context) of
         {ok, Value} ->
             Value;
         undefined ->
             Value = erlang:apply(M, F, A),
-            set(Key, Value, MaxAge, Dep),
+            set(Key, Value, MaxAge, Dep, Context),
             Value
     end;
-memo(F, Key, MaxAge) ->
-    memo(F, Key, MaxAge, []).
+memo(F, Key, MaxAge, #context{} = Context) ->
+    memo(F, Key, MaxAge, [], Context).
 
-memo(F, Key, MaxAge, Dep) ->
-    case ?MODULE:get(Key) of
+memo(F, Key, MaxAge, Dep, #context{} = Context) ->
+    case ?MODULE:get(Key, Context) of
         {ok, Value} ->
             Value;
         undefined ->
             Value = F(),
-            set(Key, Value, MaxAge, Dep),
+            set(Key, Value, MaxAge, Dep, Context),
             Value
     end.
 
@@ -74,95 +76,102 @@ memo_key({M,F,A}) ->
 
 %% @spec set(Key, Data, MaxAge) -> void()
 %% @doc Add the key to the depcache, hold it for 3600 seconds and no dependencies
-set(Key, Data) ->
+set(Key, Data, #context{depcache=Depcache}) ->
     Size = erts_debug:flat_size(Data),
-    gen_server:call(?MODULE, {set, Key, Data, Size, 3600, []}).
+    gen_server:call(Depcache, {set, Key, Data, Size, 3600, []}).
 
 
 %% @spec set(Key, Data, MaxAge) -> void()
 %% @doc Add the key to the depcache, hold it for MaxAge seconds and no dependencies
-set(Key, Data, MaxAge) ->
+set(Key, Data, MaxAge, #context{depcache=Depcache}) ->
     Size = erts_debug:flat_size(Data),
-    gen_server:call(?MODULE, {set, Key, Data, Size, MaxAge, []}).
+    gen_server:call(Depcache, {set, Key, Data, Size, MaxAge, []}).
 
 
 %% @spec set(Key, Data, MaxAge, Depend) -> void()
 %% @doc Add the key to the depcache, hold it for MaxAge seconds and check the dependencies
-set(Key, Data, MaxAge, Depend) ->
+set(Key, Data, MaxAge, Depend, #context{depcache=Depcache}) ->
     Size = erts_debug:flat_size(Data),
-    gen_server:call(?MODULE, {set, Key, Data, Size, MaxAge, Depend}).
+    gen_server:call(Depcache, {set, Key, Data, Size, MaxAge, Depend}).
 
 
 %% @spec get(Key) -> {ok, Data} | undefined
 %% @doc Fetch the key from the cache, return the data or an undefined if not found (or not valid)
-get(Key) ->
-    gen_server:call(?MODULE, {get, Key}).
+get(Key, #context{depcache=Depcache}) ->
+    gen_server:call(Depcache, {get, Key}).
 
 
 %% @spec get(Key, SubKey) -> {ok, Data} | undefined
 %% @doc Fetch the key from the cache, return the data or an undefined if not found (or not valid)
-get(Key, SubKey) ->
-    gen_server:call(?MODULE, {get, Key, SubKey}).
+get(Key, SubKey, #context{depcache=Depcache}) ->
+    gen_server:call(Depcache, {get, Key, SubKey}).
 
 
 %% @spec flush(Key) -> void()
 %% @doc Flush the key and all keys depending on the key
-flush(Key) ->
-    gen_server:cast(?MODULE, {flush, Key}).
+flush(Key, #context{depcache=Depcache}) ->
+    gen_server:cast(Depcache, {flush, Key}).
 
 %% @spec flush() -> void()
 %% @doc Flush all keys from the caches
-flush() ->
-    gen_server:cast(?MODULE, flush).
+flush(#context{depcache=Depcache}) ->
+    gen_server:cast(Depcache, flush).
 
 %% @spec tick() -> none()
 %% @doc Periodic tick used for incrementing the clock
-tick() ->
-    gen_server:cast(?MODULE, tick).
+tick(#context{depcache=Depcache}) ->
+    gen_server:cast(Depcache, tick).
 
 
 %% @spec size() -> int()
 %% @doc Return the total size of all stored terms
-size() ->
-    gen_server:call(?MODULE, size).
+size(#context{depcache=Depcache}) ->
+    gen_server:call(Depcache, size);
+size(Pid) when is_pid(Pid) ->
+    gen_server:call(Pid, size).
     
 
 %% gen_server callbacks
 
-%% @spec init([]) -> {ok, session_srv())}
-%% @doc Initialize the session server with an empty session table.  We make the session manager a system process
-%%      so that crashes in sessions are isolated from each other.
-init(_Args) ->
-    ets:new(?META_TABLE, [set, named_table, {keypos, 2}, protected]),
-    ets:new(?DEPS_TABLE, [set, named_table, {keypos, 2}, protected]),
-    State = #state{now=z_utils:now(), serial=0},
-    timer:apply_interval(1000, ?MODULE, tick, []),
-    spawn_link(?MODULE, cleanup, [self()]),
+%% @spec init(SiteProps) -> {ok, State}
+%% @doc Initialize the depcache.  Creates ets tables for the deps and meta data.  Spawns garbage collector.
+init(SiteProps) ->
+    Host      = proplists:get_value(host, SiteProps),
+    Depcache  = z_utils:name_for_host(?MODULE, Host),
+    MetaTable = z_utils:name_for_host(?META_TABLE, Host),
+    DepsTable = z_utils:name_for_host(?DEPS_TABLE, Host),
+    
+    ets:new(MetaTable, [set, named_table, {keypos, 2}, protected]),
+    ets:new(DepsTable, [set, named_table, {keypos, 2}, protected]),
+    State = #state{now=z_utils:now(), serial=0, meta_table=MetaTable, deps_table=DepsTable},
+    timer:apply_interval(1000, ?MODULE, tick, #context{host=Host, depcache=Depcache}),
+    spawn_link(?MODULE, cleanup, [self(), MetaTable, DepsTable]),
     {ok, State}.
+
 
 %% @doc Fetch a key from the cache, returns undefined when not found.
 handle_call({get, Key}, _From, State) ->
     %% Find the key in the data table
-    case ets:lookup(?META_TABLE, Key) of
+    case ets:lookup(State#state.meta_table, Key) of
         [] -> 
             {reply, undefined, State};
         [#meta{serial=Serial, expire=Expire, depend=Depend}] ->
             %% Check expiration
             case Expire >= State#state.now of
                 false -> 
-                    ets:delete(?META_TABLE, Key),
+                    ets:delete(State#state.meta_table, Key),
                     State1 = erase_key(Key, State),
                     {reply, undefined, State1};
                 true ->
                     %% Check dependencies
-                    case check_depend(Serial, Depend) of
+                    case check_depend(Serial, Depend, State#state.deps_table) of
                         true ->
                             case erlang:get(Key) of
                                 {ok, _, Data} -> {reply, {ok, Data}, State};
                                 _ -> {reply, undefined, State}
                             end;
                         false ->
-                            ets:delete(?META_TABLE, Key),
+                            ets:delete(State#state.meta_table, Key),
                             State1 = erase_key(Key, State),
                             {reply, undefined, State1}
                     end
@@ -193,30 +202,30 @@ handle_call({set, Key, Data, Size, MaxAge, Depend}, _From, State) ->
     
     %% Make sure all dependency keys are available in the deps table
     AddDepend = fun(D) -> 
-                    ets:insert_new(?DEPS_TABLE, #depend{key=D, serial=State1#state.serial})
+                    ets:insert_new(State#state.deps_table, #depend{key=D, serial=State1#state.serial})
                 end,
     lists:foreach(AddDepend, Depend),
     
     %% Flush the key itself in the dependency table - this will invalidate depending items
     case is_simple_key(Key) of
         true  -> ok;
-        false -> ets:insert(?DEPS_TABLE, #depend{key=Key, serial=State#state.serial})
+        false -> ets:insert(State#state.deps_table, #depend{key=Key, serial=State#state.serial})
     end,
 
     %% Insert the record into the cache table
     erlang:put(Key, {ok, Size, Data}),
-    ets:insert(?META_TABLE, #meta{key=Key, expire=State1#state.now+MaxAge, serial=State1#state.serial, depend=Depend}),
+    ets:insert(State#state.meta_table, #meta{key=Key, expire=State1#state.now+MaxAge, serial=State1#state.serial, depend=Depend}),
     {reply, ok, State1#state{size=State1#state.size + Size}}.
 
 handle_cast({flush, Key}, State) ->
-    ets:delete(?DEPS_TABLE, Key),
-    ets:delete(?META_TABLE, Key),
+    ets:delete(State#state.deps_table, Key),
+    ets:delete(State#state.meta_table, Key),
     State1 = erase_key(Key, State),
     {noreply, State1};
 
 handle_cast(flush, State) ->
-    ets:delete_all_objects(?META_TABLE),
-    ets:delete_all_objects(?DEPS_TABLE),
+    ets:delete_all_objects(State#state.meta_table),
+    ets:delete_all_objects(State#state.deps_table),
     erlang:erase(),
     {noreply, State#state{size=0}};
 
@@ -255,13 +264,13 @@ erase_key(Key, State) ->
 
 
 %% @doc Check if all dependencies are still valid, that is they have a serial before or equal to the serial of the entry
-check_depend(_Serial, []) ->
+check_depend(_Serial, [], _DepsTable) ->
     true;
-check_depend(Serial, Depend) ->
+check_depend(Serial, Depend, DepsTable) ->
     CheckDepend = fun
                         (_Dep,false) -> false;
                         (Dep,true) ->
-                            case ets:lookup(?DEPS_TABLE, Dep) of
+                            case ets:lookup(DepsTable, Dep) of
                                 [#depend{serial=DepSerial}] -> DepSerial =< Serial;
                                 _ -> false
                             end
@@ -345,61 +354,61 @@ find_value(_Key, _Data) ->
 %%      This cleanup process starts to delete random entries.  By using a random delete we don't need to keep
 %%      a LRU list, which is a bit expensive.
 
-cleanup(Pid) ->
+cleanup(Pid, MetaTable, DepsTable) ->
     {A1,A2,A3} = now(),
     random:seed(A1, A2, A3),
-    ?MODULE:cleanup(Pid, 0, z_utils:now(), normal, 0).
+    ?MODULE:cleanup(Pid, MetaTable, DepsTable, 0, z_utils:now(), normal, 0).
 
 %% Wrap around the end of table
-cleanup(Pid, '$end_of_table', Now, _Mode, Ct) ->
-    case ets:info(?META_TABLE, size) of
-        0 -> ?MODULE:cleanup(Pid, 0, Now, cleanup_mode(Pid), 0);
-        _ -> ?MODULE:cleanup(Pid, 0, Now, cleanup_mode(Pid), Ct)
+cleanup(Pid, MetaTable, DepsTable, '$end_of_table', Now, _Mode, Ct) ->
+    case ets:info(MetaTable, size) of
+        0 -> ?MODULE:cleanup(Pid, MetaTable, DepsTable, 0, Now, cleanup_mode(Pid), 0);
+        _ -> ?MODULE:cleanup(Pid, MetaTable, DepsTable, 0, Now, cleanup_mode(Pid), Ct)
     end;
 
 %% In normal cleanup, sleep a second between each batch before continuing our cleanup sweep
-cleanup(Pid, SlotNr, Now, normal, 0) -> 
+cleanup(Pid, MetaTable, DepsTable, SlotNr, Now, normal, 0) -> 
     timer:sleep(1000),
-    case ets:info(?META_TABLE, size) of
-        0 -> ?MODULE:cleanup(Pid, 0, Now, normal, 0);
-        _ -> ?MODULE:cleanup(Pid, SlotNr, z_utils:now(), cleanup_mode(Pid), ?CLEANUP_BATCH)
+    case ets:info(MetaTable, size) of
+        0 -> ?MODULE:cleanup(Pid, MetaTable, DepsTable, 0, Now, normal, 0);
+        _ -> ?MODULE:cleanup(Pid, MetaTable, DepsTable, SlotNr, z_utils:now(), cleanup_mode(Pid), ?CLEANUP_BATCH)
     end;
 
 %% After finishing a batch in cache_full mode, check if the cache is still full, if so keep deleting entries
-cleanup(Pid, SlotNr, Now, cache_full, 0) -> 
+cleanup(Pid, MetaTable, DepsTable, SlotNr, Now, cache_full, 0) -> 
     case cleanup_mode(Pid) of
-        normal     -> ?MODULE:cleanup(Pid, SlotNr, Now, normal, 0);
-        cache_full -> ?MODULE:cleanup(Pid, SlotNr, z_utils:now(), cache_full, ?CLEANUP_BATCH)
+        normal     -> ?MODULE:cleanup(Pid, MetaTable, DepsTable, SlotNr, Now, normal, 0);
+        cache_full -> ?MODULE:cleanup(Pid, MetaTable, DepsTable, SlotNr, z_utils:now(), cache_full, ?CLEANUP_BATCH)
     end;
 
 %% Normal cleanup behaviour - check expire stamp and dependencies
-cleanup(Pid, SlotNr, Now, normal, Ct) ->
+cleanup(Pid, MetaTable, DepsTable, SlotNr, Now, normal, Ct) ->
     Slot =  try 
-                ets:slot(?META_TABLE, SlotNr)
+                ets:slot(MetaTable, SlotNr)
             catch
                 _M:_E -> '$end_of_table'
             end,
     case Slot of
-        '$end_of_table' -> ?MODULE:cleanup(Pid, '$end_of_table', Now, normal, 0);
-        [] -> ?MODULE:cleanup(Pid, SlotNr+1, Now, normal, Ct-1);
+        '$end_of_table' -> ?MODULE:cleanup(Pid, MetaTable, DepsTable, '$end_of_table', Now, normal, 0);
+        [] -> ?MODULE:cleanup(Pid, MetaTable, DepsTable, SlotNr+1, Now, normal, Ct-1);
         Entries ->
-            lists:foreach(fun(Meta) -> flush_expired(Meta, Now) end, Entries),
-            ?MODULE:cleanup(Pid, SlotNr+1, Now, normal, Ct-1)
+            lists:foreach(fun(Meta) -> flush_expired(Meta, Now, DepsTable, Pid) end, Entries),
+            ?MODULE:cleanup(Pid, MetaTable, DepsTable, SlotNr+1, Now, normal, Ct-1)
     end;
 
 %% Full cache cleanup mode - randomly delete every 10th entry
-cleanup(Pid, SlotNr, Now, cache_full, Ct) ->
+cleanup(Pid, MetaTable, DepsTable, SlotNr, Now, cache_full, Ct) ->
     Slot =  try 
-                ets:slot(?META_TABLE, SlotNr)
+                ets:slot(MetaTable, SlotNr)
             catch
                 _M:_E -> '$end_of_table'
             end,
     case Slot of
-        '$end_of_table' -> ?MODULE:cleanup(Pid, '$end_of_table', Now, cache_full, 0);
-        [] -> ?MODULE:cleanup(Pid, SlotNr+1, Now, cache_full, Ct-1);
+        '$end_of_table' -> ?MODULE:cleanup(Pid, MetaTable, DepsTable, '$end_of_table', Now, cache_full, 0);
+        [] -> ?MODULE:cleanup(Pid, MetaTable, DepsTable, SlotNr+1, Now, cache_full, Ct-1);
         Entries ->
             FlushExpire = fun (Meta) ->
-                                case flush_expired(Meta, Now) of
+                                case flush_expired(Meta, Now, DepsTable, Pid) of
                                     ok -> {ok, Meta};
                                     flushed -> flushed
                                 end
@@ -415,15 +424,15 @@ cleanup(Pid, SlotNr, Now, cache_full, Ct) ->
 
             Entries1 = lists:map(FlushExpire, Entries),
             lists:foreach(RandomDelete, Entries1),
-            ?MODULE:cleanup(Pid, SlotNr+1, Now, cache_full, Ct-1)
+            ?MODULE:cleanup(Pid, MetaTable, DepsTable, SlotNr+1, Now, cache_full, Ct-1)
     end.
 
 
 %% @doc Check if an entry is expired, if so delete it
-flush_expired(#meta{key=Key, serial=Serial, expire=Expire, depend=Depend}, Now) ->
-    Expired = Expire < Now orelse not check_depend(Serial, Depend),
+flush_expired(#meta{key=Key, serial=Serial, expire=Expire, depend=Depend}, Now, DepsTable, Pid) ->
+    Expired = Expire < Now orelse not check_depend(Serial, Depend, DepsTable),
     case Expired of
-        true  -> ?MODULE:flush(Key), flushed;
+        true  -> gen_server:cast(Pid, {flush, Key});
         false -> ok
     end.
 
@@ -433,8 +442,8 @@ flush_expired(#meta{key=Key, serial=Serial, expire=Expire, depend=Depend}, Now) 
 %% We use erts_debug:size() on the stored terms to calculate the total size of all terms stored.  This
 %% is better than counting the number of entries.  Using the process_info(Pid,memory) is not very useful as the
 %% garbage collection still needs to be done and then we delete too many entries.
-cleanup_mode(_Pid) ->
-    Memory = ?MODULE:size(),
+cleanup_mode(Pid) ->
+    Memory = ?MODULE:size(Pid),
     if 
         Memory >= ?MEMORY_MAX -> cache_full;
         true -> normal

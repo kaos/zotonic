@@ -22,7 +22,7 @@ install(Host) ->
     {ok, C} = pgsql_pool:get_connection(Host),
     ok = pgsql:with_transaction(C, fun install_all/1),
     pgsql_pool:return_connection(Host, C),
-    Context = z_context:new_for_host(Host),
+    Context = z_context:new(Host),
     m_category:renumber(Context),
     ok.
 

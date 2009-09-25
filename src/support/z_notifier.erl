@@ -12,7 +12,7 @@
 
 %% gen_server exports
 -export([init/1, handle_call/3, handle_cast/2, handle_info/2, terminate/2, code_change/3]).
--export([start_link/0, start_link/1]).
+-export([start_link/1]).
 
 %% interface functions
 -export([
@@ -42,12 +42,12 @@
 %%====================================================================
 %% API
 %%====================================================================
-%% @spec start_link() -> {ok,Pid} | ignore | {error,Error}
+%% @spec start_link(SiteProps) -> {ok,Pid} | ignore | {error,Error}
 %% @doc Starts the notification server
-start_link() ->
-    start_link([]).
-start_link(Args) when is_list(Args) ->
-    gen_server:start_link({local, ?MODULE}, ?MODULE, Args, []).
+start_link(SiteProps) when is_list(SiteProps) ->
+    {host, Host} = proplists:lookup(host, SiteProps),
+    Name = z_utils:name_for_host(?MODULE, Host),
+    gen_server:start_link({local, Name}, ?MODULE, SiteProps, []).
 
 
 %%====================================================================
@@ -59,22 +59,22 @@ observe(Event, Observer, Context) ->
     observe(Event, Observer, ?DEFAULT_PRIORITY, Context).
 
 %% @doc Subscribe to an event. Observer is a {M,F} or pid()
-observe(Event, Observer, Priority, _Context) ->
-    gen_server:cast(?MODULE, {'observe', Event, Observer, Priority}).
+observe(Event, Observer, Priority, #context{notifier=Notifier}) ->
+    gen_server:cast(Notifier, {'observe', Event, Observer, Priority}).
 
 %% @doc Detach all observers and delete the event
-detach_all(Event, _Context) ->
-    gen_server:cast(?MODULE, {'detach_all', Event}).
+detach_all(Event, #context{notifier=Notifier}) ->
+    gen_server:cast(Notifier, {'detach_all', Event}).
 
 %% @doc Unsubscribe from an event. Observer is a {M,F} or pid()
-detach(Event, Observer, _Context) ->
-    gen_server:cast(?MODULE, {'detach', Event, Observer}).
+detach(Event, Observer, #context{notifier=Notifier}) ->
+    gen_server:cast(Notifier, {'detach', Event, Observer}).
 
 %% @doc Return all observers for a particular event
-get_observers(Msg, _Context) when is_tuple(Msg) ->
-    gen_server:call(?MODULE, {'get_observers', element(1, Msg)});
-get_observers(Event, _Context) ->
-    gen_server:call(?MODULE, {'get_observers', Event}).
+get_observers(Msg, #context{notifier=Notifier}) when is_tuple(Msg) ->
+    gen_server:call(Notifier, {'get_observers', element(1, Msg)});
+get_observers(Event, #context{notifier=Notifier}) ->
+    gen_server:call(Notifier, {'get_observers', Event}).
 
 
 %%====================================================================
@@ -289,7 +289,7 @@ notify_observer_fold(Msg, {_Prio, {M,F}}, Acc, Context) ->
 %% Simple test
 
 test() ->
-    Context = z_context:new(),
+    Context = z_context:new(default),
     detach_all(test_blaat, Context),
     observe(test_blaat, {?MODULE, test_observer}, Context),
     received = first({test_blaat, arg1, arg2}, Context),

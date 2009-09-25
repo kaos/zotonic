@@ -18,16 +18,16 @@
 
 %% gen_server exports
 -export([init/1, handle_call/3, handle_cast/2, handle_info/2, terminate/2, code_change/3]).
--export([start_link/0]).
+-export([start_link/1]).
 
 %% External exports
 -export([
     ensure_session/1, 
     stop_session/1, 
     rename_session/1, 
-    count/0, 
-    dump/0, 
-    tick/0
+    count/1, 
+    dump/1, 
+    tick/1
 ]).
 
 -include_lib("zotonic.hrl").
@@ -36,50 +36,55 @@
 -record(session_srv, {key2pid, pid2key}).
 
 
-start_link() -> gen_server:start_link({local, ?MODULE}, ?MODULE, [], []).
+%% @spec start_link(SiteProps) -> {ok,Pid} | ignore | {error,Error}
+%% @doc Starts the session manager server
+start_link(SiteProps) -> 
+    {host, Host} = proplists:lookup(host, SiteProps),
+    Name = z_utils:name_for_host(?MODULE, Host),
+    gen_server:start_link({local, Name}, ?MODULE, SiteProps, []).
 
 
 %% @spec start_session(Context) -> Context
 %% @doc Start a new session or continue an existing session
-ensure_session(Context) ->
-    gen_server:call(?MODULE, {ensure_session, Context}).
+ensure_session(#context{session_manager=SessionManager} = Context) ->
+    gen_server:call(SessionManager, {ensure_session, Context}).
 
 %% @spec stop_session(Context) -> Context
 %% @doc Explicitly stop an existing session
-stop_session(Context) ->
-    gen_server:call(?MODULE, {stop_session, Context}).
+stop_session(#context{session_manager=SessionManager} = Context) ->
+    gen_server:call(SessionManager, {stop_session, Context}).
 
 %% @spec rename_session(Context) -> Context
 %% @doc Rename the session id, only call this after ensure_session
-rename_session(Context) ->
-    gen_server:call(?MODULE, {rename_session, Context}).
+rename_session(#context{session_manager=SessionManager} = Context) ->
+    gen_server:call(SessionManager, {rename_session, Context}).
 
-%% @spec count() -> Int
+%% @spec count(Context) -> Int
 %% @doc Return the number of open sessions
-count() ->
-    gen_server:call(?MODULE, count).
+count(#context{session_manager=SessionManager}) ->
+    gen_server:call(SessionManager, count).
 
 
-%% @spec dump() -> void()
+%% @spec dump(Context) -> void()
 %% @doc Dump all session to stdout
-dump() ->
-    gen_server:call(?MODULE, dump).
+dump(#context{session_manager=SessionManager}) ->
+    gen_server:call(SessionManager, dump).
 
 
-%% @spec tick() -> none()
+%% @spec tick(pid()) -> void()
 %% @doc Periodic tick used for cleaning up sessions
-tick() ->
-    gen_server:cast(?MODULE, tick).
+tick(Pid) when is_pid(Pid) ->
+    gen_server:cast(Pid, tick).
 
 
 %% gen_server callbacks
 
-%% @spec init([]) -> {ok, session_srv())}
+%% @spec init(SiteProps) -> {ok, State}
 %% @doc Initialize the session server with an empty session table.  We make the session manager a system process
 %%      so that crashes in sessions are isolated from each other.
-init(_Args) ->
+init(_SiteProps) ->
     State = #session_srv{key2pid=dict:new(), pid2key=dict:new()},
-    timer:apply_interval(?SESSION_CHECK_EXPIRE * 1000, ?MODULE, tick, []),
+    timer:apply_interval(?SESSION_CHECK_EXPIRE * 1000, ?MODULE, tick, [self()]),
     process_flag(trap_exit, true),
     {ok, State}.
 

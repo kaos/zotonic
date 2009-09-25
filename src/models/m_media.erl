@@ -94,7 +94,7 @@ exists(Id, Context) ->
 %% @spec get(RscId, Context) -> PropList
 get(Id, Context) ->
     F = fun() -> z_db:assoc_props_row("select * from medium where id = $1", [Id], Context) end,
-    z_depcache:memo(F, {medium, Id}, ?WEEK, [Id]).
+    z_depcache:memo(F, {medium, Id}, ?WEEK, [Id], Context).
 
 
 %% @doc Get the medium record that depicts the resource id. "depiction" Predicates are preferred, when 
@@ -105,7 +105,7 @@ depiction(Id, Context) when is_integer(Id) ->
     F = fun() ->
         find_previewable(m_edge:objects(Id, depiction, Context) ++ [Id], Context)
     end,
-    z_depcache:memo(F, {depiction, Id}, ?WEEK, [Id]).
+    z_depcache:memo(F, {depiction, Id}, ?WEEK, [Id], Context).
 
     %% @doc Find the first image in the the list of depictions that can be used to generate a preview.
     find_previewable([], _Context) ->
@@ -135,8 +135,8 @@ delete(Id, Context) ->
         true ->
             Depicts = depicts(Id, Context),
             z_db:delete(medium, Id, Context),
-            [ z_depcache:flush(DepictId) || DepictId <- Depicts ],
-            z_depcache:flush(Id),
+            [ z_depcache:flush(DepictId, Context) || DepictId <- Depicts ],
+            z_depcache:flush(Id, Context),
             ok;
         false ->
             {error, eacces}
@@ -155,8 +155,8 @@ replace(Id, Props, Context) ->
     
     case z_db:transaction(F, Context) of
         {ok, _} -> 
-            [ z_depcache:flush(DepictId) || DepictId <- Depicts ],
-            z_depcache:flush(Id),
+            [ z_depcache:flush(DepictId, Context) || DepictId <- Depicts ],
+            z_depcache:flush(Id, Context),
             ok;
         {rollback, {Error, _Trace}} ->
              {error, Error}
@@ -192,7 +192,7 @@ insert_file(File, Props, Context) ->
     case z_db:transaction(InsertFun, Context) of
         {ok, Id} ->
             CatList = m_rsc:is_a(Id, Context),
-            [ z_depcache:flush(Cat) || Cat <- CatList ],
+            [ z_depcache:flush(Cat, Context) || Cat <- CatList ],
             {ok, Id};
         {error, Reason} -> 
             {error, Reason}
@@ -246,8 +246,8 @@ replace_file(File, RscId, Props, Context) ->
             
             Depicts = depicts(RscId, Context),
             {ok, Id} = z_db:transaction(F, Context),
-            [ z_depcache:flush(DepictId) || DepictId <- Depicts ],
-            z_depcache:flush(Id),
+            [ z_depcache:flush(DepictId, Context) || DepictId <- Depicts ],
+            z_depcache:flush(Id, Context),
             {ok, Id};
         false ->
             {error, eacces}

@@ -9,12 +9,14 @@
 
 -export([render_error/3]).
 
+-include_lib("zotonic.hrl").
+
 render_error(404, Req, _Reason) ->
     Req:add_response_header("Content-Type", "text/html; charset=utf-8"),
     Req:add_response_header("Content-Encoding", "identity"),
     ErrorDump = mochiweb_html:escape(lists:flatten(io_lib:format("Resource not found: ~p", [Req:path()]))),
-    Context   = z_context:new(),
-	Vars      = [{error_code, 404}, {error_dump, ErrorDump}],
+    Context   = z_context:new(Req:get_metadata('host')),
+    Vars      = [{error_code, 404}, {error_dump, ErrorDump}],
     Html      = z_template:render("error.tpl", Vars, Context),
     {Output, _Context} = z_context:output(Html, Context),
     Output;
@@ -24,8 +26,8 @@ render_error(500, Req, Reason) ->
     Req:add_response_header("Content-Encoding", "identity"),
     error_logger:error_msg("webmachine error: path=~p~n~p~n", [Req:path(), Reason]),
     ErrorDump = mochiweb_html:escape(lists:flatten(io_lib:format("~p", [Reason]))),
-    Context   = z_context:new(),
-	Vars      = [{error_code, 500}, {error_dump, ErrorDump}],
+    Context   = z_context:new(Req:get_metadata('host')),
+    Vars      = [{error_code, 500}, {error_dump, ErrorDump}],
     Html      = z_template:render("error.tpl", Vars, Context),
     {Output, _Context} = z_context:output(Html, Context),
     Output.

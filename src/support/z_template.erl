@@ -11,7 +11,7 @@
 
 %% gen_server exports
 -export([init/1, handle_call/3, handle_cast/2, handle_info/2, terminate/2, code_change/3]).
--export([start_link/0]).
+-export([start_link/1]).
 
 -include_lib("zotonic.hrl").
 
@@ -25,15 +25,17 @@
     reset/1
 ]).
 
--record(state, {reset_counter}).
+-record(state, {reset_counter, host}).
 
-start_link() -> 
-    gen_server:start_link({local, ?MODULE}, ?MODULE, [], []).
+start_link(SiteProps) ->
+    {host, Host} = proplists:lookup(host, SiteProps),
+    Name = z_utils:name_for_host(?MODULE, Host),
+    gen_server:start_link({local, Name}, ?MODULE, SiteProps, []).
 
 
 %% @doc Force a reset of all templates, used after a module has been activated or deactivated.
-reset(_Context) ->
-    gen_server:cast(?MODULE, reset).
+reset(Context) ->
+    gen_server:cast(Context#context.template_server, reset).
 
 
 %% @spec render(File, Variables, Context) -> iolist()
@@ -41,7 +43,7 @@ reset(_Context) ->
 render(File, Variables, Context) ->
     case find_template(File, Context) of
         {ok, FoundFile} ->
-            Result = case gen_server:call(?MODULE, {check_modified, FoundFile}) of
+            Result = case gen_server:call(Context#context.template_server, {check_modified, FoundFile}) of
                 modified -> compile(File, Context);
                 Other -> Other
             end,
@@ -78,7 +80,7 @@ render_to_iolist(File, Vars, Context) ->
 compile(File, Context) ->
     case find_template(File, Context) of
         {ok, FoundFile} ->
-            gen_server:call(?MODULE, {compile, FoundFile, Context});
+            gen_server:call(Context#context.template_server, {compile, FoundFile, Context});
         {error, Reason} ->
             {error, Reason}
     end.
@@ -110,14 +112,14 @@ find_template(File, true, Context) ->
 %%                     ignore               |
 %%                     {stop, Reason}
 %% @doc Initialize the template server, handles template compiles and rendering.
-init(_Options) ->
-    {ok, #state{reset_counter=0}}.
+init(SiteProps) ->
+    {ok, #state{reset_counter=0, host=proplists:get_value(host, SiteProps)}}.
 
 
 %% @spec check_modified(File) -> {ok, Module} | {error, Reason}
 %% @doc Compile the template if its has been modified, return the template module for rendering.
 handle_call({check_modified, File}, _From, State) ->
-    ModuleName = filename_to_modulename(File),
+    ModuleName = filename_to_modulename(File, State#state.host),
     Module = list_to_atom(ModuleName),
     Result = case template_is_modified(Module, State#state.reset_counter) of
                 true  -> modified;
@@ -132,7 +134,7 @@ handle_call({compile, File, Context}, _From, State) ->
     FinderFun  = fun(FinderFile, All) ->
         ?MODULE:find_template(FinderFile, All, Context)
     end,
-    ModuleName = filename_to_modulename(File),
+    ModuleName = filename_to_modulename(File, State#state.host),
     Module     = list_to_atom(ModuleName),
     ErlyResult = case erlydtl:compile(File, Module, [{finder, FinderFun}, {template_reset_counter, State#state.reset_counter}]) of
                     {ok, Module1} -> {ok, Module1};
@@ -156,13 +158,13 @@ code_change(_OldVersion, State, _Extra) ->
 
 
 %% @doc Translate a filename to a module name
-filename_to_modulename(File) ->
-    filename_to_modulename(File, []).
+filename_to_modulename(File, Host) ->
+    filename_to_modulename(File, Host, []).
 
-filename_to_modulename([], Acc) ->
-    "template_" ++ lists:reverse(Acc);
-filename_to_modulename([C|T], Acc) ->
-    filename_to_modulename(T, [savechar(C)|Acc]).
+filename_to_modulename([], Host, Acc) ->
+    "template_" ++ atom_to_list(Host) ++ [$_ | lists:reverse(Acc)];
+filename_to_modulename([C|T], Host, Acc) ->
+    filename_to_modulename(T, Host, [savechar(C)|Acc]).
 
 savechar(C) when C >= $0 andalso C =< $9 ->
     C;

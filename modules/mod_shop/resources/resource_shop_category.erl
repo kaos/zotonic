@@ -78,10 +78,10 @@ html(Context) ->
         	#search_result{result=Featured} = case BrandId of
         	    undefined -> z_depcache:memo(
         	                        {z_search, search, [{featured, [{cat,CatId}]}, Context]},
-        	                        ?HOUR, [shop_import]);
+        	                        ?HOUR, [shop_import], Context);
         	    _ -> z_depcache:memo(
                                     {z_search, search, [{featured, [{cat,CatId},{object,BrandId},{predicate,brand}]}, Context]}, 
-                                    ?HOUR, [shop_import])
+                                    ?HOUR, [shop_import], Context)
         	end,
             {FeatShown,_} = z_utils:randomize(3, Featured),
             Vars1 = [
@@ -94,10 +94,10 @@ html(Context) ->
             #search_result{result=Products} = case BrandId of
                 undefined -> z_depcache:memo(
                                     {z_search, search, [{featured, [{cat,CatId}]}, {1,1000}, Context]}, 
-                                    ?HOUR, [shop_import]);
+                                    ?HOUR, [shop_import], Context);
                 _ -> z_depcache:memo(
                                     {z_search, search, [{featured, [{cat,CatId},{object,BrandId},{predicate,brand}]}, {1,1000}, Context]}, 
-                                    ?HOUR, [shop_import])
+                                    ?HOUR, [shop_import], Context)
             end,
             Vars1 = [
                 {products, Products},

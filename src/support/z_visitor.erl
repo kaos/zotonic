@@ -45,14 +45,14 @@ start_link(Args) when is_list(Args) ->
 %% @doc Start a new anonymous user process, link to the new process.
 new_anonymous(CookieId, Context) ->
     SessionPid = Context#context.session_pid,
-    start_link([{session, SessionPid}, {cookie, CookieId}, {is_new, true}, {context, z_context:new_for_host(Context)}]).
+    start_link([{session, SessionPid}, {cookie, CookieId}, {is_new, true}, {context, z_context:new(Context)}]).
 
 
 %% @spec new_returning(CookieId, SessionPid) -> {ok, pid()} | error
 %% @doc Start a new process for the visitor associated with the cookie, return error when no person associated.
 new_returning(CookieId, Context) ->
     SessionPid = Context#context.session_pid,
-    start_link([{session, SessionPid}, {cookie, CookieId}, {is_new, false}, {context, z_context:new_for_host(Context)}]).
+    start_link([{session, SessionPid}, {cookie, CookieId}, {is_new, false}, {context, z_context:new(Context)}]).
 
 
 %% @spec associate_session(Pid, SessionPid) -> void()

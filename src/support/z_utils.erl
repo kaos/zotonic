@@ -47,7 +47,8 @@
 	replace1/3,
 	guess_mime/1,
 	list_dir_recursive/1,
-	are_equal/2
+	are_equal/2,
+	name_for_host/2
 ]).
 
 %%% FORMAT %%%
@@ -550,3 +551,9 @@ are_equal(Arg1, Arg2) when is_integer(Arg2) ->
     are_equal(Arg1, integer_to_list(Arg2));
 are_equal(_Arg1, _Arg2) ->
     false.
+
+
+%% @doc Return the name used in the context of a hostname
+%% @spec name_for_host(atom(), atom()) -> atom().
+name_for_host(Name, Host) ->
+    z_convert:to_atom(z_convert:to_list(Name) ++ [$$, z_convert:to_list(Host)]).
