@@ -16,8 +16,8 @@
 -module(wrq).
 -author('Justin Sheehy <justin@basho.com>').
 
--export([create/4,load_dispatch_data/6]).
--export([method/1,version/1,peer/1,disp_path/1,path/1,raw_path/1,path_info/1,
+-export([create/4,load_dispatch_data/7]).
+-export([method/1,version/1,peer/1,host/1,disp_path/1,path/1,raw_path/1,path_info/1,
          response_code/1,req_cookie/1,req_qs/1,req_headers/1,req_body/1,
          stream_req_body/2,resp_redirect/1,resp_headers/1,resp_body/1,
         app_root/1,path_tokens/1]).
@@ -56,8 +56,8 @@ create(RD = #wm_reqdata{raw_path=RawPath}) ->
     {_, QueryString, _} = mochiweb_util:urlsplit_path(RawPath),
     ReqQS = mochiweb_util:parse_qs(QueryString),
     RD#wm_reqdata{path=Path,req_cookie=Cookie,req_qs=ReqQS}.
-load_dispatch_data(PathInfo, PathTokens, AppRoot, DispPath, WMReq, RD) ->
-    RD#wm_reqdata{path_info=PathInfo,path_tokens=PathTokens,
+load_dispatch_data(Host, PathInfo, PathTokens, AppRoot, DispPath, WMReq, RD) ->
+    RD#wm_reqdata{host=Host, path_info=PathInfo,path_tokens=PathTokens,
                  app_root=AppRoot,disp_path=DispPath,wmreq=WMReq}.
 
 method(_RD = #wm_reqdata{method=Method}) -> Method.
@@ -67,6 +67,8 @@ version(_RD = #wm_reqdata{version=Version})
      is_integer(element(1,Version)), is_integer(element(2,Version)) -> Version.
 
 peer(_RD = #wm_reqdata{peer=Peer}) when is_list(Peer) -> Peer.
+
+host(_RD = #wm_reqdata{host=Host}) when is_atom(Host) -> Host.
 
 app_root(_RD = #wm_reqdata{app_root=AR}) when is_list(AR) -> AR.
 

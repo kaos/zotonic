@@ -25,19 +25,19 @@ start(Options) ->
     {ErrorHandler0, Options2} = get_option(error_handler, Options1),
     {EnablePerfLog, Options3} = get_option(enable_perf_logger, Options2),
     ErrorHandler = 
-	case ErrorHandler0 of 
-	    undefined ->
-		webmachine_error_handler;
-	    EH -> EH
-	end,
+        case ErrorHandler0 of 
+            undefined ->
+                webmachine_error_handler;
+            EH -> EH
+        end,
     {LogDir, Options4} = get_option(log_dir, Options3),
     webmachine_sup:start_logger(LogDir),
     case EnablePerfLog of
-	true ->
-	    application:set_env(webmachine, enable_perf_logger, true),
-	    webmachine_sup:start_perf_logger(LogDir);
-	_ ->
-	    ignore
+        true ->
+            application:set_env(webmachine, enable_perf_logger, true),
+            webmachine_sup:start_perf_logger(LogDir);
+        _ ->
+            ignore
     end,
     application:set_env(webmachine, dispatch_list, DispatchList),
     application:set_env(webmachine, error_handler, ErrorHandler),
@@ -48,28 +48,53 @@ stop() ->
 
 loop(MochiReq) ->
     Req = webmachine:new_request(mochiweb, MochiReq),
-    {ok, DispatchList} = application:get_env(webmachine, dispatch_list),
+    case webmachine_host:get_host_dispatch_list(Req) of
+        {ok, Host, DispatchList} ->
+            dispatch_request(Req, Host, DispatchList);
+        {redirect, Hostname} ->
+            Uri = "http://" ++ Hostname ++ Req:raw_path(),
+            Req:add_response_header("Location", Uri),
+            Req:send_response(301),
+            LogData = Req:log_data(),
+            LogModule = 
+                case application:get_env(webmachine,webmachine_logger_module) of
+                    {ok, Val} -> Val;
+                    _ -> webmachine_logger
+                end,
+            spawn(LogModule, log_access, [LogData]),
+            Req:stop();
+        no_host_match ->
+            send_404(Req, default)
+    end.
+
+dispatch_request(Req, Host, DispatchList) ->
     case webmachine_dispatcher:dispatch(Req:path(), DispatchList) of
         {no_dispatch_match, _UnmatchedPathTokens} ->
-            {ok, ErrorHandler} = application:get_env(webmachine, error_handler),
-	    ErrorHTML = ErrorHandler:render_error(404, Req, {none, none, []}),
-	    Req:append_to_response_body(ErrorHTML),
-	    Req:send_response(404),
-	    LogData = Req:log_data(),
-	    LogModule = 
-                case application:get_env(webmachine,webmachine_logger_module) of
-		    {ok, Val} -> Val;
-		    _ -> webmachine_logger
-		end,
-	    spawn(LogModule, log_access, [LogData]),
-	    Req:stop();
+            send_404(Req, Host);
         {Mod, ModOpts, PathTokens, Bindings, AppRoot, StringPath} ->
             BootstrapResource = webmachine_resource:new(x,x,x,x),
             {ok, Resource} = BootstrapResource:wrap(Mod, ModOpts),
-	    Req:load_dispatch_data(Bindings,PathTokens,AppRoot,StringPath,Req),
-	    Req:set_metadata('resource_module', Mod),
+            Req:load_dispatch_data(Host, Bindings,PathTokens,AppRoot,StringPath,Req),
+            Req:set_metadata('resource_module', Mod),
+            Req:set_metadata('host', Host),
             webmachine_decision_core:handle_request(Req, Resource)
     end.
+
+send_404(Host, Req) ->
+    Req:set_metadata('host', Host),
+    {ok, ErrorHandler} = application:get_env(webmachine, error_handler),
+    ErrorHTML = ErrorHandler:render_error(404, Req, {none, none, []}),
+    Req:append_to_response_body(ErrorHTML),
+    Req:send_response(404),
+    LogData = Req:log_data(),
+    LogModule = 
+        case application:get_env(webmachine,webmachine_logger_module) of
+            {ok, Val} -> Val;
+            _ -> webmachine_logger
+        end,
+    spawn(LogModule, log_access, [LogData]),
+    Req:stop().
+
 
 get_option(Option, Options) ->
     {proplists:get_value(Option, Options), proplists:delete(Option, Options)}.
