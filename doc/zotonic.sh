@@ -38,20 +38,6 @@ export HEART_COMMAND="$ZOTONIC_SH start"
 export ZOTONIC_IP=any
 export ZOTONIC_PORT=8000
 
-## The admin password - this is the initial password, you can change it in the /admin
-export ZOTONIC_ADMINPASSWORD="admin"
-
-## Key used for signing image urls with image manipulations (crop, rotate, resize, etc.)
-## When not set then zotonic will generate a new key on every restart, forcing old image urls to fail.
-## A new key will also force regenerating images, which takes cpu time and will fill your hard disk.
-export ZOTONIC_SIGN_KEY_SIMPLE="--change-me--"
-
-## Key used for signing postbacks - this _must_ be a hard to guess key, otherwise your system is insecure.
-## When not defined, then zotonic will generate a new key on every restart.
-## When a new key is generated then all postbacks from old html pages will fail.
-export ZOTONIC_SIGN_KEY="--change-me-as-well--"
-
-
 pushd $PWD >/dev/null
 
 

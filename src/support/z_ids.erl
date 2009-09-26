@@ -63,8 +63,10 @@ optid(Id) -> Id.
 %% @doc Get the key for signing requests stored in the user agent.
 sign_key(Context) ->
     case m_site:get(sign_key, Context) of
-        "--change-me--" -> gen_server:call(?MODULE, sign_key);
-        SignKey -> SignKey
+        SiteKey when not is_binary(SiteKey) orelse SiteKey =:= <<"--change-me--">> -> 
+            gen_server:call(?MODULE, sign_key);
+        SignKey -> 
+            SignKey
     end.
 
 
@@ -72,8 +74,10 @@ sign_key(Context) ->
 %% @doc Get the key for less secure signing of data (without nonce).
 sign_key_simple(Context) -> 
     case m_site:get(sign_key_simple, Context) of
-        "--change-me--" -> gen_server:call(?MODULE, sign_key_simple);
-        SignKeySimple -> SignKeySimple
+        SiteKey when not is_binary(SiteKey) orelse SiteKey =:= <<"--change-me--">> -> 
+            gen_server:call(?MODULE, sign_key_simple);
+        SignKeySimple -> 
+            SignKeySimple
     end.
 
 
@@ -114,8 +118,7 @@ handle_call({id, Len}, _From, State) ->
 handle_call(sign_key, _From, State) ->
     case State#state.sign_key of
         undefined ->
-            SKey = case os:getenv("ZOTONIC_SIGN_KEY") of false -> generate_id(50); K -> K end,
-            Key  = list_to_binary(SKey),
+            Key = list_to_binary(generate_id(50)),
             {reply, Key, State#state{sign_key=Key}};
         Key -> 
             {reply, Key, State}
@@ -124,8 +127,7 @@ handle_call(sign_key, _From, State) ->
 handle_call(sign_key_simple, _From, State) ->
     case State#state.sign_key_simple of
         undefined ->
-            SKey = case os:getenv("ZOTONIC_SIGN_KEY_SIMPLE") of false -> generate_id(10); K -> K end,
-            Key  = list_to_binary(SKey),
+            Key = list_to_binary(generate_id(10)),
             {reply, Key, State#state{sign_key_simple=Key}};
         Key -> 
             {reply, Key, State}
