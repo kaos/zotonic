@@ -264,12 +264,12 @@ is_text(_Mime) -> false.
 %% The original media should be in State#media_path (or z_path:media_archive)
 %% The generated image should be created in State#root (or z_path:media_preview)
 ensure_preview(ReqData, Path, State) ->
-    {Filepath, PreviewPropList, _Checksum, _ChecksumBaseString} = z_media_tag:url2props(Path),
+    Context = z_context:new(ReqData, ?MODULE), 
+    {Filepath, PreviewPropList, _Checksum, _ChecksumBaseString} = z_media_tag:url2props(Path, Context),
     case mochiweb_util:safe_relative_path(Filepath) of
         undefined ->
             {false, ReqData, State};
         Safepath  ->
-            Context = z_context:new(ReqData, ?MODULE), 
             MediaPath = case State#state.media_path of
                 undefined -> z_path:media_archive(Context);
                 ConfMediaPath -> ConfMediaPath

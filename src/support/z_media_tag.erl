@@ -20,7 +20,7 @@
     tag/3,
     url/3,
     props2url/1,
-    url2props/1
+    url2props/2
 ]).
 
 -include_lib("zotonic.hrl").
@@ -93,7 +93,7 @@ tag(Filename, Options, Context) when is_list(Filename) ->
     
 
     tag1(MediaRef, Filename, Options, Context) ->
-        {url, Url, TagOpts, ImageOpts} = url1(Filename, Options),
+        {url, Url, TagOpts, ImageOpts} = url1(Filename, Options, Context),
         % Calculate the real size of the image using the options
         TagOpts1 = case z_media_preview:size(MediaRef, ImageOpts, Context) of
                         {size, Width, Height, _Mime} ->
@@ -142,27 +142,27 @@ url([{_Prop, _Value}|_] = Props, Options, Context) ->
         None when None == undefined; None == <<>>; None == [] -> 
             case z_notifier:first({media_stillimage, Props}, Context) of
                 {ok, Filename} ->
-                    {url, Url, _TagOptions, _ImageOptions} = url1(Filename, Options),
+                    {url, Url, _TagOptions, _ImageOptions} = url1(Filename, Options, Context),
                     {ok, Url};
                 _ ->
                     {ok, []}
             end;
         Filename -> 
-            {url, Url, _TagOptions, _ImageOptions} = url1(Filename, Options),
+            {url, Url, _TagOptions, _ImageOptions} = url1(Filename, Options, Context),
             {ok, Url}
     end;
-url(Filename, Options, _Context) ->
-    {url, Url, _TagOptions, _ImageOptions} = url1(Filename, Options),
+url(Filename, Options, Context) ->
+    {url, Url, _TagOptions, _ImageOptions} = url1(Filename, Options, Context),
     {ok, Url}.
 
 
-%% @spec url1(Filename, Options) -> {url, Url, TagOptions, ImageOpts} | {error, Reason}
+%% @spec url1(Filename, Options, Context) -> {url, Url, TagOptions, ImageOpts} | {error, Reason}
 %% @doc Creates an url for the given filename and filters.  This does not check the filename or if it is convertible.
-url1(Filename, Options) ->
+url1(Filename, Options, Context) ->
     {TagOpts, ImageOpts} = lists:partition(fun is_tagopt/1, Options),
     % Map all ImageOpts to an opt string
     UrlProps = props2url(ImageOpts),
-    Checksum = z_utils:checksum([Filename,UrlProps,".jpg"]),
+    Checksum = z_utils:checksum([Filename,UrlProps,".jpg"], Context),
     PropCheck = mochiweb_util:quote_plus(lists:flatten([UrlProps,$(,Checksum,$)])),
     {url, list_to_binary(filename_to_urlpath(lists:flatten([Filename,PropCheck,".jpg"]))), 
           TagOpts,
@@ -200,17 +200,17 @@ props2url([{Prop,Value}|Rest], Width, Height, Acc) ->
     props2url(Rest, Width, Height, [[atom_to_list(Prop),$-,z_convert:to_list(Value)]|Acc]).
 
 
-%% @spec url2props(Url) -> {Filepath,PreviewPropList,Checksum,ChecksumBaseString}
+%% @spec url2props(Url, Context) -> {Filepath,PreviewPropList,Checksum,ChecksumBaseString}
 %% @doc Translate an url of the format "image.jpg(300x300)(crop-center)(checksum).jpg" to parts
 %% @todo Map the extension to the format of the preview (.jpg or .png)
-url2props(Url) ->
+url2props(Url, Context) ->
     {Filepath,Rest} = lists:splitwith(fun(C) -> C =/= $( end, Url),
     PropsRoot       = filename:rootname(Rest),
     % Take the checksum from the string
     LastParen       = string:rchr(PropsRoot, $(),
     {Props,[$(|Check]} = lists:split(LastParen-1, PropsRoot),
     Check1          = string:strip(Check, right, $)),
-    z_utils:checksum_assert([Filepath,Props,".jpg"], Check1),
+    z_utils:checksum_assert([Filepath,Props,".jpg"], Check1, Context),
     PropList        = string:tokens(Props, ")("),
     PropList1       = case PropList of
                         [] -> [];

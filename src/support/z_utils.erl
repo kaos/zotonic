@@ -17,8 +17,8 @@
 	decode/2,
 	hex_encode/1,
 	hex_decode/1,
-	checksum/1,
-	checksum_assert/2,
+	checksum/2,
+	checksum_assert/3,
 	pickle/2,
 	depickle/2,
 	url_encode/1,
@@ -111,12 +111,12 @@ inner_decode(Data, Base) when is_list(Data) ->
 
 %%% CHECKSUM %%%
 
-checksum(Data) ->
-    Sign = z_ids:sign_key_simple(),
+checksum(Data, Context) ->
+    Sign = z_ids:sign_key_simple(Context),
     z_utils:hex_encode(erlang:md5([Sign,Data])).
 
-checksum_assert(Data, Checksum) ->
-    Sign = z_ids:sign_key_simple(),
+checksum_assert(Data, Checksum, Context) ->
+    Sign = z_ids:sign_key_simple(Context),
     assert(list_to_binary(z_utils:hex_decode(Checksum)) == erlang:md5([Sign,Data]), checksum_invalid).
 
 %%% PICKLE / UNPICKLE %%%
