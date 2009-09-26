@@ -133,17 +133,12 @@ site(ReqData) ->
     end.
 
 
-%% @doc Return the current hostname from the config or reqdata
+%% @doc Return the preferred hostname from the site configuration
 %% @spec hostname(Context) -> string()
-hostname(Context = #context{wm_reqdata=ReqData}) ->
-    case m_config:get_value(site, hostname, Context) of
-        Empty when Empty == undefined; Empty == <<>>; Empty == [] ->
-            case wrq:get_req_header("host", ReqData) of
-                undefined ->
-                    "localhost";
-                Hostname ->
-                    Hostname
-            end;
+hostname(Context) ->
+    case z_dispatcher:hostname(Context) of
+        Empty when Empty == undefined; Empty == [] ->
+            "localhost";
         Hostname ->
             Hostname
     end.

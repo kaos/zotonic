@@ -9,7 +9,7 @@
 -behaviour(supervisor).
 
 %% External exports
--export([start_link/0, upgrade/0, update_dispatchinfo/0]).
+-export([start_link/0, upgrade/0, update_dispatchinfo/0, get_site_config/1]).
 
 %% supervisor callbacks
 -export([init/1]).
@@ -97,4 +97,10 @@ scan_sites() ->
                 ?ERROR("Could not consult site config ~p: error ~p", [C, Reason]),
                 Error
         end.
+
+%% @doc Fetch the configuration of a specific site.
+%% @spec site_config(Site::atom()) -> SiteProps::list() | {error, Reason}
+get_site_config(Site) ->
+    ConfigFile = filename:join([code:lib_dir(zotonic, priv), "sites", Site, "config"]),
+    parse_config(ConfigFile).
 

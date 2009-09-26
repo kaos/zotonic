@@ -95,11 +95,15 @@ init(SiteProps) ->
                 lookup=dict:new(),
                 context=Context, 
                 host=Host, 
-                hostname=iolist_to_binary(Hostname), 
-                hostalias=[iolist_to_binary(Alias) || Alias <- HostAlias]
+                hostname=drop_port(Hostname), 
+                hostalias=[ drop_port(Alias) || Alias <- HostAlias ]
     },
     z_notifier:observe(module_ready, {?MODULE, reload}, Context),
     {ok, State}.
+
+
+    drop_port(Hostname) ->
+        hd(string:tokens(Hostname, ":")).
 
 
 %% @spec handle_call(Request, From, State) -> {reply, Reply, State} |

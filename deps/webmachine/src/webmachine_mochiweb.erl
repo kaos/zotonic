@@ -80,7 +80,7 @@ dispatch_request(Req, Host, DispatchList) ->
             webmachine_decision_core:handle_request(Req, Resource)
     end.
 
-send_404(Host, Req) ->
+send_404(Req, Host) ->
     Req:set_metadata('host', Host),
     {ok, ErrorHandler} = application:get_env(webmachine, error_handler),
     ErrorHTML = ErrorHandler:render_error(404, Req, {none, none, []}),

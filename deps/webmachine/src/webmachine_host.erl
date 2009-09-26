@@ -29,13 +29,12 @@ get_host_dispatch_list(Req) ->
     case DispatchList of
         [#wm_host_dispatch_list{}|_] ->
             {Host, Port} = get_host(Req),
-            HostBin = list_to_binary(Host),
-            case get_dispatch_host(HostBin, DispatchList) of
+            case get_dispatch_host(Host, DispatchList) of
                 {ok, DL} ->
                     {ok, DL#wm_host_dispatch_list.host, DL#wm_host_dispatch_list.dispatch_list};
 
                 undefined ->
-                    FoundHost = case get_dispatch_alias(HostBin, DispatchList) of
+                    FoundHost = case get_dispatch_alias(Host, DispatchList) of
                                     {ok, _} = Found -> Found;
                                     undefined -> get_dispatch_default(DispatchList)
                                 end,
@@ -44,7 +43,7 @@ get_host_dispatch_list(Req) ->
                             case DL#wm_host_dispatch_list.redirect andalso is_hostname(DL#wm_host_dispatch_list.hostname) andalso Req:method() =:= 'GET' of
                                 true ->
                                     % Redirect, keep the port number
-                                    Hostname = binary_to_list(DL#wm_host_dispatch_list.hostname),
+                                    Hostname = DL#wm_host_dispatch_list.hostname,
                                     Hostname1 = case Port of
                                                     "80" -> Hostname;
                                                     _ -> Hostname ++ [$:|Port]
@@ -114,8 +113,8 @@ get_dispatch_default([_|Rest]) ->
 
 %% @doc Check if the hostname is a hostname suitable to redirect to
 is_hostname(undefined) -> false;
-is_hostname(<<"">>) -> false;
-is_hostname(<<"localhost">>) -> false;
-is_hostname(<<"127.0.0.1">>) -> false;
+is_hostname("") -> false;
+is_hostname("localhost") -> false;
+is_hostname("127.0.0.1") -> false;
 is_hostname(_) -> true.
 

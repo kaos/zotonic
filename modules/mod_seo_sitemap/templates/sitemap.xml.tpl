@@ -5,7 +5,7 @@
       xsi:schemaLocation="http://www.sitemaps.org/schemas/sitemap/0.9
             http://www.sitemaps.org/schemas/sitemap/0.9/sitemap.xsd">
 
-{% with m.config.site.hostname.value|default:"localhost" as hostname %}
+{% with m.site.hostname|default:"localhost" as hostname %}
 
 	<url>
 	  <loc>http://{{ hostname }}/</loc>
