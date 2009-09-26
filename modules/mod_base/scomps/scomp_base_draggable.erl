@@ -41,7 +41,7 @@ render(Params, _Vars, Context, _State) ->
 	                undefined -> z_context:get_resource_module(Context);
 	                _ -> Delegate
 	               end,
-	PickledTag   = z_utils:pickle({Tag,Delegate1,Id}),
+	PickledTag   = z_utils:pickle({Tag,Delegate1,Id}, Context),
 	GroupClasses = groups_to_classes(Groups1),
 
 	Helper       =  case z_utils:is_true(Clone) of

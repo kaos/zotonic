@@ -52,7 +52,7 @@ render(Params, _Vars, Context, _State) ->
 %% @doc Drops will be delegated to this event handler, which will call the postback resource.
 event({postback, {DropTag,DropDelegate}, TriggerId, _TargetId}, Context) ->
 	DragItem = z_context:get_q("drag_item", Context),
-	{DragTag,DragDelegate,DragId} = z_utils:depickle(DragItem),
+	{DragTag,DragDelegate,DragId} = z_utils:depickle(DragItem, Context),
 
     Drop = #dragdrop{tag=DropTag, delegate=DropDelegate, id=TriggerId},
     Drag = #dragdrop{tag=DragTag, delegate=DragDelegate, id=DragId},

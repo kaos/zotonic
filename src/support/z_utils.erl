@@ -19,8 +19,8 @@
 	hex_decode/1,
 	checksum/1,
 	checksum_assert/2,
-	pickle/1,
-	depickle/1,
+	pickle/2,
+	depickle/2,
 	url_encode/1,
 	os_escape/1,
 	js_escape/1,
@@ -121,18 +121,18 @@ checksum_assert(Data, Checksum) ->
 
 %%% PICKLE / UNPICKLE %%%
 
-pickle(Data) ->
+pickle(Data, Context) ->
     BData = erlang:term_to_binary(Data),
 	Nonce = z_ids:number(1 bsl 31),
-	Sign  = z_ids:sign_key(),
+	Sign  = z_ids:sign_key(Context),
 	SData = <<BData/binary, Nonce:32, Sign/binary>>,
 	<<C1:64,C2:64>> = erlang:md5(SData),
 	base64:encode(<<C1:64, C2:64, Nonce:32, BData/binary>>).
 	
-depickle(Data) ->
+depickle(Data, Context) ->
     try
         <<C1:64, C2:64, Nonce:32, BData/binary>> = base64:decode(Data),
-    	Sign  = z_ids:sign_key(),
+    	Sign  = z_ids:sign_key(Context),
     	SData = <<BData/binary, Nonce:32, Sign/binary>>,
     	<<C1:64, C2:64>> = erlang:md5(SData),
     	erlang:binary_to_term(BData)

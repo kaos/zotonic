@@ -30,8 +30,8 @@
 	
 	make_postback/6,
 	make_postback_info/6,
-	make_validation_postback/1,
 	make_validation_postback/2,
+	make_validation_postback/3,
 	
 	wire/2, wire/3, wire/4
 ]).
@@ -155,7 +155,7 @@ render_validator(TriggerId, TargetId, Args, Context) ->
         [] ->
             {[VldScript|Append], Context1};
         _ ->
-            Pickled  = z_utils:pickle({Trigger,Name,Postback}),
+            Pickled  = z_utils:pickle({Trigger,Name,Postback}, Context1),
             PbScript = [<<"z_set_validator_postback('">>,Trigger,<<"', '">>, Pickled, <<"');\n">>],
             {[PbScript,VldScript|Append], Context1}
     end.
@@ -223,7 +223,7 @@ make_postback_info(Tag, EventType, TriggerId, TargetId, Delegate, Context) ->
             		_         -> z_convert:to_atom(Delegate)
             	end,
 	PostbackInfo = {EventType, TriggerId, TargetId, Tag, Delegate1},
-	z_utils:pickle(PostbackInfo).
+	z_utils:pickle(PostbackInfo, Context).
 
 
 %% @doc Make a javascript to call the postback, posting an encoded string containing callback information. 
@@ -236,10 +236,10 @@ make_postback(PostbackTag, EventType, TriggerId, TargetId, Delegate, Context) ->
 	{[<<"z_queue_postback('">>,TriggerId,<<"', '">>,PickledPostbackInfo,<<"');">>], PickledPostbackInfo}.
 
 
-make_validation_postback(Validator) ->
-    make_validation_postback(Validator,{}).
-make_validation_postback(Validator, Args) ->
-    z_utils:pickle({Validator, Args}).
+make_validation_postback(Validator, Context) ->
+    make_validation_postback(Validator, {}, Context).
+make_validation_postback(Validator, Args, Context) ->
+    z_utils:pickle({Validator, Args}, Context).
 
 
 %%% ACTION WIRING %%%

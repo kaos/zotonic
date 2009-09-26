@@ -20,8 +20,7 @@
     tag/3,
     url/3,
     props2url/1,
-    url2props/1,
-    test/0
+    url2props/1
 ]).
 
 -include_lib("zotonic.hrl").
@@ -241,31 +240,4 @@ url2props1([P|Rest], Acc) ->
     url2props1(Rest, [Filter|Acc]).
 
 
-test() ->
-    Context = z_context:new(default),
-    OldSignKey = z_ids:set_sign_key_simple("test"),
-    try
-        {   "koe.jpg", [{width,400},{crop,east},{blur},{grey}], 
-            "791202B7AEEF0BBF0A5AE3B43652431E","(400x)(crop-east)(blur)(grey)"} 
-        = url2props("koe.jpg(400x)(crop-east)(blur)(grey)(791202B7AEEF0BBF0A5AE3B43652431E).jpg"),
-    
-        "(300x300)(crop-center)" 
-        = props2url([{width,300},{height,300},{crop,center}]),
-    
-        {ok,[60,"img",
-              [ [32,<<"src">>,61,39,
-                 <<"/image/koe.jpg%28300x300%29%28crop-center%29%2845036B4120DBFE5E5859B1ADFFB8E5A1%29.jpg">>,39],
-                [],
-                [32,<<"width">>,61,39,<<"300">>,39],
-                [32,<<"height">>,61,39,<<"300">>,39],
-                [32,<<"class">>,61,39,"some-class",39]],
-              47,62]} = 
-        tag(<<"koe.jpg">>, [{width,300},{height,300},{crop,center},{class,"some-class"}], Context),
-        z_ids:set_sign_key_simple(OldSignKey),
-        ok
-    catch 
-        _:Error ->
-            z_ids:set_sign_key_simple(OldSignKey),
-            Error
-    end.
     

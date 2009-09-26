@@ -25,9 +25,8 @@
     identifier/0,
     identifier/1,
     optid/1,
-    sign_key/0,
-    sign_key_simple/0,
-    set_sign_key_simple/1,
+    sign_key/1,
+    sign_key_simple/1,
     number/0,
     number/1,
     start_link/0
@@ -60,21 +59,23 @@ optid(undefined) -> identifier(?OPTID_LENGTH);
 optid(false) -> identifier(?OPTID_LENGTH);
 optid(Id) -> Id.
 
-%% @spec sign_key() -> binary()
+%% @spec sign_key(Context) -> binary()
 %% @doc Get the key for signing requests stored in the user agent.
-sign_key() -> 
-    gen_server:call(?MODULE, sign_key).
+sign_key(Context) ->
+    case m_site:get(sign_key, Context) of
+        "--change-me--" -> gen_server:call(?MODULE, sign_key);
+        SignKey -> SignKey
+    end.
 
 
-%% @spec sign_key_simple() -> binary()
+%% @spec sign_key_simple(Context) -> binary()
 %% @doc Get the key for less secure signing of data (without nonce).
-sign_key_simple() -> 
-    gen_server:call(?MODULE, sign_key_simple).
+sign_key_simple(Context) -> 
+    case m_site:get(sign_key_simple, Context) of
+        "--change-me--" -> gen_server:call(?MODULE, sign_key_simple);
+        SignKeySimple -> SignKeySimple
+    end.
 
-%% @spec set_sign_key_simple(binary()) -> binary()
-%% @doc Set the key for less secure signing of data (without nonce), returning the previous key.
-set_sign_key_simple(Key) -> 
-    gen_server:call(?MODULE, {set_sign_key_simple, Key}).
 
 %% @doc Return a big random integer, but smaller than maxint32
 number() ->

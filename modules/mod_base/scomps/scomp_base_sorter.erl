@@ -90,7 +90,7 @@ event({postback, {SortTag,SortDelegate}, TriggerId, _TargetId}, Context) ->
 	SortItems = z_context:get_q("sort_items", Context),
 
     UnpickleF = fun(X) ->
-                    {DragTag,DragDelegate,DragId} = z_utils:depickle(X),
+                    {DragTag,DragDelegate,DragId} = z_utils:depickle(X, Context),
                     #dragdrop{tag=DragTag, delegate=DragDelegate, id=DragId}
                 end,
 
