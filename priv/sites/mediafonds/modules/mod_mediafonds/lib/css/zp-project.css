@@ -1,14 +1,105 @@
+/* Mediafonds 2009 project styles
+----------------------------------------------------------
+
+@package:	zotonic
+@project:	mediafonds.nl 2009
+@Author: 	Tim Benniks <tim@timbenniks.com>
+@Created: 	28-09-2009
+
+---------------------------------------------------------- */
+
+body {
+	background: #fff;
+	color: #000;
+	font: 13px/18px "Georgia", Times, serif;
+}
+
+
+/* Typography
+---------------------------------------------------------- */
+
+h1 {
+}
+
+h2 {
+}
+
+h3 {
+}
+
+h4 {
+}
+
+h5 {
+}
+
+h5 {
+}
+
+a, a:focus {
+	color: #555;
+	text-decoration: none;
+}
+
+a:hover {
+	color: #000;
+}
+
+/* Grid
+---------------------------------------------------------- */
+
 .zp-wrapper {
 	width: 920px;
 }
 
-footer {
-	font-size: 10px;
+#content .padding {
+	padding: 0 60px 0 0;
+}	
+
+	/* footer
+	------------------------------------------------------ */
+
+	footer {
+		font-size: 11px;
+		border-top: 5px solid #000;
+		padding: 3px 0 0 0;
+	}
+
+	.footer-logos {
+		text-align: right;
+	}
+
+
+/* navigation
+---------------------------------------------------------- */
+
+
+/* Misc
+---------------------------------------------------------- */
+
+#ie6-upgrade {
+	padding: 5px 10px;
 }
 
-.footer-logos {
-	text-align: right;
+#ie6-upgrade h4 {
+	color: #000;
+	font-weight: bold;
 }
+
+#ie6-upgrade a {
+	color: #000;
+	text-decoration: underline;
+	border: none;
+}
+
+	#ie6-upgrade a:hover {
+		border: none;
+		color: #444;
+	}
+
+
+/* Forms
+---------------------------------------------------------- */
 
 #search fieldset {
 	padding: 0;
