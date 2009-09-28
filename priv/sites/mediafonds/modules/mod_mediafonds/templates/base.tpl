@@ -44,7 +44,7 @@
 		
 		<header>
 			<nav id="subnav-top">
-				<ul>
+				<ul class="list">
 					<li><a href="#" title="">Home</a></li>
 					<li><a href="#" title="">Contact</a></li>
 					<li><a href="#" title="">Het fonds</a></li>
@@ -57,26 +57,30 @@
 			
 			<figure>
 				<a href="/" title="">
-					<img src="#" alt="" />
+					<img src="./lib/images/logo.jpg" alt="" />
 				</a>
 			</figure>
 			
-			<nav id="main-nav">
-				<ul>
-					<li><a href="#" title="">Aanvragen</a></li>
-					<li><a href="#" title="">Etalage</a></li>
-					<li><a href="#" title="">Toegekend</a></li>
-					<li><a href="#" title="">Nieuws</a></li>
-				</ul>
-			</nav>
+			<section id="nav-search-wrapper" class="clearfix">
 			
-			<section id="search">
-				<form>
-					<fieldset>
-						<input type="text" name="q" value="" />
-						<button type="submit">Zoek</button>
-					</fieldset>	
-				</form>	
+				<nav id="main-nav" class="left">
+					<ul class="list">
+						<li><a href="#" title="">Aanvragen</a></li>
+						<li><a href="#" title="">Etalage</a></li>
+						<li><a href="#" title="">Toegekend</a></li>
+						<li><a href="#" title="">Nieuws</a></li>
+					</ul>
+				</nav>
+			
+				<section id="search" class="right">
+					<form>
+						<fieldset>
+							<input type="text" name="q" value="" />
+							<button type="submit">Zoek</button>
+						</fieldset>	
+					</form>	
+				</section>
+				
 			</section>
 		</header>
 		

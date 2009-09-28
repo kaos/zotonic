@@ -9,3 +9,16 @@ footer {
 .footer-logos {
 	text-align: right;
 }
+
+#search fieldset {
+	padding: 0;
+	margin: 0;
+	border: none;
+}
+
+	#search input {
+		float: left;
+		margin: 0 3px 0 0;
+		padding: 2px 3px;
+		border-width: 1px;
+	}
