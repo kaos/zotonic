@@ -71,6 +71,20 @@ hr {
 }
 
 
+/* html 5 compatability
+---------------------------------------------------------- */
+
+header, 
+footer, 
+section, 
+aside, 
+nav, 
+article,
+figure {
+	display: block !important;
+}
+
+
 /* A basic grid.
 ----------------------------------------------------------
 
@@ -136,6 +150,21 @@ hr {
 	float: right;
 }
 
+
+/*	Lists
+-------------------------------------------------------------- */
+
+.list {
+	list-style: none;
+	margin: 0;
+	padding: 0;
+}
+	
+	.list li {
+		display: inline;
+		margin: 0 6px 0 0;
+	}
+	
 
 /* clearfix hack
 ---------------------------------------------------------- */
