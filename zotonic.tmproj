@@ -3,7 +3,7 @@
 <plist version="1.0">
 <dict>
 	<key>currentDocument</key>
-	<string>priv/sites/default/modules/mod_nif/templates/_view.tpl</string>
+	<string>priv/sites/default/modules/mod_nif/templates/news.tpl</string>
 	<key>documents</key>
 	<array>
 		<dict>
@@ -60,7 +60,7 @@
 		</dict>
 	</array>
 	<key>fileHierarchyDrawerWidth</key>
-	<integer>293</integer>
+	<integer>362</integer>
 	<key>metaData</key>
 	<dict>
 		<key>deps/mochiweb/src/mochiweb.app</key>
@@ -163,119 +163,35 @@
 			<key>firstVisibleLine</key>
 			<integer>20</integer>
 		</dict>
-		<key>priv/sites/default/modules/mod_nif/lib/css/zp-project.css</key>
+		<key>priv/sites/default/modules/mod_nif/templates/news.tpl</key>
 		<dict>
 			<key>caret</key>
 			<dict>
 				<key>column</key>
-				<integer>22</integer>
+				<integer>92</integer>
 				<key>line</key>
-				<integer>358</integer>
-			</dict>
-			<key>firstVisibleColumn</key>
-			<integer>0</integer>
-			<key>firstVisibleLine</key>
-			<integer>349</integer>
-		</dict>
-		<key>priv/sites/default/modules/mod_nif/templates/_footer.tpl</key>
-		<dict>
-			<key>caret</key>
-			<dict>
-				<key>column</key>
-				<integer>33</integer>
-				<key>line</key>
-				<integer>17</integer>
-			</dict>
-			<key>firstVisibleColumn</key>
-			<integer>0</integer>
-			<key>firstVisibleLine</key>
-			<integer>0</integer>
-		</dict>
-		<key>priv/sites/default/modules/mod_nif/templates/_view.tpl</key>
-		<dict>
-			<key>caret</key>
-			<dict>
-				<key>column</key>
-				<integer>11</integer>
-				<key>line</key>
-				<integer>44</integer>
-			</dict>
-			<key>firstVisibleColumn</key>
-			<integer>0</integer>
-			<key>firstVisibleLine</key>
-			<integer>0</integer>
-		</dict>
-		<key>priv/sites/default/modules/mod_nif/templates/artist.tpl</key>
-		<dict>
-			<key>caret</key>
-			<dict>
-				<key>column</key>
-				<integer>43</integer>
-				<key>line</key>
-				<integer>24</integer>
-			</dict>
-			<key>firstVisibleColumn</key>
-			<integer>0</integer>
-			<key>firstVisibleLine</key>
-			<integer>5</integer>
-		</dict>
-		<key>priv/sites/default/modules/mod_nif/templates/base.tpl</key>
-		<dict>
-			<key>caret</key>
-			<dict>
-				<key>column</key>
-				<integer>0</integer>
-				<key>line</key>
-				<integer>0</integer>
-			</dict>
-			<key>firstVisibleColumn</key>
-			<integer>0</integer>
-			<key>firstVisibleLine</key>
-			<integer>25</integer>
-		</dict>
-		<key>priv/sites/default/modules/mod_nif/templates/event.tpl</key>
-		<dict>
-			<key>caret</key>
-			<dict>
-				<key>column</key>
-				<integer>15</integer>
-				<key>line</key>
-				<integer>81</integer>
+				<integer>26</integer>
 			</dict>
 			<key>columnSelection</key>
 			<false/>
 			<key>firstVisibleColumn</key>
 			<integer>0</integer>
 			<key>firstVisibleLine</key>
-			<integer>42</integer>
+			<integer>0</integer>
 			<key>selectFrom</key>
 			<dict>
 				<key>column</key>
-				<integer>4</integer>
+				<integer>36</integer>
 				<key>line</key>
-				<integer>68</integer>
+				<integer>26</integer>
 			</dict>
 			<key>selectTo</key>
 			<dict>
 				<key>column</key>
-				<integer>15</integer>
+				<integer>92</integer>
 				<key>line</key>
-				<integer>81</integer>
+				<integer>26</integer>
 			</dict>
-		</dict>
-		<key>priv/sites/default/modules/mod_nif/templates/links.tpl</key>
-		<dict>
-			<key>caret</key>
-			<dict>
-				<key>column</key>
-				<integer>157</integer>
-				<key>line</key>
-				<integer>25</integer>
-			</dict>
-			<key>firstVisibleColumn</key>
-			<integer>0</integer>
-			<key>firstVisibleLine</key>
-			<integer>0</integer>
 		</dict>
 		<key>priv/sites/default/modules/mod_nif/templates/venue.tpl</key>
 		<dict>
@@ -308,13 +224,7 @@
 	</dict>
 	<key>openDocuments</key>
 	<array>
-		<string>priv/sites/default/modules/mod_nif/templates/_view.tpl</string>
-		<string>priv/sites/default/modules/mod_nif/templates/event.tpl</string>
-		<string>priv/sites/default/modules/mod_nif/templates/artist.tpl</string>
-		<string>priv/sites/default/modules/mod_nif/lib/css/zp-project.css</string>
-		<string>priv/sites/default/modules/mod_nif/templates/base.tpl</string>
-		<string>priv/sites/default/modules/mod_nif/templates/_footer.tpl</string>
-		<string>priv/sites/default/modules/mod_nif/templates/links.tpl</string>
+		<string>priv/sites/default/modules/mod_nif/templates/news.tpl</string>
 	</array>
 	<key>showFileHierarchyDrawer</key>
 	<false/>
@@ -347,6 +257,13 @@
 							<true/>
 							<key>subItems</key>
 							<dict>
+								<key>dispatch</key>
+								<dict>
+									<key>isExpanded</key>
+									<true/>
+									<key>subItems</key>
+									<dict/>
+								</dict>
 								<key>modules</key>
 								<dict>
 									<key>isExpanded</key>
@@ -359,27 +276,12 @@
 											<true/>
 											<key>subItems</key>
 											<dict>
-												<key>lib</key>
+												<key>dispatch</key>
 												<dict>
 													<key>isExpanded</key>
 													<true/>
 													<key>subItems</key>
-													<dict>
-														<key>css</key>
-														<dict>
-															<key>isExpanded</key>
-															<true/>
-															<key>subItems</key>
-															<dict/>
-														</dict>
-														<key>images</key>
-														<dict>
-															<key>isExpanded</key>
-															<true/>
-															<key>subItems</key>
-															<dict/>
-														</dict>
-													</dict>
+													<dict/>
 												</dict>
 												<key>templates</key>
 												<dict>
@@ -400,6 +302,6 @@
 		</dict>
 	</dict>
 	<key>windowFrame</key>
-	<string>{{3, 67}, {1677, 882}}</string>
+	<string>{{191, 80}, {1677, 882}}</string>
 </dict>
 </plist>
