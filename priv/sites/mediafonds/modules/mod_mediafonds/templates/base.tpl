@@ -26,7 +26,6 @@
 	<script>(function(){if(!/*@cc_on!@*/0)return;var e = "abbr,article,aside,audio,canvas,datalist,details,dialog,eventsource,figure,footer,header,hgroup,mark,menu,meter,nav,output,progress,section,time,video".split(','),i=e.length;while(i--){document.createElement(e[i])}})()</script>
 	
 	<link rel="icon" href="/favicon.ico" type="image/x-icon" />
-	<meta http-equiv="X-UA-Compatible" content="IE=7.5" />
 
 </head>
 <body class="{% block pageclass %}{% endblock %}">
