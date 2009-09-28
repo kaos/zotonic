@@ -22,7 +22,7 @@
     find_all/3
 ]).
 
--record(state, {context, scomps=[], actions=[], validators=[], models=[], templates=[], lib=[]}).
+-record(state, {context, scomps=[], actions=[], validators=[], models=[], templates=[], lib=[], services=[]}).
 
 -include("zotonic.hrl").
 
@@ -90,6 +90,8 @@ handle_call({find, template, Name}, _From, State) ->
     {reply, lookup(Name, State#state.templates), State};
 handle_call({find, lib, Name}, _From, State) ->
     {reply, lookup(Name, State#state.lib), State};
+handle_call({find, service, Name}, _From, State) ->
+    {reply, lookup(Name, State#state.services), State};
 
 handle_call({find_all, scomp, Name}, _From, State) ->
     {reply, lookup_all(Name, State#state.scomps), State};
@@ -103,6 +105,8 @@ handle_call({find_all, template, Name}, _From, State) ->
     {reply, lookup_all(Name, State#state.templates), State};
 handle_call({find_all, lib, Name}, _From, State) ->
     {reply, lookup_all(Name, State#state.lib), State};
+handle_call({find_all, service, Name}, _From, State) ->
+    {reply, lookup_all(Name, State#state.services), State};
 
 %% @doc Trap unknown calls
 handle_call(Message, _From, State) ->
@@ -121,7 +125,8 @@ handle_cast({{module_ready}, _NotifyContext}, State) ->
         validators = proplists:get_value(validator, Scanned),
         models     = proplists:get_value(model, Scanned),
         templates  = proplists:get_value(template, Scanned),
-        lib        = proplists:get_value(lib, Scanned)
+        lib        = proplists:get_value(lib, Scanned),
+        services   = proplists:get_value(service, Scanned)
     },
     % Reset the template server after reindexing the templates, the templates might originate now from
     % different modules than before, or are using templates that are not available anymore.
@@ -177,34 +182,33 @@ lookup_all(Name, List) ->
 
 %% @doc Scan the module directories for scomps, actions etc.
 scan(Context) ->
-    [ {What, scan1(What, Context)} || What <- [ scomp, action, validator, model, template, lib ] ].
+    [ {What, scan1(What, Context)} || What <- [ scomp, action, validator, model, template, lib, service ] ].
 
 
 %% @doc Scan module directories for specific kinds of parts. Returns a lookup list [ {lookup-name, fullpath} ]
-scan1(What, Context) when What == template orelse What == lib ->
-    Subdir = case What of
-        template -> "templates";
-        lib -> "lib"
-    end,
-    scan_subdir_files(Subdir, Context);
+scan1(template, Context) ->
+    scan_subdir_files("templates", Context);
+scan1(lib, Context) ->
+    scan_subdir_files("lib", Context);
 scan1(What, Context) ->
     {Subdir, Prefix, Extension} = subdir(What),
     Scan = scan_subdir(Subdir, Prefix, Extension, Context), 
     Sorted = z_module_sup:prio_sort(Scan),
-    FlattenFun = fun({_Module, {_ModuleDir, Files}}, Acc) ->
+    FlattenFun = fun({Module, {_ModuleDir, Files}}, Acc) ->
         Files1 = [ file2index(What, F) || F <- Files ],
         Files1 ++ Acc
     end,
     lists:foldr(FlattenFun, [], Sorted).
 
-    subdir(scomp)     -> { "scomps",     "scomp_",     ".erl" };
-    subdir(action)    -> { "actions",    "action_",    ".erl" };
-    subdir(validator) -> { "validators", "validator_", ".erl" };
-    subdir(model)     -> { "models",     "m_",         ".erl" }.
+subdir(scomp)     -> { "scomps",     "scomp_",     ".erl" };
+subdir(action)    -> { "actions",    "action_",    ".erl" };
+subdir(validator) -> { "validators", "validator_", ".erl" };
+subdir(model)     -> { "models",     "m_",         ".erl" };
+subdir(service)   -> { "services",   "service_",   ".erl" }.
 
-    file2index(_, {NoPrefixExt, File}) ->
-        ModuleName = list_to_atom(filename:basename(File, ".erl")),
-        {list_to_atom(NoPrefixExt), ModuleName}.
+file2index(_, {NoPrefixExt, File}) ->
+    ModuleName = list_to_atom(filename:basename(File, ".erl")),
+    {list_to_atom(NoPrefixExt), ModuleName}.
 
 
 %% @doc Scan the whole subdir hierarchy for files, used for templates and lib folders.
