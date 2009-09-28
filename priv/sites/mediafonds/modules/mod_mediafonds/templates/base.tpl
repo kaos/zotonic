@@ -26,7 +26,7 @@
 	<script>(function(){if(!/*@cc_on!@*/0)return;var e = "abbr,article,aside,audio,canvas,datalist,details,dialog,eventsource,figure,footer,header,hgroup,mark,menu,meter,nav,output,progress,section,time,video".split(','),i=e.length;while(i--){document.createElement(e[i])}})()</script>
 	
 	<link rel="icon" href="/favicon.ico" type="image/x-icon" />
-	<meta http-equiv="X-UA-Compatible" content="IE=7.5">
+	<meta http-equiv="X-UA-Compatible" content="IE=7.5" />
 
 </head>
 <body class="{% block pageclass %}{% endblock %}">
@@ -57,7 +57,6 @@
 			</figure>
 			
 			<section id="nav-search-wrapper" class="clearfix">
-			
 				<nav id="main-nav" class="left">
 					<ul class="list">
 						<li><a href="#" title="">Aanvragen</a></li>
@@ -66,7 +65,6 @@
 						<li><a href="#" title="">Nieuws</a></li>
 					</ul>
 				</nav>
-			
 				<section id="search" class="right">
 					<form>
 						<fieldset>
@@ -75,7 +73,6 @@
 						</fieldset>	
 					</form>	
 				</section>
-				
 			</section>
 		</header>
 		
