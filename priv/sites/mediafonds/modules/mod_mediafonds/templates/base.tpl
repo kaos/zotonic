@@ -11,7 +11,7 @@
 		Proudly powered by: Zotonic. <http://www.zotonic.com>
 	-->
 	
-	<title>{% block title %}{{ m.rsc[id].seo_title | default m.rsc[id].title }}{% endblock %} &mdash; Mediafonds</title>
+	<title>{% block title %}Homepage?{% endblock %} &mdash; Mediafonds</title>
 
 	<meta charset="utf-8" />
 	<meta name="author" content="Tim Benniks &copy; 2009" />
@@ -41,7 +41,62 @@
 	</section>
 	
 	<section class="zp-wrapper">
+		
+		<header>
+			<nav id="subnav-top">
+				<ul>
+					<li><a href="#" title="">Home</a></li>
+					<li><a href="#" title="">Contact</a></li>
+					<li><a href="#" title="">Het fonds</a></li>
+					<li><a href="#" title="">English</a></li>
+					<li><a href="#" title="">RSS</a></li>
+					<li><a href="#" title="">FAQ</a></li>
+					<li><a href="#" title="">Links</a></li>
+				</ul>
+			</nav>
+			
+			<figure>
+				<a href="/" title="">
+					<img src="#" alt="" />
+				</a>
+			</figure>
+			
+			<nav id="main-nav">
+				<ul>
+					<li><a href="#" title="">Aanvragen</a></li>
+					<li><a href="#" title="">Etalage</a></li>
+					<li><a href="#" title="">Toegekend</a></li>
+					<li><a href="#" title="">Nieuws</a></li>
+				</ul>
+			</nav>
+			
+			<section id="search">
+				<form>
+					<fieldset>
+						<input type="text" name="q" value="" />
+						<button type="submit">Zoek</button>
+					</fieldset>	
+				</form>	
+			</section>
+		</header>
+		
+		{% block mediaviewer %}{% endblock %}
+		
 		{% block content %}{% endblock %}
+		
+		<footer>
+			<div class="zp-15">Stimuleringsfonds Nederlandse Culturele Mediaproducties</div>
+			<div class="zp-15">&copy; Mediafonds Herengracht 609 1017 CE Amsterdam</div>
+			<div class="zp-15">020 623 39 01 www.mediafonds.nl info@mediafonds.nl</div>
+			<div class="zp-15">
+				<a href="">Sitemap</a>
+				<a href="">disclaimer</a>
+				<a href="">Colofon</a>
+			</div>
+			<div class="zp-40 footer-logos">
+				crap plaatjes
+			</div>
+		</footer>
 	</section>
 
 	{% include "_js_include.tpl" %}
