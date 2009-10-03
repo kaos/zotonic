@@ -25,12 +25,12 @@ render(Params, _Vars, Context, _State) ->
                         [
                     		{<<"id">>,    Id},
                     		{<<"href">>,  <<"javascript:void(0)">>},
-                    		{<<"title">>, "Add a connection"},
+                    		{<<"title">>, "add a connection"},
                     		{<<"class">>, "link-add"}
                     	],
-                    	"Add a connection"),
+                    	"+ add a connection"),
 
-    Html = [<<"<span>">>, Anchor, <<"</span>">>],
+    Html = [<<"<span class=\"add-connection\">">>, Anchor, <<"</span>">>],
     Context1 = z_render:render(Html, Context),
     Context2 = z_render:wire(
                 Id, 

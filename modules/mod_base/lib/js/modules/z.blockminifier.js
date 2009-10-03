@@ -32,13 +32,39 @@ $.widget("ui.blockminifier",
 {
 	_init: function() 
 	{
-		$('span.arrow', this.element).toggle(function()
+		if(this.options.minifiedOnInit)
 		{
-			$(this).parent().addClass('above-item-all-corners').next('.item').animate({height: 'hide', opacity: 'hide'}, 120);
-		},
-		function()
+			this.element.addClass('above-item-all-corners').next('.item').hide();
+			
+			$('span.arrow', this.element).toggle(function()
+			{
+				$(this).parent().removeClass('above-item-all-corners').next('.item').slideDown(200);
+			},
+			function()
+			{
+				$(this).parent().next('.item').slideUp(200, function()
+				{
+					$(this).prev('h3').addClass('above-item-all-corners');
+				});
+			});
+		}
+		else
 		{
-			$(this).parent().removeClass('above-item-all-corners').next('.item').animate({height: 'show', opacity: 'show'}, 120);
-		});
+			$('span.arrow', this.element).toggle(function()
+			{
+				$(this).parent().next('.item').slideUp(200, function()
+				{
+					$(this).prev('h3').addClass('above-item-all-corners');
+				});
+			},
+			function()
+			{
+				$(this).parent().removeClass('above-item-all-corners').next('.item').slideDown(200);
+			});
+		}
 	}
 });
+
+$.ui.blockminifier.defaults = {
+	minifiedOnInit: false
+}

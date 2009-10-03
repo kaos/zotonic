@@ -38,47 +38,46 @@
 										<input type="text" id="field-title" name="title" value="{{ r.title }}" />
 									</div>
 
-									{% if m.acl.is_admin or m.acl.is_public_publisher %}
-									<div class="path-unique-name-wrapper clearfix">
-										<div class="zp-50">
-											<div class="form-item clearfix">
-												<label for="field-page-path">Page path, default is <em>{{ r.default_page_url|escape }}</em></label>
-												<input type="text" id="field-page-path" name="page_path" value="{{ r.page_path }}" />
-											</div>
-										</div>
-									
-										{% if m.acl.is_admin %}
-											<div class="zp-50">
-												<div class="form-item clearfix">
-													<label for="field-name">Unique name</label>
-													<input type="text" id="field-name" name="name" value="{{ r.name }}" />
-												</div>
-											</div>
-										{% else %}
-											<div class="zp-50">
-												<div class="form-item clearfix">
-													&nbsp;
-												</div>
-											</div>
-										{% endif %}
-									</div>
-									{% endif %}
-									
-									{% if m.acl.is_admin %}
-										{% if r.is_a.meta or not r.is_authoritative %}
-											<div class="form-item clearfix">
-												<label for="field-name">Unique uri</label>
-												<input type="text" id="field-name" name="uri" value="{{ r.uri }}" />
-											</div>
-										{% endif %}
-									{% endif %}
-
 									<div class="form-item clearfix">
 										<label for="field-summary">Summary</label>
 										<textarea rows="2" cols="10" id="field-summary" name="summary" class="intro">{{ r.summary }}</textarea>
 									</div>
+									
+										{% if m.acl.is_admin or m.acl.is_public_publisher %}
+										<div class="path-unique-name-wrapper clearfix">
+											<div class="zp-50">
+												<div class="form-item clearfix">
+													<label for="field-page-path">Page path, default is <em>{{ r.default_page_url|escape }}</em></label>
+													<input type="text" id="field-page-path" name="page_path" value="{{ r.page_path }}" />
+												</div>
+											</div>
+									
+											{% if m.acl.is_admin %}
+												<div class="zp-50">
+													<div class="form-item clearfix">
+														<label for="field-name">Unique name</label>
+														<input type="text" id="field-name" name="name" value="{{ r.name }}" />
+													</div>
+												</div>
+											{% else %}
+												<div class="zp-50">
+													<div class="form-item clearfix">
+														&nbsp;
+													</div>
+												</div>
+											{% endif %}
+										</div>
+										{% endif %}
+									
+										{% if m.acl.is_admin %}
+											{% if r.is_a.meta or not r.is_authoritative %}
+												<div class="form-item clearfix">
+													<label for="field-name">Unique uri</label>
+													<input type="text" id="field-name" name="uri" value="{{ r.uri }}" />
+												</div>
+											{% endif %}
+										{% endif %}
 
-									{# {% include "_admin_save_buttons.tpl" %} #}
 								</fieldset>
 							</div>
 						</div>
@@ -128,7 +127,10 @@
 						</div>
 
 						<div class="item-wrapper">
-							<h3 class="above-item">Attached media</h3>
+							<h3 class="above-item clearfix do_blockminifier { minifiedOnInit: false }">
+								<span class="title">Attached media</span>
+								<span class="arrow">make smaller</span>
+							</h3>
 							<div class="item clearfix">
 								<div id="{{ #media }}">
 									{% include "_edit_media.tpl" media=media %}
@@ -155,7 +157,10 @@
 						</div>
 					
 						<div class="item-wrapper">
-							<h3 class="above-item">Seo content</h3>
+							<h3 class="above-item clearfix do_blockminifier { minifiedOnInit: true }">
+								<span class="title">Seo content</span>
+								<span class="arrow">make smaller</span>	
+							</h3>
 							<div class="item clearfix">
 								<fieldset class="admin-form">
 									<div class="form-item clearfix">
@@ -195,10 +200,7 @@
 					<div class="padding" id="sort">
 					
 						<div class="item-wrapper" id="sort-publish">
-							<h3 class="above-item clearfix do_blockminifier">
-								<span class="title">Publish this page</span>
-								<span class="arrow">make smaller</span>
-							</h3>
+							<h3 class="above-item">Publish this page</h3>
 							<div class="item clearfix">
 								<div class="admin-form ">
 									<div class="form-item clearfix">
@@ -235,7 +237,7 @@
 						</div>
 
 						<div class="item-wrapper" id="sort-access">
-							<h3 class="above-item clearfix do_blockminifier">
+							<h3 class="above-item clearfix do_blockminifier { minifiedOnInit: true }">
 								<span class="title">Access control</span>
 								<span class="arrow">make smaller</span>
 							</h3>
@@ -275,7 +277,7 @@
 
 						{% if not r.is_a.meta %}
 						<div class="item-wrapper" id="sort-date">
-							<h3 class="above-item clearfix do_blockminifier">
+							<h3 class="above-item clearfix do_blockminifier { minifiedOnInit: true }">
 								<span class="title">Date range</span>
 								<span class="arrow">make smaller</span>
 							</h3>
@@ -305,7 +307,7 @@
 						{% endif %}
 
 						<div class="item-wrapper" id="sort-connections">
-							<h3 class="above-item clearfix do_blockminifier">
+							<h3 class="above-item clearfix do_blockminifier { minifiedOnInit: true }">
 								<span class="title">Page connections</span>
 								<span class="arrow">make smaller</span>
 							</h3>
@@ -315,13 +317,18 @@
 									This page is able to connect to others. For example you can connect it to an actor or a brand. 
 									<a href="javascript:void(0)" class="do_dialog {title: 'Help about page connections.', text: 'This page is able to connect to others. For example you can connect it to an actor or a brand.', width: '450px'}">Need more help?</a>
 								</p>
-								</div>
+							</div>
 								
 								{% with r.predicates_edit as pred_shown %}
 									{% for name, p in m.predicate %}
 										{% if p.id|member:pred_shown %}
 											{% ifnotequal name "depiction" %}
-												<h4>{{ p.title }}</h4>
+												<div class="clearfix">
+													<h4>{{ p.title }}</h4>
+													{% if is_editable %}
+														{% dialog_link_add subject_id=id predicate=name element_id=#links.name %}
+													{% endif %}
+												</div>
 												<div class="unlink-wrapper clearfix">
 													{% sorter id=#links.name tag={object_sorter predicate=name id=id} %}
 													<ul id="{{ #links.name }}" class="clearfix">
@@ -331,10 +338,6 @@
 														{# always keep one li so that there is a dropzone #}
 														<ul>&nbsp;</ul>
 													</ul>
-													
-													{% if is_editable %}
-														{% dialog_link_add subject_id=id predicate=name element_id=#links.name %}
-													{% endif %}
 												</div>
 												<hr />
 											{% endifnotequal %}
@@ -342,8 +345,8 @@
 									{% endfor %}
 								{% endwith %}
 								
-								<div class="clearfix">
-									<p>{% button action={redirect dispatch="admin_referrers" id=id} text="View all referrers"%}</p>
+								<div class="button-wrapper clearfix">
+									{% button action={redirect dispatch="admin_referrers" id=id} text="View all referrers"%}
 								</div>
 							</div>
 						</div>
@@ -351,7 +354,7 @@
 						{# meta categories (predicate, category and group) cannot be changed #}
 						{% if not r.is_a.meta %}
 						<div class="item-wrapper" id="sort-category">
-							<h3 class="above-item clearfix do_blockminifier">
+							<h3 class="above-item clearfix do_blockminifier { minifiedOnInit: true }">
 								<a name="category"></a>
 								<span class="title">Category</span>
 								<span class="arrow">make smaller</span>
@@ -371,16 +374,14 @@
 								</p>
 								
 								<div class="form-item clearfix">
-									<div class="form-item clearfix">
-										{% button type="submit" id="save_stay" class="save-resource do_tooltip" text="save this page" title="Save this page and change category." disabled=is_editable|not %}
-										{% button class="discard-resource" text="cancel" action={redirect back} %}
-									</div>
+									{% button type="submit" id="save_stay" class="save-resource do_tooltip" text="save this page" title="Save this page and change category." disabled=is_editable|not %}
+									{% button class="discard-resource" text="cancel" action={redirect back} %}
 								</div>
 							</div>
 						</div>
 						{% else %}
 						<div class="item-wrapper" id="sort-category">
-							<h3 class="above-item clearfix do_blockminifier">
+							<h3 class="above-item clearfix do_blockminifier { minifiedOnInit: true }">
 								<span class="title">Category</span>
 								<span class="arrow">make smaller</span>
 							</h3>
