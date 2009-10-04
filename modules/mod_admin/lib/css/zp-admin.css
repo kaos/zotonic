@@ -275,16 +275,24 @@ a:focus {
 ---------------------------------------------------------- */
 
 #header h1 {
-	text-indent: -99999px;
-	background: transparent url(../images/admin_zotonic.png) no-repeat 0 46%;
-	height: 64px;
-	margin: 0 0 18px 0;
+	margin: 10px 0 27px 0
 }
 
-	#header h1 a {
-		display: block;
+	#header h1 span a {
+		font-family: "Lucida Grande", Helvetica, sans-serif;
+		font-size: 11px;
+		color: #eee;
+		text-decoration: none;
+		background: #3f4962;
+		padding: 2px 4px;
+		border: 1px solid #212b43;
+		-moz-border-radius: 6px;
+		-webkit-border-radius: 6px;
 	}
-
+	
+	#header h1 span a:hover {
+		background: #242f4a;
+	}
 
 /* navigation
 ---------------------------------------------------------- */
@@ -484,6 +492,10 @@ input[type="radio"],
 	width: auto;
 }
 
+.admin-form .date-item {
+	display: block;
+	float: left;
+}
 
 /* Edit page Media
 ---------------------------------------------------------- */

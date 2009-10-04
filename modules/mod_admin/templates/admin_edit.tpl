@@ -243,6 +243,10 @@
 							</h3>
 							<div class="item clearfix">
 								<div class="admin-form clearfix">
+									<div class="notification notice">
+										Here you can manage the visibility and edibility of this page.
+									</div>
+									
 									<div class="form-item zp-50">
 										<label for="visible_for">Visible for</label>
 										<select id="visible_for" name="visible_for">
@@ -283,10 +287,10 @@
 							</h3>
 							<div class="item clearfix">
 								<div class="admin-form form-item">
-									<p>
+									<div class="notification notice">
 										Used for events and other periods.
 										<a href="javascript:void(0)" class="do_dialog {title: 'Help about dateranges.', text: 'Every page can have a date range. For example if the page is an event or description of someone\'s life.', width: '450px'}">Need more help?</a>
-									</p>
+									</div>
 									<fieldset>
 										<div class="form-item">
 											<label>From</label>
@@ -296,7 +300,7 @@
 											<label>Till</label>
 											{% include "_edit_date.tpl" date=r.date_end name="date_end" is_end=1 %}
 										</div>
-										<div class="form-item">
+										<div class="form-item clear">
 											<label>Remarks</label>
 											<input type="text" name="date_remarks" value="{{ r.date_remarks }}" />
 										</div>
@@ -312,12 +316,12 @@
 								<span class="arrow">make smaller</span>
 							</h3>
 							<div class="item clearfix">
-								<div id="unlink-undo-message">
-								<p>
+								<div class="notification notice">
 									This page is able to connect to others. For example you can connect it to an actor or a brand. 
 									<a href="javascript:void(0)" class="do_dialog {title: 'Help about page connections.', text: 'This page is able to connect to others. For example you can connect it to an actor or a brand.', width: '450px'}">Need more help?</a>
-								</p>
-							</div>
+								</div>
+								
+								<div id="unlink-undo-message"></div>
 								
 								{% with r.predicates_edit as pred_shown %}
 									{% for name, p in m.predicate %}
@@ -360,7 +364,9 @@
 								<span class="arrow">make smaller</span>
 							</h3>
 							<div class="item clearfix admin-form">
-								<p>The category defines what the page represents. <a href="javascript:void(0)" class="do_dialog {title: 'Help about category.', text: 'Every page is categorized in exactly one category.  The category defines what the page represents. For example an event, a product or a person.  The categories are hierarchically defined. In that way you can have a vehicles category with subcategories car and bicycle.', width: '450px'}">Need more help?</a></p>
+								<div class="notification notice">
+									The category defines what the page represents. <a href="javascript:void(0)" class="do_dialog {title: 'Help about category.', text: 'Every page is categorized in exactly one category.  The category defines what the page represents. For example an event, a product or a person.  The categories are hierarchically defined. In that way you can have a vehicles category with subcategories car and bicycle.', width: '450px'}">Need more help?</a>
+								</div>
 								<p>
 									{% with r.category_id as r_cat %}
 										<select id="category_id" name="category_id">

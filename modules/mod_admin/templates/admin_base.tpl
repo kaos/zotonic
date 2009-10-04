@@ -24,7 +24,12 @@
 	</div>
 	<div class="zp-wrapper">
 		<div id="header">
-			<h1 class="zotonic"><a href="/admin/">Zotonic</a></h1>
+			<h1 class="zotonic">
+				<a href="/admin/">
+					<img src="/lib/images/admin_zotonic.png">
+				</a>
+				<span><a href="http://{{ m.site.hostname }}" title="Visit your site">visit site &raquo;</a></span>
+			</h1>
 		</div>
 
 		<!--[if lte IE 6]>
