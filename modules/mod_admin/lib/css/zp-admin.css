@@ -242,15 +242,15 @@ h3.above-item {
 		display: block;
 	}
 
-	
-/*	h3.do_blockminifier:hover span.arrow {
-		display: block;
-	}*/
-	
+h4 {
+	line-height: 27px;
+}
+
 #sidebar h4 {
 	float: left;
 	color: #333;
 	margin: 0 3px 0 0;
+	line-height: 18px
 }
 
 a,

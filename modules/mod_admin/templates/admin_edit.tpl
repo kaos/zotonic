@@ -29,7 +29,7 @@
 					<div class="padding">
 
 						<div class="item-wrapper">
-							<h3 class="above-item">Basic content</h3>
+							<h3 class="above-item">Basics</h3>
 							<div class="item">
 								<fieldset class="admin-form">
 									<input type="hidden" name="id" value="{{ id }}" />
@@ -86,7 +86,10 @@
 
 						{% if r.is_a.media %}
 						<div class="item-wrapper">
-							<h3 class="above-item">File/ media content</h3>
+							<h3 class="above-item clearfix do_blockminifier { minifiedOnInit: false }">
+								<span class="title">File / media content</span>
+								<span class="arrow">make smaller</span>
+							</h3>
 							<div class="item clearfix">
 								{% with r.medium as medium %}
 									<div id="media-edit-view">
@@ -99,7 +102,10 @@
 						</div>
 
 						<div class="item-wrapper">
-							<h3 class="above-item">Website</h3>
+							<h3 class="above-item clearfix do_blockminifier { minifiedOnInit: true }">
+								<span class="title">Website</span>
+								<span class="arrow">make smaller</span>
+							</h3>
 							<div class="item">
 								<fieldset class="admin-form">
 									<div class="form-item clearfix">
@@ -113,11 +119,13 @@
 						{% endif %}
 
 						<div class="item-wrapper">
-							<h3 class="above-item">Body text</h3>
+							<h3 class="above-item clearfix do_blockminifier { minifiedOnInit: false }">
+								<span class="title">Body text</span>
+								<span class="arrow">make smaller</span>
+							</h3>
 							<div class="item">
 								<fieldset class="admin-form">
 									<div class="form-item clearfix">
-										<label for="field-content">Body</label>
 										<textarea rows="10" cols="10" id="field-content" name="body" class="body">{{ r.body|escape }}</textarea>
 									</div>
 
@@ -387,15 +395,16 @@
 						</div>
 						{% else %}
 						<div class="item-wrapper" id="sort-category">
-							<h3 class="above-item clearfix do_blockminifier">
+							<h3 class="above-item clearfix do_blockminifier { minifiedOnInit: true }">
 								<span class="title">Category</span>
 								<span class="arrow">make smaller</span>
 							</h3>
 							<div class="item clearfix admin-form">
-								<label>This page is a</label>
-								<h4>{{ m.rsc[r.category_id].title }}</h4>
-								<hr/>
-								<p>Predicates, groups and categories can't be changed into another category.</p>
+								
+								<div class="notification notice">
+									This page is a {{ m.rsc[r.category_id].title }}. 
+									Predicates, groups and categories can't be changed into another category.
+								</div>
 							</div>
 						</div>
 						{% endif %}
