@@ -381,7 +381,7 @@
 						</div>
 						{% else %}
 						<div class="item-wrapper" id="sort-category">
-							<h3 class="above-item clearfix do_blockminifier { minifiedOnInit: true }">
+							<h3 class="above-item clearfix do_blockminifier">
 								<span class="title">Category</span>
 								<span class="arrow">make smaller</span>
 							</h3>
