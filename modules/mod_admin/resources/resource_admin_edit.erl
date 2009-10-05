@@ -111,7 +111,7 @@ filter_props(Fs) ->
         "save_duplicate",
         "save_stay"
     ],
-    lists:foldl(foldl(P, Acc) -> proplists:delete(P, Acc) end, Fs, Remove).
+    lists:foldl(fun(P, Acc) -> proplists:delete(P, Acc) end, Fs, Remove).
     %[ {list_to_existing_atom(K), list_to_binary(V)} || {K,V} <- Props ].
 
 
