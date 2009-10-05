@@ -32,7 +32,7 @@
 								<span class="zp-20">Options</span>
 							</li>
 							
-							{% for id in m.search[{latest cat="text"}] %}
+							{% for id in m.search[{latest cat="text" pagelen="5"}] %}
 							<li {% if not m.rsc[id].is_published %}class="unpublished" {% endif %}>
 								<a href="{% url admin_edit_rsc id=id %}" class="clearfix">
 									<span class="zp-35">{{ m.rsc[id].title|striptags|default:"<em>untitled</em>" }}</span>
@@ -67,7 +67,7 @@
 								<span class="zp-20">Options</span>
 							</li>
 							
-							{% for id in m.search[{latest cat="person"}] %}
+							{% for id in m.search[{latest cat="person" pagelen="5"}] %}
 							<li {% if not m.rsc[id].is_published %}class="unpublished" {% endif %}>
 								<a href="{% url admin_edit_rsc id=id %}" class="clearfix">
 									<span class="zp-35">{{ m.rsc[id].title|striptags|default:"<em>untitled</em>" }}</span>
@@ -92,7 +92,7 @@
 
 			<div class="zp-50">
 
-				<div class="padding">
+				<div class="padding last">
 					<div id="dashboard-pages">
 						<h3 class="above-list">
 							Latest modified locations
@@ -106,7 +106,7 @@
 								<span class="zp-20">Options</span>
 							</li>
 							
-							{% for id in m.search[{latest cat="location"}] %}
+							{% for id in m.search[{latest cat="location" pagelen="5"}] %}
 							<li {% if not m.rsc[id].is_published %}class="unpublished" {% endif %}>
 								<a href="{% url admin_edit_rsc id=id %}" class="clearfix">
 									<span class="zp-35">{{ m.rsc[id].title|striptags|default:"<em>untitled</em>" }}</span>
@@ -127,7 +127,7 @@
 					</div>
 				</div>
 
-				<div class="padding">
+				<div class="padding last">
 					<div id="dashboard-pages">
 						<h3 class="above-list">
 							Latest modified events
@@ -141,7 +141,7 @@
 								<span class="zp-20">Options</span>
 							</li>
 							
-							{% for id in m.search[{latest cat="event"}] %}
+							{% for id in m.search[{latest cat="event" pagelen="5"}] %}
 							<li {% if not m.rsc[id].is_published %}class="unpublished" {% endif %}>
 								<a href="{% url admin_edit_rsc id=id %}" class="clearfix">
 									<span class="zp-35">{{ m.rsc[id].title|striptags|default:"<em>untitled</em>" }}</span>
@@ -177,7 +177,7 @@
 								<span class="zp-20">Options</span>
 							</li>
 							
-							{% for id in m.search[{latest cat="media"}] %}
+							{% for id in m.search[{latest cat="media" pagelen="5"}] %}
 							<li {% if not m.rsc[id].is_published %}class="unpublished" {% endif %}>
 								<a href="{% url admin_edit_rsc id=id %}" class="clearfix">
 									<span class="zp-10">{% image id width=40 height=18 crop %}&nbsp;</span>

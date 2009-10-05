@@ -32,13 +32,15 @@ $.widget("ui.blockminifier",
 {
 	_init: function() 
 	{
+		var self = this;
+
 		if(this.options.minifiedOnInit)
 		{
-			this.element.addClass('above-item-all-corners').next('.item').hide();
+			this.element.addClass('above-item-all-corners').next(self.options.itemToMinify).hide();
 			
 			$('span.arrow', this.element).toggle(function()
 			{
-				$(this).parent().removeClass('above-item-all-corners').next('.item').slideDown(200);
+				$(this).parent().removeClass('above-item-all-corners').next(self.options.itemToMinify).slideDown(200);
 			},
 			function()
 			{
@@ -52,19 +54,20 @@ $.widget("ui.blockminifier",
 		{
 			$('span.arrow', this.element).toggle(function()
 			{
-				$(this).parent().next('.item').slideUp(200, function()
+				$(this).parent().next(self.options.itemToMinify).slideUp(200, function()
 				{
 					$(this).prev('h3').addClass('above-item-all-corners');
 				});
 			},
 			function()
 			{
-				$(this).parent().removeClass('above-item-all-corners').next('.item').slideDown(200);
+				$(this).parent().removeClass('above-item-all-corners').next(self.options.itemToMinify).slideDown(200);
 			});
 		}
 	}
 });
 
 $.ui.blockminifier.defaults = {
-	minifiedOnInit: false
+	minifiedOnInit: false,
+	itemToMinify: '.item'
 }

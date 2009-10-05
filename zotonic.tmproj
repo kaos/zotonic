@@ -3,7 +3,7 @@
 <plist version="1.0">
 <dict>
 	<key>currentDocument</key>
-	<string>priv/sites/default/modules/mod_nif/templates/news.tpl</string>
+	<string>modules/mod_admin/lib/css/zp-admin.css</string>
 	<key>documents</key>
 	<array>
 		<dict>
@@ -41,8 +41,6 @@
 			<string>modules</string>
 		</dict>
 		<dict>
-			<key>expanded</key>
-			<true/>
 			<key>name</key>
 			<string>priv</string>
 			<key>regexFolderFilter</key>
@@ -149,49 +147,77 @@
 			<key>firstVisibleLine</key>
 			<integer>100</integer>
 		</dict>
-		<key>modules/mod_admin/templates/admin_base.tpl</key>
+		<key>modules/mod_admin/lib/css/zp-admin.css</key>
 		<dict>
 			<key>caret</key>
 			<dict>
 				<key>column</key>
 				<integer>0</integer>
 				<key>line</key>
-				<integer>0</integer>
+				<integer>253</integer>
 			</dict>
 			<key>firstVisibleColumn</key>
 			<integer>0</integer>
 			<key>firstVisibleLine</key>
-			<integer>20</integer>
+			<integer>247</integer>
 		</dict>
-		<key>priv/sites/default/modules/mod_nif/templates/news.tpl</key>
+		<key>modules/mod_admin/templates/admin_edit.tpl</key>
 		<dict>
 			<key>caret</key>
 			<dict>
 				<key>column</key>
-				<integer>92</integer>
+				<integer>79</integer>
 				<key>line</key>
-				<integer>26</integer>
+				<integer>291</integer>
 			</dict>
 			<key>columnSelection</key>
 			<false/>
 			<key>firstVisibleColumn</key>
 			<integer>0</integer>
 			<key>firstVisibleLine</key>
-			<integer>0</integer>
+			<integer>272</integer>
 			<key>selectFrom</key>
 			<dict>
 				<key>column</key>
-				<integer>36</integer>
+				<integer>28</integer>
 				<key>line</key>
-				<integer>26</integer>
+				<integer>291</integer>
 			</dict>
 			<key>selectTo</key>
 			<dict>
 				<key>column</key>
-				<integer>92</integer>
+				<integer>79</integer>
 				<key>line</key>
-				<integer>26</integer>
+				<integer>291</integer>
 			</dict>
+		</dict>
+		<key>modules/mod_admin_address/templates/_admin_edit_content.tpl</key>
+		<dict>
+			<key>caret</key>
+			<dict>
+				<key>column</key>
+				<integer>19</integer>
+				<key>line</key>
+				<integer>64</integer>
+			</dict>
+			<key>firstVisibleColumn</key>
+			<integer>0</integer>
+			<key>firstVisibleLine</key>
+			<integer>45</integer>
+		</dict>
+		<key>modules/mod_admin_identity/templates/_admin_edit_sidebar.tpl</key>
+		<dict>
+			<key>caret</key>
+			<dict>
+				<key>column</key>
+				<integer>33</integer>
+				<key>line</key>
+				<integer>18</integer>
+			</dict>
+			<key>firstVisibleColumn</key>
+			<integer>0</integer>
+			<key>firstVisibleLine</key>
+			<integer>0</integer>
 		</dict>
 		<key>priv/sites/default/modules/mod_nif/templates/venue.tpl</key>
 		<dict>
@@ -206,6 +232,34 @@
 			<integer>0</integer>
 			<key>firstVisibleLine</key>
 			<integer>11</integer>
+		</dict>
+		<key>priv/sites/mediafonds/modules/mod_mediafonds/templates/_js_include.tpl</key>
+		<dict>
+			<key>caret</key>
+			<dict>
+				<key>column</key>
+				<integer>9</integer>
+				<key>line</key>
+				<integer>12</integer>
+			</dict>
+			<key>firstVisibleColumn</key>
+			<integer>0</integer>
+			<key>firstVisibleLine</key>
+			<integer>0</integer>
+		</dict>
+		<key>priv/sites/mediafonds/modules/mod_mediafonds/templates/home.tpl</key>
+		<dict>
+			<key>caret</key>
+			<dict>
+				<key>column</key>
+				<integer>10</integer>
+				<key>line</key>
+				<integer>16</integer>
+			</dict>
+			<key>firstVisibleColumn</key>
+			<integer>0</integer>
+			<key>firstVisibleLine</key>
+			<integer>0</integer>
 		</dict>
 		<key>src/models/m_identity.erl</key>
 		<dict>
@@ -224,7 +278,10 @@
 	</dict>
 	<key>openDocuments</key>
 	<array>
-		<string>priv/sites/default/modules/mod_nif/templates/news.tpl</string>
+		<string>modules/mod_admin/templates/admin_edit.tpl</string>
+		<string>modules/mod_admin_identity/templates/_admin_edit_sidebar.tpl</string>
+		<string>modules/mod_admin_address/templates/_admin_edit_content.tpl</string>
+		<string>modules/mod_admin/lib/css/zp-admin.css</string>
 	</array>
 	<key>showFileHierarchyDrawer</key>
 	<false/>
@@ -237,64 +294,79 @@
 			<key>isExpanded</key>
 			<true/>
 			<key>subItems</key>
-			<dict/>
-		</dict>
-		<key>priv</key>
-		<dict>
-			<key>isExpanded</key>
-			<true/>
-			<key>subItems</key>
 			<dict>
-				<key>sites</key>
+				<key>mod_admin</key>
 				<dict>
 					<key>isExpanded</key>
 					<true/>
 					<key>subItems</key>
 					<dict>
-						<key>default</key>
+						<key>lib</key>
 						<dict>
 							<key>isExpanded</key>
 							<true/>
 							<key>subItems</key>
 							<dict>
-								<key>dispatch</key>
+								<key>css</key>
 								<dict>
 									<key>isExpanded</key>
 									<true/>
 									<key>subItems</key>
 									<dict/>
 								</dict>
-								<key>modules</key>
-								<dict>
-									<key>isExpanded</key>
-									<true/>
-									<key>subItems</key>
-									<dict>
-										<key>mod_nif</key>
-										<dict>
-											<key>isExpanded</key>
-											<true/>
-											<key>subItems</key>
-											<dict>
-												<key>dispatch</key>
-												<dict>
-													<key>isExpanded</key>
-													<true/>
-													<key>subItems</key>
-													<dict/>
-												</dict>
-												<key>templates</key>
-												<dict>
-													<key>isExpanded</key>
-													<true/>
-													<key>subItems</key>
-													<dict/>
-												</dict>
-											</dict>
-										</dict>
-									</dict>
-								</dict>
 							</dict>
+						</dict>
+						<key>templates</key>
+						<dict>
+							<key>isExpanded</key>
+							<true/>
+							<key>subItems</key>
+							<dict/>
+						</dict>
+					</dict>
+				</dict>
+				<key>mod_admin_address</key>
+				<dict>
+					<key>isExpanded</key>
+					<true/>
+					<key>subItems</key>
+					<dict>
+						<key>templates</key>
+						<dict>
+							<key>isExpanded</key>
+							<true/>
+							<key>subItems</key>
+							<dict/>
+						</dict>
+					</dict>
+				</dict>
+				<key>mod_admin_identity</key>
+				<dict>
+					<key>isExpanded</key>
+					<true/>
+					<key>subItems</key>
+					<dict>
+						<key>templates</key>
+						<dict>
+							<key>isExpanded</key>
+							<true/>
+							<key>subItems</key>
+							<dict/>
+						</dict>
+					</dict>
+				</dict>
+				<key>mod_admin_person</key>
+				<dict>
+					<key>isExpanded</key>
+					<true/>
+					<key>subItems</key>
+					<dict>
+						<key>templates</key>
+						<dict>
+							<key>isExpanded</key>
+							<true/>
+							<key>subItems</key>
+							<dict/>
 						</dict>
 					</dict>
 				</dict>
@@ -302,6 +374,6 @@
 		</dict>
 	</dict>
 	<key>windowFrame</key>
-	<string>{{191, 80}, {1677, 882}}</string>
+	<string>{{72, 246}, {1677, 882}}</string>
 </dict>
 </plist>

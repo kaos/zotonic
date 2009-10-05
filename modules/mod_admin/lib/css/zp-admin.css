@@ -174,7 +174,7 @@ ul.pager {
 
 h2 {
 	color: #0c8db2;
-	font-size: 18px;
+	font-size: 20px;
 	font-weight: normal;
 	line-height: 27px;
 	margin: 0 0 14px;
@@ -214,10 +214,9 @@ h3.above-item {
 }
 
     h3.above-list button {
-        float: none;
-        display: inline;
-        margin: 0px;    
-    }
+		display: inline;
+		margin: 0;
+	}
 
 	.above-item-all-corners {
 		-moz-border-radius: 5px;

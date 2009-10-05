@@ -9,8 +9,7 @@
 		<h2>Zotonic Menu Editor</h2>
 
 		<p>
-			Here you can change the menu of your site.  Select pages on the right hand side and drag them to the menu on the left.<br/>
-			A menu is at most two levels deep.
+			Here you can change the menu of your site.  Select pages on the right hand side and drag them to the menu on the left.
 		</p>
 
 		<div class="zp-33">
@@ -43,7 +42,16 @@
 		<div class="item-wrapper zp-33">
 			<h3 class="above-item">How does this work?</h3>
 			<div class="item">
-				<p>Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.</p>
+				<p>
+					Type the name of the page you want in your menu in the box left of this note. 
+					When you get a result, you can drag that item onto the menu pane on the left side of the page.
+				</p>
+				<p>
+					You can also move the menu items around to manage the way your navigations looks.
+				</p>
+				<p>
+					A menu is at most two levels deep.
+				</p>
 			</div>
 		</div>
 	</div>

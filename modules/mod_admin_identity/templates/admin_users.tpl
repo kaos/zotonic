@@ -7,31 +7,33 @@
 		<div class="block clearfix">
 
 		<h2>Zotonic User Overview</h2>
-		
-		<p>Every page/person can be made into an user on the edit page.  The difference between an user and a normal page is only
-			that the former has logon credentials attached to its page record.</p>
 	
 		<div class="clearfix">
+			<p>
+				Every page/person can be made into a user on the edit page.
+				The difference between a user and a normal page is only
+				that the former has logon credentials attached to its page record.
+			</p>
+
 			{% if m.acl.is_admin %}
 				{% button text="New User" action={dialog_user_add on_success={reload}} %}
 			{% else %}
 				<p>You need to be an administrator to add users.</p>
 			{% endif %}
 
-			<div class="quick-search-wrapper right">
-				<form method="get" action="{% url admin_user %}">
-					<input type="text" name="qs" value="{{ q.qs|escape }}" class="left" />
-					<button type="submit">Search user</button>
-				</form>
-			</div>
+			{# <div class="quick-search-wrapper right"> #}
+			{# 				<form method="get" action="{% url admin_user %}"> #}
+			{# 					<input type="text" name="qs" value="{{ q.qs|escape }}" class="left" /> #}
+			{# 					<button type="submit">Search user</button> #}
+			{# 				</form> #}
+			{# 			</div> #}
 		</div>
+
 	
 	{% with m.acl.user as me %}
 
 		{% with m.search.paged[{users text=q.qs page=q.page}] as result %}
 
-			{% pager result=result dispatch="admin_overview_rsc" qargs %}
-			
 			<h3 class="above-list ">
 				Users overview{% if q.qs %}, 
 					matching “{{ q.qs|escape }}”
