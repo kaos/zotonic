@@ -48,7 +48,7 @@
 	<section class="zp-wrapper">
 		<header class="clearfix">
 			<figure id="logo" class="left">
-				<a href="/" title="Home"><img src="./lib/images/logo.jpg" alt="Zotonic &mdash; Simple stuff that works" /></a>
+				<a href="/" title="Home"><img src="/lib/images/logo.jpg" alt="Zotonic &mdash; Simple stuff that works" /></a>
 			</figure>
 			
 			<nav class="right">

@@ -1,19 +1,12 @@
 {% extends "base.tpl" %}
 
-{% block title %}Stuff that works{% endblock %}
+{% block title %}{{ m.rsc[id].page_title }}{% endblock %}
 
-{% block page_class %}home{% endblock %}
+{% block page_class %}page{% endblock %}
 
 {% block banner %}
 
-	<section id="banner">
-		<section id="download-zotonic">
-			<a href="#" title=""><img src="/lib/images/download_zotonic.png" alt="" /></a>
-		</section>
-		<section id="docs-zotonic">
-			<a href="#" title=""><img src="/lib/images/docs.png" alt="" /></a>
-		</section>
-	</section>
+	<section id="banner"></section>
 
 {% endblock %}
 
@@ -21,15 +14,13 @@
 
 	<article id="content" class="zp-67">
 		<div class="padding">
-			{% with m.rsc.home as r %}
-				<h1>{{ r.title }}</h1>
+				<h1>{{ m.rsc[id].title }}</h1>
 
 				<p class="summary">
-					{{ r.summary }}
+					{{ m.rsc[id].summary }}
 				</p>
 
-				{{ r.body }}
-			{% endwith %}
+				{{ m.rsc[id].body }}
 		</div>
 	</article>
 
