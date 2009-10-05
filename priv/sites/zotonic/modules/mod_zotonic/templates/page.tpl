@@ -1,6 +1,6 @@
 {% extends "base.tpl" %}
 
-{% block title %}{{ m.rsc[id].page_title }}{% endblock %}
+{% block title %}{{ m.rsc[id].seo_title | default: m.rsc[id].title }}{% endblock %}
 
 {% block page_class %}page{% endblock %}
 

@@ -1,0 +1,7 @@
+%% Dispatch rules for mod_zotonic.
+
+[
+	{home,		[],							resource_page,	[ {template, "home.tpl"}, {id, page_home} ]},
+	{collection,["collection", id],			resource_page,	[ {template, "collection.tpl"} ]},
+	{collection,["collection", id, slug], 	resource_page,	[ {template, "collection.tpl"} ]}
+].

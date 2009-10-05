@@ -2,15 +2,12 @@
 <html lang="en">
 <head>
 	<meta http-equiv="Content-type" content="text/html; charset=utf-8" />
-	<title>{% block title %}Homepage{% endblock %} &mdash; Zotonic</title>
+	<title>{% block title %}{{ m.rsc[id].seo_title | default: m.rsc[id].title }}{% endblock %} &mdash; Zotonic</title>
 
 	<link rel="icon" href="favicon.ico" type="image/x-icon" />
+	<meta name="author" content="Tim Benniks" />
 
-	<meta name="keywords" content="Zotonic, CMS, Erlang, Pragmatic innovation, content management system" />
-	<meta name="description" content="Zotonic is a content management system build in Erlang. It is build by and for professional webdevelopers who have a pragmatic way of thinking and need stuff that works." />
-	<meta name="author" content="Marc Worrell, Tim Benniks" />
-	
-	<meta name="author" content="Marc Worrel, Arjan Scherpenisse, Tim Benniks" />
+	{% all include "_html_head.tpl" %}
 
 	{% lib
 		"css/zp-compressed.css"
@@ -34,8 +31,6 @@
 	{% lib
 		"/js/modules/cufon.js"
 	%}
-
-	{% all include "_html_head.tpl" %}
 
 </head>
 

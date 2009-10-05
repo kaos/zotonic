@@ -1,6 +1,6 @@
 {% extends "base.tpl" %}
 
-{% block title %}Stuff that works{% endblock %}
+{% block title %}{{ m.rsc[id].seo_title | default: m.rsc[id].title }}{% endblock %}
 
 {% block page_class %}home{% endblock %}
 
@@ -21,15 +21,13 @@
 
 	<article id="content" class="zp-67">
 		<div class="padding">
-			{% with m.rsc.home as r %}
-				<h1>{{ r.title }}</h1>
+			<h1>{{ m.rsc[id].title }}</h1>
 
-				<p class="summary">
-					{{ r.summary }}
-				</p>
+			<p class="summary">
+				{{ m.rsc[id].summary }}
+			</p>
 
-				{{ r.body }}
-			{% endwith %}
+			{{ m.rsc[id].body }}
 		</div>
 	</article>
 
