@@ -283,15 +283,10 @@ a:focus {
 		font-size: 11px;
 		color: #eee;
 		text-decoration: none;
-		background: #3f4962;
-		padding: 2px 4px;
-		border: 1px solid #212b43;
-		-moz-border-radius: 6px;
-		-webkit-border-radius: 6px;
 	}
 	
 	#header h1 span a:hover {
-		background: #242f4a;
+		text-decoration: underline;
 	}
 
 /* navigation

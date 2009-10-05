@@ -1,4 +1,3 @@
-
 <script type="text/javascript" src="http://ajax.googleapis.com/ajax/libs/jquery/1.3.2/jquery.min.js"></script>
 <script type="text/javascript" src="http://ajax.googleapis.com/ajax/libs/jqueryui/1.7.1/jquery-ui.min.js"></script>
 
@@ -15,10 +14,6 @@
 	"js/modules/z.formreplace.js"
 	"js/modules/livevalidation-1.3.js"
 %}
-
-{# <script type="text/javascript" src="/lib/js/modules/z.listfilter.js"></script> #}
-{# <script type="text/javascript" src="/lib/js/modules/z.imageviewer.js"></script> #}
-
 
 <script type="text/javascript">
 	$(function()

@@ -15,8 +15,12 @@
 		"css/zp-finder.css"
 		"css/zp-growl.css"
 	%}
-
-	<!--[if IE]><link href="/lib/css/zp-ie.css" type="text/css" media="screen" rel="stylesheet" /><![endif]-->
+	
+	<!--[if IE]>
+		{% lib
+			"css/zp-ie.css"
+		%}
+	<![endif]-->
 </head>
 <body class="zp-wide">
 	<div class="skip">
