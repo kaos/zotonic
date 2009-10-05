@@ -35,7 +35,7 @@
 	<article id="content" class="zp-67">
 		<div class="padding">
 			{% with m.rsc.home as r %}
-				<h1>ssss{{ r.title }}</h1>
+				<h1>{{ r.title }}</h1>
 
 				<p class="summary">
 					{{ r.summary }}

@@ -17,13 +17,6 @@ body {
 		background: #27343c url(../images/home_bg.jpg) repeat-x left top;
 	}
 
-/* html 5 compatability
----------------------------------------------------------- */
-
-header, footer, section, aside, nav, article, figure {
-	display: block !important;
-}
-
 
 /* Basic Typography
 ---------------------------------------------------------- */
@@ -111,7 +104,6 @@ p.intro:first-line {
 	color: #63c9f2;
 }
 
-
 .list-item p.summary {
 	font-size: 11px;
 }
@@ -125,7 +117,7 @@ p.intro:first-line {
 }
 
 header {
-	padding: 18px 0 15px;
+	padding: 18px 0 6px;
 }
 
 #content-area {

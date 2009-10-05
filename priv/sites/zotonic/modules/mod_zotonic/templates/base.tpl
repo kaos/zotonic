@@ -32,7 +32,7 @@
    	</script>
 
 	{% lib
-		"js/cufon.js"
+		"/js/modules/cufon.js"
 	%}
 
 	{% all include "_html_head.tpl" %}
@@ -48,11 +48,11 @@
 	<section class="zp-wrapper">
 		<header class="clearfix">
 			<figure id="logo" class="left">
-				<a href="index.html"><img src="./lib/images/logo.jpg" alt="Zotonic &mdash; Simple stuff that works" /></a>
+				<a href="/" title="Home"><img src="./lib/images/logo.jpg" alt="Zotonic &mdash; Simple stuff that works" /></a>
 			</figure>
 			
 			<nav class="right">
-				{% menu id=id %}
+				{% menu id=id class="list" %}
 			</nav>
 		</header>
 
