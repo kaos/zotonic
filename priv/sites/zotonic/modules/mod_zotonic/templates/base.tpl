@@ -4,8 +4,11 @@
 	<meta http-equiv="Content-type" content="text/html; charset=utf-8" />
 	<title>{% block title %}{{ m.rsc[id].seo_title | default: m.rsc[id].title }}{% endblock %} &mdash; Zotonic</title>
 
-	<link rel="icon" href="favicon.ico" type="image/x-icon" />
+	<link rel="icon" href="/favicon.ico" type="image/x-icon" />
+	<link rel="shortcut icon" href="/favicon.ico" type="image/x-icon" />
+	
 	<meta name="author" content="Tim Benniks" />
+	{% include "_atom_feed_link.tpl" cat="blog" %}
 
 	{% all include "_html_head.tpl" %}
 
