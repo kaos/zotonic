@@ -1,67 +1,82 @@
-<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
-<html xmlns="http://www.w3.org/1999/xhtml" lang="en">
+<!DOCTYPE html>
+<html lang="en">
 <head>
 	<meta http-equiv="Content-type" content="text/html; charset=utf-8" />
-	<title>{% block title %}Zotonic{% endblock %}</title>
+	<title>{% block title %}Homepage{% endblock %} &mdash; Zotonic</title>
+
+	<link rel="icon" href="favicon.ico" type="image/x-icon" />
 
 	<meta name="keywords" content="Zotonic, CMS, Erlang, Pragmatic innovation, content management system" />
 	<meta name="description" content="Zotonic is a content management system build in Erlang. It is build by and for professional webdevelopers who have a pragmatic way of thinking and need stuff that works." />
 	<meta name="author" content="Marc Worrell, Tim Benniks" />
+	
+	<meta name="author" content="Marc Worrel, Arjan Scherpenisse, Tim Benniks" />
 
 	{% lib
-		"/css/zp-compressed.css"
-		"/css/zp-project.css"
+		"css/zp-compressed.css"
+		"css/zp-project.css"
 	%}
+
+	<!--[if IE]>
+	{% lib	"css/zp-ie.css" %}
+	<![endif]-->
 	
-	<link rel="icon" href="favicon.ico" type="image/x-icon" />
-	<link rel="shortcut icon" href="favicon.ico" type="image/x-icon" />
-	{% include "_html_head.tpl" %}
-	
-	<!--[if IE]><link href=./lib/zp-ie.css" type="text/css" media="screen" rel="stylesheet" /><![endif]-->
+	<!-- Make ie6 understand html5 -->
+	<script>
+		document.createElement('header');
+	   	document.createElement('footer');
+	   	document.createElement('section');
+	   	document.createElement('aside');
+	   	document.createElement('nav');
+	   	document.createElement('article');
+   	</script>
+
+	{% lib
+		"js/cufon.js"
+	%}
+
+	{% all include "_html_head.tpl" %}
+
 </head>
 
-<body class="{% block pageclass %}{% endblock %}">
-<div class="skip"><a href="#content-area" title="Go directly to page content">Go to page content</a></div>
+<body class="{% block page_class %}{% endblock %}">
 
-<div class="zp-wrapper">
-	<div id="header">
-		<a href="/" title="Zotonic home"><img src="./lib/images/zotonic.gif" alt="Zotonic" class="logo" /></a>
+	<section class="skip">
+		<a href="#content-area" title="Go directly to page content">Go to page content</a>
+	</section>
+
+	<section class="zp-wrapper">
+		<header class="clearfix">
+			<figure id="logo" class="left">
+				<a href="index.html"><img src="./lib/images/logo.jpg" alt="Zotonic &mdash; Simple stuff that works" /></a>
+			</figure>
+			
+			<nav class="right">
+				{% menu id=id %}
+			</nav>
+		</header>
+
+		{% block banner %}{% endblock %}
+		
+		<section id="content-area" class="clear clearfix">
+			{% block content %}{% endblock %}
+			{% block sidebar %}{% endblock %}
+		</section>
+
+		<div class="push"><!-- push down --></div>
+	</section>
 	
-		{% block pageheader %}{% endblock %}	
-		<div class="navigation-search-wrapper clearfix">
-			{% block navigation %}{% menu id=id %}{% endblock %}
-			{% block search %}{% include "_searchfield.tpl" %}{% endblock %}
-		</div>	
-	</div>
-	
-	<div id="content-area" class="clearfix">
-		<div id="content" class="zp-65">
-			<div class="padding">
-				{% block content %}
-				{% endblock %}
-			</div>
+	<footer>
+		<div id="footer-content"> 
+			<p>Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.</p>
+			<p>Latest blog posts, news items, tweets</p>
 		</div>
-		<div id="sidebar" class="zp-35">
-			{% block sidebar %}
-			{% endblock %}
-		</div>
-	</div>
-	
-	<div class="push"><!-- push down --></div>	
-</div>
+	</footer>
 
-<div id="footer">
-	{% include "_footer.tpl" %}
-</div>
+	{% include "_js_include.tpl" %}
 
-{% include "_js_include.tpl" %}
+	{% script %}
 
-{% script %}
-
-{#
-<script type="text/javascript">var gaJsHost = (("https:" == document.location.protocol) ? "https://ssl." : "http://www.");document.write(unescape("%3Cscript src='" + gaJsHost + "google-analytics.com/ga.js' type='text/javascript'%3E%3C/script%3E"));</script>
-<script type="text/javascript">try {var pageTracker = _gat._getTracker("UA-7726967-1");pageTracker._trackPageview();} catch(err) {}</script>
-#}
-
+	<script type="text/javascript">Cufon.now();</script>
 </body>
 </html>

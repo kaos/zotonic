@@ -1,186 +1,321 @@
-/* Zoton.com project css
-----------------------------------------------------------
+/* zotonic 2009
+---------------------------------------------------------- 
 
-@package:	atatonic CSS framework 2009	
+@package:	Atatonic CSS Framework 2009	
 @Author: 	Tim Benniks <tim@timbenniks.com>
-@Created: 	28-04-2009
+@Created: 	06-09-2009
 
 ---------------------------------------------------------- */
 
 body {
-	font: 12px/20px "Lucida Grande", Arial, sans-serif; /* uses a 10px grind (5 - 10 - 15 - 20 - 25 - 30 - etc) */
-	color: #666;
-	background: url(../images/bg.gif) repeat-x top;
+	background: #27343c url(../images/page_bg.jpg) repeat-x left top;
+	color: #fff;
+	font: 12px/18px "Lucida Grande", Arial, Helvetica, sans-serif;
 }
 
-.zp-wrapper {
-	margin: 0 auto -81px;
-	height: auto!important;
-	min-height: 100%;
+	body.home {
+		background: #27343c url(../images/home_bg.jpg) repeat-x left top;
+	}
+
+/* html 5 compatability
+---------------------------------------------------------- */
+
+header, footer, section, aside, nav, article, figure {
+	display: block !important;
 }
 
-	
-/* Typography
--------------------------------------------------------------- */
+
+/* Basic Typography
+---------------------------------------------------------- */
 
 h1 {
-	font-size: 20px;
-	line-height: 30px;
-	font-weight: normal;
-	color: #09647e;
-	font-family: Helvetica, Arial, sans-serif;
+	font-size: 18px;
+	line-height: 24px;
+	letter-spacing: 0.02em;
+	text-transform: uppercase;
+	margin: 0 0 6px 0;
+	font-style: normal;
+	color: #63c9f2;
+	font-family: "Lucida Grande", Arial, Helvetica, sans-serif;
+	text-shadow: 1px 2px #000;
 }
 
 h2 {
-	font-size: 15px;
-	line-height: 20px;
+	font-family: "Lucida Grande", Arial, Helvetica, sans-serif;
 	font-weight: normal;
-	color: #0c8db2;
+	color: #53b1d7;
+	font-style: normal;
+	font-size: 17px;
+	line-height: 24px;
+	text-shadow: 1px 2px #222;
 }
 
 h3 {
-	font-size: 13px;
-	line-height: 20px;
+	color: #fff;
 	font-weight: bold;
-	color: #444;
-}
-
-h4 {
 	font-size: 13px;
-	line-height: 20px;
-	font-weight: normal;
 }
 
-h5 {
-	font-size: 13px;
-	line-height: 20px;
-}
-
-p {
-	margin: 0 0 20px 0;
-}
-
-p.intro {
-	font-size: 15px;
-	color: #0c8db2;
-	line-height: 25px;
-}
-
-#sidebar p {
-	font-size: 11px;
-}
-
-a,
-a:focus {
-	color: #09647e;
+a, a:focus {
+	color: #63c9f2;
 	text-decoration: none;
 }
 
 a:hover {
-	color: #444;
+	color: #5dbae0;
+	text-decoration: none;
+	border-bottom: 1px dotted #5dbae0;
 }
 
-	
-/* sticky footer CSS
+p {
+	margin: 0 0 18px 0;
+	letter-spacing: .03em;
+}
+
+	#sidebar p {
+		font-size: 11px;
+	}
+
+p.important:first-letter,
+p.intro:first-letter {
+	font-size: inherit;
+	font-weight: inherit;
+	line-height: inherit;
+	letter-spacing: inherit;
+	float: none;
+	padding: 0;
+	width: auto;
+	font-family: "Lucida Grande", Arial, Helvetica, sans-serif;
+}
+
+p.important:first-line,
+p.intro:first-line {
+	font-variant: normal;
+}
+
+
+/* Lists
 ---------------------------------------------------------- */
 
-html, 
-body {
-	height: 100%;
+.bullet-list {
+	list-style: circle;
+	list-style-position: inside;
+	margin: 0 0 18px 0;
 }
 
-.footer, 
-.push {
-	height: 81px;
+	.bullet-list li {
+		letter-spacing: .03em;
+	}
+
+.list-item h3 {
+	color: #63c9f2;
 }
 
 
-/* Navigation and page basics
+.list-item p.summary {
+	font-size: 11px;
+}
+
+
+/* Grid
 ---------------------------------------------------------- */
 
-#header {
+.zp-wrapper {
+	width: 960px;
+}
+
+header {
+	padding: 18px 0 15px;
+}
+
+#content-area {
+	margin: 0 0 18px 0;
+}
+
+#banner {
+	margin: 0 0 18px 0;
+}
+
+.page #banner {
+	width: 960px;
+	height: 82px;
+	background: #27343c url(../images/page_banner.jpg);
+}
+
+.home #banner {
+	width: 960px;
+	height: 313px;
+	background: #27343c url(../images/home_banner.jpg);
 	position: relative;
-	height: 180px;
 }
 
-.logo {
-	position: absolute;
-	top: 27px
-}
+	.home #banner #download-zotonic {
+		position: absolute;
+		right: 63px;
+		top: 40px;
+	}
 
-ul#navigation {
-	position: absolute;
-	top: 103px;
-	left: 0;
-}
+	.home #banner #docs-zotonic {
+		position: absolute;
+		right: 9px;
+		top: 170px;
+	}
+		
+		.home #banner #download-zotonic a,
+		.home #banner #docs-zotonic a {
+			border: none;
+		}
 
-ul#navigation li {
-	display: inline;
-	
-}
-
-#navigation li a,
-#navigation li a:focus {
-	background: transparent url(../images/menu_sep.gif) no-repeat right top;
-	color: #fff;
-	display: block;
+#logo {
 	margin: 0;
-	padding: 0 25px;
-	text-transform: uppercase;
-	float: left;
-	line-height: 50px;
-	height: 50px;
 }
 
-#navigation li.home {
-	background: transparent url(../images/menu_sep.gif) no-repeat left top;
-}
-			
-#navigation li a:hover,
-#navigation li a.active {
-	background: #0aa1cd url(../images/menu_sep.gif) no-repeat right top;
+#logo img {
+	float: none;
+	display: block;
 }
 
 #content .padding {
-	padding: 0 80px 0 0;
+	padding: 0 100px 0 0;
 }
 
-#footer {
-	width: 100%;
-	background: url(../images/footer_bg.gif) repeat-x right top;
+.collection #content .padding {
+	padding: 0 40px 0 0;
 }
 
-#footer p {
-	font-size: 11px;
-	padding: 15px 0 0;
+.collection-members .padding {
+	padding: 0 40px 0 0;
 }
 
-.footer-content {
-	width: 970px;
+
+/* sticky footer
+---------------------------------------------------------- */
+
+html, body {
+	height: 100%;
+}
+
+.zp-wrapper {
+	min-height: 100%;
+	height: auto !important;
+	height: 100%;
+	margin: 0 auto -150px;
+}
+
+.push, footer {
+	height: 150px;
+}
+
+
+/* footer
+---------------------------------------------------------- */
+
+footer {
+	background: #1f2b33 url(../images/page_footer.jpg);
+}
+
+#footer-content {
+	width: 960px;
 	margin: 0 auto;
-	background: url(../images/footer_img.gif) no-repeat right top;
-	height: 81px;
+	padding: 36px 0 0 0;
 }
 
-.footer-navigation {
-	padding: 15px 0 0 0;
+	footer p {
+		font-size: 11px;
+		color: #bbb;
+	}
+
+
+/* navigation
+---------------------------------------------------------- */
+
+nav {
+	margin: 7px 0 0 0;
 }
 
-
-ul.footer-navigation li {
-	display: inline;
-	margin: 0 5px 0 0;
+#navigation {
 }
 
-.footer-navigation li a,
-.footer-navigation li a:focus {
-	font-size: 11px;
+	#navigation li {
+		float: left;
+	}
+	
+		#navigation li a {
+			text-decoration: none;
+			display: block;
+			color: #f1f1f1;
+			padding: 0;
+			margin: 0 0 0 9px;
+			border: none;
+		}
+		
+		#navigation li a:hover,
+		#navigation li a.current:hover {
+			color: #19b7e8;
+		}
+		
+		#navigation li a.current,
+		#navigation li a:focus,
+		#navigation li a:active {
+			color: #19b7e8;
+		}
+
+
+/* Misc
+---------------------------------------------------------- */
+
+#ie6-upgrade {
+	padding: 5px 10px;
 }
 
-ul.regular {
-	margin: -10px 0 20px 0;
-	font-size: 11px;
-	list-style-image: none;
-	list-style-position: inside;
-	list-style-type: circle;
+#ie6-upgrade h4 {
+	color: #000;
+	font-weight: bold;
+}
+
+#ie6-upgrade a {
+	color: #000;
+	text-decoration: underline;
+	border: none;
+}
+
+	#ie6-upgrade a:hover {
+		border: none;
+		color: #444;
+	}
+	
+
+/* Forms
+---------------------------------------------------------- */
+
+fieldset {
+	border: none;
+}
+
+label {
+	color: #fff;
+}
+
+input[type="text"],
+input[type="password"],
+textarea {
+	border: none;
+	-moz-border-radius: 3px;
+	-webkit-border-radius: 3px;
+}
+
+input[type="text"]:focus,
+input[type="password"]:focus,
+textarea:focus {
+	background: #F74273;
+	color: #fff;
+	border: none;
+}
+
+.error,
+.notice,
+.success {
+	padding: 2px 6px;
+	-moz-border-radius: 3px;
+	-webkit-border-radius: 3px;	
 }
