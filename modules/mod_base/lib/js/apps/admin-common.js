@@ -3,7 +3,7 @@ tinyInit = {
 	elements: "field-content",
 	theme: "advanced",
 	skin: "wp_theme", 
-	theme_advanced_buttons1: "bold,italic,strikethrough,|,justifyleft,justifycenter,justifyright,|,bullist,numlist,|,outdent,indent,blockquote,|,undo,redo,|,link,unlink,|,formatselect",
+	theme_advanced_buttons1: "bold,italic,strikethrough,|,justifyleft,justifycenter,justifyright,|,bullist,numlist,|,outdent,indent,blockquote,|,undo,redo,|,link,unlink,|,code,|,formatselect",
 	theme_advanced_buttons2: "",
 	theme_advanced_buttons3: "",
 	theme_advanced_buttons4: "",
