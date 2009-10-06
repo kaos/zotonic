@@ -18,6 +18,8 @@
 	{% lib
 		"/css/zp-compressed.css"
 		"/css/zp-project.css"
+		"/css/zp-dialog.css"
+		"/css/zp-growl.css"
 	%}
 
 	<!--[if IE]><link href="/lib/css/zp-ie.css" type="text/css" media="screen" rel="stylesheet" /><![endif]-->

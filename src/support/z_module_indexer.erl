@@ -176,6 +176,8 @@ lookup(Name, List) ->
     end.
 
 %% @doc Find all scomps etc in a lookup list
+lookup_all(true, List) ->
+    List;
 lookup_all(Name, List) ->
     proplists:get_all_values(Name, List).
 
@@ -194,7 +196,7 @@ scan1(What, Context) ->
     {Subdir, Prefix, Extension} = subdir(What),
     Scan = scan_subdir(Subdir, Prefix, Extension, Context), 
     Sorted = z_module_sup:prio_sort(Scan),
-    FlattenFun = fun({Module, {_ModuleDir, Files}}, Acc) ->
+    FlattenFun = fun({_Module, {_ModuleDir, Files}}, Acc) ->
         Files1 = [ file2index(What, F) || F <- Files ],
         Files1 ++ Acc
     end,

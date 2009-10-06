@@ -3,6 +3,8 @@
 {% lib 
 	"js/apps/zotonic-1.0.js"
 	"js/apps/z.widgetmanager.js"
+	"js/modules/z.dialog.js"
+	"js/modules/z.notice.js"
 %}
 
 <script type="text/javascript">

@@ -70,4 +70,38 @@ Steps:
 
 Operating system specific notes:
 -------------------------------
-*1	If you're running on FreeBSD, make sure you've got the 'GNU' 'make' (check with 'make --version', which should give you GNU, and version info) If you're not running GNU-make as a default, edit the Makefile to run with 'gmake' (make sure gmake is available first))
+
+FreeBSD:
+
+If you're running on FreeBSD, make sure you've got the 'GNU' 'make'
+(check with 'make --version', which should give you GNU, and version
+info) If you're not running GNU-make as a default, edit the Makefile
+to run with 'gmake' (make sure gmake is available first))
+
+
+
+Ubuntu:
+
+Instead of compiling erlang, you can install the following erlang packages:
+
+erlang-base
+erlang-crypto
+erlang-dev
+erlang-docbuilder
+erlang-edoc
+erlang-et
+erlang-eunit
+erlang-gs
+erlang-inets
+erlang-mnesia
+erlang-mode
+erlang-observer
+erlang-odbc
+erlang-parsetools
+erlang-public-key
+erlang-runtime-tools
+erlang-ssl
+erlang-syntax-tools
+erlang-tools
+erlang-webtool
+erlang-xmerl

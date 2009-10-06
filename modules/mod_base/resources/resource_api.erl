@@ -13,9 +13,9 @@
     resource_exists/2,
     allowed_methods/2,
     process_post/2,
+         is_authorized/2,
     content_types_provided/2,
-    to_json/2,
-    to_jsonp/2
+    to_json/2
 ]).
 
 -include_lib("webmachine_resource.hrl").
@@ -24,49 +24,85 @@
 init([]) -> {ok, []}.
 
 
-allowed_methods(ReqData, Context) ->
-    {['POST', 'GET', 'HEAD'], ReqData, Context}.
-    
-
-resource_exists(ReqData, _Context) ->
+allowed_methods(ReqData, _Context) ->
     Context  = z_context:new(ReqData, ?MODULE),
     Context1 = z_context:ensure_qs(Context),
     Method   = z_context:get_q("method", Context1),
-    Module   = z_context:get_q("module", Context1),
-    All      = z_module_indexer:find_all(service, list_to_atom(Method), Context1),
-    ToCheck  = list_to_atom("service_" ++ Module ++ "_" ++ Method),
-    {Found, Context2} = case lists:any(fun(X) -> ToCheck == X end, All) of
-                            true ->
-                                {true, z_context:set("module", ToCheck, Context1)};
-                            false -> 
-                                {false, Context1}
-                        end,
-    ?WM_REPLY(Found, Context2).
+    TheMod   = z_context:get_q("module", Context1),
+    Module  = list_to_atom("service_" ++ TheMod ++ "_" ++ Method),
+    Context2 = z_context:set("module", Module, Context1),
+    Context3 = z_context:set("partial_method", Method, Context2),
+    try
+        {z_service:http_methods(Module), ReqData, Context3}
+    catch
+        _X:_Y ->
+            {['GET', 'HEAD', 'POST'], ReqData, Context3}
+    end.
+    
+
+is_authorized(ReqData, Context) ->
+    ?DEBUG("EXISTS?"),
+    Module = z_context:get("module", Context),
+    case mod_oauth:check_request_logon(ReqData, Context) of
+        {none, Context2} ->
+            case z_service:needauth(Module) of
+                false ->
+                    %% No auth needed; so we're authorized.
+                    {true, ReqData, Context2};
+                true ->
+                    %% Authentication is required for this module...
+                    mod_oauth:authenticate(z_service:method(Module) ++ ": " ++ z_service:title(Module) ++ "\n\nThis API call requires authentication.", ReqData, Context2)
+            end;
+
+        {true, Context2} ->
+            %% OAuth succeeded; check whether we are allowed to exec this module
+            ConsumerId = proplists:get_value(id, z_context:get("oauth_consumer", Context2)),
+            case mod_oauth:is_allowed(ConsumerId, Module, Context2) of
+                true ->
+                    {true, ReqData, Context2};
+                false ->
+                    ReqData1 = wrq:set_resp_body("You are not authorized to execute this API call.\n", ReqData),
+                    {{halt, 403}, ReqData1, Context2}
+            end;
+                
+        {false, Response} ->
+            Response
+    end.
+
+
+resource_exists(ReqData, Context) ->
+    Module = z_context:get("module", Context),
+    {lists:member(Module, z_service:all(Context)), ReqData, Context}.
 
 
 content_types_provided(ReqData, Context) ->
-   {[{"text/x-json", to_json},
-     {"application/json", to_json},
-     {"text/javascript", to_jsonp},
-     {"text/xml", to_xml}], ReqData, Context}.
+    {[{"application/json", to_json}], ReqData, Context}.
 
+
+
+json_result(ReqData, Context, Result) ->
+    try
+        {{halt, 200}, wrq:set_resp_body(mochijson:encode(Result), ReqData), Context}
+    catch
+        _E: R ->
+            ?DEBUG(R),
+            ReqData1 = wrq:set_resp_body("JSON encoding error.\n", ReqData),
+            {{halt, 500}, ReqData1, Context}
+    end.       
+    
 
 to_json(ReqData, Context) ->
     Module = z_context:get("module", Context),
-    Result = Module:process_get(ReqData, Context),
-    {rfc4627:encode(Result), ReqData, Context}.
-
-
-to_jsonp(ReqData, Context) ->
-    Module   = z_context:get("module", Context),
-    Callback = z_context:get_q("callback", Context),
-    Result = Module:process_get(ReqData, Context),
-    {Callback ++ "(" ++ rfc4627:encode(Result) ++ ");", ReqData, Context}.
+    json_result(ReqData, Context, Module:process_get(ReqData, Context)).
 
 
 process_post(ReqData, Context) ->
     Method       = list_to_atom(z_context:get_q("method", Context)),
     {ok, Module} = z_module_indexer:find(service, Method, Context),
-    ?DEBUG(rfc4627:decode(wrq:req_body(ReqData))),
-    Module:process_post(ReqData, Context),
-    {true, ReqData, Context}.
+    case Module:process_post(ReqData, Context) of
+        ok ->
+            {true, ReqData, Context};
+        Result ->
+            json_result(ReqData, Context, Result)
+    end.
+            

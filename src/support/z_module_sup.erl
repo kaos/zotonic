@@ -14,7 +14,7 @@
 -export([start_link/1, upgrade/1]).
 
 %% supervisor callbacks
--export([init/1, deactivate/2, activate/2, active/1, active_dir/1, all/1, scan/1, prio/1, prio_sort/1, module_exists/1]).
+-export([init/1, deactivate/2, activate/2, active/1, active/2, active_dir/1, all/1, scan/1, prio/1, prio_sort/1, module_exists/1, title/1]).
 
 -include_lib("zotonic.hrl").
 
@@ -39,6 +39,8 @@ start_link(SiteProps) ->
 upgrade(Context) ->
     {ok, {_, Specs}} = init([{context, Context}]),
     ModuleSup = Context#context.module_sup,
+
+    z_depcache:flush(z_modules, Context),
     
     Old  = sets:from_list([Name || {Name, _, _, _} <- supervisor:which_children(ModuleSup)]),
     New  = sets:from_list([Name || {Name, _, _, _, _, _} <- Specs]),
@@ -126,6 +128,17 @@ active(Context) ->
     [ z_convert:to_atom(M) || {M} <- Modules ].
 
 
+%% @doc Return whether a specific module is active.
+%% @spec active(context()) -> [ atom() ]
+active(Module, Context) ->
+    case z_db:q("select true from module where name = $1 and is_active = true", [Module], Context) of
+        [{true}] ->
+            true;
+        _ ->
+            false
+    end.
+
+
 %% @doc Return the list of all active modules and their directories
 %% @spec active_dir(context()) -> [ {atom, Dir}, ... ]
 active_dir(Context) ->
@@ -178,4 +191,9 @@ module_exists(M) ->
         {module,M} -> true;
         {error, _} -> false
     end.
-    
+
+%%
+%% Get the title of a module.
+%%    
+title(M) ->
+    proplists:get_value(mod_title, M:module_info(attributes)).
