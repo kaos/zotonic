@@ -8,6 +8,8 @@
 -module(z_convert).
 -author("Rusty Klophaus").
 -author("Marc Worrell <marc@worrell.nl>").
+-author("Arjan Scherpenisse <arjan@scherpenisse.net>").
+
 
 -export ([
 	clean_lower/1,
@@ -17,7 +19,8 @@
 	to_integer/1,
 	to_bool/1,
 	to_utc/1,
-	to_localtime/1
+	to_localtime/1,
+    to_json/1
 ]).
 
 
@@ -107,4 +110,31 @@ to_localtime(D) ->
         {'EXIT', _} -> D;
         LocalD -> LocalD
     end.
+
+%% @doc Convert an Erlang structure to a format that can be serialized by mochijson.
+to_json(undefined) ->
+    null;
+to_json(X) when is_atom(X) ->
+    X;
+to_json(X) when is_integer(X) ->
+    X;
+to_json(X) when is_binary(X) ->
+    X;
+to_json({{A,B,C},{D,E,F}}) ->
+    %% timestamp
+    %%[X] = io_lib:format("~B-~B-~B ~B:~B:~B", [A,B,C,D,E,F]),
+    "foo";
+
+to_json({X,Y}) ->
+    {X, to_json(Y)};
+to_json([{X, Y}]) when is_atom(X) ->
+    %% A struct
+    {struct, [{X, Y}]};
+to_json([{X, Y} | Z]) when is_atom(X) ->
+    %% A struct
+    R = [to_json({X, Y})] ++ [to_json(L) || L <- Z],
+    {struct, R};
+to_json(X) when is_list(X) ->
+    {array, [to_json(E) || E<- X]}.
+
 
