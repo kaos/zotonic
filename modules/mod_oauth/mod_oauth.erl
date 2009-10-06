@@ -107,9 +107,7 @@ code_change(_OldVsn, State, _Extra) ->
 %% Put this in a request to have it optionally served over OAuth.
 %% Returns {true, NewContext} when succeeded, or {false, WebmachineResponse} when not.
 %% Note that when the request is not signed, it will succeed as well, indicated with a 'none' atom.
-%% 
-
-    
+%%     
 check_request_logon(ReqData, Context) ->
     % request is signed; verify it.
     case request_is_signed(ReqData) of
@@ -172,6 +170,7 @@ strip_params([{"realm", _} | T]) ->
 strip_params([H|T]) ->
     [H | strip_params(T)].
 
+
 %%
 %% Transform a webmachine reqdata structure into the parameters that
 %% are considered for OAuth signature verification.
@@ -190,6 +189,9 @@ to_oauth_params(ReqData) ->
 
 
 
+%%
+%% Get an argument from either the request or the Authorization: header
+%%
 
 oauth_param_auth_header(Param, AuthHeader) ->
     case re:run(AuthHeader, Param ++ "=\"(.*?)\"", []) of
@@ -198,7 +200,6 @@ oauth_param_auth_header(Param, AuthHeader) ->
         {match, [_All, {Start, Len}]} ->
             oauth_uri:decode(string:substr(AuthHeader, Start+1, Len))
     end.
-
 
 oauth_param(Param, ReqData) ->
     % check authorization header
@@ -231,6 +232,9 @@ serve_oauth(ReqData, Context, Fun) ->
             authenticate("Unsupported OAuth version: " ++ Version ++ "\n", ReqData, Context)
     end.    
 
+%%
+%% Helper functions
+%%
 
 str_value(Key, From) ->
     binary_to_list(proplists:get_value(Key, From)).
@@ -238,6 +242,8 @@ str_value(Key, From) ->
 int_value(Key, From) ->
     z_convert:to_integer(proplists:get_value(Key, From)).
 
+
+%% Convert a consumer record from the database representation to the presentation that erlang-oauth understands.
 
 to_oauth_consumer(Consumer, "PLAINTEXT") ->
     {str_value(consumer_key, Consumer), str_value(consumer_secret, Consumer), plaintext};
