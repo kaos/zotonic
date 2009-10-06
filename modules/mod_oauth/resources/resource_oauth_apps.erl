@@ -8,6 +8,7 @@
 -author("Arjan Scherpenisse <arjan@scherpenisse.net>").
 
 -export([
+         init/1,
          is_authorized/2,
          event/2
 ]).

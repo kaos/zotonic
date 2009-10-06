@@ -4,9 +4,8 @@
     {oauth_access_token,  ["oauth", "access_token"], resource_oauth_access_token, []},
 
     {oauth_authorize,     ["oauth", "authorize"], resource_oauth_authorize, []},
-    {oauth_authorize,     ["oauth", "authorize", "finished"], resource_template, [  {template, "oauth_authorize_finished.tpl"} ]},
+    {oauth_finish,        ["oauth", "authorize", "finished"], resource_template, [  {template, "oauth_authorize_finished.tpl"} ]},
 
-    {oauth_authorize,     ["oauth", "apps"], resource_oauth_apps, []}
+    {oauth_apps,          ["oauth", "apps"], resource_oauth_apps, []}
 ].
-
 

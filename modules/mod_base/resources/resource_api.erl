@@ -41,7 +41,6 @@ allowed_methods(ReqData, _Context) ->
     
 
 is_authorized(ReqData, Context) ->
-    ?DEBUG("EXISTS?"),
     Module = z_context:get("module", Context),
     case mod_oauth:check_request_logon(ReqData, Context) of
         {none, Context2} ->
