@@ -1,19 +1,24 @@
 Zotonic installation
 ======================
 
-You will need:
+You will need to:
 
-1. Install Erlang R12B (13B has not been tested yet).
-2. Install ImageMagick 'convert' and 'identify' tools (also install libjpeg, -tiff, -png and other required libraries).
-   Make sure that the convert and identify tools are in your path so that zotonic can find them.
+1. Install Erlang R12B (13B might also work). Build it from source, or
+   use packages (see platform-specific notes below)
+2. Install ImageMagick 'convert' and 'identify' tools (also install
+   libjpeg, -tiff, -png and other required libraries).  Make sure that
+   the convert and identify tools are in your path so that zotonic can
+   find them.
 3. Install PostgreSQL (preferably 8.3 or newer).
-4. A copy of the Zotonic source code.
+4. Obtain a copy of the Zotonic source code.
 
 
 Steps:
 
+0. Make sure you put the zotonic source in a directory named 'zotonic'
+   (important for now; we're working on a solution for this).
+
 1. Type "make" in the root of zotonic (there where the Makefile is located). (*1)
-	
 
 2. Create an user and database in PostgreSQL:
 
@@ -23,28 +28,17 @@ Steps:
     \c zotonic
     CREATE LANGUAGE "plpgsql";
 
-3. Copy the file "doc/zotonic.sh" to a place that is handy for you.
+4. Create the configuration for the default site by copying
+   priv/sites/default/config.in to priv/sites/default/config
 
-4. Edit the "zotonic.sh" script, edit and uncomment at least the following keys:
+5. Edit this file; at least specify the credentials to the postgres database.
 
-   The place of zotonic and the zotonic.sh script:
-
-    BASE
-    ME
-
-   Passwords and secret signing keys:
-	
-    ZOTONIC_DBPASSWORD
-    ZOTONIC_ADMINPASSWORD
-    ZOTONIC_SIGN_KEY_SIMPLE
-    ZOTONIC_SIGN_KEY
-
-5. Make sure that the directory "priv/sites/default/files" and all its subdirectories are readable 
+5. Make sure that the directory "priv/sites/default" and all its subdirectories are readable 
    and writeable for the current user. (Which is the user zotonic will run under.)
 
 6. Start zotonic in debug mode:
 
-    zotonic.sh debug
+  ./start.sh
 
 7. You see zotonic starting up, lots of messages pass by, and zotonic will install the initial database.
    When something goes wrong here, then it is almost always a problem with the database connection. Check your 
@@ -52,19 +46,16 @@ Steps:
 
 8. Point your browser to 
 	
-    http://127.0.0.1:8000/
+    http://localhost:8000/
 	
-   or logon as admin (with the password you gave at ZOTONIC_ADMINPASSWORD) at: 
+   or logon as admin (the default password is 'admin') at: 
 
-    http://127.0.0.1:8000/admin/
+    http://localhost:8000/admin/
 
 9. When all done, then you can stop the erlang shell with:
 
     q().
   
-   Next time you can start with:
-
-    zotonic.sh start
 
 
 
@@ -72,7 +63,7 @@ Operating system specific notes:
 -------------------------------
 
 FreeBSD:
-
+-------
 If you're running on FreeBSD, make sure you've got the 'GNU' 'make'
 (check with 'make --version', which should give you GNU, and version
 info) If you're not running GNU-make as a default, edit the Makefile
@@ -81,27 +72,11 @@ to run with 'gmake' (make sure gmake is available first))
 
 
 Ubuntu:
-
+-------
 Instead of compiling erlang, you can install the following erlang packages:
 
-erlang-base
-erlang-crypto
-erlang-dev
-erlang-docbuilder
-erlang-edoc
-erlang-et
-erlang-eunit
-erlang-gs
-erlang-inets
-erlang-mnesia
-erlang-mode
-erlang-observer
-erlang-odbc
-erlang-parsetools
-erlang-public-key
-erlang-runtime-tools
-erlang-ssl
-erlang-syntax-tools
-erlang-tools
-erlang-webtool
-erlang-xmerl
+apt-get install erlang-base erlang-crypto erlang-dev erlang-docbuilder \
+erlang-edoc erlang-et erlang-eunit erlang-gs erlang-inets \
+erlang-mnesia erlang-mode erlang-observer erlang-odbc \
+erlang-parsetools erlang-public-key erlang-runtime-tools erlang-ssl \
+erlang-syntax-tools erlang-tools erlang-webtool erlang-xmerl
