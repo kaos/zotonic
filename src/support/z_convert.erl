@@ -120,11 +120,10 @@ to_json(X) when is_integer(X) ->
     X;
 to_json(X) when is_binary(X) ->
     X;
-to_json({{A,B,C},{D,E,F}}) ->
-    %% timestamp
-    %%[X] = io_lib:format("~B-~B-~B ~B:~B:~B", [A,B,C,D,E,F]),
-    "foo";
-
+to_json({{Y,M,D},{H,I,S}} = DateTime)
+    when is_integer(Y), is_integer(M), is_integer(D),
+         is_integer(H), is_integer(I), is_integer(S) ->
+    erlydtl_dateformat:format(DateTime, "Y-m-d H:i:s");
 to_json({X,Y}) ->
     {X, to_json(Y)};
 to_json([{X, Y}]) when is_atom(X) ->
