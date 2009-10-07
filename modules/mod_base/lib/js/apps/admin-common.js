@@ -22,7 +22,13 @@ tinyInit = {
 	paste_remove_spans: "1", 
 	paste_remove_styles: "1", 
 	gecko_spellcheck: "1", 
+
+	/* below is a workaround for problem where tinyMCE setEntities skips the ones below and the doesn't initialize the entityLookup array
+	 * which results in an error in the _encode function.
+	 */
+	entity_encoding: "raw",     
 	entities: "38,amp,60,lt,62,gt", 
+
 	accessibility_focus: "1", 
 	tab_focus: ":prev,:next", 
 	content_css: "/lib/js/modules/tinymce/zotonic.css", 
