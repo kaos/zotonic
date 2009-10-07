@@ -123,7 +123,7 @@ strip(L) when is_list(L) ->
 
 strip(<<>>, _, Acc) -> Acc;
 strip(<<$<,T/binary>>, in_text, Acc) ->
-    strip(T, in_tag, <<Acc/binary,32>>);
+    strip(T, in_tag, Acc);
 strip(<<$>,T/binary>>, in_tag, Acc) ->
     strip(T, in_text, Acc);
 strip(<<$>,T/binary>>, State, Acc) ->
