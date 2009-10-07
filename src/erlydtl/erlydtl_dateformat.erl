@@ -195,7 +195,10 @@ tag_to_value($l, Date, _) ->
 
 % Boolean for whether it is a leap year; i.e. True or False
 tag_to_value($L, {Y,_,_}, _) ->
-   calendar:is_leap_year(Y);
+   case calendar:is_leap_year(Y) of
+   true -> "True";
+   _ -> "False"
+   end;
 
 % Month; i.e. '01' to '12'
 tag_to_value($m, {_, M, _}, _) ->
