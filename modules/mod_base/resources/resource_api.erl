@@ -78,21 +78,37 @@ content_types_provided(ReqData, Context) ->
     {[{"application/json", to_json}], ReqData, Context}.
 
 
+api_error(HttpCode, ErrCode, Message, ReqData, Context) ->
+    R = {struct, [{error, {struct, [{code, ErrCode}, {message, Message}]}}]},
+    {{halt, HttpCode}, wrq:set_resp_body(mochijson:encode(R), ReqData), Context}.
 
-json_result(ReqData, Context, Result) ->
-    try
-        {{halt, 200}, wrq:set_resp_body(mochijson:encode(Result), ReqData), Context}
-    catch
-        _E: R ->
-            ?DEBUG(R),
-            ReqData1 = wrq:set_resp_body("JSON encoding error.\n", ReqData),
-            {{halt, 500}, ReqData1, Context}
-    end.       
+
+api_result(ReqData, Context, Result) ->
+    case Result of 
+        {error, missing_arg, Arg} ->
+            api_error(400, missing_arg, "Missing argument: " ++ Arg, ReqData, Context);
+
+        {error, not_exists, Arg} ->
+            api_error(400, not_exists, "Resource does not exist: " ++ Arg, ReqData, Context);
+
+        {error, Err, _Arg} ->
+            api_error(500, Err, "Generic error", ReqData, Context);
+
+        Result2 ->
+            try
+                {{halt, 200}, wrq:set_resp_body(mochijson:encode(Result2), ReqData), Context}
+            catch
+                _E: R ->
+                    ?DEBUG(R),
+                    ReqData1 = wrq:set_resp_body("Internal JSON encoding error.\n", ReqData),
+                    {{halt, 500}, ReqData1, Context}
+            end
+    end.
     
 
 to_json(ReqData, Context) ->
     Module = z_context:get("module", Context),
-    json_result(ReqData, Context, Module:process_get(ReqData, Context)).
+    api_result(ReqData, Context, Module:process_get(ReqData, Context)).
 
 
 process_post(ReqData, Context) ->
@@ -102,6 +118,6 @@ process_post(ReqData, Context) ->
         ok ->
             {true, ReqData, Context};
         Result ->
-            json_result(ReqData, Context, Result)
+            api_result(ReqData, Context, Result)
     end.
             
