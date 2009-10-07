@@ -4,7 +4,7 @@ tinyInit = {
 	theme: "advanced",
 	skin: "wp_theme", 
 	theme_advanced_buttons1: "bold,italic,strikethrough,|,justifyleft,justifycenter,justifyright,|,bullist,numlist,|,outdent,indent,blockquote,|,undo,redo,|,link,unlink,|,code,|,formatselect",
-	theme_advanced_buttons2: "",
+	theme_advanced_buttons2: "tablecontrols",
 	theme_advanced_buttons3: "",
 	theme_advanced_buttons4: "",
 	theme_advanced_toolbar_location: "top", 
@@ -27,5 +27,7 @@ tinyInit = {
 	tab_focus: ":prev,:next", 
 	content_css: "/lib/js/modules/tinymce/zotonic.css", 
 	wpeditimage_disable_captions: "", 
-	plugins: "safari"
+	plugins: "safari,table",
+	table_row_limit: 100,
+	table_col_limit: 10
 }
