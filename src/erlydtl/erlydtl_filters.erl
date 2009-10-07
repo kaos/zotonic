@@ -193,7 +193,7 @@ escapejs(undefined, _Context) ->
 escapejs(Input, _Context) when is_binary(Input) ->
     z_utils:js_escape(Input);
 escapejs(Input, _Context) when is_list(Input) ->
-    z_utils:js_escape(Input, []).
+    z_utils:js_escape(Input).
 
 escapexml(B, _Context) ->
     z_xml:escape(B).
