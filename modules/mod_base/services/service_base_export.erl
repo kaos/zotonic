@@ -23,18 +23,23 @@ process_get(_ReqData, Context) ->
             {error, missing_arg, "id"};
         Id ->
             case m_rsc:exists(Id, Context) of 
-                false ->
-                    {error, not_exists, Id};
                 true ->
-                    Export = m_rsc:get_raw(m_rsc:rid(Id, Context), Context),
-                    %% This should probably be encapsulated in m_edges.
-                    Edges = z_db:assoc("
-                        select e.id, e.subject_id, e.predicate_id, p.name, e.object_id, e.seq 
-                        from edge e join rsc p on p.id = e.predicate_id 
-                        where e.subject_id = $1 
-                        order by e.predicate_id, e.seq, e.id", [Id], Context),
-                    Ex = Export ++ [{connections, Edges}],
-                    z_convert:to_json(Ex)
+                    case m_rsc:is_visible(Id, Context) of
+                        true ->
+                            Export = m_rsc:get_raw(m_rsc:rid(Id, Context), Context),
+                            %% This should probably be encapsulated in m_edges.
+                            Edges = z_db:assoc("
+                                select e.id, e.subject_id, e.predicate_id, p.name, e.object_id, e.seq 
+                                from edge e join rsc p on p.id = e.predicate_id 
+                                where e.subject_id = $1 
+                                order by e.predicate_id, e.seq, e.id", [Id], Context),
+                            Ex = Export ++ [{connections, Edges}],
+                            z_convert:to_json(Ex);
+                        false ->
+                            {error, access_denied, undefined}
+                    end;
+                false ->
+                    {error, not_exists, Id}
             end
     end.
 

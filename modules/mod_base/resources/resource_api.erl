@@ -85,14 +85,17 @@ api_error(HttpCode, ErrCode, Message, ReqData, Context) ->
 
 api_result(ReqData, Context, Result) ->
     case Result of 
-        {error, missing_arg, Arg} ->
-            api_error(400, missing_arg, "Missing argument: " ++ Arg, ReqData, Context);
+        {error, Err=missing_arg, Arg} ->
+            api_error(400, Err, "Missing argument: " ++ Arg, ReqData, Context);
 
-        {error, not_exists, Arg} ->
-            api_error(400, not_exists, "Resource does not exist: " ++ Arg, ReqData, Context);
+        {error, Err=not_exists, Arg} ->
+            api_error(404, Err, "Resource does not exist: " ++ Arg, ReqData, Context);
+
+        {error, Err=access_denied, _Arg} ->
+            api_error(403, Err, "Access denied.", ReqData, Context);
 
         {error, Err, _Arg} ->
-            api_error(500, Err, "Generic error", ReqData, Context);
+            api_error(500, Err, "Generic error.", ReqData, Context);
 
         Result2 ->
             try
