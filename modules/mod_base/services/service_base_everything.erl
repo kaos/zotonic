@@ -19,7 +19,7 @@ process_get(_ReqData, Context) ->
     F = fun() ->
                 Ids = z_db:q("SELECT id FROM rsc ORDER BY id", Context),
                 Ids2 = lists:filter(fun({Id}) -> m_rsc:is_visible(Id, Context) end, Ids),
-                z_convert:to_json([Id || {Id} <- Ids2])
+                z_convert:to_json({array, [Id || {Id} <- Ids2]})
         end,
     z_depcache:memo(F, {everything}, ?HOUR, [], Context).
 

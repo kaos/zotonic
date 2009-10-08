@@ -111,7 +111,11 @@ to_localtime(D) ->
         LocalD -> LocalD
     end.
 
+%%
 %% @doc Convert an Erlang structure to a format that can be serialized by mochijson.
+%%
+
+%% Simple values
 to_json(undefined) ->
     null;
 to_json(X) when is_atom(X) ->
@@ -120,20 +124,48 @@ to_json(X) when is_integer(X) ->
     X;
 to_json(X) when is_binary(X) ->
     X;
+
+%% Tuple values
 to_json({{Y,M,D},{H,I,S}} = DateTime)
     when is_integer(Y), is_integer(M), is_integer(D),
          is_integer(H), is_integer(I), is_integer(S) ->
     erlydtl_dateformat:format(DateTime, "Y-m-d H:i:s");
-to_json({X,Y}) ->
-    {X, to_json(Y)};
+to_json({array, X}) ->
+    %% Explicit request for array (to prevent string conversion for some lists)
+    {array, [to_json(V) || V <- X]};
+to_json({X, Y}) ->
+    {struct, to_json_struct([{X, Y}])};
+to_json(X) when is_tuple(X) ->
+    {array, [to_json(V) || V <- tuple_to_list(X)]};
+
+%% List values
 to_json([{X, Y}]) when is_atom(X) ->
-    %% A struct
-    {struct, [{X, Y}]};
+    {struct, to_json_struct([{X, Y}])};
 to_json([{X, Y} | Z]) when is_atom(X) ->
-    %% A struct
-    R = [to_json({X, Y})] ++ [to_json(L) || L <- Z],
-    {struct, R};
+    {struct, to_json_struct([{X, Y} | Z])};
 to_json(X) when is_list(X) ->
-    {array, [to_json(E) || E<- X]}.
+    case z_string:is_string(X) of
+        true ->
+            X;
+        false ->
+            {array, [to_json(V) || V <- X]}
+    end.
 
-
+%% Handle structs specially
+to_json_struct([]) ->
+    [];
+to_json_struct([{X,Y}|T]) ->
+    [{to_json_struct_key(X), to_json(Y)} | to_json_struct(T)].
+to_json_struct_key(X) when is_atom(X) orelse is_integer(X) orelse is_binary(X) ->
+    X;
+to_json_struct_key(X) when is_list(X) ->
+    case z_string:is_string(X) of
+        true ->
+            X;
+        false ->
+            invalid_key
+    end;
+to_json_struct_key(_) ->
+    invalid_key.
+    
+    
