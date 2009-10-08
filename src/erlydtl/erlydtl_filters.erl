@@ -337,7 +337,8 @@ slugify(Input, _Context) ->
 join(Input, Separator, Context) when is_binary(Input) ->
     join(binary_to_list(Input), Separator, Context);
 join(Input, Separator, _Context) when is_list(Input) ->
-    string:join(Input, z_binary:to_list(Separator));
+    List1 = lists:map(fun(X) -> z_convert:to_list(X) end, Input),
+    string:join(List1, z_convert:to_list(Separator));
 join(Input, _, _Context) ->
     Input.
 
