@@ -1,33 +1,44 @@
 %% @author Marc Worrell <marc@worrell.nl>
 %% @copyright 2009  Marc Worrell
 %%
-%% @doc Error handler for webmachine HTTP errors.
+%% @doc Error handler for webmachine HTTP errors. The result varies depending on the content type being served.
 %% @todo Mail the error to the webadmin
 
 -module(z_webmachine_error_handler).
 -author("Marc Worrell <marc@worrell.nl>").
+-author("Arjan Scherpenisse <arjan@scherpenisse.net>").
 
 -export([render_error/3]).
 
 -include_lib("zotonic.hrl").
 
-render_error(404, Req, _Reason) ->
-    Req:add_response_header("Content-Type", "text/html; charset=utf-8"),
-    Req:add_response_header("Content-Encoding", "identity"),
-    ErrorDump = mochiweb_html:escape(lists:flatten(io_lib:format("Resource not found: ~p", [Req:path()]))),
-    Context   = z_context:new(Req:get_metadata('host')),
-    Vars      = [{error_code, 404}, {error_dump, ErrorDump}],
-    Html      = z_template:render("error.tpl", Vars, Context),
-    {Output, _Context} = z_context:output(Html, Context),
-    Output;
+render_error(Code=404, Req, _Reason) ->
+    ErrorDump = mochiweb_html:escape(lists:flatten(io_lib:format("Resource not found: ~p", [Req:raw_path()]))),
+    Handler = error_map(list_to_atom(Req:get_metadata('content-type'))),
+    Handler(Req, Code, ErrorDump);
 
-render_error(500, Req, Reason) ->
-    Req:add_response_header("Content-Type", "text/html; charset=utf-8"),
-    Req:add_response_header("Content-Encoding", "identity"),
+render_error(Code=500, Req, Reason) ->
     error_logger:error_msg("webmachine error: path=~p~n~p~n", [Req:path(), Reason]),
     ErrorDump = mochiweb_html:escape(lists:flatten(io_lib:format("~p", [Reason]))),
-    Context   = z_context:new(Req:get_metadata('host')),
-    Vars      = [{error_code, 500}, {error_dump, ErrorDump}],
-    Html      = z_template:render("error.tpl", Vars, Context),
-    {Output, _Context} = z_context:output(Html, Context),
-    Output.
+    Handler = error_map(Req:get_metadata('content-type')),
+    Handler(Req, Code, ErrorDump).
+
+
+error_map('application/json') ->
+    fun(Req, Code, ErrorDump) ->
+            Req:add_response_header("Content-Type", "application/json; charset=utf-8"),
+            Req:add_response_header("Content-Encoding", "identity"),
+            JS = {struct, [{error_code, Code}, {error_dump, ErrorDump}]},
+            mochijson:encode(JS)
+    end;
+
+error_map(_) ->
+    fun (Req, Code, ErrorDump) ->
+            Req:add_response_header("Content-Type", "text/html; charset=utf-8"),
+            Req:add_response_header("Content-Encoding", "identity"),
+            Context = z_context:new(Req:get_metadata('host')),
+            Vars = [{error_code, Code}, {error_dump, ErrorDump}],
+            Html = z_template:render("error.tpl", Vars, Context),
+            {Output, _} = z_context:output(Html, Context),
+            Output
+    end.
