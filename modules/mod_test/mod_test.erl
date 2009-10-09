@@ -8,9 +8,9 @@
 -author("Marc Worrell <marc@worrell.nl>").
 -behaviour(gen_server).
 
--mod_title("Test").
+-mod_title("Test module").
 -mod_description("Simple tests - no need to enable this module.").
--mod_prio(1).
+-mod_prio(1000).
 
 
 %% gen_server exports
