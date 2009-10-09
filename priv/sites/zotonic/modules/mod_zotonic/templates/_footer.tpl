@@ -1,10 +1,24 @@
-<div class="footer-content edit-this-page clearfix">
-	<ul class="footer-navigation left">
-		<li><a href="/">about</a></li>
-		<li><a href="/">open-source</a></li>
-		<li><a href="/">development blog</a></li>
-		<li><a href="/">support</a></li>
-	</ul>
-	{% include "_edit_button.tpl" %}
-	<p class="right">zotonic.com &copy; 2009</p>
+<div id="footer-content" class="clearfix"> 
+	<div class="zp-33">
+		<h5>Latest blog posts</h5>
+		<ul class="footer-list">
+		{% for id in m.search[{latest cat="blog" pagelen="5"}] %}
+				<li><a href="{{ m.rsc[id].page_url }}" title="{{ m.rsc[id].title }}">{{ m.rsc[id].publish_date }}&mdash;{{ m.rsc[id].title }}</a></li>
+			{% endfor %}
+		</ul>
+	</div>
+
+	<div class="zp-33">
+		<h5>Latest blog posts</h5>
+		<ul class="footer-list">
+		{% for id in m.search[{latest cat="blog" pagelen="5"}] %}
+				<li><a href="{{ m.rsc[id].page_url }}" title="{{ m.rsc[id].title }}">{{ m.rsc[id].title }}</a></li>
+			{% endfor %}
+		</ul>
+	</div>
+
+	<div class="zp-33">
+		<p>zotonic.com &copy; 2009</p>
+		{% include "_edit_button.tpl" %}
+	</div>
 </div>
