@@ -5,10 +5,10 @@
     {enabled, true},
     
     % Atomic hostname, MUST be equal to the directory name of this site.
-    {host, zotonic},
+    {host, default},
 
     % Hostname for virtual host support
-    {hostname, "zotonic.com"},
+    {hostname, "localhost"},
     {hostalias, "www.zotonic.com"},
     {hostalias, "zotonic.net"},
     {hostalias, "www.zotonic.net"},

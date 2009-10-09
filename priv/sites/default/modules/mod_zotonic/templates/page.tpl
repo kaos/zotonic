@@ -4,7 +4,11 @@
 
 {% block page_class %}page{% endblock %}
 
-{% block banner %}{% endblock %}
+{% block banner %}
+
+	<section id="banner"></section>
+
+{% endblock %}
 
 {% block content %}
 
