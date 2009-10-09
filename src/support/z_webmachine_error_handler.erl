@@ -12,6 +12,7 @@
 
 -include_lib("zotonic.hrl").
 
+
 render_error(Code=404, Req, _Reason) ->
     ErrorDump = mochiweb_html:escape(lists:flatten(io_lib:format("Resource not found: ~p", [Req:raw_path()]))),
     Type = list_to_atom(Req:get_metadata('content-type')),
