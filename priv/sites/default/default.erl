@@ -4,13 +4,13 @@
 %%
 %% @doc Module implementing the Zotonic web site
 
--module(mod_zotonic).
+-module(default).
 -author("Tim Benniks <tim@timbenniks.nl>").
 -behaviour(gen_server).
 
 -mod_title("Zotonic Web Site").
 -mod_description("The Zotonic web site.").
--mod_prio(100).
+-mod_prio(10).
 
 %% gen_server exports
 -export([init/1, handle_call/3, handle_cast/2, handle_info/2, terminate/2, code_change/3]).
