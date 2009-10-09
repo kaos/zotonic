@@ -15,17 +15,17 @@
 
 render_error(Code=404, Req, _Reason) ->
     ErrorDump = mochiweb_html:escape(lists:flatten(io_lib:format("Resource not found: ~p", [Req:raw_path()]))),
-    Type = list_to_atom(Req:get_metadata('content-type')),
+    Type = Req:get_metadata('content-type'),
     error_handler(Type, Req, Code, ErrorDump);
 
 render_error(Code=500, Req, Reason) ->
     error_logger:error_msg("webmachine error: path=~p~n~p~n", [Req:path(), Reason]),
     ErrorDump = mochiweb_html:escape(lists:flatten(io_lib:format("~p", [Reason]))),
-    Type = list_to_atom(Req:get_metadata('content-type')),
+    Type = Req:get_metadata('content-type'),
     error_handler(Type, Req, Code, ErrorDump).
 
 
-error_handler('application/json', Req, Code, ErrorDump) ->
+error_handler("application/json", Req, Code, ErrorDump) ->
     Req:add_response_header("Content-Type", "application/json; charset=utf-8"),
     Req:add_response_header("Content-Encoding", "identity"),
     JS = {struct, [{error_code, Code}, {error_dump, ErrorDump}]},

@@ -160,7 +160,8 @@ all(Context) ->
 scan(#context{host=Host}) ->
     Priv  = filename:join([code:lib_dir(zotonic, priv), "sites", Host, "modules", "mod_*"]),
     Src   = filename:join([code:lib_dir(zotonic, modules), "mod_*"]),
-    Files = filelib:wildcard(Priv) ++ filelib:wildcard(Src),
+    Site  = filename:join([code:lib_dir(zotonic, priv), "sites", Host]),
+    Files = filelib:wildcard(Priv) ++ filelib:wildcard(Src) ++ [Site],
     [ {z_convert:to_atom(filename:basename(F)), F} ||  F <- Files ].
 
 

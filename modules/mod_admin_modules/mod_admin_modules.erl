@@ -22,6 +22,8 @@
     all/1
 ]).
 
+-include("zotonic.hrl").
+
 
 %% @spec all(context()) -> ModuleDescriptions
 %% @doc Fetch a list of all modules available, including their description as a propertylist. The module list is sorted
@@ -49,8 +51,11 @@ descr(Module) ->
     case proplists:get_value(title, Descr) of
         undefined ->
             Title = case atom_to_list(Module) of
-                "mod_" ++ T -> string:join(string:tokens(T, "_"), " ")
-            end,
+                        "mod_" ++ T -> 
+                            string:join(string:tokens(T, "_"), " ");
+                        T ->
+                            string:join(string:tokens(T, "_"), " ")
+                    end,
             [{title, Title} | Descr];
         _Title ->
             Descr

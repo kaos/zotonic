@@ -7,6 +7,7 @@
 	"modules/*",
 	"modules/*/*",
 	"modules/*/*/*",
+	"priv/sites/*/*",
 	"priv/sites/*/modules/*",
 	"priv/sites/*/modules/*/*",
 	"priv/sites/*/modules/*/*/*"
@@ -18,3 +19,4 @@
   	debug_info
  ]
 }.
+
