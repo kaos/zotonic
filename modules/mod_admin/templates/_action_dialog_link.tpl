@@ -1,7 +1,7 @@
 
 <p>Type the title of the page you want to connect to.  Click “Make a new connection” when the page does not yet exist.</p>
 
-{% button text="Make a new connection" class="left" action={dialog_close} action={dialog_new_rsc redirect=false subject_id=subject_id predicate=predicate} %}
+{% button text="Make a new connection" class="left" action={dialog_close} action={dialog_new_rsc redirect=false subject_id=subject_id predicate=predicate cat=predicate_cat} %}
 
 <p>or use the autocompleter to search the site.</p>
 

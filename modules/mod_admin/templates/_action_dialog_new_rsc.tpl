@@ -15,12 +15,12 @@
 			<input type="text" id="new_rsc_title" name="new_rsc_title" value="{{ title|escape }}" />
 			{% validate id="new_rsc_title" type={presence} %}
 		</div>
-		
+
 		<div class="form-item clearfix">
 			<label for="{{ #category }}">Category</label>
 			<select id="{{ #category }}" name="category_id">
 			{% for cat_id, level, indent, name in m.category.all_flat %}
-				<option value="{{cat_id}}" {% ifequal name cat %}selected="selected" {% endifequal %}>
+				<option value="{{cat_id}}" {% ifequal cat_id cat %}selected="selected" {% endifequal %}>
 					{{ indent }}{{ m.rsc[cat_id].title|default:name }}
 				</option>
 			{% endfor %}

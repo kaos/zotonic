@@ -29,10 +29,15 @@ render_action(TriggerId, TargetId, Args, Context) ->
 event({postback, {dialog_link, SubjectId, Predicate, ElementId, Actions}, _TriggerId, _TargetId}, Context) ->
     Pred = m_predicate:get(Predicate, Context),
     Title = ["Add a connection: ", ?TR(proplists:get_value(title, Pred), Context)],
+    PredCat = case m_predicate:object_category(Predicate, Context) of
+                  [{Id}] -> Id;
+                  _ -> undefined
+              end,
     Vars = [
         {subject_id, SubjectId},
         {predicate, Predicate},
         {element_id, ElementId},
-        {action, Actions}
+        {action, Actions},
+        {predicate_cat, PredCat}            
     ],
     z_render:dialog(Title, "_action_dialog_link.tpl", Vars, Context).

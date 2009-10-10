@@ -245,7 +245,9 @@ install_predicate(C) ->
 
         [ 305, true,   "atvenue",  "http://zotonic.net/predicate/atvenue",              [{reversed, false},{title, "Venue"}]],
         [ 306, true,   "performer","http://zotonic.net/predicate/performer",            [{reversed, false},{title, "Performer"}]],
-        [ 307, true,   "hasgenre", "http://zotonic.net/predicate/hasgenre",             [{reversed, false},{title, "Genre"}]]
+        [ 307, true,   "hasgenre", "http://zotonic.net/predicate/hasgenre",             [{reversed, false},{title, "Genre"}]],
+
+        [ 308, true,   "subject",  "http://purl.org/dc/elements/1.1/subject",           [{reversed, false},{title, {trans, [{en,"Keyword"},  {nl,"Trefwoord"}]}}]]
     ],
 
     {ok, CatId}   = pgsql:squery1(C, "select id from rsc where name = 'predicate'"),
@@ -258,16 +260,24 @@ install_predicate(C) ->
     pgsql:reset_id(C, "rsc"),
 
     ObjSubj = [
-        {300, true,  104}, %  text  -> about     -> _
-        {301, true,  102}, %  _     -> author    -> person
-        {302, false, 105}, %  _     -> hasreview -> review
-        {304, false, 110}, %  _     -> depiction -> image
-        {305, true,  108}, %  Event -> atvenue   -> _
-        {305, false, 120}, %  _     -> atvenue   -> venue
-        {306, true,  108}, %  Event -> performer -> _
-        {306, false, 121}, %  _     -> performer -> artist
-        {307, true,  108}, %  Event -> hasgenre  -> _
-        {307, false, 124}  %  _     -> hasgenre  -> genre
+        {300, true,  104}, %  text   -> about     -> _
+        {301, true,  102}, %  _      -> author    -> person
+        {302, false, 105}, %  _      -> hasreview -> review
+        {304, false, 110}, %  _      -> depiction -> image
+        {305, true,  108}, %  Event  -> atvenue   -> _
+        {305, false, 120}, %  _      -> atvenue   -> venue
+        {306, true,  108}, %  Event  -> performer -> _
+        {306, false, 121}, %  _      -> performer -> artist
+        {307, true,  108}, %  Event  -> hasgenre  -> _
+        {307, false, 124}, %  _      -> hasgenre  -> genre
+        {308, true,  104}, %  text   -> subject   -> _
+        {308, true,  102}, %  person -> subject   -> _
+        {308, true,  119}, %  location -> subject   -> _
+        {308, true,  108}, %  event -> subject   -> _
+        {308, true,  103}, %  artifact -> subject   -> _
+        {308, true,  110}, %  media -> subject   -> _
+        {308, true,  114}, %  collection -> subject   -> _
+        {308, false, 123}  %  _      -> subject   -> keyword
     ],
     
     [ {ok, 1} = pgsql:equery(C, "
