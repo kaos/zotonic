@@ -26,6 +26,7 @@ install(C) ->
     ok = install_identity(C),
     ok = install_predicate(C),
     ok = install_edge(C),
+    ok = install_menu(C),
     ok.
 
 
@@ -189,7 +190,7 @@ install_rsc(C) ->
         [ 208,  0,  208,   118,  false,  "content",    [{title,<<"Content">>}] ],
 
         [   1,  0,  204,   102,  true,    undefined,   [{title,<<"Site Administrator">>}] ],
-        [ 500,  0,  204,   106,  false,   undefined,   [{title,<<"About Zotonic">>}, {body, "<p>Some nice text in the body.</p>"}] ],
+        [ 500,  0,  204,   106,  false,   undefined,   [{title,<<"Welcome!">>}, {body, "<p>Hi! Welcome to your brand new Zotonic site.</p><p>Wanna change stuff? <a href=\"/admin\">Go to the Zotonic admin</a>.</p>"}] ],
         [ 501,  0,  204,   109,  false,   undefined,   [{title,<<"Some News">>}, {body, "<p>And the text of the news should be typed here.</p>"}] ]
     ],
     
@@ -198,8 +199,12 @@ install_rsc(C) ->
             values ($1, $2, $3, $4, $5, $6, $7)
             ", R) || R <- Rsc ],
     {ok, _} = pgsql:squery(C, "update rsc set creator_id = 1, modifier_id = 1, is_published = true"),
-    pgsql:reset_id(C, "rsc"),
+
+    % Page 500 is the home page by default
+    {ok, _} = pgsql:squery(C, "update rsc set page_path='/', name='page_home' where id = 500"),
     
+    pgsql:reset_id(C, "rsc"),
+
     % Connect person resources to the correct groups
     RscGroup = [
         % Id, Rsc  Grp    obsvr   leader
@@ -286,6 +291,14 @@ install_edge(C) ->
     pgsql:reset_id(C, "edge"),
     ok.
 
+
+%% @doc Install the default menu.
+install_menu(C) ->
+    Menu = [{500,[]},{501,[]}],
+    {ok, 1} = pgsql:equery(C, 
+        "insert into config (module, key, value, props, modified) values ($1, $2, $3, $4, now())", 
+        ["menu", "menu_default", "", [{menu, Menu}]]),
+    ok.
 
 
 %% @doc Enumerate all categories so that their left, right, level en nr are set correctly
