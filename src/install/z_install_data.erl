@@ -69,8 +69,8 @@ install_modules(C) ->
         "mod_admin_person",
         "mod_admin_predicate",
 
-        % The example site
-        "mod_site_simple"
+        % The default site
+        "default"
     ],
     [
         {ok, 1} = pgsql:equery(C, "insert into module (name, is_active) values ($1, true)", [M]) || M <- Modules

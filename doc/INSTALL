@@ -22,11 +22,11 @@ Steps:
 
 2. Create an user and database in PostgreSQL:
 
-    CREATE USER zotonic WITH PASSWORD 'yourdbpassword';
-    CREATE DATABASE zotonic WITH OWNER = zotonic ENCODING = 'UTF8';
-    GRANT ALL ON DATABASE zotonic TO zotonic;
-    \c zotonic
-    CREATE LANGUAGE "plpgsql";
+CREATE USER zotonic WITH PASSWORD 'yourdbpassword';
+CREATE DATABASE zotonic WITH OWNER = zotonic ENCODING = 'UTF8';
+GRANT ALL ON DATABASE zotonic TO zotonic;
+\c zotonic
+CREATE LANGUAGE "plpgsql";
 
 4. Create the configuration for the default site by copying
    priv/sites/default/config.in to priv/sites/default/config
@@ -71,12 +71,22 @@ to run with 'gmake' (make sure gmake is available first))
 
 
 
-Ubuntu:
--------
+Ubuntu 9.04 (jaunty)
+--------------------
+
+You'll need to build erlang from source. Before building, make sure
+you install these packages:
+
+sudo apt-get install unixodbc-dev libncurses-dev libssl-dev
+
+
+
+Ubuntu 9.10 (karmic)
+--------------------
 Instead of compiling erlang, you can install the following erlang packages:
 
-apt-get install erlang-base erlang-crypto erlang-dev erlang-docbuilder \
+sudo apt-get install erlang-base erlang-crypto erlang-dev erlang-docbuilder \
 erlang-edoc erlang-et erlang-eunit erlang-gs erlang-inets \
-erlang-mnesia erlang-mode erlang-observer erlang-odbc \
-erlang-parsetools erlang-public-key erlang-runtime-tools erlang-ssl \
+erlang-mnesia erlang-observer erlang-odbc erlang-parsetools \
+erlang-public-key erlang-runtime-tools erlang-ssl \
 erlang-syntax-tools erlang-tools erlang-webtool erlang-xmerl
