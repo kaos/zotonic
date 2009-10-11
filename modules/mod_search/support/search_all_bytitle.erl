@@ -16,7 +16,7 @@
 
 -include_lib("zotonic.hrl").
 
-search([Cat], Context) when is_atom(Cat) ->
+search([Cat], Context) ->
     search(Cat, Context);
 search(Cat, Context) ->
     case m_category:name_to_id(Cat, Context) of
