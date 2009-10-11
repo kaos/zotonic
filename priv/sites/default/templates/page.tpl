@@ -16,7 +16,7 @@
 					{{ m.rsc[id].summary }}
 				</p>
 
-				{{ m.rsc[id].body }}
+				{{ m.rsc[id].body|show_media }}
 		</div>
 	</article>
 

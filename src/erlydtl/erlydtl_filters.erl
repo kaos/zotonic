@@ -442,6 +442,14 @@ rjust(Input, _Number, _Context) ->
     Input.
 
 
+show_media(undefined, _Context) ->
+    undefined;
+show_media(Input, Context) when is_binary(Input) ->
+    show_media1(Input, 0, Context);
+show_media(Input, _Context) ->
+    Input.
+
+
 tail(In, Context) ->
     case erlydtl_runtime:to_list(In, Context) of
         [_|T] -> T;
@@ -557,6 +565,35 @@ linebreaksbr1("\n" ++ Rest, Acc) ->
     linebreaksbr1(Rest, lists:reverse("<br />", Acc));
 linebreaksbr1([C | Rest], Acc) ->
     linebreaksbr1(Rest, [C | Acc]).
+
+
+
+% scanning for media start marker
+show_media1(Input, Index, Context) when is_binary(Input) ->
+    case Input of
+        <<Pre:Index/binary, "<!-- z-media ", Post/binary>> ->
+            process_binary_match(Pre, <<>>, size(Post), show_media1_id(Post, 0, Context));
+        <<_:Index/binary, _/binary>> ->
+            show_media1(Input, Index + 1, Context);
+        _ ->
+            Input
+    end.
+
+% scanning for media id
+show_media1_id(Input, Index, Context) ->
+    case Input of
+        <<Id:Index/binary, " -->", Post/binary>> ->
+            P = m_media:depiction(z_convert:to_integer(Id), Context),
+            FN = z_db:get(filename, P),
+            Opts = [{width, 400}, {height, 400}],
+            {ok, Html} = z_media_tag:tag(FN, Opts, Context),
+            process_binary_match(<<>>, Html, size(Post), show_media1(Post, 0, Context));
+        <<_:Index/binary, _/binary>> ->
+            show_media1_id(Input, Index + 1, Context);
+        _ ->
+            Input
+    end.
+
 
 
 % Taken from quote_plus of mochiweb_util

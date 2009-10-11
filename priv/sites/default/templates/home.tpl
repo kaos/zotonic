@@ -21,13 +21,14 @@
 
 	<article id="content" class="zp-67">
 		<div class="padding">
+
 			<h1>{{ m.rsc[id].title }}</h1>
 
 			<p class="summary">
 				{{ m.rsc[id].summary }}
 			</p>
 
-			{{ m.rsc[id].body }}
+			{{ m.rsc[id].body|show_media }}
 		</div>
 	</article>
 

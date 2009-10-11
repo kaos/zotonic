@@ -78,3 +78,10 @@ pre {
 .mceIEcenter {
 	text-align: center;
 }
+
+.z-tinymce-media {
+  padding: 10px;
+  width: 118px;
+  background: #333333;
+  color: white;
+}
