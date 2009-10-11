@@ -80,8 +80,8 @@ pre {
 }
 
 .z-tinymce-media {
-  padding: 10px;
-  width: 118px;
-  background: #333333;
-  color: white;
+}
+
+.z-tinymce-media img {
+  border: 10px solid #999999;
 }

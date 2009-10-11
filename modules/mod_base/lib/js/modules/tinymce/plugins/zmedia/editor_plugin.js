@@ -86,7 +86,7 @@ function disableSelection(target){
 
             _zMediaHtml: function(id) {
                 var divid = this._zMediaId(id);
-                return '<div class="' + this._zMediaClass() + '"><img id="' +divid + '" src="/lib/images/admin_zotonic.png" /><br/>Media item: ' + id +'</div>';
+                return '<div class="' + this._zMediaClass() + '"><img id="' +divid + '" src="/admin/media/preview/' + id + '" /></div>';
             },
 
             _zMarkersToMediaHtml: function (html) {
