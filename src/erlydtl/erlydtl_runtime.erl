@@ -156,6 +156,12 @@ is_false(<<>>) ->
     true;
 is_false({rsc_list, []}) ->
     true;
+is_false(#m{value=V}) ->
+    is_false(V);
+is_false(#m_search_result{result=V}) ->
+    is_false(V);
+is_false(#search_result{result=[]}) ->
+    true;
 is_false(_) ->
     false.
 

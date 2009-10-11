@@ -273,22 +273,7 @@ format_price(Input, Context) when is_list(Input) ->
 format_price(undefined, _Context) ->
     "-".
 
-
-default(Input, Default, _Context) -> 
-    case erlydtl_runtime:is_false(Input) of
-        true -> Default;
-        false -> Input
-    end.
-
-
-default_if_none(Input, Default, Context) -> 
-    default_if_undefined(Input, Default, Context).
-default_if_undefined(Input, Default, _Context) -> 
-    case Input of
-        undefined -> Default;
-        _ -> Input
-    end.
-
+% default, default_if_none and default_if_undefined are directly compiled inline.
 
 is_defined(undefined, _Context) ->
     false;

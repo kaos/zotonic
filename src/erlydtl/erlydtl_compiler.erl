@@ -603,6 +603,28 @@ filter_ast_noescape(Variable, Filter, Context, TreeWalker) ->
 filter_ast1([{identifier, _, Name}], VariableAst, Context, TreeWalker) ->
     FilterAst = erl_syntax:application(erl_syntax:atom(erlydtl_filters), erl_syntax:atom(Name), [VariableAst, z_context_ast(Context)]),
     {{FilterAst, #ast_info{}}, TreeWalker};
+filter_ast1([{identifier, _, "default"}, Arg], VariableAst, Context, TreeWalker) ->
+    {{ArgAst, Info},TreeWalker1} = value_ast(Arg, false, Context, TreeWalker),
+    VarAst  = erl_syntax:variable("Default_" ++ z_ids:identifier()),
+    CaseAst = erl_syntax:case_expr(erl_syntax:application(erl_syntax:atom(erlydtl_runtime), erl_syntax:atom(is_false), [VarAst]),
+        [erl_syntax:clause([erl_syntax:atom(true)], none, 
+                [ArgAst]),
+         erl_syntax:clause([erl_syntax:underscore()], none,
+                [VarAst])
+        ]),
+    {{erl_syntax:block_expr([erl_syntax:match_expr(VarAst, VariableAst), CaseAst]), Info}, TreeWalker1};
+filter_ast1([{identifier, _, "default_if_none"}, Arg], VariableAst, Context, TreeWalker) ->
+    {{ArgAst, Info},TreeWalker1} = value_ast(Arg, false, Context, TreeWalker),
+    VarAst  = erl_syntax:variable("Default_" ++ z_ids:identifier()),
+    CaseAst = erl_syntax:case_expr(VariableAst,
+        [erl_syntax:clause([erl_syntax:atom(undefined)], none, 
+                [ArgAst]),
+         erl_syntax:clause([VarAst], none,
+                [VarAst])
+        ]),
+    {{CaseAst, Info}, TreeWalker1};
+filter_ast1([{identifier, Pos, "default_if_undefined"}, Arg], VariableAst, Context, TreeWalker) ->
+    filter_ast1([{identifier, Pos, "default_if_none"}, Arg], VariableAst, Context, TreeWalker);
 filter_ast1([{identifier, _, Name}, Arg], VariableAst, Context, TreeWalker) ->
     {{ArgAst, Info},TreeWalker2} = value_ast(Arg, false, Context, TreeWalker),
     FilterAst = erl_syntax:application(erl_syntax:atom(erlydtl_filters), erl_syntax:atom(Name), [VariableAst, ArgAst, z_context_ast(Context)]),
