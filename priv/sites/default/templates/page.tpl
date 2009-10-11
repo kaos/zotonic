@@ -30,4 +30,8 @@
 		<p><a href="#">Read more about Zotonic &raquo;</a></p>
 	</aside>
 
+	<aside id="sidebar" class="zp-33">
+        {% include "_keywords.tpl" %}
+    </aside>
+
 {% endblock %}
