@@ -54,8 +54,9 @@ function disableSelection(target){
             
                 // Register buttons
                 ed.addButton('zmedia', {
-                    title : 'advimage.image_desc',
-                            cmd : 'mceZotonicMedia'
+                    title : 'Insert a Zotonic media item.',
+                            cmd : 'mceZotonicMedia',
+                            class: 'mce_image'
                             });
             },
                 
