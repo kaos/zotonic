@@ -277,8 +277,11 @@ search({media, []}, _OffsetLimit, _Context) ->
         assoc=true
     };
     
-search({all_bytitle, [{cat, Cat}]}, _OffetLimit, Context) ->
+search({all_bytitle, [{cat, Cat}]}, _OffsetLimit, Context) ->
     search_all_bytitle:search(Cat, Context);
+
+search({all_bytitle, [{cat_eq, Cat}]}, _OffsetLimit, Context) ->
+    search_all_bytitle:search_cat_eq(Cat, Context);
 
 search(_, _, _) ->
     undefined.

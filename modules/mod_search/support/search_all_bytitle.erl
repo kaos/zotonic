@@ -11,7 +11,8 @@
 
 %% interface functions
 -export([
-    search/2
+    search/2,
+	search_cat_eq/2
 ]).
 
 -include_lib("zotonic.hrl").
@@ -22,17 +23,29 @@ search(Cat, Context) ->
     case m_category:name_to_id(Cat, Context) of
         {ok, CatId} ->
             {Left,Right} = m_category:get_range(CatId, Context),
-            Ids = z_db:q("select id from rsc where pivot_category_nr >= $1 and pivot_category_nr <= $2", [Left,Right], Context),
-            IdTitles = [ add_title(Id, Context) || {Id} <- Ids, m_rsc:is_visible(Id, Context) ],
-            Sorted = lists:sort(IdTitles),
-            Result = [ {Title, Id} || {_Name, Title, Id} <- Sorted ],
-            #search_result{result=Result, all=Sorted, total=length(Sorted)};
+			search1(Left, Right, Context);
         {error, _Reason} ->
             #search_result{}
     end.
+
+search_cat_eq(Cat, Context) ->
+    case m_category:name_to_id(Cat, Context) of
+        {ok, CatId} ->
+			Props = m_category:get(CatId, Context),
+			Nr = proplists:get_value(nr, Props),
+			search1(Nr, Nr, Context);
+        {error, _Reason} ->
+            #search_result{}
+    end.
+
+search1(Left, Right, Context) ->
+	Ids = z_db:q("select id from rsc where pivot_category_nr >= $1 and pivot_category_nr <= $2", [Left,Right], Context),
+    IdTitles = [ add_title(Id, Context) || {Id} <- Ids, m_rsc:is_visible(Id, Context) ],
+    Sorted = lists:sort(IdTitles),
+    Result = [ {Title, Id} || {_Name, Title, Id} <- Sorted ],
+    #search_result{result=Result, all=Sorted, total=length(Sorted)}.
 
 
     add_title(Id, Context) ->
         Title = ?TR(m_rsc:p(Id, title, Context), Context),
         {z_string:to_name(Title), Title, Id}.
-    
