@@ -73,6 +73,8 @@ m_find_value(tree1, #m{value={cat, Id}}, Context) ->
     get_by_parent(Id, Context);
 m_find_value(tree2, #m{value={cat, Id}}, Context) ->
     tree_depth(Id, 2, Context);
+m_find_value(path, #m{value={cat, Id}}, Context) ->
+    get_path(Id, Context);
 m_find_value(image, #m{value={cat, Id}}, Context) ->
     image(Id, Context);
 m_find_value(Key, #m{value={cat, Id}}, Context) ->
