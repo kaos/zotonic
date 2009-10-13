@@ -11,7 +11,7 @@
 			<a href="#" title=""><img src="/lib/images/download_zotonic.png" alt="" /></a>
 		</section>
 		<section id="docs-zotonic">
-			<a href="#" title=""><img src="/lib/images/docs.png" alt="" /></a>
+			<a href="/documentation" title=""><img src="/lib/images/docs.png" alt="" /></a>
 		</section>
 	</section>
 
