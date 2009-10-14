@@ -105,7 +105,7 @@ menu_item(N, T, Id, Nr, Context) ->
             [
                 "<li id=\"nav-item-", integer_to_list(Nr), "\" class=\"",First,Last,"\">",
                     "<a href=\"", m_rsc:p(N, page_url, Context), "\" class=\"", Current, m_rsc:p(N, slug, Context), "\">",
-                        ?TR(get_title(N, Context), Context),
+                        get_title(N, Context),
                 "</a>"
             ];
         false ->
@@ -113,8 +113,8 @@ menu_item(N, T, Id, Nr, Context) ->
     end.
 
 get_title(Id, Context) ->
-	case m_rsc:p(Id, short_title, Context) of
-		N when N == [] orelse N == <<"">> orelse N == undefined -> m_rsc:p(Id, title, Context);
+	case ?TR(m_rsc:p(Id, short_title, Context), Context) of
+		N when N == [] orelse N == <<"">> orelse N == undefined -> ?TR(m_rsc:p(Id, title, Context), Context);
 		Title -> Title
 	end.
 
