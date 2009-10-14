@@ -10,6 +10,7 @@
 
 	<article id="content" class="zp-67">
 		<div class="padding">
+				{% block chapeau %}{% endblock %}
 				<h1>{{ m.rsc[id].title }}</h1>
 
 				<p class="summary">
