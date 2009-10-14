@@ -13,6 +13,10 @@
 			{% block breadcrumb %}{% endblock %}
 			<h1>{{ m.rsc[id].title }}</h1>
 
+			{% if m.rsc[id].website %}
+			<p class="website"><a href="{{ m.rsc[id].website }}">{{ m.rsc[id].website }}</a></p>
+			{% endif %}
+
 			<p class="summary">{{ m.rsc[id].summary }}</p>
 			{{ m.rsc[id].body|show_media }}
 		</div>
