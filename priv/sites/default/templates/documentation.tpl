@@ -3,11 +3,11 @@
 {% block chapeau %}
 	{% with m.rsc[id].category_id as category_id %}
 		<p>
-		{% for cat_id in m.category[category_id].path %}
-			{% ifnotequal m.rsc[cat_id].name "text" %}
-				<a href="{{ m.rsc[cat_id].page_url }}">{{ m.rsc[cat_id].title }}</a> &raquo;
-			{% endifnotequal %}
-		{% endfor %}
+			{% for cat_id in m.category[category_id].path %}
+				{% ifnotequal m.rsc[cat_id].name "text" %}
+					<a href="{{ m.rsc[cat_id].page_url }}">{{ m.rsc[cat_id].title }}</a> &raquo;
+				{% endifnotequal %}
+			{% endfor %}
 			<a href="{{ m.rsc[category_id].page_url }}">{{ m.rsc[category_id].title }}</a> &raquo;
 		</p>
 	{% endwith %}
