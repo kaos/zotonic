@@ -12,7 +12,7 @@
 %% interface functions
 -export([
     search/2,
-	search_cat_eq/2
+	search_cat_is/2
 ]).
 
 -include_lib("zotonic.hrl").
@@ -28,7 +28,7 @@ search(Cat, Context) ->
             #search_result{}
     end.
 
-search_cat_eq(Cat, Context) ->
+search_cat_is(Cat, Context) ->
     case m_category:name_to_id(Cat, Context) of
         {ok, CatId} ->
 			Props = m_category:get(CatId, Context),

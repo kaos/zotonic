@@ -280,8 +280,8 @@ search({media, []}, _OffsetLimit, _Context) ->
 search({all_bytitle, [{cat, Cat}]}, _OffsetLimit, Context) ->
     search_all_bytitle:search(Cat, Context);
 
-search({all_bytitle, [{cat_eq, Cat}]}, _OffsetLimit, Context) ->
-    search_all_bytitle:search_cat_eq(Cat, Context);
+search({all_bytitle, [{cat_is, Cat}]}, _OffsetLimit, Context) ->
+    search_all_bytitle:search_cat_is(Cat, Context);
 
 search(_, _, _) ->
     undefined.
