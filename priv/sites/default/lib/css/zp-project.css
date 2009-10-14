@@ -117,7 +117,7 @@ p.intro:first-line {
 }
 
 header {
-	padding: 18px 0 6px;
+	height: 58px;
 }
 
 .page header {
@@ -163,7 +163,7 @@ header {
 		}
 
 #logo {
-	margin: 0;
+	margin: 18px 0 0 0;
 }
 
 #logo img {
@@ -242,10 +242,7 @@ footer {
 ---------------------------------------------------------- */
 
 nav {
-	margin: 7px 0 0 0;
-}
-
-#navigation {
+	margin: 25px 0 0;
 }
 
 	#navigation li {
@@ -324,6 +321,10 @@ textarea:focus {
 	border: none;
 }
 
+
+/* notices
+-------------------------------------------------------------- */
+
 .error,
 .notice,
 .success {
@@ -332,14 +333,45 @@ textarea:focus {
 	-webkit-border-radius: 3px;	
 }
 
+.notice a {
+	color: #514721; 
+}
 
-/* Let pre wrap
+	.notice a:hover {
+		border-color: #514721;
+	}
+
+.error a {
+	color: #8a1f11; 
+}
+
+	.error a:hover {
+		border-color: #8a1f11;
+	}
+
+	.error pre {
+		background: #FBC2C4;
+		border: none;
+		margin: 9px 0 3px 0;
+	}
+
+.success a {
+	color: #264409; 
+}
+
+	.succes a:hover {
+		border-color: #264409;
+	}
+
+/* pre, code
 ---------------------------------------------------------- */
 
 pre {
- white-space: pre-wrap;       /* css-3 */
- white-space: -moz-pre-wrap;  /* Mozilla, since 1999 */
- white-space: -pre-wrap;      /* Opera 4-6 */
- white-space: -o-pre-wrap;    /* Opera 7 */
- word-wrap: break-word;       /* Internet Explorer 5.5+ */
+	white-space: pre-wrap;       /* css-3 */
+	white-space: -moz-pre-wrap;  /* Mozilla, since 1999 */
+	white-space: -pre-wrap;      /* Opera 4-6 */
+	white-space: -o-pre-wrap;    /* Opera 7 */
+	word-wrap: break-word;       /* Internet Explorer 5.5+ */
+	-moz-border-radius: 3px;
+	-webkit-border-radius: 3px;
 }
