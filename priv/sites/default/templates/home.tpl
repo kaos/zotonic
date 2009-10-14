@@ -38,7 +38,7 @@
 	
 	<aside id="sidebar" class="zp-33">
 		<h1>Zotonic is Open Source</h1>
-		<p>Zotonic is released under the Open Source <a href="#">Apache2 license</a>, which gives you the possibility to use it and modify it in every circumstance.</p>
+		<p>Zotonic is released under the Open Source <a href="/zotonic-license">Apache2 license</a>, which gives you the possibility to use it and modify it in every circumstance.</p>
 		<p><a href="{{ m.rsc.page_features.page_url }}">Read more about Zotonic &raquo;</a></p>
 	</aside>
 
