@@ -22,7 +22,7 @@ body {
 ---------------------------------------------------------- */
 
 h1 {
-	font-size: 18px;
+	font-size: 24px;
 	line-height: 24px;
 	letter-spacing: 0.02em;
 	text-transform: uppercase;
@@ -86,6 +86,20 @@ p.intro:first-line {
 	font-variant: normal;
 }
 
+p.breadcrumb {
+	font-size: 11px;
+	margin: 0 0 9px 0;
+	color: #ddd;
+}
+
+	p.breadcrumb a {
+		color: #bbb;
+	}
+	
+	p.breadcrumb a:hover {
+		color: #5DBAE0;
+		border: none;
+	}
 
 /* Lists
 ---------------------------------------------------------- */
@@ -372,6 +386,6 @@ pre {
 	white-space: -pre-wrap;      /* Opera 4-6 */
 	white-space: -o-pre-wrap;    /* Opera 7 */
 	word-wrap: break-word;       /* Internet Explorer 5.5+ */
-	-moz-border-radius: 3px;
-	-webkit-border-radius: 3px;
+	-moz-border-radius: 6px;
+	-webkit-border-radius: 6px;
 }
