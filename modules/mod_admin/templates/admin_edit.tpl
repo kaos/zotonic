@@ -39,6 +39,11 @@
 									</div>
 
 									<div class="form-item clearfix">
+										<label for="field-short-title">Short title</label>
+										<input type="text" id="field-short-title" name="short_title" value="{{ r.short_title }}" />
+									</div>
+
+									<div class="form-item clearfix">
 										<label for="field-summary">Summary</label>
 										<textarea rows="2" cols="10" id="field-summary" name="summary" class="intro">{{ r.summary }}</textarea>
 									</div>

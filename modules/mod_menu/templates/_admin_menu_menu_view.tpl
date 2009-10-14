@@ -21,7 +21,7 @@
 								<li id="{{ #sub.m_s_nr }}">
 									<a id="{{ #menu.m_s_nr }}" href="#" class="clearfix">
 										<span class="grippy"><img src="/lib/images/grippy.png" alt="Drag me" /></span>
-										<span>{{ m.rsc[s_id].title }}</span>
+										<span>{{ m.rsc[s_id].short_title|default:m.rsc[s_id].title }}</span>
 										{% button text="x" style="float:right" action={postback postback={delete item=[m_nr, s_nr] id=#menu.m_s_nr}} %}
 									</a>
 								</li>

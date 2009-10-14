@@ -105,13 +105,18 @@ menu_item(N, T, Id, Nr, Context) ->
             [
                 "<li id=\"nav-item-", integer_to_list(Nr), "\" class=\"",First,Last,"\">",
                     "<a href=\"", m_rsc:p(N, page_url, Context), "\" class=\"", Current, m_rsc:p(N, slug, Context), "\">",
-                        ?TR(m_rsc:p(N, title, Context), Context),
+                        ?TR(get_title(N, Context), Context),
                 "</a>"
             ];
         false ->
             []
     end.
 
+get_title(Id, Context) ->
+	case m_rsc:p(Id, short_title, Context) of
+		N when N == [] orelse N == <<"">> orelse N == undefined -> m_rsc:p(Id, title, Context);
+		Title -> Title
+	end.
 
 %% @doc Fetch the menu from the site configuration.
 %% @spec get_menu(Context) -> list()
