@@ -343,12 +343,12 @@
 												<div class="clearfix">
 													<h4>{{ p.title }}</h4>
 													{% if is_editable %}
-														{% dialog_link_add subject_id=id predicate=name element_id=#links.name %}
+														{% dialog_link_add subject_id=id predicate=name %}
 													{% endif %}
 												</div>
 												<div class="unlink-wrapper clearfix">
 													{% sorter id=#links.name tag={object_sorter predicate=name id=id} %}
-													<ul id="{{ #links.name }}" class="clearfix">
+													<ul id="links-{{ id }}-{{ name }}" class="clearfix">
 													{% for o_id, edge_id in m.edge.o[id][name] %}
 														{% include "_rsc_edge.tpl" subject_id=id predicate=name object_id=o_id edge_id=edge_id %}
 													{% endfor %}
