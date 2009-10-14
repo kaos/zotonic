@@ -22,7 +22,7 @@
 					{% ifequal c_id id %}
 						<li>{{ title }}</li>
 					{% else %}
-						<li><a href="{{ m.rsc[id].page_url }}">{{ title }}</a></li>
+						<li><a href="{{ m.rsc[c_id].page_url }}">{{ title }}</a></li>
 					{% endifequal %}
 				{% endfor %}
 			</ul>

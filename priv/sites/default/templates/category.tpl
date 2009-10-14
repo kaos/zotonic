@@ -10,6 +10,14 @@
 
 	<article id="content" class="zp-33">
 		<div class="padding">
+			<p>
+			{% for cat_id in m.category[id].path %}
+				{% ifnotequal m.rsc[cat_id].name "text" %}
+					<a href="{{ m.rsc[cat_id].page_url }}">{{ m.rsc[cat_id].title }}</a> &raquo;
+				{% endifnotequal %}
+			{% endfor %}
+			</p>
+
 			<h1>{{ m.rsc[id].title }}</h1>
 			{% if m.rsc[id].summary %}<p class="summary">{{ m.rsc[id].summary }}</p>{% endif %}
 			{{ m.rsc[id].body }}
