@@ -17,15 +17,32 @@
 	{% with m.rsc[id].category_id as category_id %}
 		<aside id="sidebar" class="zp-33">
 			<h2>{{ m.rsc[category_id].title }}</h2>
-			<ul>
-				{% for title,c_id in m.search[{all_bytitle cat_is=category_id}] %}
-					{% ifequal c_id id %}
-						<li>{{ title }}</li>
-					{% else %}
-						<li><a href="{{ m.rsc[c_id].page_url }}">{{ title }}</a></li>
-					{% endifequal %}
+			
+			{% ifequal m.rsc[category_id].name "zt_template_filter" %}
+				{% for ids in m.search[{all_bytitle cat_is=category_id}]|split_in:2 %}
+				<div class="zp-50">
+					<ul>
+						{% for title,c_id in ids %}
+							{% ifequal c_id id %}
+								<li>{{ title }}</li>
+							{% else %}
+								<li><a href="{{ m.rsc[c_id].page_url }}">{{ title }}</a></li>
+							{% endifequal %}
+						{% endfor %}
+					</ul>
+				</div>
 				{% endfor %}
-			</ul>
+			{% else %}
+				<ul>
+					{% for title,c_id in m.search[{all_bytitle cat_is=category_id}] %}
+						{% ifequal c_id id %}
+							<li>{{ title }}</li>
+						{% else %}
+							<li><a href="{{ m.rsc[c_id].page_url }}">{{ title }}</a></li>
+						{% endifequal %}
+					{% endfor %}
+				</ul>
+			{% endifequal %}
 		</aside>
 	{% endwith %}
 {% endblock %}	
