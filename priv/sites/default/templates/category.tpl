@@ -76,7 +76,7 @@
 								{% for title,c_id in ids %}
 								<li class="list-item">
 									<h3><a href="{{ m.rsc[c_id].page_url }}">{{ title }}</a></h3>
-									<p class="summary">{{ m.rsc[c_id].summary }}</p>
+									<p class="summary">{{ m.rsc[c_id].summary | ljust:50 }}&hellip;</p>
 								</li>
 								{% endfor %}
 							</ul>
