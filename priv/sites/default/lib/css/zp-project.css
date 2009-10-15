@@ -129,6 +129,18 @@ li.list-item {
 	font-weight: normal;
 }
 
+.list-filters li a {
+	color: #fff;
+	text-decoration: none;
+}
+
+	.list-filters li a.current,
+	.list-filters li a:hover {
+		color: #5dbae0;
+		text-decoration: none;
+		border-bottom: 1px dotted #5dbae0;
+	}
+
 
 /* Grid
 ---------------------------------------------------------- */
