@@ -2,7 +2,7 @@
 
 {% block title %}{{ m.rsc[id].seo_title | default: m.rsc[id].title }}{% endblock %}
 
-{% block page_class %}page{% endblock %}
+{% block page_class %}page collection{% endblock %}
 
 {% block banner %}{% endblock %}
 
