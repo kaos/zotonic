@@ -116,9 +116,17 @@ p.breadcrumb {
 		letter-spacing: .03em;
 	}
 
+li.list-item {
+	margin: 0 0 18px 0;
+}
+
 .list-item h3 {
 	color: #63c9f2;
 }
+
+	.list-item p.summary {
+		margin: 0;
+	}
 
 .list-item p.summary {
 	font-size: 11px;
