@@ -22,7 +22,7 @@ body {
 ---------------------------------------------------------- */
 
 h1 {
-	font-size: 24px;
+	font-size: 21px;
 	line-height: 24px;
 	letter-spacing: 0.02em;
 	text-transform: uppercase;
@@ -40,7 +40,6 @@ h2 {
 	font-style: normal;
 	font-size: 17px;
 	line-height: 24px;
-	text-shadow: 1px 2px #222;
 }
 
 h3 {
@@ -88,18 +87,16 @@ p.intro:first-line {
 
 p.breadcrumb {
 	font-size: 11px;
-	margin: 0 0 9px 0;
+	margin: 0 0 6px 0;
 	color: #ddd;
+	text-transform: lowercase;
 }
 
-	p.breadcrumb a {
-		color: #bbb;
-	}
-	
 	p.breadcrumb a:hover {
 		color: #5DBAE0;
 		border: none;
 	}
+
 
 /* Lists
 ---------------------------------------------------------- */
@@ -189,10 +186,8 @@ header {
 	padding: 0 100px 0 0;
 }
 
-.collection #content .padding {
-	padding: 0 40px 0 0;
-}
-
+.category #content .padding,
+.collection #content .padding,
 .collection-members .padding {
 	padding: 0 40px 0 0;
 }

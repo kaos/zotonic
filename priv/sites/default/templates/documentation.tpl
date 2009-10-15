@@ -3,12 +3,16 @@
 {% block breadcrumb %}
 	{% with m.rsc[id].category_id as category_id %}
 		<p class="breadcrumb">
+			<a href="{{ m.rsc.page_home.page_url }}">{{ m.rsc.page_home.short_title | default: m.rsc.page_home.title}}</a> &raquo;
+			
 			{% for cat_id in m.category[category_id].path %}
 				{% ifnotequal m.rsc[cat_id].name "text" %}
-					<a href="{{ m.rsc[cat_id].page_url }}">{{ m.rsc[cat_id].title }}</a> /
+					<a href="{{ m.rsc[cat_id].page_url }}">{{ m.rsc[cat_id].short_title | default: m.rsc[cat_id].title }}</a> &raquo;
 				{% endifnotequal %}
 			{% endfor %}
-			<a href="{{ m.rsc[category_id].page_url }}">{{ m.rsc[category_id].title }}</a>
+			<a href="{{ m.rsc[category_id].page_url }}">{{ m.rsc[category_id].short_title | default: m.rsc[category_id].title }}</a> &raquo;
+			
+			{{ m.rsc[id].short_title | default: m.rsc[id].title }}
 		</p>
 	{% endwith %}
 {% endblock %}

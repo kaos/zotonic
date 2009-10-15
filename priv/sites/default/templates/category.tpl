@@ -2,7 +2,7 @@
 
 {% block title %}{{ m.rsc[id].seo_title | default: m.rsc[id].title }}{% endblock %}
 
-{% block page_class %}page{% endblock %}
+{% block page_class %}page category{% endblock %}
 
 {% block banner %}{% endblock %}
 
@@ -12,12 +12,16 @@
 		<div class="padding">
 			{% with m.category[id].path as path %}
 				{% ifnotequal path|length 1 %}
-					<p>
-					{% for cat_id in path %}
-						{% ifnotequal m.rsc[cat_id].name "text" %}
-							<a href="{{ m.rsc[cat_id].page_url }}">{{ m.rsc[cat_id].title }}</a> &raquo;
-						{% endifnotequal %}
-					{% endfor %}
+					<p class="breadcrumb">
+						<a href="{{ m.rsc.page_home.page_url }}">{{ m.rsc.page_home.short_title | default: m.rsc.page_home.title}}</a> &raquo;
+						{% for cat_id in path %}
+							{% ifnotequal m.rsc[cat_id].name "text" %}
+								<a href="{{ m.rsc[cat_id].page_url }}">{{ m.rsc[cat_id].short_title | default: m.rsc[cat_id].title }}</a> &raquo;
+							{% endifnotequal %}
+						{% endfor %}
+						
+						{{ m.rsc[id].short_title | default: m.rsc[id].title }}
+						
 					</p>
 				{% endifnotequal %}
 			{% endwith %}
@@ -86,5 +90,3 @@
 	{% endwith %}
 
 {% endblock %}
-
-{% block sidebar %}{% endblock %}
