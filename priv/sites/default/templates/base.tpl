@@ -27,6 +27,7 @@
 	   	document.createElement('footer');
 	   	document.createElement('section');
 	   	document.createElement('aside');
+	   	document.createElement('figure');
 	   	document.createElement('nav');
 	   	document.createElement('article');
    	</script>

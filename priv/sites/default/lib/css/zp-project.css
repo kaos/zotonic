@@ -18,6 +18,10 @@ body {
 	}
 
 
+figure {
+	display: block !important;
+}
+
 /* Basic Typography
 ---------------------------------------------------------- */
 
