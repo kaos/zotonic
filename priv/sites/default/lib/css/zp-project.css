@@ -43,7 +43,7 @@ h2 {
 }
 
 h3 {
-	color: #fff;
+	color: #63c9f2;
 	font-weight: bold;
 	font-size: 13px;
 }
@@ -118,10 +118,6 @@ p.breadcrumb {
 
 li.list-item {
 	margin: 0 0 18px 0;
-}
-
-.list-item h3 {
-	color: #63c9f2;
 }
 
 	.list-item p.summary {
