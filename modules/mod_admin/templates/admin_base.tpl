@@ -67,10 +67,11 @@
 	</div>
 
 	{% include "_admin_js_include.tpl" %}
-	{% block tinymce %}{% endblock %}
 	{% block js_extra %}{% endblock %}
 	
 	{% script %}
+
+	{% block tinymce %}{% endblock %}
 	
 </body>
 </html>
