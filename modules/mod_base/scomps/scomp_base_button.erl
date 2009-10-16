@@ -33,9 +33,9 @@ terminate(_Reason) -> ok.
 
 render(Params, _Vars, Context, _State) ->
     Postback  = proplists:get_value(postback, Params),
+	Delegate  = proplists:get_value(delegate, Params),
     Text      = proplists:get_value(text, Params, <<"Submit">>),
     Id        = z_ids:optid(proplists:get_value(id, Params)),
-    %%Class     = [button | proplists:get_all_values(class, Params)],
     Class     = proplists:get_all_values(class, Params),
     Style     = proplists:get_value(style, Params),
     Type      = proplists:get_value(type, Params),
@@ -51,7 +51,12 @@ render(Params, _Vars, Context, _State) ->
 
     Context1 = case Options1 of
                     [] -> Context;
-                    _  -> z_render:wire(Id, {event,[{type,click}|Options1]}, Context)
+                    _  -> 
+					    Options2  = case Delegate of
+										undefined -> Options1;
+										_ -> [{delegate, Delegate} | Options1]
+									end,
+						z_render:wire(Id, {event,[{type,click}|Options2]}, Context)
                end,
 
     Attrs = [
