@@ -34,10 +34,13 @@ render(Params, _Vars, Context, _State) ->
     ChartColor = proplists:get_value(chart_color, Params, "ffffff"),
     LegendLoc  = proplists:get_value(legend_location, Params, "bottom"),
     AxesArg    = proplists:get_all_values(axis, Params),
-    DataArg    = proplists:get_value(data, Params, []),
+    DataArg    = proplists:get_all_values(data, Params),
     BarSpace   = z_convert:to_integer(proplists:get_value(bar_space, Params, 3)),
     BarGroupSpace   = z_convert:to_integer(proplists:get_value(bar_group_space, Params, 7)),
-    
+
+	AxesArg1 = lists:flatten(AxesArg),
+	DataArg1 = lists:flatten(DataArg),
+	
 	% Path to Google API
 	Path = "http://chart.apis.google.com/chart?",
 
@@ -96,7 +99,7 @@ render(Params, _Vars, Context, _State) ->
                     	end,
 	
 	% Axes...
-	Axes = case AxesArg of 
+	Axes = case AxesArg1 of 
     		undefined   -> [];
     		[]          -> [];
     		<<>>        -> <<>>;
@@ -109,7 +112,7 @@ render(Params, _Vars, Context, _State) ->
     	end,
 	
 	% Data...
-	Data = case DataArg of
+	Data = case DataArg1 of
         		undefined   -> MaxValueLength=0, [];
         		[]          -> MaxValueLength=0, [];
         		<<>>        -> MaxValueLength=0, [];
