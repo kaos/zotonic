@@ -20,4 +20,10 @@
 		hover: true,
 		textShadow: '#222 1px 1px'
 	});
+	
+	Cufon.replace('.feature-wrapper h2',{
+		color: '-linear-gradient(#19B7E8, #5bbde5)',
+		hover: true,
+		textShadow: '#222 1px 1px'
+	});
 </script>
