@@ -441,4 +441,9 @@ pre {
 		font-weight: normal;
 		color: #fff;
 		font-size: 11px;
+		margin: 0;
+	}
+	
+	.feature-item {
+		margin: 0 0 18px 0;
 	}
