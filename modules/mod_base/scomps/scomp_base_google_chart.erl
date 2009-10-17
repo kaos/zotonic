@@ -33,7 +33,7 @@ render(Params, _Vars, Context, _State) ->
     BGColor    = proplists:get_value(background_color, Params, "ffffff"),
     ChartColor = proplists:get_value(chart_color, Params, "ffffff"),
     LegendLoc  = proplists:get_value(legend_location, Params, "bottom"),
-    AxesArg    = proplists:get_value(axes, Params, []),
+    AxesArg    = proplists:get_all_values(axis, Params),
     DataArg    = proplists:get_value(data, Params, []),
     BarSpace   = z_convert:to_integer(proplists:get_value(bar_space, Params, 3)),
     BarGroupSpace   = z_convert:to_integer(proplists:get_value(bar_group_space, Params, 7)),
@@ -182,7 +182,7 @@ process_axis(N, {axis, Axis}, Context) ->
 process_data(_N, {data, Data}) ->
     LineWidth    = proplists:get_value(line_width,  Data, 1),
     LineLength   = proplists:get_value(line_length, Data, 1),
-    BlankLength  = proplists:get_value(blank_width, Data, 0),
+    BlankLength  = proplists:get_value(blank_length, Data, 0),
     MinValue     = proplists:get_value(min_value, Data, 0),
     MaxValue     = proplists:get_value(max_value, Data, 100),
 	Color        = proplists:get_value(color, Data),
@@ -201,8 +201,7 @@ flatten_color(A) ->
     z_convert:to_list(A).
 
 
-make_label(N, Context) when is_integer(N) ->
-    z_convert:to_list(?TR(m_rsc:p(N, title, Context), Context));
+make_label(N, _Context) when is_integer(N) orelse is_float(N) orelse is_atom(N) ->
+    z_convert:to_list(N);
 make_label(L, Context) -> 
     z_convert:to_list(?TR(L, Context)).
-    
