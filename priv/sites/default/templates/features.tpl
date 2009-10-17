@@ -23,7 +23,7 @@
 					<div class="padding">
 						<ul class="feature-list">
 							{% for c_id in c_ids %}
-							<li class="feature-item">
+							<li class="feature-item {% if forloop.last %}last-feature{% endif %}">
 								{% if m.rsc[c_id].depiction %}
 									{% image m.rsc[c_id].depiction width=70 height=70 crop %}
 								{% endif %}

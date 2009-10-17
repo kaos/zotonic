@@ -447,3 +447,7 @@ pre {
 	.feature-item {
 		margin: 0 0 18px 0;
 	}
+	
+		.last-feature {
+			margin: 0;
+		}
