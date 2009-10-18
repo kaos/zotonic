@@ -24,15 +24,14 @@ function disableSelection(target){
                 // Register commands
                 ed.addCommand('mceZotonicMedia', function() {
                         
-                        var id = prompt('Enter media ID');
-                        if (!id) {
-                            return;
+                        document.getElementById('zmedia-open-dialog').click();
+
+                        window.z_choose_zmedia = function(id) {
+                            if (!id) return;
+
+                            ed.execCommand('mceInsertContent', false, '<p>' + self._zMediaHtml(id) + '</p> ', {});
+                            disableSelection(ed.dom.get(self._zMediaId(id)).parentNode);
                         }
-
-
-                        ed.execCommand('mceInsertContent', false, '<p>' + self._zMediaHtml(id) + '</p> ', {});
-                        disableSelection(ed.dom.get(self._zMediaId(id)).parentNode);
-
                     });
 
                 ed.onBeforeSetContent.add(function(ed, o) {
@@ -82,12 +81,12 @@ function disableSelection(target){
             },
 
             _MediaHtmlToMarkers: function (html) {
-                return html.replace(new RegExp('<div class="' + this._zMediaClass() + '.*?id="z-media-([0-9]+).*?</div>', 'g'), '<!-- z-media $1 -->');
+                return html.replace(new RegExp('<img.*?id="z-media-([0-9]+).*?/>', 'g'), '<!-- z-media $1 -->');
             },
 
             _zMediaHtml: function(id) {
                 var divid = this._zMediaId(id);
-                return '<div class="' + this._zMediaClass() + '"><img id="' +divid + '" src="/admin/media/preview/' + id + '" /></div>';
+                return '<img class="z-tinymce-media" id="' +divid + '" src="/admin/media/preview/' + id + '" />';
             },
 
             _zMarkersToMediaHtml: function (html) {

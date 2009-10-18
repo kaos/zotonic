@@ -129,6 +129,7 @@
 								<span class="arrow">make smaller</span>
 							</h3>
 							<div class="item">
+								{% button action={zmedia id=id} text="XX" id="zmedia-open-dialog" style="display:none" %}
 								<fieldset class="admin-form">
 									<div class="form-item clearfix">
 										<textarea rows="10" cols="10" id="field-content" name="body" class="body">{{ r.body|escape }}</textarea>

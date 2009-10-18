@@ -2,7 +2,7 @@
 {% tabs id=#tabs %}
 <div id="{{ #tabs }}">
 	<ul>
-		<li><a href="#{{ #tab }}-upload">Upload</li>
+		<li><a href="#{{ #tab }}-upload">Upload</a></li>
 		{% all include "_media_upload_tab.tpl" tab=#tab %}
 	</ul>
 	

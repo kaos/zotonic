@@ -79,9 +79,6 @@ pre {
 	text-align: center;
 }
 
-.z-tinymce-media {
-}
-
-.z-tinymce-media img {
-  border: 10px solid #999999;
+img.z-tinymce-media {
+  border: 2px solid #999999;
 }
