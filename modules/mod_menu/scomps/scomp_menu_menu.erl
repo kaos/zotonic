@@ -104,7 +104,7 @@ menu_item(N, T, Id, Nr, Context) ->
             Current = case N == Id of true -> " current "; _ -> [] end,
             [
                 "<li id=\"nav-item-", integer_to_list(Nr), "\" class=\"",First,Last,"\">",
-                    "<a href=\"", m_rsc:p(N, page_url, Context), "\" class=\"", Current, m_rsc:p(N, slug, Context), "\">",
+                    "<a href=\"", m_rsc:p(N, page_url, Context), "\" class=\"", Current, m_rsc:p(N, name, Context), "\">",
                         get_title(N, Context),
                 "</a>"
             ];
