@@ -9,7 +9,7 @@
 -behaviour(supervisor).
 
 %% External exports
--export([start_link/0, upgrade/0, update_dispatchinfo/0, get_site_config/1]).
+-export([start_link/0, upgrade/0, update_dispatchinfo/0, get_sites/0, get_site_contexts/0, get_site_config/1]).
 
 %% supervisor callbacks
 -export([init/1]).
@@ -26,8 +26,7 @@ start_link() ->
 %% @doc Update the webmachine dispatch information. Collects dispatch information from all sites and sends it
 %% to webmachine for updating its dispatch lists and host information.
 update_dispatchinfo() ->
-    Sites = [Name || {Name, _, _, _} <- supervisor:which_children(?MODULE)],
-    DispatchList = [ fetch_dispatchinfo(Site) || Site <- Sites ],
+    DispatchList = [ fetch_dispatchinfo(Site) || Site <- get_sites() ],
     application:set_env(webmachine, dispatch_list, DispatchList).
 
     fetch_dispatchinfo(Site) ->
@@ -35,6 +34,18 @@ update_dispatchinfo() ->
         {Host, Hostname, Hostalias, DispatchList} = z_dispatcher:dispatchinfo(Name),
         WMList = [list_to_tuple(tl(tuple_to_list(Disp))) || Disp <- DispatchList],
         #wm_host_dispatch_list{host=Host, hostname=Hostname, hostalias=Hostalias, redirect=true, dispatch_list=WMList}.
+
+
+%% @doc Return a list of site names.
+%% @spec get_sites -> [ atom() ]
+get_sites() ->
+	[Name || {Name, _, _, _} <- supervisor:which_children(?MODULE)]. 
+
+
+%% @doc Return a list of contexts initialized for all active sites.
+%% @spec get_site_contexts -> [ Context ]
+get_site_contexts() ->
+	[ z_context:new(Name) || Name <- get_sites() ].
 
 
 %% @spec upgrade() -> ok

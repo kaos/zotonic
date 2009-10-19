@@ -13,7 +13,7 @@
 -export([start_link/1]).
 
 %% z_dispatch exports
--export([url_for/2, url_for/3, url_for/4, hostname/1, dispatchinfo/1, reload/1, reload/2, test/0]).
+-export([url_for/2, url_for/3, url_for/4, hostname/1, dispatchinfo/1, update/1, reload/1, reload/2, test/0]).
 
 -include_lib("zotonic.hrl").
 
@@ -64,6 +64,11 @@ dispatchinfo(#context{dispatcher=Dispatcher}) ->
     gen_server:call(Dispatcher, 'dispatchinfo');
 dispatchinfo(Server) when is_pid(Server) orelse is_atom(Server) -> 
     gen_server:call(Server, 'dispatchinfo').
+
+
+%% @doc Update the dispatch list but don't reload it yet. Used when flushing all sites, see z:flush/0
+update(#context{dispatcher=Dispatcher}) ->
+    gen_server:call(Dispatcher, 'reload').
 
 
 %% @doc Reload all dispatch lists.  Finds new dispatch lists and adds them to the dispatcher

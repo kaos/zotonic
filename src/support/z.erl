@@ -13,6 +13,7 @@
     n1/2,
     m/0,
     flush/0,
+	flush/1,
     restart/0
 ]).
 
@@ -33,10 +34,13 @@ m() ->
 
 %% @doc Reset all caches, reload the dispatch rules and rescan all modules.
 flush() ->
-    C = z_context:new(default),
-    z_depcache:flush(C),
-    z_dispatcher:reload(C),
-    n({module_ready}, C).
+	[ flush(C) || C <- z_sites_sup:get_site_contexts() ],
+	z_sites_sup:update_dispatchinfo().
+	
+flush(Context) ->
+   	z_depcache:flush(Context),
+   	z_dispatcher:reload(Context),
+   	n({module_ready}, Context).
 
 %% @doc Full restart of Zotonic
 restart() ->
