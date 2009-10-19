@@ -48,9 +48,14 @@ render(Params, _Vars, Context, _State) ->
 									undefined -> "null";
 									_		  -> [$', Handle, $']
 								end,
-			ConnectWithGroups = groups_to_connect_with(ConnectGroups),
+								
+			ConnectWithGroups = case ConnectGroups of
+									[All] when All == "all" orelse All == <<"all">> -> ["*"];
+									[None] when None == "none" orelse None == <<"none">> -> [];
+									_ -> groups_to_connect_with(lists:usort(ConnectGroups ++ Groups))
+								end,
 			GroupClasses	  = groups_to_classes(Groups),
-		
+			
 			Axis1				= case Axis of
 									undefined -> "null";
 									_		  -> [$', Axis, $']
@@ -74,11 +79,11 @@ render(Params, _Vars, Context, _State) ->
 		
         	% Emit the javascript...
         	Script = io_lib:format( "z_sorter($('#~s'), { handle: ~s, connectWith: [~s], axis: ~s, containment: ~s, opacity: ~s, placeholder: ~s }, '~s');", 
-        	                        [Id, Handle1, ConnectWithGroups, Axis1, Containment1, Opacity1, Placeholder1, PickledPostbackInfo]),
+        	                        [Id, Handle1, string:join(ConnectWithGroups, ", "), Axis1, Containment1, Opacity1, Placeholder1, PickledPostbackInfo]),
 
             Actions = [
                         {script,    [{script, Script}]},
-                        {add_class, [{class, "sorter " ++ GroupClasses ++ " " ++ z_convert:to_list(Class)}]}
+                        {add_class, [{class, "sorter " ++ string:join(GroupClasses, " ") ++ " " ++ z_convert:to_list(Class)}]}
                     ],
 	
     	    {ok, z_render:wire(Id, Actions, Context)}
@@ -106,21 +111,8 @@ event({postback, {SortTag,SortDelegate}, TriggerId, _TargetId}, Context) ->
     end.
 
 
-groups_to_classes([]) -> "";
-groups_to_classes([<<>>]) -> "";
-groups_to_classes([""]) -> "";
 groups_to_classes(Groups) ->
-	Groups1 = lists:flatten(Groups),
-	Groups2 = ["drag_group_" ++ z_convert:to_list(X) || X <- Groups1],
-	string:join(Groups2, " ").
+	["drag_group_" ++ z_convert:to_list(X) || X <- Groups].
 	
-
-groups_to_connect_with([]) -> "'*'";
-groups_to_connect_with(["all"]) -> "'*'";
-groups_to_connect_with([<<"all">>]) -> "'*'";
-groups_to_connect_with(["none"]) -> "";
-groups_to_connect_with([<<"none">>]) -> "";
 groups_to_connect_with(Groups) ->
-	Groups1 = lists:flatten(Groups),
-	Groups2 = ["'.drag_group_" ++ z_convert:to_list(X) ++ "'" || X <- Groups1],
-	string:join(Groups2, ", ").
+	["'.drag_group_" ++ z_convert:to_list(X) ++ "'" || X <- Groups].
