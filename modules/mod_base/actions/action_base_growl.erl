@@ -11,7 +11,7 @@ render_action(_TriggerId, _TargetId, Args, Context) ->
     Type   = proplists:get_value(type, Args, "notice"),
 
     TextJS = z_utils:js_escape(Text),
-    StayJS = case z_utils:to_bool(Stay) of 
+    StayJS = case z_convert:to_bool(Stay) of 
                 true  -> $1;
                 false -> $0
              end,
