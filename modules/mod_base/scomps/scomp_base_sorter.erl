@@ -78,7 +78,7 @@ render(Params, _Vars, Context, _State) ->
 
             Actions = [
                         {script,    [{script, Script}]},
-                        {add_class, [{class, "sortblock " ++ GroupClasses ++ " " ++ z_convert:to_list(Class)}]}
+                        {add_class, [{class, "sorter " ++ GroupClasses ++ " " ++ z_convert:to_list(Class)}]}
                     ],
 	
     	    {ok, z_render:wire(Id, Actions, Context)}
