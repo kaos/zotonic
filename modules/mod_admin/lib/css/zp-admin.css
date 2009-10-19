@@ -489,6 +489,11 @@ input[type="radio"],
 /* Edit page Media
 ---------------------------------------------------------- */
 
+.choose-media-wrapper {
+	height: 110px;
+	overflow-y: auto;
+}
+
 .edit_media {
 	margin: 0 6px 0 0;
 }
@@ -497,6 +502,7 @@ input[type="radio"],
 	border: 4px solid #ccc;
 	-moz-border-radius: 3px;
 	-webkit-border-radius: 3px;
+	margin: 0 6px 6px 0;
 }
 
 .media-list li img {
