@@ -550,9 +550,6 @@ ul.media-sorter li {
 	-moz-border-radius-bottomright: 5px;
 	-webkit-border-bottom-left-radius: 5px;
 	-webkit-border-bottom-right-radius: 5px;
-	top: 23px;
-	left: 0;
-	position: absolute;
 	filter: alpha(opacity=95);
 	-moz-opacity: .95;
 	opacity: .95;
