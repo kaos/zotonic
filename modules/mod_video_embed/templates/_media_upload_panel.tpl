@@ -36,9 +36,10 @@
 				{% validate id=#embed_code name="video_embed_code" type={presence} %}
 			</div>
 	
-			<button type="submit">{% if id %}Replace{% else %}Make{% endif %} media item</button>
-
-			{% button action={dialog_close} text="Cancel" %}
+			<div class="form-item clearfix">
+				<button type="submit">{% if id %}Replace{% else %}Make{% endif %} media item</button>
+				{% button action={dialog_close} text="Cancel" %}
+			</div>
 		</div>
 	</form>
 </div>

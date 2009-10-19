@@ -40,7 +40,7 @@
 				dialogTLC			= $('<span></span>').addClass('dialog-top-left');
 				dialogTRC			= $('<span></span>').addClass('dialog-top-right');
 				dialogClose			= $('<span></span>').addClass('dialog-close').click(function(){ $.dialogRemove(dialogWrapper); });
-				dialogInnerContent	= $('<div></div>').addClass('dialog-inner-content').html(options.text).resizable({handles: 'se', alsoResize: '.dialog', maxWidth: 700, minWidth: 250, minHeight: 20});
+				dialogInnerContent	= $('<div></div>').addClass('dialog-inner-content').html(options.text).resizable({handles: 'se', alsoResize: '.dialog', maxWidth: 700, minWidth: 450, minHeight: 50});
 				dialogRightContent	= $('<span></span>').addClass('dialog-content-right');
 				dialogBLC			= $('<span></span>').addClass('dialog-bottom-left');
 				dialogBRC			= $('<span></span>').addClass('dialog-bottom-right');
@@ -77,6 +77,8 @@
 		
 		dialogRemove: function(obj)
 		{
+			obj = obj || $('.dialog');
+			
 			obj.draggable('destroy').resizable('destroy').fadeOut(300, function()
 			{
 				$(this).remove();

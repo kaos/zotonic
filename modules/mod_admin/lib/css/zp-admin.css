@@ -383,12 +383,6 @@ button.disabled {
 	cursor: default;
 }
 
-/*
-#poststuff .form-item:last-child {
-	margin: 0;
-}
-*/
-
 #quick-search input {
 	margin: 0 3px 0 0;
 }
@@ -820,10 +814,10 @@ ul.categories li a {
 .short-list li.depth-10 { margin-left: 240px; }
 .short-list li.depth-11 { margin-left: 270px; }
 
+
 /* Modules - Tabs
 --------------------------------------------------------- */
 
 .ui-tabs-hide {
 	display: none !important; 
 }
-

@@ -12,7 +12,6 @@
 		"css/zp-wysiwyg.css"
 		"css/zp-dialog.css"
 		"css/zp-formreplace.css"
-		"css/zp-finder.css"
 		"css/zp-growl.css"
 	%}
 	

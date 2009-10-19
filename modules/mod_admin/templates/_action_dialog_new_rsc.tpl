@@ -11,7 +11,7 @@
 
 	<div class="new-rsc-wrapper">
 		<div class="form-item clearfix">
-			<label for="new_rsc_title" style="color:white">Page title</label>
+			<label for="new_rsc_title">Page title</label>
 			<input type="text" id="new_rsc_title" name="new_rsc_title" value="{{ title|escape }}" />
 			{% validate id="new_rsc_title" type={presence} %}
 		</div>
@@ -41,10 +41,11 @@
 			</select>
 		</div>
 		
-		<button type="submit">Make {{catname}}</button>
-
-		{% button action={dialog_close} text="Cancel" %}
-
+		<div class="form-item clearfix">
+			<button type="submit">Make {{catname}}</button>
+			{% button action={dialog_close} text="Cancel" %}
+		</div>
+		
 		<input type="hidden" name="subject_id" value="{{ subject_id }}" />
 		<input type="hidden" name="predicate" value="{{ predicate }}" />
 		<input type="hidden" name="redirect" value="{{ redirect }}" />

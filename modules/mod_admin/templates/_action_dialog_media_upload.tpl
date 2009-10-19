@@ -1,7 +1,6 @@
-
 {% tabs id=#tabs %}
 <div id="{{ #tabs }}">
-	<ul>
+	<ul class="clearfix">
 		<li><a href="#{{ #tab }}-upload">Upload</a></li>
 		{% all include "_media_upload_tab.tpl" tab=#tab %}
 	</ul>
@@ -40,9 +39,10 @@
 					{% validate id="upload_file" type={presence} %}
 				</div>
 		
-				<button type="submit">Upload file</button>
-
-				{% button action={dialog_close} text="Cancel" %}
+				<div class="form-item clearfix">
+					<button type="submit">Upload file</button>
+					{% button action={dialog_close} text="Cancel" %}
+				</div>
 			</div>
 		</form>
 	</div>
