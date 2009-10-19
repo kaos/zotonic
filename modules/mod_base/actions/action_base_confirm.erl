@@ -8,11 +8,12 @@
 -export([render_action/4]).
 
 render_action(TriggerId, TargetId, Args, Context) ->
-    Postback    = proplists:get_value(postback, Args),
-    Actions     = proplists:get_all_values(action, Args),
-    Text        = proplists:get_value(text, Args, ""),
+    Postback  = proplists:get_value(postback, Args),
+    Actions   = proplists:get_all_values(action, Args),
+    Text      = proplists:get_value(text, Args, ""),
+	Delegate  = proplists:get_value(delegate, Args),
     
-	{PostbackMsgJS, _PickledPostback} = z_render:make_postback(Postback, confirm, TriggerId, TargetId, undefined, Context),
+	{PostbackMsgJS, _PickledPostback} = z_render:make_postback(Postback, confirm, TriggerId, TargetId, Delegate, Context),
 	{ActionJS,Context1} = z_render:render_actions(TriggerId, TargetId, Actions, Context),
 	Script           = [
 	                        <<"if (confirm(\"">>,z_utils:js_escape(Text),<<"\")) {">>,
