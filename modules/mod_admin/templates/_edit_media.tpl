@@ -2,7 +2,7 @@
 
 	<div id="{{ #unlink_message }}"></div>
 	
-	{% sorter id=#media tag={object_sorter predicate="depiction" id=id} placeholder="sortable-placeholder" %}
+	{% sorter id=#media tag={object_sorter predicate="depiction" id=id} placeholder="ui-sortable-placeholder" %}
 	<ul id="{{ #media }}" class="media-sorter">
 		{% for media_id, edge_id in m.edge.o[id].depiction %}
 			{% sortable id=#medium.media_id tag=edge_id %}
@@ -14,6 +14,7 @@
 					<div class="media-unlink-wrapper">
 						<div class="rsc-edge do_unlink">
 							<span class="clearfix">
+								<span class="unlink-mover"></span>
 								<span id="{{ #unlink.media_id }}" class="unlink-cross do_tooltip" title="Disconnect {{title}}."></span>
 								<span class="unlink-item"><a href="{% url admin_edit_rsc id=media_id %}">{{ title }}</a></span>
 							</span>

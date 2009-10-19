@@ -39,49 +39,16 @@
 									</div>
 
 									<div class="form-item clearfix">
-										<label for="field-short-title">Short title</label>
-										<input type="text" id="field-short-title" name="short_title" value="{{ r.short_title }}" />
-									</div>
-
-									<div class="form-item clearfix">
 										<label for="field-summary">Summary</label>
 										<textarea rows="2" cols="10" id="field-summary" name="summary" class="intro">{{ r.summary }}</textarea>
 									</div>
 									
-										{% if m.acl.is_admin or m.acl.is_public_publisher %}
-										<div class="path-unique-name-wrapper clearfix">
-											<div class="zp-50">
-												<div class="form-item clearfix">
-													<label for="field-page-path">Page path, default is <em>{{ r.default_page_url|escape }}</em></label>
-													<input type="text" id="field-page-path" name="page_path" value="{{ r.page_path }}" />
-												</div>
-											</div>
-									
-											{% if m.acl.is_admin %}
-												<div class="zp-50">
-													<div class="form-item clearfix">
-														<label for="field-name">Unique name</label>
-														<input type="text" id="field-name" name="name" value="{{ r.name }}" />
-													</div>
-												</div>
-											{% else %}
-												<div class="zp-50">
-													<div class="form-item clearfix">
-														&nbsp;
-													</div>
-												</div>
-											{% endif %}
-										</div>
-										{% endif %}
-									
-										{% if m.acl.is_admin %}
-											{% if r.is_a.meta or not r.is_authoritative %}
-												<div class="form-item clearfix">
-													<label for="field-name">Unique uri</label>
-													<input type="text" id="field-name" name="uri" value="{{ r.uri }}" />
-												</div>
-											{% endif %}
-										{% endif %}
+									{% button action={zmedia id=id} text="XX" id="zmedia-open-dialog" style="display:none" %}
+									<div class="form-item clearfix">
+										<textarea rows="10" cols="10" id="field-content" name="body" class="body">{{ r.body|escape }}</textarea>
+									</div>
+
+									{% include "_admin_save_buttons.tpl" %}
 
 								</fieldset>
 							</div>
@@ -125,23 +92,6 @@
 
 						<div class="item-wrapper">
 							<h3 class="above-item clearfix do_blockminifier { minifiedOnInit: false }">
-								<span class="title">Body text</span>
-								<span class="arrow">make smaller</span>
-							</h3>
-							<div class="item">
-								{% button action={zmedia id=id} text="XX" id="zmedia-open-dialog" style="display:none" %}
-								<fieldset class="admin-form">
-									<div class="form-item clearfix">
-										<textarea rows="10" cols="10" id="field-content" name="body" class="body">{{ r.body|escape }}</textarea>
-									</div>
-
-									{% include "_admin_save_buttons.tpl" %}
-								</fieldset>
-							</div>
-						</div>
-
-						<div class="item-wrapper">
-							<h3 class="above-item clearfix do_blockminifier { minifiedOnInit: false }">
 								<span class="title">Attached media</span>
 								<span class="arrow">make smaller</span>
 							</h3>
@@ -167,6 +117,58 @@
 										&nbsp;
 									{% endif %}
 								</div>
+							</div>
+						</div>
+					
+						<div class="item-wrapper">
+							<h3 class="above-item clearfix do_blockminifier { minifiedOnInit: true }">
+								<span class="title">Advanced</span>
+								<span class="arrow">make smaller</span>	
+							</h3>
+							<div class="item clearfix">
+								<fieldset class="admin-form">
+									
+									<div class="form-item clearfix">
+										<label for="field-short-title">Short title</label>
+										<input type="text" id="field-short-title" name="short_title" value="{{ r.short_title }}" />
+									</div>
+									
+									{% if m.acl.is_admin or m.acl.is_public_publisher %}
+									<div class="path-unique-name-wrapper clearfix">
+										<div class="zp-50">
+											<div class="form-item clearfix">
+												<label for="field-page-path">Page path, default is <em>{{ r.default_page_url|escape }}</em></label>
+												<input type="text" id="field-page-path" name="page_path" value="{{ r.page_path }}" />
+											</div>
+										</div>
+								
+										{% if m.acl.is_admin %}
+											<div class="zp-50">
+												<div class="form-item clearfix">
+													<label for="field-name">Unique name</label>
+													<input type="text" id="field-name" name="name" value="{{ r.name }}" />
+												</div>
+											</div>
+										{% else %}
+											<div class="zp-50">
+												<div class="form-item clearfix">
+													&nbsp;
+												</div>
+											</div>
+										{% endif %}
+									</div>
+									{% endif %}
+								
+									{% if m.acl.is_admin %}
+										{% if r.is_a.meta or not r.is_authoritative %}
+											<div class="form-item clearfix">
+												<label for="field-name">Unique uri</label>
+												<input type="text" id="field-name" name="uri" value="{{ r.uri }}" />
+											</div>
+										{% endif %}
+									{% endif %}
+									
+								</fieldset>
 							</div>
 						</div>
 					
@@ -349,7 +351,7 @@
 												</div>
 												<div class="unlink-wrapper clearfix">
 													{% sorter id=["links",id|format_integer,name]|join:"-" tag={object_sorter predicate=name id=id} %}
-													<ul id="links-{{ id }}-{{ name }}" class="clearfix">
+													<ul id="links-{{ id }}-{{ name }}" class="clearfix edge-sidebar-sorter">
 													{% for o_id, edge_id in m.edge.o[id][name] %}
 														{% include "_rsc_edge.tpl" subject_id=id predicate=name object_id=o_id edge_id=edge_id %}
 													{% endfor %}

@@ -485,6 +485,7 @@ input[type="radio"],
 	float: left;
 }
 
+
 /* Edit page Media
 ---------------------------------------------------------- */
 
@@ -610,7 +611,6 @@ span.add-connection {
 	.rsc-edge a {
 		text-decoration: none;
 	}
-	
 
 .unlink-item {
 	float: left;
@@ -631,6 +631,20 @@ span.add-connection {
 		background: transparent url(/lib/images/crosses.png) no-repeat left top;
 	}
 	
+.unlink-mover {
+	background: transparent url(/lib/images/move.png) no-repeat left top;
+	height: 12px;
+	width: 12px;
+	display: block;
+	float: left;
+	margin: 0 3px 0 0;
+	cursor: move;
+}
+
+ul ul {
+	display: none;
+}
+
 .link-add {
 	color: #666;
 }
@@ -638,6 +652,7 @@ span.add-connection {
 #unlink-message {
 	height: 60px;
 }
+
 
 /* Modules - Tooltip
 ---------------------------------------------------------- */
@@ -661,17 +676,22 @@ span.add-connection {
 /* Modules - Sortable
 ---------------------------------------------------------- */
 
-.sortable-placeholder,
-.ui-sortable-placeholder {
-	background: #eee !important;
-	display: block !important;
-	border: 1px dashed #888 !important;
+.media-sorter .ui-sortable-placeholder,
+.edge-sidebar-sorter .ui-sortable-placeholder {
+	background: #eee;
+	display: block;
+	border: 1px dashed #888;
 	visibility: visible !important;
-	height: 200px !important;
-	padding: 0 !important;
-	margin: 6px 16px 18px 0 !important;
+	height: 200px;
+	padding: 0;
+	margin: 6px 16px 18px 0;
 }
 
+	.edge-sidebar-sorter .ui-sortable-placeholder {
+		height: 20px !important;
+		margin: 0 6px 6px 0;
+		padding: 0 5px;
+	}
 
 /* Modules - image viewer
 ---------------------------------------------------------- */
