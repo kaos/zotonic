@@ -79,13 +79,14 @@ event({submit, {media_upload, EventProps}, _TriggerId, _TargetId}, Context) ->
             
                     case Result of
                         {ok, MediaId} ->
+                            Context2 = z_context:set("media_id", MediaId, Context),
                             ContextRedirect = case SubjectId of
                                 undefined -> 
                                     case Stay of
-                                        true -> Context;
-                                        false -> z_render:wire({redirect, [{dispatch, "admin_edit_rsc"}, {id, MediaId}]}, Context)
+                                        true -> Context2;
+                                        false -> z_render:wire({redirect, [{dispatch, "admin_edit_rsc"}, {id, MediaId}]}, Context2)
                                     end;
-                                _ -> Context
+                                _ -> Context2
                             end,
                             z_render:wire([{growl, [{text, "Uploaded the file."}]} | Actions], ContextRedirect);
                         {error, _Error} ->

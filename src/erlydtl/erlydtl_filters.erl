@@ -616,7 +616,6 @@ show_media_html(Id, Context) ->
 
 show_media_html(Id, {struct, Args}, Context) ->
 	Template = "_body_media.tpl",
-    ?DEBUG(Args),
     Args2 = [ {list_to_atom(A), B} || {A,B} <- Args],
     z_template:render(Template, [ {id, Id} | Args2 ++ z_context:get_all(Context)  ], Context).
 

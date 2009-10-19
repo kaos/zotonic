@@ -20,10 +20,16 @@ render_action(TriggerId, TargetId, Args, Context) ->
 	{PostbackMsgJS, Context}.
 
 
-%% @doc Unlink the edge, on success show an undo message in the element with id "unlink-message"
+%% @spec event(Event, Context1) -> Context2
+event({postback, {zmedia_choose, []}, _TriggerId, _TargetId}, Context) ->
+    ?DEBUG(z_context:get("media_id", Context)),
+    Args = [{id, z_context:get("media_id", Context)}],
+    z_render:wire({zmedia_has_chosen, Args}, Context);
+
 %% @spec event(Event, Context1) -> Context2
 event({postback, {zmedia_choose, Args}, _TriggerId, _TargetId}, Context) ->
     z_render:wire({zmedia_has_chosen, Args}, Context).
+
 
 %z_render:wire([{growl, [{text, "Yay."}]}], Context).
 
