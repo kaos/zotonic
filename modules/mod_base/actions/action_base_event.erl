@@ -25,7 +25,7 @@ render_action(TriggerId, TargetId, Args, Context) ->
 
         		EventType == interval   orelse EventType == continuation orelse
         		EventType == "interval" orelse EventType == "continuation" ->
-        		    Interval = proplists:get_value(interval, Args, 1),
+        		    Interval = proplists:get_value(interval, Args, 250),
         		    [
         		        <<"setTimeout(\"">>,z_utils:js_escape(PostbackMsgJS), z_utils:js_escape(ActionsJS), <<"\", ">>,
         		        io_lib:format("~p", [Interval]), <<");\n">>
