@@ -17,7 +17,7 @@ render_action(_TriggerId, TargetId, Args, Context) ->
 	Effect  = proplists:get_value(effect, Args),
 	Options = to_js(proplists:get_value(options, Args, [])),
 
-	Script = case Type of
+	Script = case z_convert:to_atom(Type) of
 	    'show'   when Speed=="normal" -> "show();";
 		'hide'   when Speed=="normal" -> "hide();";
 		'show'          -> io_lib:format("show(~p);", [Speed]);
