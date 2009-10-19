@@ -18,7 +18,7 @@
     {dbhost, "127.0.0.1"},
     {dbport, 5432},
     {dbuser, "zotonic"},
-    {dbpassword, "yourdbpassword"},
+    {dbpassword, ""},
     {dbdatabase, "zotonic"},
     
     % Admin password, used during installation. You can change it later

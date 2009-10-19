@@ -21,7 +21,7 @@ var z_input_updater         = false;
 function z_dialog_open(title, text)
 {
     $('.dialog').remove();
-    $.dialogAdd({title: title, text: text, width: "450px"});
+    $.dialogAdd({title: title, text: text});
 }
 
 function z_dialog_close()

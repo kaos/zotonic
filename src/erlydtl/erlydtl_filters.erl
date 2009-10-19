@@ -583,17 +583,42 @@ show_media1(Input, Index, Context) when is_binary(Input) ->
 show_media1_id(Input, Index, Context) ->
     case Input of
         <<Id:Index/binary, " -->", Post/binary>> ->
-            P = m_media:depiction(z_convert:to_integer(Id), Context),
-            FN = z_db:get(filename, P),
-            Opts = [{width, 400}, {height, 400}],
-            {ok, Html} = z_media_tag:tag(FN, Opts, Context),
+            Id2 = z_convert:to_integer(Id),
+            Html = show_media_html(Id2, Context),
             process_binary_match(<<>>, Html, size(Post), show_media1(Post, 0, Context));
+
+        <<Id:Index/binary, " {", Post/binary>> ->
+            Id2 = z_convert:to_integer(Id),
+            process_binary_match(<<>>, <<>>, size(Post), show_media1_opts(Id2, Post, 0, Context));
         <<_:Index/binary, _/binary>> ->
             show_media1_id(Input, Index + 1, Context);
         _ ->
             Input
     end.
 
+% scanning for media id
+show_media1_opts(Id, Input, Index, Context) ->
+    case Input of
+        <<Opts:Index/binary, "} -->", Post/binary>> ->
+            Opts2 = mochijson:decode("{" ++ binary_to_list(Opts) ++ "}"),
+            Html = show_media_html(Id, Opts2, Context),
+            process_binary_match(<<>>, Html, size(Post), show_media1(Post, 0, Context));
+        <<_:Index/binary, _/binary>> ->
+            show_media1_opts(Id, Input, Index + 1, Context);
+        _ ->
+            Input
+    end.
+
+
+
+show_media_html(Id, Context) ->
+    show_media_html(Id, {struct, []}, Context).
+
+show_media_html(Id, {struct, Args}, Context) ->
+	Template = "_body_media.tpl",
+    ?DEBUG(Args),
+    Args2 = [ {list_to_atom(A), B} || {A,B} <- Args],
+    z_template:render(Template, [ {id, Id} | Args2 ++ z_context:get_all(Context)  ], Context).
 
 
 % Taken from quote_plus of mochiweb_util
