@@ -2,7 +2,7 @@
 
 	<div id="{{ #unlink_message }}"></div>
 	
-	{% sorter id=#media tag={object_sorter predicate="depiction" id=id} placeholer="sortable-placeholder" %}
+	{% sorter id=#media tag={object_sorter predicate="depiction" id=id} placeholder="sortable-placeholder" %}
 	<ul id="{{ #media }}" class="media-sorter">
 		{% for media_id, edge_id in m.edge.o[id].depiction %}
 			{% sortable id=#medium.media_id tag=edge_id %}
