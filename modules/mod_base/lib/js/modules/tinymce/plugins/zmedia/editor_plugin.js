@@ -144,7 +144,7 @@
             },
         
             _zMediaId: function(id) {
-                return "z-media-" + id + "-" + Math.floor(Math.random()*10000);
+                return "z-media-" + id;
             },
 
             _MediaHtmlToMarkers: function (html) {
