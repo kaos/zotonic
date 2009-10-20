@@ -3,7 +3,7 @@ tinyInit = {
 	elements: "field-content",
 	theme: "advanced",
 	skin: "wp_theme", 
-	theme_advanced_buttons1: "bold,italic,strikethrough,|,justifyleft,justifycenter,justifyright,|,bullist,numlist,|,outdent,indent,blockquote,|,undo,redo,|,link,unlink,|,code,|,formatselect,|,zmedia",
+	theme_advanced_buttons1: "bold,italic,|,bullist,numlist,blockquote,|,justifyleft,justifycenter,justifyright,|,link,unlink,|,code,|,formatselect,|,zmedia,zmore",
 	theme_advanced_buttons2: "tablecontrols",
 	theme_advanced_buttons3: "",
 	theme_advanced_buttons4: "",
@@ -11,7 +11,8 @@ tinyInit = {
 	theme_advanced_toolbar_align: "left", 
 	theme_advanced_statusbar_location: "bottom", 
 	theme_advanced_resizing: "1", 
-	theme_advanced_resize_horizontal: "", 
+	theme_advanced_resize_horizontal: "",
+	theme_advanced_blockformats: "pre,h1,h2,h3,h4", 
 	dialog_type: "modal", 
 	relative_urls: "", 
 	remove_script_host: "", 
@@ -33,7 +34,7 @@ tinyInit = {
 	tab_focus: ":prev,:next", 
 	content_css: "/lib/js/modules/tinymce/zotonic.css", 
 	wpeditimage_disable_captions: "", 
-	plugins: "safari,table,zmedia",
+	plugins: "safari,table,zmedia,zmore",
 	table_row_limit: 100,
 	table_col_limit: 10
 }
