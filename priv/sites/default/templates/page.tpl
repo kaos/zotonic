@@ -16,7 +16,14 @@
 			{% endif %}
 
 			<p class="summary">{{ m.rsc[id].summary }}</p>
-			{{ m.rsc[id].body|show_media }}
+			
+			{% with m.rsc[id].media as media %}
+				{% if media[1] %}
+					{% media media[1] width=540 %}
+				{% endif %}
+
+				{{ m.rsc[id].body|show_media }}
+			{% endwith %}
 		</div>
 	</article>
 
