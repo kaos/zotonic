@@ -30,7 +30,28 @@
 
 	<div id="{{ #tab }}-search">
 		<div class="form-item clearfix">
-			<label for="media-search">Search for media</label>
-			<input id="media-search" />
+
+
+            <p>Use the autocompleter to search the media in this site.</p>
+
+            <div class="form-item autocomplete-wrapper clear">
+                <input id="{{#input}}" class="autocompleter" type="text" value="" />
+                <ul id="{{#suggestions}}" class="suggestions-list"></ul>
+            </div>
+
+            {% wire id=#input
+            type="keyup" 
+            action={typeselect
+            target=#suggestions 
+            action_with_id={with_args action={link subject_id=subject_id predicate="depiction" element_id=element_id} arg={object_id select_id}
+            }
+			action={postback postback={reload_media rsc_id=id div_id=media_div_id} delegate="resource_admin_edit"}
+            action_with_id={with_args action={zmedia_has_chosen} arg={id select_id}}
+            action={dialog_close}
+
+            cat=m.predicate.object_category[predicate]
+			}
+            %}
+
 		</div>	
     </div>
