@@ -249,7 +249,8 @@ install_predicate(C) ->
 
         [ 308, true,   "subject",  "http://purl.org/dc/elements/1.1/subject",           [{reversed, false},{title, {trans, [{en,"Keyword"},  {nl,"Trefwoord"}]}}]],
 
-        [ 309, true,   "document", "http://zotonic.net/predicate/document",             [{reversed, false},{title, "Document"}]]
+        [ 309, true,   "document", "http://zotonic.net/predicate/document",             [{reversed, false},{title, "Document"}]],
+		[ 310, true,   "haspart",  "http://purl.org/dc/terms/hasPart",					[{reversed, false},{title, "Contains"}]]
     ],
 
     {ok, CatId}   = pgsql:squery1(C, "select id from rsc where name = 'predicate'"),
@@ -289,7 +290,9 @@ install_predicate(C) ->
         {309, true,  103}, %  artifact -> document -> _
         {309, true,  104}, %  text     -> document -> _
         {309, true,  119}, %  location -> document -> _
-        {309, false, 110}  %  _        -> document -> media
+        {309, false, 110}, %  _        -> document -> media
+
+        {310, true,  114}  %  collection -> haspart -> _
     ],
     
     [ {ok, 1} = pgsql:equery(C, "
