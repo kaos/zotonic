@@ -237,17 +237,19 @@ install_predicate(C) ->
     ?DEBUG("Inserting predicates"),
     Preds = [
         % id   protect name       uri                                                  props
-        [ 300, false,  "about",    "http://www.w3.org/1999/02/22-rdf-syntax-ns#about",  [{reversed, false},{title, {trans, [{en,"About"},    {nl,"Over"}]}}]],
-        [ 301, false,  "author",   "http://purl.org/dc/terms/creator",                  [{reversed, false},{title, {trans, [{en,"Author"},   {nl,"Auteur"}]}}]],
-        [ 302, false,  "hasreview","http://purl.org/stuff/rev#hasReview",               [{reversed, false},{title, {trans, [{en,"Review"},   {nl,"Beoordeling"}]}}]],
-        [ 303, false,  "relation", "http://purl.org/dc/terms/relation",                 [{reversed, false},{title, {trans, [{en,"Relation"}, {nl,"Relatie"}]}}]],
+        [ 300, true,   "about",    "http://www.w3.org/1999/02/22-rdf-syntax-ns#about",  [{reversed, false},{title, {trans, [{en,"About"},    {nl,"Over"}]}}]],
+        [ 301, true,   "author",   "http://purl.org/dc/terms/creator",                  [{reversed, false},{title, {trans, [{en,"Author"},   {nl,"Auteur"}]}}]],
+        [ 302, true,   "hasreview","http://purl.org/stuff/rev#hasReview",               [{reversed, false},{title, {trans, [{en,"Review"},   {nl,"Beoordeling"}]}}]],
+        [ 303, true,   "relation", "http://purl.org/dc/terms/relation",                 [{reversed, false},{title, {trans, [{en,"Relation"}, {nl,"Relatie"}]}}]],
         [ 304, true,   "depiction","http://xmlns.com/foaf/0.1/depiction",               [{reversed, false},{title, {trans, [{en,"Depiction"},{nl,"Afbeelding"}]}}]],
 
         [ 305, true,   "atvenue",  "http://zotonic.net/predicate/atvenue",              [{reversed, false},{title, "Venue"}]],
         [ 306, true,   "performer","http://zotonic.net/predicate/performer",            [{reversed, false},{title, "Performer"}]],
         [ 307, true,   "hasgenre", "http://zotonic.net/predicate/hasgenre",             [{reversed, false},{title, "Genre"}]],
 
-        [ 308, true,   "subject",  "http://purl.org/dc/elements/1.1/subject",           [{reversed, false},{title, {trans, [{en,"Keyword"},  {nl,"Trefwoord"}]}}]]
+        [ 308, true,   "subject",  "http://purl.org/dc/elements/1.1/subject",           [{reversed, false},{title, {trans, [{en,"Keyword"},  {nl,"Trefwoord"}]}}]],
+
+        [ 309, true,   "document", "http://zotonic.net/predicate/document",             [{reversed, false},{title, "Document"}]]
     ],
 
     {ok, CatId}   = pgsql:squery1(C, "select id from rsc where name = 'predicate'"),
@@ -261,23 +263,33 @@ install_predicate(C) ->
 
     ObjSubj = [
         {300, true,  104}, %  text   -> about     -> _
-        {301, true,  102}, %  _      -> author    -> person
+        {301, false, 102}, %  _      -> author    -> person
         {302, false, 105}, %  _      -> hasreview -> review
         {304, false, 110}, %  _      -> depiction -> image
+
         {305, true,  108}, %  Event  -> atvenue   -> _
         {305, false, 120}, %  _      -> atvenue   -> venue
+
         {306, true,  108}, %  Event  -> performer -> _
         {306, false, 121}, %  _      -> performer -> artist
+
         {307, true,  108}, %  Event  -> hasgenre  -> _
         {307, false, 124}, %  _      -> hasgenre  -> genre
-        {308, true,  104}, %  text   -> subject   -> _
-        {308, true,  102}, %  person -> subject   -> _
+
+        {308, true,  104}, %  text     -> subject   -> _
+        {308, true,  102}, %  person   -> subject   -> _
         {308, true,  119}, %  location -> subject   -> _
-        {308, true,  108}, %  event -> subject   -> _
+        {308, true,  108}, %  event    -> subject   -> _
         {308, true,  103}, %  artifact -> subject   -> _
-        {308, true,  110}, %  media -> subject   -> _
+        {308, true,  110}, %  media    -> subject   -> _
         {308, true,  114}, %  collection -> subject   -> _
-        {308, false, 123}  %  _      -> subject   -> keyword
+        {308, false, 123}, %  _      -> subject   -> keyword
+
+        {309, true,  102}, %  person   -> document -> _
+        {309, true,  103}, %  artifact -> document -> _
+        {309, true,  104}, %  text     -> document -> _
+        {309, true,  119}, %  location -> document -> _
+        {309, false, 110}  %  _        -> document -> media
     ],
     
     [ {ok, 1} = pgsql:equery(C, "
