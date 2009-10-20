@@ -16,7 +16,7 @@
 		</div>
 	</article>
 
-	{% for c_ids in m.rsc[id].o.collection_member|split_in:2 %}
+	{% for c_ids in m.rsc[id].o.haspart|split_in:2 %}
 		{% if c_ids %}
 			<section class="collection-members zp-33">
 				<div class="padding">
