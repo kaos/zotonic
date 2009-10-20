@@ -49,4 +49,6 @@
 			{% endifequal %}
 		</aside>
 	{% endwith %}
+
+	{% include "_documents.tpl" %}
 {% endblock %}	
