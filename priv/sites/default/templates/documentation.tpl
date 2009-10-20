@@ -47,8 +47,8 @@
 					{% endfor %}
 				</ul>
 			{% endifequal %}
+
+			{% include "_documents.tpl" %}
 		</aside>
 	{% endwith %}
-
-	{% include "_documents.tpl" %}
 {% endblock %}	
