@@ -58,6 +58,7 @@
 			{% endif %}
 		{% endwith %}
 
+		{% include "_documents.tpl" %}
 	</aside>
 
 {% endblock %}
