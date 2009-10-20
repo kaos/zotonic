@@ -16,6 +16,9 @@
         {% button
                 text="add a new media item" 
                 action={dialog_media_upload subject_id=id group_id=r.group_id stay
+                        action={postback 
+                                postback={zmedia_choose} 
+                                          delegate="action_admin_zmedia_choose"}
 						action={postback
 								postback={reload_media rsc_id=id div_id=media_div_id}
  										  delegate="resource_admin_edit"}

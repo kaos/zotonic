@@ -79,16 +79,16 @@ event({submit, {media_upload, EventProps}, _TriggerId, _TargetId}, Context) ->
             
                     case Result of
                         {ok, MediaId} ->
-                            Context2 = z_context:set("media_id", MediaId, Context),
                             ContextRedirect = case SubjectId of
                                 undefined -> 
                                     case Stay of
-                                        true -> Context2;
-                                        false -> z_render:wire({redirect, [{dispatch, "admin_edit_rsc"}, {id, MediaId}]}, Context2)
+                                        true -> Context;
+                                        false -> z_render:wire({redirect, [{dispatch, "admin_edit_rsc"}, {id, MediaId}]}, Context)
                                     end;
-                                _ -> Context2
+                                _ -> Context
                             end,
-                            z_render:wire([{growl, [{text, "Uploaded the file."}]} | Actions], ContextRedirect);
+                            Actions2 = [add_arg_to_action({id, MediaId}, A) || A <- Actions],
+                            z_render:wire([{growl, [{text, "Uploaded the file."}]} | Actions2], ContextRedirect);
                         {error, _Error} ->
                             z_render:growl_error("Error uploading the file.", Context)
                     end;
@@ -112,4 +112,12 @@ event({submit, {media_upload, EventProps}, _TriggerId, _TargetId}, Context) ->
 
     % Close the dialog and optionally perform the post upload actions
     z_render:wire({dialog_close, []}, ContextUpload).
+
+
+% Add an extra argument to a postback / submit action.
+add_arg_to_action(Arg, {postback, [{postback, {Action, ArgList}} | Rest]}) ->
+    {postback, [{postback, {Action, [Arg | ArgList]}} | Rest]};
+add_arg_to_action(_A, B) ->
+    B.
+
 

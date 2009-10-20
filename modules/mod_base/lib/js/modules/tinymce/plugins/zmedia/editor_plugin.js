@@ -27,7 +27,7 @@
                             window.z_choose_zmedia = function(id) {
                                 if (!id) return;
                                 
-                                ed.execCommand('mceInsertContent', false, self._zMediaHtml(id), {});
+                                ed.execCommand('mceInsertContent', false, self._zMediaHtml(id, {align: "left"}), {});
                             }
                         }
 
