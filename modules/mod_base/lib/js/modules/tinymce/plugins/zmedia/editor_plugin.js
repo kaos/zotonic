@@ -27,7 +27,8 @@
                             window.z_choose_zmedia = function(id) {
                                 if (!id) return;
                                 
-                                ed.execCommand('mceInsertContent', false, self._zMediaHtml(id, {align: "left"}), {});
+                                var res = self._zMediaHtml(id, {align: "left"});
+                                ed.execCommand('mceInsertContent', false, res['html'], {});
                             }
                         }
 
@@ -143,7 +144,7 @@
             },
         
             _zMediaId: function(id) {
-                return "z-media-" + id;
+                return "z-media-" + id + "-" + Math.floor(Math.random()*10000);
             },
 
             _MediaHtmlToMarkers: function (html) {
@@ -153,7 +154,7 @@
                 {
                     var img = m[0];
                     var cls = (new RegExp('class="(.*?)"', 'g')).exec(img)[1];
-                    var id = (new RegExp('id="z-media-(.*?)"', 'g')).exec(img)[1];
+                    var id = (new RegExp('id="z-media-([0-9]+)', 'g')).exec(img)[1];
                     var opts = this._zMediaOptsFromClassName(cls);
                     var newtag = this._zMediaMarker(id, opts);
 
@@ -165,7 +166,7 @@
 
             _zMediaHtml: function(id, opts) {
                 var divid = this._zMediaId(id);
-                return '<img class="' + this._zMediaOptsToDOM(opts) + '" id="' +divid + '" src="/admin/media/preview/' + id + '" />';
+                return {'html': '<img class="' + this._zMediaOptsToDOM(opts) + '" id="' +divid + '" src="/admin/media/preview/' + id + '" />', 'id': divid};
             },
 
             _zMediaMarker: function(id, opts) {
@@ -181,7 +182,7 @@
                     var opts = eval("(" + m[2] + ")");
                     var repl = this._zMediaHtml(id, opts);
 
-                    html = html.substr(0, re.lastIndex - m[0].length) + repl + html.substr(re.lastIndex);
+                    html = html.substr(0, re.lastIndex - m[0].length) + repl['html'] + html.substr(re.lastIndex);
                     re.lastIndex = re.lastIndex - m[0].length + repl.length;
                 }
                 return html;
