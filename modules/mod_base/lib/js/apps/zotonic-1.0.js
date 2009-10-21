@@ -99,7 +99,7 @@ function z_queue_postback(triggerID, postback, extraParams, noTriggerValue)
 		var nodeName = trigger.nodeName.toLowerCase();
 		
 		if (nodeName == 'input' || nodeName == 'button' || nodeName == 'textarea' || nodeName == 'select')
-		    triggerValue = trigger.val() || '';
+		    triggerValue = $('#'+triggerID).val() || '';
 	}
 
 	    triggerValue = $('#'+triggerID).val() || '';
