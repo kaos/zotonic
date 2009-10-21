@@ -52,7 +52,7 @@
                 ed.addButton('zmedia', {
                     title : 'Insert a Zotonic media item.',
                             cmd : 'mceZotonicMedia',
-                            class: 'mce_image'
+                            'class': 'mce_image'
                             });
             },
 
