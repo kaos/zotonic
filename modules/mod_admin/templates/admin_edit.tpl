@@ -121,7 +121,7 @@
 						</div>
 					
 						<div class="item-wrapper">
-							<h3 class="above-item clearfix do_blockminifier { minifiedOnInit: true }">
+							<h3 class="above-item clearfix do_blockminifier { minifiedOnInit: {{ r.is_a.meta|not }} }">
 								<span class="title">Advanced</span>
 								<span class="arrow">make smaller</span>	
 							</h3>
