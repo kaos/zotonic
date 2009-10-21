@@ -297,7 +297,7 @@
 
 						{% if not r.is_a.meta %}
 						<div class="item-wrapper" id="sort-date">
-							<h3 class="above-item clearfix do_blockminifier { minifiedOnInit: true }">
+							<h3 class="above-item clearfix do_blockminifier { minifiedOnInit: {{ r.is_a.event|not }} }">
 								<span class="title">Date range</span>
 								<span class="arrow">make smaller</span>
 							</h3>

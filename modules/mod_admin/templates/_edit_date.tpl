@@ -1,3 +1,20 @@
+{# 
+
+Example of using a single input field for the date and for the time: 
+
+{% ifequal date|date:'Y' 9999 %}
+
+<input type="text" style="width:80px" name="dt:ymd:{{ is_end }}:{{ name }}" value="" />
+<input type="text" style="width:40px" name="dt:hi:{{ is_end }}:{{ name }}" value="" />
+
+{% else %}
+
+<input type="text" style="width:80px" name="dt:ymd:{{ is_end }}:{{ name }}" value="{{ date|date:'Y-m-d' }}" />
+<input type="text" style="width:40px" name="dt:hi:{{ is_end }}:{{ name }}" value="{{ date|date:'H:i' }}" />
+
+{% endifequal %}
+#}
+
 {% ifequal date|date:'Y' 9999 %}
 
 <input type="text" style="width:32px" name="dt:y:{{ is_end }}:{{ name }}" value="" />
