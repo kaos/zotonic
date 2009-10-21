@@ -84,8 +84,8 @@ size(InFile, Filters, Context) ->
                 {height, ImageHeight} = proplists:lookup(height, FileProps),
                 {orientation, Orientation} = proplists:lookup(orientation, FileProps),
                 
-                ReqWidth   = proplists:get_value(width, Filters),
-                ReqHeight  = proplists:get_value(height, Filters),
+                ReqWidth   = z_convert:to_integer(proplists:get_value(width, Filters)),
+                ReqHeight  = z_convert:to_integer(proplists:get_value(height, Filters)),
                 {CropPar,_Filters1} = fetch_crop(Filters),
                 {ResizeWidth,ResizeHeight,CropArgs} = calc_size(ReqWidth, ReqHeight, ImageWidth, ImageHeight, CropPar, Orientation),
                 case CropArgs of
