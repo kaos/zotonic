@@ -327,7 +327,7 @@
 						{% endif %}
 
 						<div class="item-wrapper" id="sort-connections">
-							<h3 class="above-item clearfix do_blockminifier { minifiedOnInit: true }">
+							<h3 class="above-item clearfix do_blockminifier { minifiedOnInit: {{ r.is_a.collection|not }} }">
 								<span class="title">Page connections</span>
 								<span class="arrow">make smaller</span>
 							</h3>
