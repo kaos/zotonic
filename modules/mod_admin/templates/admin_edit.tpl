@@ -97,7 +97,7 @@
 							</h3>
 							<div class="item clearfix">
 								<div id="{{ #media }}">
-									{% include "_edit_media.tpl" media=media %}
+									{% include "_edit_media.tpl" media=media div_id=#media %}
 								</div>
 								<div class="clear">
 									{% if is_editable %}

@@ -29,7 +29,7 @@
 										object_id=media_id 
 										hide=#medium.media_id
 										undo_message_id=#unlink_message 
-										undo_action={postback postback={reload_media rsc_id=id div_id=#media} delegate="resource_admin_edit"}} 
+										undo_action={postback postback={reload_media rsc_id=id div_id=div_id} delegate="resource_admin_edit"}} 
 					%}
 
 				{% endwith %}
