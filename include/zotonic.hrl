@@ -70,7 +70,7 @@
 -define(HOST(Context), Context#context.host).
 -define(DBC(Context), Context#context.dbc).
 
--define(ST_JUTTEMIS, {{9999,6,1}, {12,0,0}}.
+-define(ST_JUTTEMIS, {{9999,8,17}, {12,0,0}}).
 
 %% ACL fields for an acl check. Fields are initialized for the visible resource.
 %% This is used for fetching the acl fields from a resource record.
