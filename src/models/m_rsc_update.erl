@@ -279,7 +279,7 @@ preflight_check(_Id, [], _Context) ->
 preflight_check(Id, [{name, Name}|T], Context) when Name =/= undefined ->
     case z_db:q1("select count(*) from rsc where name = $1 and id <> $2", [Name, Id], Context) of
         0 ->  preflight_check(Id, T, Context);
-        _N -> {error, duplicate_name}
+        _N -> {error, duplicate_name, Name}
     end;
 preflight_check(Id, [{page_path, Path}|T], Context) when Path =/= undefined ->
     case z_db:q1("select count(*) from rsc where page_path = $1 and id <> $2", [Path, Id], Context) of

@@ -24,6 +24,8 @@
     last_modified/2,
     is_a/2,
     is_a/3,
+    insert_top_level/5,
+    insert_cat/6,
     get_page_count/2,
     delete/3,
     name_to_id/2,
@@ -614,4 +616,22 @@ make_tree({NodeId,_Parent,NodeSeq} = Node, Nodes, Level, Path) ->
 flatten_tree({Level, _NodeSeq, {NodeId,_Parent,_Seq}, SubTrees, Path}, NodesAcc, NodeNr) ->
     {NodesAcc1, NodeNr1} = lists:foldl(fun(Tree, {Acc,Nr}) -> flatten_tree(Tree, Acc, Nr) end, {NodesAcc,NodeNr+1}, SubTrees),
     {[ {NodeId, NodeNr, Level, NodeNr, NodeNr1-1, Path} | NodesAcc1], NodeNr1}.
+
+
+
+
+%% Insert a top-level category
+insert_top_level(Id, Name, GroupId, Props, Context) ->
+    insert_cat(Id, undefined, Name, GroupId, Props, Context).
+
+
+insert_cat(Id, ParentId, Name, GroupId, Props, Context) ->
+    {ok, CatId} = name_to_id("category", Context),
+    F = fun(Ctx) ->
+                z_db:q("insert into rsc (id, visible_for, is_protected, group_id, category_id, name, uri, props) values ($1, 0, true, $2, $3, $4, null, $5)", [Id, GroupId, CatId, Name, Props], Ctx),
+                z_db:q("insert into category (id, parent_id) values ($1, $2)", [Id, ParentId], Ctx),
+                renumber(Ctx)
+        end,
+    z_db:transaction(F, Context),
+    ok.
 
