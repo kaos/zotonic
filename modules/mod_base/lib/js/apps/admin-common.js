@@ -38,3 +38,9 @@ tinyInit = {
 	table_row_limit: 100,
 	table_col_limit: 10
 }
+
+$('.do_datepicker').datepicker(
+{ 
+	dateFormat: 'yy-mm-dd',
+	showAnim: 'fadeIn'
+});
