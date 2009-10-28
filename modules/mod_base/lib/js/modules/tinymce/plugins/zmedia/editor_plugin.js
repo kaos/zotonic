@@ -61,17 +61,17 @@
                 var opts = this._zMediaOptsFromDOM(node);
 
                 $.dialogAdd({title: 'Media properties',
-                            text: '<p><img src="/admin/media/preview/' + id + '" class="z-tinymce-media-left" />' + 
-                            '<p> Choose the alignment of the image:</p>' + 
-                            '<div class="form-item">' +
+                            text: '<div class="z-tinymce-media-options"><img src="/admin/media/preview/' + id + '" class="z-tinymce-media-left" />' + 
+                            '<p>Choose the alignment of the image:</p>' + 
+                            '<div class="form-item clearfix left">' +
                             '<label for="a-block"><input type="radio" name="align" ' + (opts.align=='block'?'checked="checked"':'') + ' value="block" id="a-block"> Between text</label>' +
                             '<label for="a-left"><input type="radio" name="align" ' + (opts.align=='left'?'checked="checked"':'') + 'value="left" id="a-left"> Aligned left</label>' +
                             '<label for="a-right"><input type="radio" name="align" ' + (opts.align=='right'?'checked="checked"':'') + 'value="right" id="a-right"> Aligned right</label>' +
                             '</div>' +
-                            '<div class="form-item clearfix">' +
+                            '<div class="form-item clearfix clear">' +
                             '<button onclick="window.z_media_props();">Submit</button>' +
                             '<button onclick="$.dialogRemove($(\'.dialog\'));">Cancel</button>' +
-                            '</div>'});
+                            '</div></div>'});
 
                 window.z_media_props = function() {
                     opts = {'align': $('input[type="radio"]:checked', $('.dialog')).val() };
