@@ -1,6 +1,6 @@
 {% with m.rsc[id].o.document as docs %}
 	{% if docs %}
-		<h2>Downloads</h2>
+		<h3>Downloadable attachments</h3>
 		
 		<ul class="list-filters">
 		{% for doc in docs %}
@@ -10,6 +10,5 @@
 			</li>
 		{% endfor %}
 		</ul>
-		
 	{% endif %}
 {% endwith %}

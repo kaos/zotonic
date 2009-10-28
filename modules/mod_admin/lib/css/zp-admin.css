@@ -566,7 +566,7 @@ ul.media-sorter li {
 		display: block;
 		text-decoration: none;
 		color: #eee;
-		padding: 4px;
+		padding: 4px 4px 10px;
 	}
 	
 		.suggestions-list li.suggestions-result a:hover {
