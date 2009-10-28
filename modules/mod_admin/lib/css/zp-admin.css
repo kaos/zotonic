@@ -844,3 +844,11 @@ ul.categories li a {
 .ui-tabs-hide {
 	display: none !important; 
 }
+
+
+/* tinyMce stuff
+--------------------------------------------------------- */
+
+.mceToolbar td a span.mce_zmore {
+	background: url(/lib/images/toolbars.gif) !important;
+}
