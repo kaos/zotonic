@@ -103,20 +103,12 @@ name_to_id_cat(Name, Cat, Context) when is_integer(Name) ->
     z_depcache:memo(F, {rsc_name, Name, Cat}, ?DAY, [Cat], Context);
 name_to_id_cat(Name, Cat, Context) ->
     F = fun() ->
-                CatId = m_category:name_to_id_check(Cat, Context),
-                case z_db:q1("select id from rsc where Name = $1 and category_id = $2", [Name, CatId], Context) of
-                    undefined -> 
-                        %% Check if id is in wrong category
-                        case z_db:q1("select category_id from rsc where Name = $1", [Name], Context) of
-                            undefined ->
-                                {error, {enoent, Cat, Name}};
-                            {ok, OtherCat} ->
-                                {error, {ewrongcat, OtherCat}}
-                        end;
-                    Id -> 
-                        {ok, Id}
-                end
-        end,
+        CatId = m_category:name_to_id_check(Cat, Context),
+        case z_db:q1("select id from rsc where Name = $1 and category_id = $2", [Name, CatId], Context) of
+            undefined -> {error, {enoent, Cat, Name}};
+            Id -> {ok, Id}
+        end
+    end,
     z_depcache:memo(F, {rsc_name, Name, Cat}, ?DAY, [Cat], Context).
 
 name_to_id_cat_check(Name, Cat, Context) ->
