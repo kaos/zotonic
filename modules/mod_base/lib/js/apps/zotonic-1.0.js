@@ -102,8 +102,6 @@ function z_queue_postback(triggerID, postback, extraParams, noTriggerValue)
 		    triggerValue = $('#'+triggerID).val() || '';
 	}
 
-	    triggerValue = $('#'+triggerID).val() || '';
-	
 	extraParams = extraParams || new Array(); 
 	extraParams.push({name: 'triggervalue', value: triggerValue})
 	
