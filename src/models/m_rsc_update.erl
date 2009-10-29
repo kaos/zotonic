@@ -517,7 +517,7 @@ recombine_dates([H|T], Dates, Acc) ->
         end,
         Date1 = recombine_date_part(Date, Part, to_date_value(Part, string:strip(V))),
         lists:keystore(Name, 1, Dates, {Name, Date1}).
-    
+
     recombine_date_part({{_Y,M,D},{H,I,S}}, "y", V) -> {{V,M,D},{H,I,S}};
     recombine_date_part({{Y,_M,D},{H,I,S}}, "m", V) -> {{Y,V,D},{H,I,S}};
     recombine_date_part({{Y,M,_D},{H,I,S}}, "d", V) -> {{Y,M,V},{H,I,S}};
@@ -529,11 +529,15 @@ recombine_dates([H|T], Dates, Acc) ->
     recombine_date_part({_Date,{H,I,S}}, "ymd", {_,_,_} = V) -> {V,{H,I,S}}.
 
 	to_date_value(Part, V) when Part == "ymd" orelse Part == "his"->
-		[Y,M,D] = string:tokens(V, "-/: "),
-		{to_int(Y), to_int(M), to_int(D)};
+		case string:tokens(V, "-/: ") of
+			[] -> {undefined, undefined, undefined};
+			[Y,M,D] -> {to_int(Y), to_int(M), to_int(D)}
+		end;
 	to_date_value("hi", V) ->
-		[H,I] = string:tokens(V, "-/: "),
-		{to_int(H), to_int(I), 0};
+		case string:tokens(V, "-/: ") of
+			[] -> {undefined, undefined, undefined};
+			[H,I] -> {to_int(H), to_int(I), undefined}
+		end;
 	to_date_value(_, V) ->
 		to_int(V).
 
