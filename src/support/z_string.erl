@@ -89,57 +89,59 @@ to_name(Name) when is_binary(Name) ->
 to_name(Name) when is_atom(Name) ->
     to_name(atom_to_list(Name));
 to_name(Name) ->
-    to_name(Name, []).
+    to_name(Name, [], 0).
 
-    to_name([], Acc) ->
-        case string:strip(lists:reverse(Acc), both, $_) of
-            [] -> "_";
-            Name -> Name
-        end;
-    to_name([C|T], Acc) when C >= $A andalso C =< $Z ->
-        to_name(T, [C+32|Acc]);
-    to_name([C|T], Acc) when (C >= $a andalso C =< $z) orelse (C >= $0 andalso C =< $9) orelse C =:= $_ ->
-        to_name(T, [C|Acc]);
-    to_name("ä"++T, Acc) -> to_name(T, [$a|Acc]);
-    to_name("ë"++T, Acc) -> to_name(T, [$e|Acc]);
-    to_name("ï"++T, Acc) -> to_name(T, [$i|Acc]);
-    to_name("ü"++T, Acc) -> to_name(T, [$u|Acc]);
-    to_name("ö"++T, Acc) -> to_name(T, [$o|Acc]);
-    to_name("Ä"++T, Acc) -> to_name(T, [$a|Acc]);
-    to_name("Ë"++T, Acc) -> to_name(T, [$e|Acc]);
-    to_name("Ï"++T, Acc) -> to_name(T, [$i|Acc]);
-    to_name("Ü"++T, Acc) -> to_name(T, [$u|Acc]);
-    to_name("Ö"++T, Acc) -> to_name(T, [$o|Acc]);
-    to_name("é"++T, Acc) -> to_name(T, [$e|Acc]);
-    to_name("è"++T, Acc) -> to_name(T, [$e|Acc]);
-    to_name("É"++T, Acc) -> to_name(T, [$e|Acc]);
-    to_name("È"++T, Acc) -> to_name(T, [$e|Acc]);
-    to_name("í"++T, Acc) -> to_name(T, [$i|Acc]);
-    to_name("ì"++T, Acc) -> to_name(T, [$i|Acc]);
-    to_name("Í"++T, Acc) -> to_name(T, [$i|Acc]);
-    to_name("Ì"++T, Acc) -> to_name(T, [$i|Acc]);
-    to_name("ú"++T, Acc) -> to_name(T, [$u|Acc]);
-    to_name("ù"++T, Acc) -> to_name(T, [$u|Acc]);
-    to_name("Ú"++T, Acc) -> to_name(T, [$u|Acc]);
-    to_name("Ù"++T, Acc) -> to_name(T, [$u|Acc]);
-    to_name("ó"++T, Acc) -> to_name(T, [$o|Acc]);
-    to_name("ò"++T, Acc) -> to_name(T, [$o|Acc]);
-    to_name("Ó"++T, Acc) -> to_name(T, [$o|Acc]);
-    to_name("Ò"++T, Acc) -> to_name(T, [$o|Acc]);
-    to_name("ß"++T, Acc) -> to_name(T, [$s,$s|Acc]);
-    to_name("ç"++T, Acc) -> to_name(T, [$c|Acc]);
-    to_name("Ç"++T, Acc) -> to_name(T, [$c|Acc]);
-    to_name("ø"++T, Acc) -> to_name(T, [$o|Acc]);
-    to_name("Ø"++T, Acc) -> to_name(T, [$o|Acc]);
-    to_name("å"++T, Acc) -> to_name(T, [$a|Acc]);
-    to_name("Å"++T, Acc) -> to_name(T, [$a|Acc]);
-    to_name("€"++T, Acc) -> to_name(T, [$e|Acc]);
-    to_name("ÿ"++T, Acc) -> to_name(T, [$i,$j|Acc]);
-    to_name("@"++T, Acc) -> to_name(T, [$_,$t,$a,$_|Acc]);
-    to_name([_C|T], [$_|_] = Acc) ->
-        to_name(T, Acc);
-    to_name([_C|T], Acc) ->
-        to_name(T, [$_|Acc]).
+to_name([], Acc, _I) ->
+    case string:strip(lists:reverse(Acc), both, $_) of
+        [] -> "_";
+        Name -> Name
+    end;
+to_name(_, Acc, 80) ->
+    to_name([], Acc, 80);
+to_name([C|T], Acc, I) when C >= $A andalso C =< $Z ->
+    to_name(T, [C+32|Acc], I+1);
+to_name([C|T], Acc, I) when (C >= $a andalso C =< $z) orelse (C >= $0 andalso C =< $9) orelse C =:= $_ ->
+    to_name(T, [C|Acc], I+1);
+to_name("ä"++T, Acc, I) -> to_name(T, [$a|Acc], I+1);
+to_name("ë"++T, Acc, I) -> to_name(T, [$e|Acc], I+1);
+to_name("ï"++T, Acc, I) -> to_name(T, [$i|Acc], I+1);
+to_name("ü"++T, Acc, I) -> to_name(T, [$u|Acc], I+1);
+to_name("ö"++T, Acc, I) -> to_name(T, [$o|Acc], I+1);
+to_name("Ä"++T, Acc, I) -> to_name(T, [$a|Acc], I+1);
+to_name("Ë"++T, Acc, I) -> to_name(T, [$e|Acc], I+1);
+to_name("Ï"++T, Acc, I) -> to_name(T, [$i|Acc], I+1);
+to_name("Ü"++T, Acc, I) -> to_name(T, [$u|Acc], I+1);
+to_name("Ö"++T, Acc, I) -> to_name(T, [$o|Acc], I+1);
+to_name("é"++T, Acc, I) -> to_name(T, [$e|Acc], I+1);
+to_name("è"++T, Acc, I) -> to_name(T, [$e|Acc], I+1);
+to_name("É"++T, Acc, I) -> to_name(T, [$e|Acc], I+1);
+to_name("È"++T, Acc, I) -> to_name(T, [$e|Acc], I+1);
+to_name("í"++T, Acc, I) -> to_name(T, [$i|Acc], I+1);
+to_name("ì"++T, Acc, I) -> to_name(T, [$i|Acc], I+1);
+to_name("Í"++T, Acc, I) -> to_name(T, [$i|Acc], I+1);
+to_name("Ì"++T, Acc, I) -> to_name(T, [$i|Acc], I+1);
+to_name("ú"++T, Acc, I) -> to_name(T, [$u|Acc], I+1);
+to_name("ù"++T, Acc, I) -> to_name(T, [$u|Acc], I+1);
+to_name("Ú"++T, Acc, I) -> to_name(T, [$u|Acc], I+1);
+to_name("Ù"++T, Acc, I) -> to_name(T, [$u|Acc], I+1);
+to_name("ó"++T, Acc, I) -> to_name(T, [$o|Acc], I+1);
+to_name("ò"++T, Acc, I) -> to_name(T, [$o|Acc], I+1);
+to_name("Ó"++T, Acc, I) -> to_name(T, [$o|Acc], I+1);
+to_name("Ò"++T, Acc, I) -> to_name(T, [$o|Acc], I+1);
+to_name("ß"++T, Acc, I) -> to_name(T, [$s,$s|Acc], I+1);
+to_name("ç"++T, Acc, I) -> to_name(T, [$c|Acc], I+1);
+to_name("Ç"++T, Acc, I) -> to_name(T, [$c|Acc], I+1);
+to_name("ø"++T, Acc, I) -> to_name(T, [$o|Acc], I+1);
+to_name("Ø"++T, Acc, I) -> to_name(T, [$o|Acc], I+1);
+to_name("å"++T, Acc, I) -> to_name(T, [$a|Acc], I+1);
+to_name("Å"++T, Acc, I) -> to_name(T, [$a|Acc], I+1);
+to_name("€"++T, Acc, I) -> to_name(T, [$e|Acc], I+1);
+to_name("ÿ"++T, Acc, I) -> to_name(T, [$i,$j|Acc], I+1);
+to_name("@"++T, Acc, I) -> to_name(T, [$_,$t,$a,$_|Acc], I+1);
+to_name([_C|T], [$_|_] = Acc, I) ->
+    to_name(T, Acc, I+1);
+to_name([_C|T], Acc, I) ->
+    to_name(T, [$_|Acc], I+1).
 
 
 %% @doc Replace a string inside another string
