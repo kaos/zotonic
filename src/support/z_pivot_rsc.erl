@@ -209,7 +209,8 @@ pivot_resource(Id, Context) ->
             ", pivot_gender   = $",integer_to_list(N+9),
             ", pivot_date_start= $",integer_to_list(N+10),
             ", pivot_date_end  = $",integer_to_list(N+11),
-            " where id = $",integer_to_list(N+12)
+            ", pivot_title     = $",integer_to_list(N+12),
+            " where id = $",integer_to_list(N+13)
         ]),
     SqlArgs = ArgsD ++ [
         TsvIds,
@@ -223,6 +224,7 @@ pivot_resource(Id, Context) ->
         proplists:get_value(gender, R),
         DateStart,
         DateEnd,
+        pivot_sort_title(R),
         Id
     ],
     z_db:q(Sql, SqlArgs, Context).
@@ -246,6 +248,7 @@ pivot_resource(Id, Context) ->
     %        setweight(to_tsvector('pg_catalog.english', coalesce(new.title_en,'')), 'A') || 
     %        setweight(to_tsvector('pg_catalog.english', coalesce(new.desc_en,'')),  'D'); 
 
+
 %% @doc Fetch the date range from the record
 pivot_date(R) ->
     DateStart = proplists:get_value(date_start, R),
@@ -260,6 +263,17 @@ pivot_date(R) ->
         {S, ?ST_JUTTEMIS};
     pivot_date1(S, E) when is_tuple(S) andalso is_tuple(E) ->
         {S, E}.
+
+
+%% @doc Fetch the first title from the record for sorting.
+pivot_sort_title(R) ->
+    case proplists:get_value(title, R) of
+        {trans, []} ->
+            "";
+        {trans, [{_, Text}]} ->
+            Text;
+        T -> T
+    end.    
 
 
 %% @doc Split texts into different languages

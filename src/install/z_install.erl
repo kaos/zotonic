@@ -125,6 +125,7 @@ model_pgsql() ->
         pivot_postcode character varying(30),
         pivot_country character varying(80),
         pivot_geocode character varying(20),
+        pivot_title character varying(100),
 
         CONSTRAINT rsc_pkey PRIMARY KEY (id),
         CONSTRAINT rsc_uri_key UNIQUE (uri),
@@ -160,6 +161,7 @@ model_pgsql() ->
     "CREATE INDEX rsc_pivot_country_key ON rsc (pivot_country)",
     "CREATE INDEX rsc_pivot_postcode_key ON rsc (pivot_postcode)",
     "CREATE INDEX rsc_pivot_geocode_key ON rsc (pivot_geocode)",
+    "CREATE INDEX rsc_pivot_title_key ON rsc (pivot_title)",
 
     % Table: protect
     % By making an entry in this table we protect a rsc from being deleted.
