@@ -7,6 +7,7 @@
 	"modules/*",
 	"modules/*/*",
 	"modules/*/*/*",
+	"modules/*/*/*/*",
 	"priv/sites/*/*",
 	"priv/sites/*/modules/*",
 	"priv/sites/*/modules/*/*",
