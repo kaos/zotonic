@@ -82,12 +82,12 @@ handle_call(Message, _From, State) ->
 %% @spec handle_cast(Msg, State) -> {noreply, State} |
 %%                                  {noreply, State, Timeout} |
 %%                                  {stop, Reason, State}
-handle_cast(reload, State) ->
+handle_cast({development_reload, _Context}, State) ->
 	ensure_dev_server(),
 	z_development_server:reload(),
     {noreply, State};
 
-handle_cast(make, State) ->
+handle_cast({development_make, _Context}, State) ->
 	ensure_dev_server(),
 	z_development_server:make(),
     {noreply, State};
