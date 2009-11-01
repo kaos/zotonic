@@ -22,10 +22,15 @@
     render_to_iolist/3,
     find_template/2,
     find_template/3,
-    reset/1
+    reset/1,
+	is_template_module/1
 ]).
 
 -record(state, {reset_counter, host}).
+
+%% Prefix for modules generated from templates.
+-define(TEMPLATE_PREFIX, "template_").
+
 
 start_link(SiteProps) ->
     {host, Host} = proplists:lookup(host, SiteProps),
@@ -102,6 +107,13 @@ find_template(File, false, Context) ->
 find_template(File, true, Context) ->
     z_module_indexer:find_all(template, File, Context).
 
+%% @doc Check if the module is a template module.
+%% @spec is_template_module(atom()) -> bool()
+is_template_module(Module) ->
+	case z_convert:to_list(Module) of
+		?TEMPLATE_PREFIX ++ _ -> true;
+		_ -> false
+	end.
 
 %%====================================================================
 %% gen_server callbacks
@@ -162,7 +174,7 @@ filename_to_modulename(File, Host) ->
     filename_to_modulename(File, Host, []).
 
 filename_to_modulename([], Host, Acc) ->
-    "template_" ++ atom_to_list(Host) ++ [$_ | lists:reverse(Acc)];
+    ?TEMPLATE_PREFIX ++ atom_to_list(Host) ++ [$_ | lists:reverse(Acc)];
 filename_to_modulename([C|T], Host, Acc) ->
     filename_to_modulename(T, Host, [savechar(C)|Acc]).
 
