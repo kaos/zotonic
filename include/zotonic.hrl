@@ -93,7 +93,7 @@
 -record(rsc_list, {list}).
 
 %% Default page length for search
--define(SEARCH_PAGELEN, 15).
+-define(SEARCH_PAGELEN, 20).
 
 %% Used for search results
 -record(search_result, {result=[], page=1, pagelen, total, all, pages, next, prev}).
