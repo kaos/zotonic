@@ -64,17 +64,17 @@ m_value(#m{}, Context) ->
 
 %% @doc Test if the property is the name of a predicate
 %% @spec is_predicate(Pred, Context) -> bool()
-is_predicate(Id, Context) when is_integer(Id) ->
-    F = fun() ->
-        case z_db:q1("select id from rsc where id = $1 and category_id = $2", [Id, cat_id(Context)], Context) of
-            undefined -> false;
-            _ -> true
-        end
-    end,
-    z_depcache:memo(F, {is_predicate, Id}, ?DAY, [predicate], Context);
+is_predicate(Id, Context) when is_integer(Id) -> 
+    case m_rsc:p(Id, category_id, Context) of
+        undefined -> false;
+        CatId ->
+            m_category:is_a(CatId, predicate, Context)
+    end;
+
 is_predicate(Pred, Context) ->
-    case name_to_id(Pred, Context) of
-        {ok, _Id} -> true;
+    case m_rsc:name_to_id(Pred, Context) of
+        {ok, Id} ->
+            is_predicate(Id, Context);
         _ -> false
     end.
 
@@ -83,21 +83,29 @@ is_predicate(Pred, Context) ->
 %% @spec id_to_name(Id, Context) -> {ok, atom()} | {error, Reason}
 id_to_name(Id, Context) when is_integer(Id) ->
     F = fun() ->
-        case z_db:q1("select name from rsc where id = $1 and category_id = $2", [Id, cat_id(Context)], Context) of
-            undefined -> {error, {enoent, predicate, Id}};
-            Name -> {ok, z_convert:to_atom(Name)}
-        end
-    end,
+                {L,R} = cat_bounds(Context),
+                case z_db:q1("select name from rsc r join category c on (r.category_id = c.id) where r.id = $1 and $2 <= c.nr and c.nr <= $3", [Id, R, L], Context) of
+                    undefined -> {error, {enoent, predicate, Id}};
+                    Name -> {ok, z_convert:to_atom(Name)}
+                end
+        end,
     z_depcache:memo(F, {predicate_name, Id}, ?DAY, [predicate], Context).
 
     
 %% @doc Return the id of the predicate
 %% @spec name_to_id(Pred, Context) -> {ok, int()} | {error, Reason}
 name_to_id(Name, Context) ->
-    m_rsc:name_to_id_cat(Name, predicate, Context).
+    case m_rsc:name_to_id(Name, Context) of
+        {ok, Id} ->
+            case is_predicate(Id, Context) of
+                true -> {ok, Id};
+                false -> {error, enoent, Name}
+            end;
+        _ -> {error, enoent}
+    end.
 
 name_to_id_check(Name, Context) ->
-    m_rsc:name_to_id_cat_check(Name, predicate, Context).
+    {ok, _} = name_to_id(Name, Context).
 
 
 %% @doc Return the definition of the predicate
@@ -134,17 +142,18 @@ subjects(Id, Context) ->
 %% @spec all(Context) -> PropList
 all(Context) ->
     F = fun() ->
-        Preds = z_db:assoc_props("select * from rsc where category_id = $1 order by name", [cat_id(Context)], Context),
-        FSetPred = fun(Pred) ->
-            Id = proplists:get_value(id, Pred),
-            Atom = case proplists:get_value(name, Pred) of
-                undefined -> undefined;
-                B -> list_to_atom(binary_to_list(B))
-            end,
-            {Atom, [{pred, Atom},{subject,subjects(Id,Context)},{object,objects(Id,Context)}|Pred]}
+                {L,R} = cat_bounds(Context),
+                Preds = z_db:assoc_props("select * from rsc r join category c on (r.category_id = c.id) where $1 <= c.nr and c.nr <= $2 order by name", [L, R], Context),
+                FSetPred = fun(Pred) ->
+                                   Id = proplists:get_value(id, Pred),
+                                   Atom = case proplists:get_value(name, Pred) of
+                                              undefined -> undefined;
+                                              B -> list_to_atom(binary_to_list(B))
+                                          end,
+                                   {Atom, [{pred, Atom},{subject,subjects(Id,Context)},{object,objects(Id,Context)}|Pred]}
+                           end,
+                [ FSetPred(Pred) || Pred <- Preds]
         end,
-        [ FSetPred(Pred) || Pred <- Preds]
-    end,
     z_depcache:memo(F, predicate, ?DAY, Context).
 
 
@@ -224,7 +233,8 @@ subject_category(Id, Context) ->
     F = fun() ->
         case name_to_id(Id, Context) of
             {ok, PredId} ->
-                z_db:q("select category_id from predicate_category where predicate_id = $1 and is_subject = true", [PredId], Context);
+                {L,R} = cat_bounds(PredId, Context),
+                z_db:q("select pc.category_id from predicate_category pc join category c on (pc.predicate_id = c.id) where $1 <= c.nr and c.nr <= $2 and is_subject = true", [L, R], Context);
             _ -> 
                 []
         end
@@ -234,6 +244,7 @@ subject_category(Id, Context) ->
 
 %% @doc Return the list of predicates that are valid for the given resource id. Append all predicates that have no restrictions.
 for_subject(Id, Context) ->
+    {L,R} = cat_bounds(Context),
     ValidIds = z_db:q("
                 select p.predicate_id 
                 from predicate_category p,
@@ -251,9 +262,10 @@ for_subject(Id, Context) ->
     NoRestrictionIds = z_db:q("
                     select r.id
                     from rsc r left join predicate_category p on p.predicate_id = r.id and p.is_subject = true
+                        join category c on (r.category_id = c.id)
                     where p.predicate_id is null
-                      and r.category_id = $1
-                ", [cat_id(Context)], Context),
+                      and $1 <= c.nr and c.nr <= $2
+                ", [L, R], Context),
     NoRestriction = [ NoRestrictionId || {NoRestrictionId} <- NoRestrictionIds ],
     Valid ++ NoRestriction.
                 
@@ -264,4 +276,9 @@ for_subject(Id, Context) ->
 %% @spec cat_id(Context) -> integer()
 cat_id(Context) ->
     m_category:name_to_id_check(predicate, Context).
+
+cat_bounds(PredicateId, Context) ->
+    m_category:boundaries(PredicateId, Context).
+cat_bounds(Context) ->
+    m_category:boundaries(cat_id(Context), Context).
         

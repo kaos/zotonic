@@ -43,7 +43,8 @@
     tree_depth/2,
     tree_depth/3,
     renumber/1,
-    enumerate/1
+    enumerate/1,
+    boundaries/2         
 ]).
 
 
@@ -635,3 +636,12 @@ insert_cat(Id, ParentId, Name, GroupId, Props, Context) ->
     z_db:transaction(F, Context),
     ok.
 
+%%
+%% Return the left/right boundaries of the given category.
+%% @spec bounds(Id, C) -> {Left, Right}
+boundaries(CatId, Context) ->
+    F = fun() ->
+                [{L,R}] = z_db:q("SELECT lft, rght FROM category WHERE id = $1", [CatId], Context),
+                {L,R}
+        end,
+    z_depcache:memo(F, {category_bounds, CatId}, ?WEEK, [CatId, category], Context).
