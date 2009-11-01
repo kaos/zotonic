@@ -2,30 +2,27 @@
 %% @copyright 2009 Marc Worrell
 %% @date 2009-11-01
 %%
-%% @doc Development server.  Periodically performs a "make" and loads new files.
-%% When new files are loaded the caches are emptied.
+%% @doc Development server.  Periodically loads modules whose beam file have been updated.
+%% This server is started by the mod_development.
 
--module(mod_development).
+-module(z_development_server).
 -author("Marc Worrell <marc@worrell.nl>").
 -behaviour(gen_server).
 
--mod_title("Development").
--mod_description("Development support, periodically builds and loads changed files.").
--mod_prio(1000).
-
 %% gen_server exports
 -export([init/1, handle_call/3, handle_cast/2, handle_info/2, terminate/2, code_change/3]).
--export([start_link/1]).
+-export([start_link/0, start_link/1]).
 
 %% interface functions
 -export([
-	reload/1,
-	make/1
+	reload/0,
+	make/0
 ]).
 
 -include_lib("zotonic.hrl").
 
--record(state, {context}).
+% The state record for this server
+-record(state, {}).
 
 % Interval for checking for new and/or changed files.
 -define(DEV_POLL_INTERVAL, 10000).
@@ -36,15 +33,19 @@
 %%====================================================================
 %% @spec start_link(Args) -> {ok,Pid} | ignore | {error,Error}
 %% @doc Starts the server
+start_link() ->
+	start_link([]).
 start_link(Args) when is_list(Args) ->
-    gen_server:start_link(?MODULE, Args, []).
+    gen_server:start_link({local, ?MODULE}, ?MODULE, Args, []).
 
 
-reload(Context) ->
-	z_event:notify(development_reload, Context).
+%% @doc Check if beam files are changed, load the changed ones.
+reload() ->
+	gen_server:cast(?MODULE, reload).
 
-make(Context) ->
-	z_event:notify(development_make, Context).
+%% @doc Perform a make:all() and reload the changed beam files.
+make() ->
+	gen_server:cast(?MODULE, make).
 
 
 %%====================================================================
@@ -56,15 +57,9 @@ make(Context) ->
 %%                     ignore               |
 %%                     {stop, Reason}
 %% @doc Initiates the server.
-init(Args) ->
-    process_flag(trap_exit, true),
-    {context, Context} = proplists:lookup(context, Args),
-    timer:send_interval(?DEV_POLL_INTERVAL, ensure_server),
-	z_notifier:observe(development_reload, self(), Context),
-	z_notifier:observe(development_make, self(), Context),
-    {ok, #state{
-        context  = z_context:new(Context)
-    }}.
+init(_Args) ->
+    timer:send_interval(?DEV_POLL_INTERVAL, reload_beams),
+    {ok, #state{}}.
 
 
 %% @spec handle_call(Request, From, State) -> {reply, Reply, State} |
@@ -83,13 +78,12 @@ handle_call(Message, _From, State) ->
 %%                                  {noreply, State, Timeout} |
 %%                                  {stop, Reason, State}
 handle_cast(reload, State) ->
-	ensure_dev_server(),
-	z_development_server:reload(),
+	reload_all(),
     {noreply, State};
 
 handle_cast(make, State) ->
-	ensure_dev_server(),
-	z_development_server:make(),
+	make_all(),
+	reload_all(),
     {noreply, State};
 
 %% @doc Trap unknown casts
@@ -100,9 +94,9 @@ handle_cast(Message, State) ->
 %% @spec handle_info(Info, State) -> {noreply, State} |
 %%                                       {noreply, State, Timeout} |
 %%                                       {stop, Reason, State}
-%% @doc Periodic check if the dev server is still running.
-handle_info(ensure_server, State) ->
-	ensure_dev_server(),
+%% @doc Periodic check for changed beam files.
+handle_info(reload_beams, State) ->
+	reload_all(),
     {noreply, State};
 
 %% @doc Handling all non call/cast messages
@@ -114,9 +108,7 @@ handle_info(_Info, State) ->
 %% terminate. It should be the opposite of Module:init/1 and do any necessary
 %% cleaning up. When it returns, the gen_server terminates with Reason.
 %% The return value is ignored.
-terminate(_Reason, State) ->
-	z_notifier:detach(development_reload, self(), State#state.context),
-	z_notifier:detach(development_make, self(), State#state.context),
+terminate(_Reason, _State) ->
     ok.
 
 %% @spec code_change(OldVsn, State, Extra) -> {ok, NewState}
@@ -129,11 +121,49 @@ code_change(_OldVsn, State, _Extra) ->
 %% support functions
 %%====================================================================
 
-
-%% @doc Ensure that a dev server is running.  If it is not running then the server is started and
-%% this module process is linked to the server.
-ensure_dev_server() ->
-	case erlang:whereis(z_development_server) of
-		undefined -> z_development_server:start_link();
-		_Pid -> ok
+%% @doc Check if any of the loaded modules has been changed. If so reload the module's beam file.
+reload_all() ->
+	case reload_loaded_modules() of
+		[] -> ok;
+		_ -> z:flush()
 	end.
+
+%% @doc Remake beam files from source. Do not load the new files (yet).
+make_all() ->
+	make:all([]),
+	ok.
+
+%% @doc Reload a module, purge the old code.
+reload_module(M) ->
+	code:purge(M),
+	code:soft_purge(M),
+	{module, M} = code:load_file(M),
+	{ok, M}.
+
+%% @doc Reload all modules from the zotonic directory or subdirectories.  Return a list of modules reloaded. Empty list when nothing changed.
+%% @spec reload_all() -> [Result]
+reload_loaded_modules() ->
+	Dir = code:lib_dir(zotonic),
+	Modules = [{M,P} || {M, P} <- code:all_loaded(), is_list(P) andalso string:str(P, Dir) > 0],
+	[reload_module(M) || {M,Path} <- Modules, module_changed(M,Path)].
+	
+%% @doc Check if the version number of the module has been changed.  Skip template modules.
+%% @spec module_changed(atom(), filename()) -> bool()
+module_changed(Module, BeamFile) ->
+	case z_template:is_template_module(Module) of
+		true -> 
+			false;
+		false ->
+			Props = Module:module_info(attributes),
+			case proplists:get_value(vsn, Props) of
+				undefined ->
+					false;
+				Version ->
+					case beam_lib:version(BeamFile) of
+						{ok, {_Module, Version}} -> false;
+						{ok, {_Module, _OtherVersion}} -> true;
+						{error, _} -> false
+					end
+			end
+	end.
+
