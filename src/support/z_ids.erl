@@ -74,7 +74,7 @@ sign_key(Context) ->
 %% @doc Get the key for less secure signing of data (without nonce).
 sign_key_simple(Context) -> 
     case m_site:get(sign_key_simple, Context) of
-        SiteKey when not is_binary(SiteKey) orelse SiteKey =:= <<"--change-me--">> -> 
+        SiteKey when not is_binary(SiteKey) -> 
             gen_server:call(?MODULE, sign_key_simple);
         SignKeySimple -> 
             SignKeySimple
