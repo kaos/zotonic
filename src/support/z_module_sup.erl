@@ -37,7 +37,9 @@ start_link(SiteProps) ->
 %% @spec upgrade(context()) -> ok
 %% @doc Reload the list of all modules, add processes if necessary.
 upgrade(Context) ->
-    {ok, {_, Specs}} = init([{context, Context}]),
+	Site = z_context:site(Context),
+	SiteProps = z_sites_sup:get_site_config(Site),
+    {ok, {_, Specs}} = init([{context, Context} | SiteProps]),
     ModuleSup = Context#context.module_sup,
 
     z_depcache:flush(z_modules, Context),
@@ -84,13 +86,13 @@ upgrade(Context) ->
         
 
 %% @spec init(proplist()) -> SupervisorTree
-%% @doc supervisor callback.
+%% @doc supervisor callback.  The proplist is the concatenation of {context,_} and the site configuration.
 init(Args) ->
     {context, Context} = proplists:lookup(context, Args),
     Ms = lists:filter(fun module_exists/1, active(Context)),
     Processes = [
         {M, 
-            {M, start_link, [[{context, Context}]]},
+            {M, start_link, [Args]},
             permanent, 5000, worker, [M]} || M <- Ms
     ],
     {ok, {{one_for_one, 1000, 10}, Processes}}.
