@@ -270,7 +270,7 @@ pivot_sort_title(R) ->
     case proplists:get_value(title, R) of
         {trans, []} ->
             "";
-        {trans, [{_, Text}]} ->
+        {trans, [{_, Text}|_]} ->
             Text;
         T -> T
     end.    
