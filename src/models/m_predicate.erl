@@ -105,7 +105,8 @@ name_to_id(Name, Context) ->
     end.
 
 name_to_id_check(Name, Context) ->
-    {ok, _} = name_to_id(Name, Context).
+    {ok, Id} = name_to_id(Name, Context),
+    Id.
 
 
 %% @doc Return the definition of the predicate
