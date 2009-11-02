@@ -162,7 +162,7 @@ module_changed(Module, BeamFile) ->
 					case beam_lib:version(BeamFile) of
 						{ok, {_Module, Version}} -> false;
 						{ok, {_Module, _OtherVersion}} -> true;
-						{error, _} -> false
+						{error, _, _} -> false
 					end
 			end
 	end.
