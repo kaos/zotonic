@@ -16,6 +16,7 @@
     m_value/2,
     all/1,
     get/2,
+    get/3,
     get_all/2
 ]).
 
@@ -59,6 +60,13 @@ get(Key, Context) when is_atom(Key) ->
             All = all(Context),
             proplists:get_value(Key, All)
     end.
+
+%% @doc Fetch a nested key from the site configuration
+get(Module, Key, Context) when is_atom(Key) ->
+	case get(Module, Context) of
+		undefined -> undefined;
+		L when is_list(L) -> proplists:get_value(Key, L)
+	end.
 
 %% @doc Fetch all values for a key, eg for the hostalias key.
 get_all(Key, Context) ->

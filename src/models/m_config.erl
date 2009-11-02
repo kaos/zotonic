@@ -2,7 +2,8 @@
 %% @copyright 2009 Marc Worrell
 %% @date 2009-04-09
 %%
-%% @doc Model for the zotonic config table
+%% @doc Model for the zotonic config table. Performs a fallback to the site configuration when 
+%% a key is not defined in the configuration table.
 
 -module(m_config).
 -author("Marc Worrell <marc@worrell.nl").
@@ -49,8 +50,7 @@ m_value(#m{value=Module}, Context) ->
     get(Module, Context).
     
 
-%% @doc Return all configurations gives a nested proplist (module, key)
-
+%% @doc Return all configurations from the configuration table. Returns a nested proplist (module, key)
 all(Context) ->
     case z_depcache:get(config, Context) of
         {ok, Cs} ->
@@ -63,19 +63,25 @@ all(Context) ->
     end.
 
 
+%% @doc Get the list of configuration key for the module.
 get(Module, Context) when is_atom(Module) ->
-    case z_depcache:get(config, Module, Context) of
+    ConfigProps = case z_depcache:get(config, Module, Context) of
         {ok, undefined} ->
-            undefined;
+            [];
         {ok, Cs} ->
             Cs;
         undefined ->
             All = all(Context),
-            proplists:get_value(Module, All)
-    end.
+            proplists:get_value(Module, All, [])
+    end,
+	case m_site:get(Module, Context) of
+		L when is_list(L) -> z_convert:to_list(ConfigProps) ++ L;
+		_ -> ConfigProps
+	end.
+	
 
 get(Module, Key, Context) when is_atom(Module) andalso is_atom(Key) ->
-    case z_depcache:get(config, Module, Context) of
+    Value = case z_depcache:get(config, Module, Context) of
         {ok, undefined} ->
             undefined;
         {ok, Cs} ->
@@ -86,13 +92,28 @@ get(Module, Key, Context) when is_atom(Module) andalso is_atom(Key) ->
                 undefined -> undefined;
                 Cs -> proplists:get_value(Key, Cs)
             end
-    end.
+    end,
+	case Value of 
+		undefined ->
+			case m_site:get(Module, Key, Context) of
+				undefined -> Value;
+				V -> [{value,V}]
+			end;
+		_ ->
+			Value
+	end.
+
 
 get_value(Module, Key, Context) when is_atom(Module) andalso is_atom(Key) ->
-    case get(Module, Key, Context) of
+    Value = case get(Module, Key, Context) of
         undefined -> undefined;
         Cfg -> proplists:get_value(value, Cfg)
-    end.
+    end,
+	case Value of
+		undefind -> m_site:get(Module, Key, Context);
+		_ -> Value
+	end.
+
 
 get_value(Module, Key, Default, Context) when is_atom(Module) andalso is_atom(Key) ->
     case get_value(Module, Key, Context) of
