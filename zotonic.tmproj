@@ -178,8 +178,6 @@
 	</dict>
 	<key>showFileHierarchyDrawer</key>
 	<false/>
-	<key>showFileHierarchyPanel</key>
-	<true/>
 	<key>treeState</key>
 	<dict>
 		<key>modules</key>
@@ -187,187 +185,17 @@
 			<key>isExpanded</key>
 			<true/>
 			<key>subItems</key>
-			<dict>
-				<key>mod_admin</key>
-				<dict>
-					<key>isExpanded</key>
-					<true/>
-					<key>subItems</key>
-					<dict>
-						<key>lib</key>
-						<dict>
-							<key>isExpanded</key>
-							<true/>
-							<key>subItems</key>
-							<dict>
-								<key>css</key>
-								<dict>
-									<key>isExpanded</key>
-									<true/>
-									<key>subItems</key>
-									<dict/>
-								</dict>
-							</dict>
-						</dict>
-					</dict>
-				</dict>
-				<key>mod_base</key>
-				<dict>
-					<key>isExpanded</key>
-					<true/>
-					<key>subItems</key>
-					<dict>
-						<key>lib</key>
-						<dict>
-							<key>isExpanded</key>
-							<true/>
-							<key>subItems</key>
-							<dict>
-								<key>js</key>
-								<dict>
-									<key>isExpanded</key>
-									<true/>
-									<key>subItems</key>
-									<dict>
-										<key>apps</key>
-										<dict>
-											<key>isExpanded</key>
-											<true/>
-											<key>subItems</key>
-											<dict/>
-										</dict>
-										<key>modules</key>
-										<dict>
-											<key>isExpanded</key>
-											<true/>
-											<key>subItems</key>
-											<dict>
-												<key>tinymce</key>
-												<dict>
-													<key>isExpanded</key>
-													<true/>
-													<key>subItems</key>
-													<dict>
-														<key>themes</key>
-														<dict>
-															<key>isExpanded</key>
-															<true/>
-															<key>subItems</key>
-															<dict>
-																<key>advanced</key>
-																<dict>
-																	<key>isExpanded</key>
-																	<true/>
-																	<key>subItems</key>
-																	<dict>
-																		<key>img</key>
-																		<dict>
-																			<key>isExpanded</key>
-																			<true/>
-																			<key>subItems</key>
-																			<dict/>
-																		</dict>
-																		<key>skins</key>
-																		<dict>
-																			<key>isExpanded</key>
-																			<true/>
-																			<key>subItems</key>
-																			<dict>
-																				<key>wp_theme</key>
-																				<dict>
-																					<key>isExpanded</key>
-																					<true/>
-																					<key>subItems</key>
-																					<dict>
-																						<key>img</key>
-																						<dict>
-																							<key>isExpanded</key>
-																							<true/>
-																							<key>subItems</key>
-																							<dict/>
-																						</dict>
-																					</dict>
-																				</dict>
-																			</dict>
-																		</dict>
-																	</dict>
-																</dict>
-															</dict>
-														</dict>
-													</dict>
-												</dict>
-											</dict>
-										</dict>
-									</dict>
-								</dict>
-							</dict>
-						</dict>
-						<key>templates</key>
-						<dict>
-							<key>isExpanded</key>
-							<true/>
-							<key>subItems</key>
-							<dict/>
-						</dict>
-					</dict>
-				</dict>
-			</dict>
+			<dict/>
 		</dict>
 		<key>priv</key>
 		<dict>
 			<key>isExpanded</key>
 			<true/>
 			<key>subItems</key>
-			<dict>
-				<key>sites</key>
-				<dict>
-					<key>isExpanded</key>
-					<true/>
-					<key>subItems</key>
-					<dict>
-						<key>default</key>
-						<dict>
-							<key>isExpanded</key>
-							<true/>
-							<key>subItems</key>
-							<dict>
-								<key>dispatch</key>
-								<dict>
-									<key>isExpanded</key>
-									<true/>
-									<key>subItems</key>
-									<dict/>
-								</dict>
-								<key>lib</key>
-								<dict>
-									<key>isExpanded</key>
-									<true/>
-									<key>subItems</key>
-									<dict>
-										<key>css</key>
-										<dict>
-											<key>isExpanded</key>
-											<true/>
-											<key>subItems</key>
-											<dict/>
-										</dict>
-									</dict>
-								</dict>
-								<key>templates</key>
-								<dict>
-									<key>isExpanded</key>
-									<true/>
-									<key>subItems</key>
-									<dict/>
-								</dict>
-							</dict>
-						</dict>
-					</dict>
-				</dict>
-			</dict>
+			<dict/>
 		</dict>
 	</dict>
 	<key>windowFrame</key>
-	<string>{{44, 190}, {1677, 882}}</string>
+	<string>{{0, 74}, {1280, 704}}</string>
 </dict>
 </plist>
