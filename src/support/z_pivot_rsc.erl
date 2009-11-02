@@ -154,7 +154,7 @@ fetch_queue(Context) ->
 
 %% @doc Fetch the serial of id's queue record
 fetch_queue_id(Id, Context) ->
-    z_db:q1("select serial from rsc_pivot_queue where id = $1", [Id], Context).
+    z_db:q1("select serial from rsc_pivot_queue where rsc_id = $1", [Id], Context).
 
 %% @doc Delete the previously queued ids iff the queue entry has not been updated in the meanwhile
 delete_queue(Qs, Context) ->
@@ -167,7 +167,7 @@ delete_queue(Qs, Context) ->
 delete_queue(_Id, undefined, _Context) ->
     ok;
 delete_queue(Id, Serial, Context) ->
-    z_db:q("delete from rsc_pivot_queue where id = $1 and serial = $2", [Id,Serial], Context).
+    z_db:q("delete from rsc_pivot_queue where rsc_id = $1 and serial = $2", [Id,Serial], Context).
 
 
 
