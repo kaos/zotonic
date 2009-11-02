@@ -51,8 +51,7 @@ start_link(Args) when is_list(Args) ->
 init(Args) ->
     process_flag(trap_exit, true),
     {context, Context} = proplists:lookup(context, Args),
-    z_notifier:observe(email,        self(), Context),
-    z_notifier:observe(email_render, self(), Context),
+    z_notifier:observe(#email{}, self(), Context),
     timer:send_interval(60000, poll),
 	State = update_config(#state{context=z_context:new(Context)}),
 	{ok, State}.
@@ -73,49 +72,25 @@ handle_call(Message, _From, State) ->
 %%                                  {noreply, State, Timeout} |
 %%                                  {stop, Reason, State}
 %% @doc Send an e-mail to an e-mail address.
-handle_cast({{email, SendNow, To, Subject, Message}, Context}, State) ->
+handle_cast({#email{} = Email, Context}, State) ->
 	State1 = update_config(State),
     Cols = [
-        {recipient, To},
-        {render, false},
-        {subject, Subject},
-        {message, Message},
+        {recipient, Email#email.to},
+		{sender, Email#email.from},
+        {email, Email},
         {context, z_context:pickle(Context)},
         {retry, 0}
     ],
     {ok, Id} = z_db:insert(emailq, Cols, Context),
-	case SendNow of
-		true -> send_queued([{id, Id}|Cols], State1);
-		false -> ok
-	end,
-    {noreply, State1};
-
-%% @doc Render a template and send it as an e-mail.
-handle_cast({{email_render, SendNow, To, HtmlTemplate, Vars}, Context}, State) ->
-	handle_cast({{email_render, SendNow, To, HtmlTemplate, undefined, Vars}, Context}, State);
-handle_cast({{email_render, SendNow, To, HtmlTemplate, TextTemplate, Vars}, Context}, State) ->
-	State1 = update_config(State),
-    Cols = [
-        {recipient, To},
-        {render, true},
-        {html_tpl, HtmlTemplate},
-        {text_tpl, TextTemplate},
-        {vars, Vars},
-        {context, z_context:pickle(Context)},
-        {retry, 0}
-    ],
-    {ok, Id} = z_db:insert(emailq, Cols, Context),
-	case SendNow of
-		true -> send_queued([{id, Id}|Cols], State1);
-		false -> ok
+	case Email#email.queue of
+		false -> send_queued([{id, Id}|Cols], State1);
+		true -> ok
 	end,
     {noreply, State1};
 
 %% @doc Trap unknown casts
 handle_cast(Message, State) ->
     {stop, {unknown_cast, Message}, State}.
-
-
 
 %% @spec handle_info(Info, State) -> {noreply, State} |
 %%                                   {noreply, State, Timeout} |
@@ -135,8 +110,7 @@ handle_info(_Info, State) ->
 %% cleaning up. When it returns, the gen_server terminates with Reason.
 %% The return value is ignored.
 terminate(_Reason, State) ->
-    z_notifier:detach(email,        self(), State#state.context),
-    z_notifier:detach(email_render, self(), State#state.context),
+    z_notifier:detach(#email{}, self(), State#state.context),
     ok.
 
 %% @spec code_change(OldVsn, State, Extra) -> {ok, NewState}
@@ -184,67 +158,56 @@ poll_queued(State) ->
 
 send_queued(Cols, State) ->
     {id, Id} = proplists:lookup(id, Cols),
-    {recipient, To} = proplists:lookup(recipient, Cols),
+	{email, Email} = proplists:lookup(email, Cols),
     {context, PickledContext} = proplists:lookup(context, Cols),
     Context = z_context:depickle(PickledContext),
     {retry, Retry} = proplists:lookup(retry, Cols),
-    case proplists:get_value(render, Cols) of
-        true ->
-            {html_tpl, HtmlTemplate} = proplists:lookup(html_tpl, Cols),
-            TextTemplate = proplists:get_value(text_tpl, Cols),
-            {vars, Vars} = proplists:lookup(vars, Cols),
-            spawn_send_html(Id, Retry, To, HtmlTemplate, TextTemplate, Vars, Context, State);
-        false ->
-            {subject, Subject} = proplists:lookup(subject, Cols),
-            {message, Message} = proplists:lookup(message, Cols),
-            spawn_send(Id, Retry, To, Subject, Message, Context, State)
-    end.
+    mark_retry(Id, Retry, Context),
+	spawn_send(Id, Email, Context, State).
 
 
-% @doc Spawn a simple mail sending process
-spawn_send(Id, Retry, To, Subject, Msg, Context, State) ->
+spawn_send(Id, Email, Context, State) ->
     F = fun() ->
-        mark_retry(Id, Retry, Context),
-        MimeMsg = esmtp_mime:msg(
-                            z_convert:to_list(To), 
-                            State#state.from, 
-                            z_convert:to_list(Subject), 
-                            z_convert:to_list(Msg)),
-        sendemail(MimeMsg, State),
-        mark_sent(Id, Context)
-    end,
-    spawn(F).
+	    To = Email#email.to,
+		From = case Email#email.from of L when L =:= [] orelse L =:= undefined -> State#state.from; EmailFrom -> EmailFrom end,
 
+		% Optionally render the text and html body
+		Vars = [{email_to, To}, {email_from, From} | Email#email.vars],
+		Text = optional_render(Email#email.text, Email#email.text_tpl, Vars, Context),
+		Html = optional_render(Email#email.html, Email#email.html_tpl, Vars, Context),
 
-spawn_send_html(Id, Retry, To, HtmlTemplate, TextTemplate, Vars, Context, State) ->
-    F = fun() ->
-        mark_retry(Id, Retry, Context),
-        
-        {HtmlOutput,_HtmlContext} = z_template:render_to_iolist(z_convert:to_list(HtmlTemplate), Vars, Context),
-        Html = binary_to_list(iolist_to_binary(HtmlOutput)),
-        Text = case TextTemplate of
-            undefined -> 
-                undefined;
-            _ ->
-                {TextOutput,_TextContext} = z_template:render_to_iolist(z_convert:to_list(TextTemplate), Vars, Context),
-                binary_to_list(iolist_to_binary(TextOutput))
-        end,
-
-        % Fetch the subject from the title of the HTML part
-        {match, [_, {Start,Len}|_]} = re:run(Html, "<title>(.*)</title>", [dotall, caseless]),
-        Subject = string:strip(z_string:line(lists:sublist(Html, Start+1, Len))),
+        % Fetch the subject from the title of the HTML part or from the Email record
+		Subject = case {Html, Email#email.subject} of
+			{[], undefined} -> [];
+			{[], Sub} -> Sub;
+			{_Html, undefined} ->
+		        {match, [_, {Start,Len}|_]} = re:run(Html, "<title>(.*)</title>", [dotall, caseless]),
+		        string:strip(z_string:line(lists:sublist(Html, Start+1, Len)))
+		end,
 
         % Build the message and send it
-        MimeMsg = esmtp_mime:msg(z_convert:to_list(To), State#state.from, Subject),
-        MimeMsg2 = case Text of
-            undefined -> MimeMsg;
-            _ -> esmtp_mime:add_text_part(MimeMsg, Text)
+        MimeMsg = esmtp_mime:msg(z_convert:to_list(To), z_convert:to_list(From), z_convert:to_list(Subject)),
+        MimeMsg1 = case Text of
+            [] -> MimeMsg;
+            _ -> esmtp_mime:add_text_part(MimeMsg, z_convert:to_list(Text))
         end,
-        MimeMsg3 = esmtp_mime:add_html_part(MimeMsg2, Html),
-        sendemail(MimeMsg3, State),
+        MimeMsg2 = case Html of
+            [] -> MimeMsg1;
+            _ -> esmtp_mime:add_html_part(MimeMsg1, z_convert:to_list(Html))
+        end,
+        sendemail(MimeMsg2, State),
         mark_sent(Id, Context)
     end,
     spawn(F).
+
+
+optional_render(undefined, undefined, _Vars, _Context) ->
+	[];
+optional_render(Text, undefined, _Vars, _Context) ->
+	Text;
+optional_render(undefined, Template, Vars, Context) ->
+    {Output, _Context} = z_template:render_to_iolist(z_convert:to_list(Template), Vars, Context),
+    binary_to_list(iolist_to_binary(Output)).
 
 
 mark_sent(Id, Context) ->

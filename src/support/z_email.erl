@@ -12,6 +12,8 @@
 	get_admin_email/1,
 	send_admin/3,
 	
+	send/2,
+	
     send/4,
     send_render/4,
     send_render/5,
@@ -20,6 +22,8 @@
     sendq_render/4,
     sendq_render/5
 ]).
+
+-include_lib("zotonic.hrl").
 
 
 %% @doc Fetch the e-mail address of the site administrator
@@ -37,16 +41,20 @@ get_admin_email(Context) ->
 send_admin(Subject, Message, Context) ->
 	case get_admin_email(Context) of
 		undefined -> error;
-		Email -> z_notifier:notify1({email, true, Email, Subject, Message}, Context)
+		Email -> z_notifier:notify1(#email{queue=false, to=Email, subject=Subject, text=Message}, Context)
 	end.
+
+%% @doc Send an email message defined by the email record.
+send(#email{} = Email, Context) ->
+	z_notifier:notify1(Email, Context).
 
 %% @doc Send a simple text message to an email address
 send(To, Subject, Message, Context) ->
-	z_notifier:notify1({email, true, To, Subject, Message}, Context).
+	z_notifier:notify1(#email{queue=false, to=To, subject=Subject, text=Message}, Context).
 
 %% @doc Queue a simple text message to an email address
 sendq(To, Subject, Message, Context) ->
-	z_notifier:notify1({email, false, To, Subject, Message}, Context).
+	z_notifier:notify1(#email{queue=true, to=To, subject=Subject, text=Message}, Context).
 
 %% @doc Send a html message to an email address, render the message using a template.
 send_render(To, HtmlTemplate, Vars, Context) ->
@@ -54,7 +62,7 @@ send_render(To, HtmlTemplate, Vars, Context) ->
 
 %% @doc Send a html and text message to an email address, render the message using two templates.
 send_render(To, HtmlTemplate, TextTemplate, Vars, Context) ->
-	z_notifier:notify1({email_render, true, To, HtmlTemplate, TextTemplate, Vars}, Context).
+	z_notifier:notify1(#email{queue=false, to=To, html_tpl=HtmlTemplate, text_tpl=TextTemplate, vars=Vars}, Context).
 
 %% @doc Queue a html message to an email address, render the message using a template.
 sendq_render(To, HtmlTemplate, Vars, Context) ->
@@ -62,5 +70,5 @@ sendq_render(To, HtmlTemplate, Vars, Context) ->
 
 %% @doc Queue a html and text message to an email address, render the message using two templates.
 sendq_render(To, HtmlTemplate, TextTemplate, Vars, Context) ->
-	z_notifier:notify1({email_render, false, To, HtmlTemplate, TextTemplate, Vars}, Context).
+	z_notifier:notify1(#email{queue=true, to=To, html_tpl=HtmlTemplate, text_tpl=TextTemplate, vars=Vars}, Context).
 

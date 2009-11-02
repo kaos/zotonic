@@ -106,8 +106,11 @@
 -define(ACL_VIS_COMMUNITY, 1).
 -define(ACL_VIS_PUBLIC, 0).
 
-%% drag and drop event message
+%% @doc drag and drop event message
 -record(dragdrop, {tag, delegate, id}).
+
+%% @doc e-mail notification used by z_email and the mod_emailer.
+-record(email, {to=[], from=[], subject, text, html, text_tpl, html_tpl, vars=[], queue=false}).
 
 %% @doc Check if an assumption is true
 -define(ASSERT(A,E), z_utils:assert(A,E)).
@@ -150,6 +153,3 @@
 -define(LOG(Msg, Args), error_logger:info_msg(Msg, Args)).
 -define(DEBUG(Msg), error_logger:info_msg("DEBUG: ~p:~p  ~p~n", [?MODULE, ?LINE, Msg])).
 -define(ERROR(Msg, Args), error_logger:error_msg("~p:~p "++Msg, [?MODULE, ?LINE|Args])).
-
-%%% EMAIL %%%
--record(email, {from, to, subject, body}).
