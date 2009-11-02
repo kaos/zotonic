@@ -64,7 +64,7 @@ loop(MochiReq) ->
             spawn(LogModule, log_access, [LogData]),
             Req:stop();
         no_host_match ->
-            send_404(Req, default)
+            send_no_host(Req)
     end.
 
 dispatch_request(Req, Host, DispatchList) ->
@@ -95,7 +95,26 @@ send_404(Req, Host) ->
     spawn(LogModule, log_access, [LogData]),
     Req:stop().
 
-
 get_option(Option, Options) ->
     {proplists:get_value(Option, Options), proplists:delete(Option, Options)}.
 
+send_no_host(Req) ->
+	ErrorHTML = <<"<html>
+<title>Site Unknown &mdash; Webmachine</title>
+<body>
+	<h1>Who, What, Where?</h1>
+	<p>Someone sent you here for a site I don't know.</p>
+	<p>I guess I'm wrongly configured or you should have been somewhere else.</p>
+	<p>I'm really sorry about this.</p>
+</body>
+</html>">>,
+	Req:append_to_response_body(ErrorHTML),
+	Req:send_response(404),
+	LogData = Req:log_data(),
+	LogModule = 
+	    case application:get_env(webmachine,webmachine_logger_module) of
+	        {ok, Val} -> Val;
+	        _ -> webmachine_logger
+	    end,
+	spawn(LogModule, log_access, [LogData]),
+	Req:stop().
