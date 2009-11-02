@@ -171,7 +171,7 @@ init(_Args) ->
 %%                                      {stop, Reason, State}
 %% Description: Handling call messages
 
-%% @doc Return the list of observers for an event
+%% @doc Return the list of observers for an event. The event must be an atom.
 handle_call({'get_observers', Event}, _From, State) ->
     case dict:find(Event, State#state.observers) of
         {ok, Observers} ->
@@ -191,21 +191,23 @@ handle_call(Message, _From, State) ->
 
 %% @doc Add an observer to an event
 handle_cast({'observe', Event, Observer, Priority}, State) ->
-    Observers1 = case dict:find(Event, State#state.observers) of
+	Event1 = case is_tuple(Event) of true -> element(1,Event); false -> Event end,
+    Observers1 = case dict:find(Event1, State#state.observers) of
                   {ok, EventObservers} -> 
                         Os1 = lists:sort([{Priority, Observer}|EventObservers]),
-                        dict:store(Event, Os1, State#state.observers);
+                        dict:store(Event1, Os1, State#state.observers);
                   error -> 
-                        dict:store(Event, [{Priority, Observer}], State#state.observers)
+                        dict:store(Event1, [{Priority, Observer}], State#state.observers)
                   end,
     {noreply, State#state{observers=Observers1}};
 
 %% @doc Detach an observer from an event
 handle_cast({'detach', Event, Observer}, State) ->
-    Observers1 = case dict:find(Event, State#state.observers) of
+	Event1 = case is_tuple(Event) of true -> element(1,Event); false -> Event end,
+    Observers1 = case dict:find(Event1, State#state.observers) of
                   {ok, Olist} ->
                       Olist1 = lists:filter(fun({_Prio,Obs}) -> Obs /= Observer end, Olist),
-                      dict:store(Event, Olist1, State#state.observers);
+                      dict:store(Event1, Olist1, State#state.observers);
                   error ->
                       State#state.observers
                   end,
@@ -214,7 +216,8 @@ handle_cast({'detach', Event, Observer}, State) ->
 
 %% @doc Detach all observer from an event
 handle_cast({'detach_all', Event}, State) ->
-    {noreply, State#state{observers = dict:erase(Event, State#state.observers)}};
+	Event1 = case is_tuple(Event) of true -> element(1,Event); false -> Event end,
+    {noreply, State#state{observers = dict:erase(Event1, State#state.observers)}};
 
 
 %% @doc Trap unknown casts
