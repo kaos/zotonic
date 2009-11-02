@@ -18,9 +18,6 @@
 
 %% interface functions
 -export([
-    send/4,
-    send_render/4,
-    send_render/5
 ]).
 
 -include_lib("zotonic.hrl").
@@ -29,28 +26,10 @@
 %% -define(SMTP_PORT_TLS, 587).
 %% -define(SMTP_PORT_SSL, 465).
 
--define(EMAILER_FROM, "mworrell@wanadoo.nl").
--define(EMAILER_HOST, "smtp.wanadoo.nl").
--define(EMAILER_EHLO, "localhost").
-
 % Maximum times we retry to send a message before we mark it as failed.
 -define(MAX_RETRY, 7).
 
 -record(state, {from, ehlo, host, ssl, port, username, password, context}).
-
-
-%% @doc Send a simple text message to an email address
-send(To, Subject, Message, Context) ->
-	z_notifier:notify1({email, To, Subject, Message}, Context).
-
-%% @doc Send a html message to an email address, render the message using a template.
-send_render(To, HtmlTemplate, Vars, Context) ->
-    send_render(To, HtmlTemplate, undefined, Vars, Context).
-
-%% @doc Send a html and text message to an email address, render the message using two templates.
-send_render(To, HtmlTemplate, TextTemplate, Vars, Context) ->
-	z_notifier:notify1({email_render, To, HtmlTemplate, TextTemplate, Vars}, Context).
-
 
 %%====================================================================
 %% API
@@ -75,28 +54,9 @@ init(Args) ->
     z_notifier:observe(email,        self(), Context),
     z_notifier:observe(email_render, self(), Context),
     timer:send_interval(60000, poll),
-
-	%% Fetch defaults from the site configuration
-	EmailFrom = proplists:get_value(email_from, Args),
-	SmtpHost  = proplists:get_value(smtp_host, Args),
-	SmtpPort  = proplists:get_value(stmp_port, Args, 25), 
-	SmtpSsl   = proplists:get_value(stmp_ssl, Args, false), 
-	SmtpEhlo  = proplists:get_value(stmp_ehlo, Args, "localhost"), 
-	SmtpUsername = proplists:get_value(stmp_userame, Args), 
-	SmtpPassword = proplists:get_value(stmp_password, Args), 
-
-	%% Let the defaults be overruled by the config settings (from the admin)
-    {ok, #state{
-        from     = z_convert:to_list(m_config:get_value(?MODULE, email_from, EmailFrom, Context)),
-        host     = z_convert:to_list(m_config:get_value(?MODULE, smtp_host, SmtpHost, Context)),
-        port     = z_convert:to_integer(m_config:get_value(?MODULE, smtp_port, SmtpPort, Context)),
-        ssl      = z_convert:to_bool(m_config:get_value(?MODULE, smtp_ssl, SmtpSsl, Context)),
-        ehlo     = z_convert:to_list(m_config:get_value(?MODULE, smtp_ehlo, SmtpEhlo, Context)),
-        username = z_convert:to_list(m_config:get_value(?MODULE, smtp_username, SmtpUsername, Context)),
-        password = z_convert:to_list(m_config:get_value(?MODULE, smtp_password, SmtpPassword, Context)),
-        context  = z_context:new(Context)
-    }}.
-
+	State = update_config(#state{context=z_context:new(Context)}),
+	{ok, State}.
+	
 
 %% @spec handle_call(Request, From, State) -> {reply, Reply, State} |
 %%                                      {reply, Reply, State, Timeout} |
@@ -113,7 +73,8 @@ handle_call(Message, _From, State) ->
 %%                                  {noreply, State, Timeout} |
 %%                                  {stop, Reason, State}
 %% @doc Send an e-mail to an e-mail address.
-handle_cast({{email, To, Subject, Message}, Context}, State) ->
+handle_cast({{email, SendNow, To, Subject, Message}, Context}, State) ->
+	State1 = update_config(State),
     Cols = [
         {recipient, To},
         {render, false},
@@ -123,13 +84,17 @@ handle_cast({{email, To, Subject, Message}, Context}, State) ->
         {retry, 0}
     ],
     {ok, Id} = z_db:insert(emailq, Cols, Context),
-    send_queued([{id, Id}|Cols], State),
-    {noreply, State};
+	case SendNow of
+		true -> send_queued([{id, Id}|Cols], State1);
+		false -> ok
+	end,
+    {noreply, State1};
 
 %% @doc Render a template and send it as an e-mail.
-handle_cast({{email_render, To, HtmlTemplate, Vars}, Context}, State) ->
-	handle_cast({{email_render, To, HtmlTemplate, undefined, Vars}, Context}, State);
-handle_cast({{email_render, To, HtmlTemplate, TextTemplate, Vars}, Context}, State) ->
+handle_cast({{email_render, SendNow, To, HtmlTemplate, Vars}, Context}, State) ->
+	handle_cast({{email_render, SendNow, To, HtmlTemplate, undefined, Vars}, Context}, State);
+handle_cast({{email_render, SendNow, To, HtmlTemplate, TextTemplate, Vars}, Context}, State) ->
+	State1 = update_config(State),
     Cols = [
         {recipient, To},
         {render, true},
@@ -140,8 +105,11 @@ handle_cast({{email_render, To, HtmlTemplate, TextTemplate, Vars}, Context}, Sta
         {retry, 0}
     ],
     {ok, Id} = z_db:insert(emailq, Cols, Context),
-    send_queued([{id, Id}|Cols], State),
-    {noreply, State};
+	case SendNow of
+		true -> send_queued([{id, Id}|Cols], State1);
+		false -> ok
+	end,
+    {noreply, State1};
 
 %% @doc Trap unknown casts
 handle_cast(Message, State) ->
@@ -154,8 +122,8 @@ handle_cast(Message, State) ->
 %%                                   {stop, Reason, State}
 %% @doc Poll the database queue for any retrys.
 handle_info(poll, State) ->
-    poll_queued(State#state.context, State),
-    {noreply, State};
+    State1 = poll_queued(State),
+    {noreply, State1};
 
 %% @doc Handling all non call/cast messages
 handle_info(_Info, State) ->
@@ -167,13 +135,12 @@ handle_info(_Info, State) ->
 %% cleaning up. When it returns, the gen_server terminates with Reason.
 %% The return value is ignored.
 terminate(_Reason, State) ->
-    z_notifier:detach(email,       self(), State#state.context),
-    z_notifier:detach(emai_render, self(), State#state.context),
+    z_notifier:detach(email,        self(), State#state.context),
+    z_notifier:detach(email_render, self(), State#state.context),
     ok.
 
 %% @spec code_change(OldVsn, State, Extra) -> {ok, NewState}
 %% @doc Convert process state when code is changed
-
 code_change(_OldVsn, State, _Extra) ->
     {ok, State}.
 
@@ -182,12 +149,37 @@ code_change(_OldVsn, State, _Extra) ->
 %% support functions
 %%====================================================================
 
-poll_queued(Context, State) ->
+%% @doc Refetch the emailer configuration so that we adapt to any config changes.
+update_config(State) ->
+	%% Make the default no-reply e-mail address for the main site url.
+	[EmailFrom|_] = string:tokens("no-reply@" ++ z_convert:to_list(m_site:get(hostname, State#state.context)), ":"),
+
+	%% Let the defaults be overruled by the config settings (from the admin and site config)
+    State#state{
+        from     = z_convert:to_list(m_config:get_value(?MODULE, email_from, EmailFrom, State#state.context)),
+        host     = z_convert:to_list(m_config:get_value(?MODULE, smtp_host, State#state.context)),
+        port     = z_convert:to_integer(m_config:get_value(?MODULE, smtp_port, 25, State#state.context)),
+        ssl      = z_convert:to_bool(m_config:get_value(?MODULE, smtp_ssl, false, State#state.context)),
+        ehlo     = z_convert:to_list(m_config:get_value(?MODULE, smtp_ehlo, "localhost", State#state.context)),
+        username = z_convert:to_list(m_config:get_value(?MODULE, smtp_username, State#state.context)),
+        password = z_convert:to_list(m_config:get_value(?MODULE, smtp_password, State#state.context))
+    }.
+
+
+%% @doc Fetch a new batch of queued e-mails. Set status of failed messages.
+poll_queued(State) ->
     % Set all messages with too high retry count to 'failed'
-    z_db:q("update emailq set status = 'fail' where status = 'new' and retry > $1", [?MAX_RETRY], Context),
-    % Fetch a batch of message to be retried
-    Ms = z_db:assoc_props("select * from emailq where status = 'new' and retry_on < now() order by retry_on asc limit 10", Context),
-    [ send_queued(M, State) || M <- Ms ].
+    z_db:q("update emailq set status = 'fail' where status = 'new' and retry > $1", [?MAX_RETRY], State#state.context),
+    % Fetch a batch of messages for sending
+    Ms = z_db:assoc_props("select * from emailq where status = 'new' and retry_on < now() order by retry_on asc limit 100", State#state.context),
+	case Ms of
+		[] -> 
+			State;
+		_  ->
+			State1 = update_config(State), 
+    		[ send_queued(M, State) || M <- Ms ],
+			State1
+	end.
 
 
 send_queued(Cols, State) ->
