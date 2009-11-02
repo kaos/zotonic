@@ -10,6 +10,7 @@
 %% interface functions
 -export([
     insert/2,
+    insert/3,
     delete/2,
     update/3,
     update/4,
