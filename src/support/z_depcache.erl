@@ -156,7 +156,7 @@ init(SiteProps) ->
     ets:new(MetaTable, [set, named_table, {keypos, 2}, protected]),
     ets:new(DepsTable, [set, named_table, {keypos, 2}, protected]),
     State = #state{now=z_utils:now(), serial=0, meta_table=MetaTable, deps_table=DepsTable, wait_pids=dict:new()},
-    timer:apply_interval(1000, ?MODULE, tick, #context{host=Host, depcache=Depcache}),
+    timer:apply_interval(1000, ?MODULE, tick, [#context{host=Host, depcache=Depcache}]),
     spawn_link(?MODULE, cleanup, [self(), MetaTable, DepsTable]),
     {ok, State}.
 
@@ -176,15 +176,14 @@ init(SiteProps) ->
 handle_call({get_wait, Key}, From, State) ->
 	case handle_call({get, Key}, From, State) of
 		{reply, undefined, State1} ->
-			Now = z_utils:now(),
 			case dict:find(Key, State1#state.wait_pids) of
-				{ok, {MaxAge,List}} when Now < MaxAge ->
+				{ok, {MaxAge,List}} when State#state.now < MaxAge ->
 					%% Another process is already calculating the value, let the caller wait.
 					WaitPids = dict:store(Key, {MaxAge, [From|List]}, State1#state.wait_pids),
 					{noreply, State1#state{wait_pids=WaitPids}};
 				error ->
 					%% Nobody waiting or we hit a timeout, let next requestors wait for this caller.
-					WaitPids = dict:store(Key, {Now+?MAX_GET_WAIT, []}, State1#state.wait_pids),
+					WaitPids = dict:store(Key, {State#state.now+?MAX_GET_WAIT, []}, State1#state.wait_pids),
 					{reply, undefined, State1#state{wait_pids=WaitPids}}
 			end;
 		Other -> 
