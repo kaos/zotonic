@@ -35,8 +35,8 @@ start_link(SiteProps) ->
 %% Default max size of the stored data in the depcache before the gc kicks in.
 -define(MEMORY_MAX, 20*1024*1024).
 
-% Maximum time to wait for a get_wait/2 call (in secs).
--define(MAX_GET_WAIT, 10).
+% Maximum time to wait for a get_wait/2 call before a timout failure (in secs).
+-define(MAX_GET_WAIT, 30).
 
 % Number of slots visited for each gc iteration
 -define(CLEANUP_BATCH, 100).
@@ -73,7 +73,7 @@ memo(F, Key, MaxAge, Dep, #context{} = Context) ->
             Value
     end.
 
-
+%% @doc Calculate the key used for memo functions.
 memo_key({M,F,A}) -> 
     WithoutContext = lists:filter(fun(#context{}) -> false; (_) -> true end, A),
     {M,F,WithoutContext}.
@@ -178,14 +178,12 @@ handle_call({get_wait, Key}, From, State) ->
 		{reply, undefined, State1} ->
 			Now = z_utils:now(),
 			case dict:find(Key, State1#state.wait_pids) of
-				{ok, {MaxAge,List}} when Now > MaxAge ->
+				{ok, {MaxAge,List}} when Now < MaxAge ->
+					%% Another process is already calculating the value, let the caller wait.
 					WaitPids = dict:store(Key, {MaxAge, [From|List]}, State1#state.wait_pids),
 					{noreply, State1#state{wait_pids=WaitPids}};
-				{ok, {_Timestamp,List}} ->
-					[ catch gen_server:reply(Pid, undefined) || Pid <- List ],
-					WaitPids = dict:store(Key, {Now+?MAX_GET_WAIT, []}, State1#state.wait_pids),
-					{reply, undefined, State1#state{wait_pids=WaitPids}};
 				error ->
+					%% Nobody waiting or we hit a timeout, let next requestors wait for this caller.
 					WaitPids = dict:store(Key, {Now+?MAX_GET_WAIT, []}, State1#state.wait_pids),
 					{reply, undefined, State1#state{wait_pids=WaitPids}}
 			end;
@@ -521,6 +519,7 @@ cleanup_mode(Pid) ->
 
 test() ->
 	C = z_context:new(default),
+	?MODULE:flush(test_m_key, C),
 	[ test_m(C) || _N <- lists:seq(1,100) ],
 	ok.
 
