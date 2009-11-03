@@ -10,7 +10,7 @@
 
 -mod_title("Zotonic Base").
 -mod_description("Base supplies all basic scomps, actions and validators.").
--mod_prio(1000).
+-mod_prio(9999).
 
 
 %% gen_server exports
