@@ -33,14 +33,18 @@ event({postback, {new_rsc_dialog, Title, Cat, Redirect, SubjectId, Predicate}, _
         undefined -> "page";
         _ -> z_convert:to_list(?TR(m_rsc:p(Cat, title, Context), Context))
     end,
-
+    CatId = case Cat of 
+                undefined -> undefined;
+                X when is_integer(X) -> X;
+                X -> m_category:name_to_id_check(X, Context)
+            end,
     Vars = [
         {delegate, atom_to_list(?MODULE)},
         {redirect, Redirect },
         {subject_id, SubjectId},
         {predicate, Predicate},
         {title, Title},
-        {cat, Cat},
+        {cat, CatId},
         {catname, CatName}
     ],
     z_render:dialog("Make a new "++CatName++".", "_action_dialog_new_rsc.tpl", Vars, Context);
