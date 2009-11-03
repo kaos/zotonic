@@ -12,15 +12,15 @@
 -export([start_link/1]).
 
 %% depcache exports
--export([set/3, set/4, set/5, get/2, get/3, flush/2, flush/1, tick/1, size/1]).
+-export([set/3, set/4, set/5, get/2, get_wait/2, get/3, flush/2, flush/1, tick/1, size/1]).
 -export([memo/2, memo/3, memo/4, memo/5]).
 
 %% internal export
--export([cleanup/3, cleanup/7]).
+-export([cleanup/3, cleanup/7, test/0]).
 
 -include_lib("zotonic.hrl").
 
--record(state, {now, serial, size=0, meta_table, deps_table}).
+-record(state, {now, serial, size=0, meta_table, deps_table, wait_pids}).
 -record(meta,  {key, expire, serial, depend}).
 -record(depend,{key, serial}).
 
@@ -31,9 +31,14 @@ start_link(SiteProps) ->
 
 -define(META_TABLE, z_depcache_meta).
 -define(DEPS_TABLE, z_depcache_deps).
+
+%% Default max size of the stored data in the depcache before the gc kicks in.
 -define(MEMORY_MAX, 20*1024*1024).
 
-% Number of slots visited for each iteration
+% Maximum time to wait for a get_wait/2 call (in secs).
+-define(MAX_GET_WAIT, 10).
+
+% Number of slots visited for each gc iteration
 -define(CLEANUP_BATCH, 100).
 
 
@@ -47,7 +52,7 @@ memo(F, Key, Context) ->
 
 memo({M,F,A}, MaxAge, Dep, #context{} = Context) ->
     Key = memo_key({M,F,A}),
-    case ?MODULE:get(Key, Context) of
+    case ?MODULE:get_wait(Key, Context) of
         {ok, Value} ->
             Value;
         undefined ->
@@ -59,7 +64,7 @@ memo(F, Key, MaxAge, #context{} = Context) ->
     memo(F, Key, MaxAge, [], Context).
 
 memo(F, Key, MaxAge, Dep, #context{} = Context) ->
-    case ?MODULE:get(Key, Context) of
+    case ?MODULE:get_wait(Key, Context) of
         {ok, Value} ->
             Value;
         undefined ->
@@ -99,6 +104,13 @@ set(Key, Data, MaxAge, Depend, #context{depcache=Depcache}) ->
 %% @doc Fetch the key from the cache, return the data or an undefined if not found (or not valid)
 get(Key, #context{depcache=Depcache}) ->
     gen_server:call(Depcache, {get, Key}).
+
+%% @spec get_wait(Key) -> {ok, Data} | undefined
+%% @doc Fetch the key from the cache, when the key does not exist then lock the entry and let 
+%% the calling process insert the value. All other processes requesting the key will wait till
+%% the key is updated and receive the key's new value.
+get_wait(Key, #context{depcache=Depcache}) ->
+    gen_server:call(Depcache, {get_wait, Key}, ?MAX_GET_WAIT*1000).
 
 
 %% @spec get(Key, SubKey) -> {ok, Data} | undefined
@@ -143,11 +155,43 @@ init(SiteProps) ->
     
     ets:new(MetaTable, [set, named_table, {keypos, 2}, protected]),
     ets:new(DepsTable, [set, named_table, {keypos, 2}, protected]),
-    State = #state{now=z_utils:now(), serial=0, meta_table=MetaTable, deps_table=DepsTable},
+    State = #state{now=z_utils:now(), serial=0, meta_table=MetaTable, deps_table=DepsTable, wait_pids=dict:new()},
     timer:apply_interval(1000, ?MODULE, tick, #context{host=Host, depcache=Depcache}),
     spawn_link(?MODULE, cleanup, [self(), MetaTable, DepsTable]),
     {ok, State}.
 
+
+%%--------------------------------------------------------------------
+%% Function: handle_call(Request, From, State) -> {reply, Reply, State} |
+%%                                      {reply, Reply, State, Timeout} |
+%%                                      {noreply, State} |
+%%                                      {noreply, State, Timeout} |
+%%                                      {stop, Reason, Reply, State} |
+%%                                      {stop, Reason, State}
+%% Description: Handling call messages
+%%--------------------------------------------------------------------
+
+%% @doc Fetch a key from the cache. When the key is not available then let processes wait till the
+%% key is available.
+handle_call({get_wait, Key}, From, State) ->
+	case handle_call({get, Key}, From, State) of
+		{reply, undefined, State1} ->
+			Now = z_utils:now(),
+			case dict:find(Key, State1#state.wait_pids) of
+				{ok, {MaxAge,List}} when Now > MaxAge ->
+					WaitPids = dict:store(Key, {MaxAge, [From|List]}, State1#state.wait_pids),
+					{noreply, State1#state{wait_pids=WaitPids}};
+				{ok, {_Timestamp,List}} ->
+					[ catch gen_server:reply(Pid, undefined) || Pid <- List ],
+					WaitPids = dict:store(Key, {Now+?MAX_GET_WAIT, []}, State1#state.wait_pids),
+					{reply, undefined, State1#state{wait_pids=WaitPids}};
+				error ->
+					WaitPids = dict:store(Key, {Now+?MAX_GET_WAIT, []}, State1#state.wait_pids),
+					{reply, undefined, State1#state{wait_pids=WaitPids}}
+			end;
+		Other -> 
+			Other
+	end;
 
 %% @doc Fetch a key from the cache, returns undefined when not found.
 handle_call({get, Key}, _From, State) ->
@@ -212,10 +256,34 @@ handle_call({set, Key, Data, Size, MaxAge, Depend}, _From, State) ->
         false -> ets:insert(State#state.deps_table, #depend{key=Key, serial=State#state.serial})
     end,
 
-    %% Insert the record into the cache table
-    erlang:put(Key, {ok, Size, Data}),
-    ets:insert(State#state.meta_table, #meta{key=Key, expire=State1#state.now+MaxAge, serial=State1#state.serial, depend=Depend}),
-    {reply, ok, State1#state{size=State1#state.size + Size}}.
+    %% Insert the record into the cache table, increment load counter.
+	State2 = case MaxAge of
+		0 ->
+			ets:delete(State1#state.meta_table, Key),
+			erase_key(Key, State);
+		_ ->
+			OldSize = case erlang:put(Key, {ok, Size, Data}) of {ok, Sz, _} -> Sz; _ -> 0 end,
+    		ets:insert(State1#state.meta_table, #meta{key=Key, expire=State1#state.now+MaxAge, serial=State1#state.serial, depend=Depend}),
+			State1#state{size=State1#state.size + Size - OldSize}
+	end,
+
+	%% Check if other processes are waiting for this key, send them the data
+	case dict:find(Key, State2#state.wait_pids) of
+		{ok, {_MaxAge, List}} ->
+			[ catch gen_server:reply(Pid, {ok, Data}) || Pid <- List ],
+			WaitPids = dict:erase(Key, State2#state.wait_pids),
+			{reply, ok, State2#state{wait_pids=WaitPids}};
+		error ->
+			{reply, ok, State2}
+	end.
+
+
+%%--------------------------------------------------------------------
+%% Function: handle_cast(Msg, State) -> {noreply, State} |
+%%                                      {noreply, State, Timeout} |
+%%                                      {stop, Reason, State}
+%% Description: Handling cast messages
+%%--------------------------------------------------------------------
 
 handle_cast({flush, Key}, State) ->
     ets:delete(State#state.deps_table, Key),
@@ -448,3 +516,17 @@ cleanup_mode(Pid) ->
         Memory >= ?MEMORY_MAX -> cache_full;
         true -> normal
     end.
+
+
+
+test() ->
+	C = z_context:new(default),
+	[ test_m(C) || _N <- lists:seq(1,100) ],
+	ok.
+
+	test_m(Context) ->
+		?DEBUG(?MODULE:memo(fun test_f/0, test_m_key, Context)).
+
+	test_f() ->
+		?DEBUG(waiting),
+		receive after 5000 -> y end.
