@@ -456,6 +456,11 @@ tail(In, Context) ->
         _ -> []
     end.
 
+timesince(Date, Context) ->
+	z_datetime:timesince(Date, Context).
+timesince(Date, Base, Context) ->
+	z_datetime:timesince(Date, Base, Context).
+	
 
 upper(undefined, _Context) ->
     undefined;

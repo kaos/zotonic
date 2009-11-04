@@ -16,10 +16,18 @@
 		<div class="block clearfix">
 
 			{% if not is_editable %}
-				<h2>You are not allowed to edit the {{ m.rsc[r.category_id].title|lower }} “{{ r.title|striptags }}”</h2>
+				<h2>
+					You are not allowed to edit the {{ m.rsc[r.category_id].title|lower }} “{{ r.title|striptags }}”
+				</h2>
 			{% else %}
-				<p class="admin-chapeau">editing:</p>
-				<h2>{{ r.title|striptags|default:"<em>untitled</em>" }} <span>{{ m.rsc[r.category_id].title|lower }} <a href="#category">change</a></span></h2>
+				<p class="admin-chapeau">editing:
+					<span class="right">
+						Modified {{ m.rsc[id].modified|timesince }}.
+					</span>
+				</p>
+				<h2>{{ r.title|striptags|default:"<em>untitled</em>" }}
+					<span>{{ m.rsc[r.category_id].title|lower }} <a href="#category">change</a></span>
+				</h2>
 			{% endif %}	
 
 			{% wire id="rscform" type="submit" postback="rscform" %}
