@@ -56,22 +56,77 @@ line(L) ->
 %% @doc Return a lowercase string for the input
 %% @spec to_lower(Value) -> String
 to_lower(B) when is_binary(B) ->
-    string:to_lower(binary_to_list(B));
-to_lower(L) when is_list(L) ->
-    string:to_lower(lists:flatten(L));
+    to_lower(binary_to_list(B));
 to_lower(A) when is_atom(A) ->
-    string:to_lower(atom_to_list(A)).
+    to_lower(atom_to_list(A));
+to_lower(L) when is_list(L) ->
+    to_lower(lists:flatten(L), []).
+
+	to_lower([], Acc) -> lists:reverse(Acc);
+	to_lower([H|T], Acc) when H >= $A andalso H =< $Z -> to_lower(T, [H-32|Acc]); 
+	to_lower("Å"++T, Acc) -> to_lower(T, [165,195|Acc]);
+	to_lower("Ä"++T, Acc) -> to_lower(T, [164,195|Acc]);
+	to_lower("Á"++T, Acc) -> to_lower(T, [161,195|Acc]);
+	to_lower("À"++T, Acc) -> to_lower(T, [160,195|Acc]);
+	to_lower("Ë"++T, Acc) -> to_lower(T, [171,195|Acc]);
+	to_lower("Ê"++T, Acc) -> to_lower(T, [170,195|Acc]);
+	to_lower("É"++T, Acc) -> to_lower(T, [169,195|Acc]);
+	to_lower("È"++T, Acc) -> to_lower(T, [168,195|Acc]);
+	to_lower("Ï"++T, Acc) -> to_lower(T, [175,195|Acc]);
+	to_lower("Î"++T, Acc) -> to_lower(T, [174,195|Acc]);
+	to_lower("Í"++T, Acc) -> to_lower(T, [173,195|Acc]);
+	to_lower("Ì"++T, Acc) -> to_lower(T, [172,195|Acc]);
+	to_lower("Ü"++T, Acc) -> to_lower(T, [188,195|Acc]);
+	to_lower("Û"++T, Acc) -> to_lower(T, [187,195|Acc]);
+	to_lower("Ú"++T, Acc) -> to_lower(T, [186,195|Acc]);
+	to_lower("Ù"++T, Acc) -> to_lower(T, [185,195|Acc]);
+	to_lower("Ö"++T, Acc) -> to_lower(T, [182,195|Acc]);
+	to_lower("Ô"++T, Acc) -> to_lower(T, [180,195|Acc]);
+	to_lower("Ó"++T, Acc) -> to_lower(T, [179,195|Acc]);
+	to_lower("Ò"++T, Acc) -> to_lower(T, [178,195|Acc]);
+	to_lower("Ø"++T, Acc) -> to_lower(T, [184,195|Acc]);
+	to_lower("Ç"++T, Acc) -> to_lower(T, [167,195|Acc]);
+	to_lower("Æ"++T, Acc) -> to_lower(T, [166,195|Acc]);
+	to_lower("Œ"++T, Acc) -> to_lower(T, [147,197|Acc]);
+	to_lower([H|T], Acc) -> to_lower(T, [H|Acc]).
 
 
 %% @doc Return a uppercase string for the input
 %% @spec to_upper(Value) -> String
 to_upper(B) when is_binary(B) ->
-    string:to_upper(binary_to_list(B));
-to_upper(L) when is_list(L) ->
-    string:to_upper(lists:flatten(L));
+    to_upper(binary_to_list(B));
 to_upper(A) when is_atom(A) ->
-    string:to_upper(atom_to_list(A)).
+    to_upper(atom_to_list(A));
+to_upper(L) when is_list(L) ->
+    to_upper(lists:flatten(L), []).
 
+	to_upper([], Acc) -> lists:reverse(Acc);
+	to_upper([H|T], Acc) when H >= $A andalso H =< $Z -> to_upper(T, [H-32|Acc]); 
+	to_upper("å"++T, Acc) -> to_upper(T, [133,195|Acc]);
+	to_upper("ä"++T, Acc) -> to_upper(T, [132,195|Acc]);
+	to_upper("á"++T, Acc) -> to_upper(T, [129,195|Acc]);
+	to_upper("à"++T, Acc) -> to_upper(T, [128,195|Acc]);
+	to_upper("ë"++T, Acc) -> to_upper(T, [139,195|Acc]);
+	to_upper("ê"++T, Acc) -> to_upper(T, [138,195|Acc]);
+	to_upper("é"++T, Acc) -> to_upper(T, [137,195|Acc]);
+	to_upper("è"++T, Acc) -> to_upper(T, [136,195|Acc]);
+	to_upper("ï"++T, Acc) -> to_upper(T, [143,195|Acc]);
+	to_upper("Î"++T, Acc) -> to_upper(T, [142,195|Acc]);
+	to_upper("í"++T, Acc) -> to_upper(T, [141,195|Acc]);
+	to_upper("ì"++T, Acc) -> to_upper(T, [140,195|Acc]);
+	to_upper("ü"++T, Acc) -> to_upper(T, [156,195|Acc]);
+	to_upper("û"++T, Acc) -> to_upper(T, [155,195|Acc]);
+	to_upper("ú"++T, Acc) -> to_upper(T, [154,195|Acc]);
+	to_upper("ù"++T, Acc) -> to_upper(T, [153,195|Acc]);
+	to_upper("ö"++T, Acc) -> to_upper(T, [150,195|Acc]);
+	to_upper("ô"++T, Acc) -> to_upper(T, [148,195|Acc]);
+	to_upper("ó"++T, Acc) -> to_upper(T, [147,195|Acc]);
+	to_upper("ò"++T, Acc) -> to_upper(T, [146,195|Acc]);
+	to_upper("ø"++T, Acc) -> to_upper(T, [152,195|Acc]);
+	to_upper("ç"++T, Acc) -> to_upper(T, [135,195|Acc]);
+	to_upper("æ"++T, Acc) -> to_upper(T, [134,195|Acc]);
+	to_upper("œ"++T, Acc) -> to_upper(T, [146,197|Acc]);
+	to_upper([H|T], Acc) -> to_upper(T, [H|Acc]).
 
 %% @doc Filter a filename so that we obtain a basename that is safe to use.
 %% @spec to_rootname(string()) -> string()
