@@ -16,6 +16,7 @@
     m_value/2,
 
     get/2,
+	get_triple/2,
     get_id/4,
     get_edges/2,
     insert/4,
@@ -74,6 +75,14 @@ m_value(#m{}, _Context) ->
 %% @doc Get the complete edge with the id
 get(Id, Context) ->
     z_db:assoc_row("select * from edge where id = $1", [Id], Context).
+
+%% @doc Get the edge as a triple {subject_id, predicate, object_id}
+get_triple(Id, Context) ->
+    {SubjectId, Predicate, ObjectId} = z_db:q_row("
+			select e.subject_id, r.name, e.object_id 
+			from edge e join rsc r on e.predicate_id = r.id 
+			where e.id = $1", [Id], Context),
+	{SubjectId, z_convert:to_atom(Predicate), ObjectId}.
 
 %% @doc Get the edge id of a subject/pred/object combination
 get_id(SubjectId, Pred, ObjectId, Context) ->
