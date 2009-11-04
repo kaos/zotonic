@@ -207,6 +207,30 @@ truncate(L, N, Append) ->
 			in_word -> truncate(Rest1, N-1, Append, word, Acc1, word, Acc1);
 			_ 		-> truncate(Rest1, N-1, Append, LastState, Last, word, Acc1)
 		end;
+
+	%% Overlong encoding: start of a 2-byte sequence, but code point <= 127
+	truncate([X,A|Rest], N, Append, LastState, Last, _AccState, Acc) when X >= 192, X =< 193 ->
+		truncate(Rest, N-1, Append, LastState, Last, in_word, [A,X|Acc]);
+	%% Start of 2-byte sequence
+	truncate([X,A|Rest], N, Append, LastState, Last, _AccState, Acc) when X >= 194, X =< 223 ->
+		truncate(Rest, N-1, Append, LastState, Last, in_word, [A,X|Acc]);
+	%% Start of 3-byte sequence
+	truncate([X,A,B|Rest], N, Append, LastState, Last, _AccState, Acc) when X >= 224, X =< 239 ->
+		truncate(Rest, N-1, Append, LastState, Last, in_word, [B,A,X|Acc]);
+	%% Start of 4-byte sequence
+	truncate([X,A,B,C|Rest], N, Append, LastState, Last, _AccState, Acc) when X >= 240, X =< 244 ->
+		truncate(Rest, N-1, Append, LastState, Last, in_word, [C,B,A,X|Acc]);
+	%% Restricted by RFC 3629: start of 4-byte sequence for codepoint above 10FFFF
+	truncate([X,A,B,C|Rest], N, Append, LastState, Last, _AccState, Acc) when X >= 245, X =< 247 ->
+		truncate(Rest, N-1, Append, LastState, Last, in_word, [C,B,A,X|Acc]);
+	%% Restricted by RFC 3629: start of 5-byte sequence
+	truncate([X,A,B,C,D|Rest], N, Append, LastState, Last, _AccState, Acc) when X >= 248, X =< 251 ->
+		truncate(Rest, N-1, Append, LastState, Last, in_word, [D,C,B,A,X|Acc]);
+	%% Restricted by RFC 3629: start of 6-byte sequence
+	truncate([X,A,B,C,D,E|Rest], N, Append, LastState, Last, _AccState, Acc) when X >= 252, X =< 253 ->
+		truncate(Rest, N-1, Append, LastState, Last, in_word, [E,D,C,B,A,X|Acc]);
+	
+	%% Any other character
 	truncate([C|Rest], N, Append, LastState, Last, _AccState, Acc) ->
 		truncate(Rest, N-1, Append, LastState, Last, in_word, [C|Acc]).
 
