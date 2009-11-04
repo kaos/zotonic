@@ -171,44 +171,44 @@ truncate(B, N, Append) when is_binary(B) ->
 truncate(_L, N, _Append) when N =< 0 ->
 	[];
 truncate(L, N, Append) ->
-	truncate(L, N, Append, in_word, [], []).
+	truncate(L, N, Append, in_word, [], in_word, []).
 	
 
-	truncate([], _, _Append, _LastState, _Last, Acc) ->
+	truncate([], _, _Append, _LastState, _Last, _AccState, Acc) ->
 		lists:reverse(Acc);
-	truncate(_, 0, _Append, sentence, Last, _Acc) ->
+	truncate(_, 0, _Append, sentence, Last, _AccState, _Acc) ->
 		lists:reverse(Last);
-	truncate(_, 0, Append, _, [], Acc) ->
+	truncate(_, 0, Append, _, [], _AccState, Acc) ->
 		lists:reverse(insert_acc(Append, Acc));
-	truncate(_, 0, Append, _LastState, Last, _Acc) ->
+	truncate(_, 0, Append, _LastState, Last, _AccState, _Acc) ->
 		lists:reverse(insert_acc(Append, Last));
-	truncate([C|Rest], N, Append, LastState, Last, Acc) 
+	truncate([C|Rest], N, Append, LastState, Last, AccState, Acc) 
 		when C == $.; C == $!; C == $? ->
-			case LastState of
-				in_word -> truncate(Rest, N-1, Append, sentence, [C|Acc], [C|Acc]);
-				word    -> truncate(Rest, N-1, Append, sentence, [C|Acc], [C|Acc]);
-				_ 		-> truncate(Rest, N-1, Append, LastState, Last, [C|Acc])
+			case AccState of
+				in_word -> truncate(Rest, N-1, Append, sentence, [C|Acc], sentence, [C|Acc]);
+				word    -> truncate(Rest, N-1, Append, sentence, [C|Acc], sentence, [C|Acc]);
+				_ 		-> truncate(Rest, N-1, Append, LastState, Last,   sentence, [C|Acc])
 			end;
-	truncate([C|Rest], N, Append, LastState, Last, Acc) 
+	truncate([C|Rest], N, Append, LastState, Last, AccState, Acc) 
 		when C == $;; C == $-; C == $, ->
-			case LastState of
-				in_word -> truncate(Rest, N-1, Append, sentence, Acc, [C|Acc]);
-				_ 		-> truncate(Rest, N-1, Append, LastState, Last, [C|Acc])
+			case AccState of
+				in_word -> truncate(Rest, N-1, Append, sentence,  Acc,  word, [C|Acc]);
+				_ 		-> truncate(Rest, N-1, Append, LastState, Last, word, [C|Acc])
 			end;
-	truncate([C|Rest], N, Append, LastState, Last, Acc) 
+	truncate([C|Rest], N, Append, LastState, Last, AccState, Acc) 
 		when C == 32; C == 9; C == 10; C == 13; C == $/; C == $|; C == $(; C == $); C == $" ->
-			case LastState of
-				in_word -> truncate(Rest, N-1, Append, word, Acc, [C|Acc]);
-				_       -> truncate(Rest, N-1, Append, LastState, Last, [C|Acc])
+			case AccState of
+				in_word -> truncate(Rest, N-1, Append, word, Acc, word, [C|Acc]);
+				_       -> truncate(Rest, N-1, Append, LastState, Last, word, [C|Acc])
 			end;
-	truncate([$&|_]=Input, N, Append, LastState, Last, Acc) ->
+	truncate([$&|_]=Input, N, Append, LastState, Last, AccState, Acc) ->
 		{Rest1,Acc1} = get_entity(Input,Acc),
-		case LastState of
-			in_word -> truncate(Rest1, N-1, Append, word, Acc1, Acc1);
-			_ 		-> truncate(Rest1, N-1, Append, LastState, Last, Acc1)
+		case AccState of
+			in_word -> truncate(Rest1, N-1, Append, word, Acc1, word, Acc1);
+			_ 		-> truncate(Rest1, N-1, Append, LastState, Last, word, Acc1)
 		end;
-	truncate([C|Rest], N, Append, LastState, Last, Acc) ->
-		truncate(Rest, N-1, Append, LastState, Last, [C|Acc]).
+	truncate([C|Rest], N, Append, LastState, Last, _AccState, Acc) ->
+		truncate(Rest, N-1, Append, LastState, Last, in_word, [C|Acc]).
 
 	insert_acc([], Acc) ->
 		Acc;
