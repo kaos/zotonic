@@ -11,7 +11,8 @@
 %% interface functions
 -export([
     identify/2,
-    extension/1
+    extension/1,
+	guess_mime/1
 ]).
 
 -include_lib("zotonic.hrl").
@@ -101,4 +102,56 @@ extension("image/bmp") -> ".bmp";
 extension("image/png") -> ".png";
 extension("application/pdf") -> ".pdf";
 extension("application/postscript") -> ".ps";
+extension("application/vnd.ms-excel") -> ".xls";
+extension("application/msword") -> ".doc";
+extension("application/vnd.ms-powerpoint") -> ".pps";
+extension("audio/mpeg") -> ".mp3";
+extension("video/mp4") -> ".mp4";
+extension("video/mpeg") -> ".mpg";
+extension("video/msvideo") -> ".avi";
+extension("video/x-ms-asf") -> ".asf";
+extension("video/quicktime") -> ".mov";
 extension(_) -> ".bin".
+
+%% @spec guess_mime(string()) -> string()
+%% @doc  Guess the mime type of a file by the extension of its filename.
+guess_mime(File) ->
+    case filename:extension(File) of
+	".htm" -> "text/html";
+	".html" -> "text/html";
+	".xhtml" -> "application/xhtml+xml";
+	".xml" -> "application/xml";
+	".css" -> "text/css";
+	".js" -> "application/x-javascript";
+	".jpg" -> "image/jpeg";
+	".jpeg" -> "image/jpeg";
+	".gif" -> "image/gif";
+	".png" -> "image/png";
+	".bmp" -> "image/bmp";
+	".tiff" -> "image/tiff";
+	".tif" -> "image/tiff";
+	".ico" -> "image/vnd.microsoft.icon";
+	".pdf" -> "application/pdf";
+	".ps" -> "application/ps";
+	".swf" -> "application/x-shockwave-flash";
+	".zip" -> "application/zip";
+	".bz2" -> "application/x-bzip2";
+	".gz" -> "application/x-gzip";
+	".tar" -> "application/x-tar";
+	".tgz" -> "application/x-gzip";
+    ".htc" -> "text/x-component";
+	".txt" -> "text/plain";
+	".doc" -> "application/msword";
+	".xls" -> "application/vnd.ms-excel";
+	".pps" -> "application/vnd.ms-powerpoint";
+	".ppt" -> "application/vnd.ms-powerpoint";
+	".mp3" -> "audio/mpeg";
+	".mp4" -> "video/mp4";
+	".mpg" -> "video/mpeg";
+	".mpeg" -> "video/mpeg";
+	".avi" -> "video/msvideo";
+	".asf" -> "video/x-ms-asf";
+	".mov" -> "video/quicktime";
+	_ -> "application/octet-stream"
+end.
+

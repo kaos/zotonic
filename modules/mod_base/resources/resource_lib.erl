@@ -61,7 +61,7 @@ content_types_provided(ReqData, State) ->
     case State#state.mime of
         undefined ->
             Path = mochiweb_util:unquote(wrq:disp_path(ReqData)),
-            CT = z_utils:guess_mime(Path),
+            CT = z_media_identify:guess_mime(Path),
             {[{CT, provide_content}], ReqData, State#state{mime=CT}};
         Mime -> 
             {[{Mime, provide_content}], ReqData, State}

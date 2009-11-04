@@ -46,7 +46,6 @@
 	vsplit_in/2,
 	group_by/3,
 	replace1/3,
-	guess_mime/1,
 	list_dir_recursive/1,
 	are_equal/2,
 	name_for_host/2
@@ -502,17 +501,6 @@ replace1(F, T, [F|R], Acc) ->
     replace1(F, T, R, [T|Acc]);
 replace1(F, T, [C|R], Acc) ->
     replace1(F, T, R, [C|Acc]).
-
-
-
-%% @spec guess_mime(string()) -> string()
-%% @doc  Guess the mime type of a file by the extension of its filename.
-guess_mime(File) ->
-    case filename:extension(File) of
-	".htm" -> "text/html";
-	".ico" -> "image/vnd.microsoft.icon";
-	_ -> webmachine_util:guess_mime(File)
-end.
 
 
 %% @doc Return a list of all files in a directory, recursive depth first search for files not starting with a '.'
