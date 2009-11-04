@@ -303,7 +303,7 @@ a:focus {
 	#navigation li a {
 		height: 36px;
 		line-height: 36px;
-		padding: 0 18px;
+		padding: 0 15px;
 		border-right: 1px solid #ddd;
 		float: left;
 		display: block;
