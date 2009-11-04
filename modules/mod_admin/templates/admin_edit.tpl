@@ -305,6 +305,31 @@
 
 						{% if not r.is_a.meta %}
 						<div class="item-wrapper" id="sort-date">
+							<h3 class="above-item clearfix do_blockminifier { minifiedOnInit: true }">
+								<span class="title">Publication period</span>
+								<span class="arrow">make smaller</span>
+							</h3>
+							<div class="item clearfix">
+								<div class="admin-form form-item">
+									<div class="notification notice">
+										Show this article only between the two dates.
+										<a href="javascript:void(0)" class="do_dialog {title: 'Help about publication date range.', text: 'When a page has a publication date range then it will only be visible between the two dates. Note that when you are allowed to edit the page then you can always see it.', width: '450px'}">Need more help?</a>
+									</div>
+									<fieldset>
+										<div class="form-item">
+											<label>Visible from</label>
+											{% include "_edit_date.tpl" date=r.publication_start name="publication_start" is_end=0 %}
+										</div>
+										<div class="form-item">
+											<label>Visible till</label>
+											{% include "_edit_date.tpl" date=r.publication_end name="publication_end" is_end=1 %}
+										</div>
+									</fieldset>
+								</div>
+							</div>
+						</div>
+
+						<div class="item-wrapper" id="sort-date">
 							<h3 class="above-item clearfix do_blockminifier { minifiedOnInit: {{ r.is_a.event|not }} }">
 								<span class="title">Date range</span>
 								<span class="arrow">make smaller</span>
