@@ -43,6 +43,7 @@
 	randomize/2,
 	split/2,
 	split_in/2,
+	vsplit_in/2,
 	group_by/3,
 	replace1/3,
 	guess_mime/1,
@@ -441,6 +442,26 @@ split_in(L, N) when is_list(L) ->
     split_in([H|T], Acc1, [HA|HT]) ->
         split_in(T, [[H|HA]|Acc1], HT).
 
+
+vsplit_in(L, N) when N =< 1 ->
+	L;
+vsplit_in(L, N) when is_binary(L) ->
+	vsplit_in(binary_to_list(L), N);
+vsplit_in(L, N) ->
+	Len = length(L),
+	RunLength = case Len rem N of
+		0 -> Len div N;
+		_ -> Len div N + 1
+	end,
+	vsplit_in(N, L, RunLength, []).
+	
+	vsplit_in(1, L, _, Acc) ->
+		lists:reverse([L|Acc]);
+	vsplit_in(N, L, RunLength, Acc) ->
+		{Row,Rest} = lists:split(RunLength, L),
+		vsplit_in(N-1, Rest, RunLength, [Row|Acc]).
+
+		
 %% @doc Group by a property or m_rsc property, keeps the input list in the same order.
 group_by([], _, _Context) ->
     [];

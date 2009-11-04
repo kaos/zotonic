@@ -290,6 +290,12 @@ split_in(In, N, Context) ->
     z_utils:split_in(erlydtl_runtime:to_list(In, Context), N).
 
 
+vsplit_in(undefined, _N, _Context) ->
+    undefined;
+vsplit_in(In, N, Context) ->
+    z_utils:vsplit_in(erlydtl_runtime:to_list(In, Context), N).
+
+
 striptags(undefined, _Context) ->
     undefined;
 striptags(In, _Context) when is_integer(In) ->
