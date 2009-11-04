@@ -383,7 +383,7 @@
 													{% endif %}
 												</div>
 												<div class="unlink-wrapper clearfix">
-													{% sorter id=["links",id|format_integer,name]|join:"-" tag={object_sorter predicate=name id=id} group="edges" %}
+													{% sorter id=["links",id|format_integer,name]|join:"-" tag={object_sorter predicate=name id=id} group="edges" handle=".unlink-mover" %}
 													<ul id="links-{{ id }}-{{ name }}" class="clearfix edge-sidebar-sorter" style="min-height: 10px">
 													{% for o_id, edge_id in m.edge.o[id][name] %}
 														{% include "_rsc_edge.tpl" subject_id=id predicate=name object_id=o_id edge_id=edge_id %}
