@@ -77,7 +77,7 @@
 								<li class="list-item">
 									<h3><a href="{{ m.rsc[c_id].page_url }}">{{ title }}</a></h3>
 									{% if m.rsc[c_id].summary %}
-										<p class="summary">{{ m.rsc[c_id].summary | ljust:50 }}&hellip;</p>
+										<p class="summary">{{ m.rsc[c_id].summary | truncate:50 }}</p>
 									{% endif %}
 								</li>
 								{% endfor %}

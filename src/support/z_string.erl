@@ -17,8 +17,12 @@
     to_slug/1,
     to_lower/1,
     to_upper/1,
-    replace/3
+    replace/3,
+	truncate/2,
+	truncate/3
 ]).
+
+-include_lib("include/zotonic.hrl").
 
 
 %% @doc Remove whitespace at the start and end of the string
@@ -156,3 +160,65 @@ replace(String, S1, S2) when is_list(String), is_list(S1), is_list(S2) ->
 			[hd(String)|replace(tl(String), S1, S2)]
 	end.
 
+
+%% @doc Truncate a string.  Append the '…' character at the place of break off.
+%% @spec truncate(String, int()) -> String
+truncate(L, N) ->
+	truncate(L, N, "…").
+
+truncate(B, N, Append) when is_binary(B) ->
+	truncate(z_convert:to_list(B), N, Append);
+truncate(_L, N, _Append) when N =< 0 ->
+	[];
+truncate(L, N, Append) ->
+	truncate(L, N, Append, in_word, [], []).
+	
+
+	truncate([], _, _Append, _LastState, _Last, Acc) ->
+		lists:reverse(Acc);
+	truncate(_, 0, _Append, sentence, Last, _Acc) ->
+		lists:reverse(Last);
+	truncate(_, 0, Append, _, [], Acc) ->
+		lists:reverse(insert_acc(Append, Acc));
+	truncate(_, 0, Append, _LastState, Last, _Acc) ->
+		lists:reverse(insert_acc(Append, Last));
+	truncate([C|Rest], N, Append, LastState, Last, Acc) 
+		when C == $.; C == $!; C == $? ->
+			case LastState of
+				in_word -> truncate(Rest, N-1, Append, sentence, [C|Acc], [C|Acc]);
+				word    -> truncate(Rest, N-1, Append, sentence, [C|Acc], [C|Acc]);
+				_ 		-> truncate(Rest, N-1, Append, LastState, Last, [C|Acc])
+			end;
+	truncate([C|Rest], N, Append, LastState, Last, Acc) 
+		when C == $;; C == $-; C == $, ->
+			case LastState of
+				in_word -> truncate(Rest, N-1, Append, sentence, Acc, [C|Acc]);
+				_ 		-> truncate(Rest, N-1, Append, LastState, Last, [C|Acc])
+			end;
+	truncate([C|Rest], N, Append, LastState, Last, Acc) 
+		when C == 32; C == 9; C == 10; C == 13; C == $/; C == $|; C == $(; C == $); C == $" ->
+			case LastState of
+				in_word -> truncate(Rest, N-1, Append, word, Acc, [C|Acc]);
+				_       -> truncate(Rest, N-1, Append, LastState, Last, [C|Acc])
+			end;
+	truncate([$&|_]=Input, N, Append, LastState, Last, Acc) ->
+		{Rest1,Acc1} = get_entity(Input,Acc),
+		case LastState of
+			in_word -> truncate(Rest1, N-1, Append, word, Acc1, Acc1);
+			_ 		-> truncate(Rest1, N-1, Append, LastState, Last, Acc1)
+		end;
+	truncate([C|Rest], N, Append, LastState, Last, Acc) ->
+		truncate(Rest, N-1, Append, LastState, Last, [C|Acc]).
+
+	insert_acc([], Acc) ->
+		Acc;
+	insert_acc([H|T], Acc) ->
+		insert_acc(T, [H|Acc]).
+	
+	get_entity([], Acc) ->
+		{[],Acc};
+	get_entity([$;|Rest], Acc) ->
+		{Rest,[$;|Acc]};
+	get_entity([C|Rest], Acc) ->
+		get_entity(Rest, [C|Acc]).
+	

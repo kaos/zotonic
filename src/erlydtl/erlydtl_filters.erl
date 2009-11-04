@@ -467,6 +467,12 @@ timesince(Date, Context) ->
 timesince(Date, Base, Context) ->
 	z_datetime:timesince(Date, Base, Context).
 	
+	
+truncate(undefined, _N, _Context) ->
+	undefined;
+truncate(In, N, Context) ->
+	z_string:truncate(erlydtl_runtime:to_list(In, Context), z_convert:to_integer(N)).
+
 
 upper(undefined, _Context) ->
     undefined;
