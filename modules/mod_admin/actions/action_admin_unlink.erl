@@ -15,6 +15,7 @@
 ]).
 
 render_action(TriggerId, TargetId, Args, Context) ->
+    EdgeId = z_convert:to_integer(proplists:get_value(edge_id, Args)),
     SubjectId = z_convert:to_integer(proplists:get_value(subject_id, Args)),
     ObjectId = z_convert:to_integer(proplists:get_value(object_id, Args)),
     Predicate = proplists:get_value(predicate, Args),
@@ -23,21 +24,25 @@ render_action(TriggerId, TargetId, Args, Context) ->
     UndoAction = proplists:get_all_values(undo_action, Args),
     UndoMessageId = proplists:get_value(undo_message_id, Args, "unlink-undo-message"),
     
-    Postback = {unlink, SubjectId, Predicate, ObjectId, Hide, UndoMessageId, Action, UndoAction},
+    Postback = {unlink, EdgeId, SubjectId, Predicate, ObjectId, Hide, UndoMessageId, Action, UndoAction},
 	{PostbackMsgJS, _PickledPostback} = z_render:make_postback(Postback, click, TriggerId, TargetId, ?MODULE, Context),
 	{PostbackMsgJS, Context}.
 
 
 %% @doc Unlink the edge, on success show an undo message in the element with id "undo-message"
 %% @spec event(Event, Context1) -> Context2
-event({postback, {unlink, SubjectId, Predicate, ObjectId, Hide, UndoMessageId, Action, UndoAction}, _TriggerId, _TargetId}, Context) ->
+event({postback, {unlink, EdgeId, SubjectId, Predicate, ObjectId, Hide, UndoMessageId, Action, UndoAction}, _TriggerId, _TargetId}, Context) ->
     case z_acl:rsc_editable(SubjectId, Context) of
         true ->
-            ok = m_edge:delete(SubjectId, Predicate, ObjectId, Context),
+			{SubjectId, Predicate1, ObjectId1} = case EdgeId of
+					undefined -> {SubjectId, Predicate, ObjectId};
+					_ -> m_edge:get_triple(EdgeId, Context)
+				end,
+            ok = m_edge:delete(SubjectId, Predicate1, ObjectId1, Context),
             Vars = [
                 {subject_id, SubjectId},
-                {predicate, Predicate},
-                {object_id, ObjectId},
+                {predicate, Predicate1},
+                {object_id, ObjectId1},
                 {action, UndoAction}
             ],
             Html = z_template:render("_action_unlink_undo.tpl", Vars, Context),

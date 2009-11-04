@@ -10,4 +10,4 @@
 	</li>
 {% endwith %}
 
-{% wire id=#unlink action={unlink subject_id=subject_id predicate=predicate object_id=object_id hide=#unlink_wrapper} %}
+{% wire id=#unlink action={unlink subject_id=subject_id edge_id=edge_id hide=#unlink_wrapper} %}
