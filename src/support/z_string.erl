@@ -63,7 +63,7 @@ to_lower(L) when is_list(L) ->
     to_lower(lists:flatten(L), []).
 
 	to_lower([], Acc) -> lists:reverse(Acc);
-	to_lower([H|T], Acc) when H >= $A andalso H =< $Z -> to_lower(T, [H-32|Acc]); 
+	to_lower([H|T], Acc) when H >= $A andalso H =< $Z -> to_lower(T, [H+32|Acc]); 
 	to_lower("Å"++T, Acc) -> to_lower(T, [165,195|Acc]);
 	to_lower("Ä"++T, Acc) -> to_lower(T, [164,195|Acc]);
 	to_lower("Á"++T, Acc) -> to_lower(T, [161,195|Acc]);
@@ -101,7 +101,7 @@ to_upper(L) when is_list(L) ->
     to_upper(lists:flatten(L), []).
 
 	to_upper([], Acc) -> lists:reverse(Acc);
-	to_upper([H|T], Acc) when H >= $A andalso H =< $Z -> to_upper(T, [H-32|Acc]); 
+	to_upper([H|T], Acc) when H >= $a andalso H =< $z -> to_upper(T, [H-32|Acc]); 
 	to_upper("å"++T, Acc) -> to_upper(T, [133,195|Acc]);
 	to_upper("ä"++T, Acc) -> to_upper(T, [132,195|Acc]);
 	to_upper("á"++T, Acc) -> to_upper(T, [129,195|Acc]);
