@@ -68,7 +68,7 @@
 
 		{% else %}
 
-			{% for ids in c_ids|split_in:2 %}
+			{% for ids in c_ids|vsplit_in:2 %}
 				{% if ids %}
 					<section class="collection-members zp-33">
 						<div class="padding">

@@ -23,7 +23,7 @@
 			<h2>{{ m.rsc[category_id].title }}</h2>
 			
 			{% ifequal m.rsc[category_id].name "zt_template_filter" %}
-				{% for ids in m.search[{all_bytitle cat_is=category_id}]|split_in:2 %}
+				{% for ids in m.search[{all_bytitle cat_is=category_id}]|vsplit_in:2 %}
 				<div class="zp-50">
 					<ul class="list-filters">
 						{% for title,c_id in ids %}
