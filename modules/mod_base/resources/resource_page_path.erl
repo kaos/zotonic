@@ -30,7 +30,7 @@ resource_exists(ReqData, _Context) ->
         {ok, Id} ->
             Context2 = z_context:set(id, Id, Context),
             ?WM_REPLY(true, Context2);
-        {error, enoent} ->
+        {error, _} ->
             ?WM_REPLY(false, Context)
     end.
 

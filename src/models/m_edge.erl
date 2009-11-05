@@ -109,7 +109,7 @@ get_edges(SubjectId, Context) ->
 insert(SubjectId, PredId, ObjectId, Context) when is_integer(PredId) ->
     case m_predicate:is_predicate(PredId, Context) of
         true -> insert1(SubjectId, PredId, ObjectId, Context);
-        false -> throw({error, {enoent, predicate, PredId}})
+        false -> throw({error, {unknown_predicate, PredId}})
     end;
 insert(SubjectId, Pred, ObjectId, Context) ->
     PredId = m_predicate:name_to_id_check(Pred, Context),
@@ -181,7 +181,7 @@ duplicate(Id, ToId, Context) ->
             z_depcache:flush(ToId, Context),
             ok;
         false ->
-            {error, enoent}
+            {error, {eacces, Id}}
     end.
     
     
@@ -210,7 +210,7 @@ objects(_Id, undefined, _Context) ->
     [];
 objects(Id, Pred, Context) when is_atom(Pred) ->
     case m_predicate:name_to_id(Pred, Context) of
-        {error,{enoent,predicate,_}} -> [];
+        {error, _} -> [];
         {ok, PredId} -> objects(Id, PredId, Context)
     end;
 objects(Id, Pred, Context) ->
@@ -231,7 +231,7 @@ subjects(_Id, undefined, _Context) ->
     [];
 subjects(Id, Pred, Context) when is_atom(Pred) ->
     case m_predicate:name_to_id(Pred, Context) of
-        {error,{enoent,predicate,_}} -> [];
+        {error, _} -> [];
         {ok, PredId} -> subjects(Id, PredId, Context)
     end;
 subjects(Id, Pred, Context) ->
@@ -274,7 +274,7 @@ object_edge_ids(Id, Predicate, Context) ->
                 z_db:q("select object_id, id from edge where subject_id = $1 and predicate_id = $2 order by seq, id", [Id, PredId], Context)
             end,
             z_depcache:memo(F, {object_edge_ids, Id, PredId}, ?DAY, [Id], Context);
-        {error, enoent} ->
+        {error, _} ->
             []
     end.
 
@@ -288,7 +288,7 @@ subject_edge_ids(Id, Predicate, Context) ->
                 z_db:q("select subject_id, id from edge where object_id = $1 and predicate_id = $2 order by seq, id", [Id, PredId], Context)
             end,
             z_depcache:memo(F, {subject_edge_ids, Id, PredId}, ?DAY, [Id], Context);
-        {error, enoent} ->
+        {error, _} ->
             []
     end.
 

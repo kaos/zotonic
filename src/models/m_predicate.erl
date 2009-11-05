@@ -85,7 +85,7 @@ id_to_name(Id, Context) when is_integer(Id) ->
     F = fun() ->
                 {L,R} = cat_bounds(Context),
                 case z_db:q1("select name from rsc r join category c on (r.category_id = c.id) where r.id = $1 and $2 <= c.nr and c.nr <= $3", [Id, R, L], Context) of
-                    undefined -> {error, {enoent, predicate, Id}};
+                    undefined -> {error, {unknown_predicate, Id}};
                     Name -> {ok, z_convert:to_atom(Name)}
                 end
         end,
@@ -99,9 +99,9 @@ name_to_id(Name, Context) ->
         {ok, Id} ->
             case is_predicate(Id, Context) of
                 true -> {ok, Id};
-                false -> {error, enoent, Name}
+                false -> {error, {unkown_predicate, Id}}
             end;
-        _ -> {error, enoent}
+        _ -> {error, {unknown_predicate, Name}}
     end.
 
 name_to_id_check(Name, Context) ->
@@ -113,8 +113,8 @@ name_to_id_check(Name, Context) ->
 %% @spec predicate(Pred, Context) -> PredicatePropList | undefined
 get(PredId, Context) when is_integer(PredId) ->
     case id_to_name(PredId, Context) of
-        {ok, Pred} -> get(Pred, Context);
-        {error, {enoent, predicate, _Id}} -> undefined
+        {error, _} -> undefined;
+		{ok, Name} -> get(Name, Context)
     end;
 get(Pred, Context) when is_list(Pred) orelse is_binary(Pred) ->
     get(list_to_atom(string:to_lower(Pred)), Context);

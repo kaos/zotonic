@@ -184,7 +184,7 @@ name_to_id(Name, Context) ->
                     select r.id 
                     from rsc r join category c on r.id = c.id 
                     where r.name = $1", [Name], Context) of
-                undefined -> {error, {enoent, category, Name}};
+                undefined -> {error, {unknown_category, Name}};
                 Id -> {ok, Id}
             end,
             case Result of
@@ -221,7 +221,7 @@ last_modified(Cat, Context) ->
         {ok, CatId} ->
             {Left, Right} = get_range(CatId, Context),
             case z_db:q1("select max(modified) from rsc where pivot_category_nr >= $1 and pivot_category_nr <= $2", [Left, Right], Context) of
-                false -> {error, enoent};
+                false -> {error, {no_rsc_in_cat, CatId}};
                 Date -> {ok, Date}
             end;
         {error, Reason} ->
