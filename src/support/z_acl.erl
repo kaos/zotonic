@@ -59,7 +59,18 @@ rsc_visible(Id, #context{user_id=UserId}) when Id == UserId andalso is_integer(U
     % Can always see myself
     true;
 rsc_visible(Id, Context) ->
-    acl_visible(m_rsc:get_acl_props(Id, Context), Context).
+	case z_memo:is_enabled(Context) of
+		true ->
+			case z_memo:get({rsc_visible, Id}) of
+				true -> true;
+				false -> false;
+				undefined ->
+					Visible = acl_visible(m_rsc:get_acl_props(Id, Context), Context),
+					z_memo:set({rsc_visible, Id}, Visible),
+					Visible
+			end;
+		false -> acl_visible(m_rsc:get_acl_props(Id, Context), Context)
+	end.
 
 
 %% @doc Check if the resource is editable by the current user

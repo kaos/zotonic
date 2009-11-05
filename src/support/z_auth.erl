@@ -65,7 +65,11 @@ logoff(Context) ->
 %% then the user_id of the context is set.
 %% @spec logon_from_session(#context) -> #context
 logon_from_session(Context) ->
-    case z_context:get_session(auth_user_id, Context) of
+	% Enable simple memo functionality
+	AuthUserId = z_context:get_session(auth_user_id, Context),
+	z_memo:set_userid(AuthUserId),
+	% When there is an user, perform the user logon
+    case AuthUserId of
         undefined -> Context;
         UserId -> z_acl:logon(UserId, Context)
     end.

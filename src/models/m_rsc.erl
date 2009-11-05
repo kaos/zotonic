@@ -36,7 +36,9 @@
 	is_a/2,
 	is_a/3,
 	
-	p/3, 
+	p/3,
+	p_no_acl/3,
+	
 	op/2, o/2, o/3, o/4,
 	sp/2, s/2, s/3, s/4,
 	media/2,
@@ -52,14 +54,18 @@
 m_find_value(Id, #m{value=undefined} = M, Context) ->
     case rid(Id, Context) of
         undefined -> undefined;
-        RId -> M#m{value=RId}
+        RId -> 
+			case z_acl:rsc_visible(Id, Context) of
+				true -> M#m{value=RId};
+				false -> undefined
+			end
     end;
 m_find_value(is_cat, #m{value=Id} = M, _Context) when is_integer(Id) -> 
     M#m{value={is_cat, Id}};
 m_find_value(Key, #m{value={is_cat, Id}}, Context) -> 
     is_cat(Id, Key, Context);
 m_find_value(Key, #m{value=Id}, Context) when is_integer(Id) ->
-    p(Id, Key, Context).
+    p_no_acl(Id, Key, Context).
 
 %% @doc Transform a m_config value to a list, used for template loops
 %% @spec m_to_list(Source, Context) -> List
@@ -76,7 +82,7 @@ m_value(#m{value=V}, _Context) ->
     V.
 
 %% @doc Return the id of the resource with the name
-% @spec name_to_id(NameString, Context) -> int() | undefined
+% @spec name_to_id(NameString, Context) -> int() | {error, Reason}
 name_to_id(Name, Context) ->
     case is_list(Name) andalso z_utils:only_digits(Name) of
         true ->
@@ -84,7 +90,7 @@ name_to_id(Name, Context) ->
         false ->
             case rid_name(Name, Context) of
                 Id when is_integer(Id) -> {ok, Id};
-                _ -> {error, {enoent, rsc, Name}}
+                _ -> {error, {unknown_rsc, Name}}
             end
     end.
 
@@ -96,7 +102,7 @@ name_to_id_cat(Name, Cat, Context) when is_integer(Name) ->
     F = fun() ->
         CatId = m_category:name_to_id_check(Cat, Context),
         case z_db:q1("select id from rsc where id = $1 and category_id = $2", [Name, CatId], Context) of
-            undefined -> {error, {enoent, Cat, Name}};
+            undefined -> {error, {unknown_rsc_cat, Name, Cat}};
             Id -> {ok, Id}
         end
     end,
@@ -105,7 +111,7 @@ name_to_id_cat(Name, Cat, Context) ->
     F = fun() ->
         CatId = m_category:name_to_id_check(Cat, Context),
         case z_db:q1("select id from rsc where Name = $1 and category_id = $2", [Name, CatId], Context) of
-            undefined -> {error, {enoent, Cat, Name}};
+            undefined -> {error, {unknown_rsc_cat, Name, Cat}};
             Id -> {ok, Id}
         end
     end,
@@ -118,7 +124,7 @@ name_to_id_cat_check(Name, Cat, Context) ->
 page_path_to_id(Path, Context) ->
     Path1 = [ $/, string:strip(Path, both, $/)],
     case z_db:q1("select id from rsc where page_path = $1", [Path1], Context) of
-        undefined -> {error, enoent};
+        undefined -> {error, {unknown_page_path, Path1}};
         Id -> {ok, Id}
     end.
 
@@ -159,7 +165,7 @@ get_acl_props(Id, Context) when is_integer(Id) ->
     
             {IsPub, Vis, Group, PubS, PubE} ->
                 #acl_props{is_published=IsPub, visible_for=Vis, group_id=Group, publication_start=PubS, publication_end=PubE};
-            false ->
+            undefined ->
                 #acl_props{is_published=false, visible_for=3, group_id=0}
         end
     end,
@@ -190,12 +196,13 @@ duplicate(Id, Props, Context) ->
 
 
 %% @doc "Touch" the rsc, incrementing the version nr and the modification date/ modifier_id. 
-%% This should be called as part of another update or transaction and does not resync the caches.
+%% This should be called as part of another update or transaction and does not resync the caches,
+%% and does not check the ACL.  After "touching" the resource will be re-pivoted.
 %% @spec touch(Id, Context) -> {ok, Id} | {error, Reason}
-touch(Id, Context) ->
+touch(Id, Context) when is_integer(Id) ->
     case z_db:q("update rsc set version = version + 1, modifier_id = $1, modified = now() where id = $2", [z_acl:user(Context), Id], Context) of
         1 -> {ok, Id};
-        0 -> {error, enoent}
+        0 -> {error, {unknown_rsc, Id}}
     end.
     
 
@@ -262,54 +269,64 @@ is_me(Id, Context) ->
             false
     end.
 
-%% @todo Perform access control checks, return 'undefined' on an error or permission denial
 
-% List of special properties to be redirected to functions
-p(Id, o, Context)  -> o(Id, Context);
-p(Id, s, Context)  -> s(Id, Context);
-p(Id, op, Context) -> op(Id, Context);
-p(Id, sp, Context) -> sp(Id, Context);
-p(Id, is_me, Context) -> is_me(Id, Context);
-p(Id, is_visible, Context) -> is_visible(Id, Context);
-p(Id, is_editable, Context) -> is_editable(Id, Context);
-p(Id, is_ingroup, Context) -> is_ingroup(Id, Context);
-p(Id, is_a, Context) -> [ {C,true} || C <- is_a(Id, Context) ];
-p(Id, exists, Context) -> exists(Id, Context);
-p(Id, page_url, Context) -> 
-    case p(Id, page_path, Context) of
+%% @doc Fetch a property from a resource. When the rsc does not exist, the property does not
+%% exist or the user does not have access rights to the property then return 'undefined'.
+%% p(ResourceId, atom(), Context) -> term() | undefined
+p(Id, Property, Context) 
+	when Property =:= category_id orelse Property =:= page_url 
+	orelse Property =:= group orelse Property =:= category 
+	orelse Property =:= category_id orelse Property =:= is_a ->
+		p_no_acl(rid(Id, Context), Property, Context);
+p(Id, Property, Context) ->
+    case rid(Id, Context) of
+        undefined -> 
+			undefined;
+		RId ->
+			case z_acl:rsc_visible(RId, Context) of
+				true -> p_no_acl(RId, Property, Context);
+				false -> undefined
+			end
+	end.
+
+%% @doc Fetch a property from a resource, no ACL check is done.
+p_no_acl(undefined, _Predicate, _Context) -> undefined;
+p_no_acl(Id, o, Context)  -> o(Id, Context);
+p_no_acl(Id, s, Context)  -> s(Id, Context);
+p_no_acl(Id, op, Context) -> op(Id, Context);
+p_no_acl(Id, sp, Context) -> sp(Id, Context);
+p_no_acl(Id, is_me, Context) -> is_me(Id, Context);
+p_no_acl(Id, is_visible, Context) -> is_visible(Id, Context);
+p_no_acl(Id, is_editable, Context) -> is_editable(Id, Context);
+p_no_acl(Id, is_ingroup, Context) -> is_ingroup(Id, Context);
+p_no_acl(Id, is_a, Context) -> [ {C,true} || C <- is_a(Id, Context) ];
+p_no_acl(Id, exists, Context) -> exists(Id, Context);
+p_no_acl(Id, page_url, Context) -> 
+    case p_no_acl(Id, page_path, Context) of
         undefined -> page_url(Id, Context);
         PagePath -> PagePath
     end;
-p(Id, default_page_url, Context) -> page_url(Id, Context);
-p(Id, resource_uri, Context) ->
-    case rid(Id, Context) of
-        undefined ->
-            undefined;
-        IdNr ->
-            case p(IdNr, is_authoritative, Context) of
-                true ->  iolist_to_binary(z_context:abs_url(z_dispatcher:url_for(id, [{id, IdNr}], Context), Context));
-                false -> p_cached(IdNr, resource_uri, Context) 
-            end
+p_no_acl(Id, default_page_url, Context) -> page_url(Id, Context);
+p_no_acl(Id, resource_uri, Context) ->
+    case p_no_acl(Id, is_authoritative, Context) of
+        true ->  iolist_to_binary(z_context:abs_url(z_dispatcher:url_for(id, [{id, Id}], Context), Context));
+        false -> p_cached(Id, resource_uri, Context) 
     end;
-p(Id, group, Context) -> 
-    case p(Id, group_id, Context) of
+p_no_acl(Id, group, Context) -> 
+    case p_no_acl(Id, group_id, Context) of
         undefined -> undefined;
         GroupId -> m_group:get(GroupId, Context)
     end;
-p(Id, category, Context) -> 
-    m_category:get(p(Id, category_id, Context), Context);
-p(Id, media, Context) -> media(Id, Context);
-p(Id, medium, Context) -> m_media:get(Id, Context);
-p(Id, depiction, Context) -> m_media:depiction(Id, Context);
-p(Id, predicates_edit, Context) -> predicates_edit(Id, Context);
+p_no_acl(Id, category, Context) -> 
+    m_category:get(p_no_acl(Id, category_id, Context), Context);
+p_no_acl(Id, media, Context) -> media(Id, Context);
+p_no_acl(Id, medium, Context) -> m_media:get(Id, Context);
+p_no_acl(Id, depiction, Context) -> m_media:depiction(Id, Context);
+p_no_acl(Id, predicates_edit, Context) -> predicates_edit(Id, Context);
     
 % Check if the requested predicate is a readily available property or an edge
-p(Id, Predicate, Context) when is_integer(Id) -> 
-    p_cached(Id, Predicate, Context);
-p(undefined, _Predicate, _Context) ->
-    undefined;
-p(Id, Predicate, Context) ->
-    p(rid(Id, Context), Predicate, Context).
+p_no_acl(Id, Predicate, Context) when is_integer(Id) -> 
+    p_cached(Id, Predicate, Context).
 
 
     p_cached(Id, Predicate, Context) ->

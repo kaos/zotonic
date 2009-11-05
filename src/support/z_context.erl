@@ -91,12 +91,16 @@ new(Host) when is_atom(Host) ->
     Context = set_server_names(#context{host=Host}),
     Context#context{language=z_trans:default_language(Context)};
 new(ReqData) ->
+	%% This is the requesting thread, enable simple memo functionality.
+	z_memo:enable(),
     Context = set_server_names(#context{wm_reqdata=ReqData, host=site(ReqData)}),
     Context#context{language=z_trans:default_language(Context)}.
     
 
 %% @doc Create a new context record for the current request and resource module
 new(ReqData, Module) ->
+	%% This is the requesting thread, enable simple memo functionality.
+	z_memo:enable(),
     Context = set_server_names(#context{wm_reqdata=ReqData, resource_module=Module, host=site(ReqData)}),
     Context#context{language=z_trans:default_language(Context)}.
 
