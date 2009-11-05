@@ -257,8 +257,8 @@ install_predicate(C) ->
     {ok, GroupId} = pgsql:squery1(C, "select id from rsc where name = 'admins'"),
     
     [ {ok,1} = pgsql:equery(C, "
-            insert into rsc (id, is_protected, name, uri, props, group_id, category_id, is_published, creator_id, modifier_id)
-            values ($1, $2, $3, $4, $5, $6, $7, true, 1, 1)
+            insert into rsc (id, visible_for, is_protected, name, uri, props, group_id, category_id, is_published, creator_id, modifier_id)
+            values ($1, 0, $2, $3, $4, $5, $6, $7, true, 1, 1)
             ", R ++ [GroupId,CatId]) || R <- Preds],
     pgsql:reset_id(C, "rsc"),
 
