@@ -2,6 +2,7 @@
 %% @copyright 2009 Marc Worrell
 %%
 %% Original code copyright (c) 2008-2009 Rusty Klophaus
+%% @todo Adapt this for Zotonic.
 
 -module(action_base_validation_error).
 -include("zotonic.hrl").
