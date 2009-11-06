@@ -27,7 +27,7 @@ render_action(TriggerId, TargetId, Args, Context) ->
 	{JS, Context}.
 
 
-%% @doc Unlink the edge, on success show an undo message in the element with id "unlink-message"
+%% @doc Show possible completions of the search text using a template.
 %% @spec event(Event, Context1) -> Context2
 event({postback, {typeselect, Cats, Template, Actions, ActionsWithId}, _TriggerId, TargetId}, Context) ->
     Text = z_context:get_q("triggervalue", Context),
