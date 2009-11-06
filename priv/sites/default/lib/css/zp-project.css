@@ -110,7 +110,7 @@ p.breadcrumb {
 /* Lists
 ---------------------------------------------------------- */
 
-.bullet-list {
+.bullet-list, #content ul {
 	list-style: circle;
 	list-style-position: inside;
 	margin: 0 0 18px 0;
@@ -147,6 +147,20 @@ li.list-item {
 		color: #5dbae0;
 		text-decoration: none;
 		border-bottom: 1px dotted #5dbae0;
+	}
+
+
+/* Tables
+---------------------------------------------------------- */
+
+#content table td {
+	padding: 3px 6px 3px 0px;
+	border-bottom: 1px solid #323f47;
+}
+
+	#content table tr:first-child td {
+		font-weight: bold;
+		border-bottom: 1px solid #ddd;
 	}
 
 
