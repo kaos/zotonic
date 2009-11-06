@@ -39,11 +39,12 @@ do_link(SubjectId, Predicate, ObjectId, Context) ->
 do_link(SubjectId, Predicate, ObjectId, ElementId, Action, Context) ->
     case z_acl:rsc_editable(SubjectId, Context) of
         true ->
-            {ok, _EdgeId} = m_edge:insert(SubjectId, Predicate, ObjectId, Context),
+            {ok, EdgeId} = m_edge:insert(SubjectId, Predicate, ObjectId, Context),
             Vars = [
                 {subject_id, SubjectId},
                 {predicate, Predicate},
-                {object_id, ObjectId}
+                {object_id, ObjectId},
+				{edge_id, EdgeId}
             ],
             Html  = z_template:render("_rsc_edge.tpl", Vars, Context),
             Title = z_html:strip(?TR(m_rsc:p(ObjectId, title, Context), Context)),
