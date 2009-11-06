@@ -169,7 +169,10 @@ get_acl_props(Id, Context) when is_integer(Id) ->
                 #acl_props{is_published=false, visible_for=3, group_id=0}
         end
     end,
-    z_depcache:memo(F, {rsc_acl_fields, Id}, ?DAY, [Id], Context).
+    z_depcache:memo(F, {rsc_acl_fields, Id}, ?DAY, [Id], Context);
+
+get_acl_props(Name, Context) ->
+    get_acl_props(name_to_id_check(Name, Context), Context).
 
 
 %% @doc Insert a new resource
