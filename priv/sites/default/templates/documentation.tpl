@@ -20,7 +20,7 @@
 {% block sidebar %}
 	{% with m.rsc[id].category_id as category_id %}
 		<aside id="sidebar" class="zp-33">
-			<h2>{{ m.rsc[category_id].title }}</h2>
+			<h2><a href="{{ m.rsc[category_id].page_url }}">{{ m.rsc[category_id].title }}</a></h2>
 			
 			{% ifequal m.rsc[category_id].name "zt_template_filter" %}
 				{% for ids in m.search[{all_bytitle cat_is=category_id}]|vsplit_in:2 %}
