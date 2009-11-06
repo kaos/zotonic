@@ -11,7 +11,7 @@
 
 	{% wire id=#connect.id 
 			action={set_value id=#typeselect value=id}
-			action={submit_form closest=#typeselect}
+			action={submit closest=#typeselect}
 	%}
 
 {% empty %}
