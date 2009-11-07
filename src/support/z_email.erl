@@ -31,7 +31,12 @@ get_admin_email(Context) ->
 	case m_config:get_value(zotonic, admin_email, Context) of
 		undefined -> 
 			case m_site:get(admin_email, Context) of
-				undefined -> hd(string:tokens("wwwadmin@" ++ z_convert:to_list(m_site:get(hostname, Context)), ":"));
+				undefined -> 
+					case m_rsc:p_no_acl(1, email, Context) of
+						Empty when Empty == undefined orelse Empty == <<>> ->
+							hd(string:tokens("wwwadmin@" ++ z_convert:to_list(m_site:get(hostname, Context)), ":"));
+						Email -> Email
+					end;
 				Email -> Email
 			end;
 		Email -> Email
