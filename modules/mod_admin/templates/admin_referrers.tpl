@@ -32,8 +32,8 @@
 				<li id="{{ #li.id }}" {% if not m.rsc[id].is_published %}class="unpublished" {% endif %}>
 					<a href="{% url admin_edit_rsc id=id %}" class="clearfix">
 						<span class="zp-30">{{ m.rsc[id].title|striptags|default:"<em>untitled</em>" }}</span>
-						<span class="zp-15">{{ m.predicate[pred_id].title }}</span>
-						<span class="zp-15">{{ m.rsc[id].category.name }}</span>
+						<span class="zp-15">{{ m.rsc[pred_id].title }}</span>
+						<span class="zp-15">{{ m.rsc[m.rsc[id].category_id].title }}</span>
 						<span class="zp-15">{{ m.rsc[id].modified|date:"d M, H:i" }}</span>
 						<span class="zp-15">{{ m.rsc[m.rsc[id].modifier_id].title|default:"-" }}</span>
 						<span class="zp-10">
