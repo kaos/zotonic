@@ -51,6 +51,7 @@ install_modules(C) ->
         "mod_base",
         "mod_emailer",
         "mod_menu",
+        "mod_oauth",
         "mod_search",
         "mod_video_embed",
         "mod_atom_feed",
