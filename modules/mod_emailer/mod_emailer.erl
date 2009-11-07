@@ -187,9 +187,10 @@ spawn_send(Id, Email, Context, State) ->
 
         % Build the message and send it
         MimeMsg = esmtp_mime:msg(z_convert:to_list(To), z_convert:to_list(From), z_convert:to_list(Subject)),
+        MimeMsg0 = esmtp_mime:add_header(MimeMsg, {"User-Agent", "Zotonic " ?ZOTONIC_VERSION " (http://zotonic.com)"}),
         MimeMsg1 = case Text of
-            [] -> MimeMsg;
-            _ -> esmtp_mime:add_text_part(MimeMsg, z_convert:to_list(Text))
+            [] -> MimeMsg0;
+            _ -> esmtp_mime:add_text_part(MimeMsg0, z_convert:to_list(Text))
         end,
         MimeMsg2 = case Html of
             [] -> MimeMsg1;

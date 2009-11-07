@@ -14,7 +14,8 @@
          msg/0, msg/3, msg/4,
          from/1, to/1,
          add_text_part/2,
-         add_html_part/2
+         add_html_part/2,
+         add_header/2
 ]).
 
 -export([test_msg/0,
@@ -58,6 +59,9 @@ add_text_part(Msg = #mime_msg{parts=Parts}, Text) ->
 
 add_html_part(Msg = #mime_msg{parts=Parts}, Html) ->
     Msg#mime_msg{parts=Parts ++ [#mime_part{data=Html, encoding={"8bit", "text/html", "utf-8"}}]}.
+
+add_header(Msg = #mime_msg{headers=H}, Header) ->
+    Msg#mime_msg{headers=H++[Header]}.
 
 %%====================================================================
 %% Internal functions
