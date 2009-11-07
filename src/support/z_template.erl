@@ -60,16 +60,16 @@ render(File, Variables, Context) ->
                             Output;
                         {error, Reason} ->
                             ?ERROR("Error rendering template: ~p (~p)", [File, Reason]),
-                            <<>>
+                            throw({error, {template_rendering_error, File, Reason}})
                      end;
                 {error, Reason} ->
                     Reason1 = try lists:flatten(Reason) catch _:_ -> Reason end,
                     ?ERROR("Error compiling template: ~s (~p)", [File, Reason1]),
-                    <<>>
+                    throw({error, {template_compile_error, File, Reason1}})
             end;
         {error, Reason} ->
             ?LOG("Could not find template: ~s (~p)", [File, Reason]),
-            <<>>
+            throw({error, {template_not_found, File, Reason}})
     end.
             
 %% @doc Render a template to an iolist().  This removes all scomp state etc from the rendered html and appends the
