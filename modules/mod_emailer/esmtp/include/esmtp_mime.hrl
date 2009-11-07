@@ -10,7 +10,7 @@
 
 -record(mime_msg, {headers = [], boundary, parts = []}).
 -record(mime_part, {type,
-                    encoding = {"7bit", "text/plain","iso-8859-1"},
+                    encoding = {"8bit", "text/plain","utf-8"},
                     name,
                     data}).
 

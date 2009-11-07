@@ -54,10 +54,10 @@ from(#mime_msg{headers=H}) ->
     proplists:get_value("From", H, undefined).
 
 add_text_part(Msg = #mime_msg{parts=Parts}, Text) ->
-    Msg#mime_msg{parts=Parts ++ [#mime_part{data=Text}]}.
+    Msg#mime_msg{parts=Parts ++ [#mime_part{data=Text, encoding={"8bit", "text/plain", "utf-8"}}]}.
 
 add_html_part(Msg = #mime_msg{parts=Parts}, Html) ->
-    Msg#mime_msg{parts=Parts ++ [#mime_part{data=Html, encoding={"7bit", "text/html", "utf-8"}}]}.
+    Msg#mime_msg{parts=Parts ++ [#mime_part{data=Html, encoding={"8bit", "text/html", "utf-8"}}]}.
 
 %%====================================================================
 %% Internal functions
@@ -73,7 +73,7 @@ test_msg() ->
               parts=[#mime_part{data="This is a test..."},
                      #mime_part{data="This,is,a,test\r\nof,something,ok,maybe",
                                 type=attachment,
-                                encoding={"7bit","text/plain","utf-8"},
+                                encoding={"8bit","text/plain","utf-8"},
                                 name="foo.csv"}]}.
 test() ->
     io:format("~s~n", [encode(test_msg())]).
@@ -94,6 +94,8 @@ encode_header({Header, [V|Vs]}) when is_list(V) ->
                     end,
                     [V|Vs]),
     Header ++ ": " ++ join(Hdr, ";\r\n  ");
+encode_header({"Subject", Value}) ->
+	"Subject: " ++ rfc2047:encode(Value);
 encode_header({Header, Value}) when is_list(Header), is_list(Value) ->
     Header ++ ": " ++ Value;
 encode_header({Header, Value}) when is_atom(Header), is_list(Value) ->
@@ -124,10 +126,23 @@ part_headers(#mime_part{type=Type, encoding={Enc, MimeType, Charset},
                               {"filename", 
                               Name}]}].
 
-headers(#mime_msg{headers=H, boundary=Boundary}) ->
+headers(#mime_msg{headers=H, boundary=Boundary} = Msg) ->
     H ++ [{"MIME-Version", "1.0"},
-          {"Content-Type", ["multipart/mixed", 
+          {"Content-Type", [multipart_mime(Msg), 
                             "boundary=\"" ++ Boundary ++ "\""]}].
+
+    multipart_mime(Msg) ->
+		case is_mixed(Msg#mime_msg.parts) of
+			true -> "multipart/mixed";
+    		false -> "multipart/alternative"
+		end.
+
+    is_mixed([]) -> false;
+	is_mixed([#mime_part{type=attachment}|_]) -> true;
+	is_mixed([#mime_part{encoding={_, "text/plain", _}}|T]) -> is_mixed(T);
+	is_mixed([#mime_part{encoding={_, "text/html", _}}|T]) -> is_mixed(T);
+	is_mixed(_) -> true.
+	
 
 invent_mime_boundary() ->
     string:copies("=", 10) ++ list_rand(boundary_chars(), 30).

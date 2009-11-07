@@ -131,7 +131,7 @@ update_config(State) ->
 	%% Let the defaults be overruled by the config settings (from the admin and site config)
     State#state{
         from     = z_convert:to_list(m_config:get_value(?MODULE, email_from, EmailFrom, State#state.context)),
-        host     = z_convert:to_list(m_config:get_value(?MODULE, smtp_host, State#state.context)),
+        host     = z_convert:to_list(m_config:get_value(?MODULE, smtp_host, "localhost", State#state.context)),
         port     = z_convert:to_integer(m_config:get_value(?MODULE, smtp_port, 25, State#state.context)),
         ssl      = z_convert:to_bool(m_config:get_value(?MODULE, smtp_ssl, false, State#state.context)),
         ehlo     = z_convert:to_list(m_config:get_value(?MODULE, smtp_ehlo, "localhost", State#state.context)),
