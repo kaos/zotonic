@@ -41,31 +41,42 @@ allowed_methods(ReqData, _Context) ->
     
 
 is_authorized(ReqData, Context) ->
-    Module = z_context:get("module", Context),
-    case mod_oauth:check_request_logon(ReqData, Context) of
-        {none, Context2} ->
-            case z_service:needauth(Module) of
-                false ->
-                    %% No auth needed; so we're authorized.
-                    {true, ReqData, Context2};
-                true ->
-                    %% Authentication is required for this module...
-                    mod_oauth:authenticate(z_service:method(Module) ++ ": " ++ z_service:title(Module) ++ "\n\nThis API call requires authentication.", ReqData, Context2)
-            end;
 
-        {true, Context2} ->
-            %% OAuth succeeded; check whether we are allowed to exec this module
-            ConsumerId = proplists:get_value(id, z_context:get("oauth_consumer", Context2)),
-            case mod_oauth:is_allowed(ConsumerId, Module, Context2) of
-                true ->
-                    {true, ReqData, Context2};
-                false ->
-                    ReqData1 = wrq:set_resp_body("You are not authorized to execute this API call.\n", ReqData),
-                    {{halt, 403}, ReqData1, Context2}
-            end;
-                
-        {false, Response} ->
-            Response
+    %% Check if we are authorized via a regular session.
+    SessionAuthorized = z_auth:wm_is_authorized(ReqData, Context),
+    case SessionAuthorized of
+        {true, _, _} ->
+            %% Yep; use these credentials.
+            SessionAuthorized;
+
+        _ ->
+            %% No; see if we can use OAuth.
+            Module = z_context:get("module", Context),
+            case mod_oauth:check_request_logon(ReqData, Context) of
+                {none, Context2} ->
+                    case z_service:needauth(Module) of
+                        false ->
+                            %% No auth needed; so we're authorized.
+                            {true, ReqData, Context2};
+                        true ->
+                            %% Authentication is required for this module...
+                            mod_oauth:authenticate(z_service:method(Module) ++ ": " ++ z_service:title(Module) ++ "\n\nThis API call requires authentication.", ReqData, Context2)
+                    end;
+
+                {true, Context2} ->
+                    %% OAuth succeeded; check whether we are allowed to exec this module
+                    ConsumerId = proplists:get_value(id, z_context:get("oauth_consumer", Context2)),
+                    case mod_oauth:is_allowed(ConsumerId, Module, Context2) of
+                        true ->
+                            {true, ReqData, Context2};
+                        false ->
+                            ReqData1 = wrq:set_resp_body("You are not authorized to execute this API call.\n", ReqData),
+                            {{halt, 403}, ReqData1, Context2}
+                    end;
+
+                {false, Response} ->
+                    Response
+            end
     end.
 
 
