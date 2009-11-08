@@ -33,35 +33,39 @@ $.widget("ui.blockminifier",
 	_init: function() 
 	{
 		var self = this;
+        self.item = self.element.next(self.options.itemToMinify);
 
-		if(this.options.minifiedOnInit)
+		if(self.options.minifiedOnInit)
 		{
-			this.element.addClass('above-item-all-corners').next(self.options.itemToMinify).hide();
+			self.element.addClass('above-item-all-corners');
+            self.item.hide();
 			
-			$('span.arrow', this.element).toggle(function()
+			self.element.toggle(function()
 			{
-				$(this).parent().removeClass('above-item-all-corners').next(self.options.itemToMinify).slideDown(200);
+				self.element.removeClass('above-item-all-corners');
+                self.item.slideDown(200);
 			},
 			function()
 			{
-				$(this).parent().next('.item').slideUp(200, function()
+				self.item.slideUp(200, function()
 				{
-					$(this).prev('h3').addClass('above-item-all-corners');
+					self.element.addClass('above-item-all-corners');
 				});
 			});
 		}
 		else
 		{
-			$('span.arrow', this.element).toggle(function()
+			self.element.toggle(function()
 			{
-				$(this).parent().next(self.options.itemToMinify).slideUp(200, function()
+				self.item.slideUp(200, function()
 				{
-					$(this).prev('h3').addClass('above-item-all-corners');
+					self.element.addClass('above-item-all-corners');
 				});
 			},
 			function()
 			{
-				$(this).parent().removeClass('above-item-all-corners').next(self.options.itemToMinify).slideDown(200);
+				self.element.removeClass('above-item-all-corners');
+                self.item.slideDown(200);
 			});
 		}
 	}

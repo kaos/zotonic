@@ -211,6 +211,7 @@ h3.above-item {
 	margin: 0;
 	padding: 4px 8px;
 	position: relative;
+	cursor: pointer;
 }
 
     h3.above-list button {
@@ -237,7 +238,6 @@ h3.above-item {
 		text-indent: -9999px;
 		top: 0;
 		width: 22px;
-		cursor: pointer;
 		display: block;
 	}
 
