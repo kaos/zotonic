@@ -278,10 +278,16 @@ search({media, []}, _OffsetLimit, _Context) ->
     };
     
 search({all_bytitle, [{cat, Cat}]}, _OffsetLimit, Context) ->
-    search_all_bytitle:search(Cat, Context);
+    search_all_bytitle:search(Cat, all_bytitle, Context);
+
+search({all_bytitle_featured, [{cat, Cat}]}, _OffsetLimit, Context) ->
+    search_all_bytitle:search(Cat, all_bytitle_featured, Context);
 
 search({all_bytitle, [{cat_is, Cat}]}, _OffsetLimit, Context) ->
-    search_all_bytitle:search_cat_is(Cat, Context);
+    search_all_bytitle:search_cat_is(Cat, all_bytitle, Context);
+
+search({all_bytitle_featured, [{cat_is, Cat}]}, _OffsetLimit, Context) ->
+    search_all_bytitle:search_cat_is(Cat, all_bytitle_featured, Context);
 
 search(_, _, _) ->
     undefined.

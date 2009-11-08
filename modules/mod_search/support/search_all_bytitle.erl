@@ -11,41 +11,44 @@
 
 %% interface functions
 -export([
-    search/2,
-	search_cat_is/2
+    search/3,
+	search_cat_is/3
 ]).
 
 -include_lib("zotonic.hrl").
 
-search([Cat], Context) ->
-    search(Cat, Context);
-search(Cat, Context) ->
+search([Cat], Search, Context) ->
+    search(Cat, Search, Context);
+search(Cat, Search, Context) ->
     case m_category:name_to_id(Cat, Context) of
         {ok, CatId} ->
             {Left,Right} = m_category:get_range(CatId, Context),
-			search1(Left, Right, Context);
+			search1(Left, Right, Search, Context);
         {error, _Reason} ->
             #search_result{}
     end.
 
-search_cat_is(Cat, Context) ->
+search_cat_is(Cat, Search, Context) ->
     case m_category:name_to_id(Cat, Context) of
         {ok, CatId} ->
 			Props = m_category:get(CatId, Context),
 			Nr = proplists:get_value(nr, Props),
-			search1(Nr, Nr, Context);
+			search1(Nr, Nr, Search, Context);
         {error, _Reason} ->
             #search_result{}
     end.
 
-search1(Left, Right, Context) ->
-	Ids = z_db:q("select id from rsc where pivot_category_nr >= $1 and pivot_category_nr <= $2", [Left,Right], Context),
-    IdTitles = [ add_title(Id, Context) || {Id} <- Ids, m_rsc:is_visible(Id, Context) ],
+search1(Left, Right, Search, Context) ->
+	Ids = z_db:q("select id, is_featured from rsc where pivot_category_nr >= $1 and pivot_category_nr <= $2", [Left,Right], Context),
+    IdTitles = [ add_title(Id, Featured, Search, Context) || {Id, Featured} <- Ids, m_rsc:is_visible(Id, Context) ],
     Sorted = lists:sort(IdTitles),
     Result = [ {Title, Id} || {_Name, Title, Id} <- Sorted ],
     #search_result{result=Result, all=Sorted, total=length(Sorted)}.
 
 
-    add_title(Id, Context) ->
+    add_title(Id, true, all_by_title_featured, Context) ->
+        Title = ?TR(m_rsc:p(Id, title, Context), Context),
+        {[32 | z_string:to_name(Title)], Title, Id};
+    add_title(Id, _Featured, _Search, Context) ->
         Title = ?TR(m_rsc:p(Id, title, Context), Context),
         {z_string:to_name(Title), Title, Id}.

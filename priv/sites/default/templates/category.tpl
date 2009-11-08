@@ -33,7 +33,7 @@
 	</article>
 	
 	{% with m.category[id].tree1 as sub_cats %}
-		{% with m.search[{all_bytitle cat_is=id}] as c_ids %}
+		{% with m.search[{all_bytitle_featured cat_is=id}] as c_ids %}
 
 		{% if sub_cats %}
 			<section class="collection-members zp-33">
