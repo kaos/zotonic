@@ -86,7 +86,9 @@ resource_exists(ReqData, Context) ->
 
 
 content_types_provided(ReqData, Context) ->
-    {[{"application/json", to_json}], ReqData, Context}.
+    {[{"text/javascript", to_json}, 
+      {"application/json", to_json}
+     ], ReqData, Context}.
 
 
 api_error(HttpCode, ErrCode, Message, ReqData, Context) ->
