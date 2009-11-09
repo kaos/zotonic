@@ -13,11 +13,22 @@
 -export([start_link/1]).
 
 %% z_dispatch exports
--export([url_for/2, url_for/3, url_for/4, hostname/1, dispatchinfo/1, update/1, reload/1, reload/2, test/0]).
+-export([
+	url_for/2,
+	url_for/3,
+	url_for/4,
+	hostname/1,
+	hostname_port/1,
+	dispatchinfo/1,
+	update/1,
+	reload/1,
+	reload/2,
+	test/0
+]).
 
 -include_lib("zotonic.hrl").
 
--record(state, {dispatchlist=undefined, lookup=undefined, context, host, hostname, hostalias}).
+-record(state, {dispatchlist=undefined, lookup=undefined, context, host, hostname, hostname_port, hostalias}).
 
 %%====================================================================
 %% API
@@ -56,6 +67,11 @@ url_for(Name, Args, Escape, #context{dispatcher=Dispatcher} = Context) ->
 %% @doc Fetch the preferred hostname for this site
 hostname(#context{dispatcher=Dispatcher}) ->
     gen_server:call(Dispatcher, 'hostname').
+
+%% @spec hostname(Context) -> iolist()
+%% @doc Fetch the preferred hostname, including port, for this site
+hostname_port(#context{dispatcher=Dispatcher}) ->
+    gen_server:call(Dispatcher, 'hostname_port').
 
 
 %% @spec dispatchinfo(Context) -> {host, hostname, hostalias, dispatchlist}
@@ -100,7 +116,8 @@ init(SiteProps) ->
                 lookup=dict:new(),
                 context=Context, 
                 host=Host, 
-                hostname=drop_port(Hostname), 
+                hostname=drop_port(Hostname),
+				hostname_port=Hostname,
                 hostalias=[ drop_port(Alias) || Alias <- HostAlias ]
     },
     z_notifier:observe(module_ready, {?MODULE, reload}, Context),
@@ -126,6 +143,10 @@ handle_call({'url_for', Name, Args, Escape}, _From, State) ->
 %% @doc Return the preferred hostname for the site
 handle_call('hostname', _From, State) ->
     {reply, State#state.hostname, State};
+
+%% @doc Return the preferred hostname, and port, for the site
+handle_call('hostname_port', _From, State) ->
+    {reply, State#state.hostname_port, State};
 
 %% @doc Return the dispatchinfo for the site  {host, hostname, hostaliases, dispatchlist}
 handle_call('dispatchinfo', _From, State) ->

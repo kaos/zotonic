@@ -12,6 +12,7 @@
 
     site/1,
     hostname/1,
+    hostname_port/1,
     
     prune_for_async/1,
     prune_for_template/1,
@@ -75,7 +76,8 @@
     merge_scripts/2,
     copy_scripts/2,
     
-    set_resp_header/3
+    set_resp_header/3,
+    get_resp_header/2
 ]).
 
 -include_lib("zotonic.hrl").
@@ -141,6 +143,16 @@ site(ReqData) ->
 %% @spec hostname(Context) -> string()
 hostname(Context) ->
     case z_dispatcher:hostname(Context) of
+        Empty when Empty == undefined; Empty == [] ->
+            "localhost";
+        Hostname ->
+            Hostname
+    end.
+
+%% @doc Return the preferred hostname, including port, from the site configuration
+%% @spec hostname_port(Context) -> string()
+hostname_port(Context) ->
+    case z_dispatcher:hostname_port(Context) of
         Empty when Empty == undefined; Empty == [] ->
             "localhost";
         Hostname ->
@@ -229,7 +241,7 @@ abs_url(Url, Context) ->
         true ->
             Url;
         false ->
-            ["http://", hostname(Context), Url]
+            ["http://", hostname_port(Context), Url]
     end.
     
     has_url_protocol([]) -> 
@@ -637,6 +649,11 @@ language(Context) ->
 set_resp_header(Header, Value, Context = #context{wm_reqdata=ReqData}) ->
     RD1 = wrq:set_resp_header(Header, Value, ReqData),
     Context#context{wm_reqdata=RD1}.
+
+%% @doc Get a response header
+%% @spec get_response_header(Header, Context) -> Value
+get_resp_header(Header, #context{wm_reqdata=ReqData}) ->
+	wrq:get_resp_header(Header, ReqData).
 
 
 %% ------------------------------------------------------------------------------------
