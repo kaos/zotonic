@@ -33,7 +33,7 @@ content_types_provided(ReqData, Context) ->
  
 to_html(ReqData, Context) ->
     Id       = z_context:get_q("id", Context),
-    Location = m_rsc:p(Id, page_url, Context),
+    Location = m_rsc:p_no_acl(Id, page_url, Context),
     Url = "http://" ++ wrq:get_req_header("host", ReqData) ++ Location,
     ReqData1 = wrq:set_resp_header("Location", Url, ReqData),
     ReqData2 = wrq:set_response_code(303, ReqData1),
