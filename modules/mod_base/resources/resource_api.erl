@@ -27,16 +27,24 @@ init([]) -> {ok, []}.
 allowed_methods(ReqData, _Context) ->
     Context  = z_context:new(ReqData, ?MODULE),
     Context1 = z_context:ensure_qs(Context),
+    %% 'ping' the service to ensure we loaded all the existing services.
+    z_service:all(Context1),
     Method   = z_context:get_q("method", Context1),
     TheMod   = z_context:get_q("module", Context1),
-    Module  = list_to_atom("service_" ++ TheMod ++ "_" ++ Method),
-    Context2 = z_context:set("module", Module, Context1),
-    Context3 = z_context:set("partial_method", Method, Context2),
     try
-        {z_service:http_methods(Module), ReqData, Context3}
+        Module  = list_to_existing_atom("service_" ++ TheMod ++ "_" ++ Method),
+        Context2 = z_context:set("module", Module, Context1),
+        Context3 = z_context:set("partial_method", Method, Context2),
+        try
+            {z_service:http_methods(Module), ReqData, Context3}
+        catch
+            _X:_Y ->
+                {['GET', 'HEAD', 'POST'], ReqData, Context3}
+        end
     catch
-        _X:_Y ->
-            {['GET', 'HEAD', 'POST'], ReqData, Context3}
+        error: badarg ->
+            %% Not exists
+            {['GET', 'HEAD', 'POST'], ReqData, Context1}
     end.
     
 
