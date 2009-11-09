@@ -3,7 +3,6 @@
 %% @date 2009-04-28
 %%
 %% @doc Redirect to resources depening on the content type requested.
-%% @todo Split the redirect function to z_context and check for injection in the host header
 
 -module(resource_id).
 
@@ -53,11 +52,11 @@ see_other(ReqData, Context) ->
 	?WM_REPLY({halt, 303}, Context3).
 
 %% @doc Fetch the list of content types provided, together with their dispatch rule name.
+%% text/html is moved to the front of the list as that is the default mime type to be returned.
 get_content_types(Context) ->
 	case z_context:get(content_types_dispatch, Context) of
 		undefined ->
 			CT = z_notifier:foldr({content_types_dispatch}, [], Context),
-			?DEBUG(CT),
 			CT1 = case proplists:get_value("text/html", CT) of
 					undefined -> [{"text/html", page_url}|CT];
 					Prov -> [Prov|CT]
