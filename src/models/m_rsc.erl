@@ -279,7 +279,8 @@ is_me(Id, Context) ->
 p(Id, Property, Context) 
 	when Property =:= category_id orelse Property =:= page_url 
 	orelse Property =:= group orelse Property =:= category 
-	orelse Property =:= category_id orelse Property =:= is_a ->
+	orelse Property =:= category_id orelse Property =:= is_a 
+	orelse Property =:= default_page_url ->
 		p_no_acl(rid(Id, Context), Property, Context);
 p(Id, Property, Context) ->
     case rid(Id, Context) of
@@ -294,6 +295,7 @@ p(Id, Property, Context) ->
 
 %% @doc Fetch a property from a resource, no ACL check is done.
 p_no_acl(undefined, _Predicate, _Context) -> undefined;
+p_no_acl(Id, Prop, Context) when not is_integer(Id) -> p_no_acl(rid(Id, Context), Prop, Context);
 p_no_acl(Id, o, Context)  -> o(Id, Context);
 p_no_acl(Id, s, Context)  -> s(Id, Context);
 p_no_acl(Id, op, Context) -> op(Id, Context);
