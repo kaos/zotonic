@@ -39,8 +39,8 @@ content_types_provided(ReqData, Context) ->
 	{CT1, ReqData, Context1}.
 
 see_other(ReqData, Context) ->
-	Mime = wrq:get_resp_header("Content-Type", ReqData),
     Context1 = ?WM_REQ(ReqData, Context),
+	Mime = z_context:get_resp_header("Content-Type", Context1),
 	{CT,Context2} = get_content_types(Context1),
     Id = z_context:get_q("id", Context2),
 	Location = case proplists:get_value(Mime, CT) of
