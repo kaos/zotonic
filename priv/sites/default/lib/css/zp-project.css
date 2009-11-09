@@ -153,6 +153,10 @@ li.list-item {
 /* Tables
 ---------------------------------------------------------- */
 
+#content table {
+	margin-bottom: 18px;
+}
+
 #content table td {
 	padding: 3px 6px 3px 0px;
 	border-bottom: 1px solid #323f47;
