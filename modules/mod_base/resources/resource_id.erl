@@ -56,7 +56,7 @@ see_other(ReqData, Context) ->
 get_content_types(Context) ->
 	case z_context:get(content_types_dispatch, Context) of
 		undefined ->
-			CT = z_notifier:foldr({content_types_dispatch}, [], Context),
+			CT = z_notifier:foldr(content_types_dispatch, [], Context),
 			CT1 = case proplists:get_value("text/html", CT) of
 					undefined -> [{"text/html", page_url}|CT];
 					Prov -> [Prov|CT]
