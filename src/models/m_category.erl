@@ -100,6 +100,8 @@ m_value(#m{value=undefined}, Context) ->
 m_value(#m{value=#m{value={cat, Id}}}, Context) ->
     get(Id, Context).
 
+get(Name, Context) when not is_integer(Name) ->
+	get_by_name(Name, Context);
 get(Id, Context) ->
     F = fun() ->
         z_db:assoc_props_row("
@@ -641,7 +643,9 @@ insert(ParentId, Name, GroupId, Props, Context) ->
 %% @spec bounds(Id, C) -> {Left, Right}
 boundaries(CatId, Context) ->
     F = fun() ->
-                [{L,R}] = z_db:q("SELECT lft, rght FROM category WHERE id = $1", [CatId], Context),
-                {L,R}
+                case z_db:q_row("SELECT lft, rght FROM category WHERE id = $1", [CatId], Context) of
+                	{_,_} = LR -> LR;
+					_ -> {-100,-100}
+				end
         end,
     z_depcache:memo(F, {category_bounds, CatId}, ?WEEK, [CatId, category], Context).
