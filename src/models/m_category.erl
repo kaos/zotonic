@@ -27,6 +27,7 @@
     insert/5,
     get_page_count/2,
     delete/3,
+	image/2,
     name_to_id/2,
     name_to_id_check/2,
     id_to_name/2,
