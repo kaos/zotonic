@@ -558,7 +558,7 @@ build_tree({Id, Parent, Lvl, Name, Props}, Acc, Rest) ->
         <<>> -> [];
         _ -> Props
     end,
-    {[{id,Id}, {parent,Parent}, {level,Lvl}, {children, {ok, lists:reverse(Acc)}}, {name, Name} | Props1], Rest}.
+    {[{id,Id}, {parent_id,Parent}, {level,Lvl}, {children, {ok, lists:reverse(Acc)}}, {name, Name} | Props1], Rest}.
 
 
 
