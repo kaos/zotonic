@@ -213,7 +213,7 @@ update_predicate_category(Id, IsSubject, CatIds, Context) ->
 
 
 %% @doc Return all the valid categories for objects.  Return the empty list when there is no constraint.  Note that the resulting array
-%% is a bit strangely formatted [{id}, {id2}], this is compatible with the category name lookup and prevents mixups with strings (lists of integers).
+%% is a bit strangely formatted [{id}, {id2}, ...], this is compatible with the category name lookup and prevents mixups with strings (lists of integers).
 %% @spec object_category(Id, Context) -> List
 object_category(Id, Context) ->
     F = fun() ->
@@ -228,14 +228,13 @@ object_category(Id, Context) ->
 
 
 %% @doc Return all the valid categories for subjects.  Return the empty list when there is no constraint.  Note that the resulting array
-%% is a bit strangely formatted [{id}, {id2}], this is compatible with the category name lookup and prevents mixups with strings (lists of integers).
-%% @spec object_category(Id, Context) -> List
+%% is a bit strangely formatted [{id}, {id2}, ...], this is compatible with the category name lookup and prevents mixups with strings (lists of integers).
+%% @spec subject_category(Id, Context) -> List
 subject_category(Id, Context) ->
     F = fun() ->
         case name_to_id(Id, Context) of
             {ok, PredId} ->
-                {L,R} = cat_bounds(PredId, Context),
-                z_db:q("select pc.category_id from predicate_category pc join category c on (pc.predicate_id = c.id) where $1 <= c.nr and c.nr <= $2 and is_subject = true", [L, R], Context);
+                z_db:q("select category_id from predicate_category where predicate_id = $1 and is_subject = true", [PredId], Context);
             _ -> 
                 []
         end
@@ -278,8 +277,6 @@ for_subject(Id, Context) ->
 cat_id(Context) ->
     m_category:name_to_id_check(predicate, Context).
 
-cat_bounds(PredicateId, Context) ->
-    m_category:boundaries(PredicateId, Context).
 cat_bounds(Context) ->
     m_category:boundaries(cat_id(Context), Context).
         
