@@ -274,7 +274,7 @@
 							<div class="item clearfix">
 								<div class="admin-form clearfix">
 									<div class="notification notice">
-										Here you can manage the visibility and edibility of this page.
+										Here you can manage who can see or edit this page.
 									</div>
 									
 									<div class="form-item zp-50">
