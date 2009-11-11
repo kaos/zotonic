@@ -1,3 +1,7 @@
+%%%-------------------------------------------------------------------
+%%% Adapted and expanded for Zotonic by Marc Worrell <marc@worrell.nl>
+%%%-------------------------------------------------------------------
+
 -module(erlydtl_runtime).
 -compile(export_all).
 

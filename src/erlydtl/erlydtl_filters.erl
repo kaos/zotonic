@@ -31,6 +31,11 @@
 %%%
 %%% @since 2007-11-11 by Roberto Saccon, Evan Miller
 %%%-------------------------------------------------------------------
+%%%
+%%%-------------------------------------------------------------------
+%%% Adapted and expanded for Zotonic by Marc Worrell <marc@worrell.nl>
+%%%-------------------------------------------------------------------
+
 -module(erlydtl_filters).
 -author('rsaccon@gmail.com').
 -author('emmiller@gmail.com').
