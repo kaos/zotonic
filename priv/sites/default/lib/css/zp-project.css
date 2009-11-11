@@ -172,6 +172,10 @@ li.list-item {
 		background: #2a373f;
 	}
 
+	#content table tr:nth-child(odd) td {
+		background: #2a363d;
+	}
+
 
 /* Grid
 ---------------------------------------------------------- */
