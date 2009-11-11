@@ -4,7 +4,7 @@
 {% lib 
 	"js/apps/zotonic-1.0.js"
 	"js/apps/z.widgetmanager.js"
-	"js/modules/z.dialog.js"
+	"js/apps/modernizr.js"
 	"js/cufon.anja.js"
 %}
 
@@ -21,7 +21,7 @@
 		textShadow: '#222 1px 1px'
 	});
 	
-	Cufon.replace('.feature-wrapper h2',{
+	Cufon.replace('h2', {
 		color: '-linear-gradient(#19B7E8, #5bbde5)',
 		hover: true,
 		textShadow: '#222 1px 1px'

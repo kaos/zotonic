@@ -21,28 +21,13 @@
 	{% lib	"css/zp-ie.css" %}
 	<![endif]-->
 	
-	<!-- Make ie6 understand html5 -->
-	<script>
-		document.createElement('header');
-	   	document.createElement('footer');
-	   	document.createElement('section');
-	   	document.createElement('aside');
-	   	document.createElement('figure');
-	   	document.createElement('nav');
-	   	document.createElement('article');
-   	</script>
-
 	{% lib
 		"/js/modules/cufon.js"
 	%}
-
 </head>
-
 <body class="{% block page_class %}{% endblock %}">
 
-	<section class="skip">
-		<a href="#content-area" title="Go directly to page content">Go to page content</a>
-	</section>
+	<section class="skip"><a href="#content-area" title="Go directly to page content">Go to page content</a></section>
 
 	<section class="zp-wrapper">
 		<header class="clearfix">
