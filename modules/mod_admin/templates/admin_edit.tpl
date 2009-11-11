@@ -21,8 +21,9 @@
 				</h2>
 			{% else %}
 				<p class="admin-chapeau">editing:
-					<span class="right">
-						Modified {{ m.rsc[id].modified|timesince }}.
+					<span class="right" style="text-align: right">
+						Modified {{ r.modified|timesince }}.<br/>
+						By {{ m.rsc[r.modifier_id].title }}.
 					</span>
 				</p>
 				<h2>{{ r.title|striptags|default:"<em>untitled</em>" }}
