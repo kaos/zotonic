@@ -116,6 +116,7 @@ Nonterminals
 	CacheBlock
 	CacheBraced
 	EndCacheBraced
+	OptCacheTime
 
 	UrlTag
 	PrintTag
@@ -316,8 +317,11 @@ WithBraced -> open_tag with_keyword Value as_keyword ForGroup close_tag : ['$3',
 EndWithBraced -> open_tag endwith_keyword close_tag.
 
 CacheBlock -> CacheBraced Elements EndCacheBraced : {cache, '$1', '$2'}.
-CacheBraced -> open_tag cache_keyword Value identifier Args close_tag : [ '$3', '$4', '$5' ].
+CacheBraced -> open_tag cache_keyword OptCacheTime Args close_tag : [ '$3', '$4' ].
 EndCacheBraced -> open_tag endcache_keyword close_tag.
+
+OptCacheTime -> '$empty' : undefined.
+OptCacheTime -> number_literal : '$1'.
 
 Filter -> identifier : ['$1'].
 Filter -> identifier colon TermValue : ['$1', '$3'].

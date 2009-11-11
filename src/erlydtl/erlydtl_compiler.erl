@@ -388,8 +388,8 @@ body_ast(DjangoParseTree, Context, TreeWalker) ->
                 print_ast(Value, Context, TreeWalkerAcc);
             ({'lib', LibList}, TreeWalkerAcc) ->
                 lib_ast(LibList, Context, TreeWalkerAcc);
-            ({'cache', [MaxAge, Ident, Args], CacheContents}, TreeWalkerAcc) ->
-                cache_ast(MaxAge, Ident, Args, CacheContents, Context, TreeWalkerAcc);
+            ({'cache', [MaxAge, Args], CacheContents}, TreeWalkerAcc) ->
+                cache_ast(MaxAge, Args, CacheContents, Context, TreeWalkerAcc);
             (ValueToken, TreeWalkerAcc) -> 
                 {{ValueAst,ValueInfo},ValueTreeWalker} = value_ast(ValueToken, true, Context, TreeWalkerAcc),
                 {{format(ValueAst, Context),ValueInfo},ValueTreeWalker}
@@ -1291,15 +1291,21 @@ lib_ast(LibList, Context, TreeWalker) ->
     {{Ast, #ast_info{}}, TreeWalker}.
 
 
-%% @todo Add the caching code!
-cache_ast(MaxAge, {identifier, _, Name}, Args, Body, Context, TreeWalker) ->
-    {ArgsAst, ArgsTreeWalker} = scomp_ast_list_args(Args, Context, TreeWalker),
-    {{MaxAgeAst, MaxAgeInfo}, MaxAgeTreeWalker} = value_ast(MaxAge, false, Context, ArgsTreeWalker),
+cache_ast(MaxAge, Args, Body, Context, TreeWalker) ->
+	{Name, Args1} = case Args of
+		[{{identifier, _, Ident}, true}|RestArgs] -> {Ident, RestArgs};
+		_ -> {z_ids:id(), Args}
+	end,
+	MaxAge1 = case MaxAge of
+		{number_literal, _, Value} -> list_to_integer(Value);
+		undefined -> 0
+	end,
+    {ArgsAst, ArgsTreeWalker} = scomp_ast_list_args(Args1, Context, TreeWalker),
     ContextVarAst = erl_syntax:variable("Ctx_" ++ z_ids:identifier(10)),
     {{BodyAst, BodyInfo}, BodyTreeWalker} = body_ast(
                                                 Body, 
                                                 Context#dtl_context{local_scopes = [ [{'ZpContext', ContextVarAst}] | Context#dtl_context.local_scopes ]},
-                                                MaxAgeTreeWalker),
+                                                ArgsTreeWalker),
     FuncAst = erl_syntax:fun_expr([
         erl_syntax:clause(
             [ ContextVarAst ], 
@@ -1307,17 +1313,16 @@ cache_ast(MaxAge, {identifier, _, Name}, Args, Body, Context, TreeWalker) ->
             [ BodyAst ]
         )
     ]),
-
     CacheAst = erl_syntax:application(
                   erl_syntax:atom(erlydtl_runtime),
                   erl_syntax:atom(cache),
-                  [ MaxAgeAst,
+                  [ erl_syntax:integer(MaxAge1),
                     erl_syntax:atom(list_to_atom("$tpl$" ++ Name)),
                     ArgsAst,
                     FuncAst,
                     z_context_ast(Context)]
             ),
-    {{CacheAst, merge_info(MaxAgeInfo, BodyInfo)}, BodyTreeWalker}.
+    {{CacheAst, BodyInfo}, BodyTreeWalker}.
 
 
 resolve_value_ast(Value, Context, TreeWalker) ->
