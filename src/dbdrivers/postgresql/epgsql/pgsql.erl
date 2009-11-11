@@ -1,5 +1,9 @@
 %%% Copyright (C) 2008 - Will Glozer.  All rights reserved.
 
+%% Modified by Marc Worrell, 2009.
+%% Added last_id/2, reset_id/2, squery1/2, equery1/2, equery1/3, assoc/2, assoc/3, columns/2
+%% Adapted with_transaction/2
+
 -module(pgsql).
 
 -export([connect/2, connect/3, connect/4, close/1]).
