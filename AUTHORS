@@ -3,14 +3,13 @@
 # See the latter for an explanation.
 
 # Names should be added to this file as
-#	Name or Organization <email address>
+# Name or Organization <email address>
 
 # Authors contributing directly to Zotonic
 
 Arjan Scherpenisse <arjan@scherpenisse.net>
 Marc Worrell <marc@worrell.nl>
-Tim Benniks <tbenniks@gmail.com>
-
+Tim Benniks <tim@timbenniks.nl>
 
 # Authors of open source projects that are either
 # integrated or essential to Zotonic.
@@ -28,4 +27,3 @@ Simo Kinnunen
 Tim Fletcher
 Torbjorn Tornkvist <tobbe@bluetail.com>
 Will Glozer
-
