@@ -77,7 +77,7 @@
 							<span class="zp-20">{{ m.rsc[m.rsc[id].modifier_id].title|default:"-" }}</span>
 						{% endif %}
 						<span class="zp-10">
-							{% button text="delete" disabled=m.rsc[id].is_protected action={dialog_delete_rsc id=id on_success={slide_fade_out target=#li.id}} %}
+                            {% button text="view" action={redirect id=id} %}
 							{% button text="edit" action={redirect dispatch="admin_edit_rsc" id=id} %}
 						</span>
 					</a>
