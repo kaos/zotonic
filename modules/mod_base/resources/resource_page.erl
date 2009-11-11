@@ -52,24 +52,29 @@ html(Context) ->
         false -> Context
     end,
 
-	RenderArgs = [ {id, Id} | z_context:get_all(Context) ],
-	RenderFunc = fun() ->
-		Template = z_context:get(template, Context1, "page.tpl"),
-	    z_template:render(Template, RenderArgs, Context1)
-	end,
-
 	%% EXPERIMENTAL:
 	%%
 	%% When the 'cache_anonymous_maxage' flag is set then we enable simple page caching.
 	%% This does not take into account any query args and vary headers.
 	%% @todo Add the 'vary' headers to the cache key
-	MaxAge = z_context:get(cache_anonymous_maxage, Context1, 0),
-	Html = case not z_auth:is_auth(Context1) andalso MaxAge > 0 of
-		true -> 
-		    z_depcache:memo(RenderFunc, {page_template_anonymous, RenderArgs}, MaxAge, [Id], Context1);
-		false ->
+	RenderArgs = [ {id, Id} | z_context:get_all(Context1) ],
+	RenderFunc = fun() ->
+		Template = z_context:get(template, Context1, "page.tpl"),
+	    z_template:render(Template, RenderArgs, Context1)
+	end,
+
+	MaxAge = z_context:get(cache_anonymous_maxage, Context1),
+	Html = case not z_auth:is_auth(Context1) of
+		true when is_integer(MaxAge), MaxAge > 0 -> 
+			QueryArgs = z_context:get_q_all(Context1),
+		    z_depcache:memo(RenderFunc, {page_template_anonymous, RenderArgs, QueryArgs}, MaxAge, [Id], Context1);
+		true when is_integer(MaxAge), MaxAge == 0 ->
+			QueryArgs = z_context:get_q_all(Context1),
+		    z_depcache:memo(RenderFunc, {page_template_anonymous, RenderArgs, QueryArgs}, 0, [], Context1);
+		_ ->
 			RenderFunc()
 	end,
+	%% End experimental.
 
 	z_context:output(Html, Context1).
 

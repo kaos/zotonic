@@ -56,41 +56,51 @@ start_link(SiteProps) ->
 -define(CLEANUP_BATCH, 100).
 
 
-memo({M,F,A}, #context{} = Context) ->
-    memo({M,F,A}, ?HOUR, [], Context).
+memo(Function, #context{} = Context) ->
+    memo(Function, undefined, ?HOUR, [], Context).
 
-memo({M,F,A}, MaxAge, #context{} = Context) ->
-    memo({M,F,A}, MaxAge, [], Context);
-memo(F, Key, Context) ->
+memo(Function, MaxAge, #context{} = Context) when is_tuple(Function) ->
+    memo(Function, undefined, MaxAge, [], Context);
+
+memo(F, Key, Context) when is_function(F) ->
     memo(F, Key, ?HOUR, [], Context).
 
-memo({M,F,A}, MaxAge, Dep, #context{} = Context) ->
-    Key = memo_key({M,F,A}),
-    case ?MODULE:get_wait(Key, Context) of
-        {ok, Value} ->
-            Value;
-        undefined ->
-            Value = erlang:apply(M, F, A),
-            set(Key, Value, MaxAge, Dep, Context),
-            Value
-    end;
 memo(F, Key, MaxAge, #context{} = Context) ->
     memo(F, Key, MaxAge, [], Context).
 
 memo(F, Key, MaxAge, Dep, #context{} = Context) ->
-    case ?MODULE:get_wait(Key, Context) of
+	Key1 = case Key of
+		undefined -> memo_key(F);
+		_ -> Key
+	end,
+    case ?MODULE:get_wait(Key1, Context) of
         {ok, Value} ->
             Value;
         undefined ->
-            Value = F(),
-            set(Key, Value, MaxAge, Dep, Context),
+			Value = case F of
+				{M,F,A} -> erlang:apply(M,F,A);
+				{M,F} -> M:F();
+				F when is_function(F) -> F()
+			end,
+			case MaxAge of
+				0 -> memo_send_replies(Key, Value, Context);
+				_ -> set(Key, Value, MaxAge, Dep, Context)
+			end,
             Value
     end.
 
-%% @doc Calculate the key used for memo functions.
-memo_key({M,F,A}) -> 
-    WithoutContext = lists:filter(fun(#context{}) -> false; (_) -> true end, A),
-    {M,F,WithoutContext}.
+	%% @doc Calculate the key used for memo functions.
+	memo_key({M,F,A}) -> 
+	    WithoutContext = lists:filter(fun(#context{}) -> false; (_) -> true end, A),
+	    {M,F,WithoutContext};
+	memo_key({M,F}) -> 
+		{M,F}.
+
+	%% @doc Send the calculated value to the processes waiting for the result.
+	memo_send_replies(Key, Value, Context) ->
+		Pids = get_waiting_pids(Key, Context),
+		[ catch gen_server:reply(Pid, {ok, Value}) || Pid <- Pids ],
+		ok.
 
 
 %% @spec set(Key, Data, MaxAge) -> void()
@@ -126,6 +136,11 @@ get(Key, #context{depcache=Depcache}) ->
 get_wait(Key, #context{depcache=Depcache}) ->
     gen_server:call(Depcache, {get_wait, Key}, ?MAX_GET_WAIT*1000).
 
+%% @spec get_waiting_pids(Key) -> {ok, Data} | undefined
+%% @doc Fetch the queue of pids that are waiting for a get_wait/1. This flushes the queue and
+%% the key from the depcache.
+get_waiting_pids(Key, #context{depcache=Depcache}) ->
+    gen_server:call(Depcache, {get_waiting_pids, Key}, ?MAX_GET_WAIT*1000).
 
 %% @spec get(Key, SubKey) -> {ok, Data} | undefined
 %% @doc Fetch the key from the cache, return the data or an undefined if not found (or not valid)
@@ -203,6 +218,17 @@ handle_call({get_wait, Key}, From, State) ->
 		Other -> 
 			Other
 	end;
+
+%% @doc Return the list of processes waiting for the rendering of a key. Flush the queue and the key.
+handle_call({get_waiting_pids, Key}, _From, State) ->
+	{State1, Pids} = case dict:find(Key, State#state.wait_pids) of
+		{ok, {_MaxAge, List}} -> 
+			WaitPids = dict:erase(Key, State#state.wait_pids),
+			{State#state{wait_pids=WaitPids}, List};
+		error ->
+			{State, []}
+	end,
+	{reply, Pids, flush_key(Key, State1)};
 
 %% @doc Fetch a key from the cache, returns undefined when not found.
 handle_call({get, Key}, _From, State) ->
@@ -297,10 +323,7 @@ handle_call({set, Key, Data, Size, MaxAge, Depend}, _From, State) ->
 %%--------------------------------------------------------------------
 
 handle_cast({flush, Key}, State) ->
-    ets:delete(State#state.deps_table, Key),
-    ets:delete(State#state.meta_table, Key),
-    State1 = erase_key(Key, State),
-    {noreply, State1};
+    {noreply, flush_key(Key, State)};
 
 handle_cast(flush, State) ->
     ets:delete_all_objects(State#state.meta_table),
@@ -340,6 +363,12 @@ erase_key(Key, State) ->
         undefined ->
             State
     end.
+
+%% @doc Flush a key from the cache
+flush_key(Key, State) ->
+	ets:delete(State#state.deps_table, Key),
+	ets:delete(State#state.meta_table, Key),
+	erase_key(Key, State).
 
 
 %% @doc Check if all dependencies are still valid, that is they have a serial before or equal to the serial of the entry
