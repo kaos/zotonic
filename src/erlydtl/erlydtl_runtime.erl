@@ -213,8 +213,9 @@ cycle(NamesTuple, Counters, Context) when is_tuple(NamesTuple) ->
 
 
 cache(MaxAge, Name, Args, Func, Context) ->
+    VisibleFor = z_acl:args_to_visible_for(Args),
     DoCache = case z_convert:to_bool(proplists:get_value(if_anonymous, Args, false)) of
-        true -> z_acl:user(Context) =:= undefined;
+        true -> VisibleFor =:= ?ACL_VIS_PUBLIC orelse z_acl:user(Context) =:= undefined;
         false -> true
     end,
     case DoCache of
@@ -224,7 +225,6 @@ cache(MaxAge, Name, Args, Func, Context) ->
             Varies = lists:flatten(proplists:get_all_values(vary, Args)),
             Cat = proplists:get_all_values(cat, Args),
             Cat1 = lists:map(fun z_convert:to_atom/1, Cat),
-            VisibleFor = z_acl:args_to_visible_for(Args),
             FuncContext = z_acl:set_visible_for(VisibleFor, Context),
             Key = {Name, Varies, z_acl:cache_key(FuncContext)},
             F = fun() ->
