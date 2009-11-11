@@ -19,27 +19,11 @@
 -module(scomp_menu_menu).
 -behaviour(gen_scomp).
 
--export([init/1, varies/2, code_change/3, terminate/1, render/4]).
+-export([init/1, varies/2, terminate/2, render/4]).
 
 -include("zotonic.hrl").
 
-
-%%      init(Args) -> {ok, State} | {error, Error}
-%%      render(Params, Context, State) -> {ok, NewContext} | {ok, iolist()} | {error, Error}
-%%      code_change(OldVsn, State, Extra) -> {ok, NewState}
-%%      terminate(Reason) -> ok
-%%      
-%%      	State = term()
-%%      	Params = proplist()
-%%      	Context = context()
-%%      
-%%      varies(Params, Context) -> {EssentialParams, MaxAge, Depends} | undefined
-%%      
-%%      	Params = proplist()
-%%      	MaxAge = integer()
-%%          Depends = TermList
-
-% Menu structure is a bit like:
+% Menu structure is a like:
 %
 % <ul id="navigation" class="at-menu">
 % 	<li id="nav-item-1" class="first">
@@ -56,8 +40,7 @@
 
 init(_Args) -> {ok, []}.
 varies(_Params, _Context) -> undefined.
-code_change(_OldVsn, State, _Extra) -> {ok, State}.    
-terminate(_Reason) -> ok.
+terminate(_State, _Context) -> ok.
 
 render(Params, _Vars, Context, _State) ->
     Menu = get_menu(Context),

@@ -19,8 +19,7 @@
 %%      
 %%      init(Args) -> {ok, State} | {error, Error}
 %%      render(Params, Vars, Context, State) -> {ok, NewContext} | {ok, io_list()} | {error, Error}
-%%      code_change(OldVsn, State, Extra) -> {ok, NewState}
-%%      terminate(Reason) -> ok
+%%      terminate(State, Context) -> ok
 %%      
 %%      	State = term()
 %%      	Params = proplist()
@@ -42,8 +41,7 @@ behaviour_info(callbacks) ->
     [
         {init,1},
         {render, 4},
-        {code_change, 3},
-        {terminate, 1},
+        {terminate, 2},
         {varies, 2}
      ];
 behaviour_info(_Other) ->

@@ -23,14 +23,13 @@
 -module(scomp_base_droppable).
 -behaviour(gen_scomp).
 
--export([init/1, varies/2, code_change/3, terminate/1, render/4, event/2]).
+-export([init/1, varies/2, terminate/2, render/4, event/2]).
 
 -include("zotonic.hrl").
 
 init(_Args) -> {ok, []}.
 varies(_Params, _Context) -> undefined.
-code_change(_OldVsn, State, _Extra) -> {ok, State}.    
-terminate(_Reason) -> ok.
+terminate(_State, _Context) -> ok.
 
 %% -record(droppable, {?ELEMENT_BASE(element_droppable), tag, body=[], accept_groups=all, active_class=active, hover_class=hover}).
 

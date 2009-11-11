@@ -111,6 +111,7 @@ render_scomp_module(ModuleName, Args, Vars, ScompContext, Context) ->
 %% Description: Initiates the server
 %%--------------------------------------------------------------------
 init(SiteProps) ->
+	process_flag(trap_exit, true),
     Host = proplists:get_value(host, SiteProps),
     Context = z_context:new(Host),
     timer:start(),
@@ -216,7 +217,10 @@ handle_info(_Info, State) ->
 %% cleaning up. When it returns, the gen_server terminates with Reason.
 %% The return value is ignored.
 %%--------------------------------------------------------------------
-terminate(_Reason, _State) ->
+terminate(_Reason, State) ->
+	dict:map(fun(ScompModule, ScompState) -> 
+				ScompModule:terminate(ScompState, State#state.context) 
+			end, State#state.scomps),
     ok.
 
 %%--------------------------------------------------------------------
