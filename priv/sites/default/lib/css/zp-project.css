@@ -154,17 +154,22 @@ li.list-item {
 ---------------------------------------------------------- */
 
 #content table {
-	margin-bottom: 18px;
+	margin: 0 0 18px;
+	font-size: 11px;
 }
 
 #content table td {
-	padding: 3px 6px 3px 0px;
+	padding: 6px 18px 6px 0;
 	border-bottom: 1px solid #323f47;
 }
 
 	#content table tr:first-child td {
 		font-weight: bold;
-		border-bottom: 1px solid #ddd;
+		border-bottom: 1px dotted #666;
+	}
+	
+	#content table tr:nth-child(odd) td {
+		background: #222e36;
 	}
 
 
