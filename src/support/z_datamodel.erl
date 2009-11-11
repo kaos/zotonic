@@ -128,7 +128,7 @@ manage_resource(Module, {Name, Category, Props}, Context) ->
                     ?DEBUG(Name),
                     {ok}
             end;
-        undefined ->
+        {error, {unknown_rsc, _}} ->
             %% new resource
             Props1 = [{name, Name}, {group_id, m_group:name_to_id_check(admins, Context)}, {category_id, CatId},
                       {installed_by, Module}] ++ Props,
@@ -137,6 +137,8 @@ manage_resource(Module, {Name, Category, Props}, Context) ->
                              [{is_published, true} | Props1];
                          _ -> Props1
                      end,
+            ?DEBUG("New resource"),
+            ?DEBUG(Props2),
             m_rsc:insert(Props2, Context)
     end.
 
