@@ -1,12 +1,25 @@
 %% @author Marc Worrell <marc@worrell.nl>
 %% @copyright 2009 Marc Worrell
-
 %% @doc User agent session management for zotonic.  A ua session is a process started for every
 %%      user agent visiting the site.  The session is alive for a fixed period after the 
 %%      last request has been done.  The session manager manages all the ua session processes.
+%%
+%% @todo make sure that all sessions and page sessions are linked to some process so that they will be killed 
+%% when the zotonic application is stopped.
 
-%% TODO: make sure that all sessions and page sessions are linked to some process so that they will be killed 
-%%       when the zotonic application is stopped.
+%% Copyright 2009 Marc Worrell
+%%
+%% Licensed under the Apache License, Version 2.0 (the "License");
+%% you may not use this file except in compliance with the License.
+%% You may obtain a copy of the License at
+%% 
+%%     http://www.apache.org/licenses/LICENSE-2.0
+%% 
+%% Unless required by applicable law or agreed to in writing, software
+%% distributed under the License is distributed on an "AS IS" BASIS,
+%% WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+%% See the License for the specific language governing permissions and
+%% limitations under the License.
 
 
 -module(z_session_manager).

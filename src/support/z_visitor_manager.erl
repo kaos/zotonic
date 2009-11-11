@@ -1,10 +1,23 @@
 %% @author Marc Worrell <marc@worrell.nl>
 %% @copyright 2009 Marc Worrell
-
 %% @doc Visitor manager.  One visitor can have only one visitor process, with multiple ua-sessions and page sessions.
 %%      The visitor process manager spawns the visitor processes.  A visitor process stops itself after some time
 %%      of inactivity.  This visitor process manager finds the correct visitor process for the person id coupled to
 %%      the user-agent.
+
+%% Copyright 2009 Marc Worrell
+%%
+%% Licensed under the Apache License, Version 2.0 (the "License");
+%% you may not use this file except in compliance with the License.
+%% You may obtain a copy of the License at
+%% 
+%%     http://www.apache.org/licenses/LICENSE-2.0
+%% 
+%% Unless required by applicable law or agreed to in writing, software
+%% distributed under the License is distributed on an "AS IS" BASIS,
+%% WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+%% See the License for the specific language governing permissions and
+%% limitations under the License.
 
 % - On first visit:
 % 	1. Create new user, flag as anonymous user
@@ -28,7 +41,6 @@
 % 	4. Change zpsid and zpuid (safety measure)
 % - On user logoff:
 % 	1. Set user process state to 'public' (locking protected and private properties)
-
 
 -module(z_visitor_manager).
 -author("Marc Worrell <marc@worrell.nl>").

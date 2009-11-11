@@ -1,30 +1,32 @@
 %% @author Marc Worrell <marc@worrell.nl>
 %% @copyright 2009 Marc Worrell
 %% @date 2009-04-15
-%%
 %% @doc Search model, used as an interface to the search functions of modules etc.
+
+%% Copyright 2009 Marc Worrell
+%%
+%% Licensed under the Apache License, Version 2.0 (the "License");
+%% you may not use this file except in compliance with the License.
+%% You may obtain a copy of the License at
+%% 
+%%     http://www.apache.org/licenses/LICENSE-2.0
+%% 
+%% Unless required by applicable law or agreed to in writing, software
+%% distributed under the License is distributed on an "AS IS" BASIS,
+%% WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+%% See the License for the specific language governing permissions and
+%% limitations under the License.
+
 %% A search question is represented by:
 %%      {search_name, [PropList]}
 %% The search result is represented by:  
 %%      {search_result, [Results], [PropList], PagingInfo}
 %% The search options are always sorted before the search is done.
 %%
-%% The model allows the following indices:
-%%  page        current page number
-%%  next        next page number (undefined if no next page)
-%%  prev        previous page number (undefined if no previous page)
-%%  pages       total number of pages
-%%  total       total number of found items
-%%  q_args      the query args for url building (all properties except paging)
-%%  props       the search properties
-%%  name        the name of the search
-%%  result      list of ids for this page, can be a #rsc_list{}
-%%
 %% {% for id in m.search[{featured cat="accessoiries"}] %}
 %%
 %% Paging is done by fetching the first ?SEARCH_LIMIT rows and then return a slice from those rows.
-%% This result set can be cached for a short while (depending on writes by the user_id associated with the visitor).
-
+%% This result set should be cached for a short while (depending on writes by the user_id associated with the visitor).
 
 -module(m_search).
 -author("Marc Worrell <marc@worrell.nl").
