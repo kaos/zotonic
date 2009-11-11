@@ -30,6 +30,8 @@ limitations under the License.
 				// declare varaibles
 				var options, dialogWrapper, dialogTop, dialogTitle, dialogTLC, dialogTRC, dialogClose, dialogContent, dialogInnerContent, dialogRightContent, dialogBottom, dialogBLC, dialogBRC, dialogSizer, leftPos, topPos;
 				
+				options = $.extend({}, $.ui.dialog.defaults, options);
+				
 				dialogTitle			= $('<h5></h5>').addClass('dialog-title').text(options.title);
 				dialogTLC			= $('<span></span>').addClass('dialog-top-left');
 				dialogTRC			= $('<span></span>').addClass('dialog-top-right');
@@ -40,7 +42,7 @@ limitations under the License.
 				dialogBRC			= $('<span></span>').addClass('dialog-bottom-right');
 				dialogSizer			= $('<span></span>').addClass('dialog-sizer');
 				leftPos				= Math.floor((parseInt($(window).width()) / 2) - (parseInt(options.width) / 2));
-				topPos				= $(window).scrollTop() + 80;
+				topPos				= $(window).scrollTop() + (parseInt($(window).height()) / 2) - (parseInt($('.dialog').height()) / 2);
 			
 				dialogTop			= $('<div></div>').addClass('dialog-top').append(dialogTitle, dialogTLC, dialogTRC, dialogClose);
 				dialogContent		= $('<div></div>').addClass('dialog-content clearfix').append(dialogInnerContent, dialogRightContent);
@@ -52,7 +54,7 @@ limitations under the License.
 										.fadeIn(300)
 										.css({left: leftPos, top: topPos, width: options.width})
 										.draggable({addClasses: false, handle: dialogTop, opacity: 0.90, zIndex: 2700, iframeFix: true, scroll: true});
-								
+
 				$(document).keypress(function(e)
 				{
 					if($.browser.msie) 	{ var key = e.which }
@@ -87,7 +89,7 @@ limitations under the License.
 			var title	= this.options.title;
 			var text	= this.options.text;
 			var width	= this.options.width;
-
+			
 			this.element.click(function()
 			{
 				$.dialogAdd(

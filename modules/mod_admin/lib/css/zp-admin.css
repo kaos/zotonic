@@ -883,3 +883,13 @@ ul.categories li a {
 	.z-tinymce-media-options p {
 		margin: 0;
 	}
+
+
+/* ajax interaction 
+-------------------------------------------------------------- */
+body.wait {
+    cursor: wait;
+}
+body.wait button {
+    cursor: wait;
+}

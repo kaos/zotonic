@@ -47,6 +47,19 @@ function z_dialog_close()
 	$('.dialog-close').click();
 }
 
+$(function()
+{
+	$(window).bind('ajaxStart', function()
+	{
+		$(document.body).addClass('wait');
+	});
+
+	$(window).bind('ajaxStop', function()
+	{
+		$(document.body).removeClass('wait');
+	});
+});
+
 
 /* Growl messages
 ---------------------------------------------------------- */
