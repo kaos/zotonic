@@ -221,7 +221,7 @@ cache(MaxAge, Name, Args, Func, Context) ->
         false ->
             Func(Context);
         true ->
-            Varies = lists:flatten(proplists:get_all_values(varies, Args)),
+            Varies = lists:flatten(proplists:get_all_values(vary, Args)),
             Cat = proplists:get_all_values(cat, Args),
             Cat1 = lists:map(fun z_convert:to_atom/1, Cat),
             VisibleFor = z_acl:args_to_visible_for(Args),
