@@ -1293,7 +1293,7 @@ lib_ast(LibList, Context, TreeWalker) ->
 
 cache_ast(MaxAge, Args, Body, Context, TreeWalker) ->
 	{Name, Args1} = case Args of
-		[{{identifier, _, Ident}, true}|RestArgs] -> {Ident, RestArgs};
+		[{{identifier, _, Ident}, true}|RestArgs] when Ident =/= "if_anonymous" -> {Ident, RestArgs};
 		_ -> {z_ids:id(), Args}
 	end,
 	MaxAge1 = case MaxAge of
