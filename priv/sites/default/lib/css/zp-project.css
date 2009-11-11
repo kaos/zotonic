@@ -159,7 +159,7 @@ li.list-item {
 }
 
 #content table td {
-	padding: 6px 18px 6px 0;
+	padding: 6px 18px 6px 6px;
 	border-bottom: 1px solid #323f47;
 }
 
@@ -168,8 +168,8 @@ li.list-item {
 		border-bottom: 1px dotted #666;
 	}
 	
-	#content table tr:nth-child(odd) td {
-		background: #222e36;
+	#content table tr:nth-child(even) td {
+		background: #2a373f;
 	}
 
 
