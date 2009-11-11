@@ -393,8 +393,15 @@ function z_init_postback_forms()
 		var form_id		= $(this).attr('id');
 		var validations = $(this).formValidationPostback();
 		
-		if(!postback) postback = z_default_form_postback;
-		if(action) setTimeout(action, 10);
+		if(!postback) 
+		{
+			postback = z_default_form_postback;
+		}
+		
+		if(action) 
+		{
+			setTimeout(action, 10);
+		}
 
 		var files = $('input:file', this).fieldValue();
 		var found = false;
