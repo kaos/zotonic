@@ -35,7 +35,7 @@
 							<li {% if not m.rsc[id].is_published %}class="unpublished" {% endif %}>
 								<a href="{% url admin_edit_rsc id=id %}" class="clearfix">
 									<span class="zp-55">{{ m.rsc[id].title|striptags|default:"<em>untitled</em>" }}</span>
-									<span class="zp-25">{{ m.rsc[id].category.name }}</span>
+									<span class="zp-25">{{ m.rsc[m.rsc[id].category_id].title }}</span>
 									<span class="zp-20">
 										{% button text="view" action={redirect id=id} %}
 										{% button text="edit" action={redirect dispatch="admin_edit_rsc" id=id} %}
@@ -68,7 +68,7 @@
 							<li {% if not m.rsc[id].is_published %}class="unpublished" {% endif %}>
 								<a href="{% url admin_edit_rsc id=id %}" class="clearfix">
 									<span class="zp-55">{{ m.rsc[id].title|striptags|default:"<em>untitled</em>" }}</span>
-									<span class="zp-25">{{ m.rsc[id].category.name }}</span>
+									<span class="zp-25">{{ m.rsc[m.rsc[id].category_id].title }}</span>
 									<span class="zp-20">
 										{% button text="view" action={redirect id=id} %}
 										{% button text="edit" action={redirect dispatch="admin_edit_rsc" id=id} %}
@@ -105,7 +105,7 @@
 							<li {% if not m.rsc[id].is_published %}class="unpublished" {% endif %}>
 								<a href="{% url admin_edit_rsc id=id %}" class="clearfix">
 									<span class="zp-55">{{ m.rsc[id].title|striptags|default:"<em>untitled</em>" }}</span>
-									<span class="zp-25">{{ m.rsc[id].category.name }}</span>
+									<span class="zp-25">{{ m.rsc[m.rsc[id].category_id].title }}</span>
 									<span class="zp-20">
 										{% button text="view" action={redirect id=id} %}
 										{% button text="edit" action={redirect dispatch="admin_edit_rsc" id=id} %}
@@ -173,7 +173,7 @@
 								<a href="{% url admin_edit_rsc id=id %}" class="clearfix">
 									<span class="zp-15">{% image id width=40 height=18 crop %}&nbsp;</span>
 									<span class="zp-40">{{ m.rsc[id].title|striptags|default:"<em>untitled</em>" }}</span>
-									<span class="zp-25">{{ m.rsc[id].category.name }}</span>
+									<span class="zp-25">{{ m.rsc[m.rsc[id].category_id].title }}</span>
 									<span class="zp-20">
 										{% button text="view" action={redirect id=id} %}
 										{% button text="edit" action={redirect dispatch="admin_edit_rsc" id=id} %}
