@@ -3,18 +3,17 @@
 {% block title %} modules {% endblock %}
 
 {% block content %}
-	<div id="content" class="zp-100">
+	<div id="content" class="zp-85">
 		<div class="block clearfix">
 
 		<h2>Zotonic Modules</h2>
 
+		{% button text="Rescan modules" action={module_rescan} %}
+
+		<hr class="clear" />
 		<p>
 			Rescanning will rebuild the index of all modules, actions, templates etc.  It will also reload all dispatch rules.
 		</p>
-
-		{% button text="Rescan modules" action={module_rescan} %}
-		
-		<div class="clear">&nbsp;</div>
 
 		<h3 class="above-list ">Modules overview</h3>
 		<ul class="short-list">

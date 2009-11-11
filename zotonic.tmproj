@@ -2,6 +2,8 @@
 <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
 <plist version="1.0">
 <dict>
+	<key>currentDocument</key>
+	<string>modules/mod_admin/templates/admin_base.tpl</string>
 	<key>documents</key>
 	<array>
 		<dict>
@@ -13,8 +15,6 @@
 			<string>deps</string>
 		</dict>
 		<dict>
-			<key>expanded</key>
-			<true/>
 			<key>name</key>
 			<string>doc</string>
 			<key>regexFolderFilter</key>
@@ -51,8 +51,6 @@
 			<string>priv</string>
 		</dict>
 		<dict>
-			<key>expanded</key>
-			<true/>
 			<key>name</key>
 			<string>src</string>
 			<key>regexFolderFilter</key>
@@ -151,6 +149,48 @@
 			<key>firstVisibleLine</key>
 			<integer>100</integer>
 		</dict>
+		<key>modules/mod_admin/templates/admin_base.tpl</key>
+		<dict>
+			<key>caret</key>
+			<dict>
+				<key>column</key>
+				<integer>0</integer>
+				<key>line</key>
+				<integer>57</integer>
+			</dict>
+			<key>firstVisibleColumn</key>
+			<integer>0</integer>
+			<key>firstVisibleLine</key>
+			<integer>20</integer>
+		</dict>
+		<key>modules/mod_admin_config/templates/admin_config.tpl</key>
+		<dict>
+			<key>caret</key>
+			<dict>
+				<key>column</key>
+				<integer>9</integer>
+				<key>line</key>
+				<integer>16</integer>
+			</dict>
+			<key>firstVisibleColumn</key>
+			<integer>0</integer>
+			<key>firstVisibleLine</key>
+			<integer>2</integer>
+		</dict>
+		<key>modules/mod_admin_modules/templates/admin_modules.tpl</key>
+		<dict>
+			<key>caret</key>
+			<dict>
+				<key>column</key>
+				<integer>0</integer>
+				<key>line</key>
+				<integer>16</integer>
+			</dict>
+			<key>firstVisibleColumn</key>
+			<integer>0</integer>
+			<key>firstVisibleLine</key>
+			<integer>0</integer>
+		</dict>
 		<key>src/models/m_identity.erl</key>
 		<dict>
 			<key>caret</key>
@@ -166,17 +206,16 @@
 			<integer>0</integer>
 		</dict>
 	</dict>
+	<key>openDocuments</key>
+	<array>
+		<string>modules/mod_admin_modules/templates/admin_modules.tpl</string>
+		<string>modules/mod_admin_config/templates/admin_config.tpl</string>
+		<string>modules/mod_admin/templates/admin_base.tpl</string>
+	</array>
 	<key>showFileHierarchyDrawer</key>
 	<false/>
 	<key>treeState</key>
 	<dict>
-		<key>doc</key>
-		<dict>
-			<key>isExpanded</key>
-			<true/>
-			<key>subItems</key>
-			<dict/>
-		</dict>
 		<key>modules</key>
 		<dict>
 			<key>isExpanded</key>
@@ -185,13 +224,6 @@
 			<dict/>
 		</dict>
 		<key>priv</key>
-		<dict>
-			<key>isExpanded</key>
-			<true/>
-			<key>subItems</key>
-			<dict/>
-		</dict>
-		<key>src</key>
 		<dict>
 			<key>isExpanded</key>
 			<true/>

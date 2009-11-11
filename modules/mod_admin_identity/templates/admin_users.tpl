@@ -3,11 +3,19 @@
 {% block title %} users overview {% endblock %}
 
 {% block content %}
-	<div id="content" class="zp-100">
+	<div id="content" class="zp-85">
 		<div class="block clearfix">
 
 		<h2>Zotonic User Overview</h2>
 	
+		{% if m.acl.is_admin %}
+			{% button text="Make a new user" action={dialog_user_add on_success={reload}} %}
+		{% else %}
+			<p>You need to be an administrator to add users.</p>
+		{% endif %}
+		
+		<hr class="clear" />
+
 		<div class="clearfix">
 			<p>
 				Every page/person can be made into a user on the edit page.
@@ -15,18 +23,6 @@
 				that the former has logon credentials attached to its page record.
 			</p>
 
-			{% if m.acl.is_admin %}
-				{% button text="New User" action={dialog_user_add on_success={reload}} %}
-			{% else %}
-				<p>You need to be an administrator to add users.</p>
-			{% endif %}
-
-			{# <div class="quick-search-wrapper right"> #}
-			{# 				<form method="get" action="{% url admin_user %}"> #}
-			{# 					<input type="text" name="qs" value="{{ q.qs|escape }}" class="left" /> #}
-			{# 					<button type="submit">Search user</button> #}
-			{# 				</form> #}
-			{# 			</div> #}
 		</div>
 
 	
@@ -60,7 +56,7 @@
 							{% if id|ne:1 %}
 								{% button text="delete username" action={dialog_delete_username id=id on_success={slide_fade_out target=#li.id}} %}
 							{% endif %}
-							{% button text="edit &raquo;" action={redirect dispatch="admin_edit_rsc" id=id} %}
+							{% button text="edit" action={redirect dispatch="admin_edit_rsc" id=id} %}
 						</span>
 					</a>
 				</li>

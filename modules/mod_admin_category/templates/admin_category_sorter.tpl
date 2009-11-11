@@ -6,16 +6,19 @@ Category Hierarchy
 
 {% block content %}
 {% with m.acl.is_admin as editable %}
-	<div id="content" class="zp-100">
+	<div id="content" class="zp-85">
 		<div class="block clearfix">
 
 			<h2>Zotonic Categories</h2>
 
+			{% if editable %}
+				{% button text="Make a new category" action={dialog_category_add on_success={reload}} %}
+			{% endif %}
+			
+			<hr class="clear" />
+
 			<p>Categories are used to categorize all pages. Every page belongs to exactly one category. The categories are defined in a hierarchy. Here you can change that hierarchy.</p>
 
-			{% if editable %}
-				{% button text="Add a new category" action={dialog_category_add on_success={reload}} %}
-			{% endif %}
 		
 			<div id="category-sorter" class="clear zp-67">
 				{% include "_admin_category_sorter.tpl" %}
@@ -29,5 +32,3 @@ Category Hierarchy
 	</div>
 {% endwith %}
 {% endblock %}
-
-

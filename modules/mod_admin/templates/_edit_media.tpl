@@ -8,7 +8,7 @@
 			{% sortable id=#medium.media_id tag=edge_id %}
 			<li id="{{ #medium.media_id }}" class="edit_media clearfix">
 				{% with m.rsc[media_id].medium as medium %}
-					{% image medium width=227 height=200 crop %}
+					{% image medium width=187 height=200 crop %}
 
 					{% with m.rsc[media_id].title|striptags|default:"untitled" as title %}
 					<div class="media-unlink-wrapper">

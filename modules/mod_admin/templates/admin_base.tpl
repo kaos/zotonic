@@ -27,13 +27,23 @@
 		<a href="#content" title="Go directly to page content">Go to page content</a>
 	</div>
 	<div class="zp-wrapper">
-		<div id="header">
-			<h1 class="zotonic">
+		<div id="header" class="clearfix">
+			<h1 class="zotonic left">
 				<a href="/admin/">
 					<img src="/lib/images/admin_zotonic.png">
 				</a>
 				<span><a href="http://{{ m.site.hostname }}" title="Visit your site">visit site &raquo;</a></span>
 			</h1>
+			
+			{% block search %}
+			<div class="right search">
+				<form action="/admin/overview" method="get">
+					<div class="search-wrapper">
+						<input type="text" name="qs" value="{{q.qs}}">
+					</div>
+				</form>
+			</div>
+			{% endblock %}
 		</div>
 
 		<!--[if lte IE 6]>
@@ -45,22 +55,19 @@
 		<![endif]-->
 
 		{% block navigation %}
-		{% wire id="zp-logoff" action={logoff} %}
-		<ul id="navigation" class="zp-100">
-			<li><a href="/admin/" {% if page_dashboard %}class="current"{% endif %}>Dashboard</a></li>
-			<li><a href="/admin/overview/" {% if page_overview %}class="current"{% endif %}>Pages</a></li>
-			<li><a href="{% url admin_media %}" {% if page_media %}class="current"{% endif %}>Media</a></li>
-			{% all include "_admin_menu_module.tpl" %}
-			<li class="search-box">
-				<div class="quick-search-wrapper">
-					<form method="get" action="{% url admin_overview_rsc %}">
-						<input type="text" name="qs" value="{{ q.qs|escape }}" class="left" />
-						<button type="submit">Search</button>
-					</form>
-				</div>
-			</li>
-			<li class="right"><a id="zp-logoff" href="#">Logoff</a></li>
-		</ul>
+		
+			{% wire id="zp-logoff" action={logoff} %}
+		
+			<ul id="navigation" class="zp-10" style="margin: 0 10px 0 0;">
+				<li><a href="/admin/" {% if page_dashboard %}class="current"{% endif %}>Dashboard</a></li>
+				<li><a href="/admin/overview/" {% if page_overview %}class="current"{% endif %}>Pages</a></li>
+				<li><a href="{% url admin_media %}" {% if page_media %}class="current"{% endif %}>Media</a></li>
+			
+				{% all include "_admin_menu_module.tpl" %}
+
+				<li><a id="zp-logoff" href="#">Logoff</a></li>
+			</ul>
+		
 		{% endblock %}
 
 		{% block content %}{% endblock %}

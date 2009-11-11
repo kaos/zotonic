@@ -4,37 +4,41 @@
 
 {% block content %}
 {% with m.acl.is_admin as editable %}
-	<div id="content" class="zp-100">
+	<div id="content" class="zp-85">
 		<div class="block clearfix">
 
 			<h2>Zotonic Groups</h2>
+
+			{% if editable %}
+			<div class="clearfix">
+				{% button text="Make a new group" action={dialog_group_new title=""} %}
+			</div>
+			
+			<hr />
+			{% endif %}
 
 			<p>
 				All pages belong to a group. Users that are member of a group can edit pages belonging to that group.
 			</p>
 			
-			<div class="zp-50">
-				<p>
-					A <strong>group leader</strong> can add or remove members from a group.
-					<br/>A <strong>group member</strong> can edit or add pages belonging to a group.
-					<br/>A <strong>group observer</strong> can see all pages in a group but not change them.
-				</p>
-			</div>
-			<div class="zp-50">
-				<p>
-					An <strong>administrator</strong> can change all pages and administer the sytem
-					<br/>A <strong>supervisor</strong> can see all pages of all groups but not change them.
-					<br/>A <strong>community publisher</strong> can publish pages visible to all members.
-					<br/>A <strong>public publisher</strong> can publish pages visible to the whole world.
-				</p>
-			</div>
-
-			{% if editable %}
 			<div class="clearfix">
-				{% button text="New group" action={dialog_group_new title=""} %}
+				<div class="zp-50">
+					<p>
+						A <strong>group leader</strong> can add or remove members from a group.
+						<br/>A <strong>group member</strong> can edit or add pages belonging to a group.
+						<br/>A <strong>group observer</strong> can see all pages in a group but not change them.
+					</p>
+				</div>
+				<div class="zp-50">
+					<p>
+						An <strong>administrator</strong> can change all pages and administer the sytem
+						<br/>A <strong>supervisor</strong> can see all pages of all groups but not change them.
+						<br/>A <strong>community publisher</strong> can publish pages visible to all members.
+						<br/>A <strong>public publisher</strong> can publish pages visible to the whole world.
+					</p>
+				</div>
 			</div>
-			{% endif %}
-
+				
 		{% with m.acl.observer as observer %}
 		{% with m.acl.leader as leader %}
 		{% with m.acl.member as member %}
@@ -88,7 +92,7 @@
 						<span class="zp-20">
 							{% button text="members" action={redirect dispatch="admin_group_members" id=id} %}
 							{% button text="delete" disabled=m.rsc[id].is_protected action={dialog_group_delete id=id on_success={slide_fade_out target=#li.id}} %}
-							{% button text="edit &raquo;" action={redirect dispatch="admin_edit_rsc" id=id} %}
+							{% button text="edit" action={redirect dispatch="admin_edit_rsc" id=id} %}
 						</span>
 					</a>
 				</li>

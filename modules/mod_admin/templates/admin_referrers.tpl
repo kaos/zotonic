@@ -3,7 +3,7 @@
 {% block title %} admin referrers of {{ m.rsc[q.id].title }} {% endblock %}
 
 {% block content %}
-	<div id="content" class="zp-100">
+	<div id="content" class="zp-85">
 		<div class="block clearfix">
 
 			<h2>Referrers to “{{ m.rsc[q.id].title }}”</h2>

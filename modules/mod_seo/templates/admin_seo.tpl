@@ -4,7 +4,7 @@
 
 {% block content %}
 
-<div id="content" class="zp-100">
+<div id="content" class="zp-85">
 	<div class="block clearfix">
 
 	{% wire id="admin-seo" type="submit" postback="admin_seo" %}

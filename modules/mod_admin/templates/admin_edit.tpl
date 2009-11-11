@@ -12,7 +12,7 @@
 {% block content %}
 {% with m.rsc[id] as r %}
   {% with r.is_editable as is_editable %}
-	<div id="content" class="zp-100">
+	<div id="content" class="zp-85">
 		<div class="block clearfix">
 
 			{% if not is_editable %}
@@ -131,7 +131,7 @@
 						<div class="item-wrapper">
 							<h3 class="above-item clearfix do_blockminifier { minifiedOnInit: {{ r.is_a.meta|not }} }">
 								<span class="title">Advanced</span>
-								<span class="arrow">make smaller</span>	
+								<span class="arrow">make smaller</span>
 							</h3>
 							<div class="item clearfix">
 								<fieldset class="admin-form">
@@ -234,16 +234,9 @@
 										{% else %}
 											{% button id="save_view" class="save-resource do_tooltip" text="view" title="View this page." action={redirect id=id} %}
 										{% endif %}
-										
+
 										{% button class="discard-resource right do_tooltip" text="cancel" action={redirect back} title="Go back." %}
-
-										{% if is_editable %}
-											{% button type="submit" id="save_duplicate" class="save-resource right do_tooltip" text="duplicate" title="Duplicate this page." %}
-										{% else %}
-											{% button class="save-resource right do_tooltip" text="duplicate" action={dialog_duplicate_rsc id=id}  title="Duplicate this page." %}
-										{% endif %}
-
-										{% button class="discard-resource right do_tooltip" disabled=r.is_protected|ornot:is_editable id="delete-button" text="delete" action={dialog_delete_rsc id=r.id on_success={redirect back}} title="Delete this page." %}
+										
 									</div>
 									
 									<div class="form-item clearfix">
@@ -256,6 +249,16 @@
 										<input type="checkbox" class="do_fieldreplace" id="is_protected" name="is_protected" value="1" {% if r.is_protected %}checked="checked"{% endif %}/> 
 										<label for="is_protected" class="left">Protect from deletion</label>
 									</div>
+									
+									<div class="form-item clearfix">
+										{% button class="discard-resource do_tooltip" disabled=r.is_protected|ornot:is_editable id="delete-button" text="delete" action={dialog_delete_rsc id=r.id on_success={redirect back}} title="Delete this page." %}
+
+										{% if is_editable %}
+											{% button type="submit" id="save_duplicate" class="save-resource do_tooltip" text="duplicate" title="Duplicate this page." %}
+										{% else %}
+											{% button class="save-resource do_tooltip" text="duplicate" action={dialog_duplicate_rsc id=id}  title="Duplicate this page." %}
+										{% endif %}
+									</div>	
 								</div>
 							</div>
 						</div>

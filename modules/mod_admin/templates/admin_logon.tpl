@@ -3,7 +3,7 @@
 {% block title %} admin overview {% endblock %}
 
 {% block content %}
-	<div id="content" class="zp-100">
+	<div id="content" class="zp-85">
 		<div class="clearfix">
 			<div class="zp-33">&nbsp;</div>
 			<div class="zp-33 block">
@@ -20,3 +20,4 @@
 {% endblock %}
 
 {% block navigation %}{% endblock %}
+{% block search %}{% endblock %}

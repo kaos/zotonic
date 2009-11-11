@@ -6,10 +6,10 @@
 		&mdash; uploaded on {{ medium.created|date:"Y-m-d H:i:s" }}
 	</p>
 	<div class="edit_media">
-	{% if medium.width|lt:725  %}
+	{% if medium.width|lt:606  %}
 		{% media medium %}
 	{% else %}
-		{% media medium width=725 height=725 %}
+		{% media medium width=606 height=606 %}
 	{% endif %}
 	</div>
 	<div>

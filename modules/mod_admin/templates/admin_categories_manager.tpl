@@ -38,7 +38,7 @@
 {% endblock %}
 
 {% block content %}
-	<div id="content" class="zp-100">
+	<div id="content" class="zp-85">
 		<div class="block clearfix">
 
 		<h2>Zotonic Categories Manager</h2>

@@ -42,7 +42,7 @@ limitations under the License.
 				dialogBRC			= $('<span></span>').addClass('dialog-bottom-right');
 				dialogSizer			= $('<span></span>').addClass('dialog-sizer');
 				leftPos				= Math.floor((parseInt($(window).width()) / 2) - (parseInt(options.width) / 2));
-				topPos				= $(window).scrollTop() + (parseInt($(window).height()) / 2) - (parseInt($('.dialog').height()) / 2);
+				topPos				= $(window).scrollTop() + 100;
 			
 				dialogTop			= $('<div></div>').addClass('dialog-top').append(dialogTitle, dialogTLC, dialogTRC, dialogClose);
 				dialogContent		= $('<div></div>').addClass('dialog-content clearfix').append(dialogInnerContent, dialogRightContent);

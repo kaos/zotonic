@@ -6,7 +6,7 @@
 
 {% with q.qcat|eq:"event" as is_event %}
 
-	<div id="content" class="zp-100">
+	<div id="content" class="zp-85">
 		<div class="block clearfix">
 
 		<h2>Zotonic Page Overview</h2>
@@ -15,11 +15,11 @@
 			{% button class="" text="Make a new page" action={dialog_new_rsc title=""} %}
 			{% button class="" text="Make a new media item" action={dialog_media_upload title=""} %}
 		</div>
-
+		
+		<hr />
+		
 		{% with m.search.paged[{fulltext cat=q.qcat text=q.qs page=q.page}] as result %}
 
-			{% pager result=result dispatch="admin_overview_rsc" qargs %}
-			
 			<form id="{{ #form }}" method="GET" action="{% url admin_overview_rsc qs=q.qs %}">
 				<h3 class="above-list ">
 					Pages overview{% if q.qs %}, 
@@ -53,11 +53,10 @@
 						<span class="zp-15">Modified on</span>
 						<span class="zp-15">Modified by</span>
 					{% else %}
-						<span class="zp-30">Title</span>
+						<span class="zp-35">Title</span>
 						<span class="zp-15">Category</span>
-						<span class="zp-15">Modified on</span>
-						<span class="zp-15">Modified by</span>
-						<span class="zp-15">Created on</span>
+						<span class="zp-20">Modified on</span>
+						<span class="zp-20">Modified by</span>
 					{% endif %}
 					<span class="zp-10">Options</span>
 				</li>
@@ -72,16 +71,14 @@
 							<span class="zp-15">{{ m.rsc[id].modified|date:"d M Y, H:i" }}</span>
 							<span class="zp-15">{{ m.rsc[m.rsc[id].modifier_id].title|default:"-" }}</span>
 						{% else %}
-							<span class="zp-30">{{ m.rsc[id].title|striptags|default:"<em>untitled</em>" }}</span>
+							<span class="zp-35">{{ m.rsc[id].title|striptags|default:"<em>untitled</em>" }}</span>
 							<span class="zp-15">{{ m.rsc[m.rsc[id].category_id].title }}</span>
-							<span class="zp-15">{{ m.rsc[id].modified|date:"d M Y, H:i" }}</span>
-							<span class="zp-15">{{ m.rsc[m.rsc[id].modifier_id].title|default:"-" }}</span>
-							<span class="zp-15">{{ m.rsc[id].created|date:"d M Y, H:i" }}</span>
+							<span class="zp-20">{{ m.rsc[id].modified|date:"d M Y, H:i" }}</span>
+							<span class="zp-20">{{ m.rsc[m.rsc[id].modifier_id].title|default:"-" }}</span>
 						{% endif %}
 						<span class="zp-10">
 							{% button text="delete" disabled=m.rsc[id].is_protected action={dialog_delete_rsc id=id on_success={slide_fade_out target=#li.id}} %}
-
-							{% button text="edit &raquo;" action={redirect dispatch="admin_edit_rsc" id=id} %}
+							{% button text="edit" action={redirect dispatch="admin_edit_rsc" id=id} %}
 						</span>
 					</a>
 				</li>

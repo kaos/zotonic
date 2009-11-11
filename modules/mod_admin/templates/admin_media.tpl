@@ -3,19 +3,21 @@
 {% block title %} Admin Media {% endblock %}
 
 {% block content %}
-	<div id="content" class="zp-100">
+	<div id="content" class="zp-85">
 		<div class="block clearfix">
 
 			<h2>Zotonic Media</h2>
 
-			<p>Media encompasses all uploaded images, movies and documents. Media can be attached to pages.</p>
-
 			<div class="clearfix">
 				{% button
-						text="new media item" 
+						text="make a new media item" 
 						action={dialog_media_upload}
 				%}
 			</div>
+
+			<hr />
+			
+			<p>Media encompasses all uploaded images, movies and documents. Media can be attached to pages.</p>
 			
 			{% with m.search.paged[{fulltext cat="media" text=q.qs page=q.page}] as result %}
 
@@ -46,7 +48,7 @@
 								<span class="zp-10">{{ medium.created|date:"M d, H:i"|default:"&nbsp;" }}</span>
 								<span class="zp-10">
 									{% button text="delete" disabled=r.is_protected action={dialog_delete_rsc id=id on_success={slide_fade_out target=#li.id}} %}
-									{% button text="edit &raquo;" action={redirect dispatch="admin_edit_rsc" id=id} %}
+									{% button text="edit" action={redirect dispatch="admin_edit_rsc" id=id} %}
 								</span>
 							</a>
 						</li>
