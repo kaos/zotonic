@@ -14,6 +14,9 @@
 %%    See the License for the specific language governing permissions and
 %%    limitations under the License.
 
+%% Changed by Marc Worrell, 2009.
+%% Added vhost support. Re-organized loop/1 to use webmachine_host.erl
+
 %% @doc Mochiweb interface for webmachine.
 -module(webmachine_mochiweb).
 -author('Justin Sheehy <justin@basho.com>').
