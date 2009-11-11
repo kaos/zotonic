@@ -20,4 +20,19 @@
 {% endblock %}
 
 {% block navigation %}{% endblock %}
+
+{% block js_extra %}
+<script type="text/javascript">
+$(document).ready(function() 
+{
+    $('#zp-username').focus();
+});
+
+{% if error %}
+z_growl_add("Invalid credentials", false, "error");
+{% endif %}
+
+</script>
+{% endblock %}
+{% block navigation %}{% endblock %}
 {% block search %}{% endblock %}

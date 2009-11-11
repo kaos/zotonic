@@ -1,5 +1,4 @@
-{% wire id=#logon type="submit" postback="logon" delegate="z_auth" %}
-<form id="{{ #logon }}" method="post" action="postback">
+<form id="logon" method="post" action="{% url admin_logon %}">
 	<fieldset>
 		<div class="form-item">
 			<label for="zp-username">Name</label>

@@ -264,7 +264,10 @@
 						</div>
 
 						<div class="item-wrapper" id="sort-access">
-							<h3 class="above-item clearfix do_blockminifier { minifiedOnInit: true }">
+                            
+                            
+                            {% wire id="blk-access" action={toggle target=".item:first"} %}
+							<h3 id="blk-access" class="above-item clearfix do_blockminifier { minifiedOnInit: true }">
 								<span class="title">Access control</span>
 								<span class="arrow">make smaller</span>
 							</h3>
