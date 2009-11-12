@@ -38,7 +38,10 @@
 					<div class="padding">
 
 						<div class="item-wrapper">
-							<h3 class="above-item">Basics</h3>
+							<h3 class="above-item clearfix do_blockminifier { minifiedOnInit: false }">
+								<span class="title">Basics</span>
+								<span class="arrow">make smaller</span>
+							</h3>
 							<div class="item">
 								<fieldset class="admin-form">
 									<input type="hidden" name="id" value="{{ id }}" />
@@ -265,10 +268,7 @@
 						</div>
 
 						<div class="item-wrapper" id="sort-access">
-                            
-                            
-                            {% wire id="blk-access" action={toggle target=".item:first"} %}
-							<h3 id="blk-access" class="above-item clearfix do_blockminifier { minifiedOnInit: true }">
+							<h3 class="above-item clearfix do_blockminifier { minifiedOnInit: true }">
 								<span class="title">Access control</span>
 								<span class="arrow">make smaller</span>
 							</h3>
