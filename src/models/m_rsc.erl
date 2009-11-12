@@ -353,13 +353,9 @@ p_no_acl(Id, Predicate, Context) when is_integer(Id) ->
             {ok, V} -> 
                 V;
             undefined ->
-                case z_db:select(rsc, Id, Context) of
-                    {ok, Record} ->
-                        z_depcache:set(Id, Record, ?WEEK, [Id], Context),
-                        proplists:get_value(Predicate, Record);
-                    _ ->
-                        z_depcache:set(Id, undefined, ?WEEK, [Id], Context),
-                        undefined
+                case get(Id, Context) of
+					undefined -> undefined;
+                    PropList ->  proplists:get_value(Predicate, PropList)
                 end
         end,
         case Value of
