@@ -29,6 +29,10 @@
 -export([
     poll/1,
     pivot/2,
+
+	insert_task/3,
+	insert_task/4,
+	insert_task/5,
     
     pivot_resource/2,
     pg_lang/1
@@ -55,6 +59,34 @@ poll(Context) ->
 %% @spec pivot(Id, Context) -> void()
 pivot(Id, Context) ->
     gen_server:cast(Context#context.pivot_server, {pivot, Id}).
+
+
+%% @doc Insert a slow running pivot task. For example syncing category numbers after an category update.
+insert_task(Module, Function, Context) ->
+	insert_task(Module, Function, z_ids:id(), [], Context).
+
+%% @doc Insert a slow running pivot task. Use the UniqueKey to prevent double queued tasks.
+insert_task(Module, Function, UniqueKey, Context) ->
+	insert_task(Module, Function, UniqueKey, [], Context).
+	
+%% @doc Insert a slow running pivot task with unique key and arguments.
+insert_task(Module, Function, UniqueKey, Args, Context) ->
+	z_db:transaction(fun(Ctx) -> insert_transaction(Module, Function, UniqueKey, Args, Ctx) end, Context).
+
+	insert_transaction(Module, Function, UniqueKey, Args, Context) ->
+		Fields = [
+			{module, Module},
+			{function, Function},
+			{key, UniqueKey},
+			{args, Args}
+		],
+		case z_db:q1("select id from pivot_task_queue where module = $1 and function = $2 and key = $3", 
+					[Module, Function, UniqueKey], Context) of
+			undefined -> z_db:insert(pivot_task_queue, Fields, Context);
+			Id -> {ok, Id}
+		end.
+
+
 
 
 %%====================================================================
@@ -145,12 +177,33 @@ code_change(_OldVsn, State, _Extra) ->
 
 %% @doc Poll a database for any queued updates.
 do_poll(Context) ->
-    Qs = fetch_queue(Context),
-    F = fun(Ctx) ->
-        [ pivot_resource(Id, Ctx) || {Id,_Serial} <- Qs]
-    end,
-    z_db:transaction(F, Context),
-    delete_queue(Qs, Context).
+	case poll_task(Context) of
+		{Module, Function, Args} -> 
+			erlang:apply(Module, Function, Args ++ [Context]);
+		empty ->
+		    Qs = fetch_queue(Context),
+		    F = fun(Ctx) ->
+		        [ pivot_resource(Id, Ctx) || {Id,_Serial} <- Qs]
+		    end,
+		    z_db:transaction(F, Context),
+		    delete_queue(Qs, Context)
+	end.
+	
+	%% @doc Fetch the next task uit de task queue, if any.
+	poll_task(Context) ->
+		case z_db:q_row("select id, module, function, props from pivot_task_queue order by id asc limit 1", Context) of
+			{Id,Module,Function,Props} ->
+				Args = case Props of
+					[{args,Args0}] -> Args0;
+					_ -> []
+				end,
+				%% @todo We delete the task right now, this needs to be changed to a deletion after the task has been running.
+				z_db:q("delete from pivot_task_queue where id = $1", [Id], Context),
+				{z_convert:to_atom(Module), z_convert:to_atom(Function), Args};
+			undefined ->
+				empty
+		end.
+	
 
 %% @doc Pivot a specific id, delete its queue record if present
 do_pivot(Id, Context) ->

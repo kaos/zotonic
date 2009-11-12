@@ -509,7 +509,6 @@ model_pgsql() ->
     "CREATE INDEX email_created_key ON emailq (created)",
     "CREATE INDEX email_status_retry_key ON emailq (status, retry_on)",
 
-
     % pivot queue for rsc, all things that are updated are queued here for later full text indexing
     "CREATE TABLE rsc_pivot_queue
     (
@@ -526,6 +525,20 @@ model_pgsql() ->
 
     "CREATE INDEX fki_rsc_pivot_queue_rsc_id ON rsc_pivot_queue (rsc_id)",
     "CREATE INDEX fki_rsc_pivot_queue_due ON rsc_pivot_queue (is_update, due)",
+
+    % queue for slow pivoting queries, for example syncing category nrs after the categories are changed.
+	"CREATE TABLE pivot_task_queue
+	(
+    	id serial NOT NULL,
+		module character varying(30) NOT NULL,
+		function character varying(30) NOT NULL,
+		key character varying(100) NOT NULL DEFAULT ''::character varying,
+		props bytea,
+		
+		CONSTRAINT pivot_task_queue_pkey PRIMARY KEY (id),
+		CONSTRAINT pivot_task_queue_module_funcion_key_key UNIQUE (module, function, key)
+	)
+	",
 
     % Update/insert trigger on rsc to fill the update queue
     % The text indexing is delayed until the updates are stable
