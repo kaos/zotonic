@@ -188,7 +188,7 @@ cmd_args(FileProps, Filters, OutMime) ->
 
 default_background("image/gif") -> [coalesce];
 default_background("image/png") -> [coalesce];
-default_background(_) -> [{background,"white"}, {layers,"flatten"}].
+default_background(_) -> [{background,"white"}]. %%, {layers,"flatten"}].
 
 %% @doc Check if there is a blurring filter that prevents us from sharpening the resulting image
 is_blurred([]) -> false;
