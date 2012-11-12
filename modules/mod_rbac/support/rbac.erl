@@ -30,12 +30,12 @@
 
 
 %% @doc return true if user is allowed to perform operation
-check_operation_for(Session, view, Acl) ->
-    check_view_for(Session, Acl);
+check_operation_for(Domain, view, Acl) ->
+    check_view_for(Domain, Acl);
 check_operation_for(undefined, _Operation, _Acl) ->
     false;
-check_operation_for(Session, Operation, _Acl) ->
-    check_assigned(Operation, Session).
+check_operation_for(Domain, Operation, _Acl) ->
+    check_assigned(Operation, Domain).
 
 
 %% ------------------------------------------------------------
@@ -44,10 +44,10 @@ check_operation_for(Session, Operation, _Acl) ->
 
 check_view_for(undefined, Acl) ->
     check_view_level(?ACL_VIS_PUBLIC, Acl);
-check_view_for(Session, Acl) ->
+check_view_for(Domain, Acl) ->
     check_view_level(?ACL_VIS_COMMUNITY, Acl) orelse 
-        check_group_view_for(Session, Acl) orelse
-        check_owner(Session).
+        check_group_view_for(Domain, Acl) orelse
+        check_assigned(owner, Domain).
 
 check_view_level(Level, #acl_props{ is_published=true, 
                                     visible_for=Visible,
@@ -59,12 +59,9 @@ check_view_level(Level, #acl_props{ is_published=true,
 check_view_level(_, _) ->
     false.
 
-check_group_view_for(Session, Acl) ->
+check_group_view_for(Domain, Acl) ->
     check_view_level(?ACL_VIS_GROUP, Acl) andalso
-        check_assigned(view, Session).
+        check_assigned(view, Domain).
 
-check_assigned(Operation, #rbac_session{ operations=Assigned }) ->
+check_assigned(Operation, #rbac_domain{ operations=Assigned }) ->
     lists:member(Operation, Assigned).
-
-check_owner(#rbac_session{ is_owner=Owner }) ->
-    Owner.

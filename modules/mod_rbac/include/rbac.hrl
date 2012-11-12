@@ -17,13 +17,13 @@
 %% See the License for the specific language governing permissions and
 %% limitations under the License.
 
-%% the rbac session holds information on roles and operations granted to a user session
--record(rbac_session, {
-          is_owner=false :: boolean(),
+%% rbac_domain holds information on assigned operations granted to a user session
+%% in a given domain
+-record(rbac_domain, {
           operations=[] :: [term()]
 }).
 
-%% the rbac state record
+%% the rbac state record for each user, holding data for each domain
 -record(rbac_state, {
-          sessions=[] :: [#rbac_session{}]
+          domains=[] :: [{integer(), #rbac_domain{}}]
 }).

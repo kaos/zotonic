@@ -40,11 +40,25 @@
 observe_acl_logon(#acl_logon{ id=UserId }, Context) ->
     Context#context{ 
       user_id=UserId, 
-      acl=#rbac_session{}
+      acl=#rbac_state{} % fix me
      }.
 
-observe_acl_is_allowed(#acl_is_allowed{ action=Operation, object=_Rsc }, 
-                       #context{ acl=Session }) ->
-    Acl = 0, % fix me
-    rbac:check_operation_for(Session, Operation, Acl).
+observe_acl_is_allowed(#acl_is_allowed{ action=Operation, object=Rsc }, 
+                       #context{ 
+                          acl=#rbac_state{ domains=AssignedDomains } 
+                         } = Context) ->
+    Acl = #acl_props{}, % fix me
+    RscDomain = 101, % fix me
 
+    Domain = case proplists:get_value(RscDomain, AssignedDomains) of
+                 undefined -> assign_operations(RscDomain, Context);
+                 D -> D
+             end,
+    rbac:check_operation_for(Domain, Operation, Acl).
+
+%% ------------------------------------------------------------
+%% Internal functions
+%% ------------------------------------------------------------
+
+assign_operations(_RscDomain, _Context) ->
+    #rbac_domain{}. % fix me

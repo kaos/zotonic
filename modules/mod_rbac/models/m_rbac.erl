@@ -28,7 +28,8 @@
          m_to_list/2,
          m_value/2,
          
-         roles/2
+         roles/2,
+         domain/2
         ]).
 
 
@@ -42,8 +43,8 @@ m_value(_, _) ->
     ok.
 
 roles(Domain, Context) ->
-    F = fun() ->
-                []
-        end,
-    z_depcache:memo(F, {rbac_domain, Domain}, ?DAY, [rbac, Domain], Context).
+    m_edge:objects(Domain, rbac_role, Context).
+    %% fix me: recurse list of roles
 
+domain(_Id, _Context) ->
+    101.

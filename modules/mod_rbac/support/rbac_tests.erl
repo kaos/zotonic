@@ -27,33 +27,33 @@
 
 visible_world_test() ->
     Acl = #acl_props{}, % the defaults are fine
-    NoSession = undefined, % i.e. anonymous requests
-    UserSession = #rbac_session{},
-    ?assert(rbac:check_operation_for(NoSession, view, Acl)),
-    ?assertNot(rbac:check_operation_for(NoSession, update, Acl)),
+    NoDomain = undefined, % i.e. anonymous requests
+    UserDomain = #rbac_domain{},
+    ?assert(rbac:check_operation_for(NoDomain, view, Acl)),
+    ?assertNot(rbac:check_operation_for(NoDomain, update, Acl)),
     %% should work equally well for any logged in user
-    ?assert(rbac:check_operation_for(UserSession, view, Acl)),
-    ?assertNot(rbac:check_operation_for(UserSession, update, Acl)).    
+    ?assert(rbac:check_operation_for(UserDomain, view, Acl)),
+    ?assertNot(rbac:check_operation_for(UserDomain, update, Acl)).    
 
 visible_community_test() ->
     Acl = #acl_props{ visible_for=?ACL_VIS_COMMUNITY },
-    UserSession = #rbac_session{},
+    UserDomain = #rbac_domain{},
     ?assertNot(rbac:check_operation_for(undefined, view, Acl)),
-    ?assert(rbac:check_operation_for(UserSession, view, Acl)).
+    ?assert(rbac:check_operation_for(UserDomain, view, Acl)).
 
 visible_group_test() ->
     Acl = #acl_props{ visible_for=?ACL_VIS_GROUP },
-    NonMember = #rbac_session{},
-    Member = #rbac_session{ operations=[view] },
+    NonMember = #rbac_domain{},
+    Member = #rbac_domain{ operations=[view] },
     ?assertNot(rbac:check_operation_for(undefined, view, Acl)),
     ?assertNot(rbac:check_operation_for(NonMember, view, Acl)),
     ?assert(rbac:check_operation_for(Member, view, Acl)).
 
 visible_user_test() ->
     Acl = #acl_props{ visible_for=?ACL_VIS_USER },
-    NotOwner = #rbac_session{},
-    Member = #rbac_session{ operations=[view] },
-    Owner = #rbac_session{ is_owner=true },
+    NotOwner = #rbac_domain{},
+    Member = #rbac_domain{ operations=[view] },
+    Owner = #rbac_domain{ operations=[owner] },
     ?assertNot(rbac:check_operation_for(undefined, view, Acl)),
     ?assertNot(rbac:check_operation_for(NotOwner, view, Acl)),
     ?assertNot(rbac:check_operation_for(Member, view, Acl)),
@@ -61,6 +61,6 @@ visible_user_test() ->
 
 update_group_test() ->
     Acl = #acl_props{ visible_for=?ACL_VIS_GROUP },
-    Member = #rbac_session{ operations=[view, update] },
+    Member = #rbac_domain{ operations=[view, update] },
     ?assert(rbac:check_operation_for(Member, update, Acl)),
     ?assertNot(rbac:check_operation_for(undefined, update, Acl)).

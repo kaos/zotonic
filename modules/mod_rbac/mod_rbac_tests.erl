@@ -41,7 +41,7 @@ mod_rbac_test_() ->
                            C = #context{ depcache=Pid },
                            z_depcache:flush(C),
                            C
-                        end,
+                   end,
              setup_state(Ctx)
      end,
      fun(#context{ depcache=Depcache }) ->
@@ -55,30 +55,42 @@ mod_rbac_test_() ->
                           ]}
               |m_rbac_tests:all_tests_with_context(Ctx)
              ]
-
      end
     }.
 
 %% Default test state
 setup_state(Ctx) ->
-    ok = z_depcache:set(
-           {rbac_domain, ?DOMAIN1}, 
-           [
-            ?ROLE1,
-            ?ROLE2
-           ],
-           Ctx),
+    ok = z_depcache:set({category_id_to_name, ?PREDICATE}, "predicate", Ctx),
+    ok = z_depcache:set({category_is_a, ?PREDICATE}, [predicate], Ctx),
+    ok = z_depcache:set({rsc_name, "rbac_role"}, ?RBAC_ROLE, Ctx),
+    ok = z_depcache:set(?RBAC_ROLE, [{category_id, ?PREDICATE}], Ctx),
+    ok = z_depcache:set({objects, ?RBAC_ROLE, ?DOMAIN1}, ?DOMAIN1_ROLES, Ctx),
     Ctx.
 
 %% test state helpers
-setup_user(UserId, Session, Ctx) ->
-    Ctx#context{ user_id=UserId, acl=Session }.
+setup_user(UserId, Ctx) ->
+    setup_user(UserId, [], Ctx).
+setup_user(UserId, Domains, Ctx) ->
+    Ctx#context{ 
+      user_id=UserId, 
+      acl=#rbac_state{ 
+             domains=
+                 [
+                  {Id, #rbac_domain{ operations=Ops }}
+                  || {Id, Ops} <- Domains
+                 ]
+            }
+     }.
+
+
+%%------------------------------------------------------------
+%% tests
+%%------------------------------------------------------------
 
 logon_user(Ctx) ->
     ?assertEqual(
        setup_user(
          ?USR2, 
-         #rbac_session{},
          Ctx
         ),
        mod_rbac:observe_acl_logon(
@@ -89,10 +101,10 @@ logon_user(Ctx) ->
 can_update_rsc(Ctx) ->
     false = mod_rbac:observe_acl_is_allowed(
               #acl_is_allowed{ action=update, object=?RSC1 },
-              setup_user(?USR2, #rbac_session{}, Ctx)
+              setup_user(?USR2, Ctx)
              ),
     true = mod_rbac:observe_acl_is_allowed(
              #acl_is_allowed{ action=update, object=?RSC1 },
-             setup_user(?USR2, #rbac_session{ operations=[update] }, Ctx)
+             setup_user(?USR2, [{?DOMAIN1, [update]}], Ctx)
             ).
 
