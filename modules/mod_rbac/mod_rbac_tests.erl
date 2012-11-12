@@ -72,7 +72,8 @@ setup_state(Ctx) ->
                {?RBAC_ROLE, [{category_id, ?PREDICATE}]},
                {?RBAC_DOMAIN, [{category_id, ?PREDICATE}]},
                [{{objects, ?RBAC_ROLE, Domain}, Roles} || {Domain, Roles} <- ?DOMAIN_ROLES],
-               [{{objects, ?RBAC_DOMAIN, Rsc}, [Domain]} || {Rsc, Domain} <- ?RSC_DOMAINS]
+               [{{objects, ?RBAC_DOMAIN, Rsc}, [Domain]} || {Rsc, Domain} <- ?RSC_DOMAINS],
+               [{{objects, ?RBAC_ROLE, Role}, Roles} || {Role, Roles} <- ?ROLE_HIERARCHY]
               ])
     ],
     Ctx.

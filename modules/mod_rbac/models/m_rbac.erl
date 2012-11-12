@@ -42,9 +42,18 @@ m_to_list(_, _) ->
 m_value(_, _) ->
     ok.
 
+
 roles(Id, Context) ->
-    m_edge:objects(Id, rbac_role, Context).
-    %% fix me: recurse list of roles
+    Roles = m_edge:objects(Id, rbac_role, Context),
+    lists:flatten(
+      [
+       Roles | [
+                roles(Role, Context)
+                || Role <- Roles
+               ]
+      ]
+     ).
+
 
 domain(Id, Context) ->
     m_edge:object(Id, rbac_domain, 1, Context).
