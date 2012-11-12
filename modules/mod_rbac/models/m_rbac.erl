@@ -42,9 +42,9 @@ m_to_list(_, _) ->
 m_value(_, _) ->
     ok.
 
-roles(Domain, Context) ->
-    m_edge:objects(Domain, rbac_role, Context).
+roles(Id, Context) ->
+    m_edge:objects(Id, rbac_role, Context).
     %% fix me: recurse list of roles
 
-domain(_Id, _Context) ->
-    101.
+domain(Id, Context) ->
+    m_edge:object(Id, rbac_domain, 1, Context).

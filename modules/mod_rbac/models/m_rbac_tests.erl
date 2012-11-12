@@ -30,5 +30,6 @@
 all_tests_with_context(Ctx) ->
     [
      ?_test(?DOMAIN1_ROLES = m_rbac:roles(?DOMAIN1, Ctx)),
-     [?_test(?DOMAIN1 = m_rbac:domain(Rsc, Ctx)) || Rsc <- ?DOMAIN1_ROLES]
+     ?_test(?DOMAIN2_ROLES = m_rbac:roles(?DOMAIN2, Ctx)),
+     [?_test(Domain = m_rbac:domain(Rsc, Ctx)) || {Rsc, Domain} <- ?RSC_DOMAINS]
     ].

@@ -5,6 +5,7 @@
 %% predicates
 -define(PREDICATE, 50).
 -define(RBAC_ROLE, 51).
+-define(RBAC_DOMAIN, 52).
 
 %% domain resources
 -define(DOMAIN1, 101).
@@ -13,6 +14,9 @@
 %% role resources
 -define(ROLE1, 201).
 -define(ROLE2, 202).
+-define(ROLE3, 203).
+-define(ROLE4, 204).
+-define(ROLE5, 205).
 
 %% operation resources
 -define(OP1, 301).
@@ -23,4 +27,8 @@
 -define(RSC2, 402).
 
 %% edges
--define(DOMAIN1_ROLES, [?ROLE1, ?ROLE2]).
+-define(DOMAIN1_ROLES, [?ROLE1, ?ROLE2, ?ROLE3]).
+-define(DOMAIN2_ROLES, [?ROLE3, ?ROLE4, ?ROLE5]).
+
+-define(RSC_DOMAINS, [{?RSC1, ?DOMAIN1}, {?RSC2, ?DOMAIN2}]).
+-define(DOMAIN_ROLES, [{?DOMAIN1, ?DOMAIN1_ROLES}, {?DOMAIN2, ?DOMAIN2_ROLES}]).

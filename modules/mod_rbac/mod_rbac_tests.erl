@@ -60,11 +60,21 @@ mod_rbac_test_() ->
 
 %% Default test state
 setup_state(Ctx) ->
-    ok = z_depcache:set({category_id_to_name, ?PREDICATE}, "predicate", Ctx),
-    ok = z_depcache:set({category_is_a, ?PREDICATE}, [predicate], Ctx),
-    ok = z_depcache:set({rsc_name, "rbac_role"}, ?RBAC_ROLE, Ctx),
-    ok = z_depcache:set(?RBAC_ROLE, [{category_id, ?PREDICATE}], Ctx),
-    ok = z_depcache:set({objects, ?RBAC_ROLE, ?DOMAIN1}, ?DOMAIN1_ROLES, Ctx),
+    %% fill depcache with data to avoid hitting the db
+    [ok = z_depcache:set(Key, Value, Ctx)
+     || {Key, Value} <- 
+            lists:flatten(
+              [
+               {{category_id_to_name, ?PREDICATE}, "predicate"},
+               {{category_is_a, ?PREDICATE}, [predicate]},
+               {{rsc_name, "rbac_role"}, ?RBAC_ROLE},
+               {{rsc_name, "rbac_domain"}, ?RBAC_DOMAIN},
+               {?RBAC_ROLE, [{category_id, ?PREDICATE}]},
+               {?RBAC_DOMAIN, [{category_id, ?PREDICATE}]},
+               [{{objects, ?RBAC_ROLE, Domain}, Roles} || {Domain, Roles} <- ?DOMAIN_ROLES],
+               [{{objects, ?RBAC_DOMAIN, Rsc}, [Domain]} || {Rsc, Domain} <- ?RSC_DOMAINS]
+              ])
+    ],
     Ctx.
 
 %% test state helpers
