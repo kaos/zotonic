@@ -1,6 +1,6 @@
 %% @author Andreas Stenius <git@astekk.se>
 %% @copyright 2012 Andreas Stenius
-%% Date: 2012-11-09
+%% Date: 2012-11-12
 %% @doc Role Based Access Control module
 
 %% Copyright 2012 Andreas Stenius
@@ -17,34 +17,17 @@
 %% See the License for the specific language governing permissions and
 %% limitations under the License.
 
--module(mod_rbac).
+-module(m_rbac_tests).
 -author("Andreas Stenius <git@astekk.se>").
 
--mod_title("RBAC").
--mod_description("Role Based Access Control.").
--mod_prio(500).
--mod_depends([base]).
--mod_provides([acl]).
+-compile(export_all).
 
+-include_lib("eunit/include/eunit.hrl").
 -include_lib("zotonic.hrl").
--include("include/rbac.hrl").
+-include("../support/rbac_tests.hrl").
 
 
-%% interface functions
--export([
-         observe_acl_logon/2,
-         observe_acl_is_allowed/2
-]).
-
-
-observe_acl_logon(#acl_logon{ id=UserId }, Context) ->
-    Context#context{ 
-      user_id=UserId, 
-      acl=#rbac_session{}
-     }.
-
-observe_acl_is_allowed(#acl_is_allowed{ action=Operation, object=_Rsc }, 
-                       #context{ acl=Session }) ->
-    Acl = 0, % fix me
-    rbac:check_operation_for(Session, Operation, Acl).
-
+all_tests_with_context(Ctx) ->
+    [
+     ?_test([?ROLE1, ?ROLE2] = m_rbac:roles(?DOMAIN1, Ctx))
+    ].

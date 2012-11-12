@@ -1,0 +1,10 @@
+-define(USR1, 1). %% a.k.a. admin
+-define(USR2, 2).
+-define(DOMAIN1, 101).
+-define(DOMAIN2, 102).
+-define(ROLE1, 201).
+-define(ROLE2, 202).
+-define(OP1, 301).
+-define(OP2, 302).
+-define(RSC1, 401).
+-define(RSC2, 402).

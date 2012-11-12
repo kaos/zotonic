@@ -22,4 +22,77 @@
 
 -include_lib("eunit/include/eunit.hrl").
 -include_lib("zotonic.hrl").
+-include("include/rbac.hrl").
+-include("support/rbac_tests.hrl").
+
+
+%% run tests for module rbac too...
+rbac_test_() ->
+     rbac.
+
+%% mod RBAC test fixture
+mod_rbac_test_() ->
+    {setup,
+     fun() ->
+             Ctx = case z_depcache:start_link([{host, rbac_test}]) of
+                       {ok, Pid} ->              
+                           #context{ depcache=Pid };
+                       {error, {already_started, Pid}} ->
+                           C = #context{ depcache=Pid },
+                           z_depcache:flush(C),
+                           C
+                        end,
+             setup_state(Ctx)
+     end,
+     fun(#context{ depcache=Depcache }) ->
+             exit(Depcache, normal)
+     end,
+     fun(Ctx) ->
+             [
+              {with, Ctx, [
+                           fun logon_user/1,
+                           fun can_update_rsc/1
+                          ]}
+              |m_rbac_tests:all_tests_with_context(Ctx)
+             ]
+
+     end
+    }.
+
+%% Default test state
+setup_state(Ctx) ->
+    ok = z_depcache:set(
+           {rbac_domain, ?DOMAIN1}, 
+           [
+            ?ROLE1,
+            ?ROLE2
+           ],
+           Ctx),
+    Ctx.
+
+%% test state helpers
+setup_user(UserId, Session, Ctx) ->
+    Ctx#context{ user_id=UserId, acl=Session }.
+
+logon_user(Ctx) ->
+    ?assertEqual(
+       setup_user(
+         ?USR2, 
+         #rbac_session{},
+         Ctx
+        ),
+       mod_rbac:observe_acl_logon(
+         #acl_logon{ id=?USR2 }, 
+         Ctx)
+      ).
+
+can_update_rsc(Ctx) ->
+    false = mod_rbac:observe_acl_is_allowed(
+              #acl_is_allowed{ action=update, object=?RSC1 },
+              setup_user(?USR2, #rbac_session{}, Ctx)
+             ),
+    true = mod_rbac:observe_acl_is_allowed(
+             #acl_is_allowed{ action=update, object=?RSC1 },
+             setup_user(?USR2, #rbac_session{ operations=[update] }, Ctx)
+            ).
 

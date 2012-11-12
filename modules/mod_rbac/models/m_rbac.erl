@@ -1,6 +1,6 @@
 %% @author Andreas Stenius <git@astekk.se>
 %% @copyright 2012 Andreas Stenius
-%% Date: 2012-11-09
+%% Date: 2012-11-12
 %% @doc Role Based Access Control module
 
 %% Copyright 2012 Andreas Stenius
@@ -17,34 +17,33 @@
 %% See the License for the specific language governing permissions and
 %% limitations under the License.
 
--module(mod_rbac).
+-module(m_rbac).
 -author("Andreas Stenius <git@astekk.se>").
-
--mod_title("RBAC").
--mod_description("Role Based Access Control.").
--mod_prio(500).
--mod_depends([base]).
--mod_provides([acl]).
+-behaviour(gen_model).
 
 -include_lib("zotonic.hrl").
--include("include/rbac.hrl").
 
-
-%% interface functions
 -export([
-         observe_acl_logon/2,
-         observe_acl_is_allowed/2
-]).
+         m_find_value/3,
+         m_to_list/2,
+         m_value/2,
+         
+         roles/2
+        ]).
 
 
-observe_acl_logon(#acl_logon{ id=UserId }, Context) ->
-    Context#context{ 
-      user_id=UserId, 
-      acl=#rbac_session{}
-     }.
+m_find_value(_, _, _) ->
+    ok.
 
-observe_acl_is_allowed(#acl_is_allowed{ action=Operation, object=_Rsc }, 
-                       #context{ acl=Session }) ->
-    Acl = 0, % fix me
-    rbac:check_operation_for(Session, Operation, Acl).
+m_to_list(_, _) ->
+    ok.
+
+m_value(_, _) ->
+    ok.
+
+roles(Domain, Context) ->
+    F = fun() ->
+                []
+        end,
+    z_depcache:memo(F, {rbac_domain, Domain}, ?DAY, [rbac, Domain], Context).
 

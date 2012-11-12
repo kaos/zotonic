@@ -38,3 +38,5 @@ deps/
 /priv/modules/
 
 /modules/*/translations/template/*.pot
+
+.emacs.desktop*

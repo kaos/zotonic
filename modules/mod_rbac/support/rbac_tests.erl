@@ -58,3 +58,9 @@ visible_user_test() ->
     ?assertNot(rbac:check_operation_for(NotOwner, view, Acl)),
     ?assertNot(rbac:check_operation_for(Member, view, Acl)),
     ?assert(rbac:check_operation_for(Owner, view, Acl)).
+
+update_group_test() ->
+    Acl = #acl_props{ visible_for=?ACL_VIS_GROUP },
+    Member = #rbac_session{ operations=[view, update] },
+    ?assert(rbac:check_operation_for(Member, update, Acl)),
+    ?assertNot(rbac:check_operation_for(undefined, update, Acl)).

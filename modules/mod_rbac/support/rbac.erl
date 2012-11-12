@@ -32,8 +32,10 @@
 %% @doc return true if user is allowed to perform operation
 check_operation_for(Session, view, Acl) ->
     check_view_for(Session, Acl);
-check_operation_for(_Session, _Operation, _Acl) ->
-    false.
+check_operation_for(undefined, _Operation, _Acl) ->
+    false;
+check_operation_for(Session, Operation, _Acl) ->
+    check_assigned(Operation, Session).
 
 
 %% ------------------------------------------------------------
