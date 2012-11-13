@@ -24,7 +24,7 @@
 -mod_description("Role Based Access Control.").
 -mod_prio(500).
 -mod_depends([base]).
--mod_provides([acl]).
+-mod_provides([acl, rbac]).
 -mod_schema(1).
 
 -include_lib("zotonic.hrl").
