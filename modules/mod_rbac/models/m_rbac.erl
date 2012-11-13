@@ -28,11 +28,14 @@
          m_to_list/2,
          m_value/2,
          
-         roles/2,
-         domain/2
+         domain/2,
+         domain_roles/2,
+         user_roles/1,
+         user_roles/2,
+         role_operations/2
         ]).
 
-
+%% todo: implement api for accessing rbac info from templates...
 m_find_value(_, _, _) ->
     ok.
 
@@ -43,17 +46,28 @@ m_value(_, _) ->
     ok.
 
 
-roles(Id, Context) ->
+domain(Id, Context) ->
+    m_edge:object(Id, rbac_domain, 1, Context).
+
+domain_roles(Id, Context) ->
     Roles = m_edge:objects(Id, rbac_role, Context),
     lists:flatten(
       [
        Roles | [
-                roles(Role, Context)
+                domain_roles(Role, Context)
                 || Role <- Roles
                ]
       ]
      ).
 
+user_roles(#context{ user_id=UserId}=Context) ->
+    m_edge:objects(UserId, rbac_role_member, Context).
 
-domain(Id, Context) ->
-    m_edge:object(Id, rbac_domain, 1, Context).
+user_roles(Domain, Context) ->
+    UserRoles = user_roles(Context),
+    [Role || Role <- domain_roles(Domain, Context),
+             lists:member(Role, UserRoles)
+    ].
+
+role_operations(Role, Context) ->
+    m_edge:objects(Role, rbac_operation, Context).

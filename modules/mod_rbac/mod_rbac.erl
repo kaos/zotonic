@@ -40,7 +40,7 @@
 observe_acl_logon(#acl_logon{ id=UserId }, Context) ->
     Context#context{ 
       user_id=UserId, 
-      acl=#rbac_state{} % fix me
+      acl=#rbac_state{} % fix me (pick up cached domains)
      }.
 
 observe_acl_is_allowed(#acl_is_allowed{ action=Operation, object=Rsc }, 
@@ -54,11 +54,27 @@ observe_acl_is_allowed(#acl_is_allowed{ action=Operation, object=Rsc },
                  undefined -> assign_operations(RscDomain, Context);
                  D -> D
              end,
-    rbac:check_operation_for(Domain, Operation, Acl).
+    rbac:check_operation_for(Domain, Operation, Acl);
+observe_acl_is_allowed(_, _) ->
+    undefined.
+
 
 %% ------------------------------------------------------------
 %% Internal functions
 %% ------------------------------------------------------------
 
-assign_operations(_RscDomain, _Context) ->
-    #rbac_domain{}. % fix me
+assign_operations(RscDomain, Context) ->
+    %% todo: cache result
+    #rbac_domain{
+       operations=
+           lists:flatmap(
+             fun(Id) ->
+                     [
+                      z_convert:to_atom(
+                        m_rsc:p_no_acl(Op, name, Context)
+                       ) || Op <- m_rbac:role_operations(Id, Context)
+                     ]
+             end,
+             m_rbac:user_roles(RscDomain, Context)
+            )
+      }.

@@ -25,6 +25,17 @@
 -include("include/rbac.hrl").
 -include("support/rbac_tests.hrl").
 
+-export([setup/0, setup_acl/2, setup_acl/3]).
+
+%% setup test context for manual debugging of tests
+%% Run debugger from eshell with: im().
+%% load source modules of interest, adding break points as needed.
+%% get a context to use when testing: Context = mod_rbac_tests:setup().
+%% call function to debug using this context, e.g: m_rbac:user_roles(2, Context).
+setup() ->
+    {setup, Setup, _, _} = mod_rbac_test_(),
+    Setup().
+
 
 %% run tests for module rbac too...
 rbac_test_() ->
@@ -49,11 +60,8 @@ mod_rbac_test_() ->
      end,
      fun(Ctx) ->
              [
-              {with, Ctx, [
-                           fun logon_user/1,
-                           fun can_update_rsc/1
-                          ]}
-              |m_rbac_tests:all_tests_with_context(Ctx)
+              all_tests_with_context(Ctx),
+              m_rbac_tests:all_tests_with_context(Ctx)
              ]
      end
     }.
@@ -67,21 +75,24 @@ setup_state(Ctx) ->
               [
                {{category_id_to_name, ?PREDICATE}, "predicate"},
                {{category_is_a, ?PREDICATE}, [predicate]},
-               {{rsc_name, "rbac_role"}, ?RBAC_ROLE},
-               {{rsc_name, "rbac_domain"}, ?RBAC_DOMAIN},
-               {?RBAC_ROLE, [{category_id, ?PREDICATE}]},
-               {?RBAC_DOMAIN, [{category_id, ?PREDICATE}]},
+               [{{rsc_name, Name}, Id} || {Id, Name} <- ?RSC_NAMES],
+               [{Id, [{name, Name}]} || {Id, Name} <- ?RSC_NAMES],
+               [{Id, [{category_id, ?PREDICATE}]} || Id <- ?PREDICATES],
                [{{objects, ?RBAC_ROLE, Domain}, Roles} || {Domain, Roles} <- ?DOMAIN_ROLES],
+               [{{objects, ?RBAC_ROLE, Role}, Roles} || {Role, Roles} <- ?ROLE_HIERARCHY],
                [{{objects, ?RBAC_DOMAIN, Rsc}, [Domain]} || {Rsc, Domain} <- ?RSC_DOMAINS],
-               [{{objects, ?RBAC_ROLE, Role}, Roles} || {Role, Roles} <- ?ROLE_HIERARCHY]
+               [{{objects, ?RBAC_OPERATION, Role}, Ops} || {Role, Ops} <- ?ROLE_OPS],
+               [{{objects, ?RBAC_ROLE_MEMBER, User}, Roles} || {User, Roles} <- ?USER_ROLES]
               ])
     ],
     Ctx.
 
 %% test state helpers
-setup_user(UserId, Ctx) ->
-    setup_user(UserId, [], Ctx).
-setup_user(UserId, Domains, Ctx) ->
+setup_acl(UserId, Ctx) ->
+    setup_acl(UserId, [], Ctx).
+
+-spec setup_acl(integer(), [{integer(), list()}], #context{}) -> #context{}.
+setup_acl(UserId, Domains, Ctx) ->
     Ctx#context{ 
       user_id=UserId, 
       acl=#rbac_state{ 
@@ -98,24 +109,36 @@ setup_user(UserId, Domains, Ctx) ->
 %% tests
 %%------------------------------------------------------------
 
-logon_user(Ctx) ->
-    ?assertEqual(
-       setup_user(
-         ?USR2, 
-         Ctx
-        ),
-       mod_rbac:observe_acl_logon(
-         #acl_logon{ id=?USR2 }, 
-         Ctx)
-      ).
+all_tests_with_context(Ctx) ->
+    [
+     ?_test(
+        ?assertEqual(
+           setup_acl(
+             ?USR2, 
+             Ctx
+            ),
+           mod_rbac:observe_acl_logon(
+             #acl_logon{ id=?USR2 }, 
+             Ctx)
+          )
+       ),
 
-can_update_rsc(Ctx) ->
-    false = mod_rbac:observe_acl_is_allowed(
-              #acl_is_allowed{ action=update, object=?RSC1 },
-              setup_user(?USR2, Ctx)
-             ),
-    true = mod_rbac:observe_acl_is_allowed(
-             #acl_is_allowed{ action=update, object=?RSC1 },
-             setup_user(?USR2, [{?DOMAIN1, [update]}], Ctx)
-            ).
+     ?_test(
+        %% Domain info already in Acl context
+        ?assert(mod_rbac:observe_acl_is_allowed(
+                  #acl_is_allowed{ action=update, object=?RSC1 },
+                  setup_acl(?USR2, [{?DOMAIN1, [update]}], Ctx)
+                 )
+               )
+       ),
+
+     ?_test(
+        %% No domain info in Acl context
+        ?assert(mod_rbac:observe_acl_is_allowed(
+                  #acl_is_allowed{ action=update, object=?RSC1 },
+                  setup_acl(?USR2, Ctx)
+                 )
+               )
+       )
+    ].
 
