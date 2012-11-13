@@ -25,6 +25,7 @@
 -mod_prio(500).
 -mod_depends([base]).
 -mod_provides([acl]).
+-mod_schema(1).
 
 -include_lib("zotonic.hrl").
 -include("include/rbac.hrl").
@@ -32,9 +33,11 @@
 
 %% interface functions
 -export([
+         manage_schema/2,
          observe_acl_logon/2,
+         observe_acl_logoff/2,
          observe_acl_is_allowed/2
-]).
+        ]).
 
 
 observe_acl_logon(#acl_logon{ id=UserId }, Context) ->
@@ -43,13 +46,15 @@ observe_acl_logon(#acl_logon{ id=UserId }, Context) ->
       acl=#rbac_state{} % fix me (pick up cached domains)
      }.
 
+observe_acl_logoff(#acl_logoff{}, Context) ->
+    Context#context{ user_id=undefined, acl=undefined }.
+
 observe_acl_is_allowed(#acl_is_allowed{ action=Operation, object=Rsc }, 
                        #context{ 
                           acl=#rbac_state{ domains=AssignedDomains } 
                          } = Context) ->
-    Acl = #acl_props{}, % fix me
-    RscDomain = 101, % fix me
-
+    Acl = m_rsc:get_acl_props(Rsc, Context),
+    RscDomain = m_rbac:domain(Rsc, Context),
     Domain = case proplists:get_value(RscDomain, AssignedDomains) of
                  undefined -> assign_operations(RscDomain, Context);
                  D -> D
@@ -57,6 +62,39 @@ observe_acl_is_allowed(#acl_is_allowed{ action=Operation, object=Rsc },
     rbac:check_operation_for(Domain, Operation, Acl);
 observe_acl_is_allowed(_, _) ->
     undefined.
+
+
+manage_schema(install, _Context) ->
+    #datamodel{
+       categories=
+           [
+            {rbac_role, meta, [{title, <<"RBAC Role">>}]},
+            {rbac_operation, meta, [{title, <<"RBAC Operation">>}]}
+           ],
+       predicates=
+           [
+            {rbac_domain,
+             [{title, <<"RBAC Domain">>}],
+             [{undefined, undefined}]
+            },
+            {rbac_role_domain, 
+             [{title, <<"RBAC Role Domain">>}],
+             [{undefined, rbac_role}]
+            },
+            {rbac_role_member, 
+             [{title, <<"RBAC Role Member">>}],
+             [{person, rbac_role}]
+            },
+            {rbac_role_operation, 
+             [{title, <<"RBAC Role Operation">>}],
+             [{rbac_role, rbac_operation}]
+            }
+           ],
+       resources=
+           [
+
+           ]
+      }.
 
 
 %% ------------------------------------------------------------

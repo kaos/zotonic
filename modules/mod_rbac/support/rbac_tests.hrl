@@ -5,9 +5,9 @@
 %% predicates
 -define(PREDICATE, 50).
 -define(RBAC_DOMAIN, 51).
--define(RBAC_ROLE, 52).
+-define(RBAC_ROLE_DOMAIN, 52).
 -define(RBAC_ROLE_MEMBER, 53).
--define(RBAC_OPERATION, 54).
+-define(RBAC_ROLE_OPERATION, 54).
 
 %% domain resources
 -define(DOMAIN1, 101).
@@ -76,9 +76,9 @@
 -define(RSC_NAMES, 
         [
          {?RBAC_DOMAIN, "rbac_domain"},
-         {?RBAC_ROLE, "rbac_role"},
+         {?RBAC_ROLE_DOMAIN, "rbac_role_domain"},
          {?RBAC_ROLE_MEMBER, "rbac_role_member"},
-         {?RBAC_OPERATION, "rbac_operation"},
+         {?RBAC_ROLE_OPERATION, "rbac_role_operation"},
          {?OP_update, "update"},
          {?OP21, "OP21"},
          {?OP22, "OP22"},
@@ -89,7 +89,7 @@
 -define(PREDICATES, 
         [
          ?RBAC_DOMAIN,
-         ?RBAC_ROLE,
+         ?RBAC_ROLE_DOMAIN,
          ?RBAC_ROLE_MEMBER,
-         ?RBAC_OPERATION
+         ?RBAC_ROLE_OPERATION
         ]).

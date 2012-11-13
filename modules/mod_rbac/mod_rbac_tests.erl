@@ -78,10 +78,10 @@ setup_state(Ctx) ->
                [{{rsc_name, Name}, Id} || {Id, Name} <- ?RSC_NAMES],
                [{Id, [{name, Name}]} || {Id, Name} <- ?RSC_NAMES],
                [{Id, [{category_id, ?PREDICATE}]} || Id <- ?PREDICATES],
-               [{{objects, ?RBAC_ROLE, Domain}, Roles} || {Domain, Roles} <- ?DOMAIN_ROLES],
-               [{{objects, ?RBAC_ROLE, Role}, Roles} || {Role, Roles} <- ?ROLE_HIERARCHY],
+               [{{objects, ?RBAC_ROLE_DOMAIN, Domain}, Roles} || {Domain, Roles} <- ?DOMAIN_ROLES],
+               [{{objects, ?RBAC_ROLE_DOMAIN, Role}, Roles} || {Role, Roles} <- ?ROLE_HIERARCHY],
                [{{objects, ?RBAC_DOMAIN, Rsc}, [Domain]} || {Rsc, Domain} <- ?RSC_DOMAINS],
-               [{{objects, ?RBAC_OPERATION, Role}, Ops} || {Role, Ops} <- ?ROLE_OPS],
+               [{{objects, ?RBAC_ROLE_OPERATION, Role}, Ops} || {Role, Ops} <- ?ROLE_OPS],
                [{{objects, ?RBAC_ROLE_MEMBER, User}, Roles} || {User, Roles} <- ?USER_ROLES]
               ])
     ],
