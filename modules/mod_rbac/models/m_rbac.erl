@@ -47,13 +47,13 @@ m_value(_, _) ->
 
 
 domain(Id, Context) ->
-    case m_edge:objects(Id, rbac_domain, Context) of
-        [] -> Id; % default to self if no domain specified
+    case m_edge:subjects(Id, rbac_domain_rsc, Context) of
+        [] -> undefined;
         [Domain|_] -> Domain
     end.
 
 domain_roles(Id, Context) ->
-    Roles = m_edge:objects(Id, rbac_role_domain, Context),
+    Roles = m_edge:objects(Id, rbac_domain_role, Context),
     lists:flatten(
       [
        Roles | [

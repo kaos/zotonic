@@ -68,18 +68,19 @@ manage_schema(install, _Context) ->
     #datamodel{
        categories=
            [
+            {rbac_domain, meta, [{title, <<"RBAC Domain">>}]},
             {rbac_role, meta, [{title, <<"RBAC Role">>}]},
             {rbac_operation, meta, [{title, <<"RBAC Operation">>}]}
            ],
        predicates=
            [
-            {rbac_domain,
-             [{title, <<"RBAC Domain">>}],
-             [{undefined, undefined}]
+            {rbac_domain_rsc,
+             [{title, <<"RBAC Domain Resource">>}],
+             [{rbac_domain, undefined}]
             },
-            {rbac_role_domain, 
-             [{title, <<"RBAC Role Domain">>}],
-             [{undefined, rbac_role}]
+            {rbac_domain_role, 
+             [{title, <<"RBAC Domain Role">>}],
+             [{rbac_domain, rbac_role}, {rbac_role, rbac_role}]
             },
             {rbac_role_member, 
              [{title, <<"RBAC Role Member">>}],

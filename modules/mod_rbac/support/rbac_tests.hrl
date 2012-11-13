@@ -4,8 +4,8 @@
 
 %% predicates
 -define(PREDICATE, 50).
--define(RBAC_DOMAIN, 51).
--define(RBAC_ROLE_DOMAIN, 52).
+-define(RBAC_DOMAIN_RSC, 51).
+-define(RBAC_DOMAIN_ROLE, 52).
 -define(RBAC_ROLE_MEMBER, 53).
 -define(RBAC_ROLE_OPERATION, 54).
 
@@ -41,10 +41,10 @@
 %% this works recursively, so implicit roles may also refer to other non-domain roles.
 -define(DOMAIN2_ROLES_IMPLICIT, [?ROLE6, ?ROLE7, ?ROLE8]).
 
--define(RSC_DOMAINS, 
+-define(DOMAIN_RSCS, 
         [
-         {?RSC1, ?DOMAIN1}, 
-         {?RSC2, ?DOMAIN2}
+         {?DOMAIN1, [?RSC1]}, 
+         {?DOMAIN2, [?RSC2]}
         ]).
 
 -define(DOMAIN_ROLES, 
@@ -75,8 +75,9 @@
 
 -define(RSC_NAMES, 
         [
-         {?RBAC_DOMAIN, "rbac_domain"},
-         {?RBAC_ROLE_DOMAIN, "rbac_role_domain"},
+         {?PREDICATE, "predicate"},
+         {?RBAC_DOMAIN_RSC, "rbac_domain_rsc"},
+         {?RBAC_DOMAIN_ROLE, "rbac_domain_role"},
          {?RBAC_ROLE_MEMBER, "rbac_role_member"},
          {?RBAC_ROLE_OPERATION, "rbac_role_operation"},
          {?OP_update, "update"},
@@ -88,8 +89,8 @@
 
 -define(PREDICATES, 
         [
-         ?RBAC_DOMAIN,
-         ?RBAC_ROLE_DOMAIN,
+         ?RBAC_DOMAIN_RSC,
+         ?RBAC_DOMAIN_ROLE,
          ?RBAC_ROLE_MEMBER,
          ?RBAC_ROLE_OPERATION
         ]).

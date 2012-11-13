@@ -73,14 +73,18 @@ setup_state(Ctx) ->
      || {Key, Value} <- 
             lists:flatten(
               [
-               {{category_id_to_name, ?PREDICATE}, "predicate"},
                {{category_is_a, ?PREDICATE}, [predicate]},
+               [[{{category_id_to_name, Id}, Name},
+                {{category_id_to_name, z_convert:to_atom(Name)}, 
+                 z_convert:to_atom(Name)}] || {Id, Name} <- ?RSC_NAMES],
                [{{rsc_name, Name}, Id} || {Id, Name} <- ?RSC_NAMES],
                [{Id, [{name, Name}]} || {Id, Name} <- ?RSC_NAMES],
                [{Id, [{category_id, ?PREDICATE}]} || Id <- ?PREDICATES],
-               [{{objects, ?RBAC_ROLE_DOMAIN, Domain}, Roles} || {Domain, Roles} <- ?DOMAIN_ROLES],
-               [{{objects, ?RBAC_ROLE_DOMAIN, Role}, Roles} || {Role, Roles} <- ?ROLE_HIERARCHY],
-               [{{objects, ?RBAC_DOMAIN, Rsc}, [Domain]} || {Rsc, Domain} <- ?RSC_DOMAINS],
+               [{{subjects, ?RBAC_DOMAIN_RSC, Rsc}, [Domain]} 
+                || {Domain, Rscs} <- ?DOMAIN_RSCS, Rsc <- Rscs],
+               [{{objects, ?RBAC_DOMAIN_RSC, Domain}, Rscs} || {Domain, Rscs} <- ?DOMAIN_RSCS],
+               [{{objects, ?RBAC_DOMAIN_ROLE, Domain}, Roles} || {Domain, Roles} <- ?DOMAIN_ROLES],
+               [{{objects, ?RBAC_DOMAIN_ROLE, Role}, Roles} || {Role, Roles} <- ?ROLE_HIERARCHY],
                [{{objects, ?RBAC_ROLE_OPERATION, Role}, Ops} || {Role, Ops} <- ?ROLE_OPS],
                [{{objects, ?RBAC_ROLE_MEMBER, User}, Roles} || {User, Roles} <- ?USER_ROLES]
               ])
