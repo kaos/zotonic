@@ -24,7 +24,7 @@
 
 -include_lib("eunit/include/eunit.hrl").
 -include_lib("zotonic.hrl").
--include("../support/rbac_tests.hrl").
+-include("rbac_tests.hrl").
 
 
 all_tests_with_context(Ctx) ->

@@ -22,8 +22,8 @@
 
 -include_lib("eunit/include/eunit.hrl").
 -include_lib("zotonic.hrl").
--include("include/rbac.hrl").
--include("support/rbac_tests.hrl").
+-include("../include/rbac.hrl").
+-include("rbac_tests.hrl").
 
 -export([setup/0, setup_acl/2, setup_acl/3]).
 
