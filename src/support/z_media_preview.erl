@@ -159,7 +159,7 @@ cmd_args(FileProps, Filters, OutMime) ->
                     {correct_orientation, Orientation},
                     {resize, ResizeWidth, ResizeHeight, is_enabled(upscale, Filters)}, 
                     {crop, CropArgs},
-                    {colorspace, "sRGB"} | Filters1],
+                    {colorspace, "RGB"} | Filters1],
     Filters3 = case {CropArgs,is_enabled(extent, Filters)} of
                     {none,true} -> Filters2 ++ [{extent, ReqWidth, ReqHeight}];
                     _ -> Filters2
