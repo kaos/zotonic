@@ -49,19 +49,15 @@ observe_acl_logon(#acl_logon{ id=UserId }, Context) ->
 observe_acl_logoff(#acl_logoff{}, Context) ->
     Context#context{ user_id=undefined, acl=undefined }.
 
-observe_acl_is_allowed(#acl_is_allowed{ action=Operation, object=Rsc }, 
-                       #context{ 
-                          acl=#rbac_state{ domains=AssignedDomains } 
-                         } = Context) ->
+observe_acl_is_allowed(#acl_is_allowed{ object=undefined }, _) -> undefined;
+observe_acl_is_allowed(#acl_is_allowed{ action=Operation, object=Rsc }, Context) ->
     Acl = m_rsc:get_acl_props(Rsc, Context),
     RscDomain = m_rbac:domain(Rsc, Context),
-    Domain = case proplists:get_value(RscDomain, AssignedDomains) of
+    Domain = case proplists:get_value(RscDomain, assigned_domains(Context)) of
                  undefined -> assign_operations(RscDomain, Context);
                  D -> D
              end,
-    rbac:check_operation_for(Domain, Operation, Acl);
-observe_acl_is_allowed(_, _) ->
-    undefined.
+    rbac:check_operation_for(Domain, Operation, Acl).
 
 
 manage_schema(install, _Context) ->
@@ -101,6 +97,10 @@ manage_schema(install, _Context) ->
 %% ------------------------------------------------------------
 %% Internal functions
 %% ------------------------------------------------------------
+
+assigned_domains(#context{ acl=#rbac_state{ domains=AssignedDomains } }) ->
+    AssignedDomains;
+assigned_domains(_) -> [].
 
 assign_operations(RscDomain, Context) ->
     %% todo: cache result

@@ -33,6 +33,7 @@
 %% content resources
 -define(RSC1, 401).
 -define(RSC2, 402).
+-define(RSC3, 403).
 
 %% edges
 -define(DOMAIN1_ROLES, [?ROLE1, ?ROLE2, ?ROLE3]).
@@ -93,4 +94,11 @@
          ?RBAC_DOMAIN_ROLE,
          ?RBAC_ROLE_MEMBER,
          ?RBAC_ROLE_OPERATION
+        ]).
+
+-define(RSC_ACL_FIELDS,
+        [
+         {?RSC1, true, ?ACL_VIS_GROUP},
+         {?RSC2, true, ?ACL_VIS_GROUP},
+         {?RSC3, true, ?ACL_VIS_PUBLIC}
         ]).

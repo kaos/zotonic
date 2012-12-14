@@ -86,7 +86,9 @@ setup_state(Ctx) ->
                [{{objects, ?RBAC_DOMAIN_ROLE, Domain}, Roles} || {Domain, Roles} <- ?DOMAIN_ROLES],
                [{{objects, ?RBAC_DOMAIN_ROLE, Role}, Roles} || {Role, Roles} <- ?ROLE_HIERARCHY],
                [{{objects, ?RBAC_ROLE_OPERATION, Role}, Ops} || {Role, Ops} <- ?ROLE_OPS],
-               [{{objects, ?RBAC_ROLE_MEMBER, User}, Roles} || {User, Roles} <- ?USER_ROLES]
+               [{{objects, ?RBAC_ROLE_MEMBER, User}, Roles} || {User, Roles} <- ?USER_ROLES],
+               [{{rsc_acl_fields, Id}, #acl_props{is_published=Pub, visible_for=Vis}}
+                || {Id, Pub, Vis} <- ?RSC_ACL_FIELDS]
               ])
     ],
     Ctx.
@@ -115,34 +117,35 @@ setup_acl(UserId, Domains, Ctx) ->
 
 all_tests_with_context(Ctx) ->
     [
-     ?_test(
-        ?assertEqual(
-           setup_acl(
-             ?USR2, 
-             Ctx
-            ),
-           mod_rbac:observe_acl_logon(
-             #acl_logon{ id=?USR2 }, 
-             Ctx)
-          )
-       ),
+     %% test acl logon
+     ?_assertEqual(
+        setup_acl(?USR2, Ctx),
+        mod_rbac:observe_acl_logon(
+          #acl_logon{ id=?USR2 }, 
+          Ctx)),
 
-     ?_test(
-        %% Domain info already in Acl context
-        ?assert(mod_rbac:observe_acl_is_allowed(
-                  #acl_is_allowed{ action=update, object=?RSC1 },
-                  setup_acl(?USR2, [{?DOMAIN1, [update]}], Ctx)
-                 )
-               )
-       ),
+     %% Anonymous access
+     ?_assert(
+        mod_rbac:observe_acl_is_allowed(
+          #acl_is_allowed{ action=view, object=?RSC3 },
+          Ctx)),
+     ?_assertNot(
+        mod_rbac:observe_acl_is_allowed(
+          #acl_is_allowed{ action=view, object=?RSC2 },
+          Ctx)),
 
-     ?_test(
-        %% No domain info in Acl context
-        ?assert(mod_rbac:observe_acl_is_allowed(
-                  #acl_is_allowed{ action=update, object=?RSC1 },
-                  setup_acl(?USR2, Ctx)
-                 )
-               )
-       )
+     %% Domain info already in Acl context
+     ?_assert(
+        mod_rbac:observe_acl_is_allowed(
+          #acl_is_allowed{ action=update, object=?RSC1 },
+          setup_acl(?USR2, [{?DOMAIN1, [update]}], Ctx)
+         )),
+
+     %% No domain info in Acl context
+     ?_assert(
+        mod_rbac:observe_acl_is_allowed(
+          #acl_is_allowed{ action=update, object=?RSC1 },
+          setup_acl(?USR2, Ctx)
+         ))
     ].
 
