@@ -52,7 +52,12 @@ domain(Id, Context) when is_integer(Id) ->
         [Domain|_] -> Domain
     end;
 domain(Name, Context) ->
-    domain(m_rsc:name_to_id_check(Name, Context), Context).
+    case m_rsc:name_to_id(Name, Context) of
+        {ok, Id} ->
+            domain(Id, Context);
+        _ ->
+            undefined
+    end.
 
 domain_roles(Id, Context) when is_integer(Id) ->
     Roles = m_edge:objects(Id, rbac_domain_role, Context),
