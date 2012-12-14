@@ -46,13 +46,15 @@ m_value(_, _) ->
     ok.
 
 
-domain(Id, Context) ->
+domain(Id, Context) when is_integer(Id) ->
     case m_edge:subjects(Id, rbac_domain_rsc, Context) of
         [] -> undefined;
         [Domain|_] -> Domain
-    end.
+    end;
+domain(Name, Context) ->
+    domain(m_rsc:name_to_id_check(Name, Context), Context).
 
-domain_roles(Id, Context) ->
+domain_roles(Id, Context) when is_integer(Id) ->
     Roles = m_edge:objects(Id, rbac_domain_role, Context),
     lists:flatten(
       [
@@ -61,9 +63,12 @@ domain_roles(Id, Context) ->
                 || Role <- Roles
                ]
       ]
-     ).
+     );
+domain_roles(undefined, _Context) -> [];
+domain_roles(Name, Context) ->
+    domain_roles(m_rsc:name_to_id_check(Name, Context), Context).
 
-user_roles(#context{ user_id=UserId}=Context) ->
+user_roles(#context{ user_id=UserId }=Context) ->
     m_edge:objects(UserId, rbac_role_member, Context).
 
 user_roles(Domain, Context) ->
@@ -72,5 +77,5 @@ user_roles(Domain, Context) ->
              lists:member(Role, UserRoles)
     ].
 
-role_operations(Role, Context) ->
+role_operations(Role, Context) when is_integer(Role) ->
     m_edge:objects(Role, rbac_role_operation, Context).
