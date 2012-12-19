@@ -133,6 +133,10 @@ all_tests_with_context(Ctx) ->
         mod_rbac:observe_acl_is_allowed(
           #acl_is_allowed{ action=view, object=?RSC2 },
           Ctx)),
+     ?_assertNot(
+        mod_rbac:observe_acl_is_allowed(
+          #acl_is_allowed{ action=view, object=?RSC4 },
+          Ctx)),
 
      %% Domain info already in Acl context
      ?_assert(
@@ -145,6 +149,11 @@ all_tests_with_context(Ctx) ->
      ?_assert(
         mod_rbac:observe_acl_is_allowed(
           #acl_is_allowed{ action=update, object=?RSC1 },
+          setup_acl(?USR2, Ctx)
+         )),
+     ?_assert(
+        mod_rbac:observe_acl_is_allowed(
+          #acl_is_allowed{ action=view, object=?RSC4 },
           setup_acl(?USR2, Ctx)
          ))
     ].

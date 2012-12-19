@@ -34,6 +34,7 @@
 -define(RSC1, 401).
 -define(RSC2, 402).
 -define(RSC3, 403).
+-define(RSC4, 404).
 
 %% edges
 -define(DOMAIN1_ROLES, [?ROLE1, ?ROLE2, ?ROLE3]).
@@ -100,5 +101,6 @@
         [
          {?RSC1, true, ?ACL_VIS_GROUP},
          {?RSC2, true, ?ACL_VIS_GROUP},
-         {?RSC3, true, ?ACL_VIS_PUBLIC}
+         {?RSC3, true, ?ACL_VIS_PUBLIC},
+         {?RSC4, true, ?ACL_VIS_COMMUNITY}
         ]).
