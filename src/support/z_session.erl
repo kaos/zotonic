@@ -30,29 +30,30 @@
 
 %% session exports
 -export([
-    start_link/2,
-    stop/1, 
-    set/2,
-    set/3,
-    get/2, 
-    get/3, 
-    incr/3, 
-    persistent_id/1,
-    set_persistent/3,
-    get_persistent/2, 
-    get_persistent/3, 
-    restart/1,
-    keepalive/1, 
-    keepalive/2, 
-    ensure_page_session/1,
-    get_pages/1,
-    get_attach_state/1,
-    add_script/2,
-    add_script/1,
-    check_expire/2,
-    dump/1,
-    spawn_link/4
-    ]).
+         start_link/2,
+         stop/1, 
+         set/2,
+         set/3,
+         get/2, 
+         get/3,
+         get_all/1,
+         incr/3, 
+         persistent_id/1,
+         set_persistent/3,
+         get_persistent/2, 
+         get_persistent/3, 
+         restart/1,
+         keepalive/1, 
+         keepalive/2, 
+         ensure_page_session/1,
+         get_pages/1,
+         get_attach_state/1,
+         add_script/2,
+         add_script/1,
+         check_expire/2,
+         dump/1,
+         spawn_link/4
+        ]).
 
 
 %% The session state
@@ -118,6 +119,14 @@ get(Key, #context{session_pid=Pid}, DefaultValue) ->
     get(Key, Pid, DefaultValue);
 get(Key, Pid, DefaultValue) ->
     gen_server:call(Pid, {get, Key, DefaultValue}).
+
+%% @doc Get all session values.
+get_all(#context{session_pid=Pid}) ->
+    get_all(Pid);
+get_all(Pid) when is_pid(Pid) ->
+    gen_server:call(Pid, get_all);
+get_all(_) ->
+    [].
 
 incr(Key, Value, #context{session_pid=Pid}) ->
     incr(Key, Value, Pid);
@@ -338,6 +347,9 @@ handle_call({get_persistent, Key, DefaultValue}, _From, Session) ->
 
 handle_call({get, Key, DefaultValue}, _From, Session) ->
     {reply, proplists:get_value(Key, Session#session.props, DefaultValue), Session};
+
+handle_call(get_all, _From, Session) ->
+    {reply, Session#session.props, Session};
 
 handle_call({incr, Key, Delta}, _From, Session) ->
     NV = case proplists:lookup(Key, Session#session.props) of

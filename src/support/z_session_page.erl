@@ -30,30 +30,31 @@
 
 %% session exports
 -export([
-    start_link/0, 
-    start_link/1, 
-    stop/1, 
-    ping/1,
-    
-    session_pid/1,
-    set/3, 
-    get/2, 
-    incr/3, 
-    append/3,
-    
-    add_script/2,
-    add_script/1,
-    get_scripts/1,
-    comet_attach/2,
-    comet_detach/1,
-    websocket_attach/2,
+         start_link/0, 
+         start_link/1, 
+         stop/1, 
+         ping/1,
 
-    get_attach_state/1,
-    
-    check_timeout/1,
-    
-    spawn_link/4
-]).
+         session_pid/1,
+         set/3, 
+         get/2, 
+         get_all/1,
+         incr/3, 
+         append/3,
+
+         add_script/2,
+         add_script/1,
+         get_scripts/1,
+         comet_attach/2,
+         comet_detach/1,
+         websocket_attach/2,
+
+         get_attach_state/1,
+
+         check_timeout/1,
+
+         spawn_link/4
+        ]).
 
 -record(page_state, {
     last_detach,
@@ -106,6 +107,11 @@ get(Key, #context{page_pid=Pid}) ->
 	get(Key, Pid);
 get(Key, Pid) ->
     gen_server:call(Pid, {get, Key}).
+
+get_all(#context{page_pid=Pid}) ->
+    get_all(Pid);
+get_all(Pid) when is_pid(Pid) ->
+    gen_server:call(Pid, get_all).
 
 incr(Key, Value, #context{page_pid=Pid}) ->
 	incr(Key, Value, Pid);
@@ -271,6 +277,9 @@ handle_call(get_scripts, _From, State) ->
 handle_call({get, Key}, _From, State) ->
     Value = proplists:get_value(Key, State#page_state.vars),
     {reply, Value, State};
+
+handle_call(get_all, _From, State) ->
+    {reply, State#page_state.vars, State};
 
 handle_call({incr, Key, Delta}, _From, State) ->
     NV = case proplists:lookup(Key, State#page_state.vars) of
