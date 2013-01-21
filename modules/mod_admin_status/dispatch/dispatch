@@ -1,0 +1,5 @@
+%% -*- mode: erlang -*-
+%% Dispatch rule for status dashboard.
+[
+ {admin_status_dashboard, ["admin", "status", "dashboard"], controller_template, [{template, "admin_status_dashboard.tpl"}, {acl, {use, mod_admin_status}}, {ssl,true}]}
+].
