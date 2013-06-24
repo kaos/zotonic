@@ -36,7 +36,7 @@
 %%% Adapted and expanded for Zotonic by Marc Worrell <marc@worrell.nl>
 %%%-------------------------------------------------------------------
 
--module(erlydtl_scanner).
+-module(zerlydtl_scanner).
 -author('rsaccon@gmail.com').
 -author('emmiller@gmail.com').
 

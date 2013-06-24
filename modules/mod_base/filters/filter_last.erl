@@ -32,7 +32,7 @@ last(Input, _Context) when is_binary(Input) ->
             Byte
     end;
 last(Other, Context) ->
-    case erlydtl_runtime:to_list(Other, Context) of
+    case zerlydtl_runtime:to_list(Other, Context) of
         [] -> <<>>;
         L -> lists:last(L)
     end.

@@ -1,6 +1,6 @@
 %% @author Marc Worrell <marc@worrell.nl>
 %% @copyright 2009-2012 Marc Worrell
-%% @doc Template handling, compiles and renders django compatible templates using an extended version of erlydtl
+%% @doc Template handling, compiles and renders django compatible templates using an extended version of zerlydtl
 %% @todo Make the template handling dependent on the host of the context (hosts have different modules enabled).
 
 %% Copyright 2009-2012 Marc Worrell
@@ -266,7 +266,7 @@ handle_call({compile, File, FoundFile, Module, Context}, _From, State) ->
                         || F <- ?MODULE:find_template(FinderFile, All, Context)
                     ]
                  end,
-    ErlyResult = case erlydtl:compile(  FoundFile,
+    ErlyResult = case zerlydtl:compile(  FoundFile,
                                         File,
                                         Module, 
                                         [{finder, FinderFun}, {template_reset_counter, State#state.reset_counter},

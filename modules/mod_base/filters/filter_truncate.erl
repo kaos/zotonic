@@ -25,5 +25,5 @@ truncate(In, Context) ->
 truncate(undefined, _N, _Context) ->
 	undefined;
 truncate(In, N, Context) ->
-	z_string:truncate(erlydtl_runtime:to_list(In, Context), z_convert:to_integer(N)).
+	z_string:truncate(zerlydtl_runtime:to_list(In, Context), z_convert:to_integer(N)).
 

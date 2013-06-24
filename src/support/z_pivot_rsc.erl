@@ -630,7 +630,7 @@ fetch_texts({F, _} = FV, Acc, Context) ->
             false ->
                 Acc;
             true -> 
-                case catch erlydtl_dateformat:format(Date, "Y m d H i F l h", Context) of
+                case catch zerlydtl_dateformat:format(Date, "Y m d H i F l h", Context) of
                     {'EXIT', _} -> Acc;
                     Formatted -> {A, [Formatted|B]}
                 end

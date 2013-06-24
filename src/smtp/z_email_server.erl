@@ -543,7 +543,7 @@ encode_email(Id, #email{body=Body} = Email, MessageId, From, Context) when is_li
     iolist_to_binary([ encode_headers(Headers2), "\r\n\r\n", Body ]).
 
     date(Context) ->
-        z_convert:to_list(erlydtl_dateformat:format("r", z_context:set_language(en, Context))).
+        z_convert:to_list(zerlydtl_dateformat:format("r", z_context:set_language(en, Context))).
 
 
     add_cc(#email{cc=undefined}, Headers) ->

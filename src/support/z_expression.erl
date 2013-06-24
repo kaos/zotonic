@@ -14,13 +14,13 @@
 -include("zotonic.hrl").
 
 
-%% @doc Parse an expression to an expression tree.  Uses the erlydtl parser.
+%% @doc Parse an expression to an expression tree.  Uses the zerlydtl parser.
 parse(Expr) when is_binary(Expr) ->
     parse(binary_to_list(Expr));
 parse(Expr) ->
-    case erlydtl_scanner:scan("{{" ++ Expr ++ "}}") of
+    case zerlydtl_scanner:scan("{{" ++ Expr ++ "}}") of
         {ok, Tokens} ->
-            case erlydtl_parser:parse(Tokens) of
+            case zerlydtl_parser:parse(Tokens) of
                 {ok, [Tree|_]} -> {ok, simplify(Tree)};
                 Err -> Err
             end;
@@ -58,15 +58,15 @@ eval(Tree, Vars, Context) ->
     eval1(Tree, Vars, Context).
 
 eval1({expr, Op, Left, Right}, Vars, Context) ->
-    erlydtl_operators:Op(eval1(Left, Vars, Context), eval1(Right, Vars, Context), Context);
+    zerlydtl_operators:Op(eval1(Left, Vars, Context), eval1(Right, Vars, Context), Context);
 eval1({expr, Op, Expr}, Vars, Context) ->
-    erlydtl_operators:Op(eval1(Expr, Vars, Context), Context);
+    zerlydtl_operators:Op(eval1(Expr, Vars, Context), Context);
 eval1({variable, Name}, Vars, Context) ->
-    erlydtl_runtime:find_value(Name, Vars, Context);
+    zerlydtl_runtime:find_value(Name, Vars, Context);
 eval1({index_value, Array, Index}, Vars, Context) ->
-    erlydtl_runtime:find_value(eval1(Index, Vars, Context), eval1(Array, Vars, Context), Context);
+    zerlydtl_runtime:find_value(eval1(Index, Vars, Context), eval1(Array, Vars, Context), Context);
 eval1({attribute, Attr, From}, Vars, Context) ->
-    erlydtl_runtime:find_value(Attr, eval1(From, Vars, Context), Vars, Context);
+    zerlydtl_runtime:find_value(Attr, eval1(From, Vars, Context), Vars, Context);
 eval1({value_list, List}, Vars, Context) ->
     [ eval1(Elt, Vars, Context) || Elt <- List ];
 eval1({apply_filter, filter_default, _Func, Expr, Args}, Vars, Context) ->

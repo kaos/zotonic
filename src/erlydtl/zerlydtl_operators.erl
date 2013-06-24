@@ -16,7 +16,7 @@
 %% See the License for the specific language governing permissions and
 %% limitations under the License.
 
--module(erlydtl_operators).
+-module(zerlydtl_operators).
 -author("Marc Worrell <marc@worrell.nl>").
 
 -export([
@@ -44,16 +44,16 @@
 
 
 'and'(A, B, Context) ->
-    erlydtl_runtime:is_true(A, Context) and erlydtl_runtime:is_true(B, Context).
+    zerlydtl_runtime:is_true(A, Context) and zerlydtl_runtime:is_true(B, Context).
 
 'not'(A, Context) ->
-    erlydtl_runtime:is_false(A, Context).
+    zerlydtl_runtime:is_false(A, Context).
 
 'or'(A, B, Context) ->
-    erlydtl_runtime:is_true(A, Context) or erlydtl_runtime:is_true(B, Context).
+    zerlydtl_runtime:is_true(A, Context) or zerlydtl_runtime:is_true(B, Context).
 
 'xor'(A, B, Context) ->
-    erlydtl_runtime:is_true(A, Context) xor erlydtl_runtime:is_true(B, Context).
+    zerlydtl_runtime:is_true(A, Context) xor zerlydtl_runtime:is_true(B, Context).
 
 
 concat(A, B, _Context) when is_list(A), is_list(B) ->

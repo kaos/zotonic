@@ -1,9 +1,9 @@
 %%%-------------------------------------------------------------------
-%%% File:      erlydtl_tests.erl
+%%% File:      zerlydtl_tests.erl
 %%% @author    Roberto Saccon <rsaccon@gmail.com> [http://rsaccon.com]
 %%% @author    Evan Miller <emmiller@gmail.com>
 %%% @copyright 2008 Roberto Saccon, Evan Miller
-%%% @doc       ErlyDTL test suite
+%%% @doc       Zerlydtl test suite
 %%% @end
 %%%
 %%% The MIT License
@@ -228,7 +228,7 @@ test_compile_render(Name) ->
                 {force_recompile, true},
                 {finder, {?MODULE,find_file}}],
             io:format(" Template: ~p, ... compiling ... ", [Name]),
-            case catch erlydtl:compile(File, Name, Module, Options, context()) of
+            case catch zerlydtl:compile(File, Name, Module, Options, context()) of
                 {ok, ModuleName} ->
                     case CompileStatus of
                         ok -> test_render(Name, ModuleName);
@@ -317,18 +317,18 @@ find_file(File, true) ->
     end.
 
 templates_docroot() ->
-    filename:join([erlydtl_deps:get_base_dir(), "src", "tests", "erlydtl", "docroot"]).
+    filename:join([zerlydtl_deps:get_base_dir(), "src", "tests", "zerlydtl", "docroot"]).
 
 templates_docroot2() ->
-    filename:join([erlydtl_deps:get_base_dir(), "src", "tests", "erlydtl", "docroot2"]).
+    filename:join([zerlydtl_deps:get_base_dir(), "src", "tests", "zerlydtl", "docroot2"]).
 
 templates_outdir() ->   
-    Dir = filename:join([erlydtl_deps:get_base_dir(), "src", "tests", "erlydtl", "rendered_output"]),
+    Dir = filename:join([zerlydtl_deps:get_base_dir(), "src", "tests", "zerlydtl", "rendered_output"]),
     ok = filelib:ensure_dir(filename:join([Dir,"test"])),
     Dir.
 
 templates_expectdir() ->   
-    filename:join([erlydtl_deps:get_base_dir(), "src", "tests", "erlydtl", "expected_output"]).
+    filename:join([zerlydtl_deps:get_base_dir(), "src", "tests", "zerlydtl", "expected_output"]).
 
 
 context() ->

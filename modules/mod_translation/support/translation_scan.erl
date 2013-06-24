@@ -107,9 +107,9 @@ parse(File) when is_list(File) ->
             {error, io_lib:format("reading ~p failed (~p)", [File, Error])}  
     end;
 parse(Data) when is_binary(Data) ->
-    case erlydtl_scanner:scan(binary_to_list(Data)) of
+    case zerlydtl_scanner:scan(binary_to_list(Data)) of
         {ok, Tokens} ->
-            erlydtl_parser:parse(Tokens);
+            zerlydtl_parser:parse(Tokens);
         Err ->
             Err
     end.

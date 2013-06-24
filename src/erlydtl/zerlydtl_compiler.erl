@@ -35,7 +35,7 @@
 %%% Adapted and expanded for Zotonic by Marc Worrell <marc@worrell.nl>
 %%%-------------------------------------------------------------------
 
--module(erlydtl_compiler).
+-module(zerlydtl_compiler).
 -author('rsaccon@gmail.com').
 -author('emmiller@gmail.com').
 -author('marc@worrell.nl').
@@ -188,9 +188,9 @@ parse(Data) when is_binary(Data) ->
     scan_parse("string", Data).
 
 scan_parse(SourceRef, Data) ->
-    case erlydtl_scanner:scan(SourceRef, binary_to_list(Data)) of
+    case zerlydtl_scanner:scan(SourceRef, binary_to_list(Data)) of
         {ok, Tokens} ->
-            erlydtl_parser:parse(Tokens);
+            zerlydtl_parser:parse(Tokens);
         Err ->
             Err
     end.        
@@ -627,14 +627,14 @@ value_ast(ValueToken, AsString, Context, TreeWalker) ->
     case ValueToken of
         {'expr', Operator, Value} ->
             {{ValueAst,InfoValue}, TreeWalker1} = value_ast(Value, false, Context, TreeWalker),
-            Ast = erl_syntax:application(erl_syntax:atom(erlydtl_operators), 
+            Ast = erl_syntax:application(erl_syntax:atom(zerlydtl_operators), 
                                          erl_syntax:atom(Operator), 
                                          [ValueAst, z_context_ast(Context)]),
             {{Ast, InfoValue}, TreeWalker1};
         {'expr', Operator, Value1, Value2} ->
             {{Value1Ast,InfoValue1}, TreeWalker1} = value_ast(Value1, false, Context, TreeWalker),
             {{Value2Ast,InfoValue2}, TreeWalker2} = value_ast(Value2, false, Context, TreeWalker1),
-            Ast = erl_syntax:application(erl_syntax:atom(erlydtl_operators), 
+            Ast = erl_syntax:application(erl_syntax:atom(zerlydtl_operators), 
                                          erl_syntax:atom(Operator), 
                                          [Value1Ast, Value2Ast, z_context_ast(Context)]),
             {{Ast, merge_info(InfoValue1,InfoValue2)}, TreeWalker2};
@@ -847,7 +847,7 @@ filter_ast1({filter, {identifier, _, Name}, []}, VariableAst, Context, TreeWalke
 filter_ast1({filter, {identifier, _, "default"}, [Arg]}, VariableAst, Context, TreeWalker) ->
     {{ArgAst, Info},TreeWalker1} = value_ast(Arg, false, Context, TreeWalker),
     VarAst  = erl_syntax:variable("Default_" ++ z_ids:identifier()),
-    CaseAst = erl_syntax:case_expr(erl_syntax:application(erl_syntax:atom(erlydtl_runtime), erl_syntax:atom(is_false), [VarAst, z_context_ast(Context)]),
+    CaseAst = erl_syntax:case_expr(erl_syntax:application(erl_syntax:atom(zerlydtl_runtime), erl_syntax:atom(is_false), [VarAst, z_context_ast(Context)]),
         [erl_syntax:clause([erl_syntax:atom(true)], none, 
                 [ArgAst]),
          erl_syntax:clause([erl_syntax:underscore()], none,
@@ -929,7 +929,7 @@ resolve_variable_ast({index_value, Variable, Index}, Context, TreeWalker, Finder
     {{IndexAst,Info},TreeWalker2} = value_ast(Index, false, Context, TreeWalker),
     {{VarAst, VarName, Info2}, TreeWalker3} = resolve_variable_ast(Variable, Context, TreeWalker2, FinderFunction),
     Ast = erl_syntax:application(
-            erl_syntax:atom(erlydtl_runtime), 
+            erl_syntax:atom(zerlydtl_runtime), 
             erl_syntax:atom(FinderFunction),
             [IndexAst, VarAst, z_context_ast(Context)]),
     {{Ast, VarName, merge_info(Info, Info2)}, TreeWalker3};
@@ -959,7 +959,7 @@ resolve_variable_ast({attribute, {{identifier, _, Model}, {variable, {identifier
 resolve_variable_ast({attribute, {{identifier, _, AttrName}, Variable}}, Context, TreeWalker, FinderFunction) ->
     {{VarAst, VarName, Info}, TreeWalker2} = resolve_variable_ast(Variable, Context, TreeWalker, FinderFunction),
     Ast = erl_syntax:application(
-            erl_syntax:atom(erlydtl_runtime),
+            erl_syntax:atom(zerlydtl_runtime),
             erl_syntax:atom(FinderFunction),
             [erl_syntax:atom(AttrName), VarAst, z_context_ast(Context)]),
     {{Ast, VarName, Info}, TreeWalker2};
@@ -993,7 +993,7 @@ resolve_variable_ast({variable, {identifier, _, VarName}}, Context, TreeWalker, 
     Ast = case resolve_scoped_variable_ast(VarName, Context) of
         undefined ->
             erl_syntax:application(
-                erl_syntax:atom(erlydtl_runtime), 
+                erl_syntax:atom(zerlydtl_runtime), 
                 erl_syntax:atom(FinderFunction),
                 [erl_syntax:atom(VarName), erl_syntax:variable("Variables"), z_context_ast(Context)]);
         Val ->
@@ -1004,7 +1004,7 @@ resolve_variable_ast({variable, {identifier, _, VarName}}, Context, TreeWalker, 
 resolve_variable_ast({apply_filter, Variable, Filter}, Context, TreeWalker, FinderFunction) ->
     {{VarAst, VarName, Info}, TreeWalker2} = resolve_variable_ast(Variable, Context, TreeWalker, FinderFunction),
     ValueAst = erl_syntax:application(
-            erl_syntax:atom(erlydtl_runtime),
+            erl_syntax:atom(zerlydtl_runtime),
             erl_syntax:atom(to_value),
             [VarAst, z_context_ast(Context)]
         ),
@@ -1057,7 +1057,7 @@ ifexpr_ast(Expression, IfContents, ElseChoices, Context, TreeWalker) ->
                             {{ElseAst, merge_info(Inf, ElseInfo)}, TW};
                    ({'elif', E, {ElseAst, ElseInfo}}, {{InnerAst, Inf}, TW}) ->
                              {{ElseExprAst, ElseExprInfo}, TW1} = value_ast(E, false, Context, TW),
-                             {{erl_syntax:case_expr(erl_syntax:application(erl_syntax:atom(erlydtl_runtime), 
+                             {{erl_syntax:case_expr(erl_syntax:application(erl_syntax:atom(zerlydtl_runtime), 
                                                                           erl_syntax:atom(is_false), 
                                                                           [ElseExprAst, z_context_ast(Context)]),
                                                     [
@@ -1089,7 +1089,7 @@ ifequalelse_ast(Args, {IfContentsAst, IfContentsInfo}, {ElseContentsAst, ElseCon
         end,
         {[], Info#ast_info.var_names, #ast_info{}, TreeWalker},
         Args),
-    Ast = erl_syntax:case_expr(erl_syntax:application(erl_syntax:atom(erlydtl_runtime), erl_syntax:atom(are_equal),
+    Ast = erl_syntax:case_expr(erl_syntax:application(erl_syntax:atom(zerlydtl_runtime), erl_syntax:atom(are_equal),
             [Arg1Ast, Arg2Ast]),
         [
             erl_syntax:clause([erl_syntax:atom(true)], none, [IfContentsAst]),
@@ -1168,18 +1168,18 @@ for_loop_ast(IteratorList, LoopValue, Contents, EmptyPartContents, Context, Tree
                     fun({identifier, _, Iterator}) ->
                             {list_to_atom(Iterator), erl_syntax:variable("Var_" ++ Iterator ++ PostFix)} 
                     end, IteratorList)] | Context#dtl_context.local_scopes]}, TreeWalker),
-    CounterAst = erl_syntax:application(erl_syntax:atom(erlydtl_runtime), 
+    CounterAst = erl_syntax:application(erl_syntax:atom(zerlydtl_runtime), 
         erl_syntax:atom(increment_counter_stats), [erl_syntax:variable("Counters")]),
 
     {{LoopValueAst, LoopValueInfo}, TreeWalker3} = value_ast(LoopValue, false, Context, TreeWalker2),
-    ListAst = erl_syntax:application(erl_syntax:atom(erlydtl_runtime), erl_syntax:atom(to_list), [LoopValueAst, z_context_ast(Context)]),
+    ListAst = erl_syntax:application(erl_syntax:atom(zerlydtl_runtime), erl_syntax:atom(to_list), [LoopValueAst, z_context_ast(Context)]),
     ListVarAst = erl_syntax:variable("LoopVar_"++z_ids:identifier()),
 
     CounterVars0 = case resolve_scoped_variable_ast("forloop", Context) of
         undefined ->
-            erl_syntax:application(erl_syntax:atom(erlydtl_runtime), erl_syntax:atom(init_counter_stats), [ListVarAst]);
+            erl_syntax:application(erl_syntax:atom(zerlydtl_runtime), erl_syntax:atom(init_counter_stats), [ListVarAst]);
         ForLoopValue ->
-            erl_syntax:application(erl_syntax:atom(erlydtl_runtime), erl_syntax:atom(init_counter_stats), [ListVarAst, ForLoopValue])
+            erl_syntax:application(erl_syntax:atom(zerlydtl_runtime), erl_syntax:atom(init_counter_stats), [ListVarAst, ForLoopValue])
     end,
 
     ForLoopF = fun(BaseListAst) -> erl_syntax:application(
@@ -1246,7 +1246,7 @@ cycle_ast(Names, Context, TreeWalker) ->
                         Names),
 
     {{erl_syntax:application(
-        erl_syntax:atom('erlydtl_runtime'), erl_syntax:atom('cycle'),
+        erl_syntax:atom('zerlydtl_runtime'), erl_syntax:atom('cycle'),
         [erl_syntax:tuple(NamesTuple), erl_syntax:variable("Counters"), z_context_ast(Context)]), #ast_info{}}, TreeWalker1}.
 
 
@@ -1254,7 +1254,7 @@ cycle_ast(Names, Context, TreeWalker) ->
 cycle_compat_ast(Names, Context, TreeWalker) ->
     NamesTuple = [erl_syntax:string(X) || {identifier, _, X} <- Names],
     {{erl_syntax:application(
-        erl_syntax:atom('erlydtl_runtime'), erl_syntax:atom('cycle'),
+        erl_syntax:atom('zerlydtl_runtime'), erl_syntax:atom('cycle'),
         [erl_syntax:tuple(NamesTuple), erl_syntax:variable("Counters"), z_context_ast(Context)]), #ast_info{}}, TreeWalker}.
 
 
@@ -1302,14 +1302,14 @@ now_ast(FormatString, Context, TreeWalker) ->
     % Note: we can't use unescape_string_literal here
     % because we want to allow escaping in the format string.
     {{erl_syntax:application(
-        erl_syntax:atom(erlydtl_dateformat),
+        erl_syntax:atom(zerlydtl_dateformat),
         erl_syntax:atom(format),
         [erl_syntax:string(FormatString), z_context_ast(Context)]),
         #ast_info{}}, TreeWalker}.
 
 spaceless_ast(Contents, Context, TreeWalker) ->
     {{Ast, Info}, TreeWalker1} = body_ast(Contents, Context, TreeWalker),
-    {{erl_syntax:application(erl_syntax:atom(erlydtl_runtime),
+    {{erl_syntax:application(erl_syntax:atom(zerlydtl_runtime),
                              erl_syntax:atom(spaceless),
                              [Ast]), Info}, TreeWalker1}.
 
@@ -1372,7 +1372,7 @@ tag_ast(Name, Args, All, Context, TreeWalker) ->
     case lists:member(Name, TreeWalker#treewalker.custom_tags) of
         true ->
             {InterpretedArgs, TreeWalker1} = interpreted_args(Args, Context, TreeWalker),
-            DefaultFilePath = filename:join([erlydtl_deps:get_base_dir(), "priv", "custom_tags", Name]),
+            DefaultFilePath = filename:join([zerlydtl_deps:get_base_dir(), "priv", "custom_tags", Name]),
             case Context#dtl_context.custom_tags_dir of
                 [] ->
                     case parse(DefaultFilePath, Context) of
@@ -1621,7 +1621,7 @@ cache_ast(MaxAge, Args, Body, Context, TreeWalker) ->
         )
     ]),
     CacheAst = erl_syntax:application(
-                  erl_syntax:atom(erlydtl_runtime),
+                  erl_syntax:atom(zerlydtl_runtime),
                   erl_syntax:atom(cache),
                   [ erl_syntax:integer(MaxAge1),
                     erl_syntax:atom(list_to_atom("$tpl$" ++ Name)),

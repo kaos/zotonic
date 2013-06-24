@@ -21,7 +21,7 @@
 
 
 yesno(B, _Context) ->
-    case erlydtl_runtime:is_false(B) of
+    case zerlydtl_runtime:is_false(B) of
         true -> "no";
         false -> "yes"
     end.
@@ -31,7 +31,7 @@ yesno(undefined, Values, _Context) ->
         [_Yes, No] -> No
     end;
 yesno(B, Values, _Context) ->
-    case erlydtl_runtime:is_false(B) of
+    case zerlydtl_runtime:is_false(B) of
         true ->
             [_Yes,No|_Rest] = string:tokens(z_convert:to_list(Values), ","),
             No;

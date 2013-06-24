@@ -63,9 +63,9 @@
 -include_lib("include/zotonic.hrl").
 
 
-%% @doc Format a date/time. Convenience function which calls erlydtl.
+%% @doc Format a date/time. Convenience function which calls zerlydtl.
 format(Date, FormatString, Context) ->
-    erlydtl_dateformat:format(Date, FormatString, Context).
+    zerlydtl_dateformat:format(Date, FormatString, Context).
 
 
 %% @doc Show a humanized version of a relative datetime.  Like "4 months, 3 days ago".

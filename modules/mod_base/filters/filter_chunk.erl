@@ -23,7 +23,7 @@
 chunk(undefined, _N, _Context) ->
     undefined;
 chunk(In, N, Context) ->
-    chunk1(erlydtl_runtime:to_list(In, Context), N, []).
+    chunk1(zerlydtl_runtime:to_list(In, Context), N, []).
     
     chunk1([], _, Acc) ->
         lists:reverse(Acc);

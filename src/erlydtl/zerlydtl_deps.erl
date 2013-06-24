@@ -1,15 +1,15 @@
 %%%-------------------------------------------------------------------
-%%% File:      erlydtl.erl
+%%% File:      erlydtl_deps.erl
 %%% @author    Roberto Saccon <rsaccon@gmail.com> [http://rsaccon.com]
 %%% @author    Evan Miller <emmiller@gmail.com>
 %%% @copyright 2008 Roberto Saccon, Evan Miller
 %%% @doc  
-%%% Public interface for ErlyDTL
+%%% ErlyDTL helper module
 %%% @end  
 %%%
 %%% The MIT License
 %%%
-%%% Copyright (c) 2008 Roberto Saccon, Evan Miller
+%%% Copyright (c) 2007 Roberto Saccon, Evan Miller
 %%%
 %%% Permission is hereby granted, free of charge, to any person obtaining a copy
 %%% of this software and associated documentation files (the "Software"), to deal
@@ -29,20 +29,32 @@
 %%% OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 %%% THE SOFTWARE.
 %%%
-%%% @since 2007-11-11 by Roberto Saccon, Evan Miller
+%%% @since 2007-12-16 by Roberto Saccon, Evan Miller
 %%%-------------------------------------------------------------------
--module(erlydtl).
+-module(zerlydtl_deps).
 -author('rsaccon@gmail.com').
 -author('emmiller@gmail.com').
 
 %% API
--export([compile/3, compile/4, compile/5]).
+-export([get_base_dir/0, get_base_dir/1]).
 
-compile(FileOrBinary, Module, ZContext) ->
-    erlydtl_compiler:compile(FileOrBinary, Module, ZContext).
+%%====================================================================
+%% API
+%%====================================================================
+%% @spec get_base_dir(Module) -> string()
+%% @doc Return the application directory for Module. It assumes Module is in
+%%      a standard OTP layout application in the ebin or src directory.
+get_base_dir(Module) ->
+    {file, Here} = code:is_loaded(Module),
+    filename:dirname(filename:dirname(Here)).
 
-compile(FileOrBinary, Module, Options, ZContext) ->
-    erlydtl_compiler:compile(FileOrBinary, [], Module, Options, ZContext).
+%% @spec get_base_dir() -> string()
+%% @doc Return the application directory for this application. Equivalent to
+%%      get_base_dir(?MODULE).
+get_base_dir() ->
+    get_base_dir(?MODULE).
+    
+%%====================================================================
+%% Internal functions
+%%====================================================================
 
-compile(FileOrBinary, BaseFile, Module, Options, ZContext) ->
-    erlydtl_compiler:compile(FileOrBinary, BaseFile, Module, Options, ZContext).

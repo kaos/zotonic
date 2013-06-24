@@ -212,7 +212,7 @@ handle_info({'EXIT', Pid, _Error}, State) ->
             %% @todo send the error update to the page that started the backup
             %% @todo Log the error
             %% Remove all files of this backup
-            Name = z_convert:to_list(erlydtl_dateformat:format(State#state.backup_start, "Ymd-His", State#state.context)),
+            Name = z_convert:to_list(zerlydtl_dateformat:format(State#state.backup_start, "Ymd-His", State#state.context)),
             [ file:delete(F) || F <- filelib:wildcard(filename:join(dir(State#state.context), Name++"*")) ],
             {noreply, State#state{backup_pid=undefined, backup_start=undefined}};
         _ ->
@@ -306,7 +306,7 @@ name(Context) ->
     Now = calendar:local_time(),
     iolist_to_binary(
       [atom_to_list(z_context:site(Context)), "-",
-       erlydtl_dateformat:format(Now, "Ymd-His", Context)]).
+       zerlydtl_dateformat:format(Now, "Ymd-His", Context)]).
 
 
 %% @doc Dump the sql database into the backup directory.  The Name is the basename of the dump.

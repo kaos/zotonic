@@ -1,6 +1,6 @@
 %%% Stub for old format calls to z_dateformat in z_stdlib.
 
--module(erlydtl_dateformat).
+-module(zerlydtl_dateformat).
 
 -export([
 	format/2,

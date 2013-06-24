@@ -2,7 +2,7 @@
 %%% Adapted and expanded for Zotonic by Marc Worrell <marc@worrell.nl>
 %%%-------------------------------------------------------------------
 
--module(erlydtl_runtime).
+-module(zerlydtl_runtime).
 -compile(export_all).
 
 -include_lib("zotonic.hrl").

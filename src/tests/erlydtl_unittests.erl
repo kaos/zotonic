@@ -413,10 +413,10 @@ run_tests() ->
                 io:format(" Test group ~p...~n", [Group]),
                 lists:foldl(fun({Name, DTL, Vars, Output}, Acc) ->
                             % io:format("~p~n", [{Name, DTL, Vars, Output}]),
-                            case erlydtl:compile(DTL, erlydtl_running_test, [], z_context:new_tests()) of
+                            case zerlydtl:compile(DTL, zerlydtl_running_test, [], z_context:new_tests()) of
                                 {ok, _} ->
-                                    {ok, IOList} = erlydtl_running_test:render(Vars, z_context:new_tests()),
-                                    {ok, IOListBin} = erlydtl_running_test:render(vars_to_binary(Vars), z_context:new_tests()),
+                                    {ok, IOList} = zerlydtl_running_test:render(Vars, z_context:new_tests()),
+                                    {ok, IOListBin} = zerlydtl_running_test:render(vars_to_binary(Vars), z_context:new_tests()),
                                     case {iolist_to_binary(IOList), iolist_to_binary(IOListBin)} of
                                         {Output, Output} ->
                                             Acc;

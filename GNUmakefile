@@ -1,7 +1,7 @@
 ERL       ?= erl
 ERLC      ?= $(ERL)c
 APP       := zotonic
-PARSER    := src/erlydtl/erlydtl_parser
+PARSER    := src/erlydtl/zerlydtl_parser
 
 # Erlang Rebar downloading
 # see: https://groups.google.com/forum/?fromgroups=#!topic/erlang-programming/U0JJ3SeUv5Y
