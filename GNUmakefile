@@ -2,6 +2,7 @@ ERL       ?= erl
 ERLC      ?= $(ERL)c
 APP       := zotonic
 PARSER    := src/erlydtl/zerlydtl_parser
+ZTL_PARSER := src/ztl/ztl_parser
 
 # Erlang Rebar downloading
 # see: https://groups.google.com/forum/?fromgroups=#!topic/erlang-programming/U0JJ3SeUv5Y
@@ -30,8 +31,12 @@ erl:
 	@$(ERL) -pa $(wildcard deps/*/ebin) -pa ebin -noinput +B \
 	  -eval 'case make:all() of up_to_date -> halt(0); error -> halt(1) end.'
 
-$(PARSER).erl: $(PARSER).yrl
-	$(ERLC) -o src/erlydtl $(PARSER).yrl
+parsers: $(PARSER).erl $(ZTL_PARSER).erl
+
+%.erl: %.yrl
+	$(ERLC) -o $(dir $@) $(ERLC_PARSER_OPTS) $<
+
+$(ZTL_PARSER).erl: ERLC_PARSER_OPTS = -I deps/erlydtl/include/erlydtl_preparser.hrl
 
 ebin/$(APP).app: src/$(APP).app.src
 	cp src/$(APP).app.src $@
@@ -49,7 +54,7 @@ compile-deps: $(REBAR)
 	if [ -d $(LAGER) ]; then $(call Compile, $(LAGER)); fi
 	for i in $(DEPS); do $(call Compile, $$i); done
 
-compile-zotonic: $(PARSER).erl erl ebin/$(APP).app
+compile-zotonic: parsers erl ebin/$(APP).app
 
 compile: compile-deps compile-zotonic
 
@@ -68,14 +73,14 @@ edocs:
 # Cleaning
 .PHONY: clean_logs
 clean_logs:
-	@echo "deleting logs:"
-	rm -f erl_crash.dump $(PARSER).erl
+	@echo "cleaning logs:"
 	rm -rf priv/log/*
 
 .PHONY: clean
 clean: clean_logs $(REBAR)
-	@echo "removing:"
+	@echo "cleaning:"
 	rm -f ebin/*.beam ebin/*.app
+	rm -f erl_crash.dump $(PARSER).erl $(ZTL_PARSER).erl
 	@echo "cleaning dependencies:"
 	$(REBAR) clean
 

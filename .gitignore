@@ -22,6 +22,7 @@ ebin/
 deps/
 
 /src/erlydtl/zerlydtl_parser.erl
+/src/ztl/ztl_parser.erl
 /src/tests/erlydtl/rendered_output/
 
 /priv/config
