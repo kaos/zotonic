@@ -19,25 +19,59 @@
 
 -include_lib("eunit/include/eunit.hrl").
 
--record(engine, {module, compile_options=[], render_options=[]}).
+-export([run/1]).
+
+-record(engine, {module, 
+                 compile_options=[], 
+                 render_options=[],
+                 vars=[]}).
 -record(test_case, {
           title="",
           input, 
           expect_output,
           compile_options=[],
           render_options=[],
+          vars=[],
           engines=[
                    #engine{ module=zerlydtl },
                    #engine{ module=ztl, 
-                            compile_options=[{compiler_options, 
-                                              [
-                                               debug_compiler, 
-                                               verbose, report_errors, report_warnings]}, 
-                                             {extension_module, ztl_extensions}]
+                            compile_options=
+                                [{compiler_options, 
+                                  [debug_compiler, 
+                                   verbose, report_errors, report_warnings]}, 
+                                 {extension_module, ztl_extensions}]
                           }
                   ]
          }).
 
+%% run a specific crafted temporary test case
+run({Input, Output}) ->
+    run_tests(test_generator([#test_case{
+                                title="interactive",
+                                input=Input,
+                                expect_output=Output
+                                }]));
+%% run selected subset of test cases outside of eunit (don't trunc my output, d*mn it!)
+run(Search) ->
+    run_tests(test_generator(test_case(Search))).
+
+test_case([S|_]=Search) when is_list(S); is_atom(S) ->
+    lists:flatten([test_case(C) || C <- Search]);
+test_case(Search) when is_atom(Search) ->
+    test_case(atom_to_list(Search));
+test_case(Search) when is_list(Search) ->
+    [T || T <- all_test_cases(), T#test_case.title == Search].
+
+run_tests({generator, G}) ->    
+    run_tests(G());
+run_tests([{Title, Test}|Ts]) -> 
+    io:format("test case: ~s~n", [Title]),
+    Test(),
+    run_tests(Ts);
+run_tests([]) -> 
+    ok.
+
+%% eunit test entry point
 run_test_() ->
     test_generator(all_test_cases()).
 
@@ -47,7 +81,7 @@ test_generator([T|Ts]) ->
      fun () ->
              L = fun(P) -> string:join([P, T#test_case.title], ": ") end,
              M = output_matcher(T#test_case.expect_output),
-             [{T#test_case.title,
+             [{L(atom_to_list(E#engine.module)),
                fun () ->
                        ?debugTime(L("test case"), 
                                   run_test_case(L, T#test_case{ expect_output=M }, E))
@@ -68,6 +102,10 @@ output_matcher({re, Re}) ->
         (Err) ->
             {render_failure, Err}
     end;
+output_matcher(undefined) ->
+    fun (Result) ->
+            io:format("rendered: ~p~n", [Result])
+    end;
 output_matcher(Output) ->
     fun ({ok, O}) ->
             B = iolist_to_binary(O),
@@ -82,12 +120,14 @@ run_test_case(L,
                  input=I,
                  expect_output=Matcher,
                  compile_options=Co,
-                 render_options=Ro
+                 render_options=Ro,
+                 vars=V
                 },
               #engine{
                  module=E,
                  compile_options=Eco,
-                 render_options=Ero
+                 render_options=Ero,
+                 vars=Ev
                 }
              ) ->
     ?debugMsg(["-- engine ", atom_to_list(E)]),
@@ -98,10 +138,11 @@ run_test_case(L,
                  E:compile(I, ztl_template_test, Co ++ Eco, C)),
 
     Args = case E of
-               zerlydtl -> [Ro ++ Ero, C];
-               ztl -> [[], Ro ++ Ero]
+               zerlydtl -> [V ++ Ev, C]; %% does not have any render options
+               ztl -> [V ++ Ev, Ro ++ Ero ++ [{z_context, C}]]
            end,
 
+    %io:format("render ~p with args ~p = ~p~n", [M, Args, apply(M, render, Args)]),
     ?assertEqual(
        ok, Matcher(
              ?debugTime(
@@ -117,8 +158,13 @@ all_test_cases() ->
         expect_output= <<"foo">>
        },
      #test_case{
-        title="auto id",
+        title= "auto id",
         input= <<"{{ #test }}">>,
         expect_output= {re, "\\w{8}-test"}
+       },
+     #test_case{
+        title= "url tag",
+        input= <<"{% url test %}">>,
+        expect_output= <<"/test">>
        }
     ].
