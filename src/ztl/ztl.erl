@@ -20,15 +20,10 @@
 %% API
 -export([
          compile/3, compile/4
-         %%, compile/5
         ]).
 
-compile(FileOrBinary, Module, _ZContext) ->
-    erlydtl:compile(FileOrBinary, Module).
+compile(FileOrBinary, Module, Z_context) ->
+    erlydtl:compile(FileOrBinary, Module, [{z_context, Z_context}]).
 
-compile(FileOrBinary, Module, Options, _ZContext) ->
-    erlydtl:compile(FileOrBinary, Module, Options).
-
-%% compile(FileOrBinary, BaseFile, Module, Options, _ZContext) ->
-%%     erlydtl:compile(FileOrBinary, BaseFile, Module, Options).
-
+compile(FileOrBinary, Module, Options, Z_context) ->
+    erlydtl:compile(FileOrBinary, Module, [{z_context, Z_context}|Options]).
