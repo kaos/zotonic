@@ -22,10 +22,7 @@
 -module(z_scomp).
 -author("Marc Worrell <marc@worrell.nl>").
 
--export([
-         render/3, render/4,
-         render_all/3, render_all/4
-        ]).
+-export([render/3, render/4, render_all/4]).
 
 -include_lib("zotonic.hrl").
 
@@ -33,34 +30,31 @@
 render(ScompName, [{'__render_variables', Vars}|Args], Context) ->
     render(ScompName, Args, Vars, Context).
 
-render_all(ScompName, [{'__render_variables', Vars}|Args], Context) ->
-    render_all(ScompName, Args, Vars, Context).
+render_all(ScompName, Args, Vars, Context) ->
+    render(ScompName, [{'$all', true}|Args], Vars, Context).
 
 %% @spec render(ScompName, Args, Vars, Context) -> {ok, Context} | {ok, io_list} | {error, Reason}
 %% @doc Render the names scomp, Args are the scomp arguments and Vars are the variables given to the template
 render(ScompName, Args, Vars, Context) ->
-    case z_module_indexer:find(scomp, ScompName, Context) of
+    Finder = case proplists:get_value('$all', Args, false) of
+                 true -> find_all;
+                 false -> find
+             end,
+    case z_module_indexer:Finder(scomp, ScompName, Context) of
         {ok, #module_index{erlang_module=ModuleName}} ->
             ScompContext = z_context:prune_for_scomp(z_acl:args_to_visible_for(Args), Context), 
             render_scomp_module(ModuleName, Args, Vars, ScompContext, Context);
         {error, enoent} ->
             %% No such scomp, as we can switch on/off functionality we do a quiet skip
             ?LOG("custom tag \"~p\" not found", [ScompName]),
-            {ok, <<>>}
-    end.
-
-render_all(ScompName, Args, Vars, Context) ->
-    case z_module_indexer:find_all(scomp, ScompName, Context) of
-        [] -> 
-            [];
-        ModuleNames when is_list(ModuleNames) ->
-            ScompContext = z_context:prune_for_scomp(z_acl:args_to_visible_for(Args), Context),
-            Args1 = [{'$all', true} | Args],
-            RenderFun = fun(#module_index{erlang_module=ModuleName}) ->
-                            {ok, Result} = render_scomp_module(ModuleName, Args1, Vars, ScompContext, Context),
-                            Result
-                        end,
-            [ RenderFun(ModuleName) || ModuleName <- ModuleNames ]
+            {ok, <<>>};
+        [] -> [];
+        Modules when is_list(Modules) ->
+            ScompContext = z_context:prune_for_scomp(z_acl:args_to_visible_for(Args), Context), 
+            [begin
+                 {ok, Result} = render_scomp_module(ModuleName, Args, Vars, ScompContext, Context),
+                 Result
+             end || #module_index{erlang_module=ModuleName} <- Modules]
     end.
 
 render_scomp_module(ModuleName, Args, Vars, ScompContext, Context) ->

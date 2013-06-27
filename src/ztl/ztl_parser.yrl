@@ -46,19 +46,18 @@
 
 Nonterminals
     Extension
-    %% Elements
     Literal
 
     ValueBraced
     OptWith
 
-    %% ExtendsTag
-    %% OverrulesTag
-    %% InheritTag
+    ExtendsTag
+    OverrulesTag
+    InheritTag
     
-    %% IncludeTag
-    %% CatIncludeTag
-    %% NowTag
+    IncludeTag
+    CatIncludeTag
+    NowTag
 
     %% BlockBlock
     %% BlockBraced
@@ -68,9 +67,9 @@ Nonterminals
     %% CommentBraced
     %% EndCommentBraced
 
-    %% CycleTag
-    %% CycleNames
-    %% CycleNamesCompat
+    CycleTag
+    CycleNames
+    CycleNamesCompat
 
     %% FilterBlock
     %% FilterBraced
@@ -121,20 +120,20 @@ Nonterminals
     FilterArgs
     AutoId
 	
-    %% LibTag
-    %% LibList
+    LibTag
+    LibList
 	
-    %% LoadTag
-    %% LoadNames
+    LoadTag
+    LoadNames
     
-    %% CustomTag
-    %% WithArgs
+    CustomTag
+    WithArgs
     Args
     %% SpacelessBlock
-    %% TransArgs
+    TransArgs
 
-    %% CallTag
-    %% CallWithTag
+    CallTag
+    CallWithTag
 
     %% CacheBlock
     %% CacheBraced
@@ -142,18 +141,18 @@ Nonterminals
     %% OptCacheTime
 
     UrlTag
-    %% PrintTag
-    %% ImageTag
-    %% ImageUrlTag
-    %% MediaTag
-    %% TransTag
-    %% TransExtTag
+    PrintTag
+    ImageTag
+    ImageUrlTag
+    MediaTag
+    TransTag
+    TransExtTag
     %% ValueList
     OptArrayList
     ArrayList
     
-    %% OptionalPrefix
-    %% OptionalAll
+    OptionalPrefix
+    OptionalAll
 
     OptE
     E
@@ -161,20 +160,20 @@ Nonterminals
     Unot.
 
 Terminals
-    %% all_keyword
+    all_keyword
     %% as_keyword
     atom_literal
     %% autoescape_keyword
     %% block_keyword
     %% cache_keyword
-    %% call_keyword
-    %% catinclude_keyword
+    call_keyword
+    catinclude_keyword
     close_tag
     close_var
     %% comment_keyword
     %% colon
     %% comma
-    %% cycle_keyword
+    cycle_keyword
     %% dot
     %% else_keyword
     %% elif_keyword
@@ -192,30 +191,30 @@ Terminals
     %% endspaceless_keyword
     %% endwith_keyword
     %% equal
-    %% extends_keyword
+    extends_keyword
     %% filter_keyword
     %% for_keyword
     identifier
     %% if_keyword
     %% ifequal_keyword
     %% ifnotequal_keyword
-    %% image_keyword
-    %% image_url_keyword
+    image_keyword
+    image_url_keyword
     %% in_keyword
-    %% include_keyword
-    %% inherit_keyword
-    %% lib_keyword
-    %% load_keyword
-    %% media_keyword
+    include_keyword
+    inherit_keyword
+    lib_keyword
+    load_keyword
+    media_keyword
     not_keyword
-    %% now_keyword
+    now_keyword
     number_literal
     open_tag
     open_var
-    %% optional_keyword
-    %% overrules_keyword
+    optional_keyword
+    overrules_keyword
     %% pipe
-    %% print_keyword
+    print_keyword
     %% javascript_keyword
     %% spaceless_keyword
     string_literal
@@ -226,14 +225,14 @@ Terminals
     close_curly
     open_bracket
     close_bracket
-    %% open_trans
-    %% trans_text
-    %% close_trans
+    open_trans
+    trans_text
+    close_trans
     trans_literal
     or_keyword
     xor_keyword
     and_keyword
-    %% __keyword
+    __keyword
     hash
     '=' ':' ',' '|' '.'
     '==' '/=' '<' '>' '=<' '>='
@@ -256,106 +255,102 @@ Left 500 '*' '/' '%'.
 Unary 600 Uminus Unot.
 
 %% Expected shift/reduce conflicts
-%Expect 3.
+Expect 3.
 
-%% Elements -> '$empty' : [].
-%% Elements -> Elements text : '$1' ++ ['$2'].
-%% Elements -> Elements ValueBraced : '$1' ++ ['$2']. %% OK
-%% Elements -> Elements TransTag : '$1' ++ ['$2'].
-%% Elements -> Elements TransExtTag : '$1' ++ ['$2'].
-%% Elements -> Elements ExtendsTag : '$1' ++ ['$2'].
-%% Elements -> Elements OverrulesTag : '$1' ++ ['$2'].
-%% Elements -> Elements InheritTag : '$1' ++ ['$2'].
-%% Elements -> Elements IncludeTag : '$1' ++ ['$2'].
-%% Elements -> Elements CatIncludeTag : '$1' ++ ['$2'].
-%% Elements -> Elements NowTag : '$1' ++ ['$2'].
-%% Elements -> Elements SpacelessBlock : '$1' ++ ['$2'].
-%% Elements -> Elements LibTag : '$1' ++ ['$2'].
-%% Elements -> Elements LoadTag : '$1' ++ ['$2'].
-%% Elements -> Elements CycleTag : '$1' ++ ['$2'].
-%% Elements -> Elements BlockBlock : '$1' ++ ['$2'].
-%% Elements -> Elements FilterBlock : '$1' ++ ['$2'].
-%% Elements -> Elements ForBlock : '$1' ++ ['$2'].
-%% Elements -> Elements IfBlock : '$1' ++ ['$2'].
-%% Elements -> Elements IfEqualBlock : '$1' ++ ['$2'].
-%% Elements -> Elements IfNotEqualBlock : '$1' ++ ['$2'].
-%% Elements -> Elements AutoEscapeBlock : '$1' ++ ['$2'].
-%% Elements -> Elements CommentBlock : '$1' ++ ['$2'].
-%% Elements -> Elements CustomTag : '$1' ++ ['$2'].
-%% Elements -> Elements CallTag : '$1' ++ ['$2'].
-%% Elements -> Elements CallWithTag : '$1' ++ ['$2'].
-%% Elements -> Elements UrlTag : '$1' ++ ['$2'].
-%% Elements -> Elements PrintTag : '$1' ++ ['$2'].
-%% Elements -> Elements ScriptBlock : '$1' ++ ['$2'].
-%% Elements -> Elements ImageTag : '$1' ++ ['$2'].
-%% Elements -> Elements ImageUrlTag : '$1' ++ ['$2'].
-%% Elements -> Elements MediaTag : '$1' ++ ['$2'].
-%% Elements -> Elements WithBlock : '$1' ++ ['$2'].
-%% Elements -> Elements CacheBlock : '$1' ++ ['$2'].
+Extension -> ValueBraced : ['$1']. %% OK
+Extension -> TransTag : ['$1'].
+Extension -> TransExtTag : ['$1'].
+Extension -> ExtendsTag : ['$1'].
+Extension -> OverrulesTag : ['$1'].
+Extension -> InheritTag : ['$1'].
+Extension -> IncludeTag : ['$1'].
+Extension -> CatIncludeTag : ['$1'].
+Extension -> NowTag : ['$1'].
+%% Extension -> SpacelessBlock : ['$1'].
+Extension -> LibTag : ['$1'].
+Extension -> LoadTag : ['$1'].
+Extension -> CycleTag : ['$1'].
+%% Extension -> BlockBlock : ['$1'].
+%% Extension -> FilterBlock : ['$1'].
+%% Extension -> ForBlock : ['$1'].
+%% Extension -> IfBlock : ['$1'].
+%% Extension -> IfEqualBlock : ['$1'].
+%% Extension -> IfNotEqualBlock : ['$1'].
+%% Extension -> AutoEscapeBlock : ['$1'].
+%% Extension -> CommentBlock : ['$1'].
+Extension -> CustomTag : ['$1'].
+Extension -> CallTag : ['$1'].
+Extension -> CallWithTag : ['$1'].
+Extension -> UrlTag : ['$1'].  %% OK
+Extension -> PrintTag : ['$1'].
+%% Extension -> ScriptBlock : ['$1'].
+Extension -> ImageTag : ['$1'].
+Extension -> ImageUrlTag : ['$1'].
+Extension -> MediaTag : ['$1'].
+%% Extension -> WithBlock : ['$1'].
+%% Extension -> CacheBlock : ['$1'].
 
-Extension -> ValueBraced : ['$1'].
-Extension -> UrlTag : ['$1'].
 
 ValueBraced -> open_var E OptWith close_var : {extension, {value, '$2', '$3'}}.
 
 OptWith -> '$empty' : [].
 OptWith -> with_keyword Args : '$2'.
 
-%% ExtendsTag -> open_tag extends_keyword string_literal close_tag : {extends, '$3'}.
-%% OverrulesTag -> open_tag overrules_keyword close_tag : overrules.
-%% InheritTag -> open_tag inherit_keyword close_tag : inherit.
+ExtendsTag -> open_tag extends_keyword string_literal close_tag : {extends, '$3'}.
+OverrulesTag -> open_tag overrules_keyword close_tag : overrules.
+InheritTag -> open_tag inherit_keyword close_tag : inherit.
 
-%% TransTag -> open_trans trans_text close_trans : {trans, '$2'}.
-%% TransExtTag -> open_tag __keyword string_literal TransArgs close_tag : {trans_ext, '$3', '$4'}.
-%% IncludeTag -> open_tag OptionalPrefix include_keyword E OptWith WithArgs close_tag : {include, '$4', '$6', '$2'}.
-%% CatIncludeTag -> open_tag OptionalAll catinclude_keyword E E WithArgs close_tag : {catinclude, '$4', '$5', '$6', '$2'}.
-%% NowTag -> open_tag now_keyword string_literal close_tag : {date, now, '$3'}.
+TransTag -> open_trans trans_text close_trans : {trans, '$2'}.
+TransExtTag -> open_tag __keyword string_literal TransArgs close_tag : {trans_ext, '$3', '$4'}.
+IncludeTag -> open_tag OptionalPrefix include_keyword E OptWith WithArgs close_tag : {include, '$4', '$6', '$2'}.
+CatIncludeTag -> open_tag OptionalAll catinclude_keyword E E WithArgs close_tag : {catinclude, '$4', '$5', '$6', '$2'}.
+NowTag -> open_tag now_keyword string_literal close_tag : {date, now, '$3'}.
 
-%% OptionalPrefix -> optional_keyword : optional.
-%% OptionalPrefix -> OptionalAll : '$1'.
+OptionalPrefix -> optional_keyword : optional.
+OptionalPrefix -> OptionalAll : '$1'.
 
-%% OptionalAll -> all_keyword : true.
-%% OptionalAll -> '$empty' : false.
+OptionalAll -> all_keyword : {extension,{atom_literal,true}}.
+OptionalAll -> '$empty' : {extension,{atom_literal,false}}.
 
-%% LibTag -> open_tag lib_keyword LibList Args close_tag : {lib, '$3', '$4'}.
-%% LibList -> string_literal : ['$1'].
-%% LibList -> LibList string_literal : '$1' ++ ['$2'].
+LibTag -> open_tag lib_keyword LibList Args close_tag : {lib, '$3', '$4'}.
+LibList -> string_literal : ['$1'].
+LibList -> LibList string_literal : '$1' ++ ['$2'].
 
-%% LoadTag -> open_tag load_keyword LoadNames close_tag : {load, '$3'}.
-%% LoadNames -> identifier : ['$1'].
-%% LoadNames -> LoadNames identifier : '$1' ++ ['$2'].
+LoadTag -> open_tag load_keyword LoadNames close_tag : {load, '$3'}.
+LoadNames -> identifier : ['$1'].
+LoadNames -> LoadNames identifier : '$1' ++ ['$2'].
 
-%% %% BlockBlock -> BlockBraced Elements EndBlockBraced : {block, '$1', '$2'}.
+%% BlockBlock -> BlockBraced Elements EndBlockBraced : {block, '$1', '$2'}.
 %% BlockBraced -> open_tag block_keyword identifier close_tag : '$3'.
 %% EndBlockBraced -> open_tag endblock_keyword close_tag.
 
-%% %% CommentBlock -> CommentBraced Elements EndCommentBraced : {comment, '$2'}.
+%% CommentBlock -> CommentBraced Elements EndCommentBraced : {comment, '$2'}.
 %% CommentBraced -> open_tag comment_keyword close_tag.
 %% EndCommentBraced -> open_tag endcomment_keyword close_tag.
 
-%% CycleTag -> open_tag cycle_keyword CycleNamesCompat close_tag : {cycle_compat, '$3'}.
-%% CycleTag -> open_tag cycle_keyword CycleNames close_tag : {cycle, '$3'}.
+CycleTag -> open_tag cycle_keyword CycleNamesCompat close_tag : {cycle_compat, '$3'}.
+CycleTag -> open_tag cycle_keyword CycleNames close_tag : {cycle, '$3'}.
 
-%% CycleNames -> Value : ['$1'].
-%% CycleNames -> CycleNames Value : '$1' ++ ['$2'].
+CycleNames -> Value : ['$1'].
+CycleNames -> CycleNames Value : '$1' ++ ['$2'].
 
-%% CycleNamesCompat -> identifier comma : ['$1'].
-%% CycleNamesCompat -> CycleNamesCompat identifier comma : '$1' ++ ['$2'].
-%% CycleNamesCompat -> CycleNamesCompat identifier : '$1' ++ ['$2'].
+CycleNamesCompat -> identifier ',' : ['$1'].
+CycleNamesCompat -> CycleNamesCompat identifier ',' : '$1' ++ ['$2'].
+CycleNamesCompat -> CycleNamesCompat identifier : '$1' ++ ['$2'].
 
-%% %% FilterBlock -> FilterBraced Elements EndFilterBraced : {filter, '$1', '$2'}.
+%% FilterBlock -> FilterBraced Elements EndFilterBraced : {filter, '$1', '$2'}.
 %% FilterBraced -> open_tag filter_keyword Filters close_tag : '$3'.
 %% EndFilterBraced -> open_tag endfilter_keyword close_tag.
 
-%% %% ScriptBlock -> ScriptBraced Elements EndScriptBraced : {javascript, '$2'}.
+%% ScriptBlock -> ScriptBraced Elements EndScriptBraced : {javascript, '$2'}.
 %% ScriptBraced -> open_tag javascript_keyword close_tag.
 %% EndScriptBraced -> open_tag endjavascript_keyword close_tag.
 
 %% Filters -> Filter : ['$1'].
 %% Filters -> Filters pipe Filter : '$1' ++ ['$3'].
 
-%% %% ForBlock -> ForBraced Elements EndForBraced : {for, '$1', '$2'}.
-%% %% ForBlock -> ForBraced Elements EmptyBraced Elements EndForBraced : {for, '$1', '$2', '$4'}.
+%% ForBlock -> ForBraced Elements EndForBraced : {for, '$1', '$2'}.
+%% ForBlock -> ForBraced Elements EmptyBraced Elements EndForBraced : {for, '$1', '$2', '$4'}.
 %% EmptyBraced -> open_tag empty_keyword close_tag.
 %% ForBraced -> open_tag for_keyword ForExpression close_tag : '$3'.
 %% EndForBraced -> open_tag endfor_keyword close_tag.
@@ -363,42 +358,42 @@ OptWith -> with_keyword Args : '$2'.
 %% ForGroup -> identifier : ['$1'].
 %% ForGroup -> ForGroup comma identifier : '$1' ++ ['$3'].
 
-%% %% IfBlock -> IfBraced Elements ElsePart : {'if', '$1', '$2', '$3'}.
+%% IfBlock -> IfBraced Elements ElsePart : {'if', '$1', '$2', '$3'}.
 
 %% ElsePart -> EndIfBraced : [].
-%% %% ElsePart -> ElseBraced Elements EndIfBraced : [{'else', '$2'}].
+%% ElsePart -> ElseBraced Elements EndIfBraced : [{'else', '$2'}].
 %% ElsePart -> ElifList : '$1'.
 
-%% %% ElifList -> ElifBraced Elements ElsePart : [{'elif', '$1', '$2'}] ++ '$3'.
+%% ElifList -> ElifBraced Elements ElsePart : [{'elif', '$1', '$2'}] ++ '$3'.
 
 %% IfBraced -> open_tag if_keyword E close_tag : '$3'.
 %% ElifBraced -> open_tag elif_keyword E close_tag : '$3'.
 %% ElseBraced -> open_tag else_keyword close_tag.
 %% EndIfBraced -> open_tag endif_keyword close_tag.
 
-%% %% IfEqualBlock -> IfEqualBraced Elements ElseBraced Elements EndIfEqualBraced : {ifequalelse, '$1', '$2', '$4'}.
-%% %% IfEqualBlock -> IfEqualBraced Elements EndIfEqualBraced : {ifequal, '$1', '$2'}.
+%% IfEqualBlock -> IfEqualBraced Elements ElseBraced Elements EndIfEqualBraced : {ifequalelse, '$1', '$2', '$4'}.
+%% IfEqualBlock -> IfEqualBraced Elements EndIfEqualBraced : {ifequal, '$1', '$2'}.
 %% IfEqualBraced -> open_tag ifequal_keyword IfEqualExpression E close_tag : ['$3', '$4'].
 %% IfEqualExpression -> E : '$1'.
 %% EndIfEqualBraced -> open_tag endifequal_keyword close_tag.
 
-%% %% IfNotEqualBlock -> IfNotEqualBraced Elements ElseBraced Elements EndIfNotEqualBraced : {ifnotequalelse, '$1', '$2', '$4'}.
-%% %% IfNotEqualBlock -> IfNotEqualBraced Elements EndIfNotEqualBraced : {ifnotequal, '$1', '$2'}.
+%% IfNotEqualBlock -> IfNotEqualBraced Elements ElseBraced Elements EndIfNotEqualBraced : {ifnotequalelse, '$1', '$2', '$4'}.
+%% IfNotEqualBlock -> IfNotEqualBraced Elements EndIfNotEqualBraced : {ifnotequal, '$1', '$2'}.
 %% IfNotEqualBraced -> open_tag ifnotequal_keyword IfNotEqualExpression E close_tag : ['$3', '$4'].
 %% IfNotEqualExpression -> E : '$1'.
 %% EndIfNotEqualBraced -> open_tag endifnotequal_keyword close_tag.
 
-%% %% SpacelessBlock -> open_tag spaceless_keyword close_tag Elements open_tag endspaceless_keyword close_tag : {spaceless, '$4'}.
+%% SpacelessBlock -> open_tag spaceless_keyword close_tag Elements open_tag endspaceless_keyword close_tag : {spaceless, '$4'}.
 
-%% %% AutoEscapeBlock -> AutoEscapeBraced Elements EndAutoEscapeBraced : {autoescape, '$1', '$2'}.
+%% AutoEscapeBlock -> AutoEscapeBraced Elements EndAutoEscapeBraced : {autoescape, '$1', '$2'}.
 %% AutoEscapeBraced -> open_tag autoescape_keyword identifier close_tag : '$3'.
 %% EndAutoEscapeBraced -> open_tag endautoescape_keyword close_tag.
 
-%% %% WithBlock -> WithBraced Elements EndWithBraced : {with, '$1', '$2'}.
+%% WithBlock -> WithBraced Elements EndWithBraced : {with, '$1', '$2'}.
 %% WithBraced -> open_tag with_keyword ValueList as_keyword ForGroup close_tag : ['$3', '$5'].
 %% EndWithBraced -> open_tag endwith_keyword close_tag.
 
-%% %% CacheBlock -> CacheBraced Elements EndCacheBraced : {cache, '$1', '$2'}.
+%% CacheBlock -> CacheBraced Elements EndCacheBraced : {cache, '$1', '$2'}.
 %% CacheBraced -> open_tag cache_keyword OptCacheTime Args close_tag : [ '$3', '$4' ].
 %% EndCacheBraced -> open_tag endcache_keyword close_tag.
 
@@ -414,26 +409,26 @@ Literal -> trans_literal  : '$1'.
 Literal -> number_literal : '$1'.
 Literal -> atom_literal : '$1'.
 
-%% CustomTag -> open_tag OptionalAll identifier Args close_tag : {tag, '$3', '$4', '$2'}.
+CustomTag -> open_tag OptionalAll identifier Args close_tag : {tag, '$3', [{{identifier,0,'$all'},'$2'}|'$4']}.
 
-%% CallTag -> open_tag call_keyword identifier Args close_tag : {call_args, '$3', '$4'}.
-%% CallWithTag -> open_tag call_keyword identifier with_keyword E close_tag : {call_with, '$3', '$5'}.
+CallTag -> open_tag call_keyword identifier Args close_tag : {call_args, '$3', '$4'}.
+CallWithTag -> open_tag call_keyword identifier with_keyword E close_tag : {call_with, '$3', '$5'}.
 
-%% ImageTag -> open_tag image_keyword E Args close_tag : {image, '$3', '$4' }.
-%% ImageUrlTag -> open_tag image_url_keyword Value Args close_tag : {image_url, '$3', '$4' }.
+ImageTag -> open_tag image_keyword E Args close_tag : {image, '$3', '$4' }.
+ImageUrlTag -> open_tag image_url_keyword Value Args close_tag : {image_url, '$3', '$4' }.
 
-%% MediaTag -> open_tag media_keyword E Args close_tag : {media, '$3', '$4' }.
+MediaTag -> open_tag media_keyword E Args close_tag : {media, '$3', '$4' }.
 
 UrlTag -> open_tag url_keyword identifier Args close_tag : {extension, {url, '$3', '$4'}}.
 
-%% PrintTag -> open_tag print_keyword E close_tag : {print, '$3'}.
+PrintTag -> open_tag print_keyword E close_tag : {print, '$3'}.
 
-%% TransArgs -> '$empty' : [].
-%% TransArgs -> TransArgs identifier equal string_literal : '$1' ++ [{'$2', '$4'}].
+TransArgs -> '$empty' : [].
+TransArgs -> TransArgs identifier '=' string_literal : '$1' ++ [{'$2', '$4'}].
 
-%% WithArgs -> with_keyword Args identifier : '$2' ++ [{'$3', true}].
-%% WithArgs -> with_keyword Args identifier equal E : '$2' ++ [{'$3', '$5'}].
-%% WithArgs -> Args : '$1'.
+WithArgs -> with_keyword Args identifier : '$2' ++ [{'$3', true}].
+WithArgs -> with_keyword Args identifier '=' E : '$2' ++ [{'$3', '$5'}].
+WithArgs -> Args : '$1'.
 
 Args -> '$empty' : [].
 Args -> Args identifier : '$1' ++ [{'$2', true}].

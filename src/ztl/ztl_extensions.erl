@@ -67,6 +67,8 @@ compile_ast({value, E, With}, Context, TreeWalker) ->
     {{erlydtl_compiler:format(ValueAst, Context, ValueTreeWalker), ValueInfo}, ValueTreeWalker};
 compile_ast({url, {identifier, _, Name}, Args}, Context, TreeWalker) ->
     url_ast(Name, Args, Context, TreeWalker);
+compile_ast({atom_literal,Atom}, _Context, TreeWalker) ->
+    {{erl_syntax:atom(Atom), #ast_info{}}, TreeWalker};
 compile_ast(_Ast, _Context, _TreeWalker) ->
     undefined.
 

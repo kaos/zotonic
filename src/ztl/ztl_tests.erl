@@ -60,7 +60,7 @@ test_case([S|_]=Search) when is_list(S); is_atom(S) ->
 test_case(Search) when is_atom(Search) ->
     test_case(atom_to_list(Search));
 test_case(Search) when is_list(Search) ->
-    [T || T <- all_test_cases(), T#test_case.title == Search].
+    [T || T <- lists:flatten(all_tests()), T#test_case.title == Search].
 
 run_tests({generator, G}) ->    
     run_tests(G());
@@ -73,7 +73,9 @@ run_tests([]) ->
 
 %% eunit test entry point
 run_test_() ->
-    test_generator(all_test_cases()).
+    test_generator(
+      lists:flatten(
+        all_tests())).
 
 test_generator([]) -> [];
 test_generator([T|Ts]) ->
@@ -150,26 +152,24 @@ run_test_case(L,
                 apply(M, render, Args))
             )).
 
-all_test_cases() ->
+all_tests() ->
     [
-     #test_case{
-        title= "simple test",
-        input= <<"foo">>,
-        expect_output= <<"foo">>
-       },
-     #test_case{
-        title= "auto id",
-        input= <<"{{ #test }}">>,
-        expect_output= {re, "\\w{8}-test"}
-       },
-     #test_case{
-        title= "url tag",
-        input= <<"{% url test %}">>,
-        expect_output= <<"/test">>
-       },
-     #test_case{
-        title= "loremipsum tag",
-        input= <<"{% loremipsum words=5 %}">>,
-        expect_output= <<"Lorem ipsum dolor sit amet.">>
-       }
+     test_suite(
+       "Basic tests",
+       [
+        {"Simple test", <<"foo">>, <<"foo">>},
+        {"Auto id", <<"{{ #test }}">>, {re, "\\w{8}-test"}},
+        {"Url tag", <<"{% url test %}">>, <<"/test">>},
+        {"Loremipsum tag", <<"{% loremipsum words=5 %}">>, <<"Lorem ipsum dolor sit amet.">>}
+       ]),
+     test_case("Pass auto id to tag", <<"{% loremipsum words=2 dummy=#test %}">>, <<"Lorem ipsum.">>)
     ].
+
+test_case(Title, Input, Output) ->
+    #test_case{
+      title=Title,
+      input=Input,
+      expect_output=Output }.
+
+test_suite(Suite, Tests) ->
+    [test_case(string:join([Suite, Title], ": "), I, O) || {Title, I, O} <- Tests].
