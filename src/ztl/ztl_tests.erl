@@ -166,5 +166,10 @@ all_test_cases() ->
         title= "url tag",
         input= <<"{% url test %}">>,
         expect_output= <<"/test">>
+       },
+     #test_case{
+        title= "loremipsum tag",
+        input= <<"{% loremipsum words=5 %}">>,
+        expect_output= <<"Lorem ipsum dolor sit amet.">>
        }
     ].

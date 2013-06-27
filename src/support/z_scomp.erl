@@ -22,10 +22,19 @@
 -module(z_scomp).
 -author("Marc Worrell <marc@worrell.nl>").
 
--export([render/4, render_all/4]).
+-export([
+         render/3, render/4,
+         render_all/3, render_all/4
+        ]).
 
 -include_lib("zotonic.hrl").
 
+
+render(ScompName, [{'__render_variables', Vars}|Args], Context) ->
+    render(ScompName, Args, Vars, Context).
+
+render_all(ScompName, [{'__render_variables', Vars}|Args], Context) ->
+    render_all(ScompName, Args, Vars, Context).
 
 %% @spec render(ScompName, Args, Vars, Context) -> {ok, Context} | {ok, io_list} | {error, Reason}
 %% @doc Render the names scomp, Args are the scomp arguments and Vars are the variables given to the template
@@ -36,7 +45,7 @@ render(ScompName, Args, Vars, Context) ->
             render_scomp_module(ModuleName, Args, Vars, ScompContext, Context);
         {error, enoent} ->
             %% No such scomp, as we can switch on/off functionality we do a quiet skip
-            ?LOG("No scomp enabled for \"~p\"", [ScompName]),
+            ?LOG("custom tag \"~p\" not found", [ScompName]),
             {ok, <<>>}
     end.
 
@@ -59,14 +68,14 @@ render_scomp_module(ModuleName, Args, Vars, ScompContext, Context) ->
     case vary(ModuleName, Args, ScompContext) of
         nocache ->
             case ModuleName:render(Args, Vars, ScompContextWM) of
-                {ok, Result} -> {ok, z_context:prune_for_template(Result)};
+                {ok, _}=Result -> Result;
                 {error, Reason} -> throw({error, Reason})
             end;
         {CachKeyArgs, MaxAge, Varies} ->
             Key = key(ModuleName, CachKeyArgs, ScompContextWM),
             RenderFun =  fun() ->
                             case ModuleName:render(Args, Vars, ScompContextWM) of
-                                {ok, Result} -> {ok, z_context:prune_for_template(Result)};
+                                {ok, _}=Result -> Result;
                                 {error, Reason} -> throw({error, Reason})
                             end
                          end,

@@ -23,7 +23,8 @@
          init_treewalker/1,
          scan/1, post_scan/1,
          parse/1, 
-         compile_ast/3, 
+         compile_ast/3,
+         custom_tag_ast/2,
          setup_render_ast/2
         ]).
 
@@ -69,6 +70,32 @@ compile_ast({url, {identifier, _, Name}, Args}, Context, TreeWalker) ->
 compile_ast(_Ast, _Context, _TreeWalker) ->
     undefined.
 
+custom_tag_ast(Context, TreeWalker) ->
+    AppAst = erl_syntax:application(
+               erl_syntax:atom(z_scomp),
+               erl_syntax:atom(render),
+               [   erl_syntax:variable("TagName"), 
+                   erl_syntax:variable("_Variables"),
+                   z_context_ast(Context)
+               ]
+              ),
+    RenderedAst = erl_syntax:variable("Rendered"),
+    OkAst = erl_syntax:clause(
+              [erl_syntax:tuple([erl_syntax:atom(ok), RenderedAst])], 
+              none,
+              [RenderedAst]),
+    ReasonAst = erl_syntax:variable("Reason"),
+    ErrStrAst = erl_syntax:application(
+                  erl_syntax:atom(io_lib),
+                  erl_syntax:atom(format),
+                  [erl_syntax:string("error: ~p"), erl_syntax:list([ReasonAst])]),
+    ErrorAst = erl_syntax:clause(
+                 [erl_syntax:tuple([erl_syntax:atom(error), ReasonAst])], 
+                 none,
+                 [ErrStrAst]),
+    CallAst = erl_syntax:case_expr(AppAst, [OkAst, ErrorAst]),
+    {{CallAst, #ast_info{}}, TreeWalker}.
+
 setup_render_ast(Context, #treewalker{
                              extension=#treewalker_extension{
                                           has_auto_id=true }}) ->
@@ -97,16 +124,16 @@ post_scan([T|Ts], Acc) ->
 
 setup_z_context_ast() ->
     [erl_syntax:match_expr(
-       erl_syntax:variable("Z_context"),
+       erl_syntax:variable("_Z_context"),
        erl_syntax:application(
-	 erl_syntax:atom(proplists),
-	 erl_syntax:atom(get_value),
-	 [erl_syntax:atom(z_context),
+         erl_syntax:atom(proplists),
+         erl_syntax:atom(get_value),
+         [erl_syntax:atom(z_context),
           erl_syntax:variable("RenderOptions")]))].
 
 z_context_ast(Context) ->
     case erlydtl_compiler:resolve_scoped_variable_ast('$z_context', Context) of
-        undefined -> erl_syntax:variable("Z_context"); 
+        undefined -> erl_syntax:variable("_Z_context"); 
         Ast -> Ast
     end.
 
@@ -223,12 +250,12 @@ interpreted_args(Args, Context, TreeWalker) ->
       fun
           ({{identifier, _, postback}, {Literal, Pos, Value}}, {Acc, TW}) when Literal == string_literal; Literal == trans_literal ->
               %% string postbacks are always translated to atoms
-              {Ast, TW1} = erlydtl_compiler:value_ast({atom_literal, Pos, Value}, false, false, Context, TW),
-              {[{postback, Ast}|Acc], TW1};
+                       {Ast, TW1} = erlydtl_compiler:value_ast({atom_literal, Pos, Value}, false, false, Context, TW),
+                       {[{postback, Ast}|Acc], TW1};
           ({{identifier, _, Key}, Value}, {Acc, TW}) ->
               %% a normal key=value argument
-              {Ast, TW1} = erlydtl_compiler:value_ast(Value, false, false, Context, TW),
-              {[{Key, Ast}|Acc], TW1}
-      end,
+                       {Ast, TW1} = erlydtl_compiler:value_ast(Value, false, false, Context, TW),
+                       {[{Key, Ast}|Acc], TW1}
+               end,
       {[], TreeWalker},
       Args).
