@@ -62,6 +62,8 @@ parse(State) ->
 
 compile_ast({auto_id, Tag}, Context, TreeWalker) ->
     auto_id_ast(Tag, Context, TreeWalker);
+compile_ast({value, E}, Context, TreeWalker) ->
+    erlydtl_compiler:value_ast(E, false, false, Context, TreeWalker);
 compile_ast({value, E, With}, Context, TreeWalker) ->
     {{ValueAst, ValueInfo}, ValueTreeWalker} = value_ast(E, With, true, Context, TreeWalker),
     {{erlydtl_compiler:format(ValueAst, Context, ValueTreeWalker), ValueInfo}, ValueTreeWalker};

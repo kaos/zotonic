@@ -142,9 +142,9 @@ Nonterminals
 
     UrlTag
     PrintTag
-    ImageTag
-    ImageUrlTag
-    MediaTag
+    %% ImageTag
+    %% ImageUrlTag
+    %% MediaTag
     TransTag
     TransExtTag
     %% ValueList
@@ -198,14 +198,14 @@ Terminals
     %% if_keyword
     %% ifequal_keyword
     %% ifnotequal_keyword
-    image_keyword
-    image_url_keyword
+    %% image_keyword
+    %% image_url_keyword
     %% in_keyword
     include_keyword
     inherit_keyword
     lib_keyword
     load_keyword
-    media_keyword
+    %% media_keyword
     not_keyword
     now_keyword
     number_literal
@@ -255,7 +255,7 @@ Left 500 '*' '/' '%'.
 Unary 600 Uminus Unot.
 
 %% Expected shift/reduce conflicts
-Expect 3.
+Expect 2.
 
 Extension -> ValueBraced : ['$1']. %% OK
 Extension -> TransTag : ['$1'].
@@ -284,9 +284,9 @@ Extension -> CallWithTag : ['$1'].
 Extension -> UrlTag : ['$1'].  %% OK
 Extension -> PrintTag : ['$1'].
 %% Extension -> ScriptBlock : ['$1'].
-Extension -> ImageTag : ['$1'].
-Extension -> ImageUrlTag : ['$1'].
-Extension -> MediaTag : ['$1'].
+%% Extension -> ImageTag : ['$1'].
+%% Extension -> ImageUrlTag : ['$1'].
+%% Extension -> MediaTag : ['$1'].
 %% Extension -> WithBlock : ['$1'].
 %% Extension -> CacheBlock : ['$1'].
 
@@ -302,7 +302,7 @@ InheritTag -> open_tag inherit_keyword close_tag : inherit.
 
 TransTag -> open_trans trans_text close_trans : {trans, '$2'}.
 TransExtTag -> open_tag __keyword string_literal TransArgs close_tag : {trans_ext, '$3', '$4'}.
-IncludeTag -> open_tag OptionalPrefix include_keyword E OptWith WithArgs close_tag : {include, '$4', '$6', '$2'}.
+IncludeTag -> open_tag OptionalPrefix include_keyword E WithArgs close_tag : {include, '$4', '$5', '$2'}.
 CatIncludeTag -> open_tag OptionalAll catinclude_keyword E E WithArgs close_tag : {catinclude, '$4', '$5', '$6', '$2'}.
 NowTag -> open_tag now_keyword string_literal close_tag : {date, now, '$3'}.
 
@@ -414,11 +414,6 @@ CustomTag -> open_tag OptionalAll identifier Args close_tag : {tag, '$3', [{{ide
 CallTag -> open_tag call_keyword identifier Args close_tag : {call_args, '$3', '$4'}.
 CallWithTag -> open_tag call_keyword identifier with_keyword E close_tag : {call_with, '$3', '$5'}.
 
-ImageTag -> open_tag image_keyword E Args close_tag : {image, '$3', '$4' }.
-ImageUrlTag -> open_tag image_url_keyword Value Args close_tag : {image_url, '$3', '$4' }.
-
-MediaTag -> open_tag media_keyword E Args close_tag : {media, '$3', '$4' }.
-
 UrlTag -> open_tag url_keyword identifier Args close_tag : {extension, {url, '$3', '$4'}}.
 
 PrintTag -> open_tag print_keyword E close_tag : {extension, {print, '$3'}}.
@@ -426,13 +421,13 @@ PrintTag -> open_tag print_keyword E close_tag : {extension, {print, '$3'}}.
 TransArgs -> '$empty' : [].
 TransArgs -> TransArgs identifier '=' string_literal : '$1' ++ [{'$2', '$4'}].
 
-WithArgs -> with_keyword Args identifier : '$2' ++ [{'$3', true}].
-WithArgs -> with_keyword Args identifier '=' E : '$2' ++ [{'$3', '$5'}].
+WithArgs -> with_keyword Args : '$2'.
 WithArgs -> Args : '$1'.
 
 Args -> '$empty' : [].
 Args -> Args identifier : '$1' ++ [{'$2', true}].
 Args -> Args identifier '=' E : '$1' ++ [{'$2', '$4'}].
+Args -> Args Literal : '$1' ++ [{extension,{value,'$2'}}].
 
 Value -> Value '|' Filter : {apply_filter, '$1', '$3'}.
 Value -> TermValue : '$1'.

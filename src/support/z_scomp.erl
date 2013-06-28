@@ -28,52 +28,68 @@
 
 
 render(ScompName, [{'__render_variables', Vars}|Args], Context) ->
-    render(ScompName, Args, Vars, Context).
+    case {ztl_tags:builtin(ScompName), Args} of
+        {F, [{'$all', false}|BuiltinArgs]}
+          when is_function(F, 3) ->
+            render_scomp_module(F, BuiltinArgs, Vars, Context, {vary, nocache});
+        {undefined, _} ->
+            render(ScompName, Args, Vars, Context)
+    end.
 
 render_all(ScompName, Args, Vars, Context) ->
     render(ScompName, [{'$all', true}|Args], Vars, Context).
 
 %% @spec render(ScompName, Args, Vars, Context) -> {ok, Context} | {ok, io_list} | {error, Reason}
 %% @doc Render the names scomp, Args are the scomp arguments and Vars are the variables given to the template
-render(ScompName, Args, Vars, Context) ->
-    Finder = case proplists:get_value('$all', Args, false) of
+render(ScompName, [{'$all', All}|Args], Vars, Context) ->
+    Finder = case All of
                  true -> find_all;
                  false -> find
              end,
     case z_module_indexer:Finder(scomp, ScompName, Context) of
         {ok, #module_index{erlang_module=ModuleName}} ->
-            ScompContext = z_context:prune_for_scomp(z_acl:args_to_visible_for(Args), Context), 
-            render_scomp_module(ModuleName, Args, Vars, ScompContext, Context);
+            render_scomp_module(ModuleName, Args, Vars, Context);
         {error, enoent} ->
             %% No such scomp, as we can switch on/off functionality we do a quiet skip
             ?LOG("custom tag \"~p\" not found", [ScompName]),
             {ok, <<>>};
         [] -> [];
         Modules when is_list(Modules) ->
-            ScompContext = z_context:prune_for_scomp(z_acl:args_to_visible_for(Args), Context), 
             [begin
-                 {ok, Result} = render_scomp_module(ModuleName, Args, Vars, ScompContext, Context),
+                 {ok, Result} = render_scomp_module(ModuleName, Args, Vars, Context),
                  Result
              end || #module_index{erlang_module=ModuleName} <- Modules]
+    end;
+render(ScompName, Args, Vars, Context) ->
+    render(ScompName, [{'$all', false}|Args], Vars, Context).
+
+module_to_render_fun(ModuleName) ->
+    fun (Args, Vars, Context) ->
+            ModuleName:render(Args, Vars, Context)
     end.
 
-render_scomp_module(ModuleName, Args, Vars, ScompContext, Context) ->
+render_scomp_module(ModuleName, Args, Vars, Context) ->
+    %% from R15, fun ModuleName:render/3 will do just fine..
+    render_scomp_module(module_to_render_fun(ModuleName), Args, Vars, Context, ModuleName).
+
+render_scomp_module(RenderFun, Args, Vars, Context, Cache) ->
+    ScompContext = z_context:prune_for_scomp(z_acl:args_to_visible_for(Args), Context), 
     ScompContextWM = ScompContext#context{wm_reqdata=Context#context.wm_reqdata},
-    case vary(ModuleName, Args, ScompContext) of
+    case vary(Cache, Args, ScompContext) of
         nocache ->
-            case ModuleName:render(Args, Vars, ScompContextWM) of
+            case RenderFun(Args, Vars, ScompContextWM) of
                 {ok, _}=Result -> Result;
                 {error, Reason} -> throw({error, Reason})
             end;
         {CachKeyArgs, MaxAge, Varies} ->
-            Key = key(ModuleName, CachKeyArgs, ScompContextWM),
-            RenderFun =  fun() ->
-                            case ModuleName:render(Args, Vars, ScompContextWM) of
-                                {ok, _}=Result -> Result;
-                                {error, Reason} -> throw({error, Reason})
-                            end
-                         end,
-            z_depcache:memo(RenderFun, Key, MaxAge, Varies, Context)
+            Key = key(Cache, CachKeyArgs, ScompContextWM),
+            MemoRenderFun =  fun() ->
+                                     case RenderFun(Args, Vars, ScompContextWM) of
+                                         {ok, _}=Result -> Result;
+                                         {error, Reason} -> throw({error, Reason})
+                                     end
+                             end,
+            z_depcache:memo(MemoRenderFun, Key, MaxAge, Varies, Context)
     end.
 
 
@@ -84,6 +100,7 @@ key(ScompName, EssentialParams, Context) ->
 
 
 %% @doc Check how and if the scomp wants to be cached.
+vary({vary, Vary}, _Args, _ScompContext) -> Vary;
 vary(ModuleName, Args, ScompContext) ->
     case ModuleName:vary(Args, ScompContext) of
         default ->
