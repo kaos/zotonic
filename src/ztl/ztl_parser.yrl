@@ -421,7 +421,7 @@ MediaTag -> open_tag media_keyword E Args close_tag : {media, '$3', '$4' }.
 
 UrlTag -> open_tag url_keyword identifier Args close_tag : {extension, {url, '$3', '$4'}}.
 
-PrintTag -> open_tag print_keyword E close_tag : {print, '$3'}.
+PrintTag -> open_tag print_keyword E close_tag : {extension, {print, '$3'}}.
 
 TransArgs -> '$empty' : [].
 TransArgs -> TransArgs identifier '=' string_literal : '$1' ++ [{'$2', '$4'}].

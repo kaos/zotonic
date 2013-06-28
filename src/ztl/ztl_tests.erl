@@ -21,6 +21,14 @@
 
 -export([run/1]).
 
+-ifdef(PROFILE).
+-define(profile(Title, Expr),?debugTime(Title, Expr)).
+-define(message(Msg),?debugMsg(Msg)).
+-else.
+-define(profile(Title, Expr),Expr).
+-define(message(Msg),nop).
+-endif.
+
 -record(engine, {module, 
                  compile_options=[], 
                  render_options=[],
@@ -38,8 +46,8 @@
                             compile_options=
                                 [{compiler_options, 
                                   [debug_compiler, 
-                                   verbose, report_errors, report_warnings]}, 
-                                 {extension_module, ztl_extensions}]
+                                   verbose, report_errors, report_warnings]}
+                                ]
                           }
                   ]
          }).
@@ -66,7 +74,12 @@ run_tests({generator, G}) ->
     run_tests(G());
 run_tests([{Title, Test}|Ts]) -> 
     io:format("test case: ~s~n", [Title]),
-    Test(),
+    try
+        Test()
+    catch
+        Class:Reason ->
+            io:format("test case ~p failed: ~p:~p~n", [Title, Class, Reason])
+    end,
     run_tests(Ts);
 run_tests([]) -> 
     ok.
@@ -85,7 +98,7 @@ test_generator([T|Ts]) ->
              M = output_matcher(T#test_case.expect_output),
              [{L(atom_to_list(E#engine.module)),
                fun () ->
-                       ?debugTime(L("test case"), 
+                       ?profile(L("test case"), 
                                   run_test_case(L, T#test_case{ expect_output=M }, E))
                end} || E <- T#test_case.engines]
                  ++ test_generator(Ts)
@@ -117,7 +130,7 @@ output_matcher(Output) ->
             {render_failure, Err}
     end.
 
-run_test_case(L,
+run_test_case(_L,
               #test_case{ 
                  input=I,
                  expect_output=Matcher,
@@ -132,11 +145,11 @@ run_test_case(L,
                  vars=Ev
                 }
              ) ->
-    ?debugMsg(["-- engine ", atom_to_list(E)]),
+    ?message(["-- engine ", atom_to_list(E)]),
     C = z:c(testsandbox),
 
-    {ok, M} = ?debugTime(
-                 L("compiling"),
+    {ok, M} = ?profile(
+                 _L("compiling"),
                  E:compile(I, ztl_template_test, Co ++ Eco, C)),
 
     Args = case E of
@@ -147,8 +160,8 @@ run_test_case(L,
     %io:format("render ~p with args ~p = ~p~n", [M, Args, apply(M, render, Args)]),
     ?assertEqual(
        ok, Matcher(
-             ?debugTime(
-                L("rendering"), 
+             ?profile(
+                _L("rendering"), 
                 apply(M, render, Args))
             )).
 
@@ -160,9 +173,14 @@ all_tests() ->
         {"Simple test", <<"foo">>, <<"foo">>},
         {"Auto id", <<"{{ #test }}">>, {re, "\\w{8}-test"}},
         {"Url tag", <<"{% url test %}">>, <<"/test">>},
-        {"Loremipsum tag", <<"{% loremipsum words=5 %}">>, <<"Lorem ipsum dolor sit amet.">>}
+        {"Loremipsum tag", <<"{% loremipsum words=5 %}">>, <<"Lorem ipsum dolor sit amet.">>},
+        {"Print tag", <<"{% print \"foo\" %}">>, {re, "<pre>.*\"foo\".*</pre>"}}
        ]),
-     test_case("Pass auto id to tag", <<"{% loremipsum words=2 dummy=#test %}">>, <<"Lorem ipsum.">>)
+     test_suite(
+       "Somewhat basic tests",
+       [
+        {"Pass auto id to tag", <<"{% loremipsum words=2 dummy=#test %}">>, <<"Lorem ipsum.">>}
+       ])
     ].
 
 test_case(Title, Input, Output) ->

@@ -22,8 +22,13 @@
          compile/3, compile/4
         ]).
 
-compile(FileOrBinary, Module, Z_context) ->
-    erlydtl:compile(FileOrBinary, Module, [{z_context, Z_context}]).
+-include_lib("zotonic.hrl").
 
-compile(FileOrBinary, Module, Options, Z_context) ->
-    erlydtl:compile(FileOrBinary, Module, [{z_context, Z_context}|Options]).
+compile(FileOrBinary, Module, Z_context) when is_record(Z_context, context) ->
+    erlydtl:compile(FileOrBinary, Module, ztl_options([], Z_context)).
+
+compile(FileOrBinary, Module, Options, Z_context) when is_record(Z_context, context) ->
+    erlydtl:compile(FileOrBinary, Module, ztl_options(Options, Z_context)).
+
+ztl_options(Options, Context) when is_list(Options) ->
+    [{extension_module, ztl_extensions}, {z_context, Context}|Options].

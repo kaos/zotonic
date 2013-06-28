@@ -69,6 +69,8 @@ compile_ast({url, {identifier, _, Name}, Args}, Context, TreeWalker) ->
     url_ast(Name, Args, Context, TreeWalker);
 compile_ast({atom_literal,Atom}, _Context, TreeWalker) ->
     {{erl_syntax:atom(Atom), #ast_info{}}, TreeWalker};
+compile_ast({print, E}, Context, TreeWalker) ->
+    print_ast(E, Context, TreeWalker);
 compile_ast(_Ast, _Context, _TreeWalker) ->
     undefined.
 
@@ -119,11 +121,24 @@ setup_render_ast(_Context, _TreeWalker) ->
 
 post_scan([], Acc) ->
     lists:reverse(Acc);
-post_scan([{open_tag, _, _}=Open, {identifier, Pos, url}|Ts], Acc) ->
-    post_scan(Ts, [{url_keyword, Pos, url},Open|Acc]);
+post_scan([{open_tag, _, _}=Open, T|Ts], Acc) ->
+    %% look for a keyword identifier following a open tag
+    %% and translate it to a proper keyword token
+    post_scan(Ts, [post_open_tag(T),Open|Acc]);
 post_scan([T|Ts], Acc) ->
     post_scan(Ts, [T|Acc]).
 
+post_open_tag({identifier, Pos, Identifier}=T) ->
+    case keyword(Identifier) of
+        undefined -> T;
+        Keyword -> {Keyword, Pos, Identifier}
+    end;
+post_open_tag(T) -> T.
+
+keyword(url) -> url_keyword;
+keyword(print) -> print_keyword;
+keyword(_) -> undefined.
+    
 setup_z_context_ast() ->
     [erl_syntax:match_expr(
        erl_syntax:variable("_Z_context"),
@@ -261,3 +276,29 @@ interpreted_args(Args, Context, TreeWalker) ->
                end,
       {[], TreeWalker},
       Args).
+
+print_ast(E, Context, TreeWalker) ->
+    {{ValueAst,ValueInfo}, ValueTree} = erlydtl_compiler:value_ast(E, false, false, Context, TreeWalker),
+    PrintAst = erl_syntax:application(
+                erl_syntax:atom(io_lib),
+                erl_syntax:atom(format),
+                [   erl_syntax:string("~p"), 
+                    erl_syntax:list([ValueAst])
+                ]
+            ),
+    FlattenAst = erl_syntax:application(
+                erl_syntax:atom(lists),
+                erl_syntax:atom(flatten),
+                [PrintAst]
+            ),
+    EscapeAst = erl_syntax:application(
+                  erl_syntax:atom(mochiweb_html),
+                  erl_syntax:atom(escape),
+                  [FlattenAst]
+            ),
+    PreAst = erl_syntax:list([
+                erl_syntax:string("<pre>"),
+                EscapeAst,
+                erl_syntax:string("</pre>")
+            ]),
+    {{PreAst, ValueInfo}, ValueTree}. 
