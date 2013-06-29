@@ -27,7 +27,7 @@
 -include_lib("zotonic.hrl").
 
 
-render(ScompName, [{'__render_variables', Vars}|Args], Context) ->
+render(ScompName, [{'$render_variables', Vars}|Args], Context) ->
     case {ztl_tags:builtin(ScompName), Args} of
         {F, [{'$all', false}|BuiltinArgs]}
           when is_function(F, 3) ->

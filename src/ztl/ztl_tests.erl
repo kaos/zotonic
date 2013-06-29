@@ -27,6 +27,7 @@
 -else.
 -define(profile(Title, Expr),Expr).
 -define(message(Msg),nop).
+
 -endif.
 
 -record(engine, {module, 

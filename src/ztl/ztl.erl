@@ -19,16 +19,22 @@
 
 %% API
 -export([
-         compile/3, compile/4
+         compile/3, compile/4,
+         render/3
         ]).
 
 -include_lib("zotonic.hrl").
 
-compile(FileOrBinary, Module, Z_context) when is_record(Z_context, context) ->
-    erlydtl:compile(FileOrBinary, Module, ztl_options([], Z_context)).
+compile(FileOrBinary, Module, Context) when is_record(Context, context) ->
+    erlydtl:compile(FileOrBinary, Module, ztl_options([], Context)).
 
-compile(FileOrBinary, Module, Options, Z_context) when is_record(Z_context, context) ->
-    erlydtl:compile(FileOrBinary, Module, ztl_options(Options, Z_context)).
+compile(FileOrBinary, Module, Options, Context) when is_record(Context, context) ->
+    erlydtl:compile(FileOrBinary, Module, ztl_options(Options, Context)).
+
+render(TemplateModule, Variables, Context) 
+  when is_atom(TemplateModule), is_list(Variables), is_record(Context, context) ->
+    TemplateModule:render(Variables, [{'$render_variables', Variables}, {z_context, Context}]).
+
 
 ztl_options(Options, Context) when is_list(Options) ->
     [{extension_module, ztl_extensions}, {z_context, Context}|Options].

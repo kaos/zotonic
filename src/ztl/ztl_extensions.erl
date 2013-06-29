@@ -77,11 +77,24 @@ compile_ast(_Ast, _Context, _TreeWalker) ->
     undefined.
 
 custom_tag_ast(Context, TreeWalker) ->
+    ArgsAst = erl_syntax:list(
+                [erl_syntax:tuple(
+                   [erl_syntax:atom('$render_variables'),
+                    erl_syntax:application(
+                      erl_syntax:atom(proplists),
+                      erl_syntax:atom(get_value),
+                      [erl_syntax:atom('$render_variables'),
+                       erl_syntax:variable("RenderOptions"),
+                       erl_syntax:list([])
+                      ])
+                   ])
+                ],
+                erl_syntax:variable("_Variables")),
     AppAst = erl_syntax:application(
                erl_syntax:atom(z_scomp),
                erl_syntax:atom(render),
                [   erl_syntax:variable("TagName"), 
-                   erl_syntax:variable("_Variables"),
+                   ArgsAst,
                    z_context_ast(Context)
                ]
               ),
