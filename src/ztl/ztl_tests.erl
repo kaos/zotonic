@@ -180,7 +180,9 @@ all_tests() ->
      test_suite(
        "Somewhat basic tests",
        [
-        {"Pass auto id to tag", <<"{% loremipsum words=2 dummy=#test %}">>, <<"Lorem ipsum.">>}
+        {"Pass auto id to tag", <<"{% loremipsum words=2 dummy=#test %}">>, <<"Lorem ipsum.">>},
+        {"Image url", <<"{% image_url \"koe.jpg\" %}">>, {re, "^/image/koe\\.jpg"}},
+        {"Image tag", <<"{% image \"koe.jpg\" %}">>, {re, "^<img src=[\"']/image/koe\\.jpg.*/>"}}
        ])
     ].
 
