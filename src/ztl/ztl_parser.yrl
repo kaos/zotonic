@@ -140,7 +140,7 @@ Nonterminals
     %% EndCacheBraced
     %% OptCacheTime
 
-    UrlTag
+    %% UrlTag
     PrintTag
     %% ImageTag
     %% ImageUrlTag
@@ -157,7 +157,8 @@ Nonterminals
     OptE
     E
     Uminus
-    Unot.
+    Unot
+    True False.
 
 Terminals
     all_keyword
@@ -219,7 +220,7 @@ Terminals
     %% spaceless_keyword
     string_literal
     %% text
-    url_keyword
+    %% url_keyword
     with_keyword
     open_curly
     close_curly
@@ -281,7 +282,7 @@ Extension -> CycleTag : ['$1'].
 Extension -> CustomTag : ['$1'].
 Extension -> CallTag : ['$1'].
 Extension -> CallWithTag : ['$1'].
-Extension -> UrlTag : ['$1'].  %% OK
+%% Extension -> UrlTag : ['$1'].  %% OK
 Extension -> PrintTag : ['$1'].
 %% Extension -> ScriptBlock : ['$1'].
 %% Extension -> ImageTag : ['$1'].
@@ -309,8 +310,11 @@ NowTag -> open_tag now_keyword string_literal close_tag : {date, now, '$3'}.
 OptionalPrefix -> optional_keyword : optional.
 OptionalPrefix -> OptionalAll : '$1'.
 
-OptionalAll -> all_keyword : {extension,{atom_literal,true}}.
-OptionalAll -> '$empty' : {extension,{atom_literal,false}}.
+OptionalAll -> all_keyword True : '$2'.
+OptionalAll -> False : '$1'.
+
+True -> '$empty' : {extension,{atom_literal,true}}.
+False -> '$empty' : {extension,{atom_literal,false}}.
 
 LibTag -> open_tag lib_keyword LibList Args close_tag : {lib, '$3', '$4'}.
 LibList -> string_literal : ['$1'].
@@ -414,7 +418,7 @@ CustomTag -> open_tag OptionalAll identifier Args close_tag : {tag, '$3', [{{ide
 CallTag -> open_tag call_keyword identifier Args close_tag : {call_args, '$3', '$4'}.
 CallWithTag -> open_tag call_keyword identifier with_keyword E close_tag : {call_with, '$3', '$5'}.
 
-UrlTag -> open_tag url_keyword identifier Args close_tag : {extension, {url, '$3', '$4'}}.
+%% UrlTag -> open_tag url_keyword identifier Args close_tag : {extension, {url, '$3', '$4'}}.
 
 PrintTag -> open_tag print_keyword E close_tag : {extension, {print, '$3'}}.
 
@@ -425,7 +429,7 @@ WithArgs -> with_keyword Args : '$2'.
 WithArgs -> Args : '$1'.
 
 Args -> '$empty' : [].
-Args -> Args identifier : '$1' ++ [{'$2', true}].
+Args -> Args identifier True : '$1' ++ [{'$2', '$3'}].
 Args -> Args identifier '=' E : '$1' ++ [{'$2', '$4'}].
 Args -> Args Literal : '$1' ++ [{extension,{value,'$2'}}].
 
@@ -484,3 +488,9 @@ E -> Value : '$1'.
 
 Uminus -> '-' E : {expr, "negate", '$2'}.
 Unot -> not_keyword E : {expr, "not", '$2'}.
+
+
+Erlang code.
+
+-compile({nowarn_unused_function, 'yeccgoto_\'False\''/7}).
+-compile({nowarn_unused_function, 'yeccgoto_\'True\''/7}).

@@ -67,8 +67,6 @@ compile_ast({value, E}, Context, TreeWalker) ->
 compile_ast({value, E, With}, Context, TreeWalker) ->
     {{ValueAst, ValueInfo}, ValueTreeWalker} = value_ast(E, With, true, Context, TreeWalker),
     {{erlydtl_compiler:format(ValueAst, Context, ValueTreeWalker), ValueInfo}, ValueTreeWalker};
-compile_ast({url, {identifier, _, Name}, Args}, Context, TreeWalker) ->
-    url_ast(Name, Args, Context, TreeWalker);
 compile_ast({atom_literal,Atom}, _Context, TreeWalker) ->
     {{erl_syntax:atom(Atom), #ast_info{}}, TreeWalker};
 compile_ast({print, E}, Context, TreeWalker) ->
@@ -150,7 +148,6 @@ post_open_tag({identifier, Pos, Identifier}=T) ->
     end;
 post_open_tag(T) -> T.
 
-keyword(url) -> url_keyword;
 keyword(print) -> print_keyword;
 keyword(_) -> undefined.
     
@@ -195,19 +192,6 @@ auto_id_ast({{identifier, _, Name}, {identifier, _, _} = Var}, Context, TreeWalk
            ]),
          VarInfo
      }, set_has_auto_id(true, TreeWalker1)}.
-
-url_ast(Name, Args, Context, TreeWalker) ->
-    %% Check if the 'escape' argument is there
-    {{ArgsAst, ArgsInfo}, TreeWalker1} = list_args_ast(Args, Context, TreeWalker),
-    AppAst = erl_syntax:application(
-               erl_syntax:atom(z_dispatcher),
-               erl_syntax:atom(url_for),
-               [   erl_syntax:atom(Name), 
-                   ArgsAst,
-                   z_context_ast(Context)
-               ]
-              ),
-    {{AppAst, ArgsInfo}, TreeWalker1}.  
 
 value_ast(ValueToken, Args, AsString, Context, TreeWalker) ->
     value_ast(ValueToken, Args, AsString, Context, TreeWalker, []).
@@ -264,33 +248,6 @@ value_ast(ValueToken, [{{identifier,_,Var}, Value}|Args], AsString, Context, Tre
     {{InnerAst,InfoValue2}, TreeWalker2} = value_ast(ValueToken, Args, AsString, WithContext, TreeWalker1, [{Var, VarAst}|ExtraArgs]),
     WithAst = erl_syntax:block_expr([erl_syntax:match_expr(VarAst, ValueAst), InnerAst]),
     {{WithAst, erlydtl_compiler:merge_info(InfoValue1,InfoValue2)}, TreeWalker2}.
-
-list_args_ast(Args, Context, TreeWalker) ->
-    {ArgsAst, TreeWalker1} = interpreted_args(Args, Context, TreeWalker),
-    {PropListAst, AstInfo} = 
-        lists:foldr(
-          fun ({Key, {Ast, Info}}, {Acc, AccInfo}) ->
-                  {[erl_syntax:tuple([erl_syntax:atom(Key), Ast])|Acc],
-                   erlydtl_compiler:merge_info(Info, AccInfo)}
-          end,
-          {[], #ast_info{}},
-          ArgsAst),
-    {{erl_syntax:list(PropListAst), AstInfo}, TreeWalker1}.
-
-interpreted_args(Args, Context, TreeWalker) ->
-    lists:foldr(
-      fun
-          ({{identifier, _, postback}, {Literal, Pos, Value}}, {Acc, TW}) when Literal == string_literal; Literal == trans_literal ->
-              %% string postbacks are always translated to atoms
-                       {Ast, TW1} = erlydtl_compiler:value_ast({atom_literal, Pos, Value}, false, false, Context, TW),
-                       {[{postback, Ast}|Acc], TW1};
-          ({{identifier, _, Key}, Value}, {Acc, TW}) ->
-              %% a normal key=value argument
-                       {Ast, TW1} = erlydtl_compiler:value_ast(Value, false, false, Context, TW),
-                       {[{Key, Ast}|Acc], TW1}
-               end,
-      {[], TreeWalker},
-      Args).
 
 print_ast(E, Context, TreeWalker) ->
     {{ValueAst,ValueInfo}, ValueTree} = erlydtl_compiler:value_ast(E, false, false, Context, TreeWalker),

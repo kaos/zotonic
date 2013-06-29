@@ -24,10 +24,15 @@
 
 -include_lib("zotonic.hrl").
 
+builtin(url) -> url();
 builtin(image) -> image(tag);
 builtin(image_url) -> image(url);
 builtin(_) -> undefined.
 
+url() ->
+    fun ([{Name,_}|Args], _Vars, Context) ->
+            {ok, z_dispatcher:url_for(Name, Args, Context)}
+    end.
 
 image(F) ->
     fun ([Filename|Args], _Vars, Context) ->
