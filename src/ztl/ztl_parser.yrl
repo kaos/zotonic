@@ -41,7 +41,7 @@
 %%%
 %%%-------------------------------------------------------------------
 %%% Adapted and expanded for Zotonic by Marc Worrell <marc@worrell.nl>
-%%% And by Andreas Stenius <kaos@astekk.se>
+%%% And for ztl by Andreas Stenius <kaos@astekk.se>
 %%%-------------------------------------------------------------------
 
 Nonterminals
@@ -140,10 +140,6 @@ Nonterminals
     %% EndCacheBraced
     %% OptCacheTime
 
-    %% UrlTag
-    PrintTag
-    %% ImageTag
-    %% ImageUrlTag
     %% MediaTag
     TransTag
     TransExtTag
@@ -199,8 +195,6 @@ Terminals
     %% if_keyword
     %% ifequal_keyword
     %% ifnotequal_keyword
-    %% image_keyword
-    %% image_url_keyword
     %% in_keyword
     include_keyword
     inherit_keyword
@@ -215,12 +209,10 @@ Terminals
     optional_keyword
     overrules_keyword
     %% pipe
-    print_keyword
     %% javascript_keyword
     %% spaceless_keyword
     string_literal
     %% text
-    %% url_keyword
     with_keyword
     open_curly
     close_curly
@@ -282,11 +274,7 @@ Extension -> CycleTag : ['$1'].
 Extension -> CustomTag : ['$1'].
 Extension -> CallTag : ['$1'].
 Extension -> CallWithTag : ['$1'].
-%% Extension -> UrlTag : ['$1'].  %% OK
-Extension -> PrintTag : ['$1'].
 %% Extension -> ScriptBlock : ['$1'].
-%% Extension -> ImageTag : ['$1'].
-%% Extension -> ImageUrlTag : ['$1'].
 %% Extension -> MediaTag : ['$1'].
 %% Extension -> WithBlock : ['$1'].
 %% Extension -> CacheBlock : ['$1'].
@@ -417,10 +405,6 @@ CustomTag -> open_tag OptionalAll identifier Args close_tag : {tag, '$3', [{{ide
 
 CallTag -> open_tag call_keyword identifier Args close_tag : {call_args, '$3', '$4'}.
 CallWithTag -> open_tag call_keyword identifier with_keyword E close_tag : {call_with, '$3', '$5'}.
-
-%% UrlTag -> open_tag url_keyword identifier Args close_tag : {extension, {url, '$3', '$4'}}.
-
-PrintTag -> open_tag print_keyword E close_tag : {extension, {print, '$3'}}.
 
 TransArgs -> '$empty' : [].
 TransArgs -> TransArgs identifier '=' string_literal : '$1' ++ [{'$2', '$4'}].

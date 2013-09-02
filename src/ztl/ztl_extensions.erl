@@ -55,7 +55,8 @@ scan(#scanner_state{}) ->
     undefined.
 
 post_scan(Tokens) ->
-    {ok, post_scan(Tokens, [])}.
+    %% {ok, post_scan(Tokens, [])}.
+    {ok, Tokens}.
 
 parse(State) ->
     ztl_parser:resume(State).
@@ -69,8 +70,6 @@ compile_ast({value, E, With}, Context, TreeWalker) ->
     {{erlydtl_compiler:format(ValueAst, Context, ValueTreeWalker), ValueInfo}, ValueTreeWalker};
 compile_ast({atom_literal,Atom}, _Context, TreeWalker) ->
     {{erl_syntax:atom(Atom), #ast_info{}}, TreeWalker};
-compile_ast({print, E}, Context, TreeWalker) ->
-    print_ast(E, Context, TreeWalker);
 compile_ast(_Ast, _Context, _TreeWalker) ->
     undefined.
 
@@ -132,24 +131,26 @@ setup_render_ast(_Context, _TreeWalker) ->
 %%% Internal functions
 %%% ----------------------------------------------------------------------------
 
-post_scan([], Acc) ->
-    lists:reverse(Acc);
-post_scan([{open_tag, _, _}=Open, T|Ts], Acc) ->
-    %% look for a keyword identifier following a open tag
-    %% and translate it to a proper keyword token
-    post_scan(Ts, [post_open_tag(T),Open|Acc]);
-post_scan([T|Ts], Acc) ->
-    post_scan(Ts, [T|Acc]).
-
-post_open_tag({identifier, Pos, Identifier}=T) ->
-    case keyword(Identifier) of
-        undefined -> T;
-        Keyword -> {Keyword, Pos, Identifier}
-    end;
-post_open_tag(T) -> T.
-
-keyword(print) -> print_keyword;
-keyword(_) -> undefined.
+%% This section kept as it shows how to add custom keywords to erlydtl..
+%%
+%% post_scan([], Acc) ->
+%%     lists:reverse(Acc);
+%% post_scan([{open_tag, _, _}=Open, T|Ts], Acc) ->
+%%     %% look for a keyword identifier following a open tag
+%%     %% and translate it to a proper keyword token
+%%     post_scan(Ts, [post_open_tag(T),Open|Acc]);
+%% post_scan([T|Ts], Acc) ->
+%%     post_scan(Ts, [T|Acc]).
+%%
+%% post_open_tag({identifier, Pos, Identifier}=T) ->
+%%     case keyword(Identifier) of
+%%         undefined -> T;
+%%         Keyword -> {Keyword, Pos, Identifier}
+%%     end;
+%% post_open_tag(T) -> T.
+%%
+%% keyword(print) -> print_keyword;
+%% keyword(_) -> undefined.
     
 setup_z_context_ast() ->
     [erl_syntax:match_expr(
@@ -248,29 +249,3 @@ value_ast(ValueToken, [{{identifier,_,Var}, Value}|Args], AsString, Context, Tre
     {{InnerAst,InfoValue2}, TreeWalker2} = value_ast(ValueToken, Args, AsString, WithContext, TreeWalker1, [{Var, VarAst}|ExtraArgs]),
     WithAst = erl_syntax:block_expr([erl_syntax:match_expr(VarAst, ValueAst), InnerAst]),
     {{WithAst, erlydtl_compiler:merge_info(InfoValue1,InfoValue2)}, TreeWalker2}.
-
-print_ast(E, Context, TreeWalker) ->
-    {{ValueAst,ValueInfo}, ValueTree} = erlydtl_compiler:value_ast(E, false, false, Context, TreeWalker),
-    PrintAst = erl_syntax:application(
-                erl_syntax:atom(io_lib),
-                erl_syntax:atom(format),
-                [   erl_syntax:string("~p"), 
-                    erl_syntax:list([ValueAst])
-                ]
-            ),
-    FlattenAst = erl_syntax:application(
-                erl_syntax:atom(lists),
-                erl_syntax:atom(flatten),
-                [PrintAst]
-            ),
-    EscapeAst = erl_syntax:application(
-                  erl_syntax:atom(mochiweb_html),
-                  erl_syntax:atom(escape),
-                  [FlattenAst]
-            ),
-    PreAst = erl_syntax:list([
-                erl_syntax:string("<pre>"),
-                EscapeAst,
-                erl_syntax:string("</pre>")
-            ]),
-    {{PreAst, ValueInfo}, ValueTree}. 

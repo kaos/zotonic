@@ -24,10 +24,23 @@
 
 -include_lib("zotonic.hrl").
 
+builtin(print) -> print();
 builtin(url) -> url();
 builtin(image) -> image(tag);
 builtin(image_url) -> image(url);
 builtin(_) -> undefined.
+
+print() ->
+    fun ([E], _Vars, _Context) ->
+            {ok,
+             ["<pre>",
+              mochiweb_html:escape(
+               lists:flatten(
+                io_lib:format(
+                  "~p", [E]))),
+              "</pre>"
+             ]}
+    end.
 
 url() ->
     fun ([{Name,_}|Args], _Vars, Context) ->

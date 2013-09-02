@@ -14,6 +14,13 @@
 %%% See the License for the specific language governing permissions and
 %%% limitations under the License.
 %%%-------------------------------------------------------------------
+%%
+%% The testsandbox site needs to be running in order to run the tests
+%% in this file.
+%%
+%% Run the tests with: eunit:test(ztl).
+%%
+%%%-------------------------------------------------------------------
 -module(ztl_tests).
 -author('Andreas Stenius <kaos@astekk.se>').
 
@@ -124,8 +131,8 @@ output_matcher(undefined) ->
     end;
 output_matcher(Output) ->
     fun ({ok, O}) ->
-            B = iolist_to_binary(O),
-            ?assertEqual(Output, B),
+            Result = iolist_to_binary(O),
+            ?assertEqual(Output, Result),
             ok;
         (Err) ->
             {render_failure, Err}
@@ -183,6 +190,11 @@ all_tests() ->
         {"Pass auto id to tag", <<"{% loremipsum words=2 dummy=#test %}">>, <<"Lorem ipsum.">>},
         {"Image url", <<"{% image_url \"koe.jpg\" %}">>, {re, "^/image/koe\\.jpg"}},
         {"Image tag", <<"{% image \"koe.jpg\" %}">>, {re, "^<img src=[\"']/image/koe\\.jpg.*/>"}}
+       ]),
+     test_suite(
+       "Expressions",
+       [
+        %%{"Print tag: tuple", <<"{% print {foo bar=123} %}">>, <<"<pre>{foo,[{bar,123}]}</pre>">>}
        ])
     ].
 
