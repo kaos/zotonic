@@ -25,7 +25,8 @@
          parse/1, 
          compile_ast/3,
          custom_tag_ast/2,
-         setup_render_ast/2
+         setup_render_ast/2,
+         finder_function/1
         ]).
 
 -include_lib("erlydtl/include/erlydtl_ext.hrl").
@@ -49,8 +50,11 @@ init_context(#dtl_context{ local_scopes=Scopes }=Context) ->
 init_treewalker(TreeWalker) ->
     {ok, TreeWalker#treewalker{ extension=#treewalker_extension{} }}.
 
-scan(#scanner_state{ template="#" ++ T, pos={L, C}=P, scanned=Q}=S) ->
-    {ok, S#scanner_state{ template=T, pos={L, C+1}, scanned=[{hash, P, "#"}|Q] }};
+scan(#scanner_state{ template=[T|Ts], pos={L, C}=P, scanned=Q}=S) ->
+    case scan_char(T, P) of
+        undefined -> undefined;
+        R -> {ok, S#scanner_state{ template=Ts, pos={L, C+1}, scanned=[R|Q] }}
+    end;
 scan(#scanner_state{}) ->
     undefined.
 
@@ -68,10 +72,26 @@ compile_ast({value, E}, Context, TreeWalker) ->
 compile_ast({value, E, With}, Context, TreeWalker) ->
     {{ValueAst, ValueInfo}, ValueTreeWalker} = value_ast(E, With, true, Context, TreeWalker),
     {{erlydtl_compiler:format(ValueAst, Context, ValueTreeWalker), ValueInfo}, ValueTreeWalker};
-compile_ast({atom_literal,Atom}, _Context, TreeWalker) ->
+compile_ast({atom_literal, Atom}, _Context, TreeWalker) ->
     {{erl_syntax:atom(Atom), #ast_info{}}, TreeWalker};
+compile_ast({index_value, Variable, {_, {Row, Col}, _}=Index}, Context, TreeWalker) ->
+    {{IndexAst, IndexInfo}, TreeWalker1} = value_ast(Index, [], false, Context, TreeWalker),
+    {{VarAst, VarInfo}, TreeWalker2} = value_ast(Variable, [], false, Context, TreeWalker1),
+    FileNameAst = case Context#dtl_context.parse_trail of
+                      [] -> erl_syntax:atom(undefined);
+                      [H|_] -> erl_syntax:string(H)
+                  end,
+    {{erl_syntax:application(
+        erl_syntax:atom(ztl_runtime),
+        erl_syntax:atom(find_value),
+        [IndexAst, VarAst, FileNameAst,
+         erl_syntax:tuple([erl_syntax:integer(Row),
+                           erl_syntax:integer(Col)])]),
+      erlydtl_compiler:merge_info(IndexInfo, VarInfo)},
+     TreeWalker2};
 compile_ast(_Ast, _Context, _TreeWalker) ->
     undefined.
+
 
 custom_tag_ast(Context, TreeWalker) ->
     ArgsAst = erl_syntax:list(
@@ -126,10 +146,24 @@ setup_render_ast(Context, #treewalker{
 setup_render_ast(_Context, _TreeWalker) ->
     setup_z_context_ast().
 
+finder_function(_) ->
+    {ztl_runtime, find_value}.
 
 %%% ----------------------------------------------------------------------------
 %%% Internal functions
 %%% ----------------------------------------------------------------------------
+
+scan_char(Char, Pos) ->
+    case [{T, Pos, [Char]}
+          || {C, T} <- [{$#, hash},
+                        {$[, open_bracket},
+                        {$], close_bracket}
+                          ],
+             C == Char] of
+        [Res] -> Res;
+        [] -> undefined
+    end.
+
 
 %% This section kept as it shows how to add custom keywords to erlydtl..
 %%
@@ -178,7 +212,7 @@ auto_id_ast({identifier, _, Name}, Context, TreeWalker) ->
      }, set_has_auto_id(true, TreeWalker)};
 
 auto_id_ast({{identifier, _, Name}, {identifier, _, _} = Var}, Context, TreeWalker) ->
-    {{V, _, VarInfo}, TreeWalker1} = erlydtl_compiler:resolve_variable_ast({variable, Var}, Context, TreeWalker),
+    {{V, _, VarInfo}, TreeWalker1} = value_ast({variable, Var}, [], true, Context, TreeWalker),
     {{   erl_syntax:application(
            erl_syntax:atom(lists), erl_syntax:atom(append),
            [   

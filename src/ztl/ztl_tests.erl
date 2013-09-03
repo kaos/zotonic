@@ -86,7 +86,9 @@ run_tests([{Title, Test}|Ts]) ->
         Test()
     catch
         Class:Reason ->
-            io:format("test case ~p failed: ~p:~p~n", [Title, Class, Reason])
+            io:format("test case ~p failed: ~p:~p~n~p~n",
+                      [Title, Class, Reason,
+                       erlang:get_stacktrace()])
     end,
     run_tests(Ts);
 run_tests([]) -> 
@@ -194,6 +196,16 @@ all_tests() ->
      test_suite(
        "Expressions",
        [
+        #test_case{ title= "Variable based indexing",
+                    input= <<"{{ a[1][2].b }}">>,
+                    expect_output= <<"12">>,
+                    vars= [{a, [[[ % 1.1
+                                  {b, 11}],
+                                 [ % 1.2
+                                   {b, 12}]
+                                ]]
+                           }]
+                  }
         %%{"Print tag: tuple", <<"{% print {foo bar=123} %}">>, <<"<pre>{foo,[{bar,123}]}</pre>">>}
        ])
     ].
@@ -205,4 +217,9 @@ test_case(Title, Input, Output) ->
       expect_output=Output }.
 
 test_suite(Suite, Tests) ->
-    [test_case(string:join([Suite, Title], ": "), I, O) || {Title, I, O} <- Tests].
+    [case Test of
+         {Title, I, O} ->
+             test_case(string:join([Suite, Title], ": "), I, O);
+         #test_case{ title=Title } ->
+             Test#test_case{ title=string:join([Suite, Title], ": ") }
+     end || Test <- Tests].

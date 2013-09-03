@@ -1,3 +1,4 @@
+%%% -*- mode: erlang -*-
 %%%-------------------------------------------------------------------
 %%% File:      ztl_parser.erl
 %%%
@@ -424,14 +425,14 @@ TermValue -> '(' E ')' : '$2'.
 TermValue -> Variable : '$1'.
 TermValue -> Literal : '$1'.
 TermValue -> hash AutoId : {extension, {auto_id, '$2'}}.
-TermValue -> open_curly identifier Args close_curly : {tuple_value, '$2', '$3'}.
+TermValue -> open_curly identifier Args close_curly : {extension, {tuple_value, '$2', '$3'}}.
 TermValue -> open_bracket OptArrayList close_bracket : {value_list, '$2'}.
 
 AutoId -> identifier '.' identifier : { '$1', '$3' }.
 AutoId -> identifier : '$1'.
 
 Variable -> identifier : {variable, '$1'}.
-Variable -> Variable open_bracket E close_bracket : {index_value, '$1', '$3'}.
+Variable -> Variable open_bracket E close_bracket : {extension, {index_value, '$1', '$3'}}.
 Variable -> Variable '.' identifier : {attribute, {'$3', '$1'}}.
 
 %% ValueList -> E : ['$1'].
