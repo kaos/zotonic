@@ -128,6 +128,7 @@ Nonterminals
     LoadNames
     
     CustomTag
+    PrintTag
     WithArgs
     Args
     %% SpacelessBlock
@@ -141,7 +142,6 @@ Nonterminals
     %% EndCacheBraced
     %% OptCacheTime
 
-    %% MediaTag
     TransTag
     TransExtTag
     %% ValueList
@@ -154,8 +154,7 @@ Nonterminals
     OptE
     E
     Uminus
-    Unot
-    True False.
+    Unot.
 
 Terminals
     all_keyword
@@ -209,6 +208,7 @@ Terminals
     open_var
     optional_keyword
     overrules_keyword
+    print_keyword
     %% pipe
     %% javascript_keyword
     %% spaceless_keyword
@@ -249,7 +249,7 @@ Left 500 '*' '/' '%'.
 Unary 600 Uminus Unot.
 
 %% Expected shift/reduce conflicts
-Expect 2.
+Expect 3.
 
 Extension -> ValueBraced : ['$1']. %% OK
 Extension -> TransTag : ['$1'].
@@ -273,6 +273,7 @@ Extension -> CycleTag : ['$1'].
 %% Extension -> AutoEscapeBlock : ['$1'].
 %% Extension -> CommentBlock : ['$1'].
 Extension -> CustomTag : ['$1'].
+Extension -> PrintTag : ['$1'].
 Extension -> CallTag : ['$1'].
 Extension -> CallWithTag : ['$1'].
 %% Extension -> ScriptBlock : ['$1'].
@@ -299,11 +300,8 @@ NowTag -> open_tag now_keyword string_literal close_tag : {date, now, '$3'}.
 OptionalPrefix -> optional_keyword : optional.
 OptionalPrefix -> OptionalAll : '$1'.
 
-OptionalAll -> all_keyword True : '$2'.
-OptionalAll -> False : '$1'.
-
-True -> '$empty' : {extension,{atom_literal,true}}.
-False -> '$empty' : {extension,{atom_literal,false}}.
+OptionalAll -> all_keyword : atom(true).
+OptionalAll -> '$empty' : atom(false).
 
 LibTag -> open_tag lib_keyword LibList Args close_tag : {lib, '$3', '$4'}.
 LibList -> string_literal : ['$1'].
@@ -402,7 +400,8 @@ Literal -> trans_literal  : '$1'.
 Literal -> number_literal : '$1'.
 Literal -> atom_literal : '$1'.
 
-CustomTag -> open_tag OptionalAll identifier Args close_tag : {tag, '$3', [{{identifier,0,'$all'},'$2'}|'$4']}.
+CustomTag -> open_tag OptionalAll identifier Args close_tag : {tag, '$3', [{ident('$all', '$3'),'$2'}|'$4']}.
+PrintTag -> open_tag print_keyword E close_tag : {tag, ident(print, '$2'), [{ident('$all', '$2'),atom(false)},'$3']}.
 
 CallTag -> open_tag call_keyword identifier Args close_tag : {call_args, '$3', '$4'}.
 CallWithTag -> open_tag call_keyword identifier with_keyword E close_tag : {call_with, '$3', '$5'}.
@@ -414,9 +413,9 @@ WithArgs -> with_keyword Args : '$2'.
 WithArgs -> Args : '$1'.
 
 Args -> '$empty' : [].
-Args -> Args identifier True : '$1' ++ [{'$2', '$3'}].
+Args -> Args identifier : '$1' ++ [{'$2', atom(true)}].
 Args -> Args identifier '=' E : '$1' ++ [{'$2', '$4'}].
-Args -> Args Literal : '$1' ++ [{extension,{value,'$2'}}].
+Args -> Args Literal : '$1' ++ [{extension, {value, '$2'}}].
 
 Value -> Value '|' Filter : {apply_filter, '$1', '$3'}.
 Value -> TermValue : '$1'.
@@ -426,7 +425,7 @@ TermValue -> Variable : '$1'.
 TermValue -> Literal : '$1'.
 TermValue -> hash AutoId : {extension, {auto_id, '$2'}}.
 TermValue -> open_curly identifier Args close_curly : {extension, {tuple_value, '$2', '$3'}}.
-TermValue -> open_bracket OptArrayList close_bracket : {value_list, '$2'}.
+TermValue -> open_bracket OptArrayList close_bracket : {extension, {value_list, '$2'}}.
 
 AutoId -> identifier '.' identifier : { '$1', '$3' }.
 AutoId -> identifier : '$1'.
@@ -477,5 +476,7 @@ Unot -> not_keyword E : {expr, "not", '$2'}.
 
 Erlang code.
 
--compile({nowarn_unused_function, 'yeccgoto_\'False\''/7}).
--compile({nowarn_unused_function, 'yeccgoto_\'True\''/7}).
+ident(Name, {_, Pos, _}) -> {identifier, Pos, Name};
+ident(Name, Pos) -> {identifier, Pos, Name}.
+
+atom(Name) -> {extension, {atom_literal, Name}}.

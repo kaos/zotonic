@@ -59,8 +59,7 @@ scan(#scanner_state{}) ->
     undefined.
 
 post_scan(Tokens) ->
-    %% {ok, post_scan(Tokens, [])}.
-    {ok, Tokens}.
+    {ok, post_scan(Tokens, [])}.
 
 parse(State) ->
     ztl_parser:resume(State).
@@ -89,6 +88,17 @@ compile_ast({index_value, Variable, {_, {Row, Col}, _}=Index}, Context, TreeWalk
                            erl_syntax:integer(Col)])]),
       erlydtl_compiler:merge_info(IndexInfo, VarInfo)},
      TreeWalker2};
+compile_ast({value_list, Values}, Context, TreeWalker) ->
+    lists:foldr(
+      fun(V, {{Acc,Info},TreeW0}) ->
+              {{Ast,InfoV}, TreeW} = value_ast(V, [], false, Context, TreeW0),
+              {{[Ast|Acc], erlydtl_compiler:merge_info(Info, InfoV)}, TreeW}
+      end,
+      {{[], #ast_info{}}, TreeWalker},
+      Values);
+compile_ast({tuple_value, {identifier, _, TupleName}, TupleArgs}, Context, TreeWalker) ->
+    {{Args, Info}, TW} = erlydtl_compiler:interpret_args(TupleArgs, Context, TreeWalker),
+    {{erl_syntax:tuple([erl_syntax:atom(TupleName), erl_syntax:list(Args)]), Info}, TW};
 compile_ast(_Ast, _Context, _TreeWalker) ->
     undefined.
 
@@ -157,7 +167,9 @@ scan_char(Char, Pos) ->
     case [{T, Pos, [Char]}
           || {C, T} <- [{$#, hash},
                         {$[, open_bracket},
-                        {$], close_bracket}
+                        {$], close_bracket},
+                        {${, open_curly},
+                        {$}, close_curly}
                           ],
              C == Char] of
         [Res] -> Res;
@@ -165,26 +177,24 @@ scan_char(Char, Pos) ->
     end.
 
 
-%% This section kept as it shows how to add custom keywords to erlydtl..
-%%
-%% post_scan([], Acc) ->
-%%     lists:reverse(Acc);
-%% post_scan([{open_tag, _, _}=Open, T|Ts], Acc) ->
-%%     %% look for a keyword identifier following a open tag
-%%     %% and translate it to a proper keyword token
-%%     post_scan(Ts, [post_open_tag(T),Open|Acc]);
-%% post_scan([T|Ts], Acc) ->
-%%     post_scan(Ts, [T|Acc]).
-%%
-%% post_open_tag({identifier, Pos, Identifier}=T) ->
-%%     case keyword(Identifier) of
-%%         undefined -> T;
-%%         Keyword -> {Keyword, Pos, Identifier}
-%%     end;
-%% post_open_tag(T) -> T.
-%%
-%% keyword(print) -> print_keyword;
-%% keyword(_) -> undefined.
+post_scan([], Acc) ->
+    lists:reverse(Acc);
+post_scan([{open_tag, _, _}=Open, T|Ts], Acc) ->
+    %% look for a keyword identifier following a open tag
+    %% and translate it to a proper keyword token
+    post_scan(Ts, [post_open_tag(T),Open|Acc]);
+post_scan([T|Ts], Acc) ->
+    post_scan(Ts, [T|Acc]).
+
+post_open_tag({identifier, Pos, Identifier}=T) ->
+    case keyword(Identifier) of
+        undefined -> T;
+        Keyword -> {Keyword, Pos, Identifier}
+    end;
+post_open_tag(T) -> T.
+
+keyword(print) -> print_keyword;
+keyword(_) -> undefined.
     
 setup_z_context_ast() ->
     [erl_syntax:match_expr(

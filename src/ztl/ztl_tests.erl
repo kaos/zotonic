@@ -205,8 +205,8 @@ all_tests() ->
                                    {b, 12}]
                                 ]]
                            }]
-                  }
-        %%{"Print tag: tuple", <<"{% print {foo bar=123} %}">>, <<"<pre>{foo,[{bar,123}]}</pre>">>}
+                  },
+        {"Tuple value", <<"{% print {foo bar=123 baz=\"quux\"} %}">>, {re, "<pre>{foo,\\[{bar,123},{baz,(&lt;&lt;)?\"quux\"(&gt;&gt;)?}\\]}</pre>"}}
        ])
     ].
 
