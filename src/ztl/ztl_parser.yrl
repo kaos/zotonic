@@ -249,7 +249,7 @@ Left 500 '*' '/' '%'.
 Unary 600 Uminus Unot.
 
 %% Expected shift/reduce conflicts
-Expect 3.
+Expect 2.
 
 Extension -> ValueBraced : ['$1']. %% OK
 Extension -> TransTag : ['$1'].
@@ -401,7 +401,8 @@ Literal -> number_literal : '$1'.
 Literal -> atom_literal : '$1'.
 
 CustomTag -> open_tag OptionalAll identifier Args close_tag : {tag, '$3', [{ident('$all', '$3'),'$2'}|'$4']}.
-PrintTag -> open_tag print_keyword E close_tag : {tag, ident(print, '$2'), [{ident('$all', '$2'),atom(false)},'$3']}.
+PrintTag -> open_tag print_keyword E close_tag : {tag, ident(print, '$2'), [{ident('$all', '$2'),atom(false)},
+                                                                            {extension, {value, '$3'}}]}.
 
 CallTag -> open_tag call_keyword identifier Args close_tag : {call_args, '$3', '$4'}.
 CallWithTag -> open_tag call_keyword identifier with_keyword E close_tag : {call_with, '$3', '$5'}.
