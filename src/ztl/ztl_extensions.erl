@@ -73,19 +73,23 @@ compile_ast({value, E, With}, Context, TreeWalker) ->
     {{erlydtl_compiler:format(ValueAst, Context, ValueTreeWalker), ValueInfo}, ValueTreeWalker};
 compile_ast({atom_literal, Atom}, _Context, TreeWalker) ->
     {{erl_syntax:atom(Atom), #ast_info{}}, TreeWalker};
-compile_ast({index_value, Variable, {_, {Row, Col}, _}=Index}, Context, TreeWalker) ->
+compile_ast({index_value, Variable, Index}, Context, TreeWalker) ->
     {{IndexAst, IndexInfo}, TreeWalker1} = value_ast(Index, [], false, Context, TreeWalker),
     {{VarAst, VarInfo}, TreeWalker2} = value_ast(Variable, [], false, Context, TreeWalker1),
     FileNameAst = case Context#dtl_context.parse_trail of
                       [] -> erl_syntax:atom(undefined);
                       [H|_] -> erl_syntax:string(H)
                   end,
+    Pos = case Index of
+              {variable, {_, P, _}} -> P;
+              {number_literal, P, _} -> P
+          end,
     {{erl_syntax:application(
         erl_syntax:atom(ztl_runtime),
         erl_syntax:atom(find_value),
-        [IndexAst, VarAst, FileNameAst,
-         erl_syntax:tuple([erl_syntax:integer(Row),
-                           erl_syntax:integer(Col)])]),
+        [IndexAst, VarAst,
+         FileNameAst, erl_syntax:abstract(Pos)
+        ]),
       erlydtl_compiler:merge_info(IndexInfo, VarInfo)},
      TreeWalker2};
 compile_ast({value_list, Values}, Context, TreeWalker) ->

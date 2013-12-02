@@ -206,6 +206,18 @@ all_tests() ->
                                 ]]
                            }]
                   },
+        #test_case{ title= "Variable based indexing 2",
+                    input= <<"{{ a[b][c].d }}">>,
+                    expect_output= <<"12">>,
+                    vars= [{a, [[[ % 1.1
+                                  {d, 11}],
+                                 [ % 1.2
+                                   {d, 12}]
+                                ]]
+                           },
+                           {b, 1},
+                           {c, 2}]
+                  },
         {"Tuple value", <<"{% print {foo bar=123 baz=\"quux\"} %}">>, {re, "<pre>{foo,\\[{bar,123},{baz,(&lt;&lt;)?\"quux\"(&gt;&gt;)?}\\]}</pre>"}}
        ])
     ].
