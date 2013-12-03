@@ -26,6 +26,7 @@
          compile_ast/3,
          custom_tag_ast/2,
          setup_render_ast/2,
+         translate_ast/3,
          finder_function/1
         ]).
 
@@ -159,6 +160,25 @@ setup_render_ast(Context, #treewalker{
      | setup_z_context_ast()];
 setup_render_ast(_Context, _TreeWalker) ->
     setup_z_context_ast().
+
+translate_ast(String, Context, TreeWalker) ->
+    ZContext = proplists:get_value(z_context, Context#dtl_context.all_options),
+    Ast =
+        case z_trans:translations(String, ZContext) of
+            {trans, Tr} ->
+                Tr1 = [ {z_convert:to_atom(Lang), z_convert:to_binary(S)} || {Lang,S} <- Tr ],
+                erl_syntax:application(
+                  erl_syntax:atom(z_trans),
+                  erl_syntax:atom(lookup_fallback),
+                  [erl_syntax:abstract({trans, Tr1}),
+                   z_context_ast(Context)
+                  ]);
+            S when is_binary(S) ->
+                erl_syntax:abstract(S);
+            L when is_list(L) ->
+                erl_syntax:abstract(list_to_binary(L))
+        end,
+    {{Ast, #ast_info{}}, TreeWalker}.
 
 finder_function(_) ->
     {ztl_runtime, find_value}.

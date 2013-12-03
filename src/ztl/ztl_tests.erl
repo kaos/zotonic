@@ -47,6 +47,7 @@
           expect_output,
           compile_options=[],
           render_options=[],
+          context=fun() -> z:c(testsandbox) end,
           vars=[],
           engines=[
                    #engine{ module=zerlydtl },
@@ -146,6 +147,7 @@ run_test_case(_L,
                  expect_output=Matcher,
                  compile_options=Co,
                  render_options=Ro,
+                 context=CFun,
                  vars=V
                 },
               #engine{
@@ -156,7 +158,7 @@ run_test_case(_L,
                 }
              ) ->
     ?message(["-- engine ", atom_to_list(E)]),
-    C = z:c(testsandbox),
+    C = CFun(),
 
     {ok, M} = ?profile(
                  _L("compiling"),
@@ -219,10 +221,11 @@ all_tests() ->
        ]),
      test_suite(
        "i18n",
-       [#test_case{ title= "Trans tag",
+       [{"Trans tag", <<"{_ This is English. _}">>, <<"This is English.">>},
+        #test_case{ title= "Trans tag en-sv",
                     input= <<"{_ This is English. _}">>,
-                    expect_output= <<"This is English.">>,
-                    vars= []
+                    expect_output= <<"Det här är Engelska.">>,
+                    context= fun() -> z_context:set_language(sv, z:c(testsandbox)) end
                   }
        ])
     ].
