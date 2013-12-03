@@ -104,6 +104,14 @@ compile_ast({value_list, Values}, Context, TreeWalker) ->
 compile_ast({tuple_value, {identifier, _, TupleName}, TupleArgs}, Context, TreeWalker) ->
     {{Args, Info}, TW} = erlydtl_compiler:interpret_args(TupleArgs, Context, TreeWalker),
     {{erl_syntax:tuple([erl_syntax:atom(TupleName), erl_syntax:list(Args)]), Info}, TW};
+compile_ast({trans_ext, {string_literal,_,String}, Tr}, Context, TreeWalker) ->
+    UnescapedString = erlydtl_compiler:unescape_string_literal(String),
+    translate_ast(
+      {trans,
+       [{en, UnescapedString}
+        |[{Lang, erlydtl_compiler:unescape_string_literal(Trans)}
+          || {{identifier,_,Lang}, {string_literal,_,Trans}} <- Tr]]},
+      Context, TreeWalker);
 compile_ast(_Ast, _Context, _TreeWalker) ->
     undefined.
 
@@ -161,10 +169,10 @@ setup_render_ast(Context, #treewalker{
 setup_render_ast(_Context, _TreeWalker) ->
     setup_z_context_ast().
 
-translate_ast(String, Context, TreeWalker) ->
+translate_ast(Trans, Context, TreeWalker) ->
     ZContext = proplists:get_value(z_context, Context#dtl_context.all_options),
     Ast =
-        case z_trans:translations(String, ZContext) of
+        case z_trans:translations(Trans, ZContext) of
             {trans, Tr} ->
                 Tr1 = [ {z_convert:to_atom(Lang), z_convert:to_binary(S)} || {Lang,S} <- Tr ],
                 erl_syntax:application(

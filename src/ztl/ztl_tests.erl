@@ -230,8 +230,8 @@ all_tests() ->
                     context= fun() -> z_context:set_language(sv, z:c(testsandbox)) end
                   },
         #test_case{ title= "Underscore tag",
-                    input= <<"{% _ 'Another translated text' sv='En annan översatt text' %}">>,
-                    expect_output= <<"En annan översatt text">>,
+                    input= <<"{% _ 'This is English.' nl='Dit is Engels.' %}">>,
+                    expect_output= <<"Det här är Engelska.">>,
                     context= fun() -> z_context:set_language(sv, z:c(testsandbox)) end
                   }
        ])

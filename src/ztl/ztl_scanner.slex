@@ -27,6 +27,8 @@
 74 _} any+: close_trans, in_text-.
 76 any in_trans: +trans_literal.
 
+112 _\s in_code: __keyword.
+
 202 : in_trans: expr {error, "Reached end of file inside a translation tag."} end.
 
 open_trans: to_atom.
