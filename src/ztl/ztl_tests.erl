@@ -179,8 +179,7 @@ all_tests() ->
     [
      test_suite(
        "Basic tests",
-       [
-        {"Simple test", <<"foo">>, <<"foo">>},
+       [{"Simple test", <<"foo">>, <<"foo">>},
         {"Auto id", <<"{{ #test }}">>, {re, "\\w{8}-test"}},
         {"Url tag", <<"{% url test %}">>, <<"/test">>},
         {"Loremipsum tag", <<"{% loremipsum words=5 %}">>, <<"Lorem ipsum dolor sit amet.">>},
@@ -188,15 +187,13 @@ all_tests() ->
        ]),
      test_suite(
        "Somewhat basic tests",
-       [
-        {"Pass auto id to tag", <<"{% loremipsum words=2 dummy=#test %}">>, <<"Lorem ipsum.">>},
+       [{"Pass auto id to tag", <<"{% loremipsum words=2 dummy=#test %}">>, <<"Lorem ipsum.">>},
         {"Image url", <<"{% image_url \"koe.jpg\" %}">>, {re, "^/image/koe\\.jpg"}},
         {"Image tag", <<"{% image \"koe.jpg\" %}">>, {re, "^<img src=[\"']/image/koe\\.jpg.*/>"}}
        ]),
      test_suite(
        "Expressions",
-       [
-        #test_case{ title= "Variable based indexing",
+       [#test_case{ title= "Variable based indexing",
                     input= <<"{{ a[1][2].b }}">>,
                     expect_output= <<"12">>,
                     vars= [{a, [[[ % 1.1
@@ -219,6 +216,14 @@ all_tests() ->
                            {c, 2}]
                   },
         {"Tuple value", <<"{% print {foo bar=123 baz=\"quux\"} %}">>, {re, "<pre>{foo,\\[{bar,123},{baz,(&lt;&lt;)?\"quux\"(&gt;&gt;)?}\\]}</pre>"}}
+       ]),
+     test_suite(
+       "i18n",
+       [#test_case{ title= "Trans tag",
+                    input= <<"{_ This is English. _}">>,
+                    expect_output= <<"This is English.">>,
+                    vars= []
+                  }
        ])
     ].
 

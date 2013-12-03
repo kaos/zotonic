@@ -37,4 +37,7 @@ render(TemplateModule, Variables, Context)
 
 
 ztl_options(Options, Context) when is_list(Options) ->
-    [{extension_module, ztl_extensions}, {z_context, Context}|Options].
+    [{extension_module, ztl_extensions},
+     {scanner_module, ztl_scanner},
+     {z_context, Context}
+     |Options].
