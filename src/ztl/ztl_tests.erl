@@ -217,7 +217,9 @@ all_tests() ->
                            {b, 1},
                            {c, 2}]
                   },
-        {"Tuple value", <<"{% print {foo bar=123 baz=\"quux\"} %}">>, {re, "<pre>{foo,\\[{bar,123},{baz,(&lt;&lt;)?\"quux\"(&gt;&gt;)?}\\]}</pre>"}}
+        {"Tuple value",
+         <<"{% print {foo bar=123 baz=\"quux\"} %}">>,
+         {re, "<pre>{foo,\\[{bar,123},{baz,(&lt;&lt;)?\"quux\"(&gt;&gt;)?}\\]}</pre>"}}
        ]),
      test_suite(
        "i18n",
@@ -225,6 +227,11 @@ all_tests() ->
         #test_case{ title= "Trans tag en-sv",
                     input= <<"{_ This is English. _}">>,
                     expect_output= <<"Det här är Engelska.">>,
+                    context= fun() -> z_context:set_language(sv, z:c(testsandbox)) end
+                  },
+        #test_case{ title= "Underscore tag",
+                    input= <<"{% _ 'Another translated text' sv='En annan översatt text' %}">>,
+                    expect_output= <<"En annan översatt text">>,
                     context= fun() -> z_context:set_language(sv, z:c(testsandbox)) end
                   }
        ])

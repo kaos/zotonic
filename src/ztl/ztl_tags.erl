@@ -28,6 +28,7 @@ builtin(print) -> print();
 builtin(url) -> url();
 builtin(image) -> image(tag);
 builtin(image_url) -> image(url);
+builtin('_') -> trans();
 builtin(_) -> undefined.
 
 print() ->
@@ -50,4 +51,9 @@ url() ->
 image(F) ->
     fun ([Filename|Args], _Vars, Context) ->
             z_media_tag:F(Filename, Args, Context)
+    end.
+
+trans() ->
+    fun ([Text|Tr], _Vars, Context) ->
+            {ok, z_trans:lookup_fallback({trans, [{en, Text}|Tr]}, Context)}
     end.
