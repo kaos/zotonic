@@ -26,6 +26,8 @@
 %%% Exported functions
 %%% ----------------------------------------------------------------------------
 
+find_value(<<>>, #m{}, _Options) -> undefined;
+find_value(undefined, #m{}, _Options) -> undefined;
 find_value(Key, #m{ model=undefined }, _Options) ->
     #m{ model=z_convert:to_atom([<<"m_">>, z_convert:to_binary(Key)]) };
 find_value(Key, #m{ model=Model }=M, Options) ->
