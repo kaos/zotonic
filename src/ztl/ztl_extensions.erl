@@ -27,6 +27,7 @@
          custom_tag_ast/2,
          setup_render_ast/2,
          translate_ast/3,
+         to_list_ast/4,
          finder_function/1
         ]).
 
@@ -195,8 +196,15 @@ translate_ast(Trans, Context, TreeWalker) ->
         end,
     {{Ast, #ast_info{}}, TreeWalker}.
 
-finder_function(_) ->
-    {ztl_runtime, find_value}.
+to_list_ast(Value, IsReversed, _Context, _TreeWalker) ->
+    erl_syntax:application(
+      erl_syntax:atom(ztl_runtime),
+      erl_syntax:atom(to_list),
+      [Value, IsReversed,
+       erl_syntax:variable("_Z_context")]).
+
+finder_function(_) -> {ztl_runtime, find_value}.
+
 
 %%% ----------------------------------------------------------------------------
 %%% Internal functions

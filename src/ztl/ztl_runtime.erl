@@ -17,7 +17,7 @@
 -module(ztl_runtime).
 -author('Andreas Stenius <kaos@astekk.se>').
 
--export([find_value/3]).
+-export([find_value/3, to_list/3]).
 
 -include("zotonic.hrl").
 
@@ -42,6 +42,14 @@ find_value(Key, Data, Options) ->
         Value ->
             Value
     end.
+
+to_list(#m{ model=Model }=M, IsReversed, Context) ->
+    to_list(Model:m_to_list(M, Context), IsReversed, Context);
+to_list(Value, true, Context) ->
+    lists:reverse(to_list(Value, false, Context));
+to_list(Value, _, _) when is_list(Value) -> Value;
+to_list(Value, _, _) when is_tuple(Value) -> tuple_to_list(Value);
+to_list(Value, _, _) -> z_convert:to_list(Value).
 
 
 %%% ----------------------------------------------------------------------------

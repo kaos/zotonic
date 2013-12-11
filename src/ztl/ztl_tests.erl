@@ -240,6 +240,12 @@ all_tests() ->
        [#test_case{ title= "m_config",
                     input= <<"{{ m.config.site.host.value }}">>,
                     expect_output= <<"testsandbox">>
+                  },
+        #test_case{ title= "m_config list",
+                    input= <<"{% for k, v in m.config.site %}"
+                             "{{ k }}{% if not forloop.last %}, {% endif %}"
+                             "{% endfor %}">>,
+                    expect_output= <<"sign_key_simple">>
                   }
        ])
     ].
