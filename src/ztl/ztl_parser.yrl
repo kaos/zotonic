@@ -129,6 +129,7 @@ Nonterminals
     
     CustomTag
     PrintTag
+    UrlTag
     WithArgs
     Args
     %% SpacelessBlock
@@ -209,6 +210,7 @@ Terminals
     optional_keyword
     overrules_keyword
     print_keyword
+    url_keyword
     %% pipe
     %% javascript_keyword
     %% spaceless_keyword
@@ -273,6 +275,7 @@ Extension -> CycleTag : ['$1'].
 %% Extension -> CommentBlock : ['$1'].
 Extension -> CustomTag : ['$1'].
 Extension -> PrintTag : ['$1'].
+Extension -> UrlTag : ['$1'].
 Extension -> CallTag : ['$1'].
 Extension -> CallWithTag : ['$1'].
 %% Extension -> ScriptBlock : ['$1'].
@@ -400,8 +403,8 @@ Literal -> number_literal : '$1'.
 Literal -> atom_literal : '$1'.
 
 CustomTag -> open_tag OptionalAll identifier Args close_tag : {tag, '$3', [{ident('$all', '$3'),'$2'}|'$4']}.
-PrintTag -> open_tag print_keyword E close_tag : {tag, ident(print, '$2'), [{ident('$all', '$2'),atom(false)},
-                                                                            {extension, {value, '$3'}}]}.
+PrintTag -> open_tag print_keyword E close_tag : {tag, ident(print, '$2'), [value('$3')]}.
+UrlTag -> open_tag url_keyword identifier Args close_tag : {tag, ident(url, '$2'), [atom(value_of('$3'))|'$4']}.
 
 CallTag -> open_tag call_keyword identifier Args close_tag : {call_args, '$3', '$4'}.
 CallWithTag -> open_tag call_keyword identifier with_keyword E close_tag : {call_with, '$3', '$5'}.
@@ -415,7 +418,7 @@ WithArgs -> Args : '$1'.
 Args -> '$empty' : [].
 Args -> Args identifier : '$1' ++ [{'$2', atom(true)}].
 Args -> Args identifier '=' E : '$1' ++ [{'$2', '$4'}].
-Args -> Args Literal : '$1' ++ [{extension, {value, '$2'}}].
+Args -> Args Literal : '$1' ++ [value('$2')].
 
 Value -> Value '|' Filter : {apply_filter, '$1', '$3'}.
 Value -> TermValue : '$1'.
@@ -476,7 +479,10 @@ Unot -> not_keyword E : {expr, "not", '$2'}.
 
 Erlang code.
 
+value_of({_, _, Value}) -> Value.
+
 ident(Name, {_, Pos, _}) -> {identifier, Pos, Name};
 ident(Name, Pos) -> {identifier, Pos, Name}.
 
 atom(Name) -> {extension, {atom_literal, Name}}.
+value(Value) -> {extension, {value, Value}}.

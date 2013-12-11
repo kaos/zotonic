@@ -89,7 +89,12 @@ compile_ast({index_value, Variable, Index}, Context, TreeWalker) ->
         erl_syntax:atom(ztl_runtime),
         erl_syntax:atom(find_value),
         [IndexAst, VarAst,
-         FileNameAst, erl_syntax:abstract(Pos)
+         erl_syntax:list(
+           [FileNameAst,
+            erl_syntax:abstract({pos, Pos}),
+            erl_syntax:tuple([erl_syntax:atom(record_info),
+                              erl_syntax:variable("_RecordInfo")])
+           ])
         ]),
       erlydtl_compiler:merge_info(IndexInfo, VarInfo)},
      TreeWalker2};
@@ -226,6 +231,7 @@ post_open_tag({identifier, Pos, Identifier}=T) ->
 post_open_tag(T) -> T.
 
 keyword(print) -> print_keyword;
+keyword(url) -> url_keyword;
 keyword(_) -> undefined.
     
 setup_z_context_ast() ->

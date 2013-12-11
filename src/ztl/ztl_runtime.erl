@@ -17,17 +17,17 @@
 -module(ztl_runtime).
 -author('Andreas Stenius <kaos@astekk.se>').
 
--export([find_value/4]).
+-export([find_value/3]).
 
 
 %%% ----------------------------------------------------------------------------
 %%% Exported functions
 %%% ----------------------------------------------------------------------------
 
-find_value(Key, Data, Filename, Pos) ->
+find_value(Key, Data, Options) ->
     case find_value(Key, Data) of
         undefined ->
-            erlydtl_runtime:find_value(Key, Data, Filename, Pos);
+            erlydtl_runtime:find_value(Key, Data, Options);
         Value ->
             Value
     end.

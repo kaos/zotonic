@@ -44,7 +44,7 @@ print() ->
     end.
 
 url() ->
-    fun ([{Name,_}|Args], _Vars, Context) ->
+    fun ([Name|Args], _Vars, Context) ->
             {ok, z_dispatcher:url_for(Name, Args, Context)}
     end.
 

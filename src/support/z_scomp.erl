@@ -28,11 +28,10 @@
 
 
 render(ScompName, [{'$render_variables', Vars}|Args], Context) ->
-    case {ztl_tags:builtin(ScompName), Args} of
-        {F, [{'$all', false}|BuiltinArgs]}
-          when is_function(F, 3) ->
-            render_scomp_module(F, BuiltinArgs, Vars, Context, {vary, nocache});
-        {undefined, _} ->
+    case ztl_tags:builtin(ScompName) of
+        F when is_function(F, 3) ->
+            render_scomp_module(F, Args, Vars, Context, {vary, nocache});
+        undefined ->
             render(ScompName, Args, Vars, Context)
     end.
 
