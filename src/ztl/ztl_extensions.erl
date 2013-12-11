@@ -93,7 +93,9 @@ compile_ast({index_value, Variable, Index}, Context, TreeWalker) ->
            [FileNameAst,
             erl_syntax:abstract({pos, Pos}),
             erl_syntax:tuple([erl_syntax:atom(record_info),
-                              erl_syntax:variable("_RecordInfo")])
+                              erl_syntax:variable("_RecordInfo")]),
+            erl_syntax:tuple([erl_syntax:atom(render_options),
+                              erl_syntax:variable("RenderOptions")])
            ])
         ]),
       erlydtl_compiler:merge_info(IndexInfo, VarInfo)},

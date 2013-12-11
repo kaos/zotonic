@@ -180,21 +180,21 @@ run_test_case(_L,
 all_tests() ->
     [
      test_suite(
-       "Basic tests",
-       [{"Simple test", <<"foo">>, <<"foo">>},
+       "Basic",
+       [{"Simple", <<"foo">>, <<"foo">>},
         {"Auto id", <<"{{ #test }}">>, {re, "\\w{8}-test"}},
         {"Url tag", <<"{% url test %}">>, <<"/test">>},
         {"Loremipsum tag", <<"{% loremipsum words=5 %}">>, <<"Lorem ipsum dolor sit amet.">>},
         {"Print tag", <<"{% print \"foo\" %}">>, {re, "<pre>.*\"foo\".*</pre>"}}
        ]),
      test_suite(
-       "Somewhat basic tests",
+       "Somewhat basic",
        [{"Pass auto id to tag", <<"{% loremipsum words=2 dummy=#test %}">>, <<"Lorem ipsum.">>},
         {"Image url", <<"{% image_url \"koe.jpg\" %}">>, {re, "^/image/koe\\.jpg"}},
         {"Image tag", <<"{% image \"koe.jpg\" %}">>, {re, "^<img src=[\"']/image/koe\\.jpg.*/>"}}
        ]),
      test_suite(
-       "Expressions",
+       "Expression",
        [#test_case{ title= "Variable based indexing",
                     input= <<"{{ a[1][2].b }}">>,
                     expect_output= <<"12">>,
@@ -233,6 +233,13 @@ all_tests() ->
                     input= <<"{% _ 'This is English.' nl='Dit is Engels.' %}">>,
                     expect_output= <<"Det här är Engelska.">>,
                     context= fun() -> z_context:set_language(sv, z:c(testsandbox)) end
+                  }
+       ]),
+     test_suite(
+       "Model",
+       [#test_case{ title= "m_config",
+                    input= <<"{{ m.config.site.host.value }}">>,
+                    expect_output= <<"testsandbox">>
                   }
        ])
     ].
