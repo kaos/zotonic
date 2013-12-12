@@ -34,3 +34,11 @@
 open_trans: to_atom.
 close_trans: to_atom.
 trans_literal: expr {string_literal, element(2, T), tl(lists:reverse(tl(L)))} end.
+
+
+%% Parse newlines and tabs in tags
+
+110 \r\n any: skip, in_code.
+110 \t any: skip, in_code.
+%%% 111 \r any: skip, in_code. NYI: slex doesn't cope with single CR as new line marker.
+111 \n any: skip, in_code.

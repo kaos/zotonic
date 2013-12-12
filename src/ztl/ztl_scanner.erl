@@ -18,7 +18,7 @@
 %%%-------------------------------------------------------------------
 -module(ztl_scanner).
 
-%% This file was generated 2013-12-03 15:32:03 UTC by slex 0.2.0-1-g15e42ff.
+%% This file was generated 2013-12-12 01:29:02 UTC by slex 0.2.0-1-g15e42ff.
 %% http://github.com/erlydtl/slex
 -slex_source(['ztl_scanner.slex',
 	      {erlydtl, "src/erlydtl_scanner.slex"}]).
@@ -455,6 +455,13 @@ scan("_(" ++ T, S, {R, C} = P, {_, E}) ->
 	 {R, C + 2}, {in_code, E});
 scan(" " ++ T, S, {R, C}, {_, E}) ->
     scan(T, S, {R, C + 1}, {in_code, E});
+scan("\r\n" ++ T, S, {R, C}, {_, E}) ->
+    scan(T, S, {R + 1, 1}, {in_code, E});
+scan("\t" ++ T, S, {R, C}, {_, E}) ->
+    scan(T, S, {R, C + 1}, {in_code, E});
+%%% 111 \r any: skip, in_code. NYI: slex doesn't cope with single CR as new line marker.
+scan("\n" ++ T, S, {R, C}, {_, E}) ->
+    scan(T, S, {R + 1, 1}, {in_code, E});
 scan("_ " ++ T, S, {R, C} = P, {in_code, E} = St) ->
     scan(T,
 	 [{'__keyword', P} | post_process(S, '__keyword')],

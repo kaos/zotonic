@@ -185,7 +185,10 @@ all_tests() ->
         {"Auto id", <<"{{ #test }}">>, {re, "\\w{8}-test"}},
         {"Url tag", <<"{% url test %}">>, <<"/test">>},
         {"Loremipsum tag", <<"{% loremipsum words=5 %}">>, <<"Lorem ipsum dolor sit amet.">>},
-        {"Print tag", <<"{% print \"foo\" %}">>, {re, "<pre>.*\"foo\".*</pre>"}}
+        {"Print tag", <<"{% print \"foo\" %}">>, {re, "<pre>.*\"foo\".*</pre>"}},
+        {"Tags with newlines",
+         <<"{% if not \nfoo\n %}no foo here{% \n endif \n %}">>,
+         <<"no foo here">>}
        ]),
      test_suite(
        "Somewhat basic",
