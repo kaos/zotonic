@@ -188,7 +188,8 @@ all_tests() ->
         {"Print tag", <<"{% print \"foo\" %}">>, {re, "<pre>.*\"foo\".*</pre>"}},
         {"Tags with newlines",
          <<"{% if not \nfoo\n %}no foo here{% \n endif \n %}">>,
-         <<"no foo here">>}
+         <<"no foo here">>},
+        {"0 is false", <<"{% if 0 %}Noo{% endif %}">>, <<"">>}
        ]),
      test_suite(
        "Somewhat basic",
@@ -222,7 +223,10 @@ all_tests() ->
                   },
         {"Tuple value",
          <<"{% print {foo bar=123 baz=\"quux\"} %}">>,
-         {re, "<pre>{foo,\\[{bar,123},{baz,(&lt;&lt;)?\"quux\"(&gt;&gt;)?}\\]}</pre>"}}
+         {re, "<pre>{foo,\\[{bar,123},{baz,(&lt;&lt;)?\"quux\"(&gt;&gt;)?}\\]}</pre>"}},
+        {"Array value",
+         <<"{{ [1, foo, 2]|pprint }}">>,
+         <<"[1,undefined,2]">>}
        ]),
      test_suite(
        "i18n",

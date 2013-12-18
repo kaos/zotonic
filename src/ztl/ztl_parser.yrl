@@ -393,9 +393,9 @@ CycleNamesCompat -> CycleNamesCompat identifier : '$1' ++ ['$2'].
 %% OptCacheTime -> '$empty' : undefined.
 %% OptCacheTime -> number_literal : '$1'.
 
-Filter -> identifier FilterArgs: {filter, '$1', '$2'}.
+Filter -> identifier FilterArgs: {'$1', '$2'}.
 FilterArgs -> '$empty' : [].
-FilterArgs -> FilterArgs ':' TermValue : '$1' ++ ['$3'].
+FilterArgs -> ':' TermValue FilterArgs : ['$2'|'$3'].
 
 Literal -> string_literal : '$1'.
 Literal -> trans_literal  : '$1'.

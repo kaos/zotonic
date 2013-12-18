@@ -102,13 +102,15 @@ compile_ast({index_value, Variable, Index}, Context, TreeWalker) ->
       erlydtl_compiler:merge_info(IndexInfo, VarInfo)},
      TreeWalker2};
 compile_ast({value_list, Values}, Context, TreeWalker) ->
-    lists:foldr(
-      fun(V, {{Acc,Info},TreeW0}) ->
-              {{Ast,InfoV}, TreeW} = value_ast(V, [], false, Context, TreeW0),
-              {{[Ast|Acc], erlydtl_compiler:merge_info(Info, InfoV)}, TreeW}
-      end,
-      {{[], #ast_info{}}, TreeWalker},
-      Values);
+    {{List, ListInfo}, ListTree}
+        = lists:foldr(
+            fun(V, {{Acc,Info},TreeW0}) ->
+                    {{Ast,InfoV}, TreeW} = value_ast(V, [], false, Context, TreeW0),
+                    {{[Ast|Acc], erlydtl_compiler:merge_info(Info, InfoV)}, TreeW}
+            end,
+            {{[], #ast_info{}}, TreeWalker},
+            Values),
+    {{erl_syntax:list(List), ListInfo}, ListTree};
 compile_ast({tuple_value, {identifier, _, TupleName}, TupleArgs}, Context, TreeWalker) ->
     {{Args, Info}, TW} = erlydtl_compiler:interpret_args(TupleArgs, Context, TreeWalker),
     {{erl_syntax:tuple([erl_syntax:atom(TupleName), erl_syntax:list(Args)]), Info}, TW};
